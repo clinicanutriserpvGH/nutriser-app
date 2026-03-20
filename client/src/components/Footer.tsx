@@ -20,7 +20,7 @@ export default function Footer() {
             className="h-12 w-auto object-contain opacity-90"
           />
           <p className="text-sm text-center">
-            &copy; {year} Nutriser Soluciones. Todos los derechos reservados.
+            &copy; {year} Nutriser — Aesthetic & Nutrition. Todos los derechos reservados.
           </p>
           <p className="text-sm">Puerto Vallarta, Jalisco, México</p>
         </div>

@@ -1,27 +1,28 @@
 /*
  * Nutriser - Footer
- * Design: Minimal dark footer with gold accents
+ * Design: Minimal dark footer with gold accents and real logo
  */
+
+const LOGO_URL =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo_988aec8f.jpeg";
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
     <footer className="bg-[#111111] text-white/40 py-10">
       <div className="container">
-        <div className="gold-line mb-8" />
+        <div className="h-[1px] bg-gradient-to-r from-transparent via-[#C5A55A]/30 to-transparent mb-8" />
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-serif text-lg text-[#C5A55A]">nutriser</span>
-            <span className="text-[9px] tracking-[0.15em] uppercase text-white/30">
-              aesthetic & nutrition
-            </span>
-          </div>
-          <p className="text-sm">
+          <img
+            src={LOGO_URL}
+            alt="Nutriser"
+            className="h-10 w-auto object-contain brightness-0 invert opacity-60"
+          />
+          <p className="text-sm text-center">
             &copy; {year} Nutriser Soluciones. Todos los derechos reservados.
           </p>
-          <p className="text-sm">
-            Puerto Vallarta, Jalisco, México
-          </p>
+          <p className="text-sm">Puerto Vallarta, Jalisco, México</p>
         </div>
       </div>
     </footer>

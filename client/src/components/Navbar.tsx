@@ -2,15 +2,18 @@
  * Nutriser - Navbar Component
  * Design: Neo-Art Deco with warm organic feel
  * Gold accent on scroll, transparent initially
- * Playfair Display for brand, Lato for nav links
+ * Uses real Nutriser logo
  */
 import { useState, useEffect } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const LOGO_URL =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo_988aec8f.jpeg";
+
 const navLinks = [
   { label: "Inicio", href: "#inicio" },
-  { label: "Tratamientos", href: "#tratamientos" },
+  { label: "Servicios", href: "#servicios" },
   { label: "Nosotros", href: "#nosotros" },
   { label: "Contacto", href: "#contacto" },
 ];
@@ -50,20 +53,13 @@ export default function Navbar() {
             }}
             className="flex items-center gap-2"
           >
-            <span
-              className={`font-serif text-2xl tracking-wide transition-colors duration-500 ${
-                scrolled ? "text-[#C5A55A]" : "text-white"
+            <img
+              src={LOGO_URL}
+              alt="Nutriser - Aesthetic & Nutrition"
+              className={`h-12 w-auto object-contain transition-all duration-500 ${
+                scrolled ? "" : "brightness-0 invert"
               }`}
-            >
-              nutriser
-            </span>
-            <span
-              className={`text-[10px] tracking-[0.2em] uppercase transition-colors duration-500 ${
-                scrolled ? "text-[#C5A55A]/70" : "text-white/70"
-              }`}
-            >
-              aesthetic & nutrition
-            </span>
+            />
           </a>
 
           {/* Desktop Nav */}
@@ -77,7 +73,7 @@ export default function Navbar() {
                   handleNavClick(link.href);
                 }}
                 className={`text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:text-[#C5A55A] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#C5A55A] after:transition-all after:duration-300 hover:after:w-full ${
-                  scrolled ? "text-warm-black/70" : "text-white/80"
+                  scrolled ? "text-[#1A1A1A]/70" : "text-white/80"
                 }`}
               >
                 {link.label}
@@ -98,7 +94,7 @@ export default function Navbar() {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className={`lg:hidden transition-colors duration-300 ${
-              scrolled ? "text-warm-black" : "text-white"
+              scrolled ? "text-[#1A1A1A]" : "text-white"
             }`}
             aria-label="Toggle menu"
           >
@@ -129,7 +125,7 @@ export default function Navbar() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="font-serif text-3xl text-warm-black/80 hover:text-[#C5A55A] transition-colors"
+                  className="font-serif text-3xl text-[#1A1A1A]/80 hover:text-[#C5A55A] transition-colors"
                 >
                   {link.label}
                 </motion.a>

@@ -1,13 +1,14 @@
 /*
  * Nutriser - Home Page
  * Design: "Lujo Orgánico" — Neo-Art Deco con Calidez Natural
- * Sections: Hero → Treatments → CTA → About → Contact → Footer
+ * Sections: Hero → Services (27 services) → CTA → About → Contact → Footer
  * Color: Gold (#C5A55A), Cream (#FAF7F2), Warm Black (#1A1A1A)
  * Fonts: Playfair Display (serif titles), Lato (sans body)
+ * Uses real clinic photos and official logo
  */
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
-import TreatmentsSection from "@/components/TreatmentsSection";
+import ServicesSection from "@/components/ServicesSection";
 import CtaBanner from "@/components/CtaBanner";
 import AboutSection from "@/components/AboutSection";
 import ContactSection from "@/components/ContactSection";
@@ -20,7 +21,7 @@ export default function Home() {
       <Navbar />
       <main>
         <HeroSection />
-        <TreatmentsSection />
+        <ServicesSection />
         <CtaBanner />
         <AboutSection />
         <ContactSection />

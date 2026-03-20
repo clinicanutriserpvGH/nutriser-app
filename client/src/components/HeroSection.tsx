@@ -1,13 +1,13 @@
 /*
  * Nutriser - Hero Section
- * Design: Full-screen hero with dark overlay on clinic image
+ * Design: Full-screen hero with real clinic reception photo
  * Gold accent lines, Playfair Display headline, fade-in animations
  */
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 const HERO_IMG =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hero-banner-jgdNfkN4tYQjVUooNZx9Tt.webp";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-reception_c595cea6.jpeg";
 
 export default function HeroSection() {
   return (
@@ -15,14 +15,14 @@ export default function HeroSection() {
       id="inicio"
       className="relative min-h-screen flex items-center justify-start overflow-hidden"
     >
-      {/* Background image */}
+      {/* Background image - real clinic photo */}
       <div className="absolute inset-0">
         <img
           src={HERO_IMG}
-          alt="Nutriser Clínica Estética"
+          alt="Recepción de Nutriser - Clínica de Estética en Puerto Vallarta"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35" />
       </div>
 
       {/* Decorative gold line */}
@@ -47,9 +47,9 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-white leading-[1.1] mb-6"
           >
-            Tratamientos que{" "}
-            <span className="italic text-[#C5A55A]">transforman</span> tu piel y
-            tu confianza
+            Tu salud y belleza{" "}
+            <span className="italic text-[#C5A55A]">personalizada</span> en un
+            solo lugar
           </motion.h1>
 
           <motion.div
@@ -65,9 +65,9 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="text-white/70 text-lg lg:text-xl leading-relaxed mb-10 max-w-lg"
           >
-            En Nutriser no vendemos terapias, vendemos soluciones. Cada
-            protocolo está diseñado para resolver problemas específicos de la
-            piel y el cuerpo.
+            En Nutriser no vendemos terapias, vendemos soluciones. Nutrición,
+            tratamientos faciales, corporales y medicina estética con la mejor
+            tecnología y experiencia profesional.
           </motion.p>
 
           <motion.div
@@ -85,16 +85,16 @@ export default function HeroSection() {
               Agenda tu Valoración
             </a>
             <a
-              href="#tratamientos"
+              href="#servicios"
               onClick={(e) => {
                 e.preventDefault();
                 document
-                  .querySelector("#tratamientos")
+                  .querySelector("#servicios")
                   ?.scrollIntoView({ behavior: "smooth" });
               }}
               className="inline-flex items-center justify-center border border-white/30 text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:border-[#C5A55A] hover:text-[#C5A55A]"
             >
-              Ver Tratamientos
+              Ver Servicios
             </a>
           </motion.div>
         </div>

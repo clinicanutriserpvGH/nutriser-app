@@ -2,6 +2,7 @@
  * Nutriser - Contact Section
  * Design: Dark background with gold accents
  * Contact info, WhatsApp CTA, social links, embedded map
+ * Updated with email from full catalog
  */
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
@@ -12,6 +13,7 @@ import {
   Instagram,
   Facebook,
   Clock,
+  Mail,
 } from "lucide-react";
 
 export default function ContactSection() {
@@ -45,7 +47,7 @@ export default function ContactSection() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
             {/* Contact Info */}
-            <div className="space-y-8">
+            <div className="space-y-6">
               {/* WhatsApp CTA */}
               <a
                 href="https://wa.me/523221007799"
@@ -87,6 +89,24 @@ export default function ContactSection() {
                 </div>
               </a>
 
+              {/* Email */}
+              <a
+                href="mailto:clinicanutriserpv@gmail.com"
+                className="flex items-center gap-5 p-6 bg-white/5 border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-[#C5A55A]/30"
+              >
+                <div className="w-14 h-14 flex items-center justify-center border border-[#C5A55A]/40 flex-shrink-0">
+                  <Mail className="w-6 h-6 text-[#C5A55A]" />
+                </div>
+                <div>
+                  <span className="text-xs tracking-[0.2em] uppercase text-[#C5A55A]">
+                    Email
+                  </span>
+                  <p className="text-white text-lg font-medium">
+                    clinicanutriserpv@gmail.com
+                  </p>
+                </div>
+              </a>
+
               {/* Address */}
               <div className="flex items-start gap-5 p-6 bg-white/5 border border-white/10">
                 <div className="w-14 h-14 flex items-center justify-center border border-[#C5A55A]/40 flex-shrink-0">
@@ -122,7 +142,7 @@ export default function ContactSection() {
               </div>
 
               {/* Social Links */}
-              <div className="flex items-center gap-4 pt-4">
+              <div className="flex items-center gap-4 pt-2">
                 <span className="text-xs tracking-[0.2em] uppercase text-[#C5A55A]">
                   Síguenos
                 </span>
@@ -152,7 +172,11 @@ export default function ContactSection() {
                   className="w-10 h-10 flex items-center justify-center border border-white/20 text-white/60 hover:border-[#C5A55A] hover:text-[#C5A55A] transition-all duration-300"
                   aria-label="X (Twitter)"
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                 </a>

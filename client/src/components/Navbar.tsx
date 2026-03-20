@@ -56,8 +56,8 @@ export default function Navbar() {
             <img
               src={LOGO_URL}
               alt="Nutriser - Aesthetic & Nutrition"
-              className={`h-12 w-auto object-contain transition-all duration-500 ${
-                scrolled ? "" : "brightness-0 invert"
+              className={`h-14 w-auto object-contain transition-all duration-500 ${
+                scrolled ? "" : "drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
               }`}
             />
           </a>

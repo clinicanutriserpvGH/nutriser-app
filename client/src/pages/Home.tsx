@@ -1,25 +1,32 @@
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from 'streamdown';
-
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Best Practices, Design Guide and Common Pitfalls
+/*
+ * Nutriser - Home Page
+ * Design: "Lujo Orgánico" — Neo-Art Deco con Calidez Natural
+ * Sections: Hero → Treatments → CTA → About → Contact → Footer
+ * Color: Gold (#C5A55A), Cream (#FAF7F2), Warm Black (#1A1A1A)
+ * Fonts: Playfair Display (serif titles), Lato (sans body)
  */
-export default function Home() {
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
+import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
+import TreatmentsSection from "@/components/TreatmentsSection";
+import CtaBanner from "@/components/CtaBanner";
+import AboutSection from "@/components/AboutSection";
+import ContactSection from "@/components/ContactSection";
+import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
+export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
+      <Navbar />
       <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
+        <HeroSection />
+        <TreatmentsSection />
+        <CtaBanner />
+        <AboutSection />
+        <ContactSection />
       </main>
+      <Footer />
+      <WhatsAppButton />
     </div>
   );
 }

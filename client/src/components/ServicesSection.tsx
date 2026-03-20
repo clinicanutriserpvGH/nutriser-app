@@ -52,7 +52,7 @@ const categories = [
         desc: "Reafirma tu piel y combate la celulitis estimulando colágeno y elastina.",
       },
       {
-        name: "Vacumterapia",
+        name: "Vacunterapia",
         desc: "Mejora la circulación, moldea y ayuda en la reducción de celulitis.",
       },
       {

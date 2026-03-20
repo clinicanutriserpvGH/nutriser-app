@@ -17,10 +17,10 @@ export default function Footer() {
           <img
             src={LOGO_URL}
             alt="Nutriser"
-            className="h-12 w-auto object-contain opacity-90"
+            className="h-10 w-auto object-contain brightness-0 invert opacity-60"
           />
           <p className="text-sm text-center">
-            &copy; {year} Nutriser — Aesthetic & Nutrition. Todos los derechos reservados.
+            &copy; {year} Nutriser Soluciones. Todos los derechos reservados.
           </p>
           <p className="text-sm">Puerto Vallarta, Jalisco, México</p>
         </div>

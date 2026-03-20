@@ -148,7 +148,7 @@ export default function ContactSection() {
                 </span>
                 <div className="w-8 h-[1px] bg-[#C5A55A]/40" />
                 <a
-                  href="https://www.instagram.com/nutriserpv/"
+                  href="https://instagram.com/nutriserpv"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 flex items-center justify-center border border-white/20 text-white/60 hover:border-[#C5A55A] hover:text-[#C5A55A] transition-all duration-300"
@@ -157,7 +157,7 @@ export default function ContactSection() {
                   <Instagram className="w-4 h-4" />
                 </a>
                 <a
-                  href="https://www.facebook.com/nutriserpv/"
+                  href="https://facebook.com/nutriserpv"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 flex items-center justify-center border border-white/20 text-white/60 hover:border-[#C5A55A] hover:text-[#C5A55A] transition-all duration-300"
@@ -165,7 +165,21 @@ export default function ContactSection() {
                 >
                   <Facebook className="w-4 h-4" />
                 </a>
-
+                <a
+                  href="https://x.com/nutriserpv"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 flex items-center justify-center border border-white/20 text-white/60 hover:border-[#C5A55A] hover:text-[#C5A55A] transition-all duration-300"
+                  aria-label="X (Twitter)"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                </a>
               </div>
             </div>
 
@@ -173,7 +187,7 @@ export default function ContactSection() {
             <div className="relative">
               <div className="aspect-[4/3] lg:aspect-auto lg:h-full min-h-[400px] overflow-hidden border border-white/10">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1866.8!2d-105.2265714!3d20.6308619!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x84214f82065d24d5%3A0xeb2ab02e8b0e0702!2sNutriser!5e0!3m2!1ses!2smx!4v1"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3733.7!2d-105.2305!3d20.6128!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x842145a1b0c0a0a1%3A0x0!2sEmiliano+Zapata+2%2C+Valent%C3%ADn+G%C3%B3mez+Far%C3%ADas%2C+Puerto+Vallarta%2C+Jalisco!5e0!3m2!1ses!2smx!4v1"
                   width="100%"
                   height="100%"
                   style={{ border: 0, filter: "grayscale(0.3) contrast(1.1)" }}

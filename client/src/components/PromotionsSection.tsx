@@ -8,15 +8,17 @@ export default function PromotionsSection() {
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
-  const handleShareWhatsApp = (title: string, description: string) => {
-    const message = `🎁 *${title}*\n\n${description}`;
+  const handleShareWhatsApp = (title: string, description: string, promoId: number) => {
+    const shareUrl = `https://nutriserpv.com/#cupon-${promoId}`;
+    const message = `🎁 *${title}*\n\n${description}\n\n${shareUrl}`;
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
 
-  const handleShareEmail = (title: string, description: string) => {
+  const handleShareEmail = (title: string, description: string, promoId: number) => {
+    const shareUrl = `https://nutriserpv.com/#cupon-${promoId}`;
     const subject = `Promoción Nutriser: ${title}`;
-    const body = `Mira esta promoción de Nutriser:\n\n${title}\n\n${description}\n\nQuiero aprovechar esta oferta.`;
+    const body = `Mira esta promoción de Nutriser:\n\n${title}\n\n${description}\n\n${shareUrl}`;
     const url = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(url, '_blank');
   };
@@ -73,7 +75,7 @@ export default function PromotionsSection() {
                 className="relative"
               >
                 {/* Cuponera Container */}
-                <div className="relative">
+                <div className="relative" id={`cupon-${promo.id}`}>
                   {/* Cupón Principal */}
                   <div className="bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-t-2xl overflow-hidden shadow-xl">
                     {/* Decoración superior */}
@@ -143,7 +145,7 @@ export default function PromotionsSection() {
                     <div className="flex gap-3 flex-wrap">
                       {/* Botón WhatsApp */}
                       <button
-                        onClick={() => handleShareWhatsApp(promo.title, promo.description || "")}
+                        onClick={() => handleShareWhatsApp(promo.title, promo.description || "", promo.id)}
                         className="flex-1 min-w-[100px] flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 font-semibold text-sm"
                         title="Compartir por WhatsApp"
                       >
@@ -155,9 +157,9 @@ export default function PromotionsSection() {
 
                       {/* Botón Email */}
                       <button
-                        onClick={() => handleShareEmail(promo.title, promo.description || "")}
+                        onClick={() => handleShareEmail(promo.title, promo.description || "", promo.id)}
                         className="flex-1 min-w-[100px] flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 font-semibold text-sm"
-                        title="Compartir por Email"
+                        title="Compartir por email"
                       >
                         <Mail className="w-4 h-4" />
                         Email

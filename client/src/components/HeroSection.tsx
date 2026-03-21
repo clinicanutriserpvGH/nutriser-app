@@ -77,24 +77,18 @@ export default function HeroSection() {
             className="flex flex-col sm:flex-row gap-4"
           >
             <a
-              href="https://wa.me/523221007799"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/appointment-form"
               className="inline-flex items-center justify-center bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
             >
               Agenda tu Valoración
             </a>
             <a
-              href="#servicios"
-              onClick={(e) => {
-                e.preventDefault();
-                document
-                  .querySelector("#servicios")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
+              href="https://wa.me/523221007799"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center border border-white/30 text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:border-[#C5A55A] hover:text-[#C5A55A]"
             >
-              Ver Servicios
+              Agenda tu Valoración por WhatsApp
             </a>
           </motion.div>
         </div>

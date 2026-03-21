@@ -20,7 +20,7 @@ export default function AdminLogin() {
     try {
       // For now, we'll use a simple client-side check
       // In production, this should be a server-side authentication
-      if (email === "clinicanutriserpv@gmail.com" && password === "admin123456") {
+      if (email === "clinicanutricerpv@gmail.com" && password === "nutricer 2024") {
         // Store admin session in localStorage
         localStorage.setItem("adminSession", JSON.stringify({
           email,

@@ -85,6 +85,59 @@ export async function sendConfirmationEmail(
   }
 }
 
+export async function sendMembershipNotificationToAdmin(
+  adminEmail: string,
+  clientName: string,
+  clientEmail: string,
+  clientPhone: string | undefined,
+  programType: "basic" | "premium"
+) {
+  const transporter = getEmailTransporter();
+  const programName = programType === "basic" ? "Básico" : "Premium";
+  const price = programType === "basic" ? "$2,500 MXN" : "$4,000 MXN";
+
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #C5A55A;">Nueva Inscripción a Membresía</h1>
+          
+          <div style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #C5A55A; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #C5A55A;">Detalles del Cliente</h3>
+            <p><strong>Nombre:</strong> ${clientName}</p>
+            <p><strong>Email:</strong> ${clientEmail}</p>
+            <p><strong>Teléfono:</strong> ${clientPhone || "No proporcionado"}</p>
+            <p><strong>Programa:</strong> ${programName}</p>
+            <p><strong>Precio:</strong> ${price}</p>
+          </div>
+          
+          <p>El cliente ha completado su inscripción y está esperando confirmar el pago. Revisa el panel de administración para ver el comprobante cuando lo suba.</p>
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+          
+          <p style="font-size: 12px; color: #999;">
+            Este es un correo automático de Nutriser.
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: clientEmail,
+      replyTo: clientEmail,
+      to: adminEmail,
+      subject: `Nueva Inscripción a Membresía - ${clientName} (${programName})`,
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error("Error sending membership notification:", error);
+    return false;
+  }
+}
+
 export async function sendAppointmentNotification(
   adminEmail: string,
   clientName: string,

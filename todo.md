@@ -80,3 +80,26 @@
 ### Notificaciones
 - [ ] Enviar notificación al admin cuando se agenda una cita
 - [ ] Enviar correo al admin cuando se agenda una cita
+
+## Correcciones Solicitadas - Sesión 2
+
+### Admin Dashboard
+- [x] Cambiar credenciales admin a: clinicanutricerpv@gmail.com / nutricer 2024
+- [x] Crear tabla de membresías en dashboard (quién está inscrito, quién compró programa)
+- [x] Crear tabla de citas en dashboard
+- [x] Asegurar que el login admin funciona correctamente
+
+### Formulario de Citas
+- [x] Crear formulario separado para "Agenda tu valoración" (no WhatsApp)
+- [x] Agregar campos: nombre, correo, teléfono, fecha, horario (todos obligatorios)
+- [x] Guardar citas en base de datos
+- [x] Mostrar citas en panel de administración
+
+### Validaciones
+- [x] Hacer teléfono obligatorio en membresías (no opcional)
+- [x] Validar que todos los campos requeridos estén completos
+
+### Notificaciones por Correo
+- [x] Configurar notificaciones de membresías como correo directo desde la persona
+- [x] Enviar correo de confirmación de cita al admin
+- [x] Enviar correo de confirmación de cita al cliente

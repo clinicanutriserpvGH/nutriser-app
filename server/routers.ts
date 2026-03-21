@@ -5,7 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership } from "./db";
 import { notifyOwner } from "./_core/notification";
-import { sendConfirmationEmail, sendAppointmentNotification } from "./_core/email";
+import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin } from "./_core/email";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
 
@@ -62,7 +62,16 @@ export const appRouter = router({
         // Send confirmation email
         await sendConfirmationEmail(input.clientEmail, input.clientName, input.programType);
         
-        // Notify owner
+        // Send membership notification to admin from client email
+        await sendMembershipNotificationToAdmin(
+          "clinicanutricerpv@gmail.com",
+          input.clientName,
+          input.clientEmail,
+          input.clientPhone,
+          input.programType
+        );
+        
+        // Notify owner via system notification
         await notifyOwner({
           title: "Nueva Inscripción a Membresía",
           content: `Cliente: ${input.clientName}\nEmail: ${input.clientEmail}\nTeléfono: ${input.clientPhone || "No proporcionado"}\nPrograma: ${input.programType === "basic" ? "Básico" : "Premium"}`,
@@ -85,6 +94,15 @@ export const appRouter = router({
           membershipId: input.membershipId,
           proofUrl: input.fileName,
         });
+        
+        // Send proof notification email from client
+        await sendMembershipNotificationToAdmin(
+          "clinicanutricerpv@gmail.com",
+          membership.clientName,
+          membership.clientEmail,
+          membership.clientPhone || undefined,
+          membership.programType
+        );
         
         await notifyOwner({
           title: "Nuevo Comprobante de Membresía",

@@ -87,7 +87,7 @@ export default function Memberships() {
     e.preventDefault();
     if (!selectedProgram) return;
 
-    if (!formData.clientName || !formData.clientEmail) {
+    if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
       toast.error("Por favor completa todos los campos requeridos");
       return;
     }
@@ -256,12 +256,13 @@ export default function Memberships() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="phone">Teléfono</Label>
+                  <Label htmlFor="phone">Teléfono *</Label>
                   <Input
                     id="phone"
                     value={formData.clientPhone}
                     onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
-                    placeholder="+52 (opcional)"
+                    placeholder="+52 (requerido)"
+                    required
                   />
                 </div>
                 <div className="flex gap-3">

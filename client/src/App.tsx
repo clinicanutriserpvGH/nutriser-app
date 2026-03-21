@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Memberships from "./pages/Memberships";
 import AdminMemberships from "./pages/AdminMemberships";
 import Appointments from "./pages/Appointments";
+import AppointmentForm from "./pages/AppointmentForm";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 
@@ -15,9 +16,10 @@ function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+       <Route path={"/"} component={Home} />
       <Route path={"/memberships"} component={Memberships} />
       <Route path={"/appointments"} component={Appointments} />
+      <Route path={"/appointment-form"} component={AppointmentForm} />
       <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin/dashboard"} component={AdminDashboard} />
       <Route path={"/admin/memberships"} component={AdminMemberships} />

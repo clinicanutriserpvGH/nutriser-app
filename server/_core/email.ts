@@ -74,7 +74,7 @@ export async function sendConfirmationEmail(
 
   try {
     await transporter.sendMail({
-      from: ENV.gmailUser,
+      from: `"Nutriser" <${ENV.gmailUser}>`,
       to: clientEmail,
       subject: `Bienvenido a Nutriser - Programa ${programName}`,
       html: htmlContent,
@@ -126,7 +126,7 @@ export async function sendMembershipNotificationToAdmin(
 
   try {
     await transporter.sendMail({
-      from: clientEmail,
+      from: `"Nutriser" <${ENV.gmailUser}>`,
       replyTo: clientEmail,
       to: adminEmail,
       subject: `Nueva Inscripción a Membresía - ${clientName} (${programName})`,
@@ -185,7 +185,7 @@ export async function sendAppointmentConfirmationToClient(
 
   try {
     await transporter.sendMail({
-      from: ENV.gmailUser,
+      from: `"Nutriser" <${ENV.gmailUser}>`,
       to: clientEmail,
       subject: `Confirmación de Solicitud de Cita - Nutriser`,
       html: htmlContent,
@@ -245,7 +245,7 @@ export async function sendAppointmentNotification(
 
   try {
     await transporter.sendMail({
-      from: ENV.gmailUser,
+      from: `"Nutriser" <${ENV.gmailUser}>`,
       to: adminEmail,
       subject: `Nueva Cita Agendada - ${clientName}`,
       html: htmlContent,
@@ -336,7 +336,7 @@ export async function sendCouponApprovedEmail(
 
   try {
     await transporter.sendMail({
-      from: ENV.gmailUser,
+      from: `"Nutriser" <${ENV.gmailUser}>`,
       to: buyerEmail,
       subject: `🎁 Tu cupón ${couponCode} ha sido autorizado - Nutriser`,
       html: htmlContent,

@@ -288,3 +288,6 @@
 
 ## Botón "Lo Quiero" = Flujo de Compra
 - [x] Cambiar botón "Lo Quiero" para abrir el modal de compra de 3 pasos (igual que el icono regalo)
+
+## Correos siempre desde clinicanutriserpv@gmail.com
+- [x] Verificar y fijar remitente en todos los emails a clinicanutriserpv@gmail.com

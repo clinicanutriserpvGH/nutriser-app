@@ -58,8 +58,10 @@ async function startServer() {
         const filepath = join(uploadDir, filename);
         writeFileSync(filepath, buffer);
         
-        // Return URL that can be accessed directly
-        const url = `/uploads/${filename}`;
+        // Return full URL that can be accessed directly
+        const protocol = req.protocol || 'https';
+        const host = req.get('host') || 'localhost:3000';
+        const url = `${protocol}://${host}/uploads/${filename}`;
         res.json({ url });
       });
     } catch (error) {

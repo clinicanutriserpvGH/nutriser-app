@@ -9,6 +9,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import PromotionsSection from "@/components/PromotionsSection";
 import ServicesSection from "@/components/ServicesSection";
 import CtaBanner from "@/components/CtaBanner";
 import AboutSection from "@/components/AboutSection";
@@ -26,6 +27,7 @@ export default function Home() {
       <Navbar />
       <main>
         <HeroSection />
+        <PromotionsSection />
         <ServicesSection />
         <CtaBanner />
         <AboutSection />

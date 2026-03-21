@@ -154,11 +154,15 @@ export type InsertPromotion = typeof promotions.$inferInsert;
 export const giftPurchases = mysqlTable("giftPurchases", {
   id: int("id").autoincrement().primaryKey(),
   promotionId: int("promotionId").notNull().references(() => promotions.id),
+  couponCode: varchar("couponCode", { length: 20 }).notNull().unique(), // Código único NUT-XXXX-XXXX
   buyerName: varchar("buyerName", { length: 255 }).notNull(),
   buyerEmail: varchar("buyerEmail", { length: 320 }).notNull(),
   buyerPhone: varchar("buyerPhone", { length: 20 }),
   proofUrl: text("proofUrl").notNull(), // URL del comprobante de pago
-  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  isGift: boolean("isGift").default(false).notNull(), // true = regalo para otra persona
+  recipientName: varchar("recipientName", { length: 255 }), // Nombre del destinatario (si es regalo)
+  recipientContact: varchar("recipientContact", { length: 320 }), // WhatsApp o email del destinatario
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "used"]).default("pending").notNull(),
   approvedAt: timestamp("approvedAt"),
   approvedBy: int("approvedBy"), // ID del admin que aprobó
   sharedWith: varchar("sharedWith", { length: 320 }), // Email del destinatario

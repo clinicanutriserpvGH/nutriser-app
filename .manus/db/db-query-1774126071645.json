@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `giftPurchases` ADD `couponCode` varchar(20) NOT NULL DEFAULT '';\nALTER TABLE `giftPurchases` ADD `isGift` boolean NOT NULL DEFAULT false;\nALTER TABLE `giftPurchases` ADD `recipientName` varchar(255);\nALTER TABLE `giftPurchases` ADD `recipientContact` varchar(320);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute ALTER TABLE `giftPurchases` ADD `couponCode` varchar(20) NOT NULL DEFAULT '';\nALTER TABLE `giftPurchases` ADD `isGift` boolean NOT NULL DEFAULT false;\nALTER TABLE `giftPurchases` ADD `recipientName` varchar(255);\nALTER TABLE `giftPurchases` ADD `recipientContact` varchar(320);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 4093
+}

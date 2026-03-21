@@ -43,6 +43,13 @@
       "when": 1774124329536,
       "tag": "0005_bizarre_mandroid",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1774126053169,
+      "tag": "0006_quick_gabe_jones",
+      "breakpoints": true
     }
   ]
 }

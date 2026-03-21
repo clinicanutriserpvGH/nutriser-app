@@ -254,3 +254,13 @@
 - [x] Dividir modal en 2 pasos: Paso 1 (datos del comprador), Paso 2 (pago + timer 15 min)
 - [x] Timer solo empieza cuando el usuario hace click en "Continuar" al paso 2
 - [x] Mensaje claro: "Tienes 15 minutos para subir tu comprobante. Si no lo subes, deberás registrarte de nuevo"
+
+## Sistema de Cupones con Código Único
+- [x] Agregar campo couponCode (código único NUT-XXXX-XXXX) en tabla giftPurchases
+- [x] Agregar campo isGift (boolean) y recipientName, recipientContact en tabla
+- [x] Generar código único automáticamente al crear compra
+- [x] Modal 3 pasos: Paso 1 (datos comprador), Paso 2 (¿para mí o regalo?), Paso 3 (pago + timer)
+- [x] Si es regalo: pedir nombre y contacto del destinatario
+- [x] Panel admin: mostrar código único, nombre comprador, destinatario si es regalo
+- [x] Mostrar estado: Pendiente / Autorizado / Usado
+- [ ] Al autorizar: generar imagen/tarjeta del cupón con código visible

@@ -310,8 +310,17 @@ export const appRouter = router({
         buyerPhone: z.string().optional(),
         proofData: z.string(), // base64
         proofMimeType: z.string(),
+        isGift: z.boolean().default(false),
+        recipientName: z.string().optional(),
+        recipientContact: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
+        // Generate unique coupon code: NUT-XXXX-XXXX
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const part1 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const part2 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const couponCode = `NUT-${part1}-${part2}`;
+
         // Upload proof to S3
         const buffer = Buffer.from(input.proofData, 'base64');
         const fileName = `gift-proof-${Date.now()}.${input.proofMimeType.split('/')[1]}`;
@@ -319,20 +328,25 @@ export const appRouter = router({
 
         const purchase = await createGiftPurchase({
           promotionId: input.promotionId,
+          couponCode,
           buyerName: input.buyerName,
           buyerEmail: input.buyerEmail,
           buyerPhone: input.buyerPhone,
           proofUrl: url,
+          isGift: input.isGift,
+          recipientName: input.recipientName,
+          recipientContact: input.recipientContact,
           status: 'pending',
         });
 
         // Notify admin
+        const giftType = input.isGift ? `regalo para ${input.recipientName || 'destinatario'}` : 'uso personal';
         await notifyOwner({
-          title: 'Nueva compra de cupón de regalo',
-          content: `${input.buyerName} (${input.buyerEmail}) compró un cupón de regalo. Revisa el panel de administración para autorizar.`,
+          title: 'Nueva compra de cupón',
+          content: `${input.buyerName} (${input.buyerEmail}) compró el cupón ${couponCode} (${giftType}). Revisa el panel de administración para autorizar.`,
         });
 
-        return { success: true, id: purchase.id };
+        return { success: true, id: purchase.id, couponCode };
       }),
 
     list: publicProcedure.query(async () => {

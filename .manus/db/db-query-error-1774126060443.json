@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE `giftPurchases` ADD `couponCode` varchar(20) NOT NULL DEFAULT '' UNIQUE;\nALTER TABLE `giftPurchases` ADD `isGift` boolean NOT NULL DEFAULT false;\nALTER TABLE `giftPurchases` ADD `recipientName` varchar(255);\nALTER TABLE `giftPurchases` ADD `recipientContact` varchar(320);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute ALTER TABLE `giftPurchases` ADD `couponCode` varchar(20) NOT NULL DEFAULT '' UNIQUE;\nALTER TABLE `giftPurchases` ADD `isGift` boolean NOT NULL DEFAULT false;\nALTER TABLE `giftPurchases` ADD `recipientName` varchar(255);\nALTER TABLE `giftPurchases` ADD `recipientContact` varchar(320);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 8200 (HY000) at line 1: unsupported add column 'couponcode' constraint UNIQUE KEY when altering '7jSTACnGYyADJrX65GKurG.giftPurchases'"
+  ]
+}

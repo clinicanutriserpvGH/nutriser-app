@@ -628,19 +628,44 @@ export default function AdminDashboard() {
 
                           {/* Info */}
                           <div className="flex-1 space-y-1">
+                            {/* Código único del cupón */}
+                            {purchase.couponCode && (
+                              <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-lg px-3 py-2 mb-2">
+                                <p className="text-xs text-[#666] font-semibold uppercase tracking-wide">Código de Cupón</p>
+                                <p className="text-lg font-mono font-bold text-[#C5A55A] tracking-widest">{purchase.couponCode}</p>
+                              </div>
+                            )}
                             <p className="font-bold text-[#1A1A1A]">{purchase.buyerName}</p>
                             <p className="text-sm text-[#666]">{purchase.buyerEmail}</p>
                             {purchase.buyerPhone && <p className="text-sm text-[#666]">{purchase.buyerPhone}</p>}
-                            <p className="text-xs text-[#999]">
+                            {/* Tipo: personal o regalo */}
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                purchase.isGift ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                              }`}>
+                                {purchase.isGift ? '🎁 Para regalar' : '👤 Uso personal'}
+                              </span>
+                            </div>
+                            {/* Destinatario si es regalo */}
+                            {purchase.isGift && purchase.recipientName && (
+                              <div className="bg-purple-50 border border-purple-200 rounded-lg px-3 py-2 mt-2">
+                                <p className="text-xs text-purple-700 font-semibold">Destinatario del regalo:</p>
+                                <p className="text-sm font-bold text-purple-900">{purchase.recipientName}</p>
+                                {purchase.recipientContact && <p className="text-xs text-purple-700">{purchase.recipientContact}</p>}
+                              </div>
+                            )}
+                            <p className="text-xs text-[#999] mt-1">
                               {purchase.createdAt ? new Date(purchase.createdAt).toLocaleString('es-MX') : ''}
                             </p>
                             <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mt-2 ${
                               purchase.status === 'approved' ? 'bg-green-100 text-green-700' :
                               purchase.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                              purchase.status === 'used' ? 'bg-gray-100 text-gray-700' :
                               'bg-yellow-100 text-yellow-700'
                             }`}>
                               {purchase.status === 'approved' ? '✓ Autorizado' :
-                               purchase.status === 'rejected' ? '✗ Rechazado' : '⏳ Pendiente'}
+                               purchase.status === 'rejected' ? '✗ Rechazado' :
+                               purchase.status === 'used' ? '✅ Usado' : '⏳ Pendiente'}
                             </span>
                           </div>
 

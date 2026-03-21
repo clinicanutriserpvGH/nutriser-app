@@ -58,6 +58,41 @@ async function startServer() {
     }
   });
   
+  // Proxy endpoint for S3 images to handle CORS
+  app.get("/api/image-proxy", async (req, res) => {
+    try {
+      const { url } = req.query;
+      if (!url || typeof url !== "string") {
+        return res.status(400).json({ error: "URL parameter required" });
+      }
+      
+      // Verify it's a valid S3 URL to prevent abuse
+      if (!url.includes(".amazonaws.com") && !url.includes("s3")) {
+        return res.status(403).json({ error: "Invalid URL" });
+      }
+      
+      // Fetch the image from S3
+      const response = await fetch(url);
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "Failed to fetch image" });
+      }
+      
+      const contentType = response.headers.get("content-type") || "image/jpeg";
+      const buffer = await response.arrayBuffer();
+      
+      // Set CORS headers
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+      res.set("Content-Type", contentType);
+      res.set("Cache-Control", "public, max-age=86400"); // Cache for 24 hours
+      
+      res.send(Buffer.from(buffer));
+    } catch (error) {
+      console.error("Image proxy error:", error);
+      res.status(500).json({ error: "Image proxy failed" });
+    }
+  });
+  
   // tRPC API
   app.use(
     "/api/trpc",

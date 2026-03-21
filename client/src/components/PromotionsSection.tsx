@@ -62,13 +62,13 @@ export default function PromotionsSection() {
                     </div>
                   ) : (
                     <img
-                      src={promo.imageUrl}
+                      src={`/api/image-proxy?url=${encodeURIComponent(promo.imageUrl)}`}
                       alt={promo.title}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                       onError={() => handleImageError(promo.id)}
                     />
-                  )}
-                </div>
+                  )
+                }</div>
 
                 {/* Content */}
                 <div className="p-6">
@@ -81,9 +81,14 @@ export default function PromotionsSection() {
                     </p>
                   )}
                   <div className="mt-4 pt-4 border-t border-[#C5A55A]/20">
-                    <button className="w-full bg-[#C5A55A] text-white py-2 text-sm tracking-[0.1em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E]">
-                      Más Información
-                    </button>
+                    <a
+                      href={`https://wa.me/3221007799?text=${encodeURIComponent(`Quiero la promoción: ${promo.title}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full bg-[#C5A55A] text-white py-2 text-sm tracking-[0.1em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E] text-center"
+                    >
+                      Lo Quiero
+                    </a>
                   </div>
                 </div>
               </motion.div>

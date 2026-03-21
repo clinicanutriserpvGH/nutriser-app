@@ -235,3 +235,17 @@
 - [ ] Crear tabla de cupones en panel admin
 - [ ] Admin debe aprobar cupones antes de activarlos
 - [ ] Mostrar estado de cada cupón (Activo/Inactivo/Pendiente de aprobación)
+
+## Correcciones Sesión 13 - Imágenes de Promociones y WhatsApp
+
+### Problema de Imágenes
+- [x] Corregir visualización de imágenes de promociones (URLs S3 no se cargan)
+- [x] Investigar problema de CORS o permisos en S3
+- [x] Crear proxy de imágenes si es necesario
+- [x] Verificar que las URLs se guardan correctamente en BD
+
+### Botón de Promociones
+- [x] Cambiar botón "Más Información" a "Lo Quiero"
+- [x] Integrar WhatsApp con número 3221007799
+- [x] Mensaje predefinido: "Quiero la promoción: [nombre de la promoción]"
+- [x] Botón abre WhatsApp automáticamente con mensaje

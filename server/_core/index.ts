@@ -35,6 +35,29 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  
+  // Upload endpoint for promotions and other images
+  app.post("/api/upload", async (req, res) => {
+    try {
+      const chunks: Buffer[] = [];
+      req.on("data", (chunk) => chunks.push(chunk));
+      req.on("end", async () => {
+        const buffer = Buffer.concat(chunks);
+        const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+        const key = `uploads/${filename}`;
+        
+        // Import storagePut from storage module
+        const { storagePut } = await import("../storage");
+        const result = await storagePut(key, buffer, "image/jpeg");
+        
+        res.json({ url: result.url });
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+      res.status(500).json({ error: "Upload failed" });
+    }
+  });
+  
   // tRPC API
   app.use(
     "/api/trpc",

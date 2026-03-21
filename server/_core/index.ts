@@ -35,34 +35,26 @@ async function startServer() {
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   
-  // Upload endpoint for promotions and other images - save to server
+  // Upload endpoint for promotions and other images - save to S3
   app.post("/api/upload", async (req, res) => {
     try {
+      const { storagePut } = await import("../storage");
       const chunks: Buffer[] = [];
       req.on("data", (chunk) => chunks.push(chunk));
       req.on("end", async () => {
-        const buffer = Buffer.concat(chunks);
-        const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-        
-        // Save to public directory for direct access
-        const { writeFileSync, mkdirSync } = await import("fs");
-        const { join } = await import("path");
-        const uploadDir = join(process.cwd(), "dist", "uploads");
-        
         try {
-          mkdirSync(uploadDir, { recursive: true });
-        } catch (e) {
-          // Directory might already exist
+          const { storagePut } = await import("../storage");
+          const buffer = Buffer.concat(chunks);
+          const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+          const relKey = `promotions/${filename}`;
+          
+          // Upload to S3
+          const { url } = await storagePut(relKey, buffer, "image/jpeg");
+          res.json({ url });
+        } catch (error) {
+          console.error("Upload error:", error);
+          res.status(500).json({ error: "Upload failed: " + (error instanceof Error ? error.message : "Unknown error") });
         }
-        
-        const filepath = join(uploadDir, filename);
-        writeFileSync(filepath, buffer);
-        
-        // Return full URL that can be accessed directly
-        const protocol = req.protocol || 'https';
-        const host = req.get('host') || 'localhost:3000';
-        const url = `${protocol}://${host}/uploads/${filename}`;
-        res.json({ url });
       });
     } catch (error) {
       console.error("Upload error:", error);
@@ -70,14 +62,12 @@ async function startServer() {
     }
   });
   
-  // Endpoint para servir logo como fallback
+  // Endpoint para servir logo como fallback (no se usa, pero lo dejamos por compatibilidad)
   app.get("/api/logo", (req, res) => {
     res.setHeader("Content-Type", "image/jpeg");
     res.setHeader("Cache-Control", "public, max-age=86400");
-    // Logo base64 incrustado
-    const logoBase64 = "/9j/4AAQSkZJRgABAQAASABIAAD/4QDsRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAA";
-    const buffer = Buffer.from(logoBase64, 'base64');
-    res.send(buffer);
+    // Redirigir a una imagen placeholder
+    res.redirect("https://via.placeholder.com/400x300?text=Nutriser");
   });
   
   // Serve uploaded images

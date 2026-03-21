@@ -482,10 +482,45 @@ export default function AdminDashboard() {
                 <CardTitle className="text-[#C5A55A]">Gestionar Promociones</CardTitle>
                 <CardDescription>Agrega, edita o elimina promociones vigentes</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-[#FAF7F2] p-4 rounded-lg text-center">
-                  <p className="text-[#999] mb-2">Panel de Promociones</p>
-                  <p className="text-sm text-[#666]">Aqui podras subir promociones con imagen y texto para que los pacientes las vean en la pagina de inicio</p>
+              <CardContent className="space-y-6">
+                {/* Formulario para agregar promoción */}
+                <div className="bg-[#FAF7F2] p-6 rounded-lg space-y-4 border border-[#C5A55A]/20">
+                  <h3 className="font-bold text-[#1A1A1A] mb-4">Agregar Nueva Promoción</h3>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Título</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Descuento 20% en tratamientos"
+                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Descripción</label>
+                    <textarea
+                      placeholder="Describe la promoción..."
+                      rows={3}
+                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Imagen</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                    />
+                  </div>
+                  <Button className="w-full bg-[#C5A55A] hover:bg-[#B39548] text-white font-bold">
+                    Publicar Promoción
+                  </Button>
+                </div>
+
+                {/* Lista de promociones */}
+                <div>
+                  <h3 className="font-bold text-[#1A1A1A] mb-4">Promociones Publicadas</h3>
+                  <div className="bg-[#FAF7F2] p-4 rounded-lg text-center text-[#999]">
+                    <p>No hay promociones publicadas aún</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

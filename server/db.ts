@@ -285,9 +285,8 @@ export async function deletePromotion(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  await db.update(promotions)
-    .set({ isActive: false })
-    .where(eq(promotions.id, id));
+  // Hard delete - elimina completamente de la base de datos
+  await db.delete(promotions).where(eq(promotions.id, id));
 }
 
 export async function getAllPromotionsForAdmin() {

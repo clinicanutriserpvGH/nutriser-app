@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 export default function PromotionsSection() {
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+
+  const handleImageError = (id: number) => {
+    setImageErrors(prev => ({ ...prev, [id]: true }));
+  };
 
   return (
     <section id="promociones" className="py-20 bg-[#FAF7F2]">
@@ -49,12 +54,20 @@ export default function PromotionsSection() {
                 className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-[#C5A55A]/10"
               >
                 {/* Image */}
-                <div className="relative h-48 overflow-hidden bg-[#FAF7F2]">
-                  <img
-                    src={promo.imageUrl}
-                    alt={promo.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
+                <div className="relative h-48 overflow-hidden bg-[#FAF7F2] flex items-center justify-center">
+                  {imageErrors[promo.id] ? (
+                    <div className="flex flex-col items-center justify-center w-full h-full gap-2">
+                      <AlertCircle className="w-8 h-8 text-[#C5A55A]" />
+                      <p className="text-sm text-[#999]">Imagen no disponible</p>
+                    </div>
+                  ) : (
+                    <img
+                      src={promo.imageUrl}
+                      alt={promo.title}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      onError={() => handleImageError(promo.id)}
+                    />
+                  )}
                 </div>
 
                 {/* Content */}

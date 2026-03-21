@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, title, imageUrl FROM promotions LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT id, title, imageUrl FROM promotions LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "20 % Descuento en Mesoterapia Reductiva ",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/uploads/1774115363090-v8cpur.jpg"
+    },
+    {
+      "id": "2",
+      "title": "20 % Descuento en Mesoterapia Reductiva ",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/uploads/1774116166036-fw5bz.jpg"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\timageUrl\n1\t20 % Descuento en Mesoterapia Reductiva \thttps://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/uploads/1774115363090-v8cpur.jpg\n2\t20 % Descuento en Mesoterapia Reductiva \thttps://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/uploads/1774116166036-fw5bz.jpg\n",
+  "stderr": "",
+  "execution_time_ms": 71
+}

@@ -378,18 +378,9 @@ export default function PromotionsSection() {
                     <span className="text-blue-500 text-lg mt-0.5">📧</span>
                     <div>
                       <p className="text-sm font-semibold text-blue-900">Revisa tu correo: <span className="font-mono">{buyerEmail}</span></p>
-                      <p className="text-xs text-blue-700 mt-0.5">Una vez autorizado, recibirás el cupón completo por email.</p>
+                      <p className="text-xs text-blue-700 mt-0.5">Una vez autorizado, recibirás el cupón completo con tu código único por correo electrónico. Revisa también tu carpeta de spam.</p>
                     </div>
                   </div>
-                  {buyerPhone && (
-                    <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
-                      <span className="text-green-500 text-lg mt-0.5">📱</span>
-                      <div>
-                        <p className="text-sm font-semibold text-green-900">WhatsApp: <span className="font-mono">{buyerPhone}</span></p>
-                        <p className="text-xs text-green-700 mt-0.5">También te enviaremos el cupón por WhatsApp al autorizarlo.</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">

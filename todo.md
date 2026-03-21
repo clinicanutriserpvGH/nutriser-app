@@ -294,3 +294,9 @@
 
 ## Eliminar notificaciones de Manus Team
 - [x] Reemplazar notifyOwner (Manus) en compra de cupón por email Gmail desde clinicanutriserpv@gmail.com
+
+## WhatsApp al autorizar cupón
+- [ ] Corregir envío de WhatsApp al comprador cuando admin autoriza el cupón
+
+## Quitar bloque WhatsApp de confirmación de cupón
+- [x] Eliminar bloque de WhatsApp de la pantalla de éxito y dejar solo correo electrónico

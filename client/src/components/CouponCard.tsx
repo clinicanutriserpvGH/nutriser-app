@@ -10,6 +10,7 @@ interface CouponCardProps {
   holderName: string;
   isGift?: boolean;
   recipientName?: string;
+  expiresAt?: Date | string | null;
 }
 
 export default function CouponCard({
@@ -19,6 +20,7 @@ export default function CouponCard({
   holderName,
   isGift,
   recipientName,
+  expiresAt,
 }: CouponCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
@@ -234,6 +236,39 @@ export default function CouponCard({
               fontFamily: "monospace",
             }}>
               {couponCode}
+            </div>
+          </div>
+
+          {/* Fecha límite */}
+          {expiresAt && (
+            <div style={{
+              background: "#C5A55A22",
+              border: "1px solid #C5A55A44",
+              borderRadius: "8px",
+              padding: "8px 12px",
+              textAlign: "center",
+              marginBottom: "12px",
+            }}>
+              <div style={{ fontSize: "10px", letterSpacing: "1px", color: "#C5A55A", textTransform: "uppercase", fontFamily: "sans-serif", marginBottom: "2px" }}>
+                Válido hasta
+              </div>
+              <div style={{ fontSize: "13px", fontWeight: "bold", color: "#F0D080", fontFamily: "sans-serif" }}>
+                {new Date(expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </div>
+            </div>
+          )}
+
+          {/* Aviso de cita previa */}
+          <div style={{
+            background: "#FFFFFF11",
+            border: "1px solid #FFFFFF22",
+            borderRadius: "8px",
+            padding: "8px 12px",
+            textAlign: "center",
+            marginBottom: "12px",
+          }}>
+            <div style={{ fontSize: "11px", color: "#CCCCCC", fontFamily: "sans-serif" }}>
+              📞 Requiere cita previa • Llama al 322 450 3257
             </div>
           </div>
 

@@ -263,13 +263,21 @@ export async function sendCouponApprovedEmail(
   couponCode: string,
   promotionTitle: string,
   isGift: boolean,
-  recipientName?: string
+  recipientName?: string,
+  expiresAt?: Date
 ) {
   const transporter = getEmailTransporter();
 
   const holderName = isGift && recipientName ? recipientName : buyerName;
   const giftNote = isGift && recipientName
     ? `<p>Este cupón fue adquirido por <strong>${buyerName}</strong> como regalo para <strong>${recipientName}</strong>.</p>`
+    : '';
+
+  const expiresBlock = expiresAt
+    ? `<div style="background: #C5A55A22; border: 1px solid #C5A55A44; border-radius: 8px; padding: 10px 16px; margin: 12px 0; text-align: center;">
+        <p style="color: #C5A55A; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 4px;">Válido hasta</p>
+        <p style="color: #F0D080; font-size: 15px; font-weight: bold; margin: 0;">${new Date(expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+      </div>`
     : '';
 
   const htmlContent = `
@@ -298,7 +306,16 @@ export async function sendCouponApprovedEmail(
             </div>
             <p style="color: #aaa; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px;">CÓDIGO ÚNICO</p>
             <p style="color: #C5A55A; font-size: 28px; font-family: monospace; font-weight: bold; letter-spacing: 4px; margin: 0;">${couponCode}</p>
+            ${expiresBlock}
             <p style="color: #666; font-size: 10px; margin: 16px 0 0;">Presenta este código en Nutriser para redimir tu cupón.</p>
+          </div>
+
+          <!-- Aviso de cita previa -->
+          <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px 16px; border-radius: 4px; margin: 16px 0;">
+            <p style="margin: 0; font-size: 13px; color: #2e7d32;">
+              📞 <strong>Recuerda agendar tu cita previa</strong><br>
+              Llama al <strong>322 450 3257</strong> o escríbenos por WhatsApp para reservar tu lugar.
+            </p>
           </div>
 
           <div style="background-color: #fff8e1; border-left: 4px solid #C5A55A; padding: 12px 16px; border-radius: 4px; margin: 16px 0;">

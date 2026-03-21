@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -255,6 +255,17 @@ export async function createMembershipCoupon(data: InsertMembershipCoupon) {
 export async function getAllPromotions() {
   const db = await getDb();
   if (!db) return [];
+  
+  const now = new Date();
+  // Marcar automáticamente como inactivas las promociones vencidas
+  await db.update(promotions)
+    .set({ isActive: false })
+    .where(
+      and(
+        eq(promotions.isActive, true),
+        lt(promotions.expiresAt, now)
+      )
+    );
   
   return await db.select().from(promotions).where(eq(promotions.isActive, true)).orderBy(desc(promotions.createdAt));
 }

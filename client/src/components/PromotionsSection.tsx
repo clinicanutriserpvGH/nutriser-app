@@ -169,8 +169,25 @@ export default function PromotionsSection() {
                       <Sparkles className="w-5 h-5 text-white animate-pulse" />
                     </div>
                     <h3 className="font-serif text-2xl text-white mb-4 pr-20 leading-tight">{promo.title}</h3>
-                    {promo.description && <p className="text-white/90 text-sm leading-relaxed mb-6">{promo.description}</p>}
-                    <div className="h-px bg-white/30 my-6" />
+                    {promo.description && <p className="text-white/90 text-sm leading-relaxed mb-4">{promo.description}</p>}
+                    {/* Fecha límite */}
+                    {promo.expiresAt && (
+                      <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
+                        <span className="text-white text-sm">📅</span>
+                        <div>
+                          <p className="text-white/70 text-xs uppercase tracking-wider">Válido hasta</p>
+                          <p className="text-white font-bold text-sm">
+                            {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    {/* Aviso de cita previa */}
+                    <div className="bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
+                      <span className="text-white text-sm">📞</span>
+                      <p className="text-white/90 text-xs font-semibold">Requiere cita previa para ser atendido</p>
+                    </div>
+                    <div className="h-px bg-white/30 my-4" />
                     <a href={`https://wa.me/3221007799?text=${encodeURIComponent(`Quiero la promoción: ${promo.title}`)}`} target="_blank" rel="noopener noreferrer"
                       className="block w-full bg-white text-[#C5A55A] py-3 px-4 rounded-lg font-bold text-center uppercase tracking-[0.1em] hover:bg-[#FAF7F2] transition">
                       Lo Quiero

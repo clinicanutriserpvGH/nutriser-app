@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [promotionTitle, setPromotionTitle] = useState("");
   const [promotionDescription, setPromotionDescription] = useState("");
   const [promotionImage, setPromotionImage] = useState<File | null>(null);
+  const [promotionExpiresAt, setPromotionExpiresAt] = useState("");
 
   // Horarios fijos de la clínica
   const CLINIC_HOURS = [
@@ -225,6 +226,7 @@ export default function AdminDashboard() {
       setPromotionTitle("");
       setPromotionDescription("");
       setPromotionImage(null);
+      setPromotionExpiresAt("");
       utils.promotions.listForAdmin.invalidate();
       utils.promotions.list.invalidate();
     },
@@ -274,6 +276,7 @@ export default function AdminDashboard() {
         title: promotionTitle,
         description: promotionDescription,
         imageUrl: imageUrl,
+        expiresAt: promotionExpiresAt ? new Date(promotionExpiresAt).toISOString() : undefined,
       });
     } catch (error) {
       toast.error("Error al subir imagen: " + (error instanceof Error ? error.message : "Error desconocido"));
@@ -737,6 +740,24 @@ export default function AdminDashboard() {
                       className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+                      Fecha límite para canjear
+                      <span className="text-[#999] font-normal ml-2">(opcional)</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={promotionExpiresAt}
+                      onChange={(e) => setPromotionExpiresAt(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                    />
+                    {promotionExpiresAt && (
+                      <p className="text-xs text-[#C5A55A] mt-1">
+                        El cupón vencerá el {new Date(promotionExpiresAt + 'T23:59:59').toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                      </p>
+                    )}
+                  </div>
                   {/* Campo de imagen removido - ahora usa cupón automático */}
                   <Button
                     onClick={handlePublishPromotion}
@@ -768,6 +789,21 @@ export default function AdminDashboard() {
                           </div>
                           <h4 className="font-bold text-[#1A1A1A]">{promo.title}</h4>
                           <p className="text-sm text-[#666] mt-2">{promo.description}</p>
+                          {promo.expiresAt ? (
+                            <div className="mt-2 flex items-center gap-1">
+                              {new Date(promo.expiresAt) < new Date() ? (
+                                <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-semibold">
+                                  ❌ Vencido el {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </span>
+                              ) : (
+                                <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full font-semibold">
+                                  📅 Válido hasta {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-[#999] mt-2">Sin fecha límite</p>
+                          )}
                           <button
                             onClick={() => {
                               if (confirm(`¿Estás seguro de que deseas eliminar la promoción "${promo.title}"?`)) {

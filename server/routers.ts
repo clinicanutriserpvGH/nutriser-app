@@ -361,13 +361,17 @@ export const appRouter = router({
 
         await updateGiftPurchaseStatus(input.id, 'approved');
 
-        // Get promotion title
+        // Get promotion title and expiresAt
         let promotionTitle = 'Promoción Nutriser';
+        let promotionExpiresAt: Date | null = null;
         try {
-          const { getAllPromotions } = await import('./db');
-          const promos = await getAllPromotions();
+          const { getAllPromotionsForAdmin } = await import('./db');
+          const promos = await getAllPromotionsForAdmin();
           const promo = promos.find(p => p.id === purchase.promotionId);
-          if (promo) promotionTitle = promo.title;
+          if (promo) {
+            promotionTitle = promo.title;
+            promotionExpiresAt = promo.expiresAt ?? null;
+          }
         } catch {}
 
         // Send email to buyer
@@ -377,17 +381,22 @@ export const appRouter = router({
           purchase.couponCode,
           promotionTitle,
           purchase.isGift ?? false,
-          purchase.recipientName ?? undefined
+          purchase.recipientName ?? undefined,
+          promotionExpiresAt ?? undefined
         );
 
         // Build WhatsApp message for admin to send manually
         const holderName = (purchase.isGift && purchase.recipientName) ? purchase.recipientName : purchase.buyerName;
         const whatsappPhone = purchase.buyerPhone?.replace(/[^0-9]/g, '') || '';
+        const expiresLine = promotionExpiresAt
+          ? `\n📅 Válido hasta: ${new Date(promotionExpiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}`
+          : '';
         const whatsappMsg = encodeURIComponent(
           `🎁 ¡Hola ${purchase.buyerName}! Tu cupón de Nutriser ha sido autorizado.\n\n` +
           `📋 Promoción: ${promotionTitle}\n` +
           `👤 A nombre de: ${holderName}\n` +
-          `🔑 Código: ${purchase.couponCode}\n\n` +
+          `🔑 Código: ${purchase.couponCode}${expiresLine}\n\n` +
+          `📞 Recuerda agendar tu cita previa al 322 450 3257\n` +
           `Preséntalo en recepción para redimirlo. ¡Te esperamos! 💛`
         );
         const whatsappUrl = whatsappPhone
@@ -415,10 +424,12 @@ export const appRouter = router({
         title: z.string().min(1),
         description: z.string().optional(),
         imageUrl: z.string().url(),
+        expiresAt: z.string().optional(), // ISO date string
       }))
       .mutation(async ({ input }) => {
         return await createPromotion({
           ...input,
+          expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
           isActive: true,
         });
       }),
@@ -430,10 +441,15 @@ export const appRouter = router({
         description: z.string().optional(),
         imageUrl: z.string().url().optional(),
         isActive: z.boolean().optional(),
+        expiresAt: z.string().nullable().optional(), // ISO date string or null
       }))
       .mutation(async ({ input }) => {
-        const { id, ...data } = input;
-        return await updatePromotion(id, data);
+        const { id, expiresAt, ...rest } = input;
+        const data: Record<string, unknown> = { ...rest };
+        if (expiresAt !== undefined) {
+          data.expiresAt = expiresAt ? new Date(expiresAt) : null;
+        }
+        return await updatePromotion(id, data as Parameters<typeof updatePromotion>[1]);
       }),
 
     delete: publicProcedure

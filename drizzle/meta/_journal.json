@@ -50,6 +50,13 @@
       "when": 1774126053169,
       "tag": "0006_quick_gabe_jones",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1774132992421,
+      "tag": "0007_careful_bromley",
+      "breakpoints": true
     }
   ]
 }

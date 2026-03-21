@@ -277,3 +277,11 @@
 - [x] Al autorizar en admin: enviar email al comprador con tarjeta del cupón
 - [x] Al autorizar en admin: abrir WhatsApp automáticamente al número del comprador
 - [x] Email incluye: código, nombre, promoción, instrucciones para usar
+
+## Fecha Límite de Cupones y Cita Previa
+- [x] Agregar campo `expiresAt` (fecha límite) en tabla `promotions` del schema
+- [x] Backend: al listar cupones, marcar automáticamente como expirados si pasó la fecha
+- [x] Panel admin: campo de fecha límite al crear/editar promoción
+- [x] Cupón visual: mostrar fecha límite y texto "Previa cita requerida"
+- [x] Email de autorización: incluir fecha límite y aviso de cita previa
+- [x] Sección de promociones: mostrar fecha límite en cada cupón

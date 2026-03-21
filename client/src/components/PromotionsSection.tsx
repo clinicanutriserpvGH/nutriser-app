@@ -9,7 +9,8 @@ export default function PromotionsSection() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const handleShareWhatsApp = (title: string, description: string) => {
-    const message = `🎁 *${title}*\n\n${description}\n\n${window.location.href}`;
+    const shareUrl = window.location.href.replace(/https:\/\/[^\/]+/, 'https://nutriserpv.com');
+    const message = `🎁 *${title}*\n\n${description}\n\n${shareUrl}`;
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
@@ -22,7 +23,7 @@ export default function PromotionsSection() {
   };
 
   const handleCopyLink = (id: number, title: string) => {
-    const pageUrl = window.location.href;
+    const pageUrl = window.location.href.replace(/https:\/\/[^\/]+/, 'https://nutriserpv.com');
     navigator.clipboard.writeText(pageUrl);
     setCopiedId(id);
     toast.success("Link copiado al portapapeles");

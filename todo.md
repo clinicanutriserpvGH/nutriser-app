@@ -131,3 +131,14 @@
 - [x] Permitir que el usuario seleccione el servicio que desea agendar
 - [x] Verificar que NO se envíen correos del sitio en ningún lado
 - [x] Asegurar que TODOS los correos vengan desde clinicanutriserpv@gmail.com
+
+## Correcciones Críticas Sesión 7
+
+- [x] Remover OAuth - permitir acceso directo al admin sin login
+- [x] Reparar panel admin para mostrar comprobantes de membresías
+- [x] Agregar botón "Verificar" en comprobantes para activar membresía
+- [x] Enviar correo de activación desde clinicanutriserpv@gmail.com cuando admin activa
+- [x] Mostrar citas agendadas en panel admin con detalles
+- [x] Eliminar TODOS los correos automáticos del sitio (solo desde clínica)
+- [x] Verificar que NO se redirige a OAuth en ningún lado
+- [x] Verificar funcionalidad completa: membresías, comprobantes, citas

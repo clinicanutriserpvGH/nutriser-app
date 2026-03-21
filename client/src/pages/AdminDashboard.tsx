@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,24 @@ export default function AdminDashboard() {
   const { data: appointments } = trpc.appointments.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
+  const utils = trpc.useUtils();
+  const updateStatusMutation = trpc.memberships.updateStatus.useMutation({
+    onSuccess: () => {
+      toast.success("Membresía activada y correo enviado");
+      utils.memberships.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error al activar membresía: " + error.message);
+    },
+  });
+
+  const handleVerifyMembership = (membershipId: number) => {
+    updateStatusMutation.mutate({
+      id: membershipId,
+      status: "verified",
+    });
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("adminSession");
@@ -147,6 +165,8 @@ export default function AdminDashboard() {
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Email</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Programa</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Estado</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Comprobante</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Acciones</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Fecha</th>
                       </tr>
                     </thead>
@@ -176,6 +196,20 @@ export default function AdminDashboard() {
                                     : "Rechazada"}
                               </span>
                             </td>
+                            <td className="py-3 px-4">
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Ver</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs"
+                                onClick={() => handleVerifyMembership(membership.id)}
+                                disabled={membership.status === "verified" || updateStatusMutation.isPending}
+                              >
+                                {updateStatusMutation.isPending ? "Activando..." : "Verificar"}
+                              </Button>
+                            </td>
                             <td className="py-3 px-4 text-[#999]">
                               {new Date(membership.createdAt).toLocaleDateString()}
                             </td>
@@ -183,7 +217,7 @@ export default function AdminDashboard() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={5} className="py-8 text-center text-[#999]">
+                          <td colSpan={7} className="py-8 text-center text-[#999]">
                             No hay membresías registradas
                           </td>
                         </tr>

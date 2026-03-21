@@ -7,6 +7,8 @@ import { toast } from "sonner";
 export default function PromotionsSection() {
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [giftModalOpen, setGiftModalOpen] = useState(false);
+  const [selectedPromoForGift, setSelectedPromoForGift] = useState<{ id: number; title: string } | null>(null);
 
   const handleShareWhatsApp = (title: string, description: string, promoId: number) => {
     const shareUrl = `https://nutriserpv.com/#cupon-${promoId}`;
@@ -85,9 +87,16 @@ export default function PromotionsSection() {
                     <div className="p-8 relative">
                       {/* Logo y regalo en la esquina */}
                       <div className="absolute top-4 right-4 flex items-center gap-2">
-                        <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 animate-bounce">
+                        <button
+                          onClick={() => {
+                            setSelectedPromoForGift({ id: promo.id, title: promo.title });
+                            setGiftModalOpen(true);
+                          }}
+                          className="bg-white/20 backdrop-blur-sm rounded-full p-3 animate-bounce hover:bg-white/30 transition cursor-pointer"
+                          title="Comprar como regalo"
+                        >
                           <Gift className="w-6 h-6 text-white" />
-                        </div>
+                        </button>
                         <Sparkles className="w-5 h-5 text-white animate-pulse" />
                       </div>
 
@@ -194,6 +203,41 @@ export default function PromotionsSection() {
           </div>
         )}
       </div>
+
+      {/* Gift Purchase Modal */}
+      {giftModalOpen && selectedPromoForGift && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-[#C5A55A] to-[#B8963E] p-6 flex justify-between items-center">
+              <div>
+                <h2 className="text-white font-bold text-lg">Comprar Cupon de Regalo</h2>
+                <p className="text-white/80 text-sm">{selectedPromoForGift.title}</p>
+              </div>
+              <button
+                onClick={() => setGiftModalOpen(false)}
+                className="text-white hover:bg-white/20 p-2 rounded-full transition"
+              >
+                x
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-xs font-semibold text-blue-900 mb-2">CLAVE INTERBANCARIA BANAMEX</p>
+                <p className="text-lg font-mono font-bold text-blue-600 break-all">
+                  002470701448743487
+                </p>
+                <p className="text-xs text-blue-700 mt-2">
+                  Realiza la transferencia a esta clave y sube el comprobante
+                </p>
+              </div>
+              <p className="text-center text-sm text-[#999] py-4">Funcionalidad en desarrollo...</p>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

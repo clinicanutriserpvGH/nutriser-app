@@ -146,3 +146,27 @@ export const promotions = mysqlTable("promotions", {
 
 export type Promotion = typeof promotions.$inferSelect;
 export type InsertPromotion = typeof promotions.$inferInsert;
+
+/**
+ * Compras de cupones de regalo
+ * Almacena compras de cupones pagados que pueden ser compartidos como regalo
+ */
+export const giftPurchases = mysqlTable("giftPurchases", {
+  id: int("id").autoincrement().primaryKey(),
+  promotionId: int("promotionId").notNull().references(() => promotions.id),
+  buyerName: varchar("buyerName", { length: 255 }).notNull(),
+  buyerEmail: varchar("buyerEmail", { length: 320 }).notNull(),
+  buyerPhone: varchar("buyerPhone", { length: 20 }),
+  proofUrl: text("proofUrl").notNull(), // URL del comprobante de pago
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  approvedAt: timestamp("approvedAt"),
+  approvedBy: int("approvedBy"), // ID del admin que aprobó
+  sharedWith: varchar("sharedWith", { length: 320 }), // Email del destinatario
+  sharedMethod: mysqlEnum("sharedMethod", ["whatsapp", "email"]), // Método de compartir
+  sharedAt: timestamp("sharedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type GiftPurchase = typeof giftPurchases.$inferSelect;
+export type InsertGiftPurchase = typeof giftPurchases.$inferInsert;

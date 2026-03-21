@@ -36,6 +36,13 @@
       "when": 1774111797562,
       "tag": "0004_flashy_jazinda",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1774124329536,
+      "tag": "0005_bizarre_mandroid",
+      "breakpoints": true
     }
   ]
 }

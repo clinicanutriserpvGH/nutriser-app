@@ -358,6 +358,7 @@ export default function AdminDashboard() {
           <TabsList className="bg-[#C5A55A]/10">
             <TabsTrigger value="memberships">Membresías</TabsTrigger>
             <TabsTrigger value="appointments">Citas</TabsTrigger>
+            <TabsTrigger value="giftPurchases">Regalos Pagados</TabsTrigger>
             <TabsTrigger value="promotions">Promociones</TabsTrigger>
           </TabsList>
 
@@ -566,6 +567,19 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Gift Purchases Tab */}
+          <TabsContent value="giftPurchases" className="space-y-4">
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A]">Compras de Regalos Pendientes</CardTitle>
+                <CardDescription>Autoriza o rechaza las compras de cupones de regalo</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-[#999] text-center py-8">Funcionalidad en desarrollo...</p>
               </CardContent>
             </Card>
           </TabsContent>

@@ -94,8 +94,11 @@ export async function createMembership(data: InsertMembership) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(memberships).values(data);
-  return result;
+  await db.insert(memberships).values(data);
+  // Obtener el ID insertado
+  const inserted = await db.select().from(memberships).orderBy(desc(memberships.id)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create membership");
+  return inserted[0];
 }
 
 export async function getMembershipById(id: number) {

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Check } from "lucide-react";
+import { Check, Upload } from "lucide-react";
 
 const BANK_INFO = {
   bank: "Banamex",
@@ -49,6 +49,8 @@ export default function Memberships() {
   });
   const [membershipId, setMembershipId] = useState<number | null>(null);
   const [step, setStep] = useState<"select" | "form" | "proof">("select");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
 
   const createMutation = trpc.memberships.create.useMutation();
   const uploadProofMutation = trpc.memberships.uploadProof.useMutation();
@@ -62,6 +64,11 @@ export default function Memberships() {
     e.preventDefault();
     if (!selectedProgram) return;
 
+    if (!formData.clientName || !formData.clientEmail) {
+      toast.error("Por favor completa todos los campos requeridos");
+      return;
+    }
+
     try {
       const result = await createMutation.mutateAsync({
         clientName: formData.clientName,
@@ -70,44 +77,72 @@ export default function Memberships() {
         programType: selectedProgram,
       });
 
-      // Obtener el ID de la membresía (último insertado)
-      setMembershipId(Date.now()); // Usar timestamp como ID temporal
+      setMembershipId(result.id);
       setStep("proof");
       toast.success("Membresía creada. Ahora sube el comprobante de pago.");
     } catch (error) {
       toast.error("Error al crear la membresía");
+      console.error(error);
     }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar que sea imagen
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor selecciona una imagen válida");
+      return;
+    }
+
+    // Validar tamaño (máx 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("La imagen no debe exceder 5MB");
+      return;
+    }
+
+    setSelectedFile(file);
+    const preview = URL.createObjectURL(file);
+    setFilePreview(preview);
   };
 
   const handleUploadProof = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!membershipId) return;
-
-    const fileInput = document.getElementById("proof-file") as HTMLInputElement;
-    const file = fileInput?.files?.[0];
-
-    if (!file) {
+    if (!membershipId || !selectedFile) {
       toast.error("Por favor selecciona una imagen");
       return;
     }
 
-    // En producción, aquí subirías el archivo a S3 primero
-    // Por ahora, simularemos con una URL de ejemplo
-    const proofUrl = URL.createObjectURL(file);
-
     try {
-      await uploadProofMutation.mutateAsync({
-        membershipId,
-        proofUrl,
-      });
+      // Convertir archivo a base64 para enviar
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        
+        try {
+          await uploadProofMutation.mutateAsync({
+            membershipId,
+            proofData: base64,
+            fileName: selectedFile.name,
+          });
 
-      toast.success("Comprobante subido correctamente. Te enviaremos un correo de confirmación.");
-      setStep("select");
-      setFormData({ clientName: "", clientEmail: "", clientPhone: "" });
-      setSelectedProgram(null);
-      setMembershipId(null);
+          toast.success("Comprobante subido correctamente. Te enviaremos un correo de confirmación.");
+          setStep("select");
+          setFormData({ clientName: "", clientEmail: "", clientPhone: "" });
+          setSelectedProgram(null);
+          setMembershipId(null);
+          setSelectedFile(null);
+          setFilePreview(null);
+        } catch (error) {
+          toast.error("Error al subir el comprobante");
+          console.error(error);
+        }
+      };
+      reader.readAsDataURL(selectedFile);
     } catch (error) {
-      toast.error("Error al subir el comprobante");
+      toast.error("Error al procesar la imagen");
+      console.error(error);
     }
   };
 
@@ -265,24 +300,43 @@ export default function Memberships() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleUploadProof} className="space-y-6">
-                <div className="border-2 border-dashed border-[#C5A55A]/30 rounded-lg p-8 text-center">
+                <div className="border-2 border-dashed border-[#C5A55A]/30 rounded-lg p-8 text-center hover:border-[#C5A55A] transition-colors">
                   <input
                     id="proof-file"
                     type="file"
                     accept="image/*"
                     className="hidden"
+                    onChange={handleFileSelect}
                   />
                   <label
                     htmlFor="proof-file"
                     className="cursor-pointer block"
                   >
-                    <div className="text-[#C5A55A] mb-2">📷</div>
-                    <p className="font-semibold text-[#1A1A1A]">
-                      Haz clic para seleccionar una imagen
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      o arrastra tu archivo aquí
-                    </p>
+                    {filePreview ? (
+                      <div className="space-y-3">
+                        <img 
+                          src={filePreview} 
+                          alt="Preview" 
+                          className="max-h-48 mx-auto rounded"
+                        />
+                        <p className="text-sm text-gray-600">
+                          {selectedFile?.name}
+                        </p>
+                        <p className="text-xs text-[#C5A55A]">
+                          Haz clic para cambiar la imagen
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <Upload className="w-12 h-12 text-[#C5A55A] mx-auto mb-2" />
+                        <p className="font-semibold text-[#1A1A1A]">
+                          Haz clic para seleccionar una imagen
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          o arrastra tu archivo aquí
+                        </p>
+                      </div>
+                    )}
                   </label>
                 </div>
 
@@ -290,7 +344,7 @@ export default function Memberships() {
                   <p className="text-sm text-blue-800">
                     <strong>Nota:</strong> Asegúrate de que la imagen sea clara y
                     muestre el comprobante completo con todos los datos de la
-                    transferencia.
+                    transferencia. Máximo 5MB.
                   </p>
                 </div>
 
@@ -306,7 +360,7 @@ export default function Memberships() {
                   <Button
                     type="submit"
                     className="flex-1 bg-[#C5A55A] hover:bg-[#B39449] text-white"
-                    disabled={uploadProofMutation.isPending}
+                    disabled={uploadProofMutation.isPending || !selectedFile}
                   >
                     {uploadProofMutation.isPending ? "Subiendo..." : "Enviar Comprobante"}
                   </Button>

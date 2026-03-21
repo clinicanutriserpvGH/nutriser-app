@@ -49,3 +49,8 @@
 ## Correcciones Solicitadas
 - [x] Agregar botón visible de "Programas de Membresía" en la página principal
 - [x] Corregir servicios de Nutrición para dejar solo "Asesoría Nutricional Personalizada"
+
+## Errores a Corregir
+- [x] Arreglar subida de imagen del comprobante (no permite subir)
+- [x] Reparar enlace de Membresías en navegación (no funciona)
+- [x] Configurar envío automático de correos a clinicanutriserpv@gmail.com con foto y datos

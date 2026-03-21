@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId } from "./db";
+import { notifyOwner } from "./_core/notification";
 
 export const appRouter = router({
   system: systemRouter,
@@ -41,13 +42,24 @@ export const appRouter = router({
     uploadProof: publicProcedure
       .input(z.object({
         membershipId: z.number(),
-        proofUrl: z.string().url(),
+        proofData: z.string(),
+        fileName: z.string(),
       }))
       .mutation(async ({ input }) => {
-        return await createPaymentProof({
+        const membership = await getMembershipById(input.membershipId);
+        if (!membership) throw new Error("Membership not found");
+        
+        const proof = await createPaymentProof({
           membershipId: input.membershipId,
-          proofUrl: input.proofUrl,
+          proofUrl: input.fileName,
         });
+        
+        await notifyOwner({
+          title: "Nuevo Comprobante de Membresía",
+          content: `Cliente: ${membership.clientName}\nEmail: ${membership.clientEmail}\nTeléfono: ${membership.clientPhone || "No proporcionado"}\nPrograma: ${membership.programType === "basic" ? "Básico" : "Premium"}\nConcepto: ${membership.depositConcept}\nArchivo: ${input.fileName}`,
+        });
+        
+        return proof;
       }),
     
     list: protectedProcedure.query(async ({ ctx }) => {

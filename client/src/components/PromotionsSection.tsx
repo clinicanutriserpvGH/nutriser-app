@@ -188,10 +188,11 @@ export default function PromotionsSection() {
                       <p className="text-white/90 text-xs font-semibold">Requiere cita previa para ser atendido</p>
                     </div>
                     <div className="h-px bg-white/30 my-4" />
-                    <a href={`https://wa.me/3221007799?text=${encodeURIComponent(`Quiero la promoción: ${promo.title}`)}`} target="_blank" rel="noopener noreferrer"
+                    <button
+                      onClick={() => { setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true); }}
                       className="block w-full bg-white text-[#C5A55A] py-3 px-4 rounded-lg font-bold text-center uppercase tracking-[0.1em] hover:bg-[#FAF7F2] transition">
                       Lo Quiero
-                    </a>
+                    </button>
                   </div>
                   <div className="h-1 bg-[#C5A55A]/30 flex items-center justify-between px-4">
                     {[...Array(8)].map((_, i) => <div key={i} className="w-1 h-1 bg-[#C5A55A] rounded-full" />)}

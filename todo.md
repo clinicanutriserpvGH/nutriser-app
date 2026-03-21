@@ -285,3 +285,6 @@
 - [x] Cupón visual: mostrar fecha límite y texto "Previa cita requerida"
 - [x] Email de autorización: incluir fecha límite y aviso de cita previa
 - [x] Sección de promociones: mostrar fecha límite en cada cupón
+
+## Botón "Lo Quiero" = Flujo de Compra
+- [x] Cambiar botón "Lo Quiero" para abrir el modal de compra de 3 pasos (igual que el icono regalo)

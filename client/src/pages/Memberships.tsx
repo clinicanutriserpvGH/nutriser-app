@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Check, Upload, Clock } from "lucide-react";
+import { Check, Upload, Clock, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 
 const BANK_INFO = {
   bank: "Banamex",
@@ -39,6 +40,7 @@ const PROGRAMS = [
 ];
 
 export default function Memberships() {
+  const [, navigate] = useLocation();
   const [selectedProgram, setSelectedProgram] = useState<"basic" | "premium" | null>(null);
   const [formData, setFormData] = useState({
     clientName: "",
@@ -182,6 +184,18 @@ export default function Memberships() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FAF7F2] to-[#F5F1E8] py-12 px-4">
       <div className="max-w-6xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E]"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Adquirir Programa</h1>

@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle } from "lucide-react";
+import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
@@ -45,6 +45,18 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] py-8 px-4">
       <div className="max-w-6xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E]"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>

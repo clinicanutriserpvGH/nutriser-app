@@ -110,3 +110,9 @@
 - [x] Configurar correos de citas para que lleguen desde clinicanutriserpv@gmail.com
 - [x] Verificar que el login de admin funciona correctamente
 - [x] Verificar que los correos de citas llegan desde el email de la clínica
+
+## Correcciones Sesión 4
+
+- [x] Corregir contraseña de admin a nutriser2024 (sin espacio)
+- [x] Agregar toggle de visibilidad de contraseña en login (ícono de ojo)
+- [x] Agregar botones de volver en todas las páginas (membresías, citas, admin, etc.)

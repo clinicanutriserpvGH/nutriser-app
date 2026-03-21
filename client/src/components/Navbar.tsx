@@ -32,6 +32,12 @@ export default function Navbar() {
 
   const handleNavClick = (href: string) => {
     setMobileOpen(false);
+    // Si es una ruta (comienza con /), navega directamente
+    if (href.startsWith("/")) {
+      window.location.href = href;
+      return;
+    }
+    // Si es un ancla, hace scroll
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
@@ -72,7 +78,11 @@ export default function Navbar() {
                 href={link.href}
                 onClick={(e) => {
                   e.preventDefault();
-                  handleNavClick(link.href);
+                  if (link.href.startsWith("/")) {
+                    window.location.href = link.href;
+                  } else {
+                    handleNavClick(link.href);
+                  }
                 }}
                 className={`text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:text-[#C5A55A] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#C5A55A] after:transition-all after:duration-300 hover:after:w-full ${
                   scrolled ? "text-[#1A1A1A]/70" : "text-white/80"
@@ -122,7 +132,11 @@ export default function Navbar() {
                   href={link.href}
                   onClick={(e) => {
                     e.preventDefault();
-                    handleNavClick(link.href);
+                    if (link.href.startsWith("/")) {
+                      window.location.href = link.href;
+                    } else {
+                      handleNavClick(link.href);
+                    }
                   }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}

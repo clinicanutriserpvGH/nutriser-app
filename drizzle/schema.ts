@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -128,3 +128,21 @@ export const membershipCoupons = mysqlTable("membershipCoupons", {
 
 export type MembershipCoupon = typeof membershipCoupons.$inferSelect;
 export type InsertMembershipCoupon = typeof membershipCoupons.$inferInsert;
+
+
+/**
+ * Promociones vigentes
+ * Almacena promociones que el admin puede crear y mostrar en la página
+ */
+export const promotions = mysqlTable("promotions", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  imageUrl: text("imageUrl").notNull(), // URL de S3
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Promotion = typeof promotions.$inferSelect;
+export type InsertPromotion = typeof promotions.$inferInsert;

@@ -238,6 +238,7 @@ export default function AdminDashboard() {
           <TabsList className="bg-[#C5A55A]/10">
             <TabsTrigger value="memberships">Membresías</TabsTrigger>
             <TabsTrigger value="appointments">Citas</TabsTrigger>
+            <TabsTrigger value="promotions">Promociones</TabsTrigger>
           </TabsList>
 
           {/* Memberships Tab */}
@@ -415,6 +416,22 @@ export default function AdminDashboard() {
                       )}
                     </tbody>
                   </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Promotions Tab */}
+          <TabsContent value="promotions" className="space-y-4">
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A]">Gestionar Promociones</CardTitle>
+                <CardDescription>Agrega, edita o elimina promociones vigentes</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-[#FAF7F2] p-4 rounded-lg text-center">
+                  <p className="text-[#999] mb-2">Panel de Promociones</p>
+                  <p className="text-sm text-[#666]">Aqui podras subir promociones con imagen y texto para que los pacientes las vean en la pagina de inicio</p>
                 </div>
               </CardContent>
             </Card>

@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -248,4 +248,51 @@ export async function createMembershipCoupon(data: InsertMembershipCoupon) {
   const inserted = await db.select().from(membershipCoupons).orderBy(desc(membershipCoupons.id)).limit(1);
   if (inserted.length === 0) throw new Error("Failed to create membership coupon");
   return inserted[0];
+}
+
+
+// Promotion queries
+export async function getAllPromotions() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(promotions).where(eq(promotions.isActive, true)).orderBy(desc(promotions.createdAt));
+}
+
+export async function createPromotion(data: InsertPromotion) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(promotions).values(data);
+  const inserted = await db.select().from(promotions).orderBy(desc(promotions.id)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create promotion");
+  return inserted[0];
+}
+
+export async function updatePromotion(id: number, data: Partial<InsertPromotion>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(promotions)
+    .set(data)
+    .where(eq(promotions.id, id));
+  
+  const result = await db.select().from(promotions).where(eq(promotions.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function deletePromotion(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(promotions)
+    .set({ isActive: false })
+    .where(eq(promotions.id, id));
+}
+
+export async function getAllPromotionsForAdmin() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(promotions).orderBy(desc(promotions.createdAt));
 }

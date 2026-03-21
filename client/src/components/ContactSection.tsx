@@ -148,7 +148,7 @@ export default function ContactSection() {
               <div className="grid grid-cols-2 gap-3 pt-4">
                 <a
                   href="tel:3224503257"
-                  className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-green-700"
+                  className="flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E]"
                 >
                   <Phone className="w-4 h-4" />
                   Llamar
@@ -166,7 +166,6 @@ export default function ContactSection() {
                   onClick={() => navigate("/appointment-form")}
                   className="flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E]"
                 >
-                  <Clock className="w-4 h-4" />
                   Agendar Cita
                 </button>
                 <button

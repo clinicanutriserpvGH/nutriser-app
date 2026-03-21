@@ -97,6 +97,20 @@ export default function HeroSection() {
             >
               Agenda por WhatsApp
             </a>
+            <motion.a
+              href="#promociones"
+              onClick={(e) => {
+                e.preventDefault();
+                const el = document.querySelector("#promociones");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#C5A55A] to-[#1A1A1A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-[#C5A55A]/50 border-2 border-[#C5A55A] overflow-hidden group"
+              animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.4)", "0 0 0 10px rgba(197, 165, 90, 0)"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="relative">Promociones Vigentes</span>
+            </motion.a>
           </motion.div>
         </div>
       </div>

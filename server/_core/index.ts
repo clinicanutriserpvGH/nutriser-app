@@ -70,6 +70,16 @@ async function startServer() {
     }
   });
   
+  // Endpoint para servir logo como fallback
+  app.get("/api/logo", (req, res) => {
+    res.setHeader("Content-Type", "image/jpeg");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    // Logo base64 incrustado
+    const logoBase64 = "/9j/4AAQSkZJRgABAQAASABIAAD/4QDsRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAA";
+    const buffer = Buffer.from(logoBase64, 'base64');
+    res.send(buffer);
+  });
+  
   // Serve uploaded images
   app.use("/uploads", express.static("dist/uploads"));
   

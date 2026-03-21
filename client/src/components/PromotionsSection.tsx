@@ -12,7 +12,7 @@ export default function PromotionsSection() {
   };
 
   const getImageUrl = (imageUrl: string | null) => {
-    return imageUrl || '/uploads/nutriser-logo.jpeg';
+    return imageUrl || '/api/logo';
   };
 
   return (
@@ -69,7 +69,7 @@ export default function PromotionsSection() {
                       src={getImageUrl(promo.imageUrl)}
                       alt={promo.title}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                      onError={() => handleImageError(promo.id)}
+                      onError={(e) => { e.currentTarget.src = '/api/logo'; handleImageError(promo.id); }}
                     />
                   )
                 }</div>

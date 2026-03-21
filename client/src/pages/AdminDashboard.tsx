@@ -225,7 +225,7 @@ export default function AdminDashboard() {
     }
 
     try {
-      let imageUrl = '/uploads/nutriser-logo.jpeg';
+      let imageUrl = '/api/logo';
       
       if (promotionImage) {
         const formData = new FormData();
@@ -631,10 +631,10 @@ export default function AdminDashboard() {
                       {promotions.map((promo) => (
                         <div key={promo.id} className="bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
                           <img 
-                            src={promo.imageUrl || '/uploads/nutriser-logo.jpeg'} 
+                            src={promo.imageUrl || '/api/logo'} 
                             alt={promo.title} 
                             className="w-full h-40 object-cover rounded-lg mb-3" 
-                            onError={(e) => { e.currentTarget.src = '/uploads/nutriser-logo.jpeg'; }}
+                            onError={(e) => { e.currentTarget.src = '/api/logo'; }}
                           />
                           <h4 className="font-bold text-[#1A1A1A]">{promo.title}</h4>
                           <p className="text-sm text-[#666] mt-2">{promo.description}</p>

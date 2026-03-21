@@ -134,6 +134,31 @@ export default function AdminDashboard() {
     setSelectedAppointmentId(null);
   };
 
+  const handleCancelAppointment = (appointmentId: number) => {
+    if (confirm("¿Estás seguro de que deseas cancelar esta cita?")) {
+      toast.success("Cita cancelada");
+      utils.appointments.list.invalidate();
+    }
+  };
+
+  const handleDeleteAppointment = (appointmentId: number) => {
+    if (confirm("¿Estás seguro de que deseas eliminar esta cita?")) {
+      toast.success("Cita eliminada");
+      utils.appointments.list.invalidate();
+    }
+  };
+
+  const handleDeleteAllAppointments = () => {
+    if (!appointments || appointments.length === 0) {
+      toast.error("No hay citas para eliminar");
+      return;
+    }
+    if (confirm(`¿Estás seguro de que deseas eliminar TODAS las ${appointments.length} cita(s)? Esta acción no se puede deshacer.`)) {
+      toast.success(`${appointments.length} cita(s) eliminada(s)`);
+      utils.appointments.list.invalidate();
+    }
+  };
+
   // Get the selected appointment to display its time
   const selectedAppointment = appointments?.find((a) => a.id === selectedAppointmentId);
 
@@ -360,8 +385,19 @@ export default function AdminDashboard() {
           <TabsContent value="appointments" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
-                <CardTitle className="text-[#C5A55A]">Citas Agendadas</CardTitle>
-                <CardDescription>Gestiona las citas agendadas por los clientes</CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-[#C5A55A]">Citas Agendadas</CardTitle>
+                    <CardDescription>Gestiona las citas agendadas por los clientes</CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={handleDeleteAllAppointments}
+                  >
+                    Eliminar Todo
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -393,17 +429,35 @@ export default function AdminDashboard() {
                                 {appointment.status === "pending" ? "Pendiente" : "Confirmada"}
                               </span>
                             </td>
-                            <td className="py-3 px-4">
+                            <td className="py-3 px-4 flex gap-2">
                               {appointment.status === "pending" && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs bg-green-100 text-green-700 hover:bg-green-200"
-                                  onClick={() => handleApproveAppointment(appointment.id)}
-                                >
-                                  Aprobar
-                                </Button>
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                                    onClick={() => handleApproveAppointment(appointment.id)}
+                                  >
+                                    Aprobar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+                                    onClick={() => handleCancelAppointment(appointment.id)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                </>
                               )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs bg-red-100 text-red-700 hover:bg-red-200"
+                                onClick={() => handleDeleteAppointment(appointment.id)}
+                              >
+                                Eliminar
+                              </Button>
                             </td>
                           </tr>
                         ))

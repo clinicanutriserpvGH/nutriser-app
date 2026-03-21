@@ -9,8 +9,7 @@ export default function PromotionsSection() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const handleShareWhatsApp = (title: string, description: string) => {
-    const shareUrl = window.location.href.replace(/https:\/\/[^\/]+/, 'https://nutriserpv.com');
-    const message = `🎁 *${title}*\n\n${description}\n\n${shareUrl}`;
+    const message = `🎁 *${title}*\n\n${description}`;
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
@@ -22,11 +21,11 @@ export default function PromotionsSection() {
     window.open(url, '_blank');
   };
 
-  const handleCopyLink = (id: number, title: string) => {
-    const pageUrl = window.location.href.replace(/https:\/\/[^\/]+/, 'https://nutriserpv.com');
-    navigator.clipboard.writeText(pageUrl);
+  const handleCopyLink = (id: number, title: string, description: string | null) => {
+    const cuponeText = `🎁 ${title}\n\n${description || ''}`;
+    navigator.clipboard.writeText(cuponeText);
     setCopiedId(id);
-    toast.success("Link copiado al portapapeles");
+    toast.success("Cupón copiado al portapapeles");
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -165,23 +164,23 @@ export default function PromotionsSection() {
                       </button>
 
                       {/* Botón Copiar */}
-                      <button
-                        onClick={() => handleCopyLink(promo.id, promo.title)}
-                        className="flex-1 min-w-[100px] flex items-center justify-center gap-2 bg-gray-500 hover:bg-gray-600 text-white py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 font-semibold text-sm"
-                        title="Copiar al portapapeles"
-                      >
-                        {copiedId === promo.id ? (
-                          <>
-                            <Check className="w-4 h-4" />
-                            Copiado
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-4 h-4" />
-                            Copiar
-                          </>
-                        )}
-                      </button>
+                <button
+                  onClick={() => handleCopyLink(promo.id, promo.title, promo.description)}
+                  className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors flex items-center justify-center gap-2"
+                  title="Copiar cupón"
+                >
+                  {copiedId === promo.id ? (
+                    <>
+                      <Check size={18} />
+                      <span>Copiado</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={18} />
+                      <span>Copiar</span>
+                    </>
+                  )}
+                </button>
                     </div>
                   </div>
 

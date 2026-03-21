@@ -10,6 +10,26 @@ type Step = "form" | "type" | "payment" | "success";
 export default function PromotionsSection() {
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [highlightId, setHighlightId] = useState<number | null>(null);
+
+  // Scroll to coupon if URL has #cupon-{id}
+  useEffect(() => {
+    if (isLoading || !promotions) return;
+    const hash = window.location.hash; // e.g. "#cupon-3"
+    const match = hash.match(/^#cupon-(\d+)$/);
+    if (!match) return;
+    const targetId = parseInt(match[1], 10);
+    setHighlightId(targetId);
+    // Wait a tick for the DOM to render
+    setTimeout(() => {
+      const el = document.getElementById(`cupon-${targetId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      // Remove highlight after 3 seconds
+      setTimeout(() => setHighlightId(null), 3000);
+    }, 300);
+  }, [isLoading, promotions]);
   const [giftModalOpen, setGiftModalOpen] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<{ id: number; title: string } | null>(null);
   const [step, setStep] = useState<Step>("form");
@@ -159,7 +179,14 @@ export default function PromotionsSection() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {promotions.map((promo, index) => (
               <motion.div key={promo.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: index * 0.1 }}>
-                <div id={`cupon-${promo.id}`}>
+                <div
+                  id={`cupon-${promo.id}`}
+                  className={`transition-all duration-700 rounded-2xl ${
+                    highlightId === promo.id
+                      ? 'ring-4 ring-[#C5A55A] ring-offset-4 scale-[1.02] shadow-2xl'
+                      : ''
+                  }`}
+                >
                   <div className="bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-t-2xl shadow-xl p-8 relative">
                     <div className="absolute top-4 right-4 flex items-center gap-2">
                       <button onClick={() => { setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true); }}

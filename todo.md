@@ -300,3 +300,7 @@
 
 ## Quitar bloque WhatsApp de confirmación de cupón
 - [x] Eliminar bloque de WhatsApp de la pantalla de éxito y dejar solo correo electrónico
+
+## Link directo a cupón específico
+- [x] Agregar ID a cada tarjeta de cupón y scroll automático al abrir link compartido
+- [x] Resaltar visualmente el cupón al que apunta el link

@@ -45,3 +45,7 @@
 ## Tests
 - [x] Crear tests unitarios para procedimientos de membresías
 - [x] Ejecutar y verificar que todos los tests pasen
+
+## Correcciones Solicitadas
+- [x] Agregar botón visible de "Programas de Membresía" en la página principal
+- [x] Corregir servicios de Nutrición para dejar solo "Asesoría Nutricional Personalizada"

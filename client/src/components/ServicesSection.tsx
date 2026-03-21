@@ -24,16 +24,8 @@ const categories = [
     color: "#6B8E5B",
     services: [
       {
-        name: "Consultas de Nutrición Personalizada",
-        desc: "Planes hechos a tu medida para mejorar tu salud y alcanzar tus metas.",
-      },
-      {
-        name: "Programa Mensual de Nutrición + Tratamientos Corporales",
-        desc: "Incluye asesoría nutricional y sesiones de aparatología para transformar tu cuerpo.",
-      },
-      {
-        name: "Estudio con Bioimpedancia",
-        desc: "Diagnóstico corporal avanzado que mide grasa, músculo, agua y metabolismo para personalizar tu plan.",
+        name: "Asesoría Nutricional Personalizada",
+        desc: "Planes hechos a tu medida para mejorar tu salud, alcanzar tus metas y optimizar tu bienestar.",
       },
     ],
   },

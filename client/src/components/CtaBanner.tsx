@@ -4,11 +4,13 @@
  */
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Phone } from "lucide-react";
+import { Phone, Gift } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function CtaBanner() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const [, navigate] = useLocation();
 
   return (
     <section className="relative py-20 lg:py-24 overflow-hidden">
@@ -43,15 +45,24 @@ export default function CtaBanner() {
           Agenda tu valoración personalizada y descubre el protocolo ideal para
           ti.
         </p>
-        <a
-          href="https://wa.me/523221007799"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-3 bg-white text-[#B8963E] px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/90 hover:shadow-2xl hover:shadow-black/20"
-        >
-          <Phone className="w-4 h-4" />
-          Agendar por WhatsApp
-        </a>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="https://wa.me/523221007799"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 bg-white text-[#B8963E] px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/90 hover:shadow-2xl hover:shadow-black/20"
+          >
+            <Phone className="w-4 h-4" />
+            Agendar por WhatsApp
+          </a>
+          <button
+            onClick={() => navigate("/memberships")}
+            className="inline-flex items-center gap-3 bg-[#1A1A1A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#2A2A2A] hover:shadow-2xl hover:shadow-black/20"
+          >
+            <Gift className="w-4 h-4" />
+            Programas de Membresía
+          </button>
+        </div>
       </motion.div>
     </section>
   );

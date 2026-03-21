@@ -172,3 +172,45 @@
 - [x] Actualizar formulario de citas del cliente para mostrar dropdown de horarios
 - [ ] Verificar que el admin puede aprobar citas correctamente
 - [ ] Verificar que las imágenes de comprobantes se muestran en el modal
+
+## Correcciones Sesión 11 - Flujo de Citas y UI
+
+### Panel Admin - Citas
+- [ ] Cambiar flujo: paciente selecciona hora, admin solo APRUEBA
+- [ ] Remover selector de hora del modal de aprobación
+- [ ] Mostrar solo la hora que el paciente seleccionó
+
+### Panel Admin - Comprobantes
+- [ ] Arreglar visualización de imágenes en modal
+- [ ] Agregar botón "Verificar Todo" para aprobar todas las membresías pendientes
+- [ ] Agregar botón "Eliminar Todo" para eliminar todas las membresías
+
+### Página de Inicio - Botones CTA
+- [ ] Cambiar botón de llamada arriba para mostrar número 3224503257
+- [ ] Agregar botón "Adquirir programa" junto a WhatsApp en sección CTA
+- [ ] Cambiar sección de abajo a 4 botones: Llamada, WhatsApp, Agendar Valoración, Adquirir Programa
+- [ ] Hacer que todos los botones sean funcionales y consistentes
+
+## Correcciones Sesión 11 - Completadas
+
+### Panel Admin - Citas
+- [x] Cambiar flujo: paciente selecciona hora, admin solo APRUEBA
+- [x] Remover selector de hora del modal de aprobación
+- [x] Mostrar solo la hora que el paciente seleccionó
+
+### Panel Admin - Comprobantes
+- [x] Arreglar visualización de imágenes en modal (con estado de carga y manejo de errores)
+- [x] Agregar botón "Verificar Todo" para aprobar todas las membresías pendientes
+- [x] Agregar botón "Eliminar Todo" para eliminar todas las membresías
+
+### Página de Inicio - Botones CTA
+- [x] Cambiar botón de llamada arriba para mostrar número 3224503257 (verde con icono)
+- [x] Agregar botón "Adquirir programa" junto a WhatsApp en sección CTA
+- [x] Cambiar sección de abajo a 4 botones: Llamada, WhatsApp, Agendar Valoración, Adquirir Programa
+- [x] Hacer que todos los botones sean funcionales y consistentes
+
+### Archivos Modificados:
+- HeroSection.tsx: Agregado botón de llamada verde con número
+- CtaBanner.tsx: Agregado botón WhatsApp y cambio de "Programas de Membresía" a "Adquirir Programa"
+- ContactSection.tsx: Agregados 4 botones en grid (Llamar, WhatsApp, Agendar, Programas)
+- AdminDashboard.tsx: Modal de citas mejorado, botones de verificar/eliminar todo, modal de comprobantes con estado de carga

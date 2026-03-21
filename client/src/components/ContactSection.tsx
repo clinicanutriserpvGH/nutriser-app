@@ -14,11 +14,14 @@ import {
   Facebook,
   Clock,
   Mail,
+  Gift,
 } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function ContactSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const [, navigate] = useLocation();
 
   return (
     <section id="contacto" className="py-24 lg:py-32 bg-[#1A1A1A] text-white">
@@ -141,8 +144,42 @@ export default function ContactSection() {
                 </div>
               </div>
 
+              {/* CTA Buttons */}
+              <div className="grid grid-cols-2 gap-3 pt-4">
+                <a
+                  href="tel:3224503257"
+                  className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-green-700"
+                >
+                  <Phone className="w-4 h-4" />
+                  Llamar
+                </a>
+                <a
+                  href="https://wa.me/523221007799"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-[#25D366] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#1FAE5D]"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  WhatsApp
+                </a>
+                <button
+                  onClick={() => navigate("/appointment-form")}
+                  className="flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E]"
+                >
+                  <Clock className="w-4 h-4" />
+                  Agendar
+                </button>
+                <button
+                  onClick={() => navigate("/memberships")}
+                  className="flex items-center justify-center gap-2 bg-[#1A1A1A] border border-[#C5A55A] text-[#C5A55A] px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A]"
+                >
+                  <Gift className="w-4 h-4" />
+                  Programas
+                </button>
+              </div>
+
               {/* Social Links */}
-              <div className="flex items-center gap-4 pt-2">
+              <div className="flex items-center gap-4 pt-4">
                 <span className="text-xs tracking-[0.2em] uppercase text-[#C5A55A]">
                   Síguenos
                 </span>

@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
   const [appointmentTime, setAppointmentTime] = useState<string>("");
+  const [isLoadingProof, setIsLoadingProof] = useState(false);
 
   // Horarios fijos de la clínica
   const CLINIC_HOURS = [
@@ -64,13 +65,51 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
+    if (selectedProofId !== null) {
+      setIsLoadingProof(true);
+    }
+  }, [selectedProofId]);
+
+  useEffect(() => {
     if (getProofQuery.data && getProofQuery.data.proofUrl) {
       setProofUrl(getProofQuery.data.proofUrl);
+      setIsLoadingProof(false);
     }
   }, [getProofQuery.data]);
 
   const handleViewProof = (membershipId: number) => {
     setSelectedProofId(membershipId);
+    setProofUrl(null);
+  };
+
+  const handleVerifyAll = () => {
+    if (!memberships) return;
+    const pendingMemberships = memberships.filter((m) => m.status === "pending");
+    if (pendingMemberships.length === 0) {
+      toast.error("No hay membresías pendientes para verificar");
+      return;
+    }
+    if (confirm(`Estás seguro de que deseas verificar ${pendingMemberships.length} membresía(s)?`)) {
+      pendingMemberships.forEach((m) => {
+        updateStatusMutation.mutate({
+          id: m.id,
+          status: "verified",
+        });
+      });
+    }
+  };
+
+  const handleDeleteAll = () => {
+    if (!memberships) return;
+    if (memberships.length === 0) {
+      toast.error("No hay membresías para eliminar");
+      return;
+    }
+    if (confirm(`Estás seguro de que deseas eliminar TODAS las ${memberships.length} membresía(s)? Esta acción no se puede deshacer.`)) {
+      memberships.forEach((m) => {
+        deleteMembershipMutation.mutate({ membershipId: m.id });
+      });
+    }
   };
 
   const handleVerifyMembership = (membershipId: number) => {
@@ -88,17 +127,15 @@ export default function AdminDashboard() {
 
   const handleApproveAppointment = (appointmentId: number) => {
     setSelectedAppointmentId(appointmentId);
-    setAppointmentTime("");
   };
 
   const handleConfirmApprove = () => {
-    if (!appointmentTime) {
-      toast.error("Por favor selecciona una hora");
-      return;
-    }
     toast.success("Cita aprobada y correo enviado");
     setSelectedAppointmentId(null);
   };
+
+  // Get the selected appointment to display its time
+  const selectedAppointment = appointments?.find((a) => a.id === selectedAppointmentId);
 
   const handleLogout = () => {
     localStorage.removeItem("adminSession");
@@ -207,8 +244,28 @@ export default function AdminDashboard() {
           <TabsContent value="memberships" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
-                <CardTitle className="text-[#C5A55A]">Solicitudes de Membresía</CardTitle>
-                <CardDescription>Gestiona las solicitudes de membresía de los clientes</CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-[#C5A55A]">Solicitudes de Membresía</CardTitle>
+                    <CardDescription>Gestiona las solicitudes de membresía de los clientes</CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={handleVerifyAll}
+                    >
+                      Verificar Todo
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                      onClick={handleDeleteAll}
+                    >
+                      Eliminar Todo
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -365,7 +422,7 @@ export default function AdminDashboard() {
         </Tabs>
 
         {/* Modal de Aprobar Cita */}
-        {selectedAppointmentId !== null && (
+        {selectedAppointmentId !== null && selectedAppointment && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-md w-full p-6">
               <div className="flex justify-between items-center mb-4">
@@ -378,20 +435,9 @@ export default function AdminDashboard() {
                 </button>
               </div>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Hora</label>
-                  <select
-                    value={appointmentTime}
-                    onChange={(e) => setAppointmentTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
-                  >
-                    <option value="">Selecciona una hora</option>
-                    {CLINIC_HOURS.map((hour) => (
-                      <option key={hour} value={hour}>
-                        {hour}
-                      </option>
-                    ))}
-                  </select>
+                <div className="bg-[#FAF7F2] p-4 rounded-lg">
+                  <p className="text-sm text-[#999] mb-2">Hora solicitada por el paciente:</p>
+                  <p className="text-2xl font-bold text-[#C5A55A]">{selectedAppointment.appointmentTime}</p>
                 </div>
                 <div className="bg-[#FAF7F2] p-3 rounded-lg">
                   <p className="text-sm text-[#999]">
@@ -418,7 +464,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Modal de Comprobante */}
-        {selectedProofId !== null && proofUrl && (
+        {selectedProofId !== null && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-2xl w-full p-6">
               <div className="flex justify-between items-center mb-4">
@@ -433,12 +479,22 @@ export default function AdminDashboard() {
                   ×
                 </button>
               </div>
-              <div className="mb-4 bg-[#FAF7F2] p-4 rounded-lg">
-                <img
-                  src={proofUrl}
-                  alt="Comprobante de pago"
-                  className="w-full max-h-96 object-contain"
-                />
+              <div className="mb-4 bg-[#FAF7F2] p-4 rounded-lg min-h-96 flex items-center justify-center">
+                {isLoadingProof ? (
+                  <p className="text-[#999]">Cargando comprobante...</p>
+                ) : proofUrl ? (
+                  <img
+                    src={proofUrl}
+                    alt="Comprobante de pago"
+                    className="w-full max-h-96 object-contain"
+                    onError={() => {
+                      console.error("Error loading image:", proofUrl);
+                      toast.error("Error al cargar la imagen");
+                    }}
+                  />
+                ) : (
+                  <p className="text-[#999]">No se pudo cargar el comprobante</p>
+                )}
               </div>
               <p className="text-sm text-[#999] mb-4">
                 Verifica que el comprobante sea válido antes de activar la membresía.

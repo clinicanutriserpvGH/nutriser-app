@@ -4,7 +4,7 @@
  * Gold accent lines, Playfair Display headline, fade-in animations
  */
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Phone } from "lucide-react";
 
 const HERO_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-reception_c595cea6.jpeg";
@@ -77,6 +77,13 @@ export default function HeroSection() {
             className="flex flex-col sm:flex-row gap-4"
           >
             <a
+              href="tel:3224503257"
+              className="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/30"
+            >
+              <Phone className="w-5 h-5" />
+              Llamada: 322 450 3257
+            </a>
+            <a
               href="/appointment-form"
               className="inline-flex items-center justify-center bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
             >
@@ -88,7 +95,7 @@ export default function HeroSection() {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center border border-white/30 text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:border-[#C5A55A] hover:text-[#C5A55A]"
             >
-              Agenda tu Valoración por WhatsApp
+              Agenda por WhatsApp
             </a>
           </motion.div>
         </div>

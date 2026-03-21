@@ -4,7 +4,7 @@
  */
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Phone, Gift } from "lucide-react";
+import { Phone, Gift, MessageCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function CtaBanner() {
@@ -47,18 +47,27 @@ export default function CtaBanner() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
           <button
-            onClick={() => navigate("/appointments")}
+            onClick={() => navigate("/appointment-form")}
             className="inline-flex items-center gap-3 bg-white text-[#B8963E] px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/90 hover:shadow-2xl hover:shadow-black/20"
           >
             <Phone className="w-4 h-4" />
-            Agendar tu Valoración
+            Agendar Valoración
           </button>
+          <a
+            href="https://wa.me/523221007799"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 bg-green-600 text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-green-700 hover:shadow-2xl hover:shadow-green-600/20"
+          >
+            <MessageCircle className="w-4 h-4" />
+            WhatsApp
+          </a>
           <button
             onClick={() => navigate("/memberships")}
             className="inline-flex items-center gap-3 bg-[#1A1A1A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#2A2A2A] hover:shadow-2xl hover:shadow-black/20"
           >
             <Gift className="w-4 h-4" />
-            Programas de Membresía
+            Adquirir Programa
           </button>
         </div>
       </motion.div>

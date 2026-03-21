@@ -11,6 +11,10 @@ export default function PromotionsSection() {
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
 
+  const getImageUrl = (imageUrl: string | null) => {
+    return imageUrl || '/uploads/nutriser-logo.jpeg';
+  };
+
   return (
     <section id="promociones" className="py-20 bg-[#FAF7F2]">
       <div className="container">
@@ -62,7 +66,7 @@ export default function PromotionsSection() {
                     </div>
                   ) : (
                     <img
-                      src={promo.imageUrl}
+                      src={getImageUrl(promo.imageUrl)}
                       alt={promo.title}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                       onError={() => handleImageError(promo.id)}

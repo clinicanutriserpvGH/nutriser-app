@@ -223,30 +223,31 @@ export default function AdminDashboard() {
       toast.error("Ingresa un título para la promoción");
       return;
     }
-    if (!promotionImage) {
-      toast.error("Selecciona una imagen para la promoción");
-      return;
-    }
 
     try {
-      const formData = new FormData();
-      formData.append('file', promotionImage);
+      let imageUrl = '/uploads/nutriser-logo.jpeg';
       
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!uploadResponse.ok) {
-        throw new Error('Error al subir imagen');
+      if (promotionImage) {
+        const formData = new FormData();
+        formData.append('file', promotionImage);
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!uploadResponse.ok) {
+          throw new Error('Error al subir imagen');
+        }
+        
+        const { url } = await uploadResponse.json();
+        imageUrl = url;
       }
-      
-      const { url } = await uploadResponse.json();
       
       createPromotionMutation.mutate({
         title: promotionTitle,
         description: promotionDescription,
-        imageUrl: url,
+        imageUrl: imageUrl,
       });
     } catch (error) {
       toast.error("Error al subir imagen: " + (error instanceof Error ? error.message : "Error desconocido"));
@@ -629,9 +630,12 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {promotions.map((promo) => (
                         <div key={promo.id} className="bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
-                          {promo.imageUrl && (
-                            <img src={promo.imageUrl} alt={promo.title} className="w-full h-40 object-cover rounded-lg mb-3" />
-                          )}
+                          <img 
+                            src={promo.imageUrl || '/uploads/nutriser-logo.jpeg'} 
+                            alt={promo.title} 
+                            className="w-full h-40 object-cover rounded-lg mb-3" 
+                            onError={(e) => { e.currentTarget.src = '/uploads/nutriser-logo.jpeg'; }}
+                          />
                           <h4 className="font-bold text-[#1A1A1A]">{promo.title}</h4>
                           <p className="text-sm text-[#666] mt-2">{promo.description}</p>
                           <button

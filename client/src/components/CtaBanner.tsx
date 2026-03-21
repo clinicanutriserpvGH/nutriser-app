@@ -56,10 +56,10 @@ export default function CtaBanner() {
             href="https://wa.me/523221007799"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 bg-green-600 text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-green-700 hover:shadow-2xl hover:shadow-green-600/20"
+            className="inline-flex items-center gap-2 bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
           >
             <MessageCircle className="w-4 h-4" />
-            WhatsApp
+            Agenda por WhatsApp
           </a>
           <button
             onClick={() => navigate("/memberships")}

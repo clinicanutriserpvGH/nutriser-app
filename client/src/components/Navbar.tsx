@@ -114,7 +114,7 @@ export default function Navbar() {
               {/* Call Button */}
               <a
                 href="tel:3224503257"
-                className="flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/20"
+                className="flex items-center gap-2 bg-[#C5A55A] text-white px-5 py-2.5 text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/20"
               >
                 <Phone className="w-3.5 h-3.5" />
                 Llamada: 322 450 3257
@@ -174,7 +174,7 @@ export default function Navbar() {
               >
                 <a
                   href="tel:3224503257"
-                  className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 font-serif text-lg w-fit hover:bg-green-700 transition-colors"
+                  className="inline-flex items-center gap-2 bg-[#C5A55A] text-white px-6 py-3 font-serif text-lg w-fit hover:bg-[#B8963E] transition-colors"
                 >
                   <Phone className="w-5 h-5" />
                   Llamada: 322 450 3257

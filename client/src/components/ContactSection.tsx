@@ -157,7 +157,7 @@ export default function ContactSection() {
                   href="https://wa.me/523221007799"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#25D366] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#1FAE5D]"
+                  className="flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E]"
                 >
                   <MessageCircle className="w-4 h-4" />
                   WhatsApp

@@ -138,6 +138,64 @@ export async function sendMembershipNotificationToAdmin(
   }
 }
 
+export async function sendAppointmentConfirmationToClient(
+  clientName: string,
+  clientEmail: string,
+  appointmentDate: Date,
+  appointmentTime: string
+) {
+  const transporter = getEmailTransporter();
+
+  const formattedDate = appointmentDate.toLocaleDateString("es-MX", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #C5A55A;">Nutriser - Aesthetic & Nutrition</h1>
+          
+          <p>Hola <strong>${clientName}</strong>,</p>
+          
+          <p>¡Tu cita ha sido agendada exitosamente!</p>
+          
+          <div style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #C5A55A; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #C5A55A;">Detalles de tu Cita</h3>
+            <p><strong>Fecha:</strong> ${formattedDate}</p>
+            <p><strong>Hora:</strong> ${appointmentTime}</p>
+            <p><strong>Servicio:</strong> Valoración Nutricional</p>
+          </div>
+          
+          <p>Te esperamos en Nutriser. Si necesitas cambiar la fecha o hora, por favor contáctanos por WhatsApp: <strong>+52 322 100 7799</strong></p>
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+          
+          <p style="font-size: 12px; color: #999;">
+            Este es un correo automático de Nutriser. Por favor no respondas a este mensaje.
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: ENV.gmailUser,
+      to: clientEmail,
+      subject: `Confirmación de Cita - Nutriser`,
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error("Error sending appointment confirmation:", error);
+    return false;
+  }
+}
+
 export async function sendAppointmentNotification(
   adminEmail: string,
   clientName: string,

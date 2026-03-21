@@ -103,3 +103,10 @@
 - [x] Configurar notificaciones de membresías como correo directo desde la persona
 - [x] Enviar correo de confirmación de cita al admin
 - [x] Enviar correo de confirmación de cita al cliente
+
+## Correcciones Sesión 3
+
+- [x] Corregir email de admin a clinicanutriserpv@gmail.com (contraseña: nutriser 2024)
+- [x] Configurar correos de citas para que lleguen desde clinicanutriserpv@gmail.com
+- [x] Verificar que el login de admin funciona correctamente
+- [x] Verificar que los correos de citas llegan desde el email de la clínica

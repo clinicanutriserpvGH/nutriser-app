@@ -5,7 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership } from "./db";
 import { notifyOwner } from "./_core/notification";
-import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin } from "./_core/email";
+import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient } from "./_core/email";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
 
@@ -184,6 +184,14 @@ export const appRouter = router({
           notes: input.notes,
           status: "pending",
         });
+        
+        // Send confirmation email to client from clinic email
+        await sendAppointmentConfirmationToClient(
+          input.clientName,
+          input.clientEmail,
+          input.appointmentDate,
+          input.appointmentTime
+        );
         
         // Send notification to admin
         await sendAppointmentNotification(

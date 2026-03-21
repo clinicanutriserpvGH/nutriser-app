@@ -338,35 +338,49 @@ export default function PromotionsSection() {
 
             {/* ÉXITO */}
             {step === "success" && (
-              <div className="p-6 space-y-4">
+              <div className="p-6 space-y-5">
                 <div className="text-center">
-                  <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Check className="w-7 h-7 text-green-600" />
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Check className="w-8 h-8 text-green-600" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">¡Comprobante enviado!</h3>
-                  <p className="text-sm text-gray-500 mt-1">El administrador revisará tu pago y activará el cupón pronto.</p>
+                  <p className="text-sm text-gray-500 mt-1">Estamos revisando tu pago. En breve recibirás tu cupón.</p>
                 </div>
 
-                {/* Tarjeta visual del cupón */}
-                <div className="flex justify-center">
-                  <CouponCard
-                    couponCode={generatedCode}
-                    promotionTitle={selectedPromo?.title || ""}
-                    promotionDescription=""
-                    holderName={buyerName}
-                    isGift={isGift || false}
-                    recipientName={recipientName}
-                  />
+                {/* Código de referencia */}
+                <div className="bg-[#FAF7F2] border-2 border-[#C5A55A] rounded-xl p-5 text-center">
+                  <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Tu código de referencia</p>
+                  <p className="text-3xl font-mono font-bold text-[#C5A55A] tracking-widest">{generatedCode}</p>
+                  <p className="text-xs text-gray-500 mt-2">Guarda este código. El administrador lo verificará con tu nombre.</p>
                 </div>
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
-                  <p className="text-xs text-yellow-800">
-                    <strong>⚠️ Pendiente de activación.</strong> Descarga o guarda tu cupón ahora.
-                    Una vez que el admin lo autorice, será válido para usar.
+                {/* Pasos siguientes */}
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <span className="text-blue-500 text-lg mt-0.5">📧</span>
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900">Revisa tu correo: <span className="font-mono">{buyerEmail}</span></p>
+                      <p className="text-xs text-blue-700 mt-0.5">Una vez autorizado, recibirás el cupón completo por email.</p>
+                    </div>
+                  </div>
+                  {buyerPhone && (
+                    <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                      <span className="text-green-500 text-lg mt-0.5">📱</span>
+                      <div>
+                        <p className="text-sm font-semibold text-green-900">WhatsApp: <span className="font-mono">{buyerPhone}</span></p>
+                        <p className="text-xs text-green-700 mt-0.5">También te enviaremos el cupón por WhatsApp al autorizarlo.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <p className="text-xs text-yellow-800 text-center">
+                    ⏳ <strong>Tiempo de revisión:</strong> Normalmente en menos de 24 horas hábiles.
                   </p>
                 </div>
 
-                <button onClick={() => { setGiftModalOpen(false); resetForm(); }} className="w-full px-4 py-2.5 bg-[#C5A55A] text-white rounded-lg font-semibold hover:bg-[#B8963E] transition text-sm">Cerrar</button>
+                <button onClick={() => { setGiftModalOpen(false); resetForm(); }} className="w-full px-4 py-2.5 bg-[#C5A55A] text-white rounded-lg font-semibold hover:bg-[#B8963E] transition text-sm">Entendido</button>
               </div>
             )}
           </div>

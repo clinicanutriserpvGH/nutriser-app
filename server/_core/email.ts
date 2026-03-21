@@ -256,3 +256,77 @@ export async function sendAppointmentNotification(
     return false;
   }
 }
+
+export async function sendCouponApprovedEmail(
+  buyerEmail: string,
+  buyerName: string,
+  couponCode: string,
+  promotionTitle: string,
+  isGift: boolean,
+  recipientName?: string
+) {
+  const transporter = getEmailTransporter();
+
+  const holderName = isGift && recipientName ? recipientName : buyerName;
+  const giftNote = isGift && recipientName
+    ? `<p>Este cupón fue adquirido por <strong>${buyerName}</strong> como regalo para <strong>${recipientName}</strong>.</p>`
+    : '';
+
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f6f0;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+
+          <!-- Header -->
+          <div style="text-align: center; padding: 30px 0 10px;">
+            <h1 style="color: #C5A55A; font-size: 28px; margin: 0;">Nutriser</h1>
+            <p style="color: #888; font-size: 13px; margin: 4px 0 0;">Aesthetic & Nutrition</p>
+          </div>
+
+          <p>Hola <strong>${buyerName}</strong>,</p>
+          <p>¡Tu cupón ha sido <strong style="color: #2e7d32;">autorizado</strong>! Ya puedes usarlo en cualquiera de nuestros servicios.</p>
+
+          ${giftNote}
+
+          <!-- Cupón visual -->
+          <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2416 50%, #1a1a1a 100%); border-radius: 16px; padding: 30px; margin: 24px 0; text-align: center; border: 2px solid #C5A55A;">
+            <p style="color: #C5A55A; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 8px;">Cupón Válido</p>
+            <h2 style="color: #fff; font-size: 20px; margin: 0 0 16px;">${promotionTitle}</h2>
+            <div style="border-top: 1px dashed rgba(197,165,90,0.4); border-bottom: 1px dashed rgba(197,165,90,0.4); padding: 16px 0; margin: 16px 0;">
+              <p style="color: #C5A55A; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px;">A NOMBRE DE</p>
+              <p style="color: #fff; font-size: 18px; font-weight: bold; margin: 0;">${holderName}</p>
+            </div>
+            <p style="color: #aaa; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px;">CÓDIGO ÚNICO</p>
+            <p style="color: #C5A55A; font-size: 28px; font-family: monospace; font-weight: bold; letter-spacing: 4px; margin: 0;">${couponCode}</p>
+            <p style="color: #666; font-size: 10px; margin: 16px 0 0;">Presenta este código en Nutriser para redimir tu cupón.</p>
+          </div>
+
+          <div style="background-color: #fff8e1; border-left: 4px solid #C5A55A; padding: 12px 16px; border-radius: 4px; margin: 16px 0;">
+            <p style="margin: 0; font-size: 13px; color: #555;">
+              <strong>¿Cómo usar tu cupón?</strong><br>
+              Presenta el código <strong>${couponCode}</strong> en recepción o muestra este correo al momento de tu cita.
+            </p>
+          </div>
+
+          <p style="font-size: 13px; color: #666;">¿Tienes dudas? Contáctanos por WhatsApp: <strong>+52 322 100 7799</strong></p>
+
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
+          <p style="font-size: 11px; color: #aaa; text-align: center;">Nutriser - Aesthetic & Nutrition · nutriserpv.com</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: ENV.gmailUser,
+      to: buyerEmail,
+      subject: `🎁 Tu cupón ${couponCode} ha sido autorizado - Nutriser`,
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error("Error sending coupon approved email:", error);
+    return false;
+  }
+}

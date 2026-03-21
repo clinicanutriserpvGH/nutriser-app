@@ -5,7 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus } from "./db";
 import { notifyOwner } from "./_core/notification";
-import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient } from "./_core/email";
+import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail } from "./_core/email";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
@@ -356,8 +356,45 @@ export const appRouter = router({
     approve: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
+        const purchase = await getGiftPurchaseById(input.id);
+        if (!purchase) throw new Error('Compra no encontrada');
+
         await updateGiftPurchaseStatus(input.id, 'approved');
-        return { success: true };
+
+        // Get promotion title
+        let promotionTitle = 'Promoción Nutriser';
+        try {
+          const { getAllPromotions } = await import('./db');
+          const promos = await getAllPromotions();
+          const promo = promos.find(p => p.id === purchase.promotionId);
+          if (promo) promotionTitle = promo.title;
+        } catch {}
+
+        // Send email to buyer
+        await sendCouponApprovedEmail(
+          purchase.buyerEmail,
+          purchase.buyerName,
+          purchase.couponCode,
+          promotionTitle,
+          purchase.isGift ?? false,
+          purchase.recipientName ?? undefined
+        );
+
+        // Build WhatsApp message for admin to send manually
+        const holderName = (purchase.isGift && purchase.recipientName) ? purchase.recipientName : purchase.buyerName;
+        const whatsappPhone = purchase.buyerPhone?.replace(/[^0-9]/g, '') || '';
+        const whatsappMsg = encodeURIComponent(
+          `🎁 ¡Hola ${purchase.buyerName}! Tu cupón de Nutriser ha sido autorizado.\n\n` +
+          `📋 Promoción: ${promotionTitle}\n` +
+          `👤 A nombre de: ${holderName}\n` +
+          `🔑 Código: ${purchase.couponCode}\n\n` +
+          `Preséntalo en recepción para redimirlo. ¡Te esperamos! 💛`
+        );
+        const whatsappUrl = whatsappPhone
+          ? `https://wa.me/52${whatsappPhone}?text=${whatsappMsg}`
+          : `https://wa.me/?text=${whatsappMsg}`;
+
+        return { success: true, whatsappUrl, buyerPhone: purchase.buyerPhone };
       }),
 
     reject: publicProcedure

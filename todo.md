@@ -271,3 +271,9 @@
 - [x] Mostrar tarjeta visual cuando el cupón está autorizado
 - [x] Botón "Descargar Imagen" para guardar el cupón
 - [x] Botón "Compartir por WhatsApp" que abre WhatsApp con mensaje + imagen
+
+## Notificación de Cupón Autorizado
+- [x] Quitar tarjeta del paso "success" - solo mostrar mensaje de espera con código
+- [x] Al autorizar en admin: enviar email al comprador con tarjeta del cupón
+- [x] Al autorizar en admin: abrir WhatsApp automáticamente al número del comprador
+- [x] Email incluye: código, nombre, promoción, instrucciones para usar

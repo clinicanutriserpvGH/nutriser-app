@@ -51,9 +51,15 @@ export default function AdminDashboard() {
   });
 
   const approveGiftMutation = trpc.giftPurchases.approve.useMutation({
-    onSuccess: () => {
-      toast.success('Compra autorizada correctamente');
+    onSuccess: (data) => {
+      toast.success('Compra autorizada. Email enviado al comprador.');
       refetchGifts();
+      // Open WhatsApp automatically if phone is available
+      if (data?.whatsappUrl) {
+        setTimeout(() => {
+          window.open(data.whatsappUrl, '_blank');
+        }, 800);
+      }
     },
     onError: () => toast.error('Error al autorizar'),
   });

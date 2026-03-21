@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Gift, Sparkles, Mail, Copy, Check, Upload, Clock, X, ArrowRight, User, Users } from "lucide-react";
 import { toast } from "sonner";
+import CouponCard from "@/components/CouponCard";
 
 type Step = "form" | "type" | "payment" | "success";
 
@@ -337,22 +338,34 @@ export default function PromotionsSection() {
 
             {/* ÉXITO */}
             {step === "success" && (
-              <div className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                  <Check className="w-8 h-8 text-green-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">¡Comprobante enviado!</h3>
-                <div className="bg-[#FAF7F2] border-2 border-[#C5A55A] rounded-xl p-4">
-                  <p className="text-xs text-gray-500 mb-1">Tu código de cupón es:</p>
-                  <p className="text-2xl font-mono font-bold text-[#C5A55A] tracking-widest">{generatedCode}</p>
-                  <p className="text-xs text-gray-500 mt-2">Guarda este código. El admin lo verificará con tu nombre.</p>
-                </div>
-                {isGift && recipientName && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-xs text-blue-800">Una vez autorizado, podrás compartir este cupón con <strong>{recipientName}</strong>.</p>
+              <div className="p-6 space-y-4">
+                <div className="text-center">
+                  <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Check className="w-7 h-7 text-green-600" />
                   </div>
-                )}
-                <p className="text-sm text-gray-600">El administrador revisará tu comprobante y activará el cupón. Recibirás confirmación por email.</p>
+                  <h3 className="text-xl font-bold text-gray-900">¡Comprobante enviado!</h3>
+                  <p className="text-sm text-gray-500 mt-1">El administrador revisará tu pago y activará el cupón pronto.</p>
+                </div>
+
+                {/* Tarjeta visual del cupón */}
+                <div className="flex justify-center">
+                  <CouponCard
+                    couponCode={generatedCode}
+                    promotionTitle={selectedPromo?.title || ""}
+                    promotionDescription=""
+                    holderName={buyerName}
+                    isGift={isGift || false}
+                    recipientName={recipientName}
+                  />
+                </div>
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                  <p className="text-xs text-yellow-800">
+                    <strong>⚠️ Pendiente de activación.</strong> Descarga o guarda tu cupón ahora.
+                    Una vez que el admin lo autorice, será válido para usar.
+                  </p>
+                </div>
+
                 <button onClick={() => { setGiftModalOpen(false); resetForm(); }} className="w-full px-4 py-2.5 bg-[#C5A55A] text-white rounded-lg font-semibold hover:bg-[#B8963E] transition text-sm">Cerrar</button>
               </div>
             )}

@@ -264,3 +264,10 @@
 - [x] Panel admin: mostrar código único, nombre comprador, destinatario si es regalo
 - [x] Mostrar estado: Pendiente / Autorizado / Usado
 - [ ] Al autorizar: generar imagen/tarjeta del cupón con código visible
+
+## Imagen Visual del Cupón Autorizado
+- [x] Crear componente CouponCard con diseño elegante dorado (logo, nombre titular, promoción, código)
+- [x] Usar html2canvas para convertir tarjeta a imagen descargable
+- [x] Mostrar tarjeta visual cuando el cupón está autorizado
+- [x] Botón "Descargar Imagen" para guardar el cupón
+- [x] Botón "Compartir por WhatsApp" que abre WhatsApp con mensaje + imagen

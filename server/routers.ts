@@ -5,7 +5,8 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus } from "./db";
 import { notifyOwner } from "./_core/notification";
-import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail } from "./_core/email";
+import { ENV } from "./_core/env";
+import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
@@ -339,12 +340,25 @@ export const appRouter = router({
           status: 'pending',
         });
 
-        // Notify admin
-        const giftType = input.isGift ? `regalo para ${input.recipientName || 'destinatario'}` : 'uso personal';
-        await notifyOwner({
-          title: 'Nueva compra de cupón',
-          content: `${input.buyerName} (${input.buyerEmail}) compró el cupón ${couponCode} (${giftType}). Revisa el panel de administración para autorizar.`,
-        });
+        // Notify admin via Gmail
+        try {
+          const { getAllPromotionsForAdmin } = await import('./db');
+          const promos = await getAllPromotionsForAdmin();
+          const promo = promos.find(p => p.id === input.promotionId);
+          const promotionTitle = promo?.title ?? 'Promoción Nutriser';
+          await sendCouponPurchaseNotificationToAdmin(
+            ENV.gmailUser,
+            input.buyerName,
+            input.buyerEmail,
+            input.buyerPhone,
+            couponCode,
+            promotionTitle,
+            input.isGift,
+            input.recipientName
+          );
+        } catch (e) {
+          console.error('Error sending coupon purchase notification:', e);
+        }
 
         return { success: true, id: purchase.id, couponCode };
       }),

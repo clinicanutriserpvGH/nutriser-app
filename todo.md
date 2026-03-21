@@ -291,3 +291,6 @@
 
 ## Correos siempre desde clinicanutriserpv@gmail.com
 - [x] Verificar y fijar remitente en todos los emails a clinicanutriserpv@gmail.com
+
+## Eliminar notificaciones de Manus Team
+- [x] Reemplazar notifyOwner (Manus) en compra de cupón por email Gmail desde clinicanutriserpv@gmail.com

@@ -257,6 +257,59 @@ export async function sendAppointmentNotification(
   }
 }
 
+export async function sendCouponPurchaseNotificationToAdmin(
+  adminEmail: string,
+  buyerName: string,
+  buyerEmail: string,
+  buyerPhone: string | undefined,
+  couponCode: string,
+  promotionTitle: string,
+  isGift: boolean,
+  recipientName?: string
+) {
+  const transporter = getEmailTransporter();
+  const giftType = isGift && recipientName ? `regalo para <strong>${recipientName}</strong>` : 'uso personal';
+
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f6f0;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; padding: 20px 0 10px;">
+            <h1 style="color: #C5A55A; font-size: 24px; margin: 0;">Nutriser</h1>
+            <p style="color: #888; font-size: 12px; margin: 4px 0 0;">Aesthetic & Nutrition</p>
+          </div>
+          <h2 style="color: #333; font-size: 18px;">\uD83C\uDF81 Nueva compra de cup\u00f3n</h2>
+          <div style="background-color: #fff8e1; border-left: 4px solid #C5A55A; padding: 15px; border-radius: 4px; margin: 16px 0;">
+            <p style="margin: 4px 0;"><strong>Comprador:</strong> ${buyerName}</p>
+            <p style="margin: 4px 0;"><strong>Email:</strong> ${buyerEmail}</p>
+            <p style="margin: 4px 0;"><strong>Tel\u00e9fono:</strong> ${buyerPhone || 'No proporcionado'}</p>
+            <p style="margin: 4px 0;"><strong>Promoci\u00f3n:</strong> ${promotionTitle}</p>
+            <p style="margin: 4px 0;"><strong>C\u00f3digo:</strong> ${couponCode}</p>
+            <p style="margin: 4px 0;"><strong>Tipo:</strong> ${giftType}</p>
+          </div>
+          <p>Revisa el panel de administraci\u00f3n para <strong>autorizar o rechazar</strong> este cup\u00f3n.</p>
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+          <p style="font-size: 11px; color: #aaa; text-align: center;">Nutriser - Aesthetic & Nutrition \u00b7 nutriserpv.com</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"Nutriser" <${ENV.gmailUser}>`,
+      replyTo: buyerEmail,
+      to: adminEmail,
+      subject: `\uD83C\uDF81 Nueva compra de cup\u00f3n - ${buyerName} (${couponCode})`,
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending coupon purchase notification:', error);
+    return false;
+  }
+}
+
 export async function sendCouponApprovedEmail(
   buyerEmail: string,
   buyerName: string,

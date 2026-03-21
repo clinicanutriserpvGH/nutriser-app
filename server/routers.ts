@@ -313,7 +313,10 @@ export const appRouter = router({
         imageUrl: z.string().url(),
       }))
       .mutation(async ({ input }) => {
-        return await createPromotion(input);
+        return await createPromotion({
+          ...input,
+          isActive: true,
+        });
       }),
 
     update: publicProcedure

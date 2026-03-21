@@ -200,6 +200,7 @@ export default function AdminDashboard() {
       setPromotionDescription("");
       setPromotionImage(null);
       utils.promotions.listForAdmin.invalidate();
+      utils.promotions.list.invalidate();
     },
     onError: (error) => {
       toast.error("Error al publicar promoción: " + error.message);

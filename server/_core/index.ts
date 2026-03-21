@@ -1,4 +1,3 @@
-import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
@@ -36,7 +35,7 @@ async function startServer() {
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   
-  // Upload endpoint for promotions and other images
+  // Upload endpoint for promotions and other images - save to server
   app.post("/api/upload", async (req, res) => {
     try {
       const chunks: Buffer[] = [];
@@ -44,13 +43,24 @@ async function startServer() {
       req.on("end", async () => {
         const buffer = Buffer.concat(chunks);
         const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-        const key = `uploads/${filename}`;
         
-        // Import storagePut from storage module
-        const { storagePut } = await import("../storage");
-        const result = await storagePut(key, buffer, "image/jpeg");
+        // Save to public directory for direct access
+        const { writeFileSync, mkdirSync } = await import("fs");
+        const { join } = await import("path");
+        const uploadDir = join(process.cwd(), "dist", "uploads");
         
-        res.json({ url: result.url });
+        try {
+          mkdirSync(uploadDir, { recursive: true });
+        } catch (e) {
+          // Directory might already exist
+        }
+        
+        const filepath = join(uploadDir, filename);
+        writeFileSync(filepath, buffer);
+        
+        // Return URL that can be accessed directly
+        const url = `/uploads/${filename}`;
+        res.json({ url });
       });
     } catch (error) {
       console.error("Upload error:", error);
@@ -58,40 +68,8 @@ async function startServer() {
     }
   });
   
-  // Proxy endpoint for S3 images to handle CORS
-  app.get("/api/image-proxy", async (req, res) => {
-    try {
-      const { url } = req.query;
-      if (!url || typeof url !== "string") {
-        return res.status(400).json({ error: "URL parameter required" });
-      }
-      
-      // Verify it's a valid S3 URL to prevent abuse
-      if (!url.includes(".amazonaws.com") && !url.includes("s3")) {
-        return res.status(403).json({ error: "Invalid URL" });
-      }
-      
-      // Fetch the image from S3
-      const response = await fetch(url);
-      if (!response.ok) {
-        return res.status(response.status).json({ error: "Failed to fetch image" });
-      }
-      
-      const contentType = response.headers.get("content-type") || "image/jpeg";
-      const buffer = await response.arrayBuffer();
-      
-      // Set CORS headers
-      res.set("Access-Control-Allow-Origin", "*");
-      res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
-      res.set("Content-Type", contentType);
-      res.set("Cache-Control", "public, max-age=86400"); // Cache for 24 hours
-      
-      res.send(Buffer.from(buffer));
-    } catch (error) {
-      console.error("Image proxy error:", error);
-      res.status(500).json({ error: "Image proxy failed" });
-    }
-  });
+  // Serve uploaded images
+  app.use("/uploads", express.static("dist/uploads"));
   
   // tRPC API
   app.use(

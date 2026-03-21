@@ -62,7 +62,7 @@ export default function PromotionsSection() {
                     </div>
                   ) : (
                     <img
-                      src={`/api/image-proxy?url=${encodeURIComponent(promo.imageUrl)}`}
+                      src={promo.imageUrl}
                       alt={promo.title}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                       onError={() => handleImageError(promo.id)}

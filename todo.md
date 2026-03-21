@@ -249,3 +249,8 @@
 - [x] Integrar WhatsApp con número 3221007799
 - [x] Mensaje predefinido: "Quiero la promoción: [nombre de la promoción]"
 - [x] Botón abre WhatsApp automáticamente con mensaje
+
+## Corrección Flujo Modal de Regalo
+- [x] Dividir modal en 2 pasos: Paso 1 (datos del comprador), Paso 2 (pago + timer 15 min)
+- [x] Timer solo empieza cuando el usuario hace click en "Continuar" al paso 2
+- [x] Mensaje claro: "Tienes 15 minutos para subir tu comprobante. Si no lo subes, deberás registrarte de nuevo"

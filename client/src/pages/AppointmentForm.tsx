@@ -4,9 +4,38 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Calendar, Clock, Mail, Phone, User, ArrowLeft } from "lucide-react";
+import { Calendar, Clock, Mail, Phone, User, ArrowLeft, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
+
+const SERVICES = [
+  "Asesoría Nutricional Personalizada",
+  "Cavitación 80K y 120K",
+  "Radiofrecuencia Corporal",
+  "Vacunterapia",
+  "Láser Lipolítico No Invasivo (Hipoláser)",
+  "Martillo Vibrador Corporal",
+  "Vacuum con Copas para Glúteos",
+  "Aplicación de Enzimas Reductoras",
+  "Mesoterapia Reductora",
+  "Diagnóstico Facial con Monitor de Piel",
+  "Limpieza Facial Profunda",
+  "Dermaplaning",
+  "Radiofrecuencia Facial",
+  "Hollywood Peel con Láser PicoSegundos",
+  "Microneedling Profesional (Dermapen)",
+  "Plasma Rico en Plaquetas (PRP)",
+  "Martillo Frío Facial",
+  "Blefaroplastia No Quirúrgica",
+  "Láser CO₂ Fraccionado",
+  "Toxina Botulínica (Botox)",
+  "Relleno de Ácido Hialurónico (Russian Lips)",
+  "Rellenos Faciales",
+  "Detox Iónico",
+  "Retiro de Tatuajes con Láser",
+  "Productos Nutricionales y Cosméticos",
+  "Valoración General",
+];
 
 export default function AppointmentForm() {
   const [, navigate] = useLocation();
@@ -16,7 +45,9 @@ export default function AppointmentForm() {
     clientPhone: "",
     appointmentDate: "",
     appointmentTime: "",
+    serviceType: "Asesoría Nutricional Personalizada",
   });
+  const [isServiceOpen, setIsServiceOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createMutation = trpc.appointments.create.useMutation();
@@ -24,7 +55,7 @@ export default function AppointmentForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.clientName || !formData.clientEmail || !formData.clientPhone || !formData.appointmentDate || !formData.appointmentTime) {
+    if (!formData.clientName || !formData.clientEmail || !formData.clientPhone || !formData.appointmentDate || !formData.appointmentTime || !formData.serviceType) {
       toast.error("Por favor completa todos los campos requeridos");
       return;
     }
@@ -39,7 +70,7 @@ export default function AppointmentForm() {
         clientPhone: formData.clientPhone,
         appointmentDate: date,
         appointmentTime: formData.appointmentTime,
-        serviceType: "Valoración General",
+        serviceType: formData.serviceType,
         notes: "Cita agendada desde formulario de valoración",
       });
 
@@ -50,6 +81,7 @@ export default function AppointmentForm() {
         clientPhone: "",
         appointmentDate: "",
         appointmentTime: "",
+        serviceType: "Asesoría Nutricional Personalizada",
       });
     } catch (error) {
       toast.error("Error al agendar la cita");
@@ -137,6 +169,43 @@ export default function AppointmentForm() {
                   required
                   className="border-[#C5A55A]/30 focus:border-[#C5A55A]"
                 />
+              </div>
+
+              {/* Servicio */}
+              <div>
+                <Label className="flex items-center gap-2 mb-2">
+                  <ChevronDown className="w-4 h-4 text-[#C5A55A]" />
+                  Servicio deseado *
+                </Label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsServiceOpen(!isServiceOpen)}
+                    className="w-full px-4 py-2 text-left border-2 border-[#C5A55A]/30 rounded-md bg-white hover:border-[#C5A55A] focus:border-[#C5A55A] focus:outline-none transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#1A1A1A]">{formData.serviceType}</span>
+                      <ChevronDown className={`w-4 h-4 text-[#C5A55A] transition-transform ${isServiceOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                  </button>
+                  {isServiceOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-[#C5A55A]/30 rounded-md shadow-lg z-10 max-h-64 overflow-y-auto">
+                      {SERVICES.map((service) => (
+                        <button
+                          key={service}
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, serviceType: service });
+                            setIsServiceOpen(false);
+                          }}
+                          className="w-full px-4 py-2 text-left hover:bg-[#C5A55A]/10 transition-colors border-b border-[#C5A55A]/10 last:border-b-0 text-[#1A1A1A]"
+                        >
+                          {service}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Fecha */}

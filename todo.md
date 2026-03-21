@@ -123,3 +123,11 @@
 - [x] Corregir correos de citas para que vengan SOLO desde clinicanutriserpv@gmail.com
 - [x] Remover correos automáticos del sitio en procedimientos
 - [x] Verificar que NO se envíen correos desde el sitio al paciente
+
+## Correcciones Sesión 6
+
+- [x] Agregar selector de servicios en formulario de citas
+- [x] Mostrar todos los servicios disponibles (Asesoría Nutricional, Valoración, etc.)
+- [x] Permitir que el usuario seleccione el servicio que desea agendar
+- [x] Verificar que NO se envíen correos del sitio en ningún lado
+- [x] Asegurar que TODOS los correos vengan desde clinicanutriserpv@gmail.com

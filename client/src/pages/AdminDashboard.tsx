@@ -15,6 +15,9 @@ export default function AdminDashboard() {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
   const [appointmentTime, setAppointmentTime] = useState<string>("");
   const [isLoadingProof, setIsLoadingProof] = useState(false);
+  const [promotionTitle, setPromotionTitle] = useState("");
+  const [promotionDescription, setPromotionDescription] = useState("");
+  const [promotionImage, setPromotionImage] = useState<File | null>(null);
 
   // Horarios fijos de la clínica
   const CLINIC_HOURS = [
@@ -36,6 +39,10 @@ export default function AdminDashboard() {
   });
 
   const { data: appointments } = trpc.appointments.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const { data: promotions } = trpc.promotions.listForAdmin.useQuery(undefined, {
     enabled: isAuthenticated,
   });
 
@@ -183,6 +190,54 @@ export default function AdminDashboard() {
     }
     if (confirm(`¿Estás seguro de que deseas eliminar TODAS las ${appointments.length} cita(s)? Esta acción no se puede deshacer.`)) {
       deleteAllAppointmentsMutation.mutate();
+    }
+  };
+
+  const createPromotionMutation = trpc.promotions.create.useMutation({
+    onSuccess: () => {
+      toast.success("Promoción publicada exitosamente");
+      setPromotionTitle("");
+      setPromotionDescription("");
+      setPromotionImage(null);
+      utils.promotions.listForAdmin.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error al publicar promoción: " + error.message);
+    },
+  });
+
+  const handlePublishPromotion = async () => {
+    if (!promotionTitle.trim()) {
+      toast.error("Ingresa un título para la promoción");
+      return;
+    }
+    if (!promotionImage) {
+      toast.error("Selecciona una imagen para la promoción");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', promotionImage);
+      
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Error al subir imagen');
+      }
+      
+      const { url } = await uploadResponse.json();
+      
+      createPromotionMutation.mutate({
+        title: promotionTitle,
+        description: promotionDescription,
+        imageUrl: url,
+      });
+    } catch (error) {
+      toast.error("Error al subir imagen: " + (error instanceof Error ? error.message : "Error desconocido"));
     }
   };
 
@@ -518,6 +573,8 @@ export default function AdminDashboard() {
                     <input
                       type="text"
                       placeholder="Ej: Descuento 20% en tratamientos"
+                      value={promotionTitle}
+                      onChange={(e) => setPromotionTitle(e.target.value)}
                       className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
                     />
                   </div>
@@ -526,6 +583,8 @@ export default function AdminDashboard() {
                     <textarea
                       placeholder="Describe la promoción..."
                       rows={3}
+                      value={promotionDescription}
+                      onChange={(e) => setPromotionDescription(e.target.value)}
                       className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
                     />
                   </div>
@@ -534,20 +593,39 @@ export default function AdminDashboard() {
                     <input
                       type="file"
                       accept="image/*"
+                      onChange={(e) => setPromotionImage(e.target.files?.[0] || null)}
                       className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
                     />
                   </div>
-                  <Button className="w-full bg-[#C5A55A] hover:bg-[#B39548] text-white font-bold">
-                    Publicar Promoción
+                  <Button
+                    onClick={handlePublishPromotion}
+                    disabled={createPromotionMutation.isPending}
+                    className="w-full bg-[#C5A55A] hover:bg-[#B39548] text-white font-bold disabled:opacity-50"
+                  >
+                    {createPromotionMutation.isPending ? "Publicando..." : "Publicar Promoción"}
                   </Button>
                 </div>
 
                 {/* Lista de promociones */}
                 <div>
                   <h3 className="font-bold text-[#1A1A1A] mb-4">Promociones Publicadas</h3>
-                  <div className="bg-[#FAF7F2] p-4 rounded-lg text-center text-[#999]">
-                    <p>No hay promociones publicadas aún</p>
-                  </div>
+                  {!promotions || promotions.length === 0 ? (
+                    <div className="bg-[#FAF7F2] p-4 rounded-lg text-center text-[#999]">
+                      <p>No hay promociones publicadas aún</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {promotions.map((promo) => (
+                        <div key={promo.id} className="bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
+                          {promo.imageUrl && (
+                            <img src={promo.imageUrl} alt={promo.title} className="w-full h-40 object-cover rounded-lg mb-3" />
+                          )}
+                          <h4 className="font-bold text-[#1A1A1A]">{promo.title}</h4>
+                          <p className="text-sm text-[#666] mt-2">{promo.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

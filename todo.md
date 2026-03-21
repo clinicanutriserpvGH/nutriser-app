@@ -54,3 +54,29 @@
 - [x] Arreglar subida de imagen del comprobante (no permite subir)
 - [x] Reparar enlace de Membresías en navegación (no funciona)
 - [x] Configurar envío automático de correos a clinicanutriserpv@gmail.com con foto y datos
+
+
+## Nuevas Funcionalidades Solicitadas
+
+### Base de Datos y Backend
+- [ ] Crear tabla de citas en drizzle/schema.ts
+- [ ] Crear procedimientos tRPC para crear y listar citas
+- [ ] Crear tabla de admin con credenciales (email: clinicanutriserpv@gmail.com, contraseña: admin123456)
+
+### Correos Automáticos
+- [ ] Configurar envío de correo de confirmación de membresía desde clinicanutriserpv@gmail.com
+- [ ] Enviar correo de confirmación de cita cuando se agenda
+
+### Panel de Administración
+- [ ] Crear página de login para admin
+- [ ] Crear dashboard admin con tabla de membresías
+- [ ] Mostrar tabla de citas agendadas
+
+### Sistema de Agendamiento
+- [ ] Crear página de agendamiento de citas con calendario
+- [ ] Permitir seleccionar fecha y hora
+- [ ] Guardar cita en base de datos
+
+### Notificaciones
+- [ ] Enviar notificación al admin cuando se agenda una cita
+- [ ] Enviar correo al admin cuando se agenda una cita

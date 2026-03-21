@@ -7,6 +7,9 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Memberships from "./pages/Memberships";
 import AdminMemberships from "./pages/AdminMemberships";
+import Appointments from "./pages/Appointments";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -14,6 +17,9 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/memberships"} component={Memberships} />
+      <Route path={"/appointments"} component={Appointments} />
+      <Route path={"/admin/login"} component={AdminLogin} />
+      <Route path={"/admin/dashboard"} component={AdminDashboard} />
       <Route path={"/admin/memberships"} component={AdminMemberships} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />

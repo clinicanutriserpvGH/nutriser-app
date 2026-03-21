@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -137,4 +137,46 @@ export async function getPaymentProofByMembershipId(membershipId: number) {
   
   const result = await db.select().from(paymentProofs).where(eq(paymentProofs.membershipId, membershipId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+// Appointments queries
+export async function createAppointment(data: InsertAppointment) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(appointments).values(data);
+  const inserted = await db.select().from(appointments).orderBy(desc(appointments.id)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create appointment");
+  return inserted[0];
+}
+
+export async function getAllAppointments() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(appointments).orderBy(desc(appointments.createdAt));
+}
+
+export async function getAppointmentById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(appointments).where(eq(appointments.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// Admin credentials queries
+export async function getAdminByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(adminCredentials).where(eq(adminCredentials.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createAdminCredential(data: InsertAdminCredential) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return await db.insert(adminCredentials).values(data);
 }

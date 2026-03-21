@@ -3,8 +3,10 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential } from "./db";
 import { notifyOwner } from "./_core/notification";
+import { sendConfirmationEmail, sendAppointmentNotification } from "./_core/email";
+import bcrypt from "bcrypt";
 
 export const appRouter = router({
   system: systemRouter,
@@ -17,6 +19,24 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    adminLogin: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const admin = await getAdminByEmail(input.email);
+        if (!admin) throw new Error("Admin not found");
+        
+        const isPasswordValid = await bcrypt.compare(input.password, admin.passwordHash);
+        if (!isPasswordValid) throw new Error("Invalid password");
+        
+        return {
+          success: true,
+          adminId: admin.id,
+          email: admin.email,
+        };
+      }),
   }),
 
   memberships: router({
@@ -29,7 +49,7 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         const price = input.programType === "basic" ? "2000" : "3000";
-        return await createMembership({
+        const membership = await createMembership({
           clientName: input.clientName,
           clientEmail: input.clientEmail,
           clientPhone: input.clientPhone,
@@ -37,6 +57,17 @@ export const appRouter = router({
           price: price,
           depositConcept: `${input.clientName} - Programa ${input.programType === "basic" ? "Básico" : "Premium"}`,
         });
+        
+        // Send confirmation email
+        await sendConfirmationEmail(input.clientEmail, input.clientName, input.programType);
+        
+        // Notify owner
+        await notifyOwner({
+          title: "Nueva Inscripción a Membresía",
+          content: `Cliente: ${input.clientName}\nEmail: ${input.clientEmail}\nTeléfono: ${input.clientPhone || "No proporcionado"}\nPrograma: ${input.programType === "basic" ? "Básico" : "Premium"}`,
+        });
+        
+        return membership;
       }),
     
     uploadProof: publicProcedure
@@ -92,6 +123,57 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await getPaymentProofByMembershipId(input);
       }),
+  }),
+
+  appointments: router({
+    create: publicProcedure
+      .input(z.object({
+        clientName: z.string().min(1),
+        clientEmail: z.string().email(),
+        clientPhone: z.string().optional(),
+        appointmentDate: z.date(),
+        appointmentTime: z.string(),
+        serviceType: z.string().min(1),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const appointment = await createAppointment({
+          clientName: input.clientName,
+          clientEmail: input.clientEmail,
+          clientPhone: input.clientPhone,
+          appointmentDate: input.appointmentDate,
+          appointmentTime: input.appointmentTime,
+          serviceType: input.serviceType,
+          notes: input.notes,
+          status: "pending",
+        });
+        
+        // Send notification to admin
+        await sendAppointmentNotification(
+          "clinicanutriserpv@gmail.com",
+          input.clientName,
+          input.clientEmail,
+          input.clientPhone,
+          input.appointmentDate,
+          input.appointmentTime,
+          input.serviceType
+        );
+        
+        // Notify owner
+        await notifyOwner({
+          title: "Nueva Cita Agendada",
+          content: `Cliente: ${input.clientName}\nEmail: ${input.clientEmail}\nTeléfono: ${input.clientPhone || "No proporcionado"}\nFecha: ${input.appointmentDate.toLocaleDateString()}\nHora: ${input.appointmentTime}\nServicio: ${input.serviceType}`,
+        });
+        
+        return appointment;
+      }),
+    
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user?.role !== "admin") {
+        throw new Error("Only admins can list appointments");
+      }
+      return await getAllAppointments();
+    }),
   }),
 });
 

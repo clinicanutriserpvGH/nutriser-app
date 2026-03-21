@@ -59,3 +59,38 @@ export const paymentProofs = mysqlTable("paymentProofs", {
 
 export type PaymentProof = typeof paymentProofs.$inferSelect;
 export type InsertPaymentProof = typeof paymentProofs.$inferInsert;
+
+/**
+ * Citas agendadas
+ * Almacena las citas agendadas por clientes
+ */
+export const appointments = mysqlTable("appointments", {
+  id: int("id").autoincrement().primaryKey(),
+  clientName: varchar("clientName", { length: 255 }).notNull(),
+  clientEmail: varchar("clientEmail", { length: 320 }).notNull(),
+  clientPhone: varchar("clientPhone", { length: 20 }),
+  appointmentDate: timestamp("appointmentDate").notNull(),
+  appointmentTime: varchar("appointmentTime", { length: 10 }).notNull(), // HH:MM format
+  serviceType: varchar("serviceType", { length: 255 }).notNull(), // Tipo de servicio/tratamiento
+  notes: text("notes"), // Notas adicionales
+  status: mysqlEnum("status", ["pending", "confirmed", "cancelled"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Appointment = typeof appointments.$inferSelect;
+export type InsertAppointment = typeof appointments.$inferInsert;
+
+/**
+ * Credenciales de administrador
+ * Almacena credenciales para acceso al panel admin
+ */
+export const adminCredentials = mysqlTable("adminCredentials", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AdminCredential = typeof adminCredentials.$inferSelect;
+export type InsertAdminCredential = typeof adminCredentials.$inferInsert;

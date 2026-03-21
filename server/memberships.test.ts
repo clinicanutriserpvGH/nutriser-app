@@ -93,7 +93,8 @@ describe("memberships", () => {
 
     const result = await caller.memberships.uploadProof({
       membershipId: 1,
-      proofUrl: "https://example.com/proof.jpg",
+      proofData: "base64encodedimagedata",
+      fileName: "proof.jpg",
     });
 
     expect(result).toBeDefined();

@@ -94,3 +94,37 @@ export const adminCredentials = mysqlTable("adminCredentials", {
 
 export type AdminCredential = typeof adminCredentials.$inferSelect;
 export type InsertAdminCredential = typeof adminCredentials.$inferInsert;
+
+
+/**
+ * Cupones de descuento
+ * Almacena cupones para membresías con descuentos predefinidos
+ */
+export const coupons = mysqlTable("coupons", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  discountPercentage: int("discountPercentage").notNull(), // 10, 20, 30
+  status: mysqlEnum("status", ["pending", "active", "inactive"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  approvedAt: timestamp("approvedAt"),
+  approvedBy: int("approvedBy"), // ID del admin que aprobó
+});
+
+export type Coupon = typeof coupons.$inferSelect;
+export type InsertCoupon = typeof coupons.$inferInsert;
+
+/**
+ * Cupones usados en membresías
+ * Registra qué cupón se usó en cada membresía
+ */
+export const membershipCoupons = mysqlTable("membershipCoupons", {
+  id: int("id").autoincrement().primaryKey(),
+  membershipId: int("membershipId").notNull().references(() => memberships.id),
+  couponId: int("couponId").notNull().references(() => coupons.id),
+  discountAmount: decimal("discountAmount", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type MembershipCoupon = typeof membershipCoupons.$inferSelect;
+export type InsertMembershipCoupon = typeof membershipCoupons.$inferInsert;

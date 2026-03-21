@@ -5,7 +5,7 @@
  * Uses real Nutriser logo
  */
 import { useState, useEffect } from "react";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X, Phone, Instagram, Facebook } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const LOGO_URL =
@@ -91,15 +91,35 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
-            <a
-              href="https://wa.me/523221007799"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-[#C5A55A] text-white px-5 py-2.5 text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/20"
-            >
-              <Phone className="w-3.5 h-3.5" />
-              Agendar Cita
-            </a>
+            <div className="flex items-center gap-6">
+              {/* Social Links */}
+              <a
+                href="https://instagram.com/nutriserpv"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1A1A1A]/50 hover:text-[#C5A55A] transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a
+                href="https://facebook.com/nutriserpv"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1A1A1A]/50 hover:text-[#C5A55A] transition-colors"
+                aria-label="Facebook"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+              {/* Call Button */}
+              <a
+                href="tel:3224503257"
+                className="flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/20"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                Llamada: 322 450 3257
+              </a>
+            </div>
           </div>
 
           {/* Mobile Toggle */}
@@ -146,18 +166,41 @@ export default function Navbar() {
                   {link.label}
                 </motion.a>
               ))}
-              <motion.a
-                href="https://wa.me/523221007799"
-                target="_blank"
-                rel="noopener noreferrer"
+              <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
-                className="inline-flex items-center gap-2 bg-[#C5A55A] text-white px-6 py-3 font-serif text-xl w-fit mt-4 hover:bg-[#B8963E] transition-colors"
+                className="flex flex-col gap-4 mt-4"
               >
-                <Phone className="w-5 h-5" />
-                Agendar Cita
-              </motion.a>
+                <a
+                  href="tel:3224503257"
+                  className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 font-serif text-lg w-fit hover:bg-green-700 transition-colors"
+                >
+                  <Phone className="w-5 h-5" />
+                  Llamada: 322 450 3257
+                </a>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-[#1A1A1A]/60">Síguenos:</span>
+                  <a
+                    href="https://instagram.com/nutriserpv"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#1A1A1A]/60 hover:text-[#C5A55A] transition-colors"
+                    aria-label="Instagram"
+                  >
+                    <Instagram className="w-5 h-5" />
+                  </a>
+                  <a
+                    href="https://facebook.com/nutriserpv"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#1A1A1A]/60 hover:text-[#C5A55A] transition-colors"
+                    aria-label="Facebook"
+                  >
+                    <Facebook className="w-5 h-5" />
+                  </a>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         )}

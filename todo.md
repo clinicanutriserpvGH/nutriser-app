@@ -214,3 +214,24 @@
 - CtaBanner.tsx: Agregado botón WhatsApp y cambio de "Programas de Membresía" a "Adquirir Programa"
 - ContactSection.tsx: Agregados 4 botones en grid (Llamar, WhatsApp, Agendar, Programas)
 - AdminDashboard.tsx: Modal de citas mejorado, botones de verificar/eliminar todo, modal de comprobantes con estado de carga
+
+
+## Correcciones Sesión 12 - Sistema de Cupones y Navbar
+
+### Navbar
+- [ ] Cambiar botón "AGENDAR CITA" a "LLAMADA: 322 450 3257" con icono de teléfono
+- [ ] Agregar redes sociales en navbar: Instagram y Facebook (@nutriserpv)
+
+### Hero Section
+- [ ] Cambiar botón verde "LLAMADA" a "ADQUIRIR PROGRAMA" con icono de regalo
+- [ ] Color negro con dorado llamativo para destacar
+
+### Sistema de Cupones
+- [ ] Crear tabla de cupones en drizzle/schema.ts con campos: código, descuento, estado (activo/inactivo)
+- [ ] Crear cupones predefinidos: Nutri-ser 10 (10%), Nutri-ser 20 (20%), Nutri-ser 30 (30%)
+- [ ] Agregar campo de cupón en formulario de membresías
+- [ ] Validar cupón en tiempo real y mostrar descuento
+- [ ] Calcular precio final con descuento aplicado
+- [ ] Crear tabla de cupones en panel admin
+- [ ] Admin debe aprobar cupones antes de activarlos
+- [ ] Mostrar estado de cada cupón (Activo/Inactivo/Pendiente de aprobación)

@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient } from "./_core/email";
 import { storagePut } from "./storage";
@@ -234,6 +234,50 @@ export const appRouter = router({
       // This endpoint is public but admin dashboard checks localStorage before displaying
       return await getAllAppointments();
     }),
+  }),
+
+  coupons: router({
+    validateCoupon: publicProcedure
+      .input(z.object({
+        code: z.string().min(1),
+      }))
+      .query(async ({ input }) => {
+        const coupon = await getCouponByCode(input.code.toUpperCase());
+        if (!coupon) {
+          return { valid: false, discount: 0 };
+        }
+        if (coupon.status !== "active") {
+          return { valid: false, discount: 0, message: "Cupón no disponible" };
+        }
+        return {
+          valid: true,
+          discount: coupon.discountPercentage,
+          couponId: coupon.id,
+        };
+      }),
+
+    list: publicProcedure.query(async () => {
+      return await getAllCoupons();
+    }),
+
+    approve: publicProcedure
+      .input(z.object({
+        couponId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        // In a real app, check if user is admin
+        await approveCoupon(input.couponId, 1); // adminId = 1 for now
+        return { success: true };
+      }),
+
+    reject: publicProcedure
+      .input(z.object({
+        couponId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        await rejectCoupon(input.couponId);
+        return { success: true };
+      }),
   }),
 });
 

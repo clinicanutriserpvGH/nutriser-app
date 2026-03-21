@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -190,4 +190,62 @@ export async function createAdminCredential(data: InsertAdminCredential) {
   if (!db) throw new Error("Database not available");
   
   return await db.insert(adminCredentials).values(data);
+}
+
+
+// Coupon queries
+export async function getCouponByCode(code: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(coupons).where(eq(coupons.code, code)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllCoupons() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(coupons).orderBy(desc(coupons.createdAt));
+}
+
+export async function createCoupon(data: InsertCoupon) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(coupons).values(data);
+  const inserted = await db.select().from(coupons).orderBy(desc(coupons.id)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create coupon");
+  return inserted[0];
+}
+
+export async function approveCoupon(couponId: number, adminId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(coupons)
+    .set({ status: "active", approvedAt: new Date(), approvedBy: adminId })
+    .where(eq(coupons.id, couponId));
+  
+  const result = await db.select().from(coupons).where(eq(coupons.id, couponId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function rejectCoupon(couponId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(coupons)
+    .set({ status: "inactive" })
+    .where(eq(coupons.id, couponId));
+}
+
+export async function createMembershipCoupon(data: InsertMembershipCoupon) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(membershipCoupons).values(data);
+  const inserted = await db.select().from(membershipCoupons).orderBy(desc(membershipCoupons.id)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create membership coupon");
+  return inserted[0];
 }

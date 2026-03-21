@@ -17,6 +17,7 @@ const navLinks = [
   { label: "Nosotros", href: "#nosotros" },
   { label: "Contacto", href: "#contacto" },
   { label: "Membresías", href: "/memberships" },
+  { label: "Administración", href: "/admin/login" },
 ];
 
 export default function Navbar() {

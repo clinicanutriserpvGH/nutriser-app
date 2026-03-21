@@ -16,26 +16,24 @@ const PROGRAMS = [
   {
     id: "basic",
     name: "Programa Básico",
-    price: 2000,
+    price: 2500,
     color: "#C5A55A",
     features: [
-      "4 asesorías nutricionales",
+      "4 asesorías nutricionales personalizadas",
       "4 escaneos corporales",
       "5% de descuento en tratamientos corporales",
-      "Acceso por 1 año",
     ],
   },
   {
     id: "premium",
     name: "Programa Premium",
-    price: 3000,
+    price: 4000,
     color: "#D4AF37",
     features: [
-      "10 asesorías nutricionales",
-      "10 escaneos corporales",
+      "8 asesorías nutricionales personalizadas",
+      "8 escaneos corporales",
       "10% de descuento en todos los tratamientos",
-      "Acceso por 1 año",
-      "Soporte prioritario",
+      "Acceso a seguimiento online",
     ],
   },
 ];

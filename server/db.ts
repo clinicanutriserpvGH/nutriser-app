@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -317,5 +317,42 @@ export async function cancelAppointment(id: number) {
   if (!db) throw new Error("Database not available");
   
   await db.update(appointments).set({ status: "cancelled" }).where(eq(appointments.id, id));
+  return { success: true };
+}
+
+// ===== GIFT PURCHASES =====
+
+export async function createGiftPurchase(data: InsertGiftPurchase) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(giftPurchases).values(data);
+  const id = (result as any)[0]?.insertId;
+  return { id, ...data };
+}
+
+export async function getAllGiftPurchases() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(giftPurchases).orderBy(desc(giftPurchases.createdAt));
+}
+
+export async function getGiftPurchaseById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(giftPurchases).where(eq(giftPurchases.id, id));
+  return result[0] || null;
+}
+
+export async function updateGiftPurchaseStatus(id: number, status: "pending" | "approved" | "rejected") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(giftPurchases).set({ 
+    status,
+    approvedAt: status === "approved" ? new Date() : undefined,
+  }).where(eq(giftPurchases.id, id));
   return { success: true };
 }

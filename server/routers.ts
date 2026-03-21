@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient } from "./_core/email";
 import { storagePut } from "./storage";
@@ -297,6 +297,59 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         await rejectCoupon(input.couponId);
+        return { success: true };
+      }),
+  }),
+
+  giftPurchases: router({
+    create: publicProcedure
+      .input(z.object({
+        promotionId: z.number(),
+        buyerName: z.string().min(1),
+        buyerEmail: z.string().email(),
+        buyerPhone: z.string().optional(),
+        proofData: z.string(), // base64
+        proofMimeType: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // Upload proof to S3
+        const buffer = Buffer.from(input.proofData, 'base64');
+        const fileName = `gift-proof-${Date.now()}.${input.proofMimeType.split('/')[1]}`;
+        const { url } = await storagePut(`gift-proofs/${fileName}`, buffer, input.proofMimeType);
+
+        const purchase = await createGiftPurchase({
+          promotionId: input.promotionId,
+          buyerName: input.buyerName,
+          buyerEmail: input.buyerEmail,
+          buyerPhone: input.buyerPhone,
+          proofUrl: url,
+          status: 'pending',
+        });
+
+        // Notify admin
+        await notifyOwner({
+          title: 'Nueva compra de cupón de regalo',
+          content: `${input.buyerName} (${input.buyerEmail}) compró un cupón de regalo. Revisa el panel de administración para autorizar.`,
+        });
+
+        return { success: true, id: purchase.id };
+      }),
+
+    list: publicProcedure.query(async () => {
+      return await getAllGiftPurchases();
+    }),
+
+    approve: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await updateGiftPurchaseStatus(input.id, 'approved');
+        return { success: true };
+      }),
+
+    reject: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await updateGiftPurchaseStatus(input.id, 'rejected');
         return { success: true };
       }),
   }),

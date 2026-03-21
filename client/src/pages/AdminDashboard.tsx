@@ -46,6 +46,26 @@ export default function AdminDashboard() {
     enabled: isAuthenticated,
   });
 
+  const { data: giftPurchases, refetch: refetchGifts } = trpc.giftPurchases.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const approveGiftMutation = trpc.giftPurchases.approve.useMutation({
+    onSuccess: () => {
+      toast.success('Compra autorizada correctamente');
+      refetchGifts();
+    },
+    onError: () => toast.error('Error al autorizar'),
+  });
+
+  const rejectGiftMutation = trpc.giftPurchases.reject.useMutation({
+    onSuccess: () => {
+      toast.success('Compra rechazada');
+      refetchGifts();
+    },
+    onError: () => toast.error('Error al rechazar'),
+  });
+
   const utils = trpc.useUtils();
   const updateStatusMutation = trpc.memberships.updateStatus.useMutation({
     onSuccess: () => {
@@ -575,11 +595,82 @@ export default function AdminDashboard() {
           <TabsContent value="giftPurchases" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
-                <CardTitle className="text-[#C5A55A]">Compras de Regalos Pendientes</CardTitle>
+                <CardTitle className="text-[#C5A55A]">Compras de Cupones de Regalo</CardTitle>
                 <CardDescription>Autoriza o rechaza las compras de cupones de regalo</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-[#999] text-center py-8">Funcionalidad en desarrollo...</p>
+                {!giftPurchases || giftPurchases.length === 0 ? (
+                  <p className="text-[#999] text-center py-8">No hay compras de regalos pendientes</p>
+                ) : (
+                  <div className="space-y-4">
+                    {giftPurchases.map((purchase: any) => (
+                      <div key={purchase.id} className="border border-[#C5A55A]/20 rounded-xl p-5 bg-[#FAF7F2]">
+                        <div className="flex flex-col md:flex-row gap-4">
+                          {/* Comprobante */}
+                          <div className="flex-shrink-0">
+                            <p className="text-xs font-semibold text-[#666] mb-2 uppercase">Comprobante</p>
+                            {purchase.proofUrl ? (
+                              <a href={purchase.proofUrl} target="_blank" rel="noopener noreferrer">
+                                <img
+                                  src={purchase.proofUrl}
+                                  alt="Comprobante"
+                                  className="w-24 h-24 object-cover rounded-lg border border-[#C5A55A]/30 hover:opacity-80 transition"
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                />
+                                <p className="text-xs text-blue-600 mt-1 hover:underline">Ver completo</p>
+                              </a>
+                            ) : (
+                              <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <span className="text-xs text-gray-500">Sin imagen</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 space-y-1">
+                            <p className="font-bold text-[#1A1A1A]">{purchase.buyerName}</p>
+                            <p className="text-sm text-[#666]">{purchase.buyerEmail}</p>
+                            {purchase.buyerPhone && <p className="text-sm text-[#666]">{purchase.buyerPhone}</p>}
+                            <p className="text-xs text-[#999]">
+                              {purchase.createdAt ? new Date(purchase.createdAt).toLocaleString('es-MX') : ''}
+                            </p>
+                            <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mt-2 ${
+                              purchase.status === 'approved' ? 'bg-green-100 text-green-700' :
+                              purchase.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {purchase.status === 'approved' ? '✓ Autorizado' :
+                               purchase.status === 'rejected' ? '✗ Rechazado' : '⏳ Pendiente'}
+                            </span>
+                          </div>
+
+                          {/* Acciones */}
+                          {purchase.status === 'pending' && (
+                            <div className="flex flex-col gap-2 justify-center">
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => approveGiftMutation.mutate({ id: purchase.id })}
+                                disabled={approveGiftMutation.isPending}
+                              >
+                                Autorizar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-400 text-red-600 hover:bg-red-50"
+                                onClick={() => rejectGiftMutation.mutate({ id: purchase.id })}
+                                disabled={rejectGiftMutation.isPending}
+                              >
+                                Rechazar
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

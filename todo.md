@@ -116,3 +116,10 @@
 - [x] Corregir contraseña de admin a nutriser2024 (sin espacio)
 - [x] Agregar toggle de visibilidad de contraseña en login (ícono de ojo)
 - [x] Agregar botones de volver en todas las páginas (membresías, citas, admin, etc.)
+
+## Correcciones Sesión 5
+
+- [x] Corregir correos de membresía para que vengan SOLO desde clinicanutriserpv@gmail.com
+- [x] Corregir correos de citas para que vengan SOLO desde clinicanutriserpv@gmail.com
+- [x] Remover correos automáticos del sitio en procedimientos
+- [x] Verificar que NO se envíen correos desde el sitio al paciente

@@ -24,7 +24,7 @@ export async function sendConfirmationEmail(
   const transporter = getEmailTransporter();
 
   const programName = programType === "basic" ? "Básico" : "Premium";
-  const price = programType === "basic" ? "$2,000 MXN" : "$3,000 MXN";
+  const price = programType === "basic" ? "$2,500 MXN" : "$4,000 MXN";
 
   const htmlContent = `
     <html>
@@ -34,7 +34,7 @@ export async function sendConfirmationEmail(
           
           <p>Hola <strong>${clientName}</strong>,</p>
           
-          <p>¡Gracias por haber se inscrito en el programa <strong>${programName}</strong> de Nutriser!</p>
+          <p>¡Gracias por adquirir el programa <strong>${programName}</strong> de Nutriser!</p>
           
           <div style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #C5A55A; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #C5A55A;">Detalles de tu Membresía</h3>
@@ -43,28 +43,29 @@ export async function sendConfirmationEmail(
             ${programType === "basic" ? `
               <p><strong>Incluye:</strong></p>
               <ul>
-                <li>4 Asesorías Nutricionales</li>
+                <li>4 Asesorías Nutricionales Personalizadas</li>
                 <li>4 Escaneos Corporales</li>
                 <li>5% de descuento en tratamientos corporales</li>
               </ul>
             ` : `
               <p><strong>Incluye:</strong></p>
               <ul>
-                <li>10 Asesorías Nutricionales</li>
-                <li>10 Escaneos Corporales</li>
+                <li>8 Asesorías Nutricionales Personalizadas</li>
+                <li>8 Escaneos Corporales</li>
                 <li>10% de descuento en todos los tratamientos</li>
+                <li>Acceso a seguimiento online</li>
               </ul>
             `}
           </div>
           
-          <p>Tu solicitud ha sido recibida y está en proceso de validación. Pronto nos pondremos en contacto contigo para confirmar tu membresía.</p>
+          <p>Tu solicitud ha sido recibida. Pronto nos pondremos en contacto contigo para confirmar tu programa y coordinar tus primeras asesorías.</p>
           
-          <p>Si tienes alguna pregunta, no dudes en contactarnos por WhatsApp: <strong>+52 322 100 7799</strong></p>
+          <p>Si tienes alguna pregunta, no dudes en contactarnos por WhatsApp: <strong>+52 322 100 7799</strong> o por correo.</p>
           
           <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
           
           <p style="font-size: 12px; color: #999;">
-            Este es un correo automático. Por favor no respondas a este mensaje.
+            Nutriser - Aesthetic & Nutrition
           </p>
         </div>
       </body>
@@ -161,21 +162,21 @@ export async function sendAppointmentConfirmationToClient(
           
           <p>Hola <strong>${clientName}</strong>,</p>
           
-          <p>¡Tu cita ha sido agendada exitosamente!</p>
+          <p>Gracias por agendar una valoración con nosotros. Pronto nos comunicaremos con usted para confirmar su cita.</p>
           
           <div style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #C5A55A; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #C5A55A;">Detalles de tu Cita</h3>
-            <p><strong>Fecha:</strong> ${formattedDate}</p>
-            <p><strong>Hora:</strong> ${appointmentTime}</p>
+            <p><strong>Fecha Solicitada:</strong> ${formattedDate}</p>
+            <p><strong>Hora Solicitada:</strong> ${appointmentTime}</p>
             <p><strong>Servicio:</strong> Valoración Nutricional</p>
           </div>
           
-          <p>Te esperamos en Nutriser. Si necesitas cambiar la fecha o hora, por favor contáctanos por WhatsApp: <strong>+52 322 100 7799</strong></p>
+          <p>Si tienes alguna pregunta o necesitas cambiar la fecha, por favor contáctanos por WhatsApp: <strong>+52 322 100 7799</strong></p>
           
           <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
           
           <p style="font-size: 12px; color: #999;">
-            Este es un correo automático de Nutriser. Por favor no respondas a este mensaje.
+            Nutriser - Aesthetic & Nutrition
           </p>
         </div>
       </body>
@@ -186,7 +187,7 @@ export async function sendAppointmentConfirmationToClient(
     await transporter.sendMail({
       from: ENV.gmailUser,
       to: clientEmail,
-      subject: `Confirmación de Cita - Nutriser`,
+      subject: `Confirmación de Solicitud de Cita - Nutriser`,
       html: htmlContent,
     });
     return true;

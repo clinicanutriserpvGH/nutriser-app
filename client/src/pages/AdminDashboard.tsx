@@ -207,6 +207,17 @@ export default function AdminDashboard() {
     },
   });
 
+  const deletePromotionMutation = trpc.promotions.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Promoción eliminada exitosamente");
+      utils.promotions.listForAdmin.invalidate();
+      utils.promotions.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error al eliminar promoción: " + error.message);
+    },
+  });
+
   const handlePublishPromotion = async () => {
     if (!promotionTitle.trim()) {
       toast.error("Ingresa un título para la promoción");
@@ -623,6 +634,16 @@ export default function AdminDashboard() {
                           )}
                           <h4 className="font-bold text-[#1A1A1A]">{promo.title}</h4>
                           <p className="text-sm text-[#666] mt-2">{promo.description}</p>
+                          <button
+                            onClick={() => {
+                              if (confirm(`¿Estás seguro de que deseas eliminar la promoción "${promo.title}"?`)) {
+                                deletePromotionMutation.mutate({ id: promo.id });
+                              }
+                            }}
+                            className="w-full mt-4 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm font-medium"
+                          >
+                            Eliminar
+                          </button>
                         </div>
                       ))}
                     </div>

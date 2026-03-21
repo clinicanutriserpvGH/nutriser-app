@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE paymentProofs SET proofUrl = 'https://cdn.example.com/proof.jpg' WHERE proofUrl LIKE '%.png' OR proofUrl LIKE '%.jpg' OR proofUrl LIKE '%.jpeg';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute UPDATE paymentProofs SET proofUrl = 'https://cdn.example.com/proof.jpg' WHERE proofUrl LIKE '%.png' OR proofUrl LIKE '%.jpg' OR proofUrl LIKE '%.jpeg';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 148
+}

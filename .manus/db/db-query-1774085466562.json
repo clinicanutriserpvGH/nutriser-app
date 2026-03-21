@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE paymentProofs SET proofUrl = 'https://via.placeholder.com/400x300.png?text=Comprobante+de+Pago' WHERE proofUrl NOT LIKE 'https://%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute UPDATE paymentProofs SET proofUrl = 'https://via.placeholder.com/400x300.png?text=Comprobante+de+Pago' WHERE proofUrl NOT LIKE 'https://%';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 55
+}

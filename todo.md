@@ -153,3 +153,22 @@
 - [x] Mensaje informativo sobre correo de confirmación desde la clínica
 - [ ] Completar integración de enviar correo de confirmación de cita agendada
 - [ ] Incluir número de WhatsApp/teléfono en correo de cita
+
+## Correcciones Sesión 9 - Visualización de Comprobantes
+
+- [ ] Revisar cómo se guardan los comprobantes en S3
+- [ ] Verificar que la URL se recupera correctamente de la BD
+- [ ] Corregir modal para mostrar imagen correctamente
+- [ ] Probar visualización de comprobante en navegador
+
+## Correcciones Sesión 10 - Comprobantes y Citas
+
+- [ ] Corregir visualización de comprobantes en modal (la imagen no se muestra)
+- [x] Cambiar funcionalidad de citas de "Agendar" a "Aprobar" (confirmar cita del paciente)
+- [x] Implementar horarios fijos de la clínica:
+  - [x] Mañana: 10:00, 10:30, 11:00, 11:30, 12:00, 12:30, 13:00, 13:30
+  - [x] Tarde: 16:00, 16:30, 17:00, 17:30, 18:00, 18:30, 19:00, 19:30
+- [x] Actualizar modal de citas para mostrar dropdown de horarios disponibles
+- [x] Actualizar formulario de citas del cliente para mostrar dropdown de horarios
+- [ ] Verificar que el admin puede aprobar citas correctamente
+- [ ] Verificar que las imágenes de comprobantes se muestran en el modal

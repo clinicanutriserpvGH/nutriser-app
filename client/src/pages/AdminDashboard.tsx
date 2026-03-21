@@ -13,8 +13,13 @@ export default function AdminDashboard() {
   const [selectedProofId, setSelectedProofId] = useState<number | null>(null);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
-  const [appointmentDate, setAppointmentDate] = useState<string>("");
   const [appointmentTime, setAppointmentTime] = useState<string>("");
+
+  // Horarios fijos de la clínica
+  const CLINIC_HOURS = [
+    "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
+    "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
+  ];
 
   useEffect(() => {
     const adminSession = localStorage.getItem("adminSession");
@@ -81,18 +86,17 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleScheduleAppointment = (appointmentId: number) => {
+  const handleApproveAppointment = (appointmentId: number) => {
     setSelectedAppointmentId(appointmentId);
-    setAppointmentDate("");
     setAppointmentTime("");
   };
 
-  const handleConfirmSchedule = () => {
-    if (!appointmentDate || !appointmentTime) {
-      toast.error("Por favor ingresa fecha y hora");
+  const handleConfirmApprove = () => {
+    if (!appointmentTime) {
+      toast.error("Por favor selecciona una hora");
       return;
     }
-    toast.success("Cita agendada y correo enviado");
+    toast.success("Cita aprobada y correo enviado");
     setSelectedAppointmentId(null);
   };
 
@@ -260,25 +264,22 @@ export default function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-xs"
+                                className="text-xs bg-green-100 text-green-700 hover:bg-green-200"
                                 onClick={() => handleVerifyMembership(membership.id)}
-                                disabled={membership.status === "verified" || updateStatusMutation.isPending}
+                                disabled={membership.status === "verified"}
                               >
-                                {updateStatusMutation.isPending ? "Activando..." : "Verificar"}
+                                Verificar
                               </Button>
-                              {membership.status === "verified" && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-xs text-red-600 hover:bg-red-50"
-                                  onClick={() => handleDeleteMembership(membership.id)}
-                                  disabled={deleteMembershipMutation.isPending}
-                                >
-                                  {deleteMembershipMutation.isPending ? "Eliminando..." : "Eliminar"}
-                                </Button>
-                              )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs bg-red-100 text-red-700 hover:bg-red-200"
+                                onClick={() => handleDeleteMembership(membership.id)}
+                              >
+                                Eliminar
+                              </Button>
                             </td>
-                            <td className="py-3 px-4 text-[#999]">
+                            <td className="py-3 px-4 text-xs text-[#999]">
                               {new Date(membership.createdAt).toLocaleDateString()}
                             </td>
                           </tr>
@@ -286,7 +287,7 @@ export default function AdminDashboard() {
                       ) : (
                         <tr>
                           <td colSpan={7} className="py-8 text-center text-[#999]">
-                            No hay membresías registradas
+                            No hay membresías
                           </td>
                         </tr>
                       )}
@@ -340,9 +341,9 @@ export default function AdminDashboard() {
                                   size="sm"
                                   variant="outline"
                                   className="text-xs bg-green-100 text-green-700 hover:bg-green-200"
-                                  onClick={() => handleScheduleAppointment(appointment.id)}
+                                  onClick={() => handleApproveAppointment(appointment.id)}
                                 >
-                                  Agendar
+                                  Aprobar
                                 </Button>
                               )}
                             </td>
@@ -350,7 +351,7 @@ export default function AdminDashboard() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={6} className="py-8 text-center text-[#999]">
+                          <td colSpan={7} className="py-8 text-center text-[#999]">
                             No hay citas agendadas
                           </td>
                         </tr>
@@ -363,12 +364,12 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* Modal de Agendar Cita */}
+        {/* Modal de Aprobar Cita */}
         {selectedAppointmentId !== null && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-md w-full p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-[#1A1A1A]">Agendar Cita</h2>
+                <h2 className="text-2xl font-bold text-[#1A1A1A]">Aprobar Cita</h2>
                 <button
                   onClick={() => setSelectedAppointmentId(null)}
                   className="text-2xl text-[#999] hover:text-[#1A1A1A]"
@@ -378,22 +379,19 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Fecha</label>
-                  <input
-                    type="date"
-                    value={appointmentDate}
-                    onChange={(e) => setAppointmentDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
-                  />
-                </div>
-                <div>
                   <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Hora</label>
-                  <input
-                    type="time"
+                  <select
                     value={appointmentTime}
                     onChange={(e) => setAppointmentTime(e.target.value)}
                     className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
-                  />
+                  >
+                    <option value="">Selecciona una hora</option>
+                    {CLINIC_HOURS.map((hour) => (
+                      <option key={hour} value={hour}>
+                        {hour}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="bg-[#FAF7F2] p-3 rounded-lg">
                   <p className="text-sm text-[#999]">
@@ -409,10 +407,10 @@ export default function AdminDashboard() {
                   Cancelar
                 </button>
                 <button
-                  onClick={handleConfirmSchedule}
+                  onClick={handleConfirmApprove}
                   className="flex-1 px-4 py-2 bg-[#C5A55A] text-white rounded-lg hover:bg-[#B8935A] transition"
                 >
-                  Agendar
+                  Aprobar
                 </button>
               </div>
             </div>
@@ -450,7 +448,7 @@ export default function AdminDashboard() {
                   setSelectedProofId(null);
                   setProofUrl(null);
                 }}
-                className="w-full bg-[#C5A55A] text-white py-2 rounded-lg hover:bg-[#B8935A] transition"
+                className="w-full px-4 py-2 bg-[#C5A55A] text-white rounded-lg hover:bg-[#B8935A] transition"
               >
                 Cerrar
               </button>

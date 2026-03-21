@@ -1,0 +1,35 @@
+{
+  "query": "SELECT id, membershipId, proofUrl FROM paymentProofs LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT id, membershipId, proofUrl FROM paymentProofs LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "membershipId": "1",
+      "proofUrl": "https://example.com/proof.jpg"
+    },
+    {
+      "id": "2",
+      "membershipId": "4",
+      "proofUrl": "IMG_6032.png"
+    },
+    {
+      "id": "30001",
+      "membershipId": "1",
+      "proofUrl": "proof.jpg"
+    },
+    {
+      "id": "30002",
+      "membershipId": "30005",
+      "proofUrl": "portada libro-No es la dieta, Es tu mente-Antonio  Bustos.jpeg"
+    },
+    {
+      "id": "30003",
+      "membershipId": "1",
+      "proofUrl": "proof.jpg"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmembershipId\tproofUrl\n1\t1\thttps://example.com/proof.jpg\n2\t4\tIMG_6032.png\n30001\t1\tproof.jpg\n30002\t30005\tportada libro-No es la dieta, Es tu mente-Antonio  Bustos.jpeg\n30003\t1\tproof.jpg\n",
+  "stderr": "",
+  "execution_time_ms": 132
+}

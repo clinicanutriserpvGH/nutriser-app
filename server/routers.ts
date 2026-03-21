@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient } from "./_core/email";
+import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
 
@@ -90,9 +91,17 @@ export const appRouter = router({
         const membership = await getMembershipById(input.membershipId);
         if (!membership) throw new Error("Membership not found");
         
+        // Convert base64 to buffer
+        const base64Data = input.proofData.split(',')[1] || input.proofData;
+        const buffer = Buffer.from(base64Data, 'base64');
+        
+        // Upload to S3
+        const fileKey = `memberships/${input.membershipId}-${Date.now()}-${input.fileName}`;
+        const { url } = await storagePut(fileKey, buffer, 'image/jpeg');
+        
         const proof = await createPaymentProof({
           membershipId: input.membershipId,
-          proofUrl: input.fileName,
+          proofUrl: url,
         });
         
         // Send proof notification email from client

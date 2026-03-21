@@ -37,6 +37,11 @@ const SERVICES = [
   "Valoración General",
 ];
 
+const CLINIC_HOURS = [
+  "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
+  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
+];
+
 export default function AppointmentForm() {
   const [, navigate] = useLocation();
   const [formData, setFormData] = useState({
@@ -230,14 +235,20 @@ export default function AppointmentForm() {
                   <Clock className="w-4 h-4 text-[#C5A55A]" />
                   Horario deseado *
                 </Label>
-                <Input
+                <select
                   id="time"
-                  type="time"
                   value={formData.appointmentTime}
                   onChange={(e) => setFormData({ ...formData, appointmentTime: e.target.value })}
                   required
-                  className="border-[#C5A55A]/30 focus:border-[#C5A55A]"
-                />
+                  className="w-full px-4 py-2 border-2 border-[#C5A55A]/30 rounded-md bg-white hover:border-[#C5A55A] focus:border-[#C5A55A] focus:outline-none transition-colors"
+                >
+                  <option value="">Selecciona una hora</option>
+                  {CLINIC_HOURS.map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hour}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Submit Button */}

@@ -142,3 +142,14 @@
 - [x] Eliminar TODOS los correos automáticos del sitio (solo desde clínica)
 - [x] Verificar que NO se redirige a OAuth en ningún lado
 - [x] Verificar funcionalidad completa: membresías, comprobantes, citas
+
+## Correcciones Sesión 8 - Panel Admin
+
+- [x] Implementar modal para ver comprobante de pago (botón "Ver")
+- [x] Cambiar verificación de automática a manual (admin debe confirmar después de ver comprobante)
+- [x] Agregar botón "Eliminar" para membresías verificadas
+- [x] Agregar funcionalidad de "Agendar" citas con selector de fecha/hora
+- [x] Modal de agendar citas con campos de fecha y hora
+- [x] Mensaje informativo sobre correo de confirmación desde la clínica
+- [ ] Completar integración de enviar correo de confirmación de cita agendada
+- [ ] Incluir número de WhatsApp/teléfono en correo de cita

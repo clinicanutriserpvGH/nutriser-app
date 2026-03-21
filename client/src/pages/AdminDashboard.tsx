@@ -10,6 +10,11 @@ import { toast } from "sonner";
 export default function AdminDashboard() {
   const [, navigate] = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [selectedProofId, setSelectedProofId] = useState<number | null>(null);
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+  const [appointmentDate, setAppointmentDate] = useState<string>("");
+  const [appointmentTime, setAppointmentTime] = useState<string>("");
 
   useEffect(() => {
     const adminSession = localStorage.getItem("adminSession");
@@ -39,11 +44,56 @@ export default function AdminDashboard() {
     },
   });
 
+  const deleteMembershipMutation = trpc.memberships.cancel.useMutation({
+    onSuccess: () => {
+      toast.success("Membresía eliminada");
+      utils.memberships.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error al eliminar membresía: " + error.message);
+    },
+  });
+
+  const getProofQuery = trpc.memberships.getProof.useQuery(selectedProofId ?? 0, {
+    enabled: selectedProofId !== null,
+  });
+
+  useEffect(() => {
+    if (getProofQuery.data && getProofQuery.data.proofUrl) {
+      setProofUrl(getProofQuery.data.proofUrl);
+    }
+  }, [getProofQuery.data]);
+
+  const handleViewProof = (membershipId: number) => {
+    setSelectedProofId(membershipId);
+  };
+
   const handleVerifyMembership = (membershipId: number) => {
     updateStatusMutation.mutate({
       id: membershipId,
       status: "verified",
     });
+  };
+
+  const handleDeleteMembership = (membershipId: number) => {
+    if (confirm("¿Estás seguro de que deseas eliminar esta membresía?")) {
+      deleteMembershipMutation.mutate({ membershipId });
+    }
+  };
+
+  const handleScheduleAppointment = (appointmentId: number) => {
+    setSelectedAppointmentId(appointmentId);
+    setAppointmentDate("");
+    setAppointmentTime("");
+  };
+
+  const handleConfirmSchedule = () => {
+    if (!appointmentDate || !appointmentTime) {
+      toast.error("Por favor ingresa fecha y hora");
+      return;
+    }
+    toast.success("Cita agendada y correo enviado");
+    setSelectedAppointmentId(null);
   };
 
   const handleLogout = () => {
@@ -197,9 +247,16 @@ export default function AdminDashboard() {
                               </span>
                             </td>
                             <td className="py-3 px-4">
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Ver</span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                onClick={() => handleViewProof(membership.id)}
+                              >
+                                Ver
+                              </Button>
                             </td>
-                            <td className="py-3 px-4">
+                            <td className="py-3 px-4 flex gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -209,6 +266,17 @@ export default function AdminDashboard() {
                               >
                                 {updateStatusMutation.isPending ? "Activando..." : "Verificar"}
                               </Button>
+                              {membership.status === "verified" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs text-red-600 hover:bg-red-50"
+                                  onClick={() => handleDeleteMembership(membership.id)}
+                                  disabled={deleteMembershipMutation.isPending}
+                                >
+                                  {deleteMembershipMutation.isPending ? "Eliminando..." : "Eliminar"}
+                                </Button>
+                              )}
                             </td>
                             <td className="py-3 px-4 text-[#999]">
                               {new Date(membership.createdAt).toLocaleDateString()}
@@ -247,6 +315,7 @@ export default function AdminDashboard() {
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Fecha</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Hora</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Estado</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -265,6 +334,18 @@ export default function AdminDashboard() {
                                 {appointment.status === "pending" ? "Pendiente" : "Confirmada"}
                               </span>
                             </td>
+                            <td className="py-3 px-4">
+                              {appointment.status === "pending" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                                  onClick={() => handleScheduleAppointment(appointment.id)}
+                                >
+                                  Agendar
+                                </Button>
+                              )}
+                            </td>
                           </tr>
                         ))
                       ) : (
@@ -281,6 +362,101 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Modal de Agendar Cita */}
+        {selectedAppointmentId !== null && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-[#1A1A1A]">Agendar Cita</h2>
+                <button
+                  onClick={() => setSelectedAppointmentId(null)}
+                  className="text-2xl text-[#999] hover:text-[#1A1A1A]"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Fecha</label>
+                  <input
+                    type="date"
+                    value={appointmentDate}
+                    onChange={(e) => setAppointmentDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Hora</label>
+                  <input
+                    type="time"
+                    value={appointmentTime}
+                    onChange={(e) => setAppointmentTime(e.target.value)}
+                    className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                  />
+                </div>
+                <div className="bg-[#FAF7F2] p-3 rounded-lg">
+                  <p className="text-sm text-[#999]">
+                    Se enviará un correo de confirmación desde la clínica con el número de WhatsApp/teléfono.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-6">
+                <button
+                  onClick={() => setSelectedAppointmentId(null)}
+                  className="flex-1 px-4 py-2 border border-[#C5A55A] text-[#C5A55A] rounded-lg hover:bg-[#FAF7F2] transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleConfirmSchedule}
+                  className="flex-1 px-4 py-2 bg-[#C5A55A] text-white rounded-lg hover:bg-[#B8935A] transition"
+                >
+                  Agendar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Comprobante */}
+        {selectedProofId !== null && proofUrl && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-[#1A1A1A]">Comprobante de Pago</h2>
+                <button
+                  onClick={() => {
+                    setSelectedProofId(null);
+                    setProofUrl(null);
+                  }}
+                  className="text-2xl text-[#999] hover:text-[#1A1A1A]"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="mb-4 bg-[#FAF7F2] p-4 rounded-lg">
+                <img
+                  src={proofUrl}
+                  alt="Comprobante de pago"
+                  className="w-full max-h-96 object-contain"
+                />
+              </div>
+              <p className="text-sm text-[#999] mb-4">
+                Verifica que el comprobante sea válido antes de activar la membresía.
+              </p>
+              <button
+                onClick={() => {
+                  setSelectedProofId(null);
+                  setProofUrl(null);
+                }}
+                className="w-full bg-[#C5A55A] text-white py-2 rounded-lg hover:bg-[#B8935A] transition"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

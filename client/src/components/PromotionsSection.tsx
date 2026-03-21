@@ -1,19 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, Gift, Sparkles } from "lucide-react";
 
 export default function PromotionsSection() {
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
-  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
-
-  const handleImageError = (id: number) => {
-    setImageErrors(prev => ({ ...prev, [id]: true }));
-  };
-
-  const getImageUrl = (imageUrl: string | null) => {
-    return imageUrl || '/api/logo';
-  };
 
   return (
     <section id="promociones" className="py-20 bg-[#FAF7F2]">
@@ -48,53 +39,68 @@ export default function PromotionsSection() {
             </p>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {promotions.map((promo, index) => (
               <motion.div
                 key={promo.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-[#C5A55A]/10"
+                className="relative"
               >
-                {/* Image */}
-                <div className="relative h-48 overflow-hidden bg-[#FAF7F2] flex items-center justify-center">
-                  {imageErrors[promo.id] ? (
-                    <div className="flex flex-col items-center justify-center w-full h-full gap-2">
-                      <AlertCircle className="w-8 h-8 text-[#C5A55A]" />
-                      <p className="text-sm text-[#999]">Imagen no disponible</p>
+                {/* Cupón Container */}
+                <div className="bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                  {/* Decoración superior */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-50" />
+                  
+                  {/* Contenido principal */}
+                  <div className="p-8 relative">
+                    {/* Logo y regalo en la esquina */}
+                    <div className="absolute top-4 right-4 flex items-center gap-2">
+                      <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 animate-bounce">
+                        <Gift className="w-6 h-6 text-white" />
+                      </div>
+                      <Sparkles className="w-5 h-5 text-white animate-pulse" />
                     </div>
-                  ) : (
-                    <img
-                      src={getImageUrl(promo.imageUrl)}
-                      alt={promo.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                      onError={(e) => { e.currentTarget.src = '/api/logo'; handleImageError(promo.id); }}
-                    />
-                  )
-                }</div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="font-serif text-xl text-[#1A1A1A] mb-2">
-                    {promo.title}
-                  </h3>
-                  {promo.description && (
-                    <p className="text-[#666] text-sm leading-relaxed">
-                      {promo.description}
-                    </p>
-                  )}
-                  <div className="mt-4 pt-4 border-t border-[#C5A55A]/20">
+                    {/* Título */}
+                    <h3 className="font-serif text-2xl lg:text-3xl text-white mb-4 pr-20 leading-tight">
+                      {promo.title}
+                    </h3>
+
+                    {/* Descripción */}
+                    {promo.description && (
+                      <p className="text-white/90 text-sm lg:text-base leading-relaxed mb-6 font-light">
+                        {promo.description}
+                      </p>
+                    )}
+
+                    {/* Línea divisoria */}
+                    <div className="h-px bg-white/30 my-6" />
+
+                    {/* Botón Lo Quiero */}
                     <a
                       href={`https://wa.me/3221007799?text=${encodeURIComponent(`Quiero la promoción: ${promo.title}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block w-full bg-[#C5A55A] text-white py-2 text-sm tracking-[0.1em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E] text-center"
+                      className="block w-full bg-white text-[#C5A55A] py-3 px-4 rounded-lg font-bold text-center uppercase tracking-[0.1em] transition-all duration-300 hover:bg-[#FAF7F2] hover:shadow-lg transform hover:scale-105 active:scale-95"
                     >
                       Lo Quiero
                     </a>
                   </div>
+
+                  {/* Efecto de puntos decorativos */}
+                  <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4 py-2 opacity-20">
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  </div>
                 </div>
+
+                {/* Sombra decorativa */}
+                <div className="absolute -bottom-2 left-4 right-4 h-2 bg-[#C5A55A]/20 rounded-full blur-xl" />
               </motion.div>
             ))}
           </div>

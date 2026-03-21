@@ -601,15 +601,7 @@ export default function AdminDashboard() {
                       className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Imagen</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setPromotionImage(e.target.files?.[0] || null)}
-                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
-                    />
-                  </div>
+                  {/* Campo de imagen removido - ahora usa cupón automático */}
                   <Button
                     onClick={handlePublishPromotion}
                     disabled={createPromotionMutation.isPending}
@@ -630,12 +622,14 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {promotions.map((promo) => (
                         <div key={promo.id} className="bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
-                          <img 
-                            src={promo.imageUrl || '/api/logo'} 
-                            alt={promo.title} 
-                            className="w-full h-40 object-cover rounded-lg mb-3" 
-                            onError={(e) => { e.currentTarget.src = '/api/logo'; }}
-                          />
+                          {/* Cupón preview */}
+                          <div className="bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-lg p-4 mb-3 text-white">
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="text-sm font-bold">CUPÓN</span>
+                              <span className="text-lg">🎁</span>
+                            </div>
+                            <p className="text-xs font-light line-clamp-2">{promo.title}</p>
+                          </div>
                           <h4 className="font-bold text-[#1A1A1A]">{promo.title}</h4>
                           <p className="text-sm text-[#666] mt-2">{promo.description}</p>
                           <button

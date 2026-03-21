@@ -296,3 +296,27 @@ export async function getAllPromotionsForAdmin() {
   
   return await db.select().from(promotions).orderBy(desc(promotions.createdAt));
 }
+
+export async function deleteAppointment(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(appointments).where(eq(appointments.id, id));
+  return { success: true };
+}
+
+export async function deleteAllAppointments() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(appointments);
+  return { success: true };
+}
+
+export async function cancelAppointment(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(appointments).set({ status: "cancelled" }).where(eq(appointments.id, id));
+  return { success: true };
+}

@@ -134,17 +134,45 @@ export default function AdminDashboard() {
     setSelectedAppointmentId(null);
   };
 
-  const handleCancelAppointment = (appointmentId: number) => {
-    if (confirm("¿Estás seguro de que deseas cancelar esta cita?")) {
+  const cancelAppointmentMutation = trpc.appointments.cancel.useMutation({
+    onSuccess: () => {
       toast.success("Cita cancelada");
       utils.appointments.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error: " + error.message);
+    },
+  });
+
+  const deleteAppointmentMutation = trpc.appointments.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Cita eliminada");
+      utils.appointments.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error: " + error.message);
+    },
+  });
+
+  const deleteAllAppointmentsMutation = trpc.appointments.deleteAll.useMutation({
+    onSuccess: () => {
+      toast.success("Todas las citas eliminadas");
+      utils.appointments.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error: " + error.message);
+    },
+  });
+
+  const handleCancelAppointment = (appointmentId: number) => {
+    if (confirm("¿Estás seguro de que deseas cancelar esta cita?")) {
+      cancelAppointmentMutation.mutate({ id: appointmentId });
     }
   };
 
   const handleDeleteAppointment = (appointmentId: number) => {
     if (confirm("¿Estás seguro de que deseas eliminar esta cita?")) {
-      toast.success("Cita eliminada");
-      utils.appointments.list.invalidate();
+      deleteAppointmentMutation.mutate({ id: appointmentId });
     }
   };
 
@@ -154,8 +182,7 @@ export default function AdminDashboard() {
       return;
     }
     if (confirm(`¿Estás seguro de que deseas eliminar TODAS las ${appointments.length} cita(s)? Esta acción no se puede deshacer.`)) {
-      toast.success(`${appointments.length} cita(s) eliminada(s)`);
-      utils.appointments.list.invalidate();
+      deleteAllAppointmentsMutation.mutate();
     }
   };
 

@@ -9,8 +9,8 @@ export default function PromotionsSection() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const handleShareWhatsApp = (title: string, description: string) => {
-    const message = `🎁 *${title}*\n\n${description}\n\n¡Quiero esta promoción!`;
-    const url = `https://wa.me/3221007799?text=${encodeURIComponent(message)}`;
+    const message = `🎁 *${title}*\n\n${description}\n\n${window.location.href}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
 
@@ -22,10 +22,10 @@ export default function PromotionsSection() {
   };
 
   const handleCopyLink = (id: number, title: string) => {
-    const text = `Promoción Nutriser: ${title} - Quiero esta oferta`;
-    navigator.clipboard.writeText(text);
+    const pageUrl = window.location.href;
+    navigator.clipboard.writeText(pageUrl);
     setCopiedId(id);
-    toast.success("Cupón copiado al portapapeles");
+    toast.success("Link copiado al portapapeles");
     setTimeout(() => setCopiedId(null), 2000);
   };
 

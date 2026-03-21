@@ -167,7 +167,7 @@ export default function ContactSection() {
                   className="flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E]"
                 >
                   <Clock className="w-4 h-4" />
-                  Agendar
+                  Agendar Cita
                 </button>
                 <button
                   onClick={() => navigate("/memberships")}

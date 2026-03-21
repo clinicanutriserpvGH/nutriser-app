@@ -51,7 +51,7 @@ export default function CtaBanner() {
             className="inline-flex items-center gap-3 bg-white text-[#B8963E] px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/90 hover:shadow-2xl hover:shadow-black/20"
           >
             <Phone className="w-4 h-4" />
-            Agendar Valoración
+            Agendar Cita
           </button>
           <a
             href="https://wa.me/523221007799"

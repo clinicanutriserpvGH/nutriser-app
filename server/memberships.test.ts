@@ -99,4 +99,38 @@ describe("memberships", () => {
 
     expect(result).toBeDefined();
   });
+
+  it("should cancel a membership", async () => {
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    // Primero crear una membresía
+    const membership = await caller.memberships.create({
+      clientName: "Carlos López",
+      clientEmail: "carlos@example.com",
+      programType: "basic",
+    });
+
+    // Luego cancelarla
+    const result = await caller.memberships.cancel({
+      membershipId: membership.id,
+    });
+
+    expect(result).toBeDefined();
+    expect(result.success).toBe(true);
+  });
+
+  it("should fail to cancel non-existent membership", async () => {
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    try {
+      await caller.memberships.cancel({
+        membershipId: 99999,
+      });
+      expect.fail("Should have thrown an error");
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
 });

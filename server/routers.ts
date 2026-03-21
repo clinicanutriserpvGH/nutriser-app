@@ -3,10 +3,11 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { sendConfirmationEmail, sendAppointmentNotification } from "./_core/email";
 import bcrypt from "bcrypt";
+import { eq, desc } from "drizzle-orm";
 
 export const appRouter = router({
   system: systemRouter,
@@ -14,7 +15,7 @@ export const appRouter = router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      ctx.res.clearCookie("session", { ...cookieOptions, maxAge: -1 });
       return {
         success: true,
       } as const;
@@ -122,6 +123,24 @@ export const appRouter = router({
       .input(z.number())
       .query(async ({ input }) => {
         return await getPaymentProofByMembershipId(input);
+      }),
+    
+    cancel: publicProcedure
+      .input(z.object({
+        membershipId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const membership = await getMembershipById(input.membershipId);
+        if (!membership) throw new Error("Membership not found");
+        
+        await deleteMembership(input.membershipId);
+        
+        await notifyOwner({
+          title: "Inscripción a Membresía Cancelada (Timeout)",
+          content: `Cliente: ${membership.clientName}\nEmail: ${membership.clientEmail}\nPrograma: ${membership.programType === "basic" ? "Básico" : "Premium"}\nRazón: No se subió comprobante dentro de 15 minutos`,
+        });
+        
+        return { success: true };
       }),
   }),
 

@@ -123,6 +123,17 @@ export async function updateMembershipStatus(id: number, status: "pending" | "ve
   return await db.update(memberships).set({ status, verifiedAt: status === "verified" ? new Date() : undefined }).where(eq(memberships.id, id));
 }
 
+export async function deleteMembership(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Primero eliminar los comprobantes de pago asociados
+  await db.delete(paymentProofs).where(eq(paymentProofs.membershipId, id));
+  
+  // Luego eliminar la membresía
+  return await db.delete(memberships).where(eq(memberships.id, id));
+}
+
 // Payment proof queries
 export async function createPaymentProof(data: InsertPaymentProof) {
   const db = await getDb();

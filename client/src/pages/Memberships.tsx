@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Check, Upload } from "lucide-react";
+import { Check, Upload, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const BANK_INFO = {
   bank: "Banamex",
@@ -49,9 +49,34 @@ export default function Memberships() {
   const [step, setStep] = useState<"select" | "form" | "proof">("select");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number>(900); // 15 minutos en segundos
+  const [createdAt, setCreatedAt] = useState<number | null>(null);
 
   const createMutation = trpc.memberships.create.useMutation();
   const uploadProofMutation = trpc.memberships.uploadProof.useMutation();
+  const cancelMutation = trpc.memberships.cancel.useMutation();
+
+  // Contador de tiempo
+  useEffect(() => {
+    if (step !== "proof" || !createdAt) return;
+
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - createdAt) / 1000);
+      const remaining = Math.max(0, 900 - elapsed);
+      setTimeRemaining(remaining);
+
+      // Si se acabó el tiempo, cancelar membresía
+      if (remaining === 0 && membershipId) {
+        cancelMutation.mutate({ membershipId });
+        setStep("select");
+        setMembershipId(null);
+        setCreatedAt(null);
+        toast.error("Tiempo agotado. La inscripción ha sido cancelada.");
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [step, createdAt, membershipId, cancelMutation]);
 
   const handleSelectProgram = (program: "basic" | "premium") => {
     setSelectedProgram(program);
@@ -76,8 +101,10 @@ export default function Memberships() {
       });
 
       setMembershipId(result.id);
+      setCreatedAt(Date.now());
+      setTimeRemaining(900); // Reiniciar contador a 15 minutos
       setStep("proof");
-      toast.success("Membresía creada. Ahora sube el comprobante de pago.");
+      toast.success("Membresía creada. Tienes 15 minutos para subir el comprobante.");
     } catch (error) {
       toast.error("Error al crear la membresía");
       console.error(error);
@@ -132,6 +159,8 @@ export default function Memberships() {
           setMembershipId(null);
           setSelectedFile(null);
           setFilePreview(null);
+          setCreatedAt(null);
+          setTimeRemaining(900);
         } catch (error) {
           toast.error("Error al subir el comprobante");
           console.error(error);
@@ -144,45 +173,48 @@ export default function Memberships() {
     }
   };
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FAF7F2] to-[#F5F1E8] py-12 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-serif text-[#1A1A1A] mb-4">
-            Nuestros Programas
-          </h1>
-          <p className="text-lg text-gray-600">
-            Elige el programa que mejor se adapte a tus necesidades
-          </p>
+          <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Adquirir Programa</h1>
+          <p className="text-lg text-[#1A1A1A]/60">Elige el programa que mejor se adapte a tus necesidades</p>
         </div>
 
+        {/* Step: Select Program */}
         {step === "select" && (
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {PROGRAMS.map((program) => (
               <Card
                 key={program.id}
-                className="border-2 hover:border-[#C5A55A] transition-all cursor-pointer"
+                className="border-2 border-[#C5A55A]/20 hover:border-[#C5A55A] transition-all cursor-pointer"
                 onClick={() => handleSelectProgram(program.id as "basic" | "premium")}
               >
-                <CardHeader className="bg-gradient-to-r from-[#FAF7F2] to-[#F5F1E8]">
-                  <CardTitle className="text-2xl text-[#1A1A1A]">
+                <CardHeader>
+                  <CardTitle className="font-serif text-3xl" style={{ color: program.color }}>
                     {program.name}
                   </CardTitle>
-                  <CardDescription className="text-lg font-bold text-[#C5A55A]">
-                    ${program.price.toLocaleString("es-MX")} MXN
+                  <CardDescription className="text-2xl font-bold text-[#1A1A1A]">
+                    ${program.price.toLocaleString()} MXN
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <ul className="space-y-3 mb-6">
+                <CardContent>
+                  <ul className="space-y-3">
                     {program.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-[#C5A55A] flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{feature}</span>
+                        <Check className="w-5 h-5 text-[#C5A55A] mt-0.5 flex-shrink-0" />
+                        <span className="text-[#1A1A1A]/70">{feature}</span>
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full bg-[#C5A55A] hover:bg-[#B39449] text-white">
+                  <Button className="w-full mt-6" style={{ backgroundColor: program.color }}>
                     Seleccionar
                   </Button>
                 </CardContent>
@@ -191,96 +223,60 @@ export default function Memberships() {
           </div>
         )}
 
+        {/* Step: Form */}
         {step === "form" && selectedProgram && (
-          <Card className="max-w-2xl mx-auto">
+          <Card className="max-w-2xl mx-auto border-2 border-[#C5A55A]/20">
             <CardHeader>
-              <CardTitle>Datos para tu Membresía</CardTitle>
+              <CardTitle>Completa tus datos</CardTitle>
               <CardDescription>
-                Completa el formulario para registrarte en el programa{" "}
-                {selectedProgram === "basic" ? "Básico" : "Premium"}
+                Programa: {PROGRAMS.find(p => p.id === selectedProgram)?.name}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmitForm} className="space-y-6">
+              <form onSubmit={handleSubmitForm} className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Nombre Completo *</Label>
+                  <Label htmlFor="name">Nombre completo *</Label>
                   <Input
                     id="name"
-                    type="text"
-                    placeholder="Tu nombre"
                     value={formData.clientName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, clientName: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+                    placeholder="Tu nombre"
                     required
                   />
                 </div>
-
                 <div>
-                  <Label htmlFor="email">Correo Electrónico *</Label>
+                  <Label htmlFor="email">Correo electrónico *</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="tu@email.com"
                     value={formData.clientEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, clientEmail: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
+                    placeholder="tu@email.com"
                     required
                   />
                 </div>
-
                 <div>
-                  <Label htmlFor="phone">Teléfono (Opcional)</Label>
+                  <Label htmlFor="phone">Teléfono</Label>
                   <Input
                     id="phone"
-                    type="tel"
-                    placeholder="+52 1234567890"
                     value={formData.clientPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, clientPhone: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
+                    placeholder="+52 (opcional)"
                   />
                 </div>
-
-                <div className="bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
-                  <h3 className="font-semibold text-[#1A1A1A] mb-3">
-                    Datos Bancarios para Transferencia
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <p>
-                      <span className="font-semibold">Banco:</span> {BANK_INFO.bank}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Cuenta:</span>{" "}
-                      <code className="bg-white px-2 py-1 rounded font-mono text-[#C5A55A]">
-                        {BANK_INFO.account}
-                      </code>
-                    </p>
-                    <p className="text-gray-600 mt-3">
-                      <span className="font-semibold">Concepto de depósito:</span>
-                      <br />
-                      {formData.clientName || "Tu nombre"} - Programa{" "}
-                      {selectedProgram === "basic" ? "Básico" : "Premium"}
-                    </p>
-                  </div>
-                </div>
-
                 <div className="flex gap-3">
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setStep("select")}
-                    className="flex-1"
+                    onClick={() => {
+                      setStep("select");
+                      setSelectedProgram(null);
+                    }}
                   >
                     Atrás
                   </Button>
-                  <Button
-                    type="submit"
-                    className="flex-1 bg-[#C5A55A] hover:bg-[#B39449] text-white"
-                    disabled={createMutation.isPending}
-                  >
-                    {createMutation.isPending ? "Procesando..." : "Continuar"}
+                  <Button type="submit" className="flex-1" style={{ backgroundColor: "#C5A55A" }}>
+                    Continuar
                   </Button>
                 </div>
               </form>
@@ -288,82 +284,102 @@ export default function Memberships() {
           </Card>
         )}
 
-        {step === "proof" && membershipId && (
-          <Card className="max-w-2xl mx-auto">
+        {/* Step: Upload Proof */}
+        {step === "proof" && selectedProgram && (
+          <Card className="max-w-2xl mx-auto border-2 border-[#C5A55A]/20">
             <CardHeader>
-              <CardTitle>Sube tu Comprobante de Pago</CardTitle>
-              <CardDescription>
-                Por favor, adjunta una foto clara del comprobante de tu transferencia
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Sube el comprobante de pago</CardTitle>
+                  <CardDescription>
+                    Programa: {PROGRAMS.find(p => p.id === selectedProgram)?.name}
+                  </CardDescription>
+                </div>
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+                  timeRemaining < 300 ? "bg-red-100" : "bg-blue-100"
+                }`}>
+                  <Clock className="w-5 h-5" />
+                  <span className={`font-bold ${timeRemaining < 300 ? "text-red-600" : "text-blue-600"}`}>
+                    {formatTime(timeRemaining)}
+                  </span>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleUploadProof} className="space-y-6">
-                <div className="border-2 border-dashed border-[#C5A55A]/30 rounded-lg p-8 text-center hover:border-[#C5A55A] transition-colors">
-                  <input
-                    id="proof-file"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFileSelect}
-                  />
-                  <label
-                    htmlFor="proof-file"
-                    className="cursor-pointer block"
-                  >
-                    {filePreview ? (
-                      <div className="space-y-3">
-                        <img 
-                          src={filePreview} 
-                          alt="Preview" 
-                          className="max-h-48 mx-auto rounded"
-                        />
-                        <p className="text-sm text-gray-600">
-                          {selectedFile?.name}
-                        </p>
-                        <p className="text-xs text-[#C5A55A]">
-                          Haz clic para cambiar la imagen
-                        </p>
-                      </div>
-                    ) : (
-                      <div>
-                        <Upload className="w-12 h-12 text-[#C5A55A] mx-auto mb-2" />
-                        <p className="font-semibold text-[#1A1A1A]">
-                          Haz clic para seleccionar una imagen
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          o arrastra tu archivo aquí
-                        </p>
-                      </div>
-                    )}
-                  </label>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-800">
-                    <strong>Nota:</strong> Asegúrate de que la imagen sea clara y
-                    muestre el comprobante completo con todos los datos de la
-                    transferencia. Máximo 5MB.
+              <div className="space-y-6">
+                {/* Bank Info */}
+                <div className="bg-[#C5A55A]/10 p-4 rounded-lg">
+                  <h3 className="font-bold text-[#1A1A1A] mb-2">Datos para transferencia:</h3>
+                  <p className="text-sm text-[#1A1A1A]/70">
+                    <strong>Banco:</strong> {BANK_INFO.bank}
+                  </p>
+                  <p className="text-sm text-[#1A1A1A]/70">
+                    <strong>Cuenta:</strong> {BANK_INFO.account}
+                  </p>
+                  <p className="text-xs text-[#1A1A1A]/50 mt-2">
+                    Concepto: {formData.clientName} - {PROGRAMS.find(p => p.id === selectedProgram)?.name}
                   </p>
                 </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setStep("form")}
-                    className="flex-1"
-                  >
-                    Atrás
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="flex-1 bg-[#C5A55A] hover:bg-[#B39449] text-white"
-                    disabled={uploadProofMutation.isPending || !selectedFile}
-                  >
-                    {uploadProofMutation.isPending ? "Subiendo..." : "Enviar Comprobante"}
-                  </Button>
-                </div>
-              </form>
+                {/* File Upload */}
+                <form onSubmit={handleUploadProof} className="space-y-4">
+                  <div className="border-2 border-dashed border-[#C5A55A]/30 rounded-lg p-6 text-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      id="file-input"
+                    />
+                    <label htmlFor="file-input" className="cursor-pointer">
+                      {filePreview ? (
+                        <div>
+                          <img src={filePreview} alt="Preview" className="max-h-48 mx-auto rounded mb-2" />
+                          <p className="text-sm text-[#C5A55A]">Cambiar imagen</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <Upload className="w-12 h-12 text-[#C5A55A] mx-auto mb-2" />
+                          <p className="text-[#1A1A1A] font-semibold">Sube la foto del comprobante</p>
+                          <p className="text-sm text-[#1A1A1A]/60">PNG, JPG o WEBP (máx 5MB)</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setStep("select");
+                        setSelectedProgram(null);
+                        setMembershipId(null);
+                        setCreatedAt(null);
+                        setTimeRemaining(900);
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={!selectedFile || uploadProofMutation.isPending}
+                      className="flex-1"
+                      style={{ backgroundColor: "#C5A55A" }}
+                    >
+                      {uploadProofMutation.isPending ? "Enviando..." : "Enviar comprobante"}
+                    </Button>
+                  </div>
+                </form>
+
+                {timeRemaining < 300 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-sm text-red-600">
+                      ⚠️ Te quedan {formatTime(timeRemaining)} para subir el comprobante. Después se cancelará tu inscripción.
+                    </p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         )}

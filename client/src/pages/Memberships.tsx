@@ -198,7 +198,7 @@ export default function Memberships() {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Adquirir Programa</h1>
+          <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Comprar Programa Nutrición</h1>
           <p className="text-lg text-[#1A1A1A]/60">Elige el programa que mejor se adapte a tus necesidades</p>
         </div>
 

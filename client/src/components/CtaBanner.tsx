@@ -66,7 +66,7 @@ export default function CtaBanner() {
             className="inline-flex items-center gap-3 bg-[#1A1A1A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#2A2A2A] hover:shadow-2xl hover:shadow-black/20"
           >
             <Gift className="w-4 h-4" />
-            Adquirir Programa
+            Comprar Programa Nutrición
           </button>
         </div>
       </motion.div>

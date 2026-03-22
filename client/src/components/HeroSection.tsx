@@ -115,7 +115,7 @@ export default function HeroSection() {
                 transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
               />
               <Gift className="relative w-4 h-4 flex-shrink-0" />
-              <span className="relative">Promociones Vigentes</span>
+              <span className="relative">Cuponera Nutriser</span>
             </motion.button>
           </motion.div>
         </div>

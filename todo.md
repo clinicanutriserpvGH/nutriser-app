@@ -314,3 +314,7 @@
 ## Mejoras botones Hero
 - [x] Botón "Promociones Vigentes": agregar luz parpadeante + icono de regalo
 - [x] Botón "Adquirir Programa" → renombrar a "Comprar Programa Nutrición"
+
+## Renombrar textos globales
+- [x] "Promociones Vigentes" → "Cuponera Nutriser" en hero
+- [x] "Adquirir Programa" → "Comprar Programa Nutrición" en navbar, hero, CTA y demás

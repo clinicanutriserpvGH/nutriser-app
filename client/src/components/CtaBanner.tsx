@@ -68,6 +68,17 @@ export default function CtaBanner() {
             <Gift className="w-4 h-4" />
             Comprar Programa Nutrición
           </button>
+          <button
+            onClick={() => {
+              const el = document.getElementById("promociones");
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="inline-flex items-center gap-3 bg-white/20 border-2 border-white text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white hover:text-[#B8963E]"
+          >
+            <span className="w-2 h-2 rounded-full bg-white animate-pulse flex-shrink-0" />
+            <Gift className="w-4 h-4" />
+            Cuponera Nutriser
+          </button>
         </div>
       </motion.div>
     </section>

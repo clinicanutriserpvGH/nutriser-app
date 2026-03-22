@@ -326,3 +326,6 @@
 ## Mejoras ContactSection y ServicesSection
 - [x] Agregar botón "Cuponera Nutriser" en la sección de contacto con vínculo a la sección de cupones
 - [x] Personalizar mensaje de WhatsApp en botón "Consultar" de cada servicio con su nombre específico
+
+## Cuponera en CtaBanner
+- [x] Agregar botón "Cuponera Nutriser" en el banner CTA dorado

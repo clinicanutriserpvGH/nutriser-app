@@ -439,3 +439,10 @@
 ## Bug Descuento eBook
 
 - [x] Corregir monto en pantalla de pago para mostrar precio con descuento aplicado
+
+## Pre-venta eBook Próximamente
+
+- [x] EbookStore: mostrar aviso de pre-venta en tarjeta de eBook comingSoon ("Puedes adquirirlo ahora, disponible al publicarse")
+- [x] EbookStore: en pantalla de confirmación de compra (paso 3 Listo), mostrar mensaje especial si el eBook es comingSoon
+- [x] EbookStore: ocultar botón de descarga/lectura si el eBook es comingSoon (mostrar mensaje "Disponible próximamente")
+- [x] Mis compras: si el eBook comprado es comingSoon, mostrar estado "Pendiente de publicación" en lugar del botón de descarga

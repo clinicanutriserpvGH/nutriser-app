@@ -340,12 +340,17 @@ export default function EbookStore() {
                   <div className="bg-[#C5A55A]/5 rounded-2xl p-6 border border-[#C5A55A]/20">
                     <h3 className="font-bold text-[#1A1A1A] mb-4">¿Qué incluye?</h3>
                     <ul className="space-y-3">
-                      {[
+                      {(ebook.comingSoon ? [
+                        "Pre-venta: asegura tu acceso antes del lanzamiento",
+                        "El acceso se activa automáticamente al publicarse",
+                        "Lectura en línea desde cualquier dispositivo",
+                        "Sin fecha de caducidad de acceso",
+                      ] : [
                         "Acceso inmediato tras aprobación del pago",
                         "Lectura en línea desde cualquier dispositivo",
                         "Contenido exclusivo de Nutriser",
                         "Sin fecha de caducidad de acceso",
-                      ].map((feature) => (
+                      ]).map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
                           <CheckCircle className="w-5 h-5 text-[#C5A55A] flex-shrink-0 mt-0.5" />
                           <span className="text-[#666] text-sm">{feature}</span>
@@ -354,17 +359,33 @@ export default function EbookStore() {
                     </ul>
                   </div>
 
+                  {/* Aviso pre-venta si es comingSoon */}
+                  {ebook.comingSoon && (
+                    <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
+                      <span className="text-2xl">⏳</span>
+                      <div>
+                        <p className="font-bold text-amber-800 text-sm mb-1">Pre-venta disponible</p>
+                        <p className="text-amber-700 text-xs leading-relaxed">
+                          Puedes adquirir este eBook ahora. El acceso para leerlo se activará automáticamente en cuanto sea publicado oficialmente. Recibirás una notificación en tu correo.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* CTA */}
                   <button
                     onClick={() => setStep("form")}
                     className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-4 px-8 rounded-xl font-bold text-lg tracking-wide transition-all duration-300 hover:shadow-lg hover:shadow-[#C5A55A]/30 flex items-center justify-center gap-3"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    Comprar ahora — ${Number(ebook.price).toLocaleString('es-MX')} MXN
+                    {ebook.comingSoon ? `Pre-comprar — $${Number(ebook.price).toLocaleString('es-MX')} MXN` : `Comprar ahora — $${Number(ebook.price).toLocaleString('es-MX')} MXN`}
                   </button>
 
                   <p className="text-xs text-center text-[#999]">
-                    Pago por transferencia bancaria. El acceso se activa en menos de 24 horas tras verificar tu comprobante.
+                    {ebook.comingSoon
+                      ? "Pre-venta: el acceso se activa cuando se publique el eBook."
+                      : "Pago por transferencia bancaria. El acceso se activa en menos de 24 horas tras verificar tu comprobante."
+                    }
                   </p>
 
                   {/* Botón de recomendar por WhatsApp */}
@@ -661,11 +682,19 @@ export default function EbookStore() {
                     )}
                   </div>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                    <p className="text-sm text-blue-700">
-                      <strong>Tiempo de activación:</strong> El acceso se activa en menos de 24 horas hábiles. Revisa también tu carpeta de spam.
-                    </p>
-                  </div>
+                  {ebook.comingSoon ? (
+                    <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 mb-6">
+                      <p className="text-sm text-amber-800">
+                        <strong>⏳ Pre-venta confirmada:</strong> Tu compra ha sido registrada. El acceso al eBook se activará automáticamente en cuanto sea publicado oficialmente. Te notificaremos por correo a <strong>{formData.buyerEmail}</strong>.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                      <p className="text-sm text-blue-700">
+                        <strong>Tiempo de activación:</strong> El acceso se activa en menos de 24 horas hábiles. Revisa también tu carpeta de spam.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Botón de recomendar por WhatsApp */}
                   <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl p-5 mb-6">

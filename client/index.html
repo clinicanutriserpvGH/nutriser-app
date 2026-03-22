@@ -7,7 +7,45 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Nutriser | Aesthetic & Nutrition</title>
-    <meta name="description" content="Tratamientos que transforman tu piel y tu confianza. En Nutriser no vendemos terapias, vendemos soluciones." />
+    <meta name="description" content="Tu salud y belleza personalizada en un solo lugar. Nutrición, tratamientos faciales, corporales y medicina estética con la mejor tecnología." />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Theme color (Android Chrome, browser chrome) -->
+    <meta name="theme-color" content="#C5A55A" />
+    <meta name="msapplication-TileColor" content="#C5A55A" />
+    <meta name="msapplication-TileImage" content="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-144x144_035f955d.png" />
+
+    <!-- iOS PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Nutriser" />
+    <link rel="apple-touch-icon" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/apple-touch-icon_8b7d85db.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-152x152_e0881621.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png" />
+
+    <!-- iOS Splash Screen (iPhone) -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Standard favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_87a5c3e9.png" />
+
+    <!-- Open Graph / Social sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://nutriserpv.com/" />
+    <meta property="og:title" content="Nutriser | Aesthetic & Nutrition" />
+    <meta property="og:description" content="Tu salud y belleza personalizada en un solo lugar. Nutrición, tratamientos faciales, corporales y medicina estética." />
+    <meta property="og:image" content="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_87a5c3e9.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Nutriser | Aesthetic & Nutrition" />
+    <meta name="twitter:description" content="Tu salud y belleza personalizada en un solo lugar." />
+    <meta name="twitter:image" content="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_87a5c3e9.png" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
@@ -16,6 +54,20 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Register Service Worker for PWA -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('[PWA] Service Worker registered:', registration.scope);
+            })
+            .catch(function(err) {
+              console.log('[PWA] Service Worker registration failed:', err);
+            });
+        });
+      }
+    </script>
     <script
       defer
       src="%VITE_ANALYTICS_ENDPOINT%/umami"

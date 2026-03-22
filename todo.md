@@ -398,3 +398,10 @@
 
 ## Dominio Oficial
 - [x] Corregir links generados para usar siempre nutriserpv.com (no dominios de Manus)
+
+## PWA (Progressive Web App)
+- [x] Crear manifest.json con nombre, colores e iconos de Nutriser
+- [x] Implementar Service Worker para cache y funcionamiento offline
+- [x] Agregar meta tags para iOS (apple-touch-icon, apple-mobile-web-app)
+- [x] Generar iconos en múltiples tamaños (192x192, 512x512)
+- [x] Configurar Vite para registrar el Service Worker

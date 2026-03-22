@@ -1,0 +1,71 @@
+{
+  "name": "Nutriser Aesthetic & Nutrition",
+  "short_name": "Nutriser",
+  "description": "Tu salud y belleza personalizada en un solo lugar. Nutrición, tratamientos faciales, corporales y medicina estética.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F2",
+  "theme_color": "#C5A55A",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es-MX",
+  "categories": ["health", "lifestyle", "medical"],
+  "icons": [
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-144x144_035f955d.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-152x152_e0881621.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-384x384_df4db7c7.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_87a5c3e9.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Agenda tu Cita",
+      "short_name": "Cita",
+      "description": "Agenda tu cita en Nutriser",
+      "url": "/appointment-form",
+      "icons": [
+        {
+          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Tienda eBook",
+      "short_name": "eBook",
+      "description": "Compra el eBook de Nutriser",
+      "url": "/ebook",
+      "icons": [
+        {
+          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

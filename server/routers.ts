@@ -66,7 +66,7 @@ export const appRouter = router({
         
         // Send membership notification to admin from client email
         await sendMembershipNotificationToAdmin(
-          "clinicanutricerpv@gmail.com",
+          ENV.gmailUser || "clinicanutriserpv@gmail.com",
           input.clientName,
           input.clientEmail,
           input.clientPhone,
@@ -107,7 +107,7 @@ export const appRouter = router({
         
         // Send proof notification email from client
         await sendMembershipNotificationToAdmin(
-          "clinicanutricerpv@gmail.com",
+          ENV.gmailUser || "clinicanutriserpv@gmail.com",
           membership.clientName,
           membership.clientEmail,
           membership.clientPhone || undefined,

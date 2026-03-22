@@ -9,7 +9,7 @@ import { Menu, X, Phone, Instagram, Facebook } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo_988aec8f.jpeg";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-new_379bcae8.jpeg";
 
 const navLinks = [
   { label: "Inicio", href: "#inicio" },
@@ -21,7 +21,12 @@ const navLinks = [
   { label: "Administración", href: "/admin/login" },
 ];
 
-export default function Navbar() {
+interface NavbarProps {
+  /** Cuando true, el navbar asume fondo claro desde el inicio (no invierte el logo) */
+  lightBg?: boolean;
+}
+
+export default function Navbar({ lightBg = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -47,7 +52,7 @@ export default function Navbar() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
+          scrolled || lightBg
             ? "bg-white/95 backdrop-blur-md shadow-[0_2px_20px_rgba(197,165,90,0.08)]"
             : "bg-transparent"
         }`}
@@ -66,7 +71,7 @@ export default function Navbar() {
               src={LOGO_URL}
               alt="Nutriser - Aesthetic & Nutrition"
               className={`h-12 w-auto object-contain transition-all duration-500 ${
-                scrolled ? "" : "brightness-0 invert"
+                scrolled || lightBg ? "" : "brightness-0 invert"
               }`}
             />
           </a>
@@ -86,7 +91,7 @@ export default function Navbar() {
                   }
                 }}
                 className={`text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:text-[#C5A55A] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#C5A55A] after:transition-all after:duration-300 hover:after:w-full ${
-                  scrolled ? "text-[#1A1A1A]/70" : "text-white/80"
+                  scrolled || lightBg ? "text-[#1A1A1A]/70" : "text-white/80"
                 }`}
               >
                 {link.label}
@@ -127,7 +132,7 @@ export default function Navbar() {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className={`lg:hidden transition-colors duration-300 ${
-              scrolled ? "text-[#1A1A1A]" : "text-white"
+              scrolled || lightBg ? "text-[#1A1A1A]" : "text-white"
             }`}
             aria-label="Toggle menu"
           >

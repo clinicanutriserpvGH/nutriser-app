@@ -121,7 +121,7 @@ export default function EbookStore() {
   if (!ebook) {
     return (
       <div className="min-h-screen bg-[#FAF7F2]">
-        <Navbar />
+        <Navbar lightBg />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center max-w-md mx-auto px-4">
             <BookOpen className="w-16 h-16 text-[#C5A55A]/30 mx-auto mb-4" />
@@ -145,7 +145,7 @@ export default function EbookStore() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
-      <Navbar />
+      <Navbar lightBg />
 
       {/* Modal de imagen */}
       {showCoverModal && (
@@ -174,7 +174,13 @@ export default function EbookStore() {
           {/* Back Button */}
           <div className="mb-8">
             <button
-              onClick={() => step === "view" ? navigate("/") : setStep("view")}
+              onClick={() => {
+                if (step === "view") {
+                  window.location.href = "/";
+                } else {
+                  setStep("view");
+                }
+              }}
               className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E] transition"
             >
               <ArrowLeft className="w-4 h-4" />

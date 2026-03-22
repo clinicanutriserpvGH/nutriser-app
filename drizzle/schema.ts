@@ -186,9 +186,9 @@ export const ebooks = mysqlTable("ebooks", {
   description: text("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   coverUrl: text("coverUrl"), // URL portada en S3
-  backCoverUrl: text("backCoverUrl"), // URL contraportada en S3
   pdfUrl: text("pdfUrl"), // URL del PDF en S3 (protegido)
   isActive: boolean("isActive").default(true).notNull(),
+  comingSoon: boolean("comingSoon").default(false).notNull(), // true = próxima publicación, sin compra
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

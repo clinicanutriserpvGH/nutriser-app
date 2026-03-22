@@ -428,3 +428,14 @@
 
 - [x] Hero desktop: reorganizar 4 botones en 2 filas de 2 para que no se corten
 - [x] Admin: corregir error al eliminar promociones/cupones
+
+## Tienda eBook - Mejoras
+
+- [x] Quitar campo contraportada (backCoverUrl) del schema, db.ts, routers y admin
+- [x] Agregar campo comingSoon (boolean) al schema de ebooks
+- [x] Actualizar panel admin: mostrar toggle "Próxima publicación" y quitar campo contraportada
+- [x] Actualizar tienda pública: mostrar badge "Próximamente" y ocultar botón de compra para eBooks comingSoon
+
+## Bug Descuento eBook
+
+- [x] Corregir monto en pantalla de pago para mostrar precio con descuento aplicado

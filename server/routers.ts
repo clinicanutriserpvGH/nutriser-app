@@ -498,23 +498,18 @@ export const appRouter = router({
         description: z.string().optional(),
         price: z.string().min(1),
         coverBase64: z.string().optional(),
-        backCoverBase64: z.string().optional(),
         pdfBase64: z.string().optional(),
         isActive: z.boolean().optional(),
+        comingSoon: z.boolean().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { id, coverBase64, backCoverBase64, pdfBase64, ...rest } = input;
+        const { id, coverBase64, pdfBase64, ...rest } = input;
         const data: Record<string, unknown> = { ...rest };
 
         if (coverBase64) {
           const buf = Buffer.from(coverBase64.split(',')[1] ?? coverBase64, 'base64');
           const { url } = await storagePut(`ebooks/cover-${Date.now()}.jpg`, buf, 'image/jpeg');
           data.coverUrl = url;
-        }
-        if (backCoverBase64) {
-          const buf = Buffer.from(backCoverBase64.split(',')[1] ?? backCoverBase64, 'base64');
-          const { url } = await storagePut(`ebooks/backcover-${Date.now()}.jpg`, buf, 'image/jpeg');
-          data.backCoverUrl = url;
         }
         if (pdfBase64) {
           const buf = Buffer.from(pdfBase64.split(',')[1] ?? pdfBase64, 'base64');

@@ -24,14 +24,12 @@ export default function AdminDashboard() {
   const [ebookDescription, setEbookDescription] = useState("");
   const [ebookPrice, setEbookPrice] = useState("");
   const [ebookCoverBase64, setEbookCoverBase64] = useState<string | null>(null);
-  const [ebookBackCoverBase64, setEbookBackCoverBase64] = useState<string | null>(null);
   const [ebookPdfBase64, setEbookPdfBase64] = useState<string | null>(null);
   const [ebookCoverPreview, setEbookCoverPreview] = useState<string | null>(null);
-  const [ebookBackCoverPreview, setEbookBackCoverPreview] = useState<string | null>(null);
   const [ebookPdfName, setEbookPdfName] = useState<string | null>(null);
+  const [ebookComingSoon, setEbookComingSoon] = useState(false);
   const [isUploadingEbook, setIsUploadingEbook] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
-  const backCoverInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
 
   // Horarios fijos de la clínica
@@ -321,14 +319,6 @@ export default function AdminDashboard() {
     setEbookCoverPreview(base64);
   };
 
-  const handleBackCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const base64 = await handleFileToBase64(file);
-    setEbookBackCoverBase64(base64);
-    setEbookBackCoverPreview(base64);
-  };
-
   const handlePdfChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -357,8 +347,8 @@ export default function AdminDashboard() {
       description: ebookDescription,
       price: ebookPrice,
       coverBase64: ebookCoverBase64 ?? undefined,
-      backCoverBase64: ebookBackCoverBase64 ?? undefined,
       pdfBase64: ebookPdfBase64 ?? undefined,
+      comingSoon: ebookComingSoon,
     });
   };
 
@@ -369,7 +359,7 @@ export default function AdminDashboard() {
       setEbookDescription(activeEbook.description || '');
       setEbookPrice(activeEbook.price?.toString() || '');
       if (activeEbook.coverUrl) setEbookCoverPreview(activeEbook.coverUrl);
-      if (activeEbook.backCoverUrl) setEbookBackCoverPreview(activeEbook.backCoverUrl);
+      setEbookComingSoon(activeEbook.comingSoon ?? false);
     }
   }, [activeEbook]);
 
@@ -1052,42 +1042,34 @@ export default function AdminDashboard() {
                     )}
                   </div>
 
-                  {/* Contraportada */}
-                  <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-[#1A1A1A]">Contraportada</label>
-                    <input ref={backCoverInputRef} type="file" accept="image/*" onChange={handleBackCoverChange} className="hidden" />
-                    <div
-                      onClick={() => backCoverInputRef.current?.click()}
-                      className="cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-lg overflow-hidden hover:border-[#C5A55A] transition"
-                    >
-                      {ebookBackCoverPreview ? (
-                        <img src={ebookBackCoverPreview} alt="Contraportada" className="w-full h-40 object-cover" />
-                      ) : (
-                        <div className="h-40 flex flex-col items-center justify-center text-[#999]">
-                          <Upload className="w-6 h-6 mb-2" />
-                          <p className="text-xs text-center px-2">{activeEbook?.backCoverUrl ? 'Cambiar contraportada' : 'Subir contraportada'}</p>
-                        </div>
-                      )}
+                  {/* Toggle Próxima Publicación */}
+                  <div className="flex items-center justify-between p-4 bg-[#FAF7F2] rounded-lg border border-[#C5A55A]/20">
+                    <div>
+                      <p className="font-semibold text-[#1A1A1A] text-sm">⏳ Próxima publicación</p>
+                      <p className="text-xs text-[#999] mt-0.5">Muestra el eBook como adelanto sin opción de compra</p>
                     </div>
-                    {ebookBackCoverBase64 && (
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          if (!activeEbook?.id) { toast.error('Primero guarda el eBook'); return; }
-                          setIsUploadingEbook(true);
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newVal = !ebookComingSoon;
+                        setEbookComingSoon(newVal);
+                        if (activeEbook?.id) {
                           upsertEbookMutation.mutate({
                             id: activeEbook.id,
                             title: ebookTitle || activeEbook.title,
                             price: ebookPrice || activeEbook.price?.toString(),
-                            backCoverBase64: ebookBackCoverBase64,
-                          }, { onSettled: () => { setIsUploadingEbook(false); setEbookBackCoverBase64(null); } });
-                        }}
-                        disabled={isUploadingEbook}
-                        className="w-full bg-[#C5A55A] hover:bg-[#B39548] text-white text-xs"
-                      >
-                        {isUploadingEbook ? 'Subiendo...' : '📤 Subir contraportada'}
-                      </Button>
-                    )}
+                            comingSoon: newVal,
+                          });
+                        }
+                      }}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        ebookComingSoon ? 'bg-[#C5A55A]' : 'bg-gray-300'
+                      }`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                        ebookComingSoon ? 'translate-x-6' : 'translate-x-1'
+                      }`} />
+                    </button>
                   </div>
 
                   {/* PDF */}

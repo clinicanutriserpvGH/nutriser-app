@@ -241,8 +241,8 @@ export default function EbookStore() {
               <X className="w-8 h-8" />
             </button>
             <img
-              src={showCoverModal === "front" ? ebook.coverUrl! : ebook.backCoverUrl!}
-              alt={showCoverModal === "front" ? "Portada" : "Contraportada"}
+              src={ebook.coverUrl!}
+              alt="Portada"
               className="w-full rounded-lg shadow-2xl"
             />
           </div>
@@ -308,23 +308,10 @@ export default function EbookStore() {
                     </div>
                   )}
 
-                  {/* Contraportada */}
-                  {ebook.backCoverUrl && (
-                    <div className="relative group">
-                      <img
-                        src={ebook.backCoverUrl}
-                        alt={`Contraportada: ${ebook.title}`}
-                        className="w-full rounded-lg shadow-md"
-                      />
-                      <button
-                        onClick={() => setShowCoverModal("back")}
-                        className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center rounded-lg"
-                      >
-                        <span className="opacity-0 group-hover:opacity-100 transition bg-white/90 text-[#1A1A1A] px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-                          <Eye className="w-4 h-4" />
-                          Ver contraportada
-                        </span>
-                      </button>
+                  {/* Etiqueta Próximamente */}
+                  {ebook.comingSoon && (
+                    <div className="mt-3 flex items-center justify-center gap-2 bg-[#1A1A1A] text-[#C5A55A] px-4 py-2 rounded-full text-sm font-bold tracking-widest uppercase">
+                      <span>⏳</span> Próximamente
                     </div>
                   )}
                 </div>
@@ -579,7 +566,17 @@ export default function EbookStore() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-[#666]">Monto:</span>
-                      <span className="font-bold text-[#C5A55A] text-lg">${Number(ebook.price).toLocaleString('es-MX')} MXN</span>
+                      <div className="text-right">
+                        {discountPercent > 0 && (
+                          <span className="text-xs text-[#999] line-through block">${originalPrice.toLocaleString('es-MX')} MXN</span>
+                        )}
+                        <span className="font-bold text-[#C5A55A] text-lg">
+                          {isFree ? '🎉 GRATIS' : `$${finalPrice.toLocaleString('es-MX')} MXN`}
+                        </span>
+                        {discountPercent > 0 && !isFree && (
+                          <span className="text-xs text-green-600 block">({discountPercent}% descuento aplicado)</span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-[#666]">Concepto:</span>

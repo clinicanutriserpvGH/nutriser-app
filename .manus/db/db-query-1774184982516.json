@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `ebooks` ADD `comingSoon` boolean DEFAULT false NOT NULL;\nALTER TABLE `ebooks` DROP COLUMN `backCoverUrl`;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute ALTER TABLE `ebooks` ADD `comingSoon` boolean DEFAULT false NOT NULL;\nALTER TABLE `ebooks` DROP COLUMN `backCoverUrl`;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 927
+}

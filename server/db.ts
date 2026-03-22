@@ -1,6 +1,6 @@
 import { eq, desc, and, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -447,4 +447,28 @@ export async function getEbookPurchaseByEmail(email: string) {
     .orderBy(desc(ebookPurchases.createdAt))
     .limit(1);
   return result[0] || null;
+}
+
+// ─── Códigos de descuento para eBook ─────────────────────────────────────────
+
+export async function getAllEbookDiscountCodes() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(ebookDiscountCodes).orderBy(ebookDiscountCodes.discountPercent);
+}
+
+export async function getEbookDiscountCodeByCode(code: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(ebookDiscountCodes)
+    .where(eq(ebookDiscountCodes.code, code.toLowerCase().trim()))
+    .limit(1);
+  return result[0] || null;
+}
+
+export async function toggleEbookDiscountCode(id: number, isActive: boolean) {
+  const db = await getDb();
+  if (!db) return { success: false };
+  await db.update(ebookDiscountCodes).set({ isActive }).where(eq(ebookDiscountCodes.id, id));
+  return { success: true };
 }

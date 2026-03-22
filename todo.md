@@ -388,3 +388,10 @@
 - [x] Guardar el referido al crear la compra
 - [x] Mostrar botón "Recomendar por WhatsApp" en el paso de confirmación
 - [x] Mostrar el referido en el panel admin de compras
+
+## Correcciones y Nuevas Funciones - Sesión Actual
+- [ ] Corregir botón "Recomendar por WhatsApp" que no aparece en la tienda eBook
+- [ ] Crear tabla ebookDiscountCodes en schema (ebook10/20/30/ebookfree)
+- [ ] Backend: validar código de descuento y calcular precio final
+- [ ] Frontend: campo de código de descuento en tienda eBook con validación en tiempo real
+- [ ] Panel admin: activar/desactivar códigos de descuento del eBook

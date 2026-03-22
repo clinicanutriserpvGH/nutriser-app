@@ -85,6 +85,18 @@ export default function AdminDashboard() {
     },
   });
 
+  const { data: ebookDiscountCodes, refetch: refetchDiscountCodes } = trpc.ebook.listDiscountCodes.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const toggleDiscountCodeMutation = trpc.ebook.toggleDiscountCode.useMutation({
+    onSuccess: (_, variables) => {
+      toast.success(variables.isActive ? 'Código activado' : 'Código desactivado');
+      refetchDiscountCodes();
+    },
+    onError: (error) => toast.error('Error: ' + error.message),
+  });
+
   const updateEbookPurchaseMutation = trpc.ebook.updatePurchaseStatus.useMutation({
     onSuccess: (_, variables) => {
       if (variables.status === 'approved') {
@@ -1214,6 +1226,68 @@ export default function AdminDashboard() {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          {/* Sección de Códigos de Descuento */}
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                  <span className="text-lg">🏷️</span>
+                  Códigos de Descuento
+                </CardTitle>
+                <CardDescription>
+                  Activa o desactiva los códigos de descuento para el eBook. Solo los códigos activos pueden ser usados por los compradores.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {ebookDiscountCodes && ebookDiscountCodes.length > 0 ? ebookDiscountCodes.map((code) => (
+                    <div key={code.id} className={`p-4 rounded-xl border-2 transition-all ${
+                      code.isActive
+                        ? 'border-green-400 bg-green-50'
+                        : 'border-[#C5A55A]/20 bg-[#FAF7F2]'
+                    }`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`font-mono font-bold text-lg uppercase ${
+                          code.isActive ? 'text-green-700' : 'text-[#999]'
+                        }`}>{code.code}</span>
+                        <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                          code.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                        }`}>
+                          {code.isActive ? '✅ Activo' : '⏸️ Inactivo'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-[#666] mb-3">{code.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-2xl font-bold ${
+                          code.discountPercent === 100 ? 'text-purple-600' : 'text-[#C5A55A]'
+                        }`}>
+                          {code.discountPercent === 100 ? '🎉 GRATIS' : `${code.discountPercent}% OFF`}
+                        </span>
+                        <button
+                          onClick={() => toggleDiscountCodeMutation.mutate({ id: code.id, isActive: !code.isActive })}
+                          disabled={toggleDiscountCodeMutation.isPending}
+                          className={`px-4 py-2 rounded-lg font-semibold text-sm transition disabled:opacity-50 ${
+                            code.isActive
+                              ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          {code.isActive ? 'Desactivar' : 'Activar'}
+                        </button>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="col-span-2 text-center py-8 text-[#999]">
+                      <p>Cargando códigos de descuento...</p>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                  <p className="text-sm text-amber-700">
+                    <strong>⚠️ Importante:</strong> Solo activa un código a la vez si quieres controlar qué descuento está disponible. Puedes tener varios activos simultáneamente si lo deseas.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

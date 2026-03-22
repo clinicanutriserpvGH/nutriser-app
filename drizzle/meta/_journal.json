@@ -85,6 +85,13 @@
       "when": 1774150989265,
       "tag": "0011_sudden_jack_power",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1774151625353,
+      "tag": "0012_loose_naoko",
+      "breakpoints": true
     }
   ]
 }

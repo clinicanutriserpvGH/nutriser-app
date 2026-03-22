@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, getEbookPurchaseByEmail } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
@@ -533,11 +533,30 @@ export const appRouter = router({
         buyerEmail: z.string().email(),
         proofBase64: z.string().min(1),
         referredBy: z.string().optional(), // Nombre del comprador que recomendó
+        discountCode: z.string().optional(), // Código de descuento aplicado
       }))
       .mutation(async ({ input }) => {
-        const { proofBase64, ...rest } = input;
-        const buf = Buffer.from(proofBase64.split(',')[1] ?? proofBase64, 'base64');
-        const { url: proofUrl } = await storagePut(`ebooks/proof-${Date.now()}.jpg`, buf, 'image/jpeg');
+        const { proofBase64, discountCode, ...rest } = input;
+        
+        // Validar código de descuento si se proporcionó
+        let discountInfo = '';
+        if (discountCode) {
+          const code = await getEbookDiscountCodeByCode(discountCode);
+          if (code && code.isActive) {
+            discountInfo = `<p><em>Código de descuento: <strong>${discountCode}</strong> (${code.discountPercent}% off)</em></p>`;
+          }
+        }
+        
+        // Si es gratuito, no subir imagen real
+        let proofUrl: string;
+        if (proofBase64 === 'free_ebook_code') {
+          proofUrl = 'free_ebook_code'; // Marcador especial
+        } else {
+          const buf = Buffer.from(proofBase64.split(',')[1] ?? proofBase64, 'base64');
+          const uploaded = await storagePut(`ebooks/proof-${Date.now()}.jpg`, buf, 'image/jpeg');
+          proofUrl = uploaded.url;
+        }
+        
         const accessToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
         const purchase = await createEbookPurchase({ ...rest, proofUrl, accessToken, status: 'pending' });
         // Notificar al admin
@@ -548,11 +567,12 @@ export const appRouter = router({
             auth: { user: ENV.gmailUser, pass: ENV.gmailPassword },
           });
           const referralNote = rest.referredBy ? `<p><em>Recomendado por: <strong>${rest.referredBy}</strong></em></p>` : '';
+          const freeNote = proofBase64 === 'free_ebook_code' ? '<p><strong>✅ eBook GRATUITO (código 100% descuento)</strong></p>' : '';
           await transporter.sendMail({
             from: `"Nutriser" <${ENV.gmailUser}>`,
             to: ENV.gmailUser,
             subject: `📚 Nueva compra de Ebook - ${rest.buyerName}`,
-            html: `<p><strong>${rest.buyerName}</strong> (${rest.buyerEmail}) compró el ebook. Revisa el panel de administración para autorizar.</p>${referralNote}`,
+            html: `<p><strong>${rest.buyerName}</strong> (${rest.buyerEmail}) compró el ebook. Revisa el panel de administración para autorizar.</p>${referralNote}${discountInfo}${freeNote}`,
           });
         } catch (e) { console.warn('Email admin ebook error:', e); }
         return { success: true, purchaseId: purchase.id };
@@ -655,6 +675,37 @@ export const appRouter = router({
         const ebook = await getActiveEbook();
         if (!ebook) throw new Error('Ebook no encontrado');
         return { pdfUrl: ebook.pdfUrl, title: ebook.title };
+      }),
+
+    // Validar código de descuento (público)
+    validateDiscountCode: publicProcedure
+      .input(z.object({ code: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const discountCode = await getEbookDiscountCodeByCode(input.code);
+        if (!discountCode) {
+          return { valid: false, message: 'Código de descuento no encontrado' };
+        }
+        if (!discountCode.isActive) {
+          return { valid: false, message: 'Este código de descuento no está activo' };
+        }
+        return {
+          valid: true,
+          discountPercent: discountCode.discountPercent,
+          description: discountCode.description,
+          isFree: discountCode.discountPercent === 100,
+        };
+      }),
+
+    // Listar códigos de descuento (admin)
+    listDiscountCodes: publicProcedure.query(async () => {
+      return await getAllEbookDiscountCodes();
+    }),
+
+    // Activar/desactivar código de descuento (admin)
+    toggleDiscountCode: publicProcedure
+      .input(z.object({ id: z.number(), isActive: z.boolean() }))
+      .mutation(async ({ input }) => {
+        return await toggleEbookDiscountCode(input.id, input.isActive);
       }),
   }),
 });

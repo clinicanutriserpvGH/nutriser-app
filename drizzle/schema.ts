@@ -217,3 +217,21 @@ export const ebookPurchases = mysqlTable("ebookPurchases", {
 
 export type EbookPurchase = typeof ebookPurchases.$inferSelect;
 export type InsertEbookPurchase = typeof ebookPurchases.$inferInsert;
+
+/**
+ * Códigos de descuento para eBook
+ * Administrador puede activar/desactivar cada código
+ * Códigos predefinidos: ebook10 (10%), ebook20 (20%), ebook30 (30%), ebookfree (100%)
+ */
+export const ebookDiscountCodes = mysqlTable("ebookDiscountCodes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(), // ej: ebook10
+  discountPercent: int("discountPercent").notNull(), // 10, 20, 30, 100
+  isActive: boolean("isActive").default(false).notNull(), // Admin activa/desactiva
+  description: varchar("description", { length: 255 }), // ej: "10% de descuento"
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EbookDiscountCode = typeof ebookDiscountCodes.$inferSelect;
+export type InsertEbookDiscountCode = typeof ebookDiscountCodes.$inferInsert;

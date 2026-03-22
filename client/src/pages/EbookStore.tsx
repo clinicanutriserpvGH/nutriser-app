@@ -39,8 +39,51 @@ export default function EbookStore() {
   const [showCoverModal, setShowCoverModal] = useState<"front" | "back" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Estado para código de descuento
+  const [discountCode, setDiscountCode] = useState("");
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [discountError, setDiscountError] = useState<string | null>(null);
+  const [isValidatingCode, setIsValidatingCode] = useState(false);
+
   const { data: ebook, isLoading } = trpc.ebook.getActive.useQuery();
   const purchaseMutation = trpc.ebook.purchase.useMutation();
+  const utils = trpc.useUtils();
+
+  // Calcular precio final con descuento
+  const originalPrice = ebook ? Number(ebook.price) : 0;
+  const discountAmount = Math.round(originalPrice * discountPercent / 100);
+  const finalPrice = Math.max(0, originalPrice - discountAmount);
+  const isFree = finalPrice === 0;
+
+  const handleApplyDiscountCode = async () => {
+    if (!discountCode.trim()) return;
+    setIsValidatingCode(true);
+    setDiscountError(null);
+    try {
+      const result = await utils.ebook.validateDiscountCode.fetch({ code: discountCode.trim() });
+      if (result.valid) {
+        setAppliedCode(discountCode.trim());
+        setDiscountPercent(result.discountPercent ?? 0);
+        toast.success(`¡Código aplicado! ${result.discountPercent}% de descuento`);
+      } else {
+        setDiscountError(result.message ?? 'Código no válido');
+        setAppliedCode(null);
+        setDiscountPercent(0);
+      }
+    } catch {
+      setDiscountError('Error al validar el código. Intenta de nuevo.');
+    } finally {
+      setIsValidatingCode(false);
+    }
+  };
+
+  const handleRemoveDiscountCode = () => {
+    setAppliedCode(null);
+    setDiscountPercent(0);
+    setDiscountCode("");
+    setDiscountError(null);
+  };
 
   // Contador de tiempo
   useEffect(() => {
@@ -84,9 +127,35 @@ export default function EbookStore() {
       toast.error("Por favor completa todos los campos");
       return;
     }
+    // Si el eBook es gratuito (100% descuento), saltar el paso de pago
+    if (isFree) {
+      handleFreeEbookPurchase();
+      return;
+    }
     setStep("proof");
     setStartedAt(Date.now());
     setTimeRemaining(900);
+  };
+
+  const handleFreeEbookPurchase = async () => {
+    if (!ebook) return;
+    setIsSubmitting(true);
+    try {
+      const result = await purchaseMutation.mutateAsync({
+        ebookId: ebook.id,
+        buyerName: formData.buyerName,
+        buyerEmail: formData.buyerEmail,
+        proofBase64: 'free_ebook_code', // Marcador especial para eBook gratuito
+        referredBy: referredBy ?? undefined,
+        discountCode: appliedCode ?? undefined,
+      });
+      setPurchaseId(result.purchaseId);
+      setStep("success");
+    } catch {
+      toast.error("Error al procesar. Por favor intenta de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleProofSubmit = async (e: React.FormEvent) => {
@@ -104,7 +173,8 @@ export default function EbookStore() {
         buyerName: formData.buyerName,
         buyerEmail: formData.buyerEmail,
         proofBase64: filePreview,
-        referredBy: referredBy ?? undefined, // Guardar quién recomendó
+        referredBy: referredBy ?? undefined,
+        discountCode: appliedCode ?? undefined,
       });
       setPurchaseId(result.purchaseId);
       setStep("success");
@@ -365,20 +435,66 @@ export default function EbookStore() {
                     <p className="text-xs text-[#999] mt-1">Aquí recibirás el enlace de acceso a tu eBook</p>
                   </div>
 
+                  {/* Campo de código de descuento */}
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Código de descuento <span className="text-[#999] font-normal">(opcional)</span></label>
+                    {appliedCode ? (
+                      <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+                        <span className="text-green-700 font-bold flex-1">✅ {appliedCode} — {discountPercent}% de descuento</span>
+                        <button type="button" onClick={handleRemoveDiscountCode} className="text-red-400 hover:text-red-600 text-sm font-medium">Quitar</button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={discountCode}
+                          onChange={(e) => { setDiscountCode(e.target.value); setDiscountError(null); }}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleApplyDiscountCode())}
+                          placeholder="Ej: ebook10"
+                          className="flex-1 px-4 py-3 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A] bg-[#FAF7F2] uppercase"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyDiscountCode}
+                          disabled={!discountCode.trim() || isValidatingCode}
+                          className="px-4 py-3 bg-[#1A1A1A] text-white rounded-lg font-semibold text-sm hover:bg-[#333] transition disabled:opacity-50"
+                        >
+                          {isValidatingCode ? '...' : 'Aplicar'}
+                        </button>
+                      </div>
+                    )}
+                    {discountError && <p className="text-red-500 text-xs mt-1">{discountError}</p>}
+                  </div>
+
                   <div className="bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
                     <p className="text-sm text-[#666]">
                       <strong>eBook:</strong> {ebook.title}
                     </p>
-                    <p className="text-sm text-[#666] mt-1">
-                      <strong>Total:</strong> ${Number(ebook.price).toLocaleString('es-MX')} MXN
-                    </p>
+                    {discountPercent > 0 ? (
+                      <>
+                        <p className="text-sm text-[#999] mt-1 line-through">
+                          Precio original: ${originalPrice.toLocaleString('es-MX')} MXN
+                        </p>
+                        <p className="text-sm text-green-600 mt-1 font-semibold">
+                          Descuento ({discountPercent}%): −${discountAmount.toLocaleString('es-MX')} MXN
+                        </p>
+                        <p className="text-base font-bold text-[#C5A55A] mt-1">
+                          Total a pagar: {isFree ? '🎉 GRATIS' : `$${finalPrice.toLocaleString('es-MX')} MXN`}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-[#666] mt-1">
+                        <strong>Total:</strong> ${originalPrice.toLocaleString('es-MX')} MXN
+                      </p>
+                    )}
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-4 rounded-xl font-bold text-lg transition-all duration-300"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-4 rounded-xl font-bold text-lg transition-all duration-300 disabled:opacity-50"
                   >
-                    Continuar al pago
+                    {isSubmitting ? 'Procesando...' : isFree ? '🎉 Obtener eBook Gratis' : 'Continuar al pago'}
                   </button>
                 </form>
               </div>

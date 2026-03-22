@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `ebookDiscountCodes` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`code` varchar(50) NOT NULL,\n\t`discountPercent` int NOT NULL,\n\t`isActive` boolean NOT NULL DEFAULT false,\n\t`description` varchar(255),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `ebookDiscountCodes_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `ebookDiscountCodes_code_unique` UNIQUE(`code`)\n);\n\nINSERT INTO `ebookDiscountCodes` (`code`, `discountPercent`, `isActive`, `description`) VALUES\n('ebook10', 10, false, '10% de descuento en el eBook'),\n('ebook20', 20, false, '20% de descuento en el eBook'),\n('ebook30', 30, false, '30% de descuento en el eBook'),\n('ebookfree', 100, false, 'eBook gratuito (100% de descuento)');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute CREATE TABLE `ebookDiscountCodes` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`code` varchar(50) NOT NULL,\n\t`discountPercent` int NOT NULL,\n\t`isActive` boolean NOT NULL DEFAULT false,\n\t`description` varchar(255),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `ebookDiscountCodes_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `ebookDiscountCodes_code_unique` UNIQUE(`code`)\n);\n\nINSERT INTO `ebookDiscountCodes` (`code`, `discountPercent`, `isActive`, `description`) VALUES\n('ebook10', 10, false, '10% de descuento en el eBook'),\n('ebook20', 20, false, '20% de descuento en el eBook'),\n('ebook30', 30, false, '30% de descuento en el eBook'),\n('ebookfree', 100, false, 'eBook gratuito (100% de descuento)');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 277
+}

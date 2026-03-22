@@ -416,3 +416,10 @@
 - [x] Agregar botón "Ingresa a tu Portal de Salud Nutriser" con ícono de cinta de medir en Navbar
 - [x] Agregar botón "Ingresa a tu Portal de Salud Nutriser" con ícono de cinta de medir en HeroSection
 - [x] Enlace apunta a https://nutriserseguimiento.manus.space
+
+## Limpieza de Botones Hero y Navbar
+
+- [x] Hero: Eliminar botón "Agenda tu Cita"
+- [x] Hero: Eliminar botón "Agenda por WhatsApp"
+- [x] Hero: Dejar solo 4 botones: Tienda eBook, Comprar Programa Nutrición, Portal de Salud Nutriser, Cuponera Nutriser
+- [x] Navbar: Agregar botón "Agenda tu Cita" que lleva al formulario /appointment-form

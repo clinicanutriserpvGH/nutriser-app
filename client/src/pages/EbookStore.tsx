@@ -169,9 +169,9 @@ export default function EbookStore() {
         </div>
       )}
 
-      <div className="py-12 px-4">
+      <div className="pt-28 pb-12 px-4">
         <div className="max-w-4xl mx-auto">
-          {/* Back Button */}
+          {/* Back Button - siempre visible */}
           <div className="mb-8">
             <button
               onClick={() => {
@@ -181,10 +181,10 @@ export default function EbookStore() {
                   setStep("view");
                 }
               }}
-              className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E] transition"
+              className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E] transition font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
-              {step === "view" ? "Volver al inicio" : "Volver"}
+              {step === "view" ? "Volver al inicio" : "Volver al eBook"}
             </button>
           </div>
 

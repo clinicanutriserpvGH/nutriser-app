@@ -919,23 +919,22 @@ export default function AdminDashboard() {
 
           {/* eBook Tab */}
           <TabsContent value="ebook" className="space-y-6">
-            {/* Formulario de eBook */}
+            {/* Formulario de eBook - Sección 1: Información de texto */}
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
                 <CardTitle className="text-[#C5A55A] flex items-center gap-2">
                   <BookOpen className="w-5 h-5" />
-                  {activeEbook ? 'Actualizar eBook' : 'Publicar eBook'}
+                  {activeEbook ? 'Editar información del eBook' : 'Publicar eBook'}
                 </CardTitle>
                 <CardDescription>
                   {activeEbook
-                    ? `eBook activo: "${activeEbook.title}" — Precio: $${activeEbook.price} MXN`
-                    : 'No hay ningún eBook publicado. Completa el formulario para publicar uno.'}
+                    ? `Edita el título, descripción o precio. Los cambios se guardan de inmediato.`
+                    : 'Completa la información para publicar tu eBook.'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Columna izquierda: datos */}
-                  <div className="space-y-4">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Título del eBook *</label>
                       <input
@@ -947,120 +946,184 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Descripción</label>
-                      <textarea
-                        placeholder="Describe el contenido del eBook..."
-                        rows={4}
-                        value={ebookDescription}
-                        onChange={(e) => setEbookDescription(e.target.value)}
-                        className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
-                      />
-                    </div>
-                    <div>
                       <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Precio (MXN) *</label>
                       <input
                         type="number"
-                        placeholder="Ej: 299"
+                        placeholder="Ej: 499"
                         value={ebookPrice}
                         onChange={(e) => setEbookPrice(e.target.value)}
                         min="1"
                         className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Descripción</label>
+                    <textarea
+                      placeholder="Describe el contenido del eBook..."
+                      rows={5}
+                      value={ebookDescription}
+                      onChange={(e) => setEbookDescription(e.target.value)}
+                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A] resize-none"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => {
+                      if (!ebookTitle.trim()) { toast.error('Ingresa un título'); return; }
+                      if (!ebookPrice || isNaN(Number(ebookPrice)) || Number(ebookPrice) <= 0) { toast.error('Ingresa un precio válido'); return; }
+                      upsertEbookMutation.mutate({
+                        id: activeEbook?.id,
+                        title: ebookTitle,
+                        description: ebookDescription,
+                        price: ebookPrice,
+                      });
+                    }}
+                    disabled={upsertEbookMutation.isPending}
+                    className="bg-[#C5A55A] hover:bg-[#B39548] text-white font-bold disabled:opacity-50"
+                  >
+                    {upsertEbookMutation.isPending
+                      ? 'Guardando...'
+                      : activeEbook ? '💾 Guardar cambios de texto' : '📖 Publicar eBook'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-                    {/* PDF Upload */}
-                    <div>
-                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
-                        Archivo PDF *
-                        {activeEbook?.pdfUrl && !ebookPdfBase64 && (
-                          <span className="text-green-600 font-normal ml-2">(PDF cargado ✓)</span>
-                        )}
-                      </label>
-                      <input
-                        ref={pdfInputRef}
-                        type="file"
-                        accept=".pdf"
-                        onChange={handlePdfChange}
-                        className="hidden"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => pdfInputRef.current?.click()}
-                        className="w-full px-4 py-3 border-2 border-dashed border-[#C5A55A]/40 rounded-lg hover:border-[#C5A55A] transition text-center"
-                      >
-                        {ebookPdfName ? (
-                          <span className="text-green-600 font-medium">✓ {ebookPdfName}</span>
-                        ) : (
-                          <span className="text-[#999] flex items-center justify-center gap-2">
-                            <Upload className="w-4 h-4" />
-                            Seleccionar PDF (máx 50MB)
-                          </span>
-                        )}
-                      </button>
-                    </div>
-
-                    <Button
-                      onClick={handleSaveEbook}
-                      disabled={isUploadingEbook || upsertEbookMutation.isPending}
-                      className="w-full bg-[#C5A55A] hover:bg-[#B39548] text-white font-bold disabled:opacity-50"
+            {/* Formulario de eBook - Sección 2: Archivos (portada, contraportada, PDF) */}
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                  <Upload className="w-5 h-5" />
+                  Archivos del eBook
+                </CardTitle>
+                <CardDescription>
+                  Sube o actualiza la portada, contraportada y el PDF del libro. Cada archivo se guarda de forma independiente.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Portada */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-semibold text-[#1A1A1A]">Portada</label>
+                    <input ref={coverInputRef} type="file" accept="image/*" onChange={handleCoverChange} className="hidden" />
+                    <div
+                      onClick={() => coverInputRef.current?.click()}
+                      className="cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-lg overflow-hidden hover:border-[#C5A55A] transition"
                     >
-                      {isUploadingEbook || upsertEbookMutation.isPending
-                        ? 'Guardando... (puede tardar unos segundos)'
-                        : activeEbook ? 'Actualizar eBook' : 'Publicar eBook'}
-                    </Button>
+                      {ebookCoverPreview ? (
+                        <img src={ebookCoverPreview} alt="Portada" className="w-full h-40 object-cover" />
+                      ) : (
+                        <div className="h-40 flex flex-col items-center justify-center text-[#999]">
+                          <Upload className="w-6 h-6 mb-2" />
+                          <p className="text-xs text-center px-2">{activeEbook?.coverUrl ? 'Cambiar portada' : 'Subir portada'}</p>
+                        </div>
+                      )}
+                    </div>
+                    {ebookCoverBase64 && (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (!activeEbook?.id) { toast.error('Primero guarda el eBook'); return; }
+                          setIsUploadingEbook(true);
+                          upsertEbookMutation.mutate({
+                            id: activeEbook.id,
+                            title: ebookTitle || activeEbook.title,
+                            price: ebookPrice || activeEbook.price?.toString(),
+                            coverBase64: ebookCoverBase64,
+                          }, { onSettled: () => { setIsUploadingEbook(false); setEbookCoverBase64(null); } });
+                        }}
+                        disabled={isUploadingEbook}
+                        className="w-full bg-[#C5A55A] hover:bg-[#B39548] text-white text-xs"
+                      >
+                        {isUploadingEbook ? 'Subiendo...' : '📤 Subir portada'}
+                      </Button>
+                    )}
                   </div>
 
-                  {/* Columna derecha: imágenes */}
-                  <div className="space-y-4">
-                    {/* Portada */}
-                    <div>
-                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Portada (imagen)</label>
-                      <input
-                        ref={coverInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleCoverChange}
-                        className="hidden"
-                      />
-                      <div
-                        onClick={() => coverInputRef.current?.click()}
-                        className="cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-lg overflow-hidden hover:border-[#C5A55A] transition"
-                      >
-                        {ebookCoverPreview ? (
-                          <img src={ebookCoverPreview} alt="Portada" className="w-full h-48 object-cover" />
-                        ) : (
-                          <div className="h-48 flex flex-col items-center justify-center text-[#999]">
-                            <Upload className="w-8 h-8 mb-2" />
-                            <p className="text-sm">Subir portada</p>
-                          </div>
-                        )}
-                      </div>
+                  {/* Contraportada */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-semibold text-[#1A1A1A]">Contraportada</label>
+                    <input ref={backCoverInputRef} type="file" accept="image/*" onChange={handleBackCoverChange} className="hidden" />
+                    <div
+                      onClick={() => backCoverInputRef.current?.click()}
+                      className="cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-lg overflow-hidden hover:border-[#C5A55A] transition"
+                    >
+                      {ebookBackCoverPreview ? (
+                        <img src={ebookBackCoverPreview} alt="Contraportada" className="w-full h-40 object-cover" />
+                      ) : (
+                        <div className="h-40 flex flex-col items-center justify-center text-[#999]">
+                          <Upload className="w-6 h-6 mb-2" />
+                          <p className="text-xs text-center px-2">{activeEbook?.backCoverUrl ? 'Cambiar contraportada' : 'Subir contraportada'}</p>
+                        </div>
+                      )}
                     </div>
+                    {ebookBackCoverBase64 && (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (!activeEbook?.id) { toast.error('Primero guarda el eBook'); return; }
+                          setIsUploadingEbook(true);
+                          upsertEbookMutation.mutate({
+                            id: activeEbook.id,
+                            title: ebookTitle || activeEbook.title,
+                            price: ebookPrice || activeEbook.price?.toString(),
+                            backCoverBase64: ebookBackCoverBase64,
+                          }, { onSettled: () => { setIsUploadingEbook(false); setEbookBackCoverBase64(null); } });
+                        }}
+                        disabled={isUploadingEbook}
+                        className="w-full bg-[#C5A55A] hover:bg-[#B39548] text-white text-xs"
+                      >
+                        {isUploadingEbook ? 'Subiendo...' : '📤 Subir contraportada'}
+                      </Button>
+                    )}
+                  </div>
 
-                    {/* Contraportada */}
-                    <div>
-                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Contraportada (imagen)</label>
-                      <input
-                        ref={backCoverInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleBackCoverChange}
-                        className="hidden"
-                      />
-                      <div
-                        onClick={() => backCoverInputRef.current?.click()}
-                        className="cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-lg overflow-hidden hover:border-[#C5A55A] transition"
-                      >
-                        {ebookBackCoverPreview ? (
-                          <img src={ebookBackCoverPreview} alt="Contraportada" className="w-full h-48 object-cover" />
-                        ) : (
-                          <div className="h-48 flex flex-col items-center justify-center text-[#999]">
-                            <Upload className="w-8 h-8 mb-2" />
-                            <p className="text-sm">Subir contraportada</p>
-                          </div>
-                        )}
-                      </div>
+                  {/* PDF */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-semibold text-[#1A1A1A]">
+                      PDF del libro
+                      {activeEbook?.pdfUrl && (
+                        <span className="text-green-600 font-normal ml-2 text-xs">(✓ Cargado)</span>
+                      )}
+                    </label>
+                    <input ref={pdfInputRef} type="file" accept=".pdf" onChange={handlePdfChange} className="hidden" />
+                    <div
+                      onClick={() => pdfInputRef.current?.click()}
+                      className="cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-lg hover:border-[#C5A55A] transition h-40 flex flex-col items-center justify-center"
+                    >
+                      {ebookPdfName ? (
+                        <div className="text-center px-2">
+                          <p className="text-2xl mb-1">📄</p>
+                          <p className="text-xs text-green-600 font-medium break-all">{ebookPdfName}</p>
+                          <p className="text-xs text-[#999] mt-1">Clic para cambiar</p>
+                        </div>
+                      ) : (
+                        <div className="text-center px-2">
+                          <Upload className="w-6 h-6 mb-2 mx-auto text-[#999]" />
+                          <p className="text-xs text-[#999]">{activeEbook?.pdfUrl ? 'Cambiar PDF' : 'Seleccionar PDF'}</p>
+                          <p className="text-xs text-[#999]">(máx 50MB)</p>
+                        </div>
+                      )}
                     </div>
+                    {ebookPdfBase64 && (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (!activeEbook?.id) { toast.error('Primero guarda el eBook con título y precio'); return; }
+                          setIsUploadingEbook(true);
+                          upsertEbookMutation.mutate({
+                            id: activeEbook.id,
+                            title: ebookTitle || activeEbook.title,
+                            price: ebookPrice || activeEbook.price?.toString(),
+                            pdfBase64: ebookPdfBase64,
+                          }, { onSettled: () => { setIsUploadingEbook(false); setEbookPdfBase64(null); setEbookPdfName(null); } });
+                        }}
+                        disabled={isUploadingEbook}
+                        className="w-full bg-[#C5A55A] hover:bg-[#B39548] text-white text-xs"
+                      >
+                        {isUploadingEbook ? 'Subiendo PDF... (puede tardar)' : '📤 Subir PDF al servidor'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>

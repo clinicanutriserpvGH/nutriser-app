@@ -119,14 +119,6 @@ export default function Navbar({ lightBg = false }: NavbarProps) {
               >
                 <Facebook className="w-4 h-4" />
               </a>
-              {/* Agenda tu Cita Button */}
-              <a
-                href="/appointment-form"
-                onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
-                className="flex items-center gap-2 bg-[#C5A55A] text-white px-5 py-2.5 text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/20"
-              >
-                Agenda tu Cita
-              </a>
               {/* Call Button */}
               <a
                 href="tel:3224503257"
@@ -191,13 +183,6 @@ export default function Navbar({ lightBg = false }: NavbarProps) {
                 transition={{ delay: 0.4 }}
                 className="flex flex-col gap-4 mt-4"
               >
-                <a
-                  href="/appointment-form"
-                  onClick={(e) => { e.preventDefault(); setMobileOpen(false); window.location.href = '/appointment-form'; }}
-                  className="inline-flex items-center gap-2 bg-[#C5A55A] text-white px-6 py-3 font-serif text-lg w-fit hover:bg-[#B8963E] transition-colors"
-                >
-                  Agenda tu Cita
-                </a>
                 <a
                   href="tel:3224503257"
                   className="inline-flex items-center gap-2 bg-[#C5A55A] text-white px-6 py-3 font-serif text-lg w-fit hover:bg-[#B8963E] transition-colors"

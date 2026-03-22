@@ -4,7 +4,7 @@
  * Gold accent lines, Playfair Display headline, fade-in animations
  */
 import { motion } from "framer-motion";
-import { ChevronDown, Gift, BookOpen, Ruler } from "lucide-react";
+import { ChevronDown, Gift, BookOpen, Ruler, CalendarCheck } from "lucide-react";
 
 const HERO_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-reception_c595cea6.jpeg";
@@ -98,6 +98,14 @@ export default function HeroSection() {
             >
               <Ruler className="w-5 h-5" />
               Portal de Salud Nutriser
+            </a>
+            <a
+              href="/appointment-form"
+              onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
+              className="inline-flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
+            >
+              <CalendarCheck className="w-5 h-5" />
+              Agenda tu Cita
             </a>
             <motion.button
               onClick={(e) => {

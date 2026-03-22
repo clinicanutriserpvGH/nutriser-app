@@ -23,6 +23,7 @@ const PROGRAMS = [
       "4 asesorías nutricionales personalizadas",
       "4 escaneos corporales",
       "5% de descuento en tratamientos corporales",
+      "Acceso a seguimiento online",
     ],
   },
   {
@@ -35,6 +36,7 @@ const PROGRAMS = [
       "8 escaneos corporales",
       "10% de descuento en todos los tratamientos",
       "Acceso a seguimiento online",
+      "10% de descuento en compra de eBook",
     ],
   },
 ];

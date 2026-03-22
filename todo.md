@@ -405,3 +405,8 @@
 - [x] Agregar meta tags para iOS (apple-touch-icon, apple-mobile-web-app)
 - [x] Generar iconos en múltiples tamaños (192x192, 512x512)
 - [x] Configurar Vite para registrar el Service Worker
+
+## Cambios Sesión Actual
+
+- [x] Agregar "Acceso a seguimiento online" al Programa Básico
+- [x] Agregar "10% de descuento en compra de eBook" al Programa Premium

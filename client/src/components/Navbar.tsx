@@ -9,7 +9,7 @@ import { Menu, X, Phone, Instagram, Facebook } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-new_379bcae8.jpeg";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 const navLinks = [
   { label: "Inicio", href: "#inicio" },
@@ -70,9 +70,7 @@ export default function Navbar({ lightBg = false }: NavbarProps) {
             <img
               src={LOGO_URL}
               alt="Nutriser - Aesthetic & Nutrition"
-              className={`h-12 w-auto object-contain transition-all duration-500 ${
-                scrolled || lightBg ? "" : "brightness-0 invert"
-              }`}
+              className="h-12 w-auto object-contain transition-all duration-500"
             />
           </a>
 

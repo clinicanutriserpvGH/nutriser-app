@@ -310,3 +310,7 @@
 
 ## Bug: Error imageUrl al crear promoción
 - [x] Eliminar campo imageUrl de promociones (ya no se usan imágenes en cupónes)
+
+## Mejoras botones Hero
+- [x] Botón "Promociones Vigentes": agregar luz parpadeante + icono de regalo
+- [x] Botón "Adquirir Programa" → renombrar a "Comprar Programa Nutrición"

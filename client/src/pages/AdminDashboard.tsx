@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft } from "lucide-react";
+import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOpen, Upload, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
@@ -18,6 +18,21 @@ export default function AdminDashboard() {
   const [promotionTitle, setPromotionTitle] = useState("");
   const [promotionDescription, setPromotionDescription] = useState("");
   const [promotionExpiresAt, setPromotionExpiresAt] = useState("");
+
+  // Estado para eBook
+  const [ebookTitle, setEbookTitle] = useState("");
+  const [ebookDescription, setEbookDescription] = useState("");
+  const [ebookPrice, setEbookPrice] = useState("");
+  const [ebookCoverBase64, setEbookCoverBase64] = useState<string | null>(null);
+  const [ebookBackCoverBase64, setEbookBackCoverBase64] = useState<string | null>(null);
+  const [ebookPdfBase64, setEbookPdfBase64] = useState<string | null>(null);
+  const [ebookCoverPreview, setEbookCoverPreview] = useState<string | null>(null);
+  const [ebookBackCoverPreview, setEbookBackCoverPreview] = useState<string | null>(null);
+  const [ebookPdfName, setEbookPdfName] = useState<string | null>(null);
+  const [isUploadingEbook, setIsUploadingEbook] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const backCoverInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   // Horarios fijos de la clínica
   const CLINIC_HOURS = [
@@ -48,6 +63,38 @@ export default function AdminDashboard() {
 
   const { data: giftPurchases, refetch: refetchGifts } = trpc.giftPurchases.list.useQuery(undefined, {
     enabled: isAuthenticated,
+  });
+
+  const { data: activeEbook, refetch: refetchEbook } = trpc.ebook.getActive.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const { data: ebookPurchases, refetch: refetchEbookPurchases } = trpc.ebook.listPurchases.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const upsertEbookMutation = trpc.ebook.upsert.useMutation({
+    onSuccess: () => {
+      toast.success('eBook guardado exitosamente');
+      refetchEbook();
+      setIsUploadingEbook(false);
+    },
+    onError: (error) => {
+      toast.error('Error al guardar eBook: ' + error.message);
+      setIsUploadingEbook(false);
+    },
+  });
+
+  const updateEbookPurchaseMutation = trpc.ebook.updatePurchaseStatus.useMutation({
+    onSuccess: (_, variables) => {
+      if (variables.status === 'approved') {
+        toast.success('Compra aprobada. Email enviado al comprador con acceso al eBook.');
+      } else {
+        toast.success('Compra rechazada.');
+      }
+      refetchEbookPurchases();
+    },
+    onError: (error) => toast.error('Error: ' + error.message),
   });
 
   const approveGiftMutation = trpc.giftPurchases.approve.useMutation({
@@ -244,6 +291,76 @@ export default function AdminDashboard() {
     },
   });
 
+  // Funciones para eBook
+  const handleFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const base64 = await handleFileToBase64(file);
+    setEbookCoverBase64(base64);
+    setEbookCoverPreview(base64);
+  };
+
+  const handleBackCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const base64 = await handleFileToBase64(file);
+    setEbookBackCoverBase64(base64);
+    setEbookBackCoverPreview(base64);
+  };
+
+  const handlePdfChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('El PDF no puede superar los 50MB');
+      return;
+    }
+    const base64 = await handleFileToBase64(file);
+    setEbookPdfBase64(base64);
+    setEbookPdfName(file.name);
+  };
+
+  const handleSaveEbook = () => {
+    if (!ebookTitle.trim()) {
+      toast.error('Ingresa un título para el eBook');
+      return;
+    }
+    if (!ebookPrice || isNaN(Number(ebookPrice)) || Number(ebookPrice) <= 0) {
+      toast.error('Ingresa un precio válido');
+      return;
+    }
+    setIsUploadingEbook(true);
+    upsertEbookMutation.mutate({
+      id: activeEbook?.id,
+      title: ebookTitle,
+      description: ebookDescription,
+      price: ebookPrice,
+      coverBase64: ebookCoverBase64 ?? undefined,
+      backCoverBase64: ebookBackCoverBase64 ?? undefined,
+      pdfBase64: ebookPdfBase64 ?? undefined,
+    });
+  };
+
+  // Cargar datos del ebook activo al formulario
+  useEffect(() => {
+    if (activeEbook) {
+      setEbookTitle(activeEbook.title || '');
+      setEbookDescription(activeEbook.description || '');
+      setEbookPrice(activeEbook.price?.toString() || '');
+      if (activeEbook.coverUrl) setEbookCoverPreview(activeEbook.coverUrl);
+      if (activeEbook.backCoverUrl) setEbookBackCoverPreview(activeEbook.backCoverUrl);
+    }
+  }, [activeEbook]);
+
   const handlePublishPromotion = () => {
     if (!promotionTitle.trim()) {
       toast.error("Ingresa un título para la promoción");
@@ -357,11 +474,15 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="memberships" className="space-y-4">
-          <TabsList className="bg-[#C5A55A]/10">
+          <TabsList className="bg-[#C5A55A]/10 flex-wrap h-auto gap-1">
             <TabsTrigger value="memberships">Membresías</TabsTrigger>
             <TabsTrigger value="appointments">Citas</TabsTrigger>
             <TabsTrigger value="giftPurchases">Regalos Pagados</TabsTrigger>
             <TabsTrigger value="promotions">Promociones</TabsTrigger>
+            <TabsTrigger value="ebook" className="flex items-center gap-1">
+              <BookOpen className="w-4 h-4" />
+              eBook
+            </TabsTrigger>
           </TabsList>
 
           {/* Memberships Tab */}
@@ -792,6 +913,230 @@ export default function AdminDashboard() {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* eBook Tab */}
+          <TabsContent value="ebook" className="space-y-6">
+            {/* Formulario de eBook */}
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  {activeEbook ? 'Actualizar eBook' : 'Publicar eBook'}
+                </CardTitle>
+                <CardDescription>
+                  {activeEbook
+                    ? `eBook activo: "${activeEbook.title}" — Precio: $${activeEbook.price} MXN`
+                    : 'No hay ningún eBook publicado. Completa el formulario para publicar uno.'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Columna izquierda: datos */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Título del eBook *</label>
+                      <input
+                        type="text"
+                        placeholder="Ej: Guía Nutricional Nutriser"
+                        value={ebookTitle}
+                        onChange={(e) => setEbookTitle(e.target.value)}
+                        className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Descripción</label>
+                      <textarea
+                        placeholder="Describe el contenido del eBook..."
+                        rows={4}
+                        value={ebookDescription}
+                        onChange={(e) => setEbookDescription(e.target.value)}
+                        className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Precio (MXN) *</label>
+                      <input
+                        type="number"
+                        placeholder="Ej: 299"
+                        value={ebookPrice}
+                        onChange={(e) => setEbookPrice(e.target.value)}
+                        min="1"
+                        className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                      />
+                    </div>
+
+                    {/* PDF Upload */}
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+                        Archivo PDF *
+                        {activeEbook?.pdfUrl && !ebookPdfBase64 && (
+                          <span className="text-green-600 font-normal ml-2">(PDF cargado ✓)</span>
+                        )}
+                      </label>
+                      <input
+                        ref={pdfInputRef}
+                        type="file"
+                        accept=".pdf"
+                        onChange={handlePdfChange}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => pdfInputRef.current?.click()}
+                        className="w-full px-4 py-3 border-2 border-dashed border-[#C5A55A]/40 rounded-lg hover:border-[#C5A55A] transition text-center"
+                      >
+                        {ebookPdfName ? (
+                          <span className="text-green-600 font-medium">✓ {ebookPdfName}</span>
+                        ) : (
+                          <span className="text-[#999] flex items-center justify-center gap-2">
+                            <Upload className="w-4 h-4" />
+                            Seleccionar PDF (máx 50MB)
+                          </span>
+                        )}
+                      </button>
+                    </div>
+
+                    <Button
+                      onClick={handleSaveEbook}
+                      disabled={isUploadingEbook || upsertEbookMutation.isPending}
+                      className="w-full bg-[#C5A55A] hover:bg-[#B39548] text-white font-bold disabled:opacity-50"
+                    >
+                      {isUploadingEbook || upsertEbookMutation.isPending
+                        ? 'Guardando... (puede tardar unos segundos)'
+                        : activeEbook ? 'Actualizar eBook' : 'Publicar eBook'}
+                    </Button>
+                  </div>
+
+                  {/* Columna derecha: imágenes */}
+                  <div className="space-y-4">
+                    {/* Portada */}
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Portada (imagen)</label>
+                      <input
+                        ref={coverInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCoverChange}
+                        className="hidden"
+                      />
+                      <div
+                        onClick={() => coverInputRef.current?.click()}
+                        className="cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-lg overflow-hidden hover:border-[#C5A55A] transition"
+                      >
+                        {ebookCoverPreview ? (
+                          <img src={ebookCoverPreview} alt="Portada" className="w-full h-48 object-cover" />
+                        ) : (
+                          <div className="h-48 flex flex-col items-center justify-center text-[#999]">
+                            <Upload className="w-8 h-8 mb-2" />
+                            <p className="text-sm">Subir portada</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Contraportada */}
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Contraportada (imagen)</label>
+                      <input
+                        ref={backCoverInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleBackCoverChange}
+                        className="hidden"
+                      />
+                      <div
+                        onClick={() => backCoverInputRef.current?.click()}
+                        className="cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-lg overflow-hidden hover:border-[#C5A55A] transition"
+                      >
+                        {ebookBackCoverPreview ? (
+                          <img src={ebookBackCoverPreview} alt="Contraportada" className="w-full h-48 object-cover" />
+                        ) : (
+                          <div className="h-48 flex flex-col items-center justify-center text-[#999]">
+                            <Upload className="w-8 h-8 mb-2" />
+                            <p className="text-sm">Subir contraportada</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Compras de eBook */}
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A]">Compras de eBook</CardTitle>
+                <CardDescription>Gestiona las compras y autoriza el acceso al eBook</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!ebookPurchases || ebookPurchases.length === 0 ? (
+                  <div className="bg-[#FAF7F2] p-6 rounded-lg text-center text-[#999]">
+                    <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p>No hay compras de eBook registradas</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {ebookPurchases.map((purchase) => (
+                      <div key={purchase.id} className="bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                                purchase.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                purchase.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                'bg-red-100 text-red-600'
+                              }`}>
+                                {purchase.status === 'pending' ? '⏳ Pendiente' :
+                                 purchase.status === 'approved' ? '✅ Aprobado' : '❌ Rechazado'}
+                              </span>
+                            </div>
+                            <p className="font-bold text-[#1A1A1A]">{purchase.buyerName}</p>
+                            <p className="text-sm text-[#666]">{purchase.buyerEmail}</p>
+                            <p className="text-xs text-[#999] mt-1">
+                              {new Date(purchase.createdAt).toLocaleDateString('es-MX', {
+                                year: 'numeric', month: 'long', day: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <a
+                              href={purchase.proofUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 px-3 py-2 border border-[#C5A55A] text-[#C5A55A] rounded-lg hover:bg-[#C5A55A]/10 transition text-sm"
+                            >
+                              <Eye className="w-4 h-4" />
+                              Ver comprobante
+                            </a>
+                            {purchase.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => updateEbookPurchaseMutation.mutate({ id: purchase.id, status: 'approved' })}
+                                  disabled={updateEbookPurchaseMutation.isPending}
+                                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium disabled:opacity-50"
+                                >
+                                  Aprobar
+                                </button>
+                                <button
+                                  onClick={() => updateEbookPurchaseMutation.mutate({ id: purchase.id, status: 'rejected' })}
+                                  disabled={updateEbookPurchaseMutation.isPending}
+                                  className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm font-medium disabled:opacity-50"
+                                >
+                                  Rechazar
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -329,3 +329,32 @@
 
 ## Cuponera en CtaBanner
 - [x] Agregar botón "Cuponera Nutriser" en el banner CTA dorado
+
+## Correcciones urgentes
+- [x] "Cuenta" → "CLABE Interbancaria" en datos de transferencia de membresías
+- [x] Concepto de pago → solo "Programa Premium" o "Programa Básico" (sin nombre)
+- [x] "Agenda tu Valoración" → "Agenda tu Cita" en sección About y que el botón funcione
+
+## Tienda Ebook
+- [ ] Schema y backend: tabla ebooks, tabla ebook_purchases, upload PDF a S3
+- [ ] Panel admin: subir portada, contraportada, descripción y PDF del ebook
+- [ ] Página pública del ebook: portada, descripción, botón comprar, flujo de pago
+- [ ] Visor PDF en línea sin descarga (protegido, solo tras compra)
+- [ ] Botón "Tienda Ebook" en hero y menú de navegación
+
+## Sistema eBook - Sesión Actual
+
+- [x] Verificar que bugs reportados ya estaban corregidos (CLABE, concepto, About)
+- [x] Crear tabla ebooks en drizzle/schema.ts (ya existía de sesión anterior)
+- [x] Crear tabla ebookPurchases en drizzle/schema.ts (ya existía)
+- [x] Implementar backend: getActive, getAllEbooks, upsertEbook, purchase, listPurchases, updatePurchaseStatus, getAccess
+- [x] Corregir error TypeScript en routers.ts (oauthServerUrl → oAuthServerUrl)
+- [x] Agregar tab "eBook" en panel de administración (AdminDashboard.tsx)
+- [x] Formulario admin: título, descripción, precio, portada, contraportada, PDF
+- [x] Lista de compras de eBook en panel admin con botones Aprobar/Rechazar
+- [x] Crear página pública EbookStore.tsx con flujo de 3 pasos
+- [x] Crear visor PDF seguro EbookReader.tsx (sin descarga, acceso por token)
+- [x] Agregar rutas /ebook y /ebook/read en App.tsx
+- [x] Agregar "Tienda eBook" en Navbar.tsx
+- [x] Agregar botón "Tienda eBook" en HeroSection.tsx
+- [x] Escribir 7 tests de vitest para el sistema eBook (todos pasan)

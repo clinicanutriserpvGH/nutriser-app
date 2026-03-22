@@ -43,7 +43,7 @@ export default function ContactSection() {
             </h2>
             <div className="w-16 h-[1px] bg-[#C5A55A] mx-auto mb-6" />
             <p className="text-white/60 max-w-xl mx-auto text-lg">
-              Agenda tu valoración y déjanos acompañarte. Estamos para
+              Agenda tu cita y déjanos acompañarte. Estamos para
               responder todas tus preguntas.
             </p>
           </div>

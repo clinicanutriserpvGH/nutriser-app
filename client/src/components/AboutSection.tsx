@@ -6,6 +6,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { Shield, Award, Users } from "lucide-react";
+import { useLocation } from "wouter";
 
 const CLINIC_WAITING =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-waiting_b315f67e.jpeg";
@@ -35,7 +36,8 @@ const values = [
 
 export default function AboutSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const [, navigate] = useLocation();
 
   return (
     <section id="nosotros" className="py-24 lg:py-32 bg-white">
@@ -91,14 +93,12 @@ export default function AboutSection() {
                 acompañarte en tu transformación integral, brindándote
                 resultados visibles y duraderos.
               </p>
-              <a
-                href="https://wa.me/523221007799"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => navigate("/appointment-form")}
                 className="inline-flex items-center justify-center bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
               >
-                Agenda tu Valoración
-              </a>
+                Agenda tu Cita
+              </button>
             </div>
           </div>
 

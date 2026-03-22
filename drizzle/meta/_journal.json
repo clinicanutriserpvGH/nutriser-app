@@ -64,6 +64,13 @@
       "when": 1774143802661,
       "tag": "0008_slimy_korvac",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1774147703167,
+      "tag": "0009_certain_hawkeye",
+      "breakpoints": true
     }
   ]
 }

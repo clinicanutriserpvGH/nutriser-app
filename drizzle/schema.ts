@@ -175,3 +175,43 @@ export const giftPurchases = mysqlTable("giftPurchases", {
 
 export type GiftPurchase = typeof giftPurchases.$inferSelect;
 export type InsertGiftPurchase = typeof giftPurchases.$inferInsert;
+
+/**
+ * Ebook
+ * Almacena la información del ebook (solo habrá uno activo a la vez)
+ */
+export const ebooks = mysqlTable("ebooks", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  coverUrl: text("coverUrl"), // URL portada en S3
+  backCoverUrl: text("backCoverUrl"), // URL contraportada en S3
+  pdfUrl: text("pdfUrl"), // URL del PDF en S3 (protegido)
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Ebook = typeof ebooks.$inferSelect;
+export type InsertEbook = typeof ebooks.$inferInsert;
+
+/**
+ * Compras de ebook
+ * Registra cada compra del ebook con su comprobante de pago
+ */
+export const ebookPurchases = mysqlTable("ebookPurchases", {
+  id: int("id").autoincrement().primaryKey(),
+  ebookId: int("ebookId").notNull().references(() => ebooks.id),
+  buyerName: varchar("buyerName", { length: 255 }).notNull(),
+  buyerEmail: varchar("buyerEmail", { length: 320 }).notNull(),
+  proofUrl: text("proofUrl").notNull(), // URL del comprobante en S3
+  accessToken: varchar("accessToken", { length: 64 }).notNull().unique(), // Token único para acceder al PDF
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  approvedAt: timestamp("approvedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EbookPurchase = typeof ebookPurchases.$inferSelect;
+export type InsertEbookPurchase = typeof ebookPurchases.$inferInsert;

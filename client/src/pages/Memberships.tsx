@@ -329,10 +329,10 @@ export default function Memberships() {
                     <strong>Banco:</strong> {BANK_INFO.bank}
                   </p>
                   <p className="text-sm text-[#1A1A1A]/70">
-                    <strong>Cuenta:</strong> {BANK_INFO.account}
+                    <strong>CLABE Interbancaria:</strong> {BANK_INFO.account}
                   </p>
                   <p className="text-xs text-[#1A1A1A]/50 mt-2">
-                    Concepto: {formData.clientName} - {PROGRAMS.find(p => p.id === selectedProgram)?.name}
+                    Concepto: {PROGRAMS.find(p => p.id === selectedProgram)?.name}
                   </p>
                 </div>
 

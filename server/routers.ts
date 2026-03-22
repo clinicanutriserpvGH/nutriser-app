@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
@@ -477,6 +477,143 @@ export const appRouter = router({
     listForAdmin: publicProcedure.query(async () => {
       return await getAllPromotionsForAdmin();
     }),
+  }),
+
+  ebook: router({
+    // Obtener el ebook activo (público)
+    getActive: publicProcedure.query(async () => {
+      return await getActiveEbook();
+    }),
+
+    // Listar todos los ebooks (admin)
+    listAll: publicProcedure.query(async () => {
+      return await getAllEbooks();
+    }),
+
+    // Crear o actualizar el ebook (admin)
+    upsert: publicProcedure
+      .input(z.object({
+        id: z.number().optional(),
+        title: z.string().min(1),
+        description: z.string().optional(),
+        price: z.string().min(1),
+        coverBase64: z.string().optional(),
+        backCoverBase64: z.string().optional(),
+        pdfBase64: z.string().optional(),
+        isActive: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, coverBase64, backCoverBase64, pdfBase64, ...rest } = input;
+        const data: Record<string, unknown> = { ...rest };
+
+        if (coverBase64) {
+          const buf = Buffer.from(coverBase64.split(',')[1] ?? coverBase64, 'base64');
+          const { url } = await storagePut(`ebooks/cover-${Date.now()}.jpg`, buf, 'image/jpeg');
+          data.coverUrl = url;
+        }
+        if (backCoverBase64) {
+          const buf = Buffer.from(backCoverBase64.split(',')[1] ?? backCoverBase64, 'base64');
+          const { url } = await storagePut(`ebooks/backcover-${Date.now()}.jpg`, buf, 'image/jpeg');
+          data.backCoverUrl = url;
+        }
+        if (pdfBase64) {
+          const buf = Buffer.from(pdfBase64.split(',')[1] ?? pdfBase64, 'base64');
+          const { url } = await storagePut(`ebooks/pdf-${Date.now()}.pdf`, buf, 'application/pdf');
+          data.pdfUrl = url;
+        }
+
+        return await upsertEbook({ id, ...data } as any);
+      }),
+
+    // Comprar ebook (público)
+    purchase: publicProcedure
+      .input(z.object({
+        ebookId: z.number(),
+        buyerName: z.string().min(1),
+        buyerEmail: z.string().email(),
+        proofBase64: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const { proofBase64, ...rest } = input;
+        const buf = Buffer.from(proofBase64.split(',')[1] ?? proofBase64, 'base64');
+        const { url: proofUrl } = await storagePut(`ebooks/proof-${Date.now()}.jpg`, buf, 'image/jpeg');
+        const accessToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+        const purchase = await createEbookPurchase({ ...rest, proofUrl, accessToken, status: 'pending' });
+        // Notificar al admin
+        try {
+          const nodemailer = await import('nodemailer');
+          const transporter = nodemailer.default.createTransport({
+            service: 'gmail',
+            auth: { user: ENV.gmailUser, pass: ENV.gmailPassword },
+          });
+          await transporter.sendMail({
+            from: `"Nutriser" <${ENV.gmailUser}>`,
+            to: ENV.gmailUser,
+            subject: `📚 Nueva compra de Ebook - ${rest.buyerName}`,
+            html: `<p><strong>${rest.buyerName}</strong> (${rest.buyerEmail}) compró el ebook. Revisa el panel de administración para autorizar.</p>`,
+          });
+        } catch (e) { console.warn('Email admin ebook error:', e); }
+        return { success: true, purchaseId: purchase.id };
+      }),
+
+    // Listar compras (admin)
+    listPurchases: publicProcedure.query(async () => {
+      return await getAllEbookPurchases();
+    }),
+
+    // Aprobar/rechazar compra (admin)
+    updatePurchaseStatus: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['approved', 'rejected']),
+      }))
+      .mutation(async ({ input }) => {
+        await updateEbookPurchaseStatus(input.id, input.status);
+        if (input.status === 'approved') {
+          // Enviar email al comprador con el token de acceso
+          const purchases = await getAllEbookPurchases();
+          const purchase = purchases.find(p => p.id === input.id);
+          if (purchase) {
+            try {
+              const nodemailer = await import('nodemailer');
+              const transporter = nodemailer.default.createTransport({
+                service: 'gmail',
+                auth: { user: ENV.gmailUser, pass: ENV.gmailPassword },
+              });
+              const accessUrl = `https://nutriserpv.com/ebook/read?token=${purchase.accessToken}`;
+              await transporter.sendMail({
+                from: `"Nutriser" <${ENV.gmailUser}>`,
+                to: purchase.buyerEmail,
+                subject: '📚 Tu acceso al Ebook de Nutriser está listo',
+                html: `
+                  <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#FAF7F2;padding:32px;border-radius:8px">
+                    <h2 style="color:#C5A55A">¡Tu compra fue aprobada!</h2>
+                    <p>Hola <strong>${purchase.buyerName}</strong>,</p>
+                    <p>Tu pago fue verificado. Ya puedes leer tu ebook haciendo clic en el siguiente enlace:</p>
+                    <a href="${accessUrl}" style="display:inline-block;background:#C5A55A;color:#fff;padding:14px 28px;text-decoration:none;border-radius:4px;font-weight:bold;margin:16px 0">Leer mi Ebook</a>
+                    <p style="color:#888;font-size:12px">Este enlace es personal e intransferible. El contenido solo puede visualizarse en línea.</p>
+                    <p style="color:#888;font-size:12px">Nutriser Aesthetic & Nutrition · Puerto Vallarta, Jalisco</p>
+                  </div>
+                `,
+              });
+            } catch (e) { console.warn('Email ebook access error:', e); }
+          }
+        }
+        return { success: true };
+      }),
+
+    // Acceder al PDF con token (público, protegido por token)
+    getAccess: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const purchase = await getEbookPurchaseByToken(input.token);
+        if (!purchase || purchase.status !== 'approved') {
+          throw new Error('Acceso no válido o pendiente de aprobación');
+        }
+        const ebook = await getActiveEbook();
+        if (!ebook) throw new Error('Ebook no encontrado');
+        return { pdfUrl: ebook.pdfUrl, title: ebook.title };
+      }),
   }),
 });
 

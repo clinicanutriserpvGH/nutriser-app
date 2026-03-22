@@ -42,7 +42,7 @@ export default function CtaBanner() {
           <span className="italic">soluciones reales</span>
         </h2>
         <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
-          Agenda tu valoración personalizada y descubre el protocolo ideal para
+          Agenda tu cita personalizada y descubre el protocolo ideal para
           ti.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">

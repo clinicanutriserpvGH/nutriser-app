@@ -11,6 +11,8 @@ import Appointments from "./pages/Appointments";
 import AppointmentForm from "./pages/AppointmentForm";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import EbookStore from "./pages/EbookStore";
+import EbookReader from "./pages/EbookReader";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -23,6 +25,8 @@ function Router() {
       <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin/dashboard"} component={AdminDashboard} />
       <Route path={"/admin/memberships"} component={AdminMemberships} />
+      <Route path={"/ebook"} component={EbookStore} />
+      <Route path={"/ebook/read"} component={EbookReader} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

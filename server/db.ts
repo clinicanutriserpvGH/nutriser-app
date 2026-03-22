@@ -1,6 +1,6 @@
 import { eq, desc, and, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -365,5 +365,73 @@ export async function updateGiftPurchaseStatus(id: number, status: "pending" | "
     status,
     approvedAt: status === "approved" ? new Date() : undefined,
   }).where(eq(giftPurchases.id, id));
+  return { success: true };
+}
+
+// ===== EBOOKS =====
+
+export async function getActiveEbook() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(ebooks).where(eq(ebooks.isActive, true)).limit(1);
+  return result[0] || null;
+}
+
+export async function getAllEbooks() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(ebooks).orderBy(desc(ebooks.createdAt));
+}
+
+export async function upsertEbook(data: Partial<InsertEbook> & { id?: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (data.id) {
+    const { id, ...rest } = data;
+    await db.update(ebooks).set(rest).where(eq(ebooks.id, id));
+    const result = await db.select().from(ebooks).where(eq(ebooks.id, id)).limit(1);
+    return result[0];
+  } else {
+    const result = await db.insert(ebooks).values(data as InsertEbook);
+    const id = (result as any)[0]?.insertId;
+    return { id, ...data };
+  }
+}
+
+export async function createEbookPurchase(data: InsertEbookPurchase) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(ebookPurchases).values(data);
+  const id = (result as any)[0]?.insertId;
+  return { id, ...data };
+}
+
+export async function getAllEbookPurchases() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(ebookPurchases).orderBy(desc(ebookPurchases.createdAt));
+}
+
+export async function getEbookPurchaseByToken(token: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(ebookPurchases).where(eq(ebookPurchases.accessToken, token)).limit(1);
+  return result[0] || null;
+}
+
+export async function updateEbookPurchaseStatus(id: number, status: "pending" | "approved" | "rejected") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(ebookPurchases).set({
+    status,
+    approvedAt: status === "approved" ? new Date() : undefined,
+  }).where(eq(ebookPurchases.id, id));
   return { success: true };
 }

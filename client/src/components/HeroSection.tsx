@@ -4,7 +4,7 @@
  * Gold accent lines, Playfair Display headline, fade-in animations
  */
 import { motion } from "framer-motion";
-import { ChevronDown, Gift } from "lucide-react";
+import { ChevronDown, Gift, BookOpen } from "lucide-react";
 
 const HERO_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-reception_c595cea6.jpeg";
@@ -76,6 +76,13 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.9 }}
             className="flex flex-col sm:flex-row gap-4"
           >
+            <a
+              href="/ebook"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
+            >
+              <BookOpen className="w-5 h-5" />
+              Tienda eBook
+            </a>
             <a
               href="/memberships"
               className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A] text-[#C5A55A] px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A]"

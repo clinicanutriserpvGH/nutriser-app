@@ -16,6 +16,7 @@ const navLinks = [
   { label: "Servicios", href: "#servicios" },
   { label: "Nosotros", href: "#nosotros" },
   { label: "Contacto", href: "#contacto" },
+  { label: "Tienda eBook", href: "/ebook" },
   { label: "Comprar Programa Nutrición", href: "/memberships" },
   { label: "Administración", href: "/admin/login" },
 ];

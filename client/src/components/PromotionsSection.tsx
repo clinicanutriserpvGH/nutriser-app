@@ -151,9 +151,10 @@ export default function PromotionsSection() {
   };
 
   const handleCopyLink = (id: number, title: string, description: string | null) => {
-    navigator.clipboard.writeText(`🎁 ${title}\n\n${description || ""}`);
+    const shareUrl = `https://nutriserpv.com/#cupon-${id}`;
+    navigator.clipboard.writeText(`🎁 *${title}*\n\n${description || ""}\n\n${shareUrl}`);
     setCopiedId(id);
-    toast.success("Cupón copiado");
+    toast.success("Cupón copiado al portapapeles");
     setTimeout(() => setCopiedId(null), 2000);
   };
 

@@ -304,3 +304,6 @@
 ## Link directo a cupón específico
 - [x] Agregar ID a cada tarjeta de cupón y scroll automático al abrir link compartido
 - [x] Resaltar visualmente el cupón al que apunta el link
+
+## Link directo en todos los botones de compartir
+- [x] Incluir vínculo directo al cupón en Email y Copiar link (igual que WhatsApp)

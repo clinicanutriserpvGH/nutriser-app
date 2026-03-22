@@ -78,6 +78,13 @@
       "when": 1774149190297,
       "tag": "0010_polite_piledriver",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1774150989265,
+      "tag": "0011_sudden_jack_power",
+      "breakpoints": true
     }
   ]
 }

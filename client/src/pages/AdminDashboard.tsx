@@ -1159,6 +1159,11 @@ export default function AdminDashboard() {
                             </div>
                             <p className="font-bold text-[#1A1A1A]">{purchase.buyerName}</p>
                             <p className="text-sm text-[#666]">{purchase.buyerEmail}</p>
+                            {purchase.referredBy && (
+                              <p className="text-xs text-[#C5A55A] mt-1 font-medium">
+                                📣 Recomendado por: <span className="font-bold">{purchase.referredBy}</span>
+                              </p>
+                            )}
                             <p className="text-xs text-[#999] mt-1">
                               {new Date(purchase.createdAt).toLocaleDateString('es-MX', {
                                 year: 'numeric', month: 'long', day: 'numeric',

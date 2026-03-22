@@ -1,0 +1,1 @@
+ALTER TABLE `ebookPurchases` ADD `referredBy` varchar(255);

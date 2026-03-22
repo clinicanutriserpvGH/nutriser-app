@@ -532,6 +532,7 @@ export const appRouter = router({
         buyerName: z.string().min(1),
         buyerEmail: z.string().email(),
         proofBase64: z.string().min(1),
+        referredBy: z.string().optional(), // Nombre del comprador que recomendó
       }))
       .mutation(async ({ input }) => {
         const { proofBase64, ...rest } = input;
@@ -546,11 +547,12 @@ export const appRouter = router({
             service: 'gmail',
             auth: { user: ENV.gmailUser, pass: ENV.gmailPassword },
           });
+          const referralNote = rest.referredBy ? `<p><em>Recomendado por: <strong>${rest.referredBy}</strong></em></p>` : '';
           await transporter.sendMail({
             from: `"Nutriser" <${ENV.gmailUser}>`,
             to: ENV.gmailUser,
             subject: `📚 Nueva compra de Ebook - ${rest.buyerName}`,
-            html: `<p><strong>${rest.buyerName}</strong> (${rest.buyerEmail}) compró el ebook. Revisa el panel de administración para autorizar.</p>`,
+            html: `<p><strong>${rest.buyerName}</strong> (${rest.buyerEmail}) compró el ebook. Revisa el panel de administración para autorizar.</p>${referralNote}`,
           });
         } catch (e) { console.warn('Email admin ebook error:', e); }
         return { success: true, purchaseId: purchase.id };

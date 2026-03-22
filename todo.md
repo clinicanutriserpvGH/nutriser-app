@@ -381,3 +381,10 @@
 - [x] Actualizar panel admin: confirmación antes de aprobar, badge de credenciales enviadas
 - [x] Agregar ruta /ebook/login en App.tsx
 - [x] Tests para ebook.login (9 tests pasan en total)
+
+## Sistema de Referidos eBook
+- [x] Agregar columna referredBy en tabla ebookPurchases
+- [x] Capturar parámetro ?ref= en la URL de la tienda eBook
+- [x] Guardar el referido al crear la compra
+- [x] Mostrar botón "Recomendar por WhatsApp" en el paso de confirmación
+- [x] Mostrar el referido en el panel admin de compras

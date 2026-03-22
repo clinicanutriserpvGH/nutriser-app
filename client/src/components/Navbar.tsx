@@ -5,7 +5,7 @@
  * Uses real Nutriser logo
  */
 import { useState, useEffect } from "react";
-import { Menu, X, Phone, Instagram, Facebook } from "lucide-react";
+import { Menu, X, Phone, Instagram, Facebook, Ruler } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const LOGO_URL =
@@ -115,6 +115,16 @@ export default function Navbar({ lightBg = false }: NavbarProps) {
               >
                 <Facebook className="w-4 h-4" />
               </a>
+              {/* Portal de Salud Button */}
+              <a
+                href="https://nutriserseguimiento.manus.space"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-[#1A1A1A] text-[#C5A55A] px-5 py-2.5 text-sm tracking-[0.1em] uppercase border-2 border-[#C5A55A] transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/20"
+              >
+                <Ruler className="w-3.5 h-3.5" />
+                Portal de Salud
+              </a>
               {/* Call Button */}
               <a
                 href="tel:3224503257"
@@ -176,6 +186,15 @@ export default function Navbar({ lightBg = false }: NavbarProps) {
                 transition={{ delay: 0.4 }}
                 className="flex flex-col gap-4 mt-4"
               >
+                <a
+                  href="https://nutriserseguimiento.manus.space"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-[#1A1A1A] text-[#C5A55A] px-6 py-3 font-serif text-lg w-fit border-2 border-[#C5A55A] hover:bg-[#C5A55A] hover:text-[#1A1A1A] transition-colors"
+                >
+                  <Ruler className="w-5 h-5" />
+                  Ingresa a tu Portal de Salud
+                </a>
                 <a
                   href="tel:3224503257"
                   className="inline-flex items-center gap-2 bg-[#C5A55A] text-white px-6 py-3 font-serif text-lg w-fit hover:bg-[#B8963E] transition-colors"

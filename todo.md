@@ -410,3 +410,9 @@
 
 - [x] Agregar "Acceso a seguimiento online" al Programa Básico
 - [x] Agregar "10% de descuento en compra de eBook" al Programa Premium
+
+## Portal de Salud - Sesión Actual
+
+- [x] Agregar botón "Ingresa a tu Portal de Salud Nutriser" con ícono de cinta de medir en Navbar
+- [x] Agregar botón "Ingresa a tu Portal de Salud Nutriser" con ícono de cinta de medir en HeroSection
+- [x] Enlace apunta a https://nutriserseguimiento.manus.space

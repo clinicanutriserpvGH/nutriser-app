@@ -4,7 +4,7 @@
  * Gold accent lines, Playfair Display headline, fade-in animations
  */
 import { motion } from "framer-motion";
-import { ChevronDown, Gift, BookOpen } from "lucide-react";
+import { ChevronDown, Gift, BookOpen, Ruler } from "lucide-react";
 
 const HERO_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-reception_c595cea6.jpeg";
@@ -103,6 +103,15 @@ export default function HeroSection() {
               className="inline-flex items-center justify-center bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
             >
               Agenda por WhatsApp
+            </a>
+            <a
+              href="https://nutriserseguimiento.manus.space"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
+            >
+              <Ruler className="w-5 h-5" />
+              Portal de Salud Nutriser
             </a>
             <motion.button
               onClick={(e) => {

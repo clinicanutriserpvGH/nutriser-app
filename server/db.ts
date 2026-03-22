@@ -425,13 +425,26 @@ export async function getEbookPurchaseByToken(token: string) {
   return result[0] || null;
 }
 
-export async function updateEbookPurchaseStatus(id: number, status: "pending" | "approved" | "rejected") {
+export async function updateEbookPurchaseStatus(id: number, status: "pending" | "approved" | "rejected", accessPasswordHash?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
   await db.update(ebookPurchases).set({
     status,
     approvedAt: status === "approved" ? new Date() : undefined,
+    ...(accessPasswordHash ? { accessPasswordHash } : {}),
   }).where(eq(ebookPurchases.id, id));
   return { success: true };
+}
+
+export async function getEbookPurchaseByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Obtener la compra aprobada más reciente para este email
+  const result = await db.select().from(ebookPurchases)
+    .where(eq(ebookPurchases.buyerEmail, email))
+    .orderBy(desc(ebookPurchases.createdAt))
+    .limit(1);
+  return result[0] || null;
 }

@@ -358,3 +358,26 @@
 - [x] Agregar "Tienda eBook" en Navbar.tsx
 - [x] Agregar botón "Tienda eBook" en HeroSection.tsx
 - [x] Escribir 7 tests de vitest para el sistema eBook (todos pasan)
+
+## Correcciones eBook - Sesión Actual
+
+- [ ] Corregir botón "Actualizar eBook" que no hace nada al presionar
+- [ ] Implementar sistema de acceso seguro: correo + contraseña para compradores
+- [ ] Guardar credenciales de acceso en BD al aprobar compra
+- [ ] Enviar correo al comprador con su correo y contraseña de acceso
+- [ ] Crear página de login para acceder al eBook
+- [ ] Proteger visor PDF: solo accesible con credenciales válidas
+- [ ] Panel admin: mostrar credenciales de acceso de cada comprador
+
+## Correcciones Sesión Actual - Sistema eBook Seguro
+
+- [x] Corregir correo GMAIL_USER a clinicanutriserpv@gmail.com en secretos
+- [x] Eliminar correos hardcodeados incorrectos del código del servidor
+- [x] Agregar campo accessPasswordHash a tabla ebookPurchases
+- [x] Generar contraseña automática al aprobar compra de eBook
+- [x] Enviar credenciales (correo + contraseña) por email al aprobar
+- [x] Crear página /ebook/login con formulario de acceso seguro
+- [x] Actualizar visor PDF para soportar acceso por sessionStorage (login)
+- [x] Actualizar panel admin: confirmación antes de aprobar, badge de credenciales enviadas
+- [x] Agregar ruta /ebook/login en App.tsx
+- [x] Tests para ebook.login (9 tests pasan en total)

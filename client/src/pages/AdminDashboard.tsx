@@ -1116,11 +1116,14 @@ export default function AdminDashboard() {
                             {purchase.status === 'pending' && (
                               <>
                                 <button
-                                  onClick={() => updateEbookPurchaseMutation.mutate({ id: purchase.id, status: 'approved' })}
+                                  onClick={() => {
+                                    if (confirm(`¿Aprobar la compra de ${purchase.buyerName}?\n\nSe generará una contraseña automática y se enviará por correo a ${purchase.buyerEmail}.`))
+                                      updateEbookPurchaseMutation.mutate({ id: purchase.id, status: 'approved' });
+                                  }}
                                   disabled={updateEbookPurchaseMutation.isPending}
                                   className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium disabled:opacity-50"
                                 >
-                                  Aprobar
+                                  ✅ Aprobar y enviar acceso
                                 </button>
                                 <button
                                   onClick={() => updateEbookPurchaseMutation.mutate({ id: purchase.id, status: 'rejected' })}
@@ -1130,6 +1133,12 @@ export default function AdminDashboard() {
                                   Rechazar
                                 </button>
                               </>
+                            )}
+                            {purchase.status === 'approved' && (
+                              <div className="flex items-center gap-1 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
+                                <span>🔑</span>
+                                Credenciales enviadas por correo
+                              </div>
                             )}
                           </div>
                         </div>

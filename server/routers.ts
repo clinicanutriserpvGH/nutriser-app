@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, getEbookPurchaseByEmail } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
@@ -568,9 +568,14 @@ export const appRouter = router({
         status: z.enum(['approved', 'rejected']),
       }))
       .mutation(async ({ input }) => {
-        await updateEbookPurchaseStatus(input.id, input.status);
         if (input.status === 'approved') {
-          // Enviar email al comprador con el token de acceso
+          // Generar contraseña aleatoria segura (8 caracteres alfanuméricos)
+          const rawPassword = Math.random().toString(36).slice(2, 6).toUpperCase() +
+            Math.random().toString(36).slice(2, 6);
+          const passwordHash = await bcrypt.hash(rawPassword, 10);
+          await updateEbookPurchaseStatus(input.id, input.status, passwordHash);
+
+          // Obtener la compra para enviar email
           const purchases = await getAllEbookPurchases();
           const purchase = purchases.find(p => p.id === input.id);
           if (purchase) {
@@ -580,7 +585,7 @@ export const appRouter = router({
                 service: 'gmail',
                 auth: { user: ENV.gmailUser, pass: ENV.gmailPassword },
               });
-              const accessUrl = `https://nutriserpv.com/ebook/read?token=${purchase.accessToken}`;
+              const loginUrl = `https://nutriserpv.com/ebook/login`;
               await transporter.sendMail({
                 from: `"Nutriser" <${ENV.gmailUser}>`,
                 to: purchase.buyerEmail,
@@ -589,20 +594,55 @@ export const appRouter = router({
                   <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#FAF7F2;padding:32px;border-radius:8px">
                     <h2 style="color:#C5A55A">¡Tu compra fue aprobada!</h2>
                     <p>Hola <strong>${purchase.buyerName}</strong>,</p>
-                    <p>Tu pago fue verificado. Ya puedes leer tu ebook haciendo clic en el siguiente enlace:</p>
-                    <a href="${accessUrl}" style="display:inline-block;background:#C5A55A;color:#fff;padding:14px 28px;text-decoration:none;border-radius:4px;font-weight:bold;margin:16px 0">Leer mi Ebook</a>
-                    <p style="color:#888;font-size:12px">Este enlace es personal e intransferible. El contenido solo puede visualizarse en línea.</p>
-                    <p style="color:#888;font-size:12px">Nutriser Aesthetic & Nutrition · Puerto Vallarta, Jalisco</p>
+                    <p>Tu pago fue verificado. Aquí están tus credenciales de acceso al ebook:</p>
+                    <div style="background:#fff;border:1px solid #C5A55A;border-radius:8px;padding:20px;margin:16px 0">
+                      <p style="margin:4px 0"><strong>Correo:</strong> ${purchase.buyerEmail}</p>
+                      <p style="margin:4px 0"><strong>Contraseña:</strong> <span style="font-family:monospace;font-size:18px;color:#C5A55A">${rawPassword}</span></p>
+                    </div>
+                    <a href="${loginUrl}" style="display:inline-block;background:#C5A55A;color:#fff;padding:14px 28px;text-decoration:none;border-radius:4px;font-weight:bold;margin:16px 0">Acceder a mi Ebook</a>
+                    <p style="color:#888;font-size:12px">Guarda estas credenciales. Son personales e intransferibles. El contenido solo puede visualizarse en línea.</p>
+                    <p style="color:#888;font-size:12px">Nutriser Aesthetic &amp; Nutrition · Puerto Vallarta, Jalisco</p>
                   </div>
                 `,
               });
             } catch (e) { console.warn('Email ebook access error:', e); }
           }
+        } else {
+          await updateEbookPurchaseStatus(input.id, input.status);
         }
         return { success: true };
       }),
 
-    // Acceder al PDF con token (público, protegido por token)
+    // Login con correo y contraseña para acceder al ebook
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const purchase = await getEbookPurchaseByEmail(input.email);
+        if (!purchase || purchase.status !== 'approved') {
+          throw new Error('Correo no encontrado o compra pendiente de aprobación');
+        }
+        if (!purchase.accessPasswordHash) {
+          throw new Error('Credenciales no configuradas. Contacta a Nutriser.');
+        }
+        const isValid = await bcrypt.compare(input.password, purchase.accessPasswordHash);
+        if (!isValid) {
+          throw new Error('Contraseña incorrecta');
+        }
+        const ebook = await getActiveEbook();
+        if (!ebook || !ebook.pdfUrl) throw new Error('Ebook no disponible');
+        return {
+          pdfUrl: ebook.pdfUrl,
+          title: ebook.title,
+          buyerName: purchase.buyerName,
+          // Devolver token para sesión temporal
+          accessToken: purchase.accessToken,
+        };
+      }),
+
+    // Acceder al PDF con token (público, protegido por token) - mantenido para compatibilidad
     getAccess: publicProcedure
       .input(z.object({ token: z.string() }))
       .query(async ({ input }) => {

@@ -15,6 +15,7 @@ vi.mock("./db", async (importOriginal) => {
     getActiveEbook: vi.fn(),
     getAllEbooks: vi.fn(),
     getEbookPurchaseByToken: vi.fn(),
+    getEbookPurchaseByEmail: vi.fn(),
     getAllEbookPurchases: vi.fn(),
     createEbookPurchase: vi.fn(),
     updateEbookPurchaseStatus: vi.fn(),
@@ -149,6 +150,44 @@ describe("ebook.getAccess", () => {
 
     expect(result.pdfUrl).toBe("https://cdn.example.com/ebook.pdf");
     expect(result.title).toBe("Guía Nutricional Nutriser");
+  });
+});
+
+describe("ebook.login", () => {
+  it("lanza error cuando el correo no existe", async () => {
+    const { getEbookPurchaseByEmail } = await import("./db");
+    vi.mocked(getEbookPurchaseByEmail).mockResolvedValueOnce(null);
+
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await expect(
+      caller.ebook.login({ email: "noexiste@example.com", password: "abc123" })
+    ).rejects.toThrow("Correo no encontrado o compra pendiente de aprobación");
+  });
+
+  it("lanza error cuando la compra está pendiente", async () => {
+    const { getEbookPurchaseByEmail } = await import("./db");
+    vi.mocked(getEbookPurchaseByEmail).mockResolvedValueOnce({
+      id: 1,
+      ebookId: 1,
+      buyerName: "Test User",
+      buyerEmail: "test@example.com",
+      proofUrl: "https://cdn.example.com/proof.jpg",
+      accessToken: "token-1",
+      accessPasswordHash: null,
+      status: "pending",
+      approvedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await expect(
+      caller.ebook.login({ email: "test@example.com", password: "abc123" })
+    ).rejects.toThrow("Correo no encontrado o compra pendiente de aprobación");
   });
 });
 

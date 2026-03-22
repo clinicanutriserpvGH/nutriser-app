@@ -207,6 +207,7 @@ export const ebookPurchases = mysqlTable("ebookPurchases", {
   buyerEmail: varchar("buyerEmail", { length: 320 }).notNull(),
   proofUrl: text("proofUrl").notNull(), // URL del comprobante en S3
   accessToken: varchar("accessToken", { length: 64 }).notNull().unique(), // Token único para acceder al PDF
+  accessPasswordHash: varchar("accessPasswordHash", { length: 255 }), // Contraseña hasheada para login seguro
   status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
   approvedAt: timestamp("approvedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

@@ -1,0 +1,1 @@
+ALTER TABLE `ebookPurchases` ADD `accessPasswordHash` varchar(255);

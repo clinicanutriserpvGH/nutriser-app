@@ -437,12 +437,12 @@ export const appRouter = router({
       .input(z.object({
         title: z.string().min(1),
         description: z.string().optional(),
-        imageUrl: z.string().url(),
         expiresAt: z.string().optional(), // ISO date string
       }))
       .mutation(async ({ input }) => {
         return await createPromotion({
-          ...input,
+          title: input.title,
+          description: input.description,
           expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
           isActive: true,
         });
@@ -453,7 +453,6 @@ export const appRouter = router({
         id: z.number(),
         title: z.string().optional(),
         description: z.string().optional(),
-        imageUrl: z.string().url().optional(),
         isActive: z.boolean().optional(),
         expiresAt: z.string().nullable().optional(), // ISO date string or null
       }))

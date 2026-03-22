@@ -138,7 +138,7 @@ export const promotions = mysqlTable("promotions", {
   id: int("id").autoincrement().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-  imageUrl: text("imageUrl").notNull(), // URL de S3
+  imageUrl: text("imageUrl"), // URL de imagen (opcional)
   isActive: boolean("isActive").default(true).notNull(),
   expiresAt: timestamp("expiresAt"), // Fecha límite para canjear el cupón (null = sin vencimiento)
   createdAt: timestamp("createdAt").defaultNow().notNull(),

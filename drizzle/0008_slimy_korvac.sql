@@ -1,0 +1,1 @@
+ALTER TABLE `promotions` MODIFY COLUMN `imageUrl` text;

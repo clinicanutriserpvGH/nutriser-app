@@ -307,3 +307,6 @@
 
 ## Link directo en todos los botones de compartir
 - [x] Incluir vínculo directo al cupón en Email y Copiar link (igual que WhatsApp)
+
+## Bug: Error imageUrl al crear promoción
+- [x] Eliminar campo imageUrl de promociones (ya no se usan imágenes en cupónes)

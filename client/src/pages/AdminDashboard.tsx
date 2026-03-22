@@ -17,7 +17,6 @@ export default function AdminDashboard() {
   const [isLoadingProof, setIsLoadingProof] = useState(false);
   const [promotionTitle, setPromotionTitle] = useState("");
   const [promotionDescription, setPromotionDescription] = useState("");
-  const [promotionImage, setPromotionImage] = useState<File | null>(null);
   const [promotionExpiresAt, setPromotionExpiresAt] = useState("");
 
   // Horarios fijos de la clínica
@@ -225,7 +224,6 @@ export default function AdminDashboard() {
       toast.success("Promoción publicada exitosamente");
       setPromotionTitle("");
       setPromotionDescription("");
-      setPromotionImage(null);
       setPromotionExpiresAt("");
       utils.promotions.listForAdmin.invalidate();
       utils.promotions.list.invalidate();
@@ -246,41 +244,16 @@ export default function AdminDashboard() {
     },
   });
 
-  const handlePublishPromotion = async () => {
+  const handlePublishPromotion = () => {
     if (!promotionTitle.trim()) {
       toast.error("Ingresa un título para la promoción");
       return;
     }
-
-    try {
-      let imageUrl = '/api/logo';
-      
-      if (promotionImage) {
-        const formData = new FormData();
-        formData.append('file', promotionImage);
-        
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (!uploadResponse.ok) {
-          throw new Error('Error al subir imagen');
-        }
-        
-        const { url } = await uploadResponse.json();
-        imageUrl = url;
-      }
-      
-      createPromotionMutation.mutate({
-        title: promotionTitle,
-        description: promotionDescription,
-        imageUrl: imageUrl,
-        expiresAt: promotionExpiresAt ? new Date(promotionExpiresAt).toISOString() : undefined,
-      });
-    } catch (error) {
-      toast.error("Error al subir imagen: " + (error instanceof Error ? error.message : "Error desconocido"));
-    }
+    createPromotionMutation.mutate({
+      title: promotionTitle,
+      description: promotionDescription,
+      expiresAt: promotionExpiresAt ? new Date(promotionExpiresAt).toISOString() : undefined,
+    });
   };
 
   // Get the selected appointment to display its time
@@ -758,7 +731,7 @@ export default function AdminDashboard() {
                       </p>
                     )}
                   </div>
-                  {/* Campo de imagen removido - ahora usa cupón automático */}
+
                   <Button
                     onClick={handlePublishPromotion}
                     disabled={createPromotionMutation.isPending}

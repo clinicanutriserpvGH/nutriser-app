@@ -1,0 +1,46 @@
+{
+  "query": "SELECT * FROM ebookDiscountCodes;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT * FROM ebookDiscountCodes;",
+  "rows": [
+    {
+      "id": "1",
+      "code": "ebook10",
+      "discountPercent": "10",
+      "isActive": "0",
+      "description": "10% de descuento en el eBook",
+      "createdAt": "2026-03-22 03:53:54",
+      "updatedAt": "2026-03-22 03:53:54"
+    },
+    {
+      "id": "2",
+      "code": "ebook20",
+      "discountPercent": "20",
+      "isActive": "0",
+      "description": "20% de descuento en el eBook",
+      "createdAt": "2026-03-22 03:53:54",
+      "updatedAt": "2026-03-22 03:53:54"
+    },
+    {
+      "id": "3",
+      "code": "ebook30",
+      "discountPercent": "30",
+      "isActive": "0",
+      "description": "30% de descuento en el eBook",
+      "createdAt": "2026-03-22 03:53:54",
+      "updatedAt": "2026-03-22 03:53:54"
+    },
+    {
+      "id": "4",
+      "code": "ebookfree",
+      "discountPercent": "100",
+      "isActive": "0",
+      "description": "eBook gratuito (100% de descuento)",
+      "createdAt": "2026-03-22 03:53:54",
+      "updatedAt": "2026-03-22 03:53:54"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcode\tdiscountPercent\tisActive\tdescription\tcreatedAt\tupdatedAt\n1\tebook10\t10\t0\t10% de descuento en el eBook\t2026-03-22 03:53:54\t2026-03-22 03:53:54\n2\tebook20\t20\t0\t20% de descuento en el eBook\t2026-03-22 03:53:54\t2026-03-22 03:53:54\n3\tebook30\t30\t0\t30% de descuento en el eBook\t2026-03-22 03:53:54\t2026-03-22 03:53:54\n4\tebookfree\t100\t0\teBook gratuito (100% de descuento)\t2026-03-22 03:53:54\t2026-03-22 03:53:54\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

@@ -1,0 +1,19 @@
+{
+  "query": "SHOW TABLES LIKE '%ebook%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SHOW TABLES LIKE '%ebook%';",
+  "rows": [
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG (%ebook%)": "ebookDiscountCodes"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG (%ebook%)": "ebookPurchases"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG (%ebook%)": "ebooks"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_7jSTACnGYyADJrX65GKurG (%ebook%)\nebookDiscountCodes\nebookPurchases\nebooks\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

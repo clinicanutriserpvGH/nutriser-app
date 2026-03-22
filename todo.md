@@ -322,3 +322,7 @@
 ## Correcciones formulario y mapa
 - [x] Cambiar "Agenda tu valoración" por "Agenda tu cita" en el formulario
 - [x] Corregir ubicación del mapa a Emiliano Zapata #2, Col. Valentín Gómez Farías, Puerto Vallarta
+
+## Mejoras ContactSection y ServicesSection
+- [x] Agregar botón "Cuponera Nutriser" en la sección de contacto con vínculo a la sección de cupones
+- [x] Personalizar mensaje de WhatsApp en botón "Consultar" de cada servicio con su nombre específico

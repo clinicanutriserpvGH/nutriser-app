@@ -175,6 +175,17 @@ export default function ContactSection() {
                   <Gift className="w-4 h-4" />
                   Programas
                 </button>
+                <button
+                  onClick={() => {
+                    const el = document.getElementById("promociones");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="col-span-2 flex items-center justify-center gap-2 bg-[#1A1A1A] border-2 border-[#C5A55A] text-[#C5A55A] px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] relative overflow-hidden"
+                >
+                  <span className="relative w-2 h-2 rounded-full bg-[#C5A55A] flex-shrink-0 animate-pulse" />
+                  <Gift className="w-4 h-4" />
+                  Cuponera Nutriser
+                </button>
               </div>
 
               {/* Social Links */}

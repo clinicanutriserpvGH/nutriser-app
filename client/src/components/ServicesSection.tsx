@@ -257,7 +257,7 @@ export default function ServicesSection() {
                 {service.desc}
               </p>
               <a
-                href="https://wa.me/523221007799"
+                href={`https://wa.me/523221007799?text=${encodeURIComponent(`Me gustaría pedir informes sobre ${service.name}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 mt-4 text-[#C5A55A] text-xs tracking-[0.1em] uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300"

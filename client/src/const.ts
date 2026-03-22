@@ -1,5 +1,8 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
+// Dominio oficial de Nutriser - siempre usar este en links compartidos
+export const OFFICIAL_DOMAIN = "https://nutriserpv.com";
+
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;

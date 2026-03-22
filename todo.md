@@ -395,3 +395,6 @@
 - [ ] Backend: validar código de descuento y calcular precio final
 - [ ] Frontend: campo de código de descuento en tienda eBook con validación en tiempo real
 - [ ] Panel admin: activar/desactivar códigos de descuento del eBook
+
+## Dominio Oficial
+- [x] Corregir links generados para usar siempre nutriserpv.com (no dominios de Manus)

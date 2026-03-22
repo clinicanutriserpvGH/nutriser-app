@@ -10,6 +10,7 @@ import { ArrowLeft, BookOpen, Upload, Clock, CheckCircle, ShoppingCart, Eye, X, 
 import { useLocation } from "wouter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { OFFICIAL_DOMAIN } from "@/const";
 
 const BANK_INFO = {
   bank: "Banamex",
@@ -381,7 +382,7 @@ export default function EbookStore() {
 
                   {/* Botón de recomendar por WhatsApp */}
                   {(() => {
-                    const referralUrl = `${window.location.origin}/ebook`;
+                    const referralUrl = `${OFFICIAL_DOMAIN}/ebook`;
                     const whatsappMsg = encodeURIComponent(
                       `📚 *¡Te recomiendo este eBook de Nutriser!*\n\n` +
                       `*"${ebook.title}"*\n` +
@@ -633,7 +634,7 @@ export default function EbookStore() {
           {step === "success" && (() => {
             // Generar link de referido con el nombre del comprador
             const refName = encodeURIComponent(formData.buyerName);
-            const referralUrl = `${window.location.origin}/ebook?ref=${refName}`;
+            const referralUrl = `${OFFICIAL_DOMAIN}/ebook?ref=${refName}`;
             const whatsappMsg = encodeURIComponent(
               `📚 *¡Acabo de comprar el eBook "${ebook.title}" de Nutriser!*\n\n` +
               `Es un libro increíble sobre nutrición y hábitos alimentarios. ¡Te lo recomiendo mucho!\n\n` +

@@ -74,18 +74,18 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="flex flex-col sm:flex-row gap-4"
+            className="grid grid-cols-2 gap-4 max-w-2xl"
           >
             <a
               href="/ebook"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
             >
               <BookOpen className="w-5 h-5" />
               Tienda eBook
             </a>
             <a
               href="/memberships"
-              className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A] text-[#C5A55A] px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A]"
+              className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A] text-[#C5A55A] px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A]"
             >
               <Gift className="w-5 h-5" />
               Comprar Programa Nutrición
@@ -94,7 +94,7 @@ export default function HeroSection() {
               href="https://portaldesaludnutriser.club"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
             >
               <Ruler className="w-5 h-5" />
               Portal de Salud Nutriser
@@ -105,7 +105,7 @@ export default function HeroSection() {
                 const el = document.querySelector("#promociones");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}
-              className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A] text-[#C5A55A] px-10 py-5 text-base tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group"
+              className="relative col-span-2 inline-flex items-center justify-center gap-3 bg-[#1A1A1A] text-[#C5A55A] px-10 py-5 text-base tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group"
               animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
               transition={{ duration: 1.2, repeat: Infinity }}
             >

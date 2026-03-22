@@ -296,7 +296,10 @@ export async function deletePromotion(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  // Hard delete - elimina completamente de la base de datos
+  // Primero eliminar las compras de cupones asociadas (FK constraint)
+  await db.delete(giftPurchases).where(eq(giftPurchases.promotionId, id));
+  
+  // Luego eliminar la promoción
   await db.delete(promotions).where(eq(promotions.id, id));
 }
 

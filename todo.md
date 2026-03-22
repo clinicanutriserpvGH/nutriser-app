@@ -423,3 +423,8 @@
 - [x] Hero: Eliminar botón "Agenda por WhatsApp"
 - [x] Hero: Dejar solo 4 botones: Tienda eBook, Comprar Programa Nutrición, Portal de Salud Nutriser, Cuponera Nutriser
 - [x] Navbar: Agregar botón "Agenda tu Cita" que lleva al formulario /appointment-form
+
+## Correcciones Sesión Actual
+
+- [x] Hero desktop: reorganizar 4 botones en 2 filas de 2 para que no se corten
+- [x] Admin: corregir error al eliminar promociones/cupones

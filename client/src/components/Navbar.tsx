@@ -117,7 +117,7 @@ export default function Navbar({ lightBg = false }: NavbarProps) {
               </a>
               {/* Portal de Salud Button */}
               <a
-                href="https://nutriserseguimiento.manus.space"
+                href="https://portaldesaludnutriser.club"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-[#1A1A1A] text-[#C5A55A] px-5 py-2.5 text-sm tracking-[0.1em] uppercase border-2 border-[#C5A55A] transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/20"
@@ -187,7 +187,7 @@ export default function Navbar({ lightBg = false }: NavbarProps) {
                 className="flex flex-col gap-4 mt-4"
               >
                 <a
-                  href="https://nutriserseguimiento.manus.space"
+                  href="https://portaldesaludnutriser.club"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-[#1A1A1A] text-[#C5A55A] px-6 py-3 font-serif text-lg w-fit border-2 border-[#C5A55A] hover:bg-[#C5A55A] hover:text-[#1A1A1A] transition-colors"

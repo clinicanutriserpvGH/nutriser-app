@@ -113,7 +113,7 @@ export default function AppointmentForm() {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Agenda tu Valoración</h1>
+          <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Agenda tu Cita</h1>
           <p className="text-lg text-[#1A1A1A]/60">
             Completa el formulario y nos pondremos en contacto para confirmar tu cita
           </p>

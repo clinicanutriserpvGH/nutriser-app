@@ -223,7 +223,7 @@ export default function ContactSection() {
             <div className="relative">
               <div className="aspect-[4/3] lg:aspect-auto lg:h-full min-h-[400px] overflow-hidden border border-white/10">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3733.7!2d-105.2305!3d20.6128!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x842145a1b0c0a0a1%3A0x0!2sEmiliano+Zapata+2%2C+Valent%C3%ADn+G%C3%B3mez+Far%C3%ADas%2C+Puerto+Vallarta%2C+Jalisco!5e0!3m2!1ses!2smx!4v1"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3733.5!2d-105.2265714!3d20.6308619!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x84214f82065d24d5%3A0xeb2ab02e8b0e0702!2sNutriser!5e0!3m2!1ses!2smx!4v1774144000000"
                   width="100%"
                   height="100%"
                   style={{ border: 0, filter: "grayscale(0.3) contrast(1.1)" }}

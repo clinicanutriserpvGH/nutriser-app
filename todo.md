@@ -318,3 +318,7 @@
 ## Renombrar textos globales
 - [x] "Promociones Vigentes" → "Cuponera Nutriser" en hero
 - [x] "Adquirir Programa" → "Comprar Programa Nutrición" en navbar, hero, CTA y demás
+
+## Correcciones formulario y mapa
+- [x] Cambiar "Agenda tu valoración" por "Agenda tu cita" en el formulario
+- [x] Corregir ubicación del mapa a Emiliano Zapata #2, Col. Valentín Gómez Farías, Puerto Vallarta

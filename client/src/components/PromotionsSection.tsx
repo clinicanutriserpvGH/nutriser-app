@@ -225,17 +225,16 @@ export default function PromotionsSection() {
   };
 
   const handleShareWhatsApp = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null; imageUrl?: string | null }) => {
-    const shareUrl = `https://nutriserpv.com/cupon/${promo.id}`;
+    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promo.id}`;
     const priceText = promo.regularPrice && promo.price
       ? `\n💰 Antes: ~${promo.regularPrice}~ → *Ahora: ${promo.price}*`
       : promo.price ? `\n💰 Precio: *${promo.price}*` : "";
-    // El link va AL INICIO para que WhatsApp genere la vista previa con imagen
     const text = `${shareUrl}\n\n🔥 *¡OFERTA ESPECIAL NUTRISER!* 🔥\n\n🎁 *${promo.title}*\n${promo.description || ""}${priceText}\n\n✅ Adquiere tu cupón directamente en el link de arriba`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   const handleCopyLink = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null }) => {
-    const shareUrl = `https://nutriserpv.com/cupon/${promo.id}`;
+    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promo.id}`;
     navigator.clipboard.writeText(shareUrl);
     setCopiedId(promo.id);
     toast.success("¡Link copiado! Pégalo en Facebook, Instagram o donde quieras 🎉");

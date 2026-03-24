@@ -87,7 +87,7 @@ async function startServer() {
         ? ` | Antes: ${promo.regularPrice} \u2192 Ahora: ${promo.price}`
         : promo.price ? ` | ${promo.price}` : "";
       const fullDescription = description + priceInfo;
-      const canonicalUrl = `https://nutriserpv.com/cupon/${promoId}`;
+      const canonicalUrl = `https://nutriserpv.com/api/og/cupon/${promoId}`;
       const redirectUrl = `https://nutriserpv.com/#cupon-${promoId}`;
       // Use the generated coupon PNG image as og:image (1200x630)
       const ogImage = `https://nutriserpv.com/api/og/cupon-image/${promoId}`;

@@ -58,13 +58,20 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Serve static files but EXCLUDE /cupon/* routes so Express handlers can intercept them
+  // Use a custom static middleware that skips /cupon/* paths
+  app.use((req, res, next) => {
+    const url = req.originalUrl;
+    // Let Express handle /cupon/* and /api/* routes — don't serve static for these
+    if (url.startsWith("/cupon/") || url.startsWith("/api/")) {
+      return next();
+    }
+    express.static(distPath)(req, res, next);
+  });
 
-  // fall through to index.html ONLY for non-API, non-coupon routes
-  // This ensures /cupon/:id and /api/* routes are handled by their own handlers
+  // fall through to index.html for all non-API, non-coupon routes (SPA routing)
   app.use("*", (req, res, next) => {
     const url = req.originalUrl;
-    // Skip if it's an API route or a coupon OG route (let them 404 naturally)
     if (url.startsWith("/api/") || url.startsWith("/cupon/")) {
       return next();
     }

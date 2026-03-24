@@ -32,12 +32,13 @@ export default function PromotionsSection() {
   const [subEmail, setSubEmail] = useState("");
   const [subSubmitting, setSubSubmitting] = useState(false);
   const [subSuccess, setSubSuccess] = useState(false);
-  // pushEnabled: inicializar desde localStorage Y verificar permiso real del navegador
+  // emailSubscribed: estado React independiente para correo
+  const [emailSubscribed, setEmailSubscribed] = useState(() => {
+    return localStorage.getItem('nutriser_email_subscribed') === 'true';
+  });
+  // pushEnabled: inicializar desde localStorage (sin requerir Notification.permission para no perder el estado)
   const [pushEnabled, setPushEnabled] = useState(() => {
-    const saved = localStorage.getItem('nutriser_push_enabled') === 'true';
-    // También verificar que el permiso del navegador siga activo
-    const hasPermission = 'Notification' in window && Notification.permission === 'granted';
-    return saved && hasPermission;
+    return localStorage.getItem('nutriser_push_enabled') === 'true';
   });
   const [pushLoading, setPushLoading] = useState(false);
 
@@ -53,6 +54,7 @@ export default function PromotionsSection() {
       setSubSuccess(true);
       setSubSubmitting(false);
       localStorage.setItem('nutriser_email_subscribed', 'true');
+      setEmailSubscribed(true);
     },
     onError: (err) => {
       toast.error("Error al suscribirse: " + err.message);
@@ -267,13 +269,13 @@ export default function PromotionsSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="inline-block"
           >
-            {localStorage.getItem('nutriser_email_subscribed') === 'true' && pushEnabled ? (
+            {emailSubscribed && pushEnabled ? (
               /* Ya suscrito por correo Y push activo */
               <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-800 to-green-900 text-white px-8 py-4 rounded-2xl font-bold text-base shadow-xl border-2 border-green-500">
                 <Check className="w-5 h-5 text-green-400" />
-                <span className="text-green-300 font-black">✅ Suscrito y notificaciones activas</span>
+                <span className="text-green-300 font-black">✅ Suscrito: correo y notificaciones activas</span>
               </div>
-            ) : localStorage.getItem('nutriser_email_subscribed') === 'true' ? (
+            ) : emailSubscribed && !pushEnabled ? (
               /* Ya suscrito por correo, pero push no activo */
               <button
                 onClick={() => setSubModalOpen(true)}
@@ -282,6 +284,16 @@ export default function PromotionsSection() {
                 <Check className="w-5 h-5 text-green-400" />
                 <span className="text-green-300 font-black">✅ Suscrito por correo</span>
                 <span className="text-white/60 text-sm font-normal hidden sm:inline">— Activar notificaciones push</span>
+              </button>
+            ) : !emailSubscribed && pushEnabled ? (
+              /* Push activo, pero correo no suscrito */
+              <button
+                onClick={() => setSubModalOpen(true)}
+                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-2xl font-bold text-base shadow-xl border-2 border-blue-500 transition-all duration-300"
+              >
+                <BellRing className="w-5 h-5 text-blue-300" />
+                <span className="text-blue-200 font-black">🔔 Notificaciones activas</span>
+                <span className="text-white/60 text-sm font-normal hidden sm:inline">— Suscribirse también por correo</span>
               </button>
             ) : (
               /* No suscrito */
@@ -489,16 +501,16 @@ export default function PromotionsSection() {
             </div>
 
             {subSuccess ? (
-              /* —— Estado de éxito —— */
+              /* —— Estado de éxito tras suscribirse al correo —— */
               <div className="p-6 text-center space-y-4">
                 <div className="text-5xl">🎉</div>
                 <h3 className="font-bold text-xl text-[#1A1A1A]">¡Suscrito con éxito!</h3>
                 <p className="text-gray-600 text-sm">Te enviaremos un correo cada vez que publiquemos una nueva oferta o cupón.</p>
                 <div className="bg-[#FAF7F2] rounded-xl p-4 text-left">
-                  <p className="text-sm font-semibold text-[#1A1A1A] mb-2">¿Quieres recibir también notificaciones instantáneas?</p>
+                  <p className="text-sm font-semibold text-[#1A1A1A] mb-2">¿Quieres recibir también notificaciones instantáneas en tu celular?</p>
                   {pushEnabled ? (
                     <div className="flex items-center gap-2 text-green-600 text-sm font-semibold">
-                      <Check className="w-4 h-4" /> ¡Notificaciones ya activadas!
+                      <Check className="w-4 h-4" /> ¡Notificaciones push ya activadas!
                     </div>
                   ) : (
                     <button
@@ -515,6 +527,40 @@ export default function PromotionsSection() {
                   className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition"
                 >
                   Listo
+                </button>
+              </div>
+            ) : emailSubscribed && !subSuccess ? (
+              /* —— Ya suscrito por correo: mostrar estado y opción de push —— */
+              <div className="p-6 space-y-4">
+                <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-bold text-green-800 text-sm">✅ Ya estás suscrito por correo</p>
+                    <p className="text-green-600 text-xs">Recibirás un aviso cuando publiquemos nuevas ofertas.</p>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] rounded-xl p-4 border border-[#C5A55A]/30">
+                  <p className="text-white font-semibold text-sm mb-1">🔔 Notificaciones push al instante</p>
+                  <p className="text-white/60 text-xs mb-3">Aviso en tu celular aunque no estés en el sitio</p>
+                  {pushEnabled ? (
+                    <div className="flex items-center gap-2 text-green-400 text-sm font-semibold">
+                      <Check className="w-4 h-4" /> ¡Notificaciones push ya activadas!
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleEnablePush}
+                      disabled={pushLoading}
+                      className="w-full bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2"
+                    >
+                      {pushLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Activando...</> : <><BellRing className="w-4 h-4" /> Activar notificaciones push</>}
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => { setSubModalOpen(false); }}
+                  className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition"
+                >
+                  Cerrar
                 </button>
               </div>
             ) : (

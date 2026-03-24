@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Gift, Sparkles, Mail, Copy, Check, Upload, Clock, X, ArrowRight, User, Users } from "lucide-react";
+import { Loader2, Gift, Sparkles, Copy, Check, Upload, Clock, X, ArrowRight, User, Users } from "lucide-react";
 import { toast } from "sonner";
 import CouponCard from "@/components/CouponCard";
 
@@ -145,9 +145,8 @@ export default function PromotionsSection() {
     window.open(`https://wa.me/?text=${encodeURIComponent(`🎁 *${title}*\n\n${description}\n\n${shareUrl}`)}`, "_blank");
   };
 
-  const handleShareEmail = (title: string, description: string, promoId: number) => {
-    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promoId}`;
-    window.open(`mailto:?subject=${encodeURIComponent(`Promoción Nutriser: ${title}`)}&body=${encodeURIComponent(`${title}\n\n${description}\n\n${shareUrl}`)}`, "_blank");
+  const handleShareInstagram = () => {
+    window.open("https://www.instagram.com/nutriserpv/", "_blank");
   };
 
   const handleCopyLink = (id: number, title: string, description: string | null) => {
@@ -177,134 +176,75 @@ export default function PromotionsSection() {
             <p className="text-[#999] text-lg">Actualmente no existen promociones</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {promotions.map((promo, index) => (
-              <motion.div key={promo.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: index * 0.1 }}>
+              <motion.div key={promo.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.08 }}>
                 <div
                   id={`cupon-${promo.id}`}
-                  className={`transition-all duration-700 rounded-2xl overflow-hidden ${
+                  className={`transition-all duration-500 rounded-xl overflow-hidden ${
                     highlightId === promo.id
-                      ? 'ring-4 ring-[#C5A55A] ring-offset-4 scale-[1.02] shadow-2xl'
-                      : 'shadow-xl hover:shadow-2xl hover:scale-[1.01]'
+                      ? 'ring-4 ring-[#C5A55A] ring-offset-2 scale-[1.02] shadow-xl'
+                      : 'shadow-lg hover:shadow-xl hover:scale-[1.01]'
                   }`}
                 >
-                  {/* Imagen del cupón */}
+                  {/* Imagen compacta */}
                   {promo.imageUrl && (
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-36 overflow-hidden">
                       <img src={promo.imageUrl} alt={promo.title} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                      <div className="absolute top-3 right-3 flex items-center gap-2">
-                        <button onClick={() => { setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true); }}
-                          className="bg-white/30 backdrop-blur-sm rounded-full p-2.5 animate-bounce hover:bg-white/50 transition" title="Adquirir cupón">
-                          <Gift className="w-5 h-5 text-white" />
-                        </button>
-                        <Sparkles className="w-4 h-4 text-white animate-pulse" />
-                      </div>
-                      {/* Badge de descuento sobre la imagen */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       {promo.regularPrice && promo.price && (
-                        <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                          🔥 OFERTA
+                        <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow">
+                          OFERTA
                         </div>
                       )}
+                      {/* Título sobre la imagen */}
+                      <div className="absolute bottom-2 left-3 right-3">
+                        <h3 className="font-serif text-lg text-white leading-tight drop-shadow-lg">{promo.title}</h3>
+                      </div>
                     </div>
                   )}
 
-                  <div className={`bg-gradient-to-br from-[#C5A55A] to-[#B8963E] ${promo.imageUrl ? '' : 'rounded-t-2xl'} shadow-xl p-6 relative`}>
+                  {/* Contenido principal compacto */}
+                  <div className={`bg-gradient-to-br from-[#C5A55A] to-[#B8963E] ${promo.imageUrl ? '' : 'rounded-t-xl'} p-4 relative`}>
                     {!promo.imageUrl && (
-                      <div className="absolute top-4 right-4 flex items-center gap-2">
-                        <button onClick={() => { setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true); }}
-                          className="bg-white/20 backdrop-blur-sm rounded-full p-3 animate-bounce hover:bg-white/30 transition" title="Adquirir cupón">
-                          <Gift className="w-6 h-6 text-white" />
-                        </button>
-                        <Sparkles className="w-5 h-5 text-white animate-pulse" />
-                      </div>
+                      <h3 className="font-serif text-lg text-white mb-2 leading-tight pr-10">{promo.title}</h3>
                     )}
-                    <h3 className={`font-serif text-2xl text-white mb-3 ${!promo.imageUrl ? 'pr-20' : ''} leading-tight`}>{promo.title}</h3>
-                    {promo.description && <p className="text-white/90 text-sm leading-relaxed mb-4">{promo.description}</p>}
+                    {!promo.imageUrl && promo.regularPrice && promo.price && (
+                      <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">OFERTA</div>
+                    )}
+                    {promo.description && <p className="text-white/85 text-xs leading-relaxed mb-3">{promo.description}</p>}
 
-                    {/* Comparativa de precios */}
+                    {/* Precios en línea compacta */}
                     {(promo.regularPrice || promo.price) && (
-                      <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 mb-4">
-                        <div className="flex items-center justify-center gap-3">
-                          {promo.regularPrice && (
-                            <div className="text-center">
-                              <p className="text-white/60 text-[10px] uppercase tracking-wider">Precio regular</p>
-                              <p className="text-white/70 text-lg line-through font-light">{promo.regularPrice}</p>
-                            </div>
-                          )}
-                          {promo.regularPrice && promo.price && (
-                            <ArrowRight className="w-5 h-5 text-white/60" />
-                          )}
-                          {promo.price && (
-                            <div className="text-center">
-                              <p className="text-yellow-200 text-[10px] uppercase tracking-wider font-bold">Precio promocional</p>
-                              <p className="text-white text-2xl font-bold">{promo.price}</p>
-                            </div>
-                          )}
-                        </div>
-                        {promo.regularPrice && promo.price && (
-                          <p className="text-center text-green-300 text-xs font-bold mt-2 animate-pulse">
-                            ✨ Aprovecha esta promoción especial
-                          </p>
+                      <div className="flex items-center gap-2 mb-3">
+                        {promo.regularPrice && (
+                          <span className="text-white/50 text-sm line-through">{promo.regularPrice}</span>
+                        )}
+                        {promo.regularPrice && promo.price && <ArrowRight className="w-3 h-3 text-white/50" />}
+                        {promo.price && (
+                          <span className="text-white text-xl font-bold">{promo.price}</span>
                         )}
                       </div>
                     )}
 
-                    {/* Fecha límite */}
-                    {promo.expiresAt && (
-                      <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
-                        <span className="text-white text-sm">📅</span>
-                        <div>
-                          <p className="text-white/70 text-xs uppercase tracking-wider">Válido hasta</p>
-                          <p className="text-white font-bold text-sm">
-                            {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    {/* Contador de cupones restantes */}
-                    {promo.maxCoupons && promo.couponsRemaining !== null && promo.couponsRemaining !== undefined && (
-                      <div className={`rounded-lg px-3 py-2.5 mb-4 flex items-center gap-2 ${
-                        promo.couponsRemaining <= 3
-                          ? 'bg-red-500/30 border border-red-300/40'
-                          : promo.couponsRemaining <= Math.ceil(promo.maxCoupons * 0.3)
-                            ? 'bg-orange-400/25 border border-orange-300/30'
-                            : 'bg-white/15'
-                      }`}>
-                        <span className="text-white text-sm">{promo.couponsRemaining <= 3 ? '🔥' : '🎫'}</span>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className={`text-xs font-bold uppercase tracking-wider ${
-                              promo.couponsRemaining <= 3 ? 'text-red-200' : 'text-white/80'
-                            }`}>
-                              {promo.couponsRemaining === 0
-                                ? 'Cupones agotados'
-                                : promo.couponsRemaining <= 3
-                                  ? `¡Solo quedan ${promo.couponsRemaining}!`
-                                  : `Quedan ${promo.couponsRemaining} cupones`
-                              }
-                            </p>
-                            <p className="text-white/60 text-[10px]">{promo.couponsSold}/{promo.maxCoupons}</p>
-                          </div>
-                          {/* Barra de progreso */}
-                          <div className="w-full bg-white/20 rounded-full h-1.5 mt-1.5">
-                            <div
-                              className={`h-1.5 rounded-full transition-all duration-500 ${
-                                promo.couponsRemaining <= 3 ? 'bg-red-400' : promo.couponsRemaining <= Math.ceil(promo.maxCoupons * 0.3) ? 'bg-orange-400' : 'bg-green-400'
-                              }`}
-                              style={{ width: `${Math.min(100, ((promo.couponsSold || 0) / promo.maxCoupons) * 100)}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Aviso de cita previa */}
-                    <div className="bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
-                      <span className="text-white text-sm">📞</span>
-                      <p className="text-white/90 text-xs font-semibold">Requiere cita previa para ser atendido</p>
+                    {/* Info compacta: fecha + cupones en una fila */}
+                    <div className="flex items-center gap-2 flex-wrap mb-3">
+                      {promo.expiresAt && (
+                        <span className="bg-white/15 text-white/90 text-[10px] px-2 py-1 rounded-md">
+                          Hasta {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+                        </span>
+                      )}
+                      {promo.maxCoupons && promo.couponsRemaining !== null && promo.couponsRemaining !== undefined && (
+                        <span className={`text-[10px] px-2 py-1 rounded-md font-bold ${
+                          promo.couponsRemaining <= 3 ? 'bg-red-500/40 text-red-100' : 'bg-white/15 text-white/80'
+                        }`}>
+                          {promo.couponsRemaining === 0 ? 'Agotado' : `${promo.couponsRemaining} disponibles`}
+                        </span>
+                      )}
+                      <span className="bg-white/15 text-white/80 text-[10px] px-2 py-1 rounded-md">Cita previa</span>
                     </div>
-                    <div className="h-px bg-white/30 my-4" />
+
+                    {/* Botón Lo Quiero */}
                     <button
                       onClick={() => {
                         if (promo.maxCoupons && promo.couponsRemaining === 0) {
@@ -314,7 +254,7 @@ export default function PromotionsSection() {
                         setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true);
                       }}
                       disabled={promo.maxCoupons != null && promo.couponsRemaining === 0}
-                      className={`block w-full py-3 px-4 rounded-lg font-bold text-center uppercase tracking-[0.1em] transition ${
+                      className={`block w-full py-2 px-3 rounded-lg font-bold text-sm text-center uppercase tracking-wider transition ${
                         promo.maxCoupons != null && promo.couponsRemaining === 0
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           : 'bg-white text-[#C5A55A] hover:bg-[#FAF7F2]'
@@ -322,23 +262,21 @@ export default function PromotionsSection() {
                       Lo Quiero
                     </button>
                   </div>
-                  <div className="h-1 bg-[#C5A55A]/30 flex items-center justify-between px-4">
-                    {[...Array(8)].map((_, i) => <div key={i} className="w-1 h-1 bg-[#C5A55A] rounded-full" />)}
-                  </div>
-                  <div className="bg-white rounded-b-2xl p-6 shadow-xl border-t-2 border-[#C5A55A]/20">
-                    <p className="text-xs font-semibold text-[#666] mb-3 uppercase tracking-wider">Compartir con:</p>
-                    <div className="flex gap-3 flex-wrap">
-                      <button onClick={() => handleShareWhatsApp(promo.title, promo.description || "", promo.id)} className="flex-1 min-w-[90px] flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-lg text-sm font-semibold transition">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/></svg>
-                        WhatsApp
-                      </button>
-                      <button onClick={() => handleShareEmail(promo.title, promo.description || "", promo.id)} className="flex-1 min-w-[70px] flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-semibold transition">
-                        <Mail className="w-4 h-4" />Email
-                      </button>
-                      <button onClick={() => handleCopyLink(promo.id, promo.title, promo.description)} className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 transition">
-                        {copiedId === promo.id ? <><Check size={16} />Copiado</> : <><Copy size={16} />Copiar</>}
-                      </button>
-                    </div>
+
+                  {/* Compartir compacto */}
+                  <div className="bg-white rounded-b-xl px-4 py-3 flex items-center gap-2">
+                    <span className="text-[10px] text-[#999] uppercase tracking-wider">Compartir:</span>
+                    <button onClick={() => handleShareWhatsApp(promo.title, promo.description || "", promo.id)} className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-xs font-semibold transition">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/></svg>
+                      WhatsApp
+                    </button>
+                    <button onClick={() => handleShareInstagram()} className="flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-1.5 px-3 rounded-md text-xs font-semibold transition">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                      Instagram
+                    </button>
+                    <button onClick={() => handleCopyLink(promo.id, promo.title, promo.description)} className="ml-auto text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 transition">
+                      {copiedId === promo.id ? <><Check size={14} />Copiado</> : <><Copy size={14} />Copiar</>}
+                    </button>
                   </div>
                 </div>
               </motion.div>

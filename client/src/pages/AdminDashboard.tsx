@@ -123,6 +123,14 @@ export default function AdminDashboard() {
     onError: (error) => toast.error('Error: ' + error.message),
   });
 
+  const revokeEbookAccessMutation = trpc.ebook.revokeAccess.useMutation({
+    onSuccess: () => {
+      toast.success('Acceso revocado. El usuario ya no puede acceder al eBook.');
+      refetchEbookPurchases();
+    },
+    onError: (error) => toast.error('Error al revocar acceso: ' + error.message),
+  });
+
   const approveGiftMutation = trpc.giftPurchases.approve.useMutation({
     onSuccess: (data) => {
       toast.success('Compra autorizada. Email enviado al comprador.');
@@ -1549,10 +1557,34 @@ export default function AdminDashboard() {
                               </>
                             )}
                             {purchase.status === 'approved' && (
-                              <div className="flex items-center gap-1 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
-                                <span>🔑</span>
-                                Credenciales enviadas por correo
+                              <div className="flex flex-col sm:flex-row gap-2">
+                                <div className="flex items-center gap-1 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
+                                  <span>🔑</span>
+                                  Credenciales enviadas por correo
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    if (confirm(`⚠️ ¿Revocar acceso de ${purchase.buyerName}?\n\nEsto eliminará su acceso al eBook. El usuario ya no podrá iniciar sesión.\n\nEsta acción no se puede deshacer.`))
+                                      revokeEbookAccessMutation.mutate({ id: purchase.id });
+                                  }}
+                                  disabled={revokeEbookAccessMutation.isPending}
+                                  className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium disabled:opacity-50"
+                                >
+                                  🚫 Revocar Acceso
+                                </button>
                               </div>
+                            )}
+                            {purchase.status === 'rejected' && (
+                              <button
+                                onClick={() => {
+                                  if (confirm(`¿Eliminar el registro de ${purchase.buyerName}?\n\nEsto eliminará permanentemente esta compra rechazada.`))
+                                    revokeEbookAccessMutation.mutate({ id: purchase.id });
+                                }}
+                                disabled={revokeEbookAccessMutation.isPending}
+                                className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm font-medium disabled:opacity-50"
+                              >
+                                🗑 Eliminar
+                              </button>
                             )}
                           </div>
                         </div>

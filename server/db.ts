@@ -497,6 +497,13 @@ export async function updateEbookPurchaseStatus(id: number, status: "pending" | 
   return { success: true };
 }
 
+export async function deleteEbookPurchase(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(ebookPurchases).where(eq(ebookPurchases.id, id));
+  return { success: true };
+}
+
 export async function getEbookPurchaseByEmail(email: string) {
   const db = await getDb();
   if (!db) return null;

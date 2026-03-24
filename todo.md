@@ -513,3 +513,11 @@
 - [x] Cuponera pública: colores de urgencia (verde → naranja → rojo)
 - [x] Botón "Lo Quiero" deshabilitado cuando cupones agotados
 - [x] Tests: 18 tests pasan correctamente
+
+## Correcciones Sesión Mar 24 - Lote 2
+- [x] Cupón compacto: tarjeta rediseñada más compacta (imagen reducida, info condensada en una línea)
+- [x] Compartir: botón Email reemplazado por Instagram (abre instagram.com/nutriserpv)
+- [x] OG dinámico: ruta /api/og/cupon/:id funciona en producción con imagen del cupón
+- [x] Correo al comprador: sistema verificado - funciona desde clinicanutriserpv@gmail.com; correo enviado manualmente a Mohamed (NUT-PVE8-EF0R)
+- [x] Admin eBook: botón '🚫 Revocar Acceso' para aprobados + botón '🗑 Eliminar' para rechazados
+- [x] Tests: 18 tests pasan correctamente

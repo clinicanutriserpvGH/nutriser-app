@@ -29,17 +29,21 @@ export default function PromotionsSection() {
   // ─── Subscription modal state ─────────────────────────────────────────────
   const [subModalOpen, setSubModalOpen] = useState(false);
   const [subEmail, setSubEmail] = useState("");
-  const [subWhatsapp, setSubWhatsapp] = useState("");
   const [subSubmitting, setSubSubmitting] = useState(false);
+  const [subSuccess, setSubSuccess] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
 
+  // Detect iOS/Safari
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const isIOSSafari = isIOS && isSafari;
+  // Detect if running as PWA (added to home screen)
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+
   const subscribeMutation = trpc.couponSubscribers.subscribe.useMutation({
     onSuccess: () => {
-      toast.success("✅ ¡Suscrito! Recibirás correos con las nuevas ofertas.");
-      setSubModalOpen(false);
-      setSubEmail("");
-      setSubWhatsapp("");
+      setSubSuccess(true);
       setSubSubmitting(false);
     },
     onError: (err) => {
@@ -101,9 +105,8 @@ export default function PromotionsSection() {
   const handleSubscribeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subEmail.trim()) { toast.error("Ingresa tu correo"); return; }
-    if (!subWhatsapp.trim()) { toast.error("Ingresa tu WhatsApp"); return; }
     setSubSubmitting(true);
-    subscribeMutation.mutate({ email: subEmail, whatsapp: subWhatsapp });
+    subscribeMutation.mutate({ email: subEmail, whatsapp: "" });
   };
 
   const [giftModalOpen, setGiftModalOpen] = useState(false);
@@ -443,10 +446,10 @@ export default function PromotionsSection() {
 
       {/* Modal de Suscripción a Ofertas */}
       {subModalOpen && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={e => { if (e.target === e.currentTarget) { setSubModalOpen(false); setSubSuccess(false); setSubEmail(""); } }}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] p-6 flex justify-between items-start border-b-2 border-[#C5A55A]">
+            <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] p-5 flex justify-between items-start border-b-2 border-[#C5A55A]">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <BellRing className="w-6 h-6 text-[#C5A55A]" />
@@ -454,112 +457,130 @@ export default function PromotionsSection() {
                 </div>
                 <p className="text-white/70 text-sm">Sé el primero en enterarte de nuevos cupones</p>
               </div>
-              <button onClick={() => setSubModalOpen(false)} className="text-white/60 hover:text-white p-1 rounded-full transition"><X size={20} /></button>
+              <button onClick={() => { setSubModalOpen(false); setSubSuccess(false); setSubEmail(""); }} className="text-white/60 hover:text-white p-1 rounded-full transition"><X size={20} /></button>
             </div>
 
-            <div className="p-6 space-y-5">
-              {/* Beneficios */}
-              <div className="bg-[#FAF7F2] rounded-xl p-4 space-y-2">
-                <p className="text-[#1A1A1A] font-semibold text-sm mb-2">Al suscribirte recibirás:</p>
-                <div className="flex items-center gap-2 text-sm text-[#555]">
-                  <span className="text-[#C5A55A]">✉️</span>
-                  <span><strong>Correo electrónico</strong> con cada nueva oferta</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-[#555]">
-                  <span className="text-[#C5A55A]">🔔</span>
-                  <span><strong>Notificación en tu celular</strong> (activa abajo)</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-[#555]">
-                  <span className="text-[#C5A55A]">🎁</span>
-                  <span>Acceso prioritario a cupones con cupos limitados</span>
-                </div>
-              </div>
-
-              {/* Formulario de suscripción */}
-              <form onSubmit={handleSubscribeSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico *</label>
-                  <input
-                    type="email"
-                    value={subEmail}
-                    onChange={e => setSubEmail(e.target.value)}
-                    placeholder="tu@correo.com"
-                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#C5A55A] transition"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp *</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">+52</span>
-                    <input
-                      type="tel"
-                      value={subWhatsapp}
-                      onChange={e => setSubWhatsapp(e.target.value)}
-                      placeholder="322 100 7799"
-                      className="w-full border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-[#C5A55A] transition"
-                      required
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">Solo para recibir el link de la oferta por WhatsApp</p>
+            {subSuccess ? (
+              /* —— Estado de éxito —— */
+              <div className="p-6 text-center space-y-4">
+                <div className="text-5xl">🎉</div>
+                <h3 className="font-bold text-xl text-[#1A1A1A]">¡Suscrito con éxito!</h3>
+                <p className="text-gray-600 text-sm">Te enviaremos un correo cada vez que publiquemos una nueva oferta o cupón.</p>
+                <div className="bg-[#FAF7F2] rounded-xl p-4 text-left">
+                  <p className="text-sm font-semibold text-[#1A1A1A] mb-2">¿Quieres recibir también notificaciones instantáneas?</p>
+                  {pushEnabled ? (
+                    <div className="flex items-center gap-2 text-green-600 text-sm font-semibold">
+                      <Check className="w-4 h-4" /> ¡Notificaciones ya activadas!
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleEnablePush}
+                      disabled={pushLoading}
+                      className="w-full bg-[#1A1A1A] hover:bg-[#2d2416] disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2"
+                    >
+                      {pushLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Activando...</> : <><BellRing className="w-4 h-4" /> Activar notificaciones push</>}
+                    </button>
+                  )}
                 </div>
                 <button
-                  type="submit"
-                  disabled={subSubmitting}
-                  className="w-full bg-gradient-to-r from-[#C5A55A] to-[#B8963E] hover:from-[#B8963E] hover:to-[#9E7D2A] disabled:opacity-50 text-white py-3.5 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2"
+                  onClick={() => { setSubModalOpen(false); setSubSuccess(false); setSubEmail(""); }}
+                  className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition"
                 >
-                  {subSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Suscribiendo...</> : <><Bell className="w-5 h-5" /> Suscribirme por Correo</>}
+                  Listo
                 </button>
-              </form>
-
-              {/* Separador */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-xs text-gray-400 uppercase tracking-wider">También</span>
-                <div className="flex-1 h-px bg-gray-200" />
               </div>
+            ) : (
+              <div className="p-5 space-y-5">
+                {/* Opción 1: Correo */}
+                <div className="border-2 border-[#C5A55A]/30 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">✉️</span>
+                    <div>
+                      <p className="font-bold text-[#1A1A1A] text-sm">Recibir por Correo</p>
+                      <p className="text-gray-500 text-xs">Te avisamos cada vez que haya una nueva oferta</p>
+                    </div>
+                  </div>
+                  <form onSubmit={handleSubscribeSubmit} className="flex gap-2">
+                    <input
+                      type="email"
+                      value={subEmail}
+                      onChange={e => setSubEmail(e.target.value)}
+                      placeholder="tu@correo.com"
+                      className="flex-1 border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C5A55A] transition"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      disabled={subSubmitting}
+                      className="bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-1.5 whitespace-nowrap"
+                    >
+                      {subSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Bell className="w-4 h-4" /> Suscribir</>}
+                    </button>
+                  </form>
+                </div>
 
-              {/* Activar notificaciones push */}
-              <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] rounded-xl p-4 border border-[#C5A55A]/30">
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl mt-0.5">🔔</div>
-                  <div className="flex-1">
-                    <p className="text-white font-semibold text-sm">Notificaciones en tu celular</p>
-                    <p className="text-white/60 text-xs mt-0.5">Recibe un aviso instantáneo aunque no estés en el sitio</p>
-                    {pushEnabled ? (
-                      <div className="mt-2 flex items-center gap-1.5 text-green-400 text-xs font-semibold">
-                        <Check className="w-4 h-4" /> ¡Notificaciones activadas!
-                      </div>
-                    ) : (
-                      <>
-                        <button
-                          onClick={handleEnablePush}
-                          disabled={pushLoading}
-                          className="mt-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
-                        >
-                          {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones</>}
-                        </button>
-                        {/* Instrucciones iOS */}
-                        <div className="mt-3 bg-blue-900/40 border border-blue-400/30 rounded-lg p-3">
-                          <p className="text-blue-200 text-[11px] font-semibold mb-1">📱 ¿Usas iPhone/Safari?</p>
-                          <p className="text-blue-200/80 text-[11px] leading-relaxed">
-                            Para recibir notificaciones en iPhone, primero agrega esta página a tu pantalla de inicio:
-                          </p>
-                          <ol className="text-blue-200/80 text-[11px] mt-1.5 space-y-0.5 list-decimal list-inside">
-                            <li>Toca el ícono <strong className="text-blue-200">Compartir</strong> (cuadro con flecha ↑)</li>
-                            <li>Selecciona <strong className="text-blue-200">&quot;Agregar a pantalla de inicio&quot;</strong></li>
-                            <li>Abre la app desde tu pantalla de inicio</li>
-                            <li>Regresa aquí y activa las notificaciones</li>
-                          </ol>
+                {/* Separador */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs text-gray-400 uppercase tracking-wider">o también</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+
+                {/* Opción 2: Notificaciones Push */}
+                <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] rounded-xl p-4 border border-[#C5A55A]/30">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl mt-0.5">🔔</div>
+                    <div className="flex-1">
+                      <p className="text-white font-semibold text-sm">Notificaciones push al instante</p>
+                      <p className="text-white/60 text-xs mt-0.5">Aviso en tu celular aunque no estés en el sitio</p>
+
+                      {pushEnabled ? (
+                        <div className="mt-2 flex items-center gap-1.5 text-green-400 text-xs font-semibold">
+                          <Check className="w-4 h-4" /> ¡Notificaciones activadas!
                         </div>
-                      </>
-                    )}
+                      ) : isIOSSafari && !isPWA ? (
+                        /* iPhone en Safari normal: instrucciones para agregar a pantalla de inicio */
+                        <div className="mt-3 space-y-2">
+                          <p className="text-amber-300 text-xs font-semibold">📱 iPhone: un paso previo</p>
+                          <p className="text-white/70 text-[11px] leading-relaxed">
+                            Para activar notificaciones en iPhone, primero agrega esta página a tu pantalla de inicio:
+                          </p>
+                          <ol className="text-white/60 text-[11px] space-y-1 list-decimal list-inside">
+                            <li>Toca 👉 el ícono <strong className="text-white">Compartir</strong> (cuadro con flecha ↑)</li>
+                            <li>Selecciona <strong className="text-white">&quot;Agregar a pantalla de inicio&quot;</strong></li>
+                            <li>Abre la app desde tu pantalla de inicio</li>
+                            <li>Regresa aquí y presiona el botón de abajo</li>
+                          </ol>
+                          <button
+                            onClick={handleEnablePush}
+                            disabled={pushLoading}
+                            className="mt-1 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
+                          >
+                            {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Ya la agregué, activar</>}
+                          </button>
+                        </div>
+                      ) : (
+                        /* Android y Chrome: activa directo con un clic */
+                        <div className="mt-2 space-y-2">
+                          {!isIOSSafari && (
+                            <p className="text-white/60 text-[11px]">✅ En Android/Chrome se activa con un solo clic</p>
+                          )}
+                          <button
+                            onClick={handleEnablePush}
+                            disabled={pushLoading}
+                            className="bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
+                          >
+                            {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones</>}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <p className="text-xs text-gray-400 text-center">Puedes cancelar tu suscripción en cualquier momento.</p>
-            </div>
+                <p className="text-xs text-gray-400 text-center">Puedes cancelar tu suscripción en cualquier momento.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

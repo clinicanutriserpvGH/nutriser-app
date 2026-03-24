@@ -580,3 +580,10 @@
 - [x] Agregar botón "Adquirir" visible siempre en cada tarjeta de servicios
 - [x] Agregar modal de compra de servicio con formulario y comprobante
 - [x] Corregir compartir cupón: link al inicio del mensaje para que WhatsApp genere vista previa con imagen
+
+## Correcciones Modal Suscripción - Mar 24 2026
+
+- [x] Quitar campo WhatsApp del modal de suscripción
+- [x] Separar en dos opciones: "Correo" y "Notificaciones Push"
+- [x] Detectar iOS/Safari y mostrar instrucciones solo en ese caso
+- [x] Explicar que en Android se activa con un solo clic

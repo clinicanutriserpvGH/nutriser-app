@@ -573,3 +573,10 @@
 - [x] Email automático al admin cuando se crea una compra de servicio
 - [x] Email automático al comprador cuando se aprueba su compra de servicio
 - [x] Tests de vitest para todos los nuevos procedimientos (14 tests, todos pasan)
+
+## Correcciones Sesión - Mar 24 2026 (Tarde)
+
+- [x] Mejorar modal de push: agregar instrucciones para iOS (agregar a pantalla de inicio)
+- [x] Agregar botón "Adquirir" visible siempre en cada tarjeta de servicios
+- [x] Agregar modal de compra de servicio con formulario y comprobante
+- [x] Corregir compartir cupón: link al inicio del mensaje para que WhatsApp genere vista previa con imagen

@@ -210,12 +210,13 @@ export default function PromotionsSection() {
     reader.readAsDataURL(proofFile);
   };
 
-  const handleShareWhatsApp = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null }) => {
+  const handleShareWhatsApp = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null; imageUrl?: string | null }) => {
     const shareUrl = `https://nutriserpv.com/api/og/cupon/${promo.id}`;
     const priceText = promo.regularPrice && promo.price
       ? `\n💰 Antes: ~${promo.regularPrice}~ → *Ahora: ${promo.price}*`
       : promo.price ? `\n💰 Precio: *${promo.price}*` : "";
-    const text = `🔥 *¡OFERTA ESPECIAL!* 🔥\n\n🎁 *${promo.title}*\n${promo.description || ""}${priceText}\n\n👉 Adquiere tu cupón aquí:\n${shareUrl}`;
+    // El link va AL INICIO para que WhatsApp genere la vista previa con imagen
+    const text = `${shareUrl}\n\n🔥 *¡OFERTA ESPECIAL NUTRISER!* 🔥\n\n🎁 *${promo.title}*\n${promo.description || ""}${priceText}\n\n✅ Adquiere tu cupón directamente en el link de arriba`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -530,13 +531,28 @@ export default function PromotionsSection() {
                         <Check className="w-4 h-4" /> ¡Notificaciones activadas!
                       </div>
                     ) : (
-                      <button
-                        onClick={handleEnablePush}
-                        disabled={pushLoading}
-                        className="mt-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
-                      >
-                        {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones</>}
-                      </button>
+                      <>
+                        <button
+                          onClick={handleEnablePush}
+                          disabled={pushLoading}
+                          className="mt-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
+                        >
+                          {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones</>}
+                        </button>
+                        {/* Instrucciones iOS */}
+                        <div className="mt-3 bg-blue-900/40 border border-blue-400/30 rounded-lg p-3">
+                          <p className="text-blue-200 text-[11px] font-semibold mb-1">📱 ¿Usas iPhone/Safari?</p>
+                          <p className="text-blue-200/80 text-[11px] leading-relaxed">
+                            Para recibir notificaciones en iPhone, primero agrega esta página a tu pantalla de inicio:
+                          </p>
+                          <ol className="text-blue-200/80 text-[11px] mt-1.5 space-y-0.5 list-decimal list-inside">
+                            <li>Toca el ícono <strong className="text-blue-200">Compartir</strong> (cuadro con flecha ↑)</li>
+                            <li>Selecciona <strong className="text-blue-200">&quot;Agregar a pantalla de inicio&quot;</strong></li>
+                            <li>Abre la app desde tu pantalla de inicio</li>
+                            <li>Regresa aquí y activa las notificaciones</li>
+                          </ol>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>

@@ -799,12 +799,12 @@ export const appRouter = router({
     subscribe: publicProcedure
       .input(z.object({
         email: z.string().email(),
-        whatsapp: z.string().min(10),
+        whatsapp: z.string().optional().default(""),
       }))
       .mutation(async ({ input }) => {
         await subscribeToCoupons({
           email: input.email,
-          whatsapp: input.whatsapp,
+          whatsapp: input.whatsapp || "",
           isActive: true,
         });
         return { success: true };

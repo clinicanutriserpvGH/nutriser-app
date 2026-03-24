@@ -446,3 +446,16 @@
 - [x] EbookStore: en pantalla de confirmación de compra (paso 3 Listo), mostrar mensaje especial si el eBook es comingSoon
 - [x] EbookStore: ocultar botón de descarga/lectura si el eBook es comingSoon (mostrar mensaje "Disponible próximamente")
 - [x] Mis compras: si el eBook comprado es comingSoon, mostrar estado "Pendiente de publicación" en lugar del botón de descarga
+
+## Bug Correos Programas de Nutrición
+
+- [x] Quitar envío de correo al usuario al momento de enviar comprobante
+- [x] Mostrar mensaje en pantalla de éxito: "Tu comprobante fue recibido, en cuanto sea confirmado tu pago se autorizará el acceso"
+- [x] Enviar correo de confirmación al usuario SOLO cuando el admin aprueba el pago
+- [x] Correo de aprobación debe indicar que serán contactados para instrucciones de acceso
+
+## Correos - Remitente y Referencias Manus
+
+- [x] Asegurar que todos los correos se envíen desde clinicanutriserpv@gmail.com
+- [x] Eliminar cualquier referencia a Manus en el contenido de los correos
+- [x] Verificar que el correo de confirmación de membresía solo se envíe al aprobar el admin

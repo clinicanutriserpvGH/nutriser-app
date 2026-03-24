@@ -58,9 +58,11 @@ export async function sendConfirmationEmail(
             `}
           </div>
           
-          <p>Tu solicitud ha sido recibida. Pronto nos pondremos en contacto contigo para confirmar tu programa y coordinar tus primeras asesorías.</p>
+          <p>¡Tu pago ha sido <strong>confirmado y aprobado</strong> por nuestro equipo! 🎉</p>
           
-          <p>Si tienes alguna pregunta, no dudes en contactarnos por WhatsApp: <strong>+52 322 100 7799</strong> o por correo.</p>
+          <p>En breve nos pondremos en contacto contigo para darte las instrucciones de acceso a tu programa y coordinar tus primeras asesorías.</p>
+          
+          <p>Si tienes alguna pregunta, no dudes en contactarnos por WhatsApp: <strong>+52 322 100 7799</strong> o por correo a <strong>clinicanutriserpv@gmail.com</strong>.</p>
           
           <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
           
@@ -76,7 +78,7 @@ export async function sendConfirmationEmail(
     await transporter.sendMail({
       from: `"Nutriser" <${ENV.gmailUser}>`,
       to: clientEmail,
-      subject: `Bienvenido a Nutriser - Programa ${programName}`,
+      subject: `✅ Pago Confirmado - Programa ${programName} Nutriser`,
       html: htmlContent,
     });
     return true;

@@ -156,7 +156,7 @@ export default function Memberships() {
             fileName: selectedFile.name,
           });
 
-          toast.success("Comprobante subido correctamente. Te enviaremos un correo de confirmación.");
+          toast.success("Comprobante recibido. En cuanto confirmemos tu pago, recibirás un correo con las instrucciones de acceso.");
           setStep("select");
           setFormData({ clientName: "", clientEmail: "", clientPhone: "" });
           setSelectedProgram(null);

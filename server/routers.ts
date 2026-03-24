@@ -61,9 +61,6 @@ export const appRouter = router({
           depositConcept: `${input.clientName} - Programa ${input.programType === "basic" ? "Básico" : "Premium"}`,
         });
         
-        // Send confirmation email
-        await sendConfirmationEmail(input.clientEmail, input.clientName, input.programType);
-        
         // Send membership notification to admin from client email
         await sendMembershipNotificationToAdmin(
           ENV.gmailUser || "clinicanutriserpv@gmail.com",

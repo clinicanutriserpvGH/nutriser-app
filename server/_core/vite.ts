@@ -60,8 +60,14 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  // fall through to index.html ONLY for non-API, non-coupon routes
+  // This ensures /cupon/:id and /api/* routes are handled by their own handlers
+  app.use("*", (req, res, next) => {
+    const url = req.originalUrl;
+    // Skip if it's an API route or a coupon OG route (let them 404 naturally)
+    if (url.startsWith("/api/") || url.startsWith("/cupon/")) {
+      return next();
+    }
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

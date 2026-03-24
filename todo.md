@@ -629,3 +629,27 @@
 - [x] Agregar endpoint GET /api/og/cupon-image/:id que devuelve PNG del cupón
 - [x] Actualizar buildCouponOGPage para usar la imagen PNG generada como og:image
 - [x] Meta tags OG actualizados: og:image apunta a /api/og/cupon-image/:id (PNG 1200x630)
+
+## Sesión Mar 24 - Catálogo y Tienda de Productos
+
+- [ ] ServicesSection lee servicios desde BD (no array estático)
+- [ ] Tabla `products` en schema con migración
+- [ ] CRUD de productos en server/db.ts y server/routers.ts
+- [ ] Tab Productos en AdminDashboard (crear/editar/eliminar/imagen)
+- [ ] Sección pública Tienda de Productos (página /tienda)
+- [ ] Botón "Tienda de Productos" en la página principal
+
+## Sesión Mar 24 - Catálogo Servicios BD + Tienda de Productos
+
+- [x] Conectar catálogo de servicios a la BD (ServicesSection lee desde trpc.services.list)
+- [x] Insertar 26 servicios del catálogo estático en la tabla services de la BD
+- [x] Crear tabla products en la BD con schema Drizzle
+- [x] Crear tabla productPurchases en la BD con schema Drizzle
+- [x] Agregar funciones CRUD de productos y compras en db.ts
+- [x] Agregar routers tRPC: products.list, products.create, products.update, products.delete, products.uploadImage
+- [x] Agregar routers tRPC: productPurchases.create, productPurchases.listAll, productPurchases.verify, productPurchases.reject, productPurchases.delete
+- [x] Tab Productos en AdminDashboard con CRUD completo e imagen
+- [x] Tab Compras de Productos en AdminDashboard con aprobar/rechazar
+- [x] Página pública /tienda con catálogo de productos y modal de compra
+- [x] Botón "Tienda de Productos" en el Hero de la página principal
+- [x] Texto "Cuponera de Descuentos" en lugar de "Cuponera de Promociones"

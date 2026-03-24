@@ -49,6 +49,22 @@ export default function AdminDashboard() {
   const [editingServiceId, setEditingServiceId] = useState<number | null>(null);
   const [isUploadingServiceImage, setIsUploadingServiceImage] = useState(false);
 
+  // Estado para productos
+  const [productForm, setProductForm] = useState({
+    name: '',
+    description: '',
+    category: 'general',
+    price: '',
+    imageUrl: '',
+    stock: 0,
+    isActive: true,
+    sortOrder: 0,
+  });
+  const [productImage, setProductImage] = useState<File | null>(null);
+  const [productImagePreview, setProductImagePreview] = useState<string | null>(null);
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
+  const [isUploadingProductImage, setIsUploadingProductImage] = useState(false);
+
   // Estado para eBook
   const [ebookTitle, setEbookTitle] = useState("");
   const [ebookDescription, setEbookDescription] = useState("");
@@ -166,6 +182,63 @@ export default function AdminDashboard() {
       refetchServices();
     },
     onError: (error) => toast.error('Error al eliminar servicio: ' + error.message),
+  });
+
+  // Catálogo de productos
+  const { data: productsCatalog, refetch: refetchProducts } = trpc.products.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const createProductMutation = trpc.products.create.useMutation({
+    onSuccess: () => {
+      toast.success('Producto creado exitosamente');
+      refetchProducts();
+      setProductForm({ name: '', description: '', category: 'general', price: '', imageUrl: '', stock: 0, isActive: true, sortOrder: 0 });
+      setProductImage(null);
+      setProductImagePreview(null);
+      setEditingProductId(null);
+    },
+    onError: (error) => toast.error('Error al crear producto: ' + error.message),
+  });
+
+  const updateProductMutation = trpc.products.update.useMutation({
+    onSuccess: () => {
+      toast.success('Producto actualizado exitosamente');
+      refetchProducts();
+      setProductForm({ name: '', description: '', category: 'general', price: '', imageUrl: '', stock: 0, isActive: true, sortOrder: 0 });
+      setProductImage(null);
+      setProductImagePreview(null);
+      setEditingProductId(null);
+    },
+    onError: (error) => toast.error('Error al actualizar producto: ' + error.message),
+  });
+
+  const deleteProductCatalogMutation = trpc.products.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Producto eliminado');
+      refetchProducts();
+    },
+    onError: (error) => toast.error('Error al eliminar producto: ' + error.message),
+  });
+
+  // Compras de productos
+  const { data: productPurchases, refetch: refetchProductPurchases } = trpc.productPurchases.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const verifyProductMutation = trpc.productPurchases.verify.useMutation({
+    onSuccess: () => { toast.success('Compra verificada.'); refetchProductPurchases(); },
+    onError: (error) => toast.error('Error: ' + error.message),
+  });
+
+  const rejectProductMutation = trpc.productPurchases.reject.useMutation({
+    onSuccess: () => { toast.success('Compra rechazada.'); refetchProductPurchases(); },
+    onError: (error) => toast.error('Error: ' + error.message),
+  });
+
+  const deleteProductPurchaseMutation = trpc.productPurchases.delete.useMutation({
+    onSuccess: () => { toast.success('Registro eliminado.'); refetchProductPurchases(); },
+    onError: (error) => toast.error('Error: ' + error.message),
   });
 
   // Compras de servicios
@@ -586,6 +659,67 @@ export default function AdminDashboard() {
     setServiceImage(null);
   };
 
+  const handleSaveProduct = async () => {
+    if (!productForm.name.trim()) {
+      toast.error('El nombre del producto es requerido');
+      return;
+    }
+    let imageUrl = productForm.imageUrl;
+    if (productImage) {
+      setIsUploadingProductImage(true);
+      try {
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve) => {
+          reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
+          reader.readAsDataURL(productImage);
+        });
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': productImage.type },
+          body: Uint8Array.from(atob(base64), c => c.charCodeAt(0)),
+        });
+        const data = await response.json();
+        if (data.url) imageUrl = data.url;
+      } catch (e) {
+        toast.error('Error al subir imagen');
+        setIsUploadingProductImage(false);
+        return;
+      }
+      setIsUploadingProductImage(false);
+    }
+    const payload = {
+      name: productForm.name,
+      description: productForm.description || undefined,
+      category: productForm.category,
+      price: productForm.price || undefined,
+      imageUrl: imageUrl || undefined,
+      stock: productForm.stock,
+      isActive: productForm.isActive,
+      sortOrder: productForm.sortOrder,
+    };
+    if (editingProductId) {
+      updateProductMutation.mutate({ id: editingProductId, ...payload });
+    } else {
+      createProductMutation.mutate(payload);
+    }
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProductId(product.id);
+    setProductForm({
+      name: product.name,
+      description: product.description || '',
+      category: product.category || 'general',
+      price: product.price || '',
+      imageUrl: product.imageUrl || '',
+      stock: product.stock || 0,
+      isActive: product.isActive,
+      sortOrder: product.sortOrder || 0,
+    });
+    setProductImagePreview(product.imageUrl || null);
+    setProductImage(null);
+  };
+
   const handlePublishPromotion = async () => {
     if (!promotionTitle.trim()) {
       toast.error("Ingresa un título para la promoción");
@@ -772,6 +906,20 @@ export default function AdminDashboard() {
               Servicios
               {servicesCatalog && (
                 <span className="ml-1 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicesCatalog.length}</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="products" className="flex items-center gap-1">
+              <ShoppingBag className="w-4 h-4" />
+              Productos
+              {productsCatalog && (
+                <span className="ml-1 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{productsCatalog.length}</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="productPurchases" className="flex items-center gap-1">
+              <ShoppingBag className="w-4 h-4" />
+              Compras Productos
+              {productPurchases && productPurchases.filter((p: any) => p.status === 'pending').length > 0 && (
+                <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{productPurchases.filter((p: any) => p.status === 'pending').length}</span>
               )}
             </TabsTrigger>
           </TabsList>
@@ -2231,8 +2379,202 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
 
+          {/* Productos Tab */}
+          <TabsContent value="products" className="space-y-4">
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#1A1A1A]">Catálogo de Productos</CardTitle>
+                <CardDescription>Agrega, edita o elimina productos de la tienda.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Formulario */}
+                <div className="bg-[#FAF7F2] rounded-xl p-4 border border-[#C5A55A]/20">
+                  <h3 className="font-semibold text-[#1A1A1A] mb-4">{editingProductId ? 'Editar Producto' : 'Agregar Nuevo Producto'}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Nombre *</label>
+                      <input type="text" value={productForm.name} onChange={e => setProductForm(f => ({...f, name: e.target.value}))} placeholder="Nombre del producto" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Categoría</label>
+                      <select value={productForm.category} onChange={e => setProductForm(f => ({...f, category: e.target.value}))} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]">
+                        <option value="general">General</option>
+                        <option value="nutricionales">Nutricionales</option>
+                        <option value="cosmeticos">Cosméticos</option>
+                        <option value="suplementos">Suplementos</option>
+                        <option value="cuidado_piel">Cuidado de Piel</option>
+                        <option value="otros">Otros</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Precio</label>
+                      <input type="text" value={productForm.price} onChange={e => setProductForm(f => ({...f, price: e.target.value}))} placeholder="Ej: $299" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Stock</label>
+                      <input type="number" value={productForm.stock} onChange={e => setProductForm(f => ({...f, stock: parseInt(e.target.value) || 0}))} min={0} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Orden</label>
+                      <input type="number" value={productForm.sortOrder} onChange={e => setProductForm(f => ({...f, sortOrder: parseInt(e.target.value) || 0}))} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                    </div>
+                    <div className="flex items-center gap-2 mt-5">
+                      <input type="checkbox" id="productActive" checked={productForm.isActive} onChange={e => setProductForm(f => ({...f, isActive: e.target.checked}))} className="w-4 h-4 accent-[#C5A55A]" />
+                      <label htmlFor="productActive" className="text-sm text-[#666]">Activo (visible en tienda)</label>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Descripción</label>
+                      <textarea value={productForm.description} onChange={e => setProductForm(f => ({...f, description: e.target.value}))} placeholder="Descripción del producto" rows={2} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A] resize-none" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-xs font-medium text-[#666] mb-2 block">Imagen del Producto</label>
+                      <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-[#C5A55A]/40 rounded-xl cursor-pointer hover:bg-[#C5A55A]/5 transition">
+                        <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) { setProductImage(f); setProductImagePreview(URL.createObjectURL(f)); }}} className="hidden" />
+                        {productImagePreview ? (
+                          <img src={productImagePreview} alt="preview" className="h-24 object-contain rounded-lg" />
+                        ) : (
+                          <div className="text-center p-3"><Upload className="w-6 h-6 text-[#C5A55A] mx-auto mb-1" /><div className="text-sm text-gray-500">Subir imagen</div></div>
+                        )}
+                      </label>
+                      {productImagePreview && (
+                        <button onClick={() => { setProductImage(null); setProductImagePreview(null); setProductForm(f => ({...f, imageUrl: ''})); }} className="mt-1 text-xs text-red-500 hover:underline">Quitar imagen</button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={handleSaveProduct}
+                      disabled={createProductMutation.isPending || updateProductMutation.isPending || isUploadingProductImage}
+                      className="flex items-center gap-2 bg-[#C5A55A] hover:bg-[#B8935A] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {isUploadingProductImage ? 'Subiendo imagen...' :
+                       createProductMutation.isPending || updateProductMutation.isPending ? 'Guardando...' :
+                       editingProductId ? 'Actualizar Producto' : 'Agregar Producto'}
+                    </button>
+                    {editingProductId && (
+                      <button onClick={() => { setEditingProductId(null); setProductForm({ name: '', description: '', category: 'general', price: '', imageUrl: '', stock: 0, isActive: true, sortOrder: 0 }); setProductImage(null); setProductImagePreview(null); }} className="px-4 py-2 border rounded-lg text-sm text-[#666] hover:bg-gray-50 transition">Cancelar</button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Lista de productos */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-[#C5A55A]/20">
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Imagen</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Nombre</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Categoría</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Precio</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Stock</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Estado</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {productsCatalog?.map((prod: any) => (
+                        <tr key={prod.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4">
+                            {prod.imageUrl ? (
+                              <img src={prod.imageUrl} alt={prod.name} className="w-12 h-12 object-cover rounded-lg" />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">Sin img</div>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 font-medium text-[#1A1A1A]">{prod.name}</td>
+                          <td className="py-3 px-4 text-[#666] capitalize">{prod.category}</td>
+                          <td className="py-3 px-4 text-[#C5A55A] font-semibold">{prod.price || 'Sin precio'}</td>
+                          <td className="py-3 px-4 text-[#666]">{prod.stock}</td>
+                          <td className="py-3 px-4">
+                            <span className={`text-xs px-2 py-1 rounded-full font-semibold ${prod.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                              {prod.isActive ? 'Activo' : 'Inactivo'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex gap-2">
+                              <button onClick={() => handleEditProduct(prod)} className="p-1.5 text-[#C5A55A] hover:bg-[#C5A55A]/10 rounded transition"><Pencil className="w-4 h-4" /></button>
+                              <button onClick={() => { if (confirm('¿Eliminar este producto?')) deleteProductCatalogMutation.mutate({ id: prod.id }); }} className="p-1.5 text-red-400 hover:bg-red-50 rounded transition"><Trash2 className="w-4 h-4" /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {(!productsCatalog || productsCatalog.length === 0) && (
+                        <tr><td colSpan={7} className="py-8 text-center text-[#999]">No hay productos en el catálogo</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Compras de Productos Tab */}
+          <TabsContent value="productPurchases" className="space-y-4">
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#1A1A1A]">Compras de Productos</CardTitle>
+                <CardDescription>Verifica comprobantes y aprueba o rechaza compras de productos.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-[#C5A55A]/20">
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Producto</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Comprador</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Correo</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Teléfono</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Cantidad</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Estado</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Comprobante</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {productPurchases?.map((pp: any) => (
+                        <tr key={pp.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 font-medium text-[#1A1A1A]">{pp.productName}</td>
+                          <td className="py-3 px-4">{pp.buyerName}</td>
+                          <td className="py-3 px-4 text-[#666]">{pp.buyerEmail}</td>
+                          <td className="py-3 px-4 text-[#666]">{pp.buyerPhone || '-'}</td>
+                          <td className="py-3 px-4 text-center">{pp.quantity}</td>
+                          <td className="py-3 px-4">
+                            <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                              pp.status === 'approved' ? 'bg-green-100 text-green-700' :
+                              pp.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>{pp.status === 'approved' ? 'Aprobado' : pp.status === 'rejected' ? 'Rechazado' : 'Pendiente'}</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {pp.proofUrl && (
+                              <button onClick={() => window.open(pp.proofUrl, '_blank')} className="flex items-center gap-1 text-[#C5A55A] hover:underline text-xs"><Eye className="w-3.5 h-3.5" />Ver</button>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex gap-1">
+                              {pp.status === 'pending' && (
+                                <>
+                                  <button onClick={() => verifyProductMutation.mutate({ id: pp.id })} className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded transition"><CheckCircle className="w-3.5 h-3.5" />Aprobar</button>
+                                  <button onClick={() => rejectProductMutation.mutate({ id: pp.id })} className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded transition"><XCircle className="w-3.5 h-3.5" />Rechazar</button>
+                                </>
+                              )}
+                              <button onClick={() => { if (confirm('¿Eliminar este registro?')) deleteProductPurchaseMutation.mutate({ id: pp.id }); }} className="p-1.5 text-red-400 hover:bg-red-50 rounded transition"><Trash2 className="w-3.5 h-3.5" /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {(!productPurchases || productPurchases.length === 0) && (
+                        <tr><td colSpan={8} className="py-8 text-center text-[#999]">No hay compras de productos</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
         {/* Modal de Aprobar Cita */}
         {selectedAppointmentId !== null && selectedAppointment && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

@@ -4,7 +4,7 @@
  * Gold accent lines, Playfair Display headline, fade-in animations
  */
 import { motion } from "framer-motion";
-import { ChevronDown, Gift, BookOpen, Ruler, CalendarCheck } from "lucide-react";
+import { ChevronDown, Gift, BookOpen, Ruler, CalendarCheck, ShoppingBag } from "lucide-react";
 
 const HERO_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-reception_c595cea6.jpeg";
@@ -106,6 +106,13 @@ export default function HeroSection() {
             >
               <CalendarCheck className="w-5 h-5" />
               Agenda tu Cita
+            </a>
+            <a
+              href="/tienda"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              Tienda de Productos
             </a>
             <motion.button
               onClick={(e) => {

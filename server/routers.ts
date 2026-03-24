@@ -7,7 +7,8 @@ import { createMembership, getAllMemberships, getMembershipById, updateMembershi
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
-import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from "./_core/email_extra";
+import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
+import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll } from "./pushNotifications";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
@@ -985,6 +986,116 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return await deleteServicePurchase(input.id);
+      }),
+  }),
+
+  // ─── Products catalog ─────────────────────────────────────────────────────
+  products: router({
+    list: publicProcedure.query(async () => {
+      return await getAllActiveProducts();
+    }),
+    listAll: publicProcedure.query(async () => {
+      return await getAllProducts();
+    }),
+    create: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        category: z.string().min(1).default('general'),
+        price: z.string().optional(),
+        imageUrl: z.string().optional(),
+        stock: z.number().int().optional(),
+        isActive: z.boolean().default(true),
+        sortOrder: z.number().int().default(0),
+      }))
+      .mutation(async ({ input }) => {
+        return await createProduct(input);
+      }),
+    update: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        price: z.string().optional(),
+        imageUrl: z.string().optional(),
+        stock: z.number().int().optional(),
+        isActive: z.boolean().optional(),
+        sortOrder: z.number().int().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await updateProduct(id, data);
+      }),
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteProduct(input.id);
+      }),
+    uploadImage: publicProcedure
+      .input(z.object({ imageData: z.string(), mimeType: z.string() }))
+      .mutation(async ({ input }) => {
+        const buffer = Buffer.from(input.imageData, 'base64');
+        const ext = input.mimeType.split('/')[1] || 'jpg';
+        const fileName = `product-${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+        const { url } = await storagePut(`products/${fileName}`, buffer, input.mimeType);
+        return { url };
+      }),
+  }),
+
+  // ─── Product purchases ─────────────────────────────────────────────────────
+  productPurchases: router({
+    create: publicProcedure
+      .input(z.object({
+        productId: z.number(),
+        productName: z.string(),
+        buyerName: z.string().min(1),
+        buyerEmail: z.string().email(),
+        buyerPhone: z.string().optional(),
+        quantity: z.number().int().min(1).default(1),
+        proofData: z.string(),
+        proofMimeType: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const part = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const purchaseCode = `NUT-PRD-${part}`;
+        const buffer = Buffer.from(input.proofData, 'base64');
+        const ext = input.proofMimeType.split('/')[1] || 'jpg';
+        const fileName = `product-proof-${Date.now()}.${ext}`;
+        const { url: proofUrl } = await storagePut(`product-proofs/${fileName}`, buffer, input.proofMimeType);
+        const purchase = await createProductPurchase({
+          productId: input.productId,
+          productName: input.productName,
+          buyerName: input.buyerName,
+          buyerEmail: input.buyerEmail,
+          buyerPhone: input.buyerPhone,
+          quantity: input.quantity,
+          proofUrl,
+          purchaseCode,
+          status: 'pending',
+        });
+        return { purchaseCode, id: purchase.id };
+      }),
+    listAll: publicProcedure.query(async () => {
+      return await getAllProductPurchases();
+    }),
+    verify: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await updateProductPurchaseStatus(input.id, 'verified');
+        return { success: true };
+      }),
+    reject: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await updateProductPurchaseStatus(input.id, 'rejected');
+        return { success: true };
+      }),
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteProductPurchase(input.id);
       }),
   }),
 });

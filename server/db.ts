@@ -2,6 +2,7 @@ import { eq, desc, and, lt, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, couponSubscribers, InsertCouponSubscriber, services, InsertService } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { products, InsertProduct, productPurchases, InsertProductPurchase } from '../drizzle/schema';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -649,5 +650,68 @@ export async function deleteService(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(services).where(eq(services.id, id));
+  return { success: true };
+}
+
+// ===== PRODUCTS CATALOG =====
+export async function getAllProducts() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(products).orderBy(products.sortOrder, products.id);
+}
+export async function getAllActiveProducts() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(products)
+    .where(eq(products.isActive, true))
+    .orderBy(products.sortOrder, products.id);
+}
+export async function getProductById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(products).where(eq(products.id, id));
+  return rows[0] ?? null;
+}
+export async function createProduct(data: InsertProduct) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(products).values(data);
+  return { id: Number((result as any)[0]?.insertId ?? 0) };
+}
+export async function updateProduct(id: number, data: Partial<InsertProduct>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(products).set(data).where(eq(products.id, id));
+  return { success: true };
+}
+export async function deleteProduct(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(products).where(eq(products.id, id));
+  return { success: true };
+}
+
+// ===== PRODUCT PURCHASES =====
+export async function createProductPurchase(data: InsertProductPurchase) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(productPurchases).values(data);
+  return { id: Number((result as any)[0]?.insertId ?? 0) };
+}
+export async function getAllProductPurchases() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(productPurchases).orderBy(desc(productPurchases.createdAt));
+}
+export async function updateProductPurchaseStatus(id: number, status: 'pending' | 'verified' | 'rejected') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(productPurchases).set({ status }).where(eq(productPurchases.id, id));
+  return { success: true };
+}
+export async function deleteProductPurchase(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(productPurchases).where(eq(productPurchases.id, id));
   return { success: true };
 }

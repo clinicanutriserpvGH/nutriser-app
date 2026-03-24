@@ -310,3 +310,45 @@ export const services = mysqlTable("services", {
 
 export type Service = typeof services.$inferSelect;
 export type InsertService = typeof services.$inferInsert;
+
+/**
+ * Catálogo de productos de la tienda
+ * El admin puede crear, editar y eliminar productos desde el panel de administración
+ * Los usuarios pueden ver y comprar productos desde la tienda pública
+ */
+export const products = mysqlTable("products", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }).notNull().default("general"),
+  price: varchar("price", { length: 100 }), // Precio libre: "$1,500 MXN" o "Desde $800"
+  imageUrl: text("imageUrl"), // URL de la imagen en S3
+  stock: int("stock").default(0), // null = sin límite
+  isActive: boolean("isActive").default(true).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;
+
+/**
+ * Compras de productos
+ */
+export const productPurchases = mysqlTable("productPurchases", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  productName: varchar("productName", { length: 255 }).notNull(),
+  buyerName: varchar("buyerName", { length: 255 }).notNull(),
+  buyerEmail: varchar("buyerEmail", { length: 320 }).notNull(),
+  buyerPhone: varchar("buyerPhone", { length: 50 }),
+  quantity: int("quantity").default(1).notNull(),
+  proofUrl: text("proofUrl"), // URL del comprobante en S3
+  status: mysqlEnum("status", ["pending", "verified", "rejected"]).default("pending").notNull(),
+  purchaseCode: varchar("purchaseCode", { length: 30 }).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ProductPurchase = typeof productPurchases.$inferSelect;
+export type InsertProductPurchase = typeof productPurchases.$inferInsert;

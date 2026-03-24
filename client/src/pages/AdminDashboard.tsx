@@ -22,6 +22,7 @@ export default function AdminDashboard() {
   const [promotionRegularPrice, setPromotionRegularPrice] = useState("");
   const [promotionImage, setPromotionImage] = useState<File | null>(null);
   const [promotionImagePreview, setPromotionImagePreview] = useState<string | null>(null);
+  const [promotionMaxCoupons, setPromotionMaxCoupons] = useState("");
   // Estado para edición de promoción
   const [editingPromoId, setEditingPromoId] = useState<number | null>(null);
   const [editPromoTitle, setEditPromoTitle] = useState("");
@@ -31,6 +32,7 @@ export default function AdminDashboard() {
   const [editPromoExpiresAt, setEditPromoExpiresAt] = useState("");
   const [editPromoImage, setEditPromoImage] = useState<File | null>(null);
   const [editPromoImagePreview, setEditPromoImagePreview] = useState<string | null>(null);
+  const [editPromoMaxCoupons, setEditPromoMaxCoupons] = useState("");
 
   // Estado para eBook
   const [ebookTitle, setEbookTitle] = useState("");
@@ -316,6 +318,7 @@ export default function AdminDashboard() {
       setPromotionRegularPrice("");
       setPromotionImage(null);
       setPromotionImagePreview(null);
+      setPromotionMaxCoupons("");
       utils.promotions.listForAdmin.invalidate();
       utils.promotions.list.invalidate();
     },
@@ -434,6 +437,7 @@ export default function AdminDashboard() {
       regularPrice: promotionRegularPrice.trim() || undefined,
       imageBase64,
       imageMimeType,
+      maxCoupons: promotionMaxCoupons.trim() ? parseInt(promotionMaxCoupons) : undefined,
       expiresAt: promotionExpiresAt ? new Date(promotionExpiresAt).toISOString() : undefined,
     });
   };
@@ -462,6 +466,7 @@ export default function AdminDashboard() {
       regularPrice: editPromoRegularPrice.trim() || null,
       imageBase64,
       imageMimeType,
+      maxCoupons: editPromoMaxCoupons.trim() ? parseInt(editPromoMaxCoupons) : null,
       expiresAt: editPromoExpiresAt ? new Date(editPromoExpiresAt).toISOString() : null,
     });
   };
@@ -1021,6 +1026,25 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+                      Cupones disponibles
+                      <span className="text-[#999] font-normal ml-2">(opcional, deja vacío para ilimitados)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="Ej: 20 (se muestra contador de urgencia)"
+                      value={promotionMaxCoupons}
+                      onChange={(e) => setPromotionMaxCoupons(e.target.value)}
+                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                    />
+                    {promotionMaxCoupons && parseInt(promotionMaxCoupons) > 0 && (
+                      <p className="text-xs text-[#C5A55A] mt-1">
+                        Se mostrará "Quedan {promotionMaxCoupons} cupones" en la cuponera pública
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
                       Fecha límite para canjear
                       <span className="text-[#999] font-normal ml-2">(opcional)</span>
                     </label>
@@ -1113,12 +1137,26 @@ export default function AdminDashboard() {
                                   <img src={editPromoImagePreview || promo.imageUrl} alt="Preview" className="w-20 h-20 object-cover rounded mt-1 border" />
                                 )}
                               </div>
-                              <input
-                                type="date"
-                                value={editPromoExpiresAt}
-                                onChange={(e) => setEditPromoExpiresAt(e.target.value)}
-                                className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
-                              />
+                              <div>
+                                <label className="block text-xs font-semibold text-[#1A1A1A] mb-1">Cupones disponibles</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  placeholder="Vacío = ilimitados"
+                                  value={editPromoMaxCoupons}
+                                  onChange={(e) => setEditPromoMaxCoupons(e.target.value)}
+                                  className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-semibold text-[#1A1A1A] mb-1">Fecha límite</label>
+                                <input
+                                  type="date"
+                                  value={editPromoExpiresAt}
+                                  onChange={(e) => setEditPromoExpiresAt(e.target.value)}
+                                  className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
+                                />
+                              </div>
                               <div className="flex gap-2">
                                 <button
                                   onClick={handleSaveEditPromotion}
@@ -1188,6 +1226,7 @@ export default function AdminDashboard() {
                                     setEditPromoExpiresAt(promo.expiresAt ? new Date(promo.expiresAt).toISOString().split('T')[0] : '');
                                     setEditPromoImage(null);
                                     setEditPromoImagePreview(null);
+                                    setEditPromoMaxCoupons(promo.maxCoupons ? String(promo.maxCoupons) : '');
                                   }}
                                   className="flex-1 px-3 py-2 bg-[#C5A55A]/20 text-[#C5A55A] border border-[#C5A55A]/40 rounded hover:bg-[#C5A55A]/30 transition text-sm font-medium"
                                 >

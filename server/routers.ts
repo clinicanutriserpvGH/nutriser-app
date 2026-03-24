@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
@@ -448,7 +448,7 @@ export const appRouter = router({
 
   promotions: router({
     list: publicProcedure.query(async () => {
-      return await getAllPromotions();
+      return await getPromotionsWithCouponCounts();
     }),
 
     create: publicProcedure
@@ -459,6 +459,7 @@ export const appRouter = router({
         regularPrice: z.string().optional(), // Precio regular (para comparativa)
         imageBase64: z.string().optional(), // Imagen en base64
         imageMimeType: z.string().optional(),
+        maxCoupons: z.number().int().positive().optional(), // Límite de cupones
         expiresAt: z.string().optional(), // ISO date string
       }))
       .mutation(async ({ input }) => {
@@ -476,6 +477,7 @@ export const appRouter = router({
           price: input.price ?? null,
           regularPrice: input.regularPrice ?? null,
           imageUrl,
+          maxCoupons: input.maxCoupons ?? null,
           expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
           isActive: true,
         });
@@ -490,6 +492,7 @@ export const appRouter = router({
         regularPrice: z.string().nullable().optional(),
         imageBase64: z.string().optional(),
         imageMimeType: z.string().optional(),
+        maxCoupons: z.number().int().positive().nullable().optional(),
         isActive: z.boolean().optional(),
         expiresAt: z.string().nullable().optional(),
       }))

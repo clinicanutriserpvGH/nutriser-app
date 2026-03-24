@@ -74,7 +74,7 @@ async function startServer() {
   app.use("/uploads", express.static("dist/uploads"));
 
   // SSR endpoint for coupon Open Graph meta tags (WhatsApp, Facebook, etc.)
-  app.get("/cupon/:id", async (req, res) => {
+  app.get("/api/og/cupon/:id", async (req, res) => {
     try {
       const { getPromotionById } = await import("../db");
       const promoId = parseInt(req.params.id);

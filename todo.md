@@ -503,3 +503,13 @@
 - [x] Endpoint SSR /cupon/:id con meta tags OG dinámicas (imagen, título, descripción, precios)
 - [x] Enlaces de compartir actualizados: WhatsApp, Email, Copiar usan /cupon/:id
 - [x] Bots (WhatsApp, Facebook, etc.) reciben HTML con OG; usuarios normales redirigidos a /#cupon-:id
+
+## Contador de cupones restantes (Mar 24)
+- [x] OG dinámico: ruta corregida a /api/og/cupon/:id (evita conflicto con serveStatic)
+- [x] DB: campo maxCoupons (int nullable) agregado a promotions
+- [x] Admin: campo "Cupones disponibles" al crear/editar promoción con preview
+- [x] Backend: getPromotionsWithCouponCounts cuenta cupones vendidos por promoción
+- [x] Cuponera pública: contador visual con barra de progreso (vendidos/total)
+- [x] Cuponera pública: colores de urgencia (verde → naranja → rojo)
+- [x] Botón "Lo Quiero" deshabilitado cuando cupones agotados
+- [x] Tests: 18 tests pasan correctamente

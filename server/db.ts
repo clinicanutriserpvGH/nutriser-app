@@ -1,4 +1,4 @@
-import { eq, desc, and, lt } from "drizzle-orm";
+import { eq, desc, and, lt, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -268,6 +268,49 @@ export async function getAllPromotions() {
     );
   
   return await db.select().from(promotions).where(eq(promotions.isActive, true)).orderBy(desc(promotions.createdAt));
+}
+
+export async function getPromotionsWithCouponCounts() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const now = new Date();
+  // Marcar automáticamente como inactivas las promociones vencidas
+  await db.update(promotions)
+    .set({ isActive: false })
+    .where(
+      and(
+        eq(promotions.isActive, true),
+        lt(promotions.expiresAt, now)
+      )
+    );
+  
+  const promos = await db.select().from(promotions).where(eq(promotions.isActive, true)).orderBy(desc(promotions.createdAt));
+  
+  if (promos.length === 0) return [];
+  
+  // Contar cupones comprados (approved o used) por promoción
+  const promoIds = promos.map(p => p.id);
+  const counts = await db.select({
+    promotionId: giftPurchases.promotionId,
+    count: sql<number>`COUNT(*)`.as('count'),
+  })
+    .from(giftPurchases)
+    .where(
+      and(
+        inArray(giftPurchases.promotionId, promoIds),
+        inArray(giftPurchases.status, ['approved', 'used', 'pending'])
+      )
+    )
+    .groupBy(giftPurchases.promotionId);
+  
+  const countMap = new Map(counts.map(c => [c.promotionId, Number(c.count)]));
+  
+  return promos.map(p => ({
+    ...p,
+    couponsSold: countMap.get(p.id) || 0,
+    couponsRemaining: p.maxCoupons ? Math.max(0, p.maxCoupons - (countMap.get(p.id) || 0)) : null,
+  }));
 }
 
 export async function getPromotionById(id: number) {

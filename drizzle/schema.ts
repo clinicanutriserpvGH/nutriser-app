@@ -141,6 +141,7 @@ export const promotions = mysqlTable("promotions", {
   imageUrl: text("imageUrl"), // URL de imagen (opcional)
   price: varchar("price", { length: 100 }), // Precio promocional del cupón (texto libre, ej: $1,299)
   regularPrice: varchar("regularPrice", { length: 100 }), // Precio regular para comparativa (texto libre, ej: $1,800)
+  maxCoupons: int("maxCoupons"), // Límite de cupones disponibles (null = ilimitado)
   isActive: boolean("isActive").default(true).notNull(),
   expiresAt: timestamp("expiresAt"), // Fecha límite para canjear el cupón (null = sin vencimiento)
   createdAt: timestamp("createdAt").defaultNow().notNull(),

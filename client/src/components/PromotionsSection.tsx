@@ -141,17 +141,17 @@ export default function PromotionsSection() {
   };
 
   const handleShareWhatsApp = (title: string, description: string, promoId: number) => {
-    const shareUrl = `https://nutriserpv.com/cupon/${promoId}`;
+    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promoId}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(`🎁 *${title}*\n\n${description}\n\n${shareUrl}`)}`, "_blank");
   };
 
   const handleShareEmail = (title: string, description: string, promoId: number) => {
-    const shareUrl = `https://nutriserpv.com/cupon/${promoId}`;
+    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promoId}`;
     window.open(`mailto:?subject=${encodeURIComponent(`Promoción Nutriser: ${title}`)}&body=${encodeURIComponent(`${title}\n\n${description}\n\n${shareUrl}`)}`, "_blank");
   };
 
   const handleCopyLink = (id: number, title: string, description: string | null) => {
-    const shareUrl = `https://nutriserpv.com/cupon/${id}`;
+    const shareUrl = `https://nutriserpv.com/api/og/cupon/${id}`;
     navigator.clipboard.writeText(`🎁 *${title}*\n\n${description || ""}\n\n${shareUrl}`);
     setCopiedId(id);
     toast.success("Cupón copiado al portapapeles");
@@ -262,6 +262,43 @@ export default function PromotionsSection() {
                         </div>
                       </div>
                     )}
+                    {/* Contador de cupones restantes */}
+                    {promo.maxCoupons && promo.couponsRemaining !== null && promo.couponsRemaining !== undefined && (
+                      <div className={`rounded-lg px-3 py-2.5 mb-4 flex items-center gap-2 ${
+                        promo.couponsRemaining <= 3
+                          ? 'bg-red-500/30 border border-red-300/40'
+                          : promo.couponsRemaining <= Math.ceil(promo.maxCoupons * 0.3)
+                            ? 'bg-orange-400/25 border border-orange-300/30'
+                            : 'bg-white/15'
+                      }`}>
+                        <span className="text-white text-sm">{promo.couponsRemaining <= 3 ? '🔥' : '🎫'}</span>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className={`text-xs font-bold uppercase tracking-wider ${
+                              promo.couponsRemaining <= 3 ? 'text-red-200' : 'text-white/80'
+                            }`}>
+                              {promo.couponsRemaining === 0
+                                ? 'Cupones agotados'
+                                : promo.couponsRemaining <= 3
+                                  ? `¡Solo quedan ${promo.couponsRemaining}!`
+                                  : `Quedan ${promo.couponsRemaining} cupones`
+                              }
+                            </p>
+                            <p className="text-white/60 text-[10px]">{promo.couponsSold}/{promo.maxCoupons}</p>
+                          </div>
+                          {/* Barra de progreso */}
+                          <div className="w-full bg-white/20 rounded-full h-1.5 mt-1.5">
+                            <div
+                              className={`h-1.5 rounded-full transition-all duration-500 ${
+                                promo.couponsRemaining <= 3 ? 'bg-red-400' : promo.couponsRemaining <= Math.ceil(promo.maxCoupons * 0.3) ? 'bg-orange-400' : 'bg-green-400'
+                              }`}
+                              style={{ width: `${Math.min(100, ((promo.couponsSold || 0) / promo.maxCoupons) * 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Aviso de cita previa */}
                     <div className="bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
                       <span className="text-white text-sm">📞</span>
@@ -269,8 +306,19 @@ export default function PromotionsSection() {
                     </div>
                     <div className="h-px bg-white/30 my-4" />
                     <button
-                      onClick={() => { setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true); }}
-                      className="block w-full bg-white text-[#C5A55A] py-3 px-4 rounded-lg font-bold text-center uppercase tracking-[0.1em] hover:bg-[#FAF7F2] transition">
+                      onClick={() => {
+                        if (promo.maxCoupons && promo.couponsRemaining === 0) {
+                          toast.error("Esta promoción ya no tiene cupones disponibles");
+                          return;
+                        }
+                        setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true);
+                      }}
+                      disabled={promo.maxCoupons != null && promo.couponsRemaining === 0}
+                      className={`block w-full py-3 px-4 rounded-lg font-bold text-center uppercase tracking-[0.1em] transition ${
+                        promo.maxCoupons != null && promo.couponsRemaining === 0
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-white text-[#C5A55A] hover:bg-[#FAF7F2]'
+                      }`}>
                       Lo Quiero
                     </button>
                   </div>

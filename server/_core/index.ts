@@ -73,22 +73,20 @@ async function startServer() {
   // Serve uploaded images
   app.use("/uploads", express.static("dist/uploads"));
 
-  // SSR endpoint for coupon Open Graph meta tags (WhatsApp, Facebook, etc.)
-  app.get("/api/og/cupon/:id", async (req, res) => {
+  // Helper to build the OG HTML page for a coupon
+  async function buildCouponOGPage(promoId: number, res: any) {
     try {
       const { getPromotionById } = await import("../db");
-      const promoId = parseInt(req.params.id);
-      if (isNaN(promoId)) {
-        return res.redirect("https://nutriserpv.com/");
-      }
+      if (isNaN(promoId)) return res.redirect("https://nutriserpv.com/");
       const promo = await getPromotionById(promoId);
-      if (!promo) {
-        return res.redirect("https://nutriserpv.com/");
-      }
+      if (!promo) return res.redirect("https://nutriserpv.com/");
 
       const title = promo.title || "Promoci\u00f3n Nutriser";
       const description = promo.description || "Aprovecha esta promoci\u00f3n especial en Nutriser Aesthetic & Nutrition";
-      const image = promo.imageUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_87a5c3e9.png";
+      // Use the coupon's own image, or fall back to the Nutriser logo
+      const image = (promo.imageUrl && promo.imageUrl.startsWith('http'))
+        ? promo.imageUrl
+        : "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_87a5c3e9.png";
       const priceInfo = promo.regularPrice && promo.price
         ? ` | Antes: ${promo.regularPrice} \u2192 Ahora: ${promo.price}`
         : promo.price ? ` | ${promo.price}` : "";
@@ -96,16 +94,7 @@ async function startServer() {
       const canonicalUrl = `https://nutriserpv.com/cupon/${promoId}`;
       const redirectUrl = `https://nutriserpv.com/#cupon-${promoId}`;
 
-      // Detect if request is from a bot/crawler (WhatsApp, Facebook, Twitter, etc.)
-      const ua = (req.headers["user-agent"] || "").toLowerCase();
-      const isBot = /whatsapp|facebookexternalhit|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|bot|crawler|spider/i.test(ua);
-
-      if (!isBot) {
-        // Regular users get redirected to the SPA with the anchor
-        return res.redirect(redirectUrl);
-      }
-
-      // Bots get a minimal HTML page with OG meta tags
+      // Always return OG HTML — WhatsApp/bots read the meta tags, users get JS redirect
       const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -117,26 +106,38 @@ async function startServer() {
   <meta property="og:title" content="\ud83c\udf81 ${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(fullDescription)}" />
   <meta property="og:image" content="${image}" />
+  <meta property="og:image:secure_url" content="${image}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:site_name" content="Nutriser | Aesthetic & Nutrition" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:site_name" content="Nutriser | Aesthetic &amp; Nutrition" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="\ud83c\udf81 ${escapeHtml(title)}" />
   <meta name="twitter:description" content="${escapeHtml(fullDescription)}" />
   <meta name="twitter:image" content="${image}" />
-  <meta http-equiv="refresh" content="0;url=${redirectUrl}" />
 </head>
 <body>
-  <p>Redirigiendo a <a href="${redirectUrl}">${escapeHtml(title)}</a>...</p>
+  <p>Cargando oferta... <a href="${redirectUrl}">${escapeHtml(title)}</a></p>
+  <script>window.location.replace("${redirectUrl}");<\/script>
 </body>
 </html>`;
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      res.setHeader("Cache-Control", "public, max-age=300");
+      res.setHeader("Cache-Control", "no-cache, no-store");
       res.send(html);
     } catch (err) {
       console.error("[OG Cupon] Error:", err);
       res.redirect("https://nutriserpv.com/");
     }
+  }
+
+  // /cupon/:id — shareable URL for coupons (used in WhatsApp, etc.)
+  app.get("/cupon/:id", async (req, res) => {
+    await buildCouponOGPage(parseInt(req.params.id), res);
+  });
+
+  // Legacy /api/og/cupon/:id — keep for backwards compatibility
+  app.get("/api/og/cupon/:id", async (req, res) => {
+    await buildCouponOGPage(parseInt(req.params.id), res);
   });
 
   function escapeHtml(str: string): string {

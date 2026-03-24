@@ -593,3 +593,9 @@
 - [x] Deduplicar suscripciones push por endpoint (evitar múltiples registros del mismo dispositivo)
 - [x] Agregar requireInteraction:true en las notificaciones push para que no desaparezcan solas
 - [x] Agregar tag 'nutriser-promo' para que notificaciones se reemplacen en lugar de acumularse
+
+## Corrección OG Image Cupón - Mar 24 2026
+- [x] Corregir endpoint /api/og/cupon/:id para que devuelva og:image con la imagen real del cupón
+- [x] Crear nueva ruta /cupon/:id que siempre devuelve HTML con OG tags (sin depender de bot detection)
+- [x] Actualizar URL compartida en WhatsApp y Copiar Link a https://nutriserpv.com/cupon/:id
+- [x] Verificar que el endpoint devuelve la imagen real del cupón en og:image

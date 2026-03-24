@@ -223,7 +223,7 @@ export default function PromotionsSection() {
   };
 
   const handleShareWhatsApp = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null; imageUrl?: string | null }) => {
-    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promo.id}`;
+    const shareUrl = `https://nutriserpv.com/cupon/${promo.id}`;
     const priceText = promo.regularPrice && promo.price
       ? `\n💰 Antes: ~${promo.regularPrice}~ → *Ahora: ${promo.price}*`
       : promo.price ? `\n💰 Precio: *${promo.price}*` : "";
@@ -233,7 +233,7 @@ export default function PromotionsSection() {
   };
 
   const handleCopyLink = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null }) => {
-    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promo.id}`;
+    const shareUrl = `https://nutriserpv.com/cupon/${promo.id}`;
     navigator.clipboard.writeText(shareUrl);
     setCopiedId(promo.id);
     toast.success("¡Link copiado! Pégalo en Facebook, Instagram o donde quieras 🎉");

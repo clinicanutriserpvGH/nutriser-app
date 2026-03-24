@@ -1,0 +1,25 @@
+{
+  "query": "SHOW TABLES LIKE 'couponSubscribers'; SHOW TABLES LIKE 'servicePurchases'; SHOW TABLES LIKE 'pushSubscriptions';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SHOW TABLES LIKE 'couponSubscribers'; SHOW TABLES LIKE 'servicePurchases'; SHOW TABLES LIKE 'pushSubscriptions';",
+  "rows": [
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG (couponSubscribers)": "couponSubscribers"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG (couponSubscribers)": "Tables_in_7jSTACnGYyADJrX65GKurG (servicePurchases)"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG (couponSubscribers)": "servicePurchases"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG (couponSubscribers)": "Tables_in_7jSTACnGYyADJrX65GKurG (pushSubscriptions)"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG (couponSubscribers)": "pushSubscriptions"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_7jSTACnGYyADJrX65GKurG (couponSubscribers)\ncouponSubscribers\nTables_in_7jSTACnGYyADJrX65GKurG (servicePurchases)\nservicePurchases\nTables_in_7jSTACnGYyADJrX65GKurG (pushSubscriptions)\npushSubscriptions\n",
+  "stderr": "",
+  "execution_time_ms": 66
+}

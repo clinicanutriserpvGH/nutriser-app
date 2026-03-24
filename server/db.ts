@@ -1,6 +1,6 @@
 import { eq, desc, and, lt, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, couponSubscribers, InsertCouponSubscriber } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -537,5 +537,74 @@ export async function toggleEbookDiscountCode(id: number, isActive: boolean) {
   const db = await getDb();
   if (!db) return { success: false };
   await db.update(ebookDiscountCodes).set({ isActive }).where(eq(ebookDiscountCodes.id, id));
+  return { success: true };
+}
+
+// ===== SERVICE PURCHASES =====
+
+export async function createServicePurchase(data: InsertServicePurchase) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(servicePurchases).values(data);
+  const id = (result as any)[0]?.insertId;
+  return { id, ...data };
+}
+
+export async function getAllServicePurchases() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(servicePurchases).orderBy(desc(servicePurchases.createdAt));
+}
+
+export async function updateServicePurchaseStatus(id: number, status: "pending" | "approved" | "rejected") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(servicePurchases).set({
+    status,
+    approvedAt: status === "approved" ? new Date() : undefined,
+  }).where(eq(servicePurchases.id, id));
+  return { success: true };
+}
+
+export async function deleteServicePurchase(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(servicePurchases).where(eq(servicePurchases.id, id));
+  return { success: true };
+}
+
+// ===== COUPON SUBSCRIBERS =====
+
+export async function subscribeToCoupons(data: InsertCouponSubscriber) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Upsert: si ya existe el email, actualiza el whatsapp y reactiva
+  try {
+    await db.insert(couponSubscribers).values(data);
+  } catch (e: any) {
+    // Duplicate email: update whatsapp and reactivate
+    if (e?.code === 'ER_DUP_ENTRY') {
+      await db.update(couponSubscribers)
+        .set({ whatsapp: data.whatsapp, isActive: true })
+        .where(eq(couponSubscribers.email, data.email));
+    } else {
+      throw e;
+    }
+  }
+  return { success: true };
+}
+
+export async function getAllCouponSubscribers() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(couponSubscribers)
+    .where(eq(couponSubscribers.isActive, true))
+    .orderBy(desc(couponSubscribers.createdAt));
+}
+
+export async function deleteCouponSubscriber(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(couponSubscribers).where(eq(couponSubscribers.id, id));
   return { success: true };
 }

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Gift, Sparkles, Copy, Check, Upload, Clock, X, ArrowRight, User, Users } from "lucide-react";
+import { Loader2, Gift, Copy, Check, X, ArrowRight, Flame, Clock, AlertTriangle, Bell, BellRing } from "lucide-react";
 import { toast } from "sonner";
-import CouponCard from "@/components/CouponCard";
 
 type Step = "form" | "type" | "payment" | "success";
 
@@ -15,36 +14,108 @@ export default function PromotionsSection() {
   // Scroll to coupon if URL has #cupon-{id}
   useEffect(() => {
     if (isLoading || !promotions) return;
-    const hash = window.location.hash; // e.g. "#cupon-3"
+    const hash = window.location.hash;
     const match = hash.match(/^#cupon-(\d+)$/);
     if (!match) return;
     const targetId = parseInt(match[1], 10);
     setHighlightId(targetId);
-    // Wait a tick for the DOM to render
     setTimeout(() => {
       const el = document.getElementById(`cupon-${targetId}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      // Remove highlight after 3 seconds
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => setHighlightId(null), 3000);
     }, 300);
   }, [isLoading, promotions]);
+
+  // ─── Subscription modal state ─────────────────────────────────────────────
+  const [subModalOpen, setSubModalOpen] = useState(false);
+  const [subEmail, setSubEmail] = useState("");
+  const [subWhatsapp, setSubWhatsapp] = useState("");
+  const [subSubmitting, setSubSubmitting] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+
+  const subscribeMutation = trpc.couponSubscribers.subscribe.useMutation({
+    onSuccess: () => {
+      toast.success("✅ ¡Suscrito! Recibirás correos con las nuevas ofertas.");
+      setSubModalOpen(false);
+      setSubEmail("");
+      setSubWhatsapp("");
+      setSubSubmitting(false);
+    },
+    onError: (err) => {
+      toast.error("Error al suscribirse: " + err.message);
+      setSubSubmitting(false);
+    },
+  });
+
+  const pushSubscribeMutation = trpc.push.subscribe.useMutation({
+    onSuccess: () => {
+      setPushEnabled(true);
+      toast.success("🔔 ¡Notificaciones activadas!");
+    },
+    onError: () => {
+      toast.error("No se pudieron activar las notificaciones push.");
+    },
+  });
+
+  const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
+
+  const handleEnablePush = async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      toast.error("Tu navegador no soporta notificaciones push.");
+      return;
+    }
+    setPushLoading(true);
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        toast.error("Permiso de notificaciones denegado.");
+        setPushLoading(false);
+        return;
+      }
+      const reg = await navigator.serviceWorker.ready;
+      const publicKey = vapidData?.publicKey || import.meta.env.VITE_VAPID_PUBLIC_KEY;
+      if (!publicKey) { toast.error("Error de configuración."); setPushLoading(false); return; }
+      // Convert base64 to Uint8Array
+      const padding = '='.repeat((4 - publicKey.length % 4) % 4);
+      const base64 = (publicKey + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: outputArray,
+      });
+      const p256dhArr = new Uint8Array(subscription.getKey('p256dh')!);
+      const authArr = new Uint8Array(subscription.getKey('auth')!);
+      const p256dh = btoa(Array.from(p256dhArr).map(b => String.fromCharCode(b)).join(''));
+      const auth = btoa(Array.from(authArr).map(b => String.fromCharCode(b)).join(''));
+      await pushSubscribeMutation.mutateAsync({ endpoint: subscription.endpoint, p256dh, auth });
+    } catch (e: any) {
+      console.error('Push subscription error:', e);
+      toast.error("Error al activar notificaciones: " + e.message);
+    }
+    setPushLoading(false);
+  };
+
+  const handleSubscribeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subEmail.trim()) { toast.error("Ingresa tu correo"); return; }
+    if (!subWhatsapp.trim()) { toast.error("Ingresa tu WhatsApp"); return; }
+    setSubSubmitting(true);
+    subscribeMutation.mutate({ email: subEmail, whatsapp: subWhatsapp });
+  };
+
   const [giftModalOpen, setGiftModalOpen] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<{ id: number; title: string } | null>(null);
   const [step, setStep] = useState<Step>("form");
 
-  // Paso 1 - datos del comprador
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
-
-  // Paso 2 - tipo
   const [isGift, setIsGift] = useState<boolean | null>(null);
   const [recipientName, setRecipientName] = useState("");
   const [recipientContact, setRecipientContact] = useState("");
-
-  // Paso 3 - pago
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [timeLeft, setTimeLeft] = useState(900);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,7 +142,6 @@ export default function PromotionsSection() {
     setGeneratedCode(""); setStep("form");
   };
 
-  // Timer solo empieza en paso 3 (pago)
   useEffect(() => {
     if (step === "payment" && giftModalOpen) {
       setTimeLeft(900);
@@ -80,7 +150,7 @@ export default function PromotionsSection() {
           if (prev <= 1) {
             clearInterval(timerRef.current!);
             setGiftModalOpen(false);
-            toast.error("Tiempo agotado. Deberás registrarte de nuevo para activar tu cupón.");
+            toast.error("Tiempo agotado. Deberás registrarte de nuevo.");
             resetForm();
             return 900;
           }
@@ -140,33 +210,63 @@ export default function PromotionsSection() {
     reader.readAsDataURL(proofFile);
   };
 
-  const handleShareWhatsApp = (title: string, description: string, promoId: number) => {
-    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promoId}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(`🎁 *${title}*\n\n${description}\n\n${shareUrl}`)}`, "_blank");
+  const handleShareWhatsApp = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null }) => {
+    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promo.id}`;
+    const priceText = promo.regularPrice && promo.price
+      ? `\n💰 Antes: ~${promo.regularPrice}~ → *Ahora: ${promo.price}*`
+      : promo.price ? `\n💰 Precio: *${promo.price}*` : "";
+    const text = `🔥 *¡OFERTA ESPECIAL!* 🔥\n\n🎁 *${promo.title}*\n${promo.description || ""}${priceText}\n\n👉 Adquiere tu cupón aquí:\n${shareUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  const handleShareInstagram = () => {
-    window.open("https://www.instagram.com/nutriserpv/", "_blank");
-  };
-
-  const handleCopyLink = (id: number, title: string, description: string | null) => {
-    const shareUrl = `https://nutriserpv.com/api/og/cupon/${id}`;
-    navigator.clipboard.writeText(`🎁 *${title}*\n\n${description || ""}\n\n${shareUrl}`);
-    setCopiedId(id);
-    toast.success("Cupón copiado al portapapeles");
-    setTimeout(() => setCopiedId(null), 2000);
+  const handleCopyLink = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null }) => {
+    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promo.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    setCopiedId(promo.id);
+    toast.success("¡Link copiado! Pégalo en Facebook, Instagram o donde quieras 🎉");
+    setTimeout(() => setCopiedId(null), 3000);
   };
 
   const stepLabels = ["Tus datos", "¿Para quién?", "Pago"];
   const stepIndex = step === "form" ? 0 : step === "type" ? 1 : step === "payment" ? 2 : 3;
+
+  // Urgency helpers
+  const getUrgencyLevel = (remaining: number | null | undefined, max: number | null | undefined) => {
+    if (!max || remaining === null || remaining === undefined) return "none";
+    if (remaining === 0) return "sold";
+    if (remaining <= 3) return "critical";
+    if (remaining <= Math.ceil(max * 0.3)) return "low";
+    return "ok";
+  };
 
   return (
     <section id="promociones" className="py-20 bg-[#FAF7F2]">
       <div className="container">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center mb-12">
           <h2 className="font-serif text-4xl lg:text-5xl text-[#1A1A1A] mb-4">Cuponera de Promociones</h2>
-          <p className="text-[#666] mb-4">Comparte nuestras ofertas con tus amigos</p>
-          <div className="w-16 h-1 bg-gradient-to-r from-transparent via-[#C5A55A] to-transparent mx-auto" />
+          <p className="text-[#666] mb-4">Ofertas exclusivas con cupos limitados</p>
+          <div className="w-16 h-1 bg-gradient-to-r from-transparent via-[#C5A55A] to-transparent mx-auto mb-8" />
+
+          {/* Botón de suscripción prominente */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="inline-block"
+          >
+            <button
+              onClick={() => setSubModalOpen(true)}
+              className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] hover:from-[#2d2416] hover:to-[#1A1A1A] text-white px-8 py-4 rounded-2xl font-bold text-base shadow-2xl border-2 border-[#C5A55A] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(197,165,90,0.4)]"
+            >
+              <span className="relative">
+                <BellRing className="w-6 h-6 text-[#C5A55A] animate-bounce" />
+              </span>
+              <span className="text-[#C5A55A] font-black tracking-wide">🔔 Suscribirse a Ofertas</span>
+              <span className="text-white/70 text-sm font-normal hidden sm:inline">— Recibe nuevos cupones al instante</span>
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">GRATIS</span>
+            </button>
+          </motion.div>
+          <p className="text-xs text-[#999] mt-3">Correo + notificaciones en tu celular cuando publiquemos nuevas ofertas</p>
         </motion.div>
 
         {isLoading ? (
@@ -176,120 +276,282 @@ export default function PromotionsSection() {
             <p className="text-[#999] text-lg">Actualmente no existen promociones</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {promotions.map((promo, index) => (
-              <motion.div key={promo.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.08 }}>
-                <div
-                  id={`cupon-${promo.id}`}
-                  className={`transition-all duration-500 rounded-xl overflow-hidden ${
-                    highlightId === promo.id
-                      ? 'ring-4 ring-[#C5A55A] ring-offset-2 scale-[1.02] shadow-xl'
-                      : 'shadow-lg hover:shadow-xl hover:scale-[1.01]'
-                  }`}
-                >
-                  {/* Imagen compacta */}
-                  {promo.imageUrl && (
-                    <div className="relative h-36 overflow-hidden">
-                      <img src={promo.imageUrl} alt={promo.title} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      {promo.regularPrice && promo.price && (
-                        <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow">
-                          OFERTA
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {promotions.map((promo, index) => {
+              const urgency = getUrgencyLevel(promo.couponsRemaining, promo.maxCoupons);
+              const isSoldOut = urgency === "sold";
+              const isCritical = urgency === "critical";
+              const isLow = urgency === "low";
+              const pct = promo.maxCoupons && promo.couponsRemaining != null
+                ? Math.round(((promo.maxCoupons - promo.couponsRemaining) / promo.maxCoupons) * 100)
+                : 0;
+
+              return (
+                <motion.div key={promo.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.1 }}>
+                  <div
+                    id={`cupon-${promo.id}`}
+                    className={`relative rounded-2xl overflow-hidden shadow-xl transition-all duration-500 ${
+                      highlightId === promo.id ? 'ring-4 ring-[#C5A55A] ring-offset-4 scale-[1.03]' : 'hover:shadow-2xl hover:-translate-y-1'
+                    } ${isSoldOut ? 'opacity-70 grayscale' : ''}`}
+                  >
+                    {/* Urgency ribbon */}
+                    {isCritical && !isSoldOut && (
+                      <div className="absolute top-0 left-0 right-0 z-20 bg-red-600 text-white text-center py-1.5 text-xs font-black tracking-widest uppercase flex items-center justify-center gap-1 animate-pulse">
+                        <Flame className="w-3.5 h-3.5" /> ¡ÚLTIMOS {promo.couponsRemaining} CUPONES! <Flame className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                    {isLow && !isSoldOut && (
+                      <div className="absolute top-0 left-0 right-0 z-20 bg-orange-500 text-white text-center py-1.5 text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1">
+                        <AlertTriangle className="w-3.5 h-3.5" /> Pocos cupones disponibles
+                      </div>
+                    )}
+
+                    {/* Imagen */}
+                    {promo.imageUrl ? (
+                      <div className={`relative overflow-hidden ${isCritical || isLow ? 'mt-7' : ''}`} style={{ height: '200px' }}>
+                        <img src={promo.imageUrl} alt={promo.title} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        {/* OFERTA badge */}
+                        {promo.regularPrice && promo.price && (
+                          <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black shadow-lg">
+                            🔥 OFERTA
+                          </div>
+                        )}
+                        {/* Título sobre imagen */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="font-serif text-xl text-white leading-tight drop-shadow-lg">{promo.title}</h3>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`bg-gradient-to-br from-[#1A1A1A] to-[#333] p-5 ${isCritical || isLow ? 'mt-7' : ''}`}>
+                        {promo.regularPrice && promo.price && (
+                          <div className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black mb-2">🔥 OFERTA</div>
+                        )}
+                        <h3 className="font-serif text-xl text-white leading-tight">{promo.title}</h3>
+                      </div>
+                    )}
+
+                    {/* Cuerpo dorado */}
+                    <div className="bg-gradient-to-br from-[#C5A55A] via-[#B8963E] to-[#9E7D2A] p-5">
+                      {promo.description && (
+                        <p className="text-white/90 text-sm leading-relaxed mb-4">{promo.description}</p>
+                      )}
+
+                      {/* Precio comparativo */}
+                      {(promo.regularPrice || promo.price) && (
+                        <div className="bg-black/20 rounded-xl p-3 mb-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {promo.regularPrice && (
+                              <div className="text-center">
+                                <div className="text-white/50 text-[10px] uppercase tracking-wider">Antes</div>
+                                <div className="text-white/60 text-lg line-through font-semibold">{promo.regularPrice}</div>
+                              </div>
+                            )}
+                            {promo.regularPrice && promo.price && (
+                              <ArrowRight className="w-5 h-5 text-white/60 flex-shrink-0" />
+                            )}
+                            {promo.price && (
+                              <div className="text-center">
+                                <div className="text-yellow-200 text-[10px] uppercase tracking-wider font-bold">Ahora</div>
+                                <div className="text-white text-2xl font-black">{promo.price}</div>
+                              </div>
+                            )}
+                          </div>
+                          {promo.regularPrice && promo.price && (
+                            <div className="bg-green-500 text-white text-xs font-black px-2 py-1 rounded-lg text-center">
+                              ¡AHORRA!
+                            </div>
+                          )}
                         </div>
                       )}
-                      {/* Título sobre la imagen */}
-                      <div className="absolute bottom-2 left-3 right-3">
-                        <h3 className="font-serif text-lg text-white leading-tight drop-shadow-lg">{promo.title}</h3>
-                      </div>
-                    </div>
-                  )}
 
-                  {/* Contenido principal compacto */}
-                  <div className={`bg-gradient-to-br from-[#C5A55A] to-[#B8963E] ${promo.imageUrl ? '' : 'rounded-t-xl'} p-4 relative`}>
-                    {!promo.imageUrl && (
-                      <h3 className="font-serif text-lg text-white mb-2 leading-tight pr-10">{promo.title}</h3>
-                    )}
-                    {!promo.imageUrl && promo.regularPrice && promo.price && (
-                      <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">OFERTA</div>
-                    )}
-                    {promo.description && <p className="text-white/85 text-xs leading-relaxed mb-3">{promo.description}</p>}
-
-                    {/* Precios en línea compacta */}
-                    {(promo.regularPrice || promo.price) && (
-                      <div className="flex items-center gap-2 mb-3">
-                        {promo.regularPrice && (
-                          <span className="text-white/50 text-sm line-through">{promo.regularPrice}</span>
-                        )}
-                        {promo.regularPrice && promo.price && <ArrowRight className="w-3 h-3 text-white/50" />}
-                        {promo.price && (
-                          <span className="text-white text-xl font-bold">{promo.price}</span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Info compacta: fecha + cupones en una fila */}
-                    <div className="flex items-center gap-2 flex-wrap mb-3">
+                      {/* Fecha límite */}
                       {promo.expiresAt && (
-                        <span className="bg-white/15 text-white/90 text-[10px] px-2 py-1 rounded-md">
-                          Hasta {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
-                        </span>
+                        <div className="flex items-center gap-2 mb-3 text-white/80 text-xs">
+                          <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>Válido hasta el <strong className="text-white">{new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</strong></span>
+                        </div>
                       )}
-                      {promo.maxCoupons && promo.couponsRemaining !== null && promo.couponsRemaining !== undefined && (
-                        <span className={`text-[10px] px-2 py-1 rounded-md font-bold ${
-                          promo.couponsRemaining <= 3 ? 'bg-red-500/40 text-red-100' : 'bg-white/15 text-white/80'
-                        }`}>
-                          {promo.couponsRemaining === 0 ? 'Agotado' : `${promo.couponsRemaining} disponibles`}
-                        </span>
+
+                      {/* Contador de cupones con barra de progreso */}
+                      {promo.maxCoupons != null && promo.couponsRemaining != null && (
+                        <div className="mb-4">
+                          <div className="flex justify-between items-center mb-1.5">
+                            <span className={`text-xs font-bold flex items-center gap-1 ${
+                              isCritical ? 'text-red-200' : isLow ? 'text-orange-200' : 'text-white/80'
+                            }`}>
+                              {isCritical && <Flame className="w-3.5 h-3.5" />}
+                              {isSoldOut ? '❌ AGOTADO' : `${promo.couponsRemaining} cupones restantes`}
+                            </span>
+                            <span className="text-white/60 text-xs">{pct}% vendido</span>
+                          </div>
+                          <div className="w-full bg-black/30 rounded-full h-2.5 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-700 ${
+                                isCritical ? 'bg-red-500 animate-pulse' : isLow ? 'bg-orange-400' : 'bg-green-400'
+                              }`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
                       )}
-                      <span className="bg-white/15 text-white/80 text-[10px] px-2 py-1 rounded-md">Cita previa</span>
+
+                      {/* Botón Lo Quiero */}
+                      <button
+                        onClick={() => {
+                          if (isSoldOut) { toast.error("Esta promoción ya no tiene cupones disponibles"); return; }
+                          setSelectedPromo({ id: promo.id, title: promo.title });
+                          setStep("form");
+                          setGiftModalOpen(true);
+                        }}
+                        disabled={isSoldOut}
+                        className={`block w-full py-3 px-4 rounded-xl font-black text-sm text-center uppercase tracking-widest transition-all duration-200 shadow-lg ${
+                          isSoldOut
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            : 'bg-white text-[#8B6914] hover:bg-[#FAF7F2] hover:scale-[1.02] active:scale-[0.98]'
+                        }`}
+                      >
+                        {isSoldOut ? '❌ Agotado' : '🎁 ¡Lo Quiero!'}
+                      </button>
                     </div>
 
-                    {/* Botón Lo Quiero */}
-                    <button
-                      onClick={() => {
-                        if (promo.maxCoupons && promo.couponsRemaining === 0) {
-                          toast.error("Esta promoción ya no tiene cupones disponibles");
-                          return;
-                        }
-                        setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true);
-                      }}
-                      disabled={promo.maxCoupons != null && promo.couponsRemaining === 0}
-                      className={`block w-full py-2 px-3 rounded-lg font-bold text-sm text-center uppercase tracking-wider transition ${
-                        promo.maxCoupons != null && promo.couponsRemaining === 0
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-white text-[#C5A55A] hover:bg-[#FAF7F2]'
-                      }`}>
-                      Lo Quiero
-                    </button>
+                    {/* Compartir — solo WhatsApp y Copiar */}
+                    <div className="bg-[#1A1A1A] rounded-b-2xl px-4 py-3 flex items-center gap-3">
+                      <span className="text-[10px] text-gray-400 uppercase tracking-wider flex-shrink-0">Compartir:</span>
+                      <button
+                        onClick={() => handleShareWhatsApp(promo)}
+                        className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-xs font-bold transition flex-1 justify-center"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/></svg>
+                        WhatsApp
+                      </button>
+                      <button
+                        onClick={() => handleCopyLink(promo)}
+                        className="flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg text-xs font-bold transition flex-1 justify-center"
+                      >
+                        {copiedId === promo.id ? <><Check size={14} /> ¡Copiado!</> : <><Copy size={14} /> Copiar link</>}
+                      </button>
+                    </div>
                   </div>
-
-                  {/* Compartir compacto */}
-                  <div className="bg-white rounded-b-xl px-4 py-3 flex items-center gap-2">
-                    <span className="text-[10px] text-[#999] uppercase tracking-wider">Compartir:</span>
-                    <button onClick={() => handleShareWhatsApp(promo.title, promo.description || "", promo.id)} className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-xs font-semibold transition">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/></svg>
-                      WhatsApp
-                    </button>
-                    <button onClick={() => handleShareInstagram()} className="flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-1.5 px-3 rounded-md text-xs font-semibold transition">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                      Instagram
-                    </button>
-                    <button onClick={() => handleCopyLink(promo.id, promo.title, promo.description)} className="ml-auto text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 transition">
-                      {copiedId === promo.id ? <><Check size={14} />Copiado</> : <><Copy size={14} />Copiar</>}
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Modal de Adquisición de Cupón */}
-      {giftModalOpen && selectedPromo && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      {/* Modal de Suscripción a Ofertas */}
+      {subModalOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
             {/* Header */}
+            <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] p-6 flex justify-between items-start border-b-2 border-[#C5A55A]">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <BellRing className="w-6 h-6 text-[#C5A55A]" />
+                  <h2 className="text-white font-bold text-xl">Suscribirse a Ofertas</h2>
+                </div>
+                <p className="text-white/70 text-sm">Sé el primero en enterarte de nuevos cupones</p>
+              </div>
+              <button onClick={() => setSubModalOpen(false)} className="text-white/60 hover:text-white p-1 rounded-full transition"><X size={20} /></button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Beneficios */}
+              <div className="bg-[#FAF7F2] rounded-xl p-4 space-y-2">
+                <p className="text-[#1A1A1A] font-semibold text-sm mb-2">Al suscribirte recibirás:</p>
+                <div className="flex items-center gap-2 text-sm text-[#555]">
+                  <span className="text-[#C5A55A]">✉️</span>
+                  <span><strong>Correo electrónico</strong> con cada nueva oferta</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-[#555]">
+                  <span className="text-[#C5A55A]">🔔</span>
+                  <span><strong>Notificación en tu celular</strong> (activa abajo)</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-[#555]">
+                  <span className="text-[#C5A55A]">🎁</span>
+                  <span>Acceso prioritario a cupones con cupos limitados</span>
+                </div>
+              </div>
+
+              {/* Formulario de suscripción */}
+              <form onSubmit={handleSubscribeSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico *</label>
+                  <input
+                    type="email"
+                    value={subEmail}
+                    onChange={e => setSubEmail(e.target.value)}
+                    placeholder="tu@correo.com"
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#C5A55A] transition"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">+52</span>
+                    <input
+                      type="tel"
+                      value={subWhatsapp}
+                      onChange={e => setSubWhatsapp(e.target.value)}
+                      placeholder="322 100 7799"
+                      className="w-full border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-[#C5A55A] transition"
+                      required
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">Solo para recibir el link de la oferta por WhatsApp</p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={subSubmitting}
+                  className="w-full bg-gradient-to-r from-[#C5A55A] to-[#B8963E] hover:from-[#B8963E] hover:to-[#9E7D2A] disabled:opacity-50 text-white py-3.5 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2"
+                >
+                  {subSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Suscribiendo...</> : <><Bell className="w-5 h-5" /> Suscribirme por Correo</>}
+                </button>
+              </form>
+
+              {/* Separador */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-xs text-gray-400 uppercase tracking-wider">También</span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+
+              {/* Activar notificaciones push */}
+              <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] rounded-xl p-4 border border-[#C5A55A]/30">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl mt-0.5">🔔</div>
+                  <div className="flex-1">
+                    <p className="text-white font-semibold text-sm">Notificaciones en tu celular</p>
+                    <p className="text-white/60 text-xs mt-0.5">Recibe un aviso instantáneo aunque no estés en el sitio</p>
+                    {pushEnabled ? (
+                      <div className="mt-2 flex items-center gap-1.5 text-green-400 text-xs font-semibold">
+                        <Check className="w-4 h-4" /> ¡Notificaciones activadas!
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleEnablePush}
+                        disabled={pushLoading}
+                        className="mt-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
+                      >
+                        {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones</>}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-400 text-center">Puedes cancelar tu suscripción en cualquier momento.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Adquisición */}
+      {giftModalOpen && selectedPromo && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="bg-gradient-to-r from-[#C5A55A] to-[#B8963E] p-5 flex justify-between items-center rounded-t-2xl">
               <div>
                 <h2 className="text-white font-bold text-lg flex items-center gap-2"><Gift className="w-5 h-5" /> Adquirir Cupón</h2>
@@ -298,7 +560,6 @@ export default function PromotionsSection() {
               <button onClick={() => { setGiftModalOpen(false); resetForm(); }} className="text-white hover:bg-white/20 p-2 rounded-full transition"><X size={20} /></button>
             </div>
 
-            {/* Indicador de pasos (solo en pasos 1-3) */}
             {step !== "success" && (
               <div className="flex items-center px-5 py-3 border-b bg-gray-50">
                 {stepLabels.map((label, i) => (
@@ -313,149 +574,102 @@ export default function PromotionsSection() {
               </div>
             )}
 
-            {/* PASO 1: Datos del comprador */}
             {step === "form" && (
               <form onSubmit={handleStep1} className="p-5 space-y-4">
                 <p className="text-sm text-gray-600">Ingresa tus datos para adquirir el cupón.</p>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Tu Nombre *</label>
-                  <input type="text" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C5A55A] text-sm" placeholder="Ej: María García" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+                  <input type="text" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="Tu nombre" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Tu Email *</label>
-                  <input type="email" value={buyerEmail} onChange={(e) => setBuyerEmail(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C5A55A] text-sm" placeholder="tu@email.com" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico *</label>
+                  <input type="email" value={buyerEmail} onChange={e => setBuyerEmail(e.target.value)} placeholder="tu@correo.com" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Tu Teléfono (opcional)</label>
-                  <input type="tel" value={buyerPhone} onChange={(e) => setBuyerPhone(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C5A55A] text-sm" placeholder="322 450 3257" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                  <input type="tel" value={buyerPhone} onChange={e => setBuyerPhone(e.target.value)} placeholder="322 000 0000" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
                 </div>
-                <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => { setGiftModalOpen(false); resetForm(); }} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition text-sm">Cancelar</button>
-                  <button type="submit" className="flex-1 px-4 py-2.5 bg-[#C5A55A] text-white rounded-lg font-semibold hover:bg-[#B8963E] transition text-sm flex items-center justify-center gap-2">Continuar <ArrowRight size={16} /></button>
-                </div>
+                <button type="submit" className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition">Continuar →</button>
               </form>
             )}
 
-            {/* PASO 2: ¿Para mí o para regalar? */}
             {step === "type" && (
               <form onSubmit={handleStep2} className="p-5 space-y-4">
-                <p className="text-sm text-gray-600 font-semibold">¿Este cupón es para ti o lo vas a regalar?</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <button type="button" onClick={() => setIsGift(false)}
-                    className={`flex flex-col items-center gap-3 p-5 rounded-xl border-2 transition ${isGift === false ? "border-[#C5A55A] bg-[#FAF7F2]" : "border-gray-200 hover:border-[#C5A55A]/50"}`}>
-                    <User className={`w-10 h-10 ${isGift === false ? "text-[#C5A55A]" : "text-gray-400"}`} />
-                    <span className={`font-semibold text-sm ${isGift === false ? "text-[#C5A55A]" : "text-gray-600"}`}>Para mí</span>
-                    <span className="text-xs text-gray-500 text-center">El cupón queda a mi nombre</span>
+                <p className="text-sm font-medium text-gray-700">¿Este cupón es para ti o para regalar?</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button type="button" onClick={() => setIsGift(false)} className={`p-4 rounded-xl border-2 text-center transition ${isGift === false ? 'border-[#C5A55A] bg-[#C5A55A]/10' : 'border-gray-200 hover:border-[#C5A55A]/50'}`}>
+                    <div className="text-2xl mb-1">🙋</div>
+                    <div className="text-sm font-semibold">Para mí</div>
                   </button>
-                  <button type="button" onClick={() => setIsGift(true)}
-                    className={`flex flex-col items-center gap-3 p-5 rounded-xl border-2 transition ${isGift === true ? "border-[#C5A55A] bg-[#FAF7F2]" : "border-gray-200 hover:border-[#C5A55A]/50"}`}>
-                    <Users className={`w-10 h-10 ${isGift === true ? "text-[#C5A55A]" : "text-gray-400"}`} />
-                    <span className={`font-semibold text-sm ${isGift === true ? "text-[#C5A55A]" : "text-gray-600"}`}>Para regalar</span>
-                    <span className="text-xs text-gray-500 text-center">Lo comparto con alguien</span>
+                  <button type="button" onClick={() => setIsGift(true)} className={`p-4 rounded-xl border-2 text-center transition ${isGift === true ? 'border-[#C5A55A] bg-[#C5A55A]/10' : 'border-gray-200 hover:border-[#C5A55A]/50'}`}>
+                    <div className="text-2xl mb-1">🎁</div>
+                    <div className="text-sm font-semibold">Para regalar</div>
                   </button>
                 </div>
-
-                {isGift === true && (
-                  <div className="space-y-3 pt-2 border-t">
-                    <p className="text-sm font-semibold text-gray-700">Datos del destinatario:</p>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre del destinatario *</label>
-                      <input type="text" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C5A55A] text-sm" placeholder="Nombre de quien recibe el regalo" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">WhatsApp o Email del destinatario *</label>
-                      <input type="text" value={recipientContact} onChange={(e) => setRecipientContact(e.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C5A55A] text-sm" placeholder="322 000 0000 o correo@email.com" />
-                    </div>
+                {isGift && (
+                  <div className="space-y-3 bg-purple-50 p-4 rounded-xl border border-purple-200">
+                    <p className="text-xs text-purple-700 font-semibold">Datos del destinatario del regalo:</p>
+                    <input type="text" value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Nombre del destinatario" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
+                    <input type="text" value={recipientContact} onChange={e => setRecipientContact(e.target.value)} placeholder="Email o teléfono del destinatario" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
                   </div>
                 )}
-
-                {isGift === false && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-xs text-blue-800">Tu cupón quedará registrado a nombre de <strong>{buyerName}</strong>. El admin podrá verificarlo en el panel.</p>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setStep("form")} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition text-sm">Atrás</button>
-                  <button type="submit" className="flex-1 px-4 py-2.5 bg-[#C5A55A] text-white rounded-lg font-semibold hover:bg-[#B8963E] transition text-sm flex items-center justify-center gap-2">Continuar <ArrowRight size={16} /></button>
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setStep("form")} className="flex-1 border border-gray-300 text-gray-600 py-3 rounded-xl font-semibold text-sm transition hover:bg-gray-50">← Atrás</button>
+                  <button type="submit" className="flex-1 bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition">Continuar →</button>
                 </div>
               </form>
             )}
 
-            {/* PASO 3: Pago y comprobante (timer empieza aquí) */}
             {step === "payment" && (
-              <>
-                <div className={`flex items-center gap-2 px-5 py-3 border-b ${timeLeft < 120 ? "bg-red-50 border-red-200" : "bg-amber-50 border-amber-200"}`}>
-                  <Clock size={16} className={timeLeft < 120 ? "text-red-600" : "text-amber-600"} />
-                  <div>
-                    <span className={`text-sm font-bold ${timeLeft < 120 ? "text-red-900" : "text-amber-900"}`}>Tiempo para subir comprobante: {formatTime(timeLeft)}</span>
-                    <p className={`text-xs ${timeLeft < 120 ? "text-red-700" : "text-amber-700"}`}>Si no subes el comprobante a tiempo, deberás registrarte de nuevo.</p>
-                  </div>
+              <form onSubmit={handleSubmit} className="p-5 space-y-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm">
+                  <p className="font-bold text-amber-800 mb-2">💳 Datos de pago:</p>
+                  <p className="text-amber-700">Realiza tu transferencia a:</p>
+                  <p className="font-mono font-bold text-amber-900 mt-1">CLABE: 002470701448743487</p>
+                  <p className="text-amber-700 text-xs mt-1">Banco: Banamex · Titular: Nutriser</p>
                 </div>
-                <form onSubmit={handleSubmit} className="p-5 space-y-4">
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <p className="text-xs font-bold text-blue-900 mb-1 uppercase tracking-wide">Clave Interbancaria Banamex</p>
-                    <p className="text-xl font-mono font-bold text-blue-600 break-all select-all">002470701448743487</p>
-                    <p className="text-xs text-blue-700 mt-2">Realiza la transferencia y sube el comprobante abajo.</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Comprobante de Pago *</label>
-                    <label htmlFor="proof-upload" className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-6 cursor-pointer transition ${proofFile ? "border-green-400 bg-green-50" : "border-gray-300 hover:border-[#C5A55A] bg-gray-50"}`}>
-                      <Upload size={28} className={proofFile ? "text-green-500 mb-2" : "text-gray-400 mb-2"} />
-                      <p className="text-sm font-semibold text-gray-700">{proofFile ? proofFile.name : "Haz clic para subir"}</p>
-                      <p className="text-xs text-gray-500 mt-1">JPG, PNG o PDF (máx 5MB)</p>
-                      <input id="proof-upload" type="file" accept="image/jpeg,image/png,application/pdf" onChange={handleFileChange} className="hidden" />
-                    </label>
-                  </div>
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                    <p className="text-xs text-yellow-800"><strong>¿Qué pasa después?</strong> El administrador revisará tu comprobante y activará tu cupón. Recibirás confirmación por email.</p>
-                  </div>
-                  <div className="flex gap-3 pt-2">
-                    <button type="button" onClick={() => setStep("type")} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition text-sm">Atrás</button>
-                    <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-2.5 bg-[#C5A55A] text-white rounded-lg font-semibold hover:bg-[#B8963E] transition disabled:opacity-50 text-sm">
-                      {isSubmitting ? "Enviando..." : "Enviar Comprobante"}
-                    </button>
-                  </div>
-                </form>
-              </>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Tiempo restante:</span>
+                  <span className={`font-bold font-mono ${timeLeft < 120 ? 'text-red-600 animate-pulse' : 'text-[#C5A55A]'}`}>{formatTime(timeLeft)}</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Comprobante de pago *</label>
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#C5A55A]/50 rounded-xl cursor-pointer hover:bg-[#C5A55A]/5 transition">
+                    <input type="file" accept="image/*,.pdf" onChange={handleFileChange} className="hidden" />
+                    {proofFile ? (
+                      <div className="text-center p-3">
+                        <div className="text-green-600 font-semibold text-sm">✓ {proofFile.name}</div>
+                        <div className="text-gray-400 text-xs mt-1">Toca para cambiar</div>
+                      </div>
+                    ) : (
+                      <div className="text-center p-3">
+                        <div className="text-[#C5A55A] text-2xl mb-1">📎</div>
+                        <div className="text-sm text-gray-500">Toca para subir comprobante</div>
+                        <div className="text-xs text-gray-400 mt-1">JPG, PNG o PDF · máx 5MB</div>
+                      </div>
+                    )}
+                  </label>
+                </div>
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setStep("type")} className="flex-1 border border-gray-300 text-gray-600 py-3 rounded-xl font-semibold text-sm transition hover:bg-gray-50">← Atrás</button>
+                  <button type="submit" disabled={isSubmitting || !proofFile} className="flex-1 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                    {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</> : '✓ Enviar Comprobante'}
+                  </button>
+                </div>
+              </form>
             )}
 
-            {/* ÉXITO */}
             {step === "success" && (
-              <div className="p-6 space-y-5">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Check className="w-8 h-8 text-green-600" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">¡Comprobante enviado!</h3>
-                  <p className="text-sm text-gray-500 mt-1">Estamos revisando tu pago. En breve recibirás tu cupón.</p>
+              <div className="p-6 text-center space-y-4">
+                <div className="text-5xl mb-2">🎉</div>
+                <h3 className="font-bold text-xl text-[#1A1A1A]">¡Cupón Registrado!</h3>
+                <p className="text-gray-600 text-sm">Tu solicitud fue enviada. El administrador verificará tu pago y activará tu cupón.</p>
+                <div className="bg-[#FAF7F2] border-2 border-[#C5A55A] rounded-xl p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Tu código de cupón</p>
+                  <p className="font-mono font-black text-2xl text-[#C5A55A] tracking-widest">{generatedCode}</p>
                 </div>
-
-                {/* Código de referencia */}
-                <div className="bg-[#FAF7F2] border-2 border-[#C5A55A] rounded-xl p-5 text-center">
-                  <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Tu código de referencia</p>
-                  <p className="text-3xl font-mono font-bold text-[#C5A55A] tracking-widest">{generatedCode}</p>
-                  <p className="text-xs text-gray-500 mt-2">Guarda este código. El administrador lo verificará con tu nombre.</p>
-                </div>
-
-                {/* Pasos siguientes */}
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <span className="text-blue-500 text-lg mt-0.5">📧</span>
-                    <div>
-                      <p className="text-sm font-semibold text-blue-900">Revisa tu correo: <span className="font-mono">{buyerEmail}</span></p>
-                      <p className="text-xs text-blue-700 mt-0.5">Una vez autorizado, recibirás el cupón completo con tu código único por correo electrónico. Revisa también tu carpeta de spam.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <p className="text-xs text-yellow-800 text-center">
-                    ⏳ <strong>Tiempo de revisión:</strong> Normalmente en menos de 24 horas hábiles.
-                  </p>
-                </div>
-
-                <button onClick={() => { setGiftModalOpen(false); resetForm(); }} className="w-full px-4 py-2.5 bg-[#C5A55A] text-white rounded-lg font-semibold hover:bg-[#B8963E] transition text-sm">Entendido</button>
+                <p className="text-xs text-gray-400">Recibirás un correo de confirmación cuando sea aprobado.</p>
+                <button onClick={() => { setGiftModalOpen(false); resetForm(); }} className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition">Cerrar</button>
               </div>
             )}
           </div>

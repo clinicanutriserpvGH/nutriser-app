@@ -1,5 +1,5 @@
 // Nutriser PWA Service Worker
-const CACHE_NAME = 'nutriser-v1';
+const CACHE_NAME = 'nutriser-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -71,4 +71,87 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
+});
+
+// ─── Push Notifications ────────────────────────────────────────────────────────
+
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: 'Nutriser', body: event.data ? event.data.text() : 'Nueva notificación' };
+  }
+
+  const title = data.title || 'Nutriser - Nueva Oferta';
+  const options = {
+    body: data.body || 'Hay una nueva oferta disponible para ti.',
+    icon: data.icon || '/icons/icon-192x192.png',
+    badge: '/icons/icon-72x72.png',
+    vibrate: [200, 100, 200],
+    data: {
+      url: data.url || 'https://nutriserpv.com',
+    },
+    actions: [
+      {
+        action: 'open',
+        title: 'Ver Oferta',
+      },
+      {
+        action: 'close',
+        title: 'Cerrar',
+      },
+    ],
+    requireInteraction: true,
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'close') return;
+
+  const url = event.notification.data?.url || 'https://nutriserpv.com';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If there's already a window open, focus it
+      for (const client of clientList) {
+        if (client.url.includes('nutriserpv.com') && 'focus' in client) {
+          client.focus();
+          client.navigate(url);
+          return;
+        }
+      }
+      // Otherwise open a new window
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
+    })
+  );
+});
+
+self.addEventListener('pushsubscriptionchange', (event) => {
+  // Re-subscribe when subscription expires
+  event.waitUntil(
+    self.registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: event.oldSubscription?.options?.applicationServerKey,
+    }).then((subscription) => {
+      // Notify the server about the new subscription
+      return fetch('/api/trpc/push.subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: subscription.endpoint,
+          p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')))),
+          auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))),
+        }),
+      });
+    })
+  );
 });

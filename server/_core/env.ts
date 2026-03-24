@@ -9,4 +9,6 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   gmailUser: process.env.GMAIL_USER ?? "",
   gmailPassword: process.env.GMAIL_PASSWORD ?? "",
+  vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? "",
+  vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? "",
 };

@@ -239,3 +239,53 @@ export const ebookDiscountCodes = mysqlTable("ebookDiscountCodes", {
 
 export type EbookDiscountCode = typeof ebookDiscountCodes.$inferSelect;
 export type InsertEbookDiscountCode = typeof ebookDiscountCodes.$inferInsert;
+
+/**
+ * Compras de servicios individuales
+ * Registra cada compra de un servicio del catálogo con comprobante y código único
+ */
+export const servicePurchases = mysqlTable("servicePurchases", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceName: varchar("serviceName", { length: 255 }).notNull(), // Nombre del servicio comprado
+  buyerName: varchar("buyerName", { length: 255 }).notNull(),
+  buyerEmail: varchar("buyerEmail", { length: 320 }).notNull(),
+  buyerPhone: varchar("buyerPhone", { length: 20 }),
+  proofUrl: text("proofUrl").notNull(), // URL del comprobante en S3
+  serviceCode: varchar("serviceCode", { length: 20 }).notNull().unique(), // Código único NUT-SRV-XXXX
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  adminNotes: text("adminNotes"), // Notas del administrador
+  approvedAt: timestamp("approvedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ServicePurchase = typeof servicePurchases.$inferSelect;
+export type InsertServicePurchase = typeof servicePurchases.$inferInsert;
+
+/**
+ * Suscriptores a la cuponera de descuentos
+ * Reciben notificaciones por correo y WhatsApp cuando se publican nuevas promociones
+ */
+export const couponSubscribers = mysqlTable("couponSubscribers", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type CouponSubscriber = typeof couponSubscribers.$inferSelect;
+export type InsertCouponSubscriber = typeof couponSubscribers.$inferInsert;
+
+/**
+ * Suscripciones push del navegador
+ * Almacena las suscripciones Web Push para notificaciones en el navegador
+ */
+export const pushSubscriptions = mysqlTable("pushSubscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: varchar("auth", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;

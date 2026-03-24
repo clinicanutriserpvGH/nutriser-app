@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOpen, Upload, Eye } from "lucide-react";
+import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOpen, Upload, Eye, Bell, BellRing, ShoppingBag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
@@ -101,6 +101,48 @@ export default function AdminDashboard() {
 
   const { data: ebookDiscountCodes, refetch: refetchDiscountCodes } = trpc.ebook.listDiscountCodes.useQuery(undefined, {
     enabled: isAuthenticated,
+  });
+
+  // Suscriptores de cupones
+  const { data: couponSubscribers, refetch: refetchSubscribers } = trpc.couponSubscribers.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const deleteSubscriberMutation = trpc.couponSubscribers.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Suscriptor eliminado');
+      refetchSubscribers();
+    },
+    onError: (error) => toast.error('Error: ' + error.message),
+  });
+
+  // Compras de servicios
+  const { data: servicePurchases, refetch: refetchServicePurchases } = trpc.servicePurchases.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const approveServiceMutation = trpc.servicePurchases.approve.useMutation({
+    onSuccess: () => {
+      toast.success('Compra aprobada. Email enviado al comprador con su código de servicio.');
+      refetchServicePurchases();
+    },
+    onError: (error) => toast.error('Error: ' + error.message),
+  });
+
+  const rejectServiceMutation = trpc.servicePurchases.reject.useMutation({
+    onSuccess: () => {
+      toast.success('Compra rechazada.');
+      refetchServicePurchases();
+    },
+    onError: (error) => toast.error('Error: ' + error.message),
+  });
+
+  const deleteServiceMutation = trpc.servicePurchases.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Registro eliminado.');
+      refetchServicePurchases();
+    },
+    onError: (error) => toast.error('Error: ' + error.message),
   });
 
   const toggleDiscountCodeMutation = trpc.ebook.toggleDiscountCode.useMutation({
@@ -588,6 +630,20 @@ export default function AdminDashboard() {
             <TabsTrigger value="ebook" className="flex items-center gap-1">
               <BookOpen className="w-4 h-4" />
               eBook
+            </TabsTrigger>
+            <TabsTrigger value="subscribers" className="flex items-center gap-1">
+              <Bell className="w-4 h-4" />
+              Suscriptores
+              {couponSubscribers && couponSubscribers.length > 0 && (
+                <span className="ml-1 bg-[#C5A55A] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{couponSubscribers.length}</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="servicePurchases" className="flex items-center gap-1">
+              <ShoppingBag className="w-4 h-4" />
+              Compras Servicios
+              {servicePurchases && servicePurchases.filter(p => p.status === 'pending').length > 0 && (
+                <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicePurchases.filter(p => p.status === 'pending').length}</span>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -1653,6 +1709,189 @@ export default function AdminDashboard() {
                   <p className="text-sm text-amber-700">
                     <strong>⚠️ Importante:</strong> Solo activa un código a la vez si quieres controlar qué descuento está disponible. Puedes tener varios activos simultáneamente si lo deseas.
                   </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          {/* Tab de Suscriptores */}
+          <TabsContent value="subscribers" className="space-y-4">
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                      <BellRing className="w-5 h-5" />
+                      Suscriptores a Ofertas
+                    </CardTitle>
+                    <CardDescription>Usuarios suscritos para recibir notificaciones de nuevos cupones</CardDescription>
+                  </div>
+                  <div className="bg-[#FAF7F2] border border-[#C5A55A]/30 rounded-xl px-4 py-2 text-center">
+                    <p className="text-2xl font-bold text-[#C5A55A]">{couponSubscribers?.length || 0}</p>
+                    <p className="text-xs text-[#999]">suscriptores</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+                  <p className="text-sm text-amber-700">
+                    <strong>⚠️ Automático:</strong> Cuando publicas una nueva promoción, todos los suscriptores reciben un correo electrónico desde <strong>clinicanutriserpv@gmail.com</strong> y una notificación push en su celular.
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-[#C5A55A]/20">
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Correo</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">WhatsApp</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Fecha</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {couponSubscribers && couponSubscribers.length > 0 ? (
+                        couponSubscribers.map((sub) => (
+                          <tr key={sub.id} className="border-b border-[#C5A55A]/10 hover:bg-[#C5A55A]/5">
+                            <td className="py-3 px-4 font-semibold">{sub.email}</td>
+                            <td className="py-3 px-4">
+                              <a href={`https://wa.me/52${sub.whatsapp?.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/></svg>
+                                {sub.whatsapp}
+                              </a>
+                            </td>
+                            <td className="py-3 px-4 text-xs text-[#999]">{new Date(sub.createdAt).toLocaleDateString('es-MX')}</td>
+                            <td className="py-3 px-4">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs bg-red-100 text-red-700 hover:bg-red-200"
+                                onClick={() => {
+                                  if (confirm('\u00bfEliminar este suscriptor?')) {
+                                    deleteSubscriberMutation.mutate({ id: sub.id });
+                                  }
+                                }}
+                              >
+                                <Trash2 className="w-3.5 h-3.5 mr-1" /> Eliminar
+                              </Button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-[#999]">
+                            No hay suscriptores aún. El botón “Suscribirse a Ofertas” en la cuponera permite a los usuarios registrarse.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab de Compras de Servicios */}
+          <TabsContent value="servicePurchases" className="space-y-4">
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5" />
+                  Compras de Servicios
+                </CardTitle>
+                <CardDescription>Gestiona las solicitudes de compra de servicios de la clínica</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-[#C5A55A]/20">
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Comprador</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Email</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Teléfono</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Servicio</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Código</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Estado</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Comprobante</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Acciones</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {servicePurchases && servicePurchases.length > 0 ? (
+                        servicePurchases.map((sp) => (
+                          <tr key={sp.id} className={`border-b border-[#C5A55A]/10 hover:bg-[#C5A55A]/5 ${sp.status === 'pending' ? 'bg-yellow-50' : ''}`}>
+                            <td className="py-3 px-4 font-semibold">{sp.buyerName}</td>
+                            <td className="py-3 px-4">{sp.buyerEmail}</td>
+                            <td className="py-3 px-4">{sp.buyerPhone || '-'}</td>
+                            <td className="py-3 px-4">{sp.serviceName}</td>
+                            <td className="py-3 px-4">
+                              <span className="font-mono text-xs bg-[#FAF7F2] border border-[#C5A55A]/30 px-2 py-1 rounded">{sp.serviceCode}</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                sp.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                sp.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {sp.status === 'approved' ? '✅ Aprobado' : sp.status === 'pending' ? '⏳ Pendiente' : '❌ Rechazado'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              {sp.proofUrl && (
+                                <a href={sp.proofUrl} target="_blank" rel="noopener noreferrer">
+                                  <Button size="sm" variant="outline" className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200">
+                                    <Eye className="w-3.5 h-3.5 mr-1" /> Ver
+                                  </Button>
+                                </a>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex gap-1.5 flex-wrap">
+                                {sp.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                                      onClick={() => approveServiceMutation.mutate({ id: sp.id })}
+                                      disabled={approveServiceMutation.isPending}
+                                    >
+                                      Aprobar
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-xs bg-red-100 text-red-700 hover:bg-red-200"
+                                      onClick={() => rejectServiceMutation.mutate({ id: sp.id })}
+                                      disabled={rejectServiceMutation.isPending}
+                                    >
+                                      Rechazar
+                                    </Button>
+                                  </>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                  onClick={() => {
+                                    if (confirm('\u00bfEliminar este registro?')) deleteServiceMutation.mutate({ id: sp.id });
+                                  }}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-xs text-[#999]">{new Date(sp.createdAt).toLocaleDateString('es-MX')}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-[#999]">
+                            No hay compras de servicios aún.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </CardContent>
             </Card>

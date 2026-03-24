@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `servicePurchases` (\n  `id` int NOT NULL AUTO_INCREMENT,\n  `serviceName` varchar(255) NOT NULL,\n  `buyerName` varchar(255) NOT NULL,\n  `buyerEmail` varchar(320) NOT NULL,\n  `buyerPhone` varchar(20),\n  `proofUrl` text NOT NULL,\n  `serviceCode` varchar(20) NOT NULL UNIQUE,\n  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',\n  `adminNotes` text,\n  `approvedAt` timestamp NULL,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute CREATE TABLE IF NOT EXISTS `servicePurchases` (\n  `id` int NOT NULL AUTO_INCREMENT,\n  `serviceName` varchar(255) NOT NULL,\n  `buyerName` varchar(255) NOT NULL,\n  `buyerEmail` varchar(320) NOT NULL,\n  `buyerPhone` varchar(20),\n  `proofUrl` text NOT NULL,\n  `serviceCode` varchar(20) NOT NULL UNIQUE,\n  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',\n  `adminNotes` text,\n  `approvedAt` timestamp NULL,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 893
+}

@@ -3,10 +3,12 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
+import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from "./_core/email_extra";
+import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll } from "./pushNotifications";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
@@ -471,7 +473,7 @@ export const appRouter = router({
           const result = await storagePut(key, buffer, input.imageMimeType);
           imageUrl = result.url;
         }
-        return await createPromotion({
+        const newPromo = await createPromotion({
           title: input.title,
           description: input.description,
           price: input.price ?? null,
@@ -481,6 +483,38 @@ export const appRouter = router({
           expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
           isActive: true,
         });
+
+        // Notify all active subscribers about the new coupon
+        try {
+          const subscribers = await getAllCouponSubscribers();
+          if (subscribers.length > 0) {
+            await sendNewCouponNotificationToSubscribers(
+              subscribers,
+              input.title,
+              input.description ?? null,
+              input.price ?? null,
+              input.regularPrice ?? null,
+              newPromo.id
+            );
+          }
+        } catch (e) {
+          console.error('Error notifying subscribers:', e);
+        }
+
+        // Send push notification to all push subscribers
+        try {
+          const couponUrl = `https://nutriserpv.com/#cupon-${newPromo.id}`;
+          const priceText = input.price ? ` - ${input.price}` : '';
+          await sendPushNotificationToAll(
+            `Nueva oferta en Nutriser: ${input.title}`,
+            `${input.description || 'Aprovecha esta oferta exclusiva'}${priceText}`,
+            couponUrl
+          );
+        } catch (e) {
+          console.error('Error sending push notifications:', e);
+        }
+
+        return newPromo;
       }),
 
     update: publicProcedure
@@ -757,6 +791,148 @@ export const appRouter = router({
       .input(z.object({ id: z.number(), isActive: z.boolean() }))
       .mutation(async ({ input }) => {
         return await toggleEbookDiscountCode(input.id, input.isActive);
+      }),
+  }),
+
+  // ─── Suscriptores a la cuponera ─────────────────────────────────────────────
+  couponSubscribers: router({
+    subscribe: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        whatsapp: z.string().min(10),
+      }))
+      .mutation(async ({ input }) => {
+        await subscribeToCoupons({
+          email: input.email,
+          whatsapp: input.whatsapp,
+          isActive: true,
+        });
+        return { success: true };
+      }),
+
+    list: publicProcedure.query(async () => {
+      return await getAllCouponSubscribers();
+    }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteCouponSubscriber(input.id);
+      }),
+  }),
+
+  // ─── Push Notifications ─────────────────────────────────────────────────────
+  push: router({
+    subscribe: publicProcedure
+      .input(z.object({
+        endpoint: z.string().url(),
+        p256dh: z.string(),
+        auth: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return await savePushSubscription(input.endpoint, input.p256dh, input.auth);
+      }),
+
+    unsubscribe: publicProcedure
+      .input(z.object({ endpoint: z.string() }))
+      .mutation(async ({ input }) => {
+        return await deletePushSubscription(input.endpoint);
+      }),
+
+    getVapidPublicKey: publicProcedure.query(() => {
+      return { publicKey: ENV.vapidPublicKey || process.env.VITE_VAPID_PUBLIC_KEY || '' };
+    }),
+  }),
+
+  // ─── Compras de servicios ────────────────────────────────────────────────────
+  servicePurchases: router({
+    create: publicProcedure
+      .input(z.object({
+        serviceName: z.string().min(1),
+        buyerName: z.string().min(1),
+        buyerEmail: z.string().email(),
+        buyerPhone: z.string().optional(),
+        proofData: z.string(), // base64
+        proofMimeType: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // Generate unique service code: NUT-SRV-XXXX
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const part = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const serviceCode = `NUT-SRV-${part}`;
+
+        // Upload proof to S3
+        const buffer = Buffer.from(input.proofData, 'base64');
+        const ext = input.proofMimeType.split('/')[1] || 'jpg';
+        const fileName = `service-proof-${Date.now()}.${ext}`;
+        const { url } = await storagePut(`service-proofs/${fileName}`, buffer, input.proofMimeType);
+
+        const purchase = await createServicePurchase({
+          serviceName: input.serviceName,
+          buyerName: input.buyerName,
+          buyerEmail: input.buyerEmail,
+          buyerPhone: input.buyerPhone,
+          proofUrl: url,
+          serviceCode,
+          status: 'pending',
+        });
+
+        // Notify admin via email
+        try {
+          await sendServicePurchaseNotificationToAdmin(
+            ENV.gmailUser,
+            input.buyerName,
+            input.buyerEmail,
+            input.buyerPhone,
+            input.serviceName,
+            serviceCode
+          );
+        } catch (e) {
+          console.error('Error sending service purchase notification:', e);
+        }
+
+        return { success: true, serviceCode };
+      }),
+
+    list: publicProcedure.query(async () => {
+      return await getAllServicePurchases();
+    }),
+
+    approve: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const purchases = await getAllServicePurchases();
+        const purchase = purchases.find(p => p.id === input.id);
+        if (!purchase) throw new Error('Compra no encontrada');
+
+        await updateServicePurchaseStatus(input.id, 'approved');
+
+        // Send approval email to buyer
+        try {
+          await sendServicePurchaseApprovedEmail(
+            purchase.buyerEmail,
+            purchase.buyerName,
+            purchase.serviceName,
+            purchase.serviceCode
+          );
+        } catch (e) {
+          console.error('Error sending service approval email:', e);
+        }
+
+        return { success: true };
+      }),
+
+    reject: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await updateServicePurchaseStatus(input.id, 'rejected');
+        return { success: true };
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteServicePurchase(input.id);
       }),
   }),
 });

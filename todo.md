@@ -521,3 +521,55 @@
 - [x] Correo al comprador: sistema verificado - funciona desde clinicanutriserpv@gmail.com; correo enviado manualmente a Mohamed (NUT-PVE8-EF0R)
 - [x] Admin eBook: botón '🚫 Revocar Acceso' para aprobados + botón '🗑 Eliminar' para rechazados
 - [x] Tests: 18 tests pasan correctamente
+
+## Mejoras Mar 24 - Lote 3
+- [ ] OG dinámico: corregir para que WhatsApp y Facebook muestren imagen del cupón al compartir
+- [ ] Compartir: quitar botón Instagram, dejar solo WhatsApp y Copiar link
+- [ ] Cupón: rediseñar con más urgencia visual (contador de disponibles más llamativo)
+- [ ] Servicios: agregar imágenes compactas a cada servicio
+- [ ] Servicios: botón "Adquirir" visible en móvil (no solo al pasar cursor)
+- [ ] Sistema de compra de servicios: tabla servicePurchases en BD
+- [ ] Sistema de compra de servicios: formulario con nombre, correo, teléfono, comprobante
+- [ ] Sistema de compra de servicios: código único por compra
+- [ ] Admin: panel de compras de servicios con aprobación
+- [ ] Admin: correo al admin cuando llega compra de servicio
+
+## Suscripción a Cuponera (Mar 24 - Lote 4)
+- [ ] DB: tabla couponSubscribers (id, email, whatsapp, isActive, createdAt)
+- [ ] Backend: procedimiento subscribe (guarda correo + WhatsApp)
+- [ ] Backend: notificar suscriptores al publicar nuevo cupón (correo + WhatsApp via wa.me)
+- [ ] Cuponera: botón "🔔 Suscribirse a ofertas" en cada cupón con modal
+- [ ] Admin: lista de suscriptores a la cuponera
+
+## Implementación Completa - Sesión Mar 24 Lote 4+
+- [ ] Backend: procedimientos tRPC para suscriptores (subscribe, listSubscribers, deleteSubscriber)
+- [ ] Backend: notificación por correo a todos los suscriptores al publicar cupón
+- [ ] Backend: procedimientos tRPC para compras de servicios (create, list, updateStatus, delete)
+- [ ] Frontend: botón "Suscribirse a ofertas" prominente en sección cuponera
+- [ ] Frontend: modal de suscripción con campos email + WhatsApp
+- [ ] Frontend: notificaciones push del navegador (Web Push API con VAPID)
+- [ ] Frontend: service worker extendido con push listener
+- [ ] Frontend: sistema de compra de servicios con formulario y comprobante
+- [ ] Admin: panel de suscriptores con lista y opción eliminar
+- [ ] Admin: panel de compras de servicios con aprobación
+- [ ] Email: función sendNewCouponNotificationToSubscribers
+- [ ] Email: función sendServicePurchaseNotificationToAdmin
+- [ ] Email: función sendServicePurchaseApprovedToClient
+
+## Sistema de Suscripción y Notificaciones (Mar 24 2026)
+
+- [x] Botón "Suscribirse a Ofertas" prominente en la sección cuponera con badge GRATIS
+- [x] Modal de suscripción con formulario de correo + WhatsApp
+- [x] Activación de notificaciones push del navegador (Web Push API) desde el modal
+- [x] Service Worker actualizado con manejo de push notifications y notificationclick
+- [x] Tabla pushSubscriptions en la BD para guardar suscripciones push
+- [x] Procedimiento tRPC push.subscribe / push.unsubscribe / push.getVapidPublicKey
+- [x] Procedimiento tRPC couponSubscribers.subscribe / list / delete
+- [x] Notificación automática por correo a todos los suscriptores al publicar cupón
+- [x] Notificación push automática a todos los suscriptores al publicar cupón
+- [x] Tab "Suscriptores" en panel admin con tabla y botón eliminar
+- [x] Tab "Compras Servicios" en panel admin con aprobar/rechazar/eliminar
+- [x] Procedimientos tRPC servicePurchases.create / list / approve / reject / delete
+- [x] Email automático al admin cuando se crea una compra de servicio
+- [x] Email automático al comprador cuando se aprueba su compra de servicio
+- [x] Tests de vitest para todos los nuevos procedimientos (14 tests, todos pasan)

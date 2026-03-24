@@ -19,12 +19,18 @@ export default function AdminDashboard() {
   const [promotionDescription, setPromotionDescription] = useState("");
   const [promotionExpiresAt, setPromotionExpiresAt] = useState("");
   const [promotionPrice, setPromotionPrice] = useState("");
+  const [promotionRegularPrice, setPromotionRegularPrice] = useState("");
+  const [promotionImage, setPromotionImage] = useState<File | null>(null);
+  const [promotionImagePreview, setPromotionImagePreview] = useState<string | null>(null);
   // Estado para edición de promoción
   const [editingPromoId, setEditingPromoId] = useState<number | null>(null);
   const [editPromoTitle, setEditPromoTitle] = useState("");
   const [editPromoDescription, setEditPromoDescription] = useState("");
   const [editPromoPrice, setEditPromoPrice] = useState("");
+  const [editPromoRegularPrice, setEditPromoRegularPrice] = useState("");
   const [editPromoExpiresAt, setEditPromoExpiresAt] = useState("");
+  const [editPromoImage, setEditPromoImage] = useState<File | null>(null);
+  const [editPromoImagePreview, setEditPromoImagePreview] = useState<string | null>(null);
 
   // Estado para eBook
   const [ebookTitle, setEbookTitle] = useState("");
@@ -306,6 +312,10 @@ export default function AdminDashboard() {
       setPromotionTitle("");
       setPromotionDescription("");
       setPromotionExpiresAt("");
+      setPromotionPrice("");
+      setPromotionRegularPrice("");
+      setPromotionImage(null);
+      setPromotionImagePreview(null);
       utils.promotions.listForAdmin.invalidate();
       utils.promotions.list.invalidate();
     },
@@ -401,30 +411,57 @@ export default function AdminDashboard() {
     }
   }, [activeEbook]);
 
-  const handlePublishPromotion = () => {
+  const handlePublishPromotion = async () => {
     if (!promotionTitle.trim()) {
       toast.error("Ingresa un título para la promoción");
       return;
+    }
+    let imageBase64: string | undefined;
+    let imageMimeType: string | undefined;
+    if (promotionImage) {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve) => {
+        reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
+        reader.readAsDataURL(promotionImage);
+      });
+      imageBase64 = base64;
+      imageMimeType = promotionImage.type;
     }
     createPromotionMutation.mutate({
       title: promotionTitle,
       description: promotionDescription,
       price: promotionPrice.trim() || undefined,
+      regularPrice: promotionRegularPrice.trim() || undefined,
+      imageBase64,
+      imageMimeType,
       expiresAt: promotionExpiresAt ? new Date(promotionExpiresAt).toISOString() : undefined,
     });
-    setPromotionPrice("");
   };
 
-  const handleSaveEditPromotion = () => {
+  const handleSaveEditPromotion = async () => {
     if (!editingPromoId || !editPromoTitle.trim()) {
       toast.error("El título es requerido");
       return;
+    }
+    let imageBase64: string | undefined;
+    let imageMimeType: string | undefined;
+    if (editPromoImage) {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve) => {
+        reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
+        reader.readAsDataURL(editPromoImage);
+      });
+      imageBase64 = base64;
+      imageMimeType = editPromoImage.type;
     }
     updatePromotionMutation.mutate({
       id: editingPromoId,
       title: editPromoTitle,
       description: editPromoDescription,
       price: editPromoPrice.trim() || null,
+      regularPrice: editPromoRegularPrice.trim() || null,
+      imageBase64,
+      imageMimeType,
       expiresAt: editPromoExpiresAt ? new Date(editPromoExpiresAt).toISOString() : null,
     });
   };
@@ -921,18 +958,66 @@ export default function AdminDashboard() {
                       className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+                        Precio regular
+                        <span className="text-[#999] font-normal ml-1">(se tacha)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ej: $3,500 MXN"
+                        value={promotionRegularPrice}
+                        onChange={(e) => setPromotionRegularPrice(e.target.value)}
+                        className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+                        Precio promocional
+                        <span className="text-[#999] font-normal ml-1">(destacado)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ej: $2,499 MXN"
+                        value={promotionPrice}
+                        onChange={(e) => setPromotionPrice(e.target.value)}
+                        className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                      />
+                    </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
-                      Precio del cupón
-                      <span className="text-[#999] font-normal ml-2">(opcional, ej: $2,499 MXN)</span>
+                      Imagen del cupón
+                      <span className="text-[#999] font-normal ml-2">(opcional, para que llame la atención)</span>
                     </label>
                     <input
-                      type="text"
-                      placeholder="Ej: $2,499 MXN"
-                      value={promotionPrice}
-                      onChange={(e) => setPromotionPrice(e.target.value)}
-                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 5 * 1024 * 1024) { toast.error('La imagen no debe superar 5MB'); return; }
+                          setPromotionImage(file);
+                          const reader = new FileReader();
+                          reader.onload = (ev) => setPromotionImagePreview(ev.target?.result as string);
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A] text-sm"
                     />
+                    {promotionImagePreview && (
+                      <div className="mt-2 relative inline-block">
+                        <img src={promotionImagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg border border-[#C5A55A]/30" />
+                        <button
+                          type="button"
+                          onClick={() => { setPromotionImage(null); setPromotionImagePreview(null); }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
@@ -991,13 +1076,43 @@ export default function AdminDashboard() {
                                 rows={2}
                                 className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
                               />
-                              <input
-                                type="text"
-                                value={editPromoPrice}
-                                onChange={(e) => setEditPromoPrice(e.target.value)}
-                                placeholder="Precio (ej: $2,499 MXN)"
-                                className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
-                              />
+                              <div className="grid grid-cols-2 gap-2">
+                                <input
+                                  type="text"
+                                  value={editPromoRegularPrice}
+                                  onChange={(e) => setEditPromoRegularPrice(e.target.value)}
+                                  placeholder="Precio regular (se tacha)"
+                                  className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
+                                />
+                                <input
+                                  type="text"
+                                  value={editPromoPrice}
+                                  onChange={(e) => setEditPromoPrice(e.target.value)}
+                                  placeholder="Precio promocional"
+                                  className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-[#666] mb-1">Imagen del cupón</label>
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      if (file.size > 5 * 1024 * 1024) { toast.error('Max 5MB'); return; }
+                                      setEditPromoImage(file);
+                                      const reader = new FileReader();
+                                      reader.onload = (ev) => setEditPromoImagePreview(ev.target?.result as string);
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                  className="w-full px-3 py-1 border border-[#C5A55A]/30 rounded-lg text-xs"
+                                />
+                                {(editPromoImagePreview || promo.imageUrl) && (
+                                  <img src={editPromoImagePreview || promo.imageUrl} alt="Preview" className="w-20 h-20 object-cover rounded mt-1 border" />
+                                )}
+                              </div>
                               <input
                                 type="date"
                                 value={editPromoExpiresAt}
@@ -1023,16 +1138,29 @@ export default function AdminDashboard() {
                           ) : (
                             /* Vista normal */
                             <>
+                              {promo.imageUrl && (
+                                <img src={promo.imageUrl} alt={promo.title} className="w-full h-40 object-cover rounded-lg mb-3" />
+                              )}
                               <div className="bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-lg p-4 mb-3 text-white">
                                 <div className="flex justify-between items-start mb-2">
                                   <span className="text-sm font-bold">CUPÓN</span>
                                   <span className="text-lg">🎁</span>
                                 </div>
                                 <p className="text-xs font-light line-clamp-2">{promo.title}</p>
-                                {promo.price && <p className="text-sm font-bold mt-1">{promo.price}</p>}
+                                {(promo.regularPrice || promo.price) && (
+                                  <div className="flex items-center gap-2 mt-2">
+                                    {promo.regularPrice && <span className="text-xs line-through opacity-70">{promo.regularPrice}</span>}
+                                    {promo.price && <span className="text-sm font-bold">{promo.price}</span>}
+                                  </div>
+                                )}
                               </div>
                               <h4 className="font-bold text-[#1A1A1A]">{promo.title}</h4>
-                              {promo.price && <p className="text-sm font-semibold text-[#C5A55A] mt-1">💰 {promo.price}</p>}
+                              {(promo.regularPrice || promo.price) && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  {promo.regularPrice && <span className="text-sm text-[#999] line-through">{promo.regularPrice}</span>}
+                                  {promo.price && <span className="text-sm font-semibold text-[#C5A55A]">💰 {promo.price}</span>}
+                                </div>
+                              )}
                               <p className="text-sm text-[#666] mt-1">{promo.description}</p>
                               {promo.expiresAt ? (
                                 <div className="mt-2 flex items-center gap-1">
@@ -1056,7 +1184,10 @@ export default function AdminDashboard() {
                                     setEditPromoTitle(promo.title || '');
                                     setEditPromoDescription(promo.description || '');
                                     setEditPromoPrice(promo.price || '');
+                                    setEditPromoRegularPrice(promo.regularPrice || '');
                                     setEditPromoExpiresAt(promo.expiresAt ? new Date(promo.expiresAt).toISOString().split('T')[0] : '');
+                                    setEditPromoImage(null);
+                                    setEditPromoImagePreview(null);
                                   }}
                                   className="flex-1 px-3 py-2 bg-[#C5A55A]/20 text-[#C5A55A] border border-[#C5A55A]/40 rounded hover:bg-[#C5A55A]/30 transition text-sm font-medium"
                                 >

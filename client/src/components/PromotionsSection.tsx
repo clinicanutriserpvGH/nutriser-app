@@ -182,22 +182,74 @@ export default function PromotionsSection() {
               <motion.div key={promo.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: index * 0.1 }}>
                 <div
                   id={`cupon-${promo.id}`}
-                  className={`transition-all duration-700 rounded-2xl ${
+                  className={`transition-all duration-700 rounded-2xl overflow-hidden ${
                     highlightId === promo.id
                       ? 'ring-4 ring-[#C5A55A] ring-offset-4 scale-[1.02] shadow-2xl'
-                      : ''
+                      : 'shadow-xl hover:shadow-2xl hover:scale-[1.01]'
                   }`}
                 >
-                  <div className="bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-t-2xl shadow-xl p-8 relative">
-                    <div className="absolute top-4 right-4 flex items-center gap-2">
-                      <button onClick={() => { setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true); }}
-                        className="bg-white/20 backdrop-blur-sm rounded-full p-3 animate-bounce hover:bg-white/30 transition" title="Adquirir cupón">
-                        <Gift className="w-6 h-6 text-white" />
-                      </button>
-                      <Sparkles className="w-5 h-5 text-white animate-pulse" />
+                  {/* Imagen del cupón */}
+                  {promo.imageUrl && (
+                    <div className="relative h-48 overflow-hidden">
+                      <img src={promo.imageUrl} alt={promo.title} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <div className="absolute top-3 right-3 flex items-center gap-2">
+                        <button onClick={() => { setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true); }}
+                          className="bg-white/30 backdrop-blur-sm rounded-full p-2.5 animate-bounce hover:bg-white/50 transition" title="Adquirir cupón">
+                          <Gift className="w-5 h-5 text-white" />
+                        </button>
+                        <Sparkles className="w-4 h-4 text-white animate-pulse" />
+                      </div>
+                      {/* Badge de descuento sobre la imagen */}
+                      {promo.regularPrice && promo.price && (
+                        <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                          🔥 OFERTA
+                        </div>
+                      )}
                     </div>
-                    <h3 className="font-serif text-2xl text-white mb-4 pr-20 leading-tight">{promo.title}</h3>
+                  )}
+
+                  <div className={`bg-gradient-to-br from-[#C5A55A] to-[#B8963E] ${promo.imageUrl ? '' : 'rounded-t-2xl'} shadow-xl p-6 relative`}>
+                    {!promo.imageUrl && (
+                      <div className="absolute top-4 right-4 flex items-center gap-2">
+                        <button onClick={() => { setSelectedPromo({ id: promo.id, title: promo.title }); setStep("form"); setGiftModalOpen(true); }}
+                          className="bg-white/20 backdrop-blur-sm rounded-full p-3 animate-bounce hover:bg-white/30 transition" title="Adquirir cupón">
+                          <Gift className="w-6 h-6 text-white" />
+                        </button>
+                        <Sparkles className="w-5 h-5 text-white animate-pulse" />
+                      </div>
+                    )}
+                    <h3 className={`font-serif text-2xl text-white mb-3 ${!promo.imageUrl ? 'pr-20' : ''} leading-tight`}>{promo.title}</h3>
                     {promo.description && <p className="text-white/90 text-sm leading-relaxed mb-4">{promo.description}</p>}
+
+                    {/* Comparativa de precios */}
+                    {(promo.regularPrice || promo.price) && (
+                      <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 mb-4">
+                        <div className="flex items-center justify-center gap-3">
+                          {promo.regularPrice && (
+                            <div className="text-center">
+                              <p className="text-white/60 text-[10px] uppercase tracking-wider">Precio regular</p>
+                              <p className="text-white/70 text-lg line-through font-light">{promo.regularPrice}</p>
+                            </div>
+                          )}
+                          {promo.regularPrice && promo.price && (
+                            <ArrowRight className="w-5 h-5 text-white/60" />
+                          )}
+                          {promo.price && (
+                            <div className="text-center">
+                              <p className="text-yellow-200 text-[10px] uppercase tracking-wider font-bold">Precio promocional</p>
+                              <p className="text-white text-2xl font-bold">{promo.price}</p>
+                            </div>
+                          )}
+                        </div>
+                        {promo.regularPrice && promo.price && (
+                          <p className="text-center text-green-300 text-xs font-bold mt-2 animate-pulse">
+                            ✨ Aprovecha esta promoción especial
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     {/* Fecha límite */}
                     {promo.expiresAt && (
                       <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mb-4 flex items-center gap-2">

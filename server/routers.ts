@@ -455,14 +455,27 @@ export const appRouter = router({
       .input(z.object({
         title: z.string().min(1),
         description: z.string().optional(),
-        price: z.string().optional(), // Precio del cupón (opcional)
+        price: z.string().optional(), // Precio promocional
+        regularPrice: z.string().optional(), // Precio regular (para comparativa)
+        imageBase64: z.string().optional(), // Imagen en base64
+        imageMimeType: z.string().optional(),
         expiresAt: z.string().optional(), // ISO date string
       }))
       .mutation(async ({ input }) => {
+        let imageUrl: string | null = null;
+        if (input.imageBase64 && input.imageMimeType) {
+          const buffer = Buffer.from(input.imageBase64, 'base64');
+          const ext = input.imageMimeType.split('/')[1] || 'jpg';
+          const key = `promo-images/promo-${Date.now()}.${ext}`;
+          const result = await storagePut(key, buffer, input.imageMimeType);
+          imageUrl = result.url;
+        }
         return await createPromotion({
           title: input.title,
           description: input.description,
           price: input.price ?? null,
+          regularPrice: input.regularPrice ?? null,
+          imageUrl,
           expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
           isActive: true,
         });
@@ -474,14 +487,24 @@ export const appRouter = router({
         title: z.string().optional(),
         description: z.string().optional(),
         price: z.string().nullable().optional(),
+        regularPrice: z.string().nullable().optional(),
+        imageBase64: z.string().optional(),
+        imageMimeType: z.string().optional(),
         isActive: z.boolean().optional(),
-        expiresAt: z.string().nullable().optional(), // ISO date string or null
+        expiresAt: z.string().nullable().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { id, expiresAt, ...rest } = input;
+        const { id, expiresAt, imageBase64, imageMimeType, ...rest } = input;
         const data: Record<string, unknown> = { ...rest };
         if (expiresAt !== undefined) {
           data.expiresAt = expiresAt ? new Date(expiresAt) : null;
+        }
+        if (imageBase64 && imageMimeType) {
+          const buffer = Buffer.from(imageBase64, 'base64');
+          const ext = imageMimeType.split('/')[1] || 'jpg';
+          const key = `promo-images/promo-${Date.now()}.${ext}`;
+          const result = await storagePut(key, buffer, imageMimeType);
+          data.imageUrl = result.url;
         }
         return await updatePromotion(id, data as Parameters<typeof updatePromotion>[1]);
       }),

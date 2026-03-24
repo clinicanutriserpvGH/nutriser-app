@@ -488,3 +488,13 @@
 - [x] Causa raíz: el ENUM del campo status en la tabla giftPurchases en MySQL solo tenía ('pending','approved','rejected') - faltaba 'used'
 - [x] Fix: ALTER TABLE giftPurchases MODIFY COLUMN status ENUM('pending','approved','rejected','used') NOT NULL DEFAULT 'pending'
 - [x] Verificado: markUsed y delete funcionan correctamente en producción (nutriserpv.com)
+
+## Mejora Cupones Dinámicos (Mar 24)
+- [x] DB: campo regularPrice (decimal nullable) agregado a promotions
+- [x] DB: price = precio promocional, regularPrice = precio regular original
+- [x] DB: imageUrl ya existía en promotions, ahora se usa activamente
+- [x] Admin: formulario de crear/editar promoción con precio regular, precio promocional e imagen
+- [x] Admin: subir imagen para la promoción con preview y botón eliminar
+- [x] Cuponera pública: imagen del cupón con badge "OFERTA" y gradiente
+- [x] Cuponera pública: comparativa de precios (regular tachado → flecha → promocional destacado + mensaje)
+- [x] Tests: 18 tests pasan correctamente

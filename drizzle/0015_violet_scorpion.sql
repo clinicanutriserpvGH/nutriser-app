@@ -1,0 +1,1 @@
+ALTER TABLE `promotions` ADD `regularPrice` decimal(10,2);

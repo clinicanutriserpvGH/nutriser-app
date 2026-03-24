@@ -139,8 +139,8 @@ export const promotions = mysqlTable("promotions", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   imageUrl: text("imageUrl"), // URL de imagen (opcional)
-  price: decimal("price", { precision: 10, scale: 2 }), // Precio promocional del cupón
-  regularPrice: decimal("regularPrice", { precision: 10, scale: 2 }), // Precio regular (para comparativa)
+  price: varchar("price", { length: 100 }), // Precio promocional del cupón (texto libre, ej: $1,299)
+  regularPrice: varchar("regularPrice", { length: 100 }), // Precio regular para comparativa (texto libre, ej: $1,800)
   isActive: boolean("isActive").default(true).notNull(),
   expiresAt: timestamp("expiresAt"), // Fecha límite para canjear el cupón (null = sin vencimiento)
   createdAt: timestamp("createdAt").defaultNow().notNull(),

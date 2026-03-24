@@ -69,6 +69,9 @@ export async function sendPushNotificationToAll(
     body,
     url,
     icon: icon || '/icons/icon-192x192.png',
+    requireInteraction: true,  // Notification stays until user taps it
+    tag: 'nutriser-promo',     // Same tag = replaces previous notification (no duplicates on screen)
+    renotify: false,           // Don't vibrate again if tag already exists
   });
 
   const results = await Promise.allSettled(

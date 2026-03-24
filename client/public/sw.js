@@ -89,6 +89,9 @@ self.addEventListener('push', (event) => {
     icon: data.icon || '/icons/icon-192x192.png',
     badge: '/icons/icon-72x72.png',
     vibrate: [200, 100, 200],
+    tag: data.tag || 'nutriser-promo',  // Same tag replaces previous notification
+    renotify: false,                     // Don't re-vibrate if tag already shown
+    requireInteraction: true,            // Stays until user taps it
     data: {
       url: data.url || 'https://nutriserpv.com',
     },
@@ -102,7 +105,6 @@ self.addEventListener('push', (event) => {
         title: 'Cerrar',
       },
     ],
-    requireInteraction: true,
   };
 
   event.waitUntil(

@@ -584,7 +584,7 @@ export default function PromotionsSection() {
                             disabled={pushLoading}
                             className="mt-1 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
                           >
-                            {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Ya la agregué, activar</>}
+                            {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones Push</>}
                           </button>
                         </div>
                       ) : (

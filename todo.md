@@ -587,3 +587,9 @@
 - [x] Separar en dos opciones: "Correo" y "Notificaciones Push"
 - [x] Detectar iOS/Safari y mostrar instrucciones solo en ese caso
 - [x] Explicar que en Android se activa con un solo clic
+
+## Correcciones Push - Mar 24 2026
+- [x] Cambiar texto botón iOS de "Ya la agregué, activar" a "Activar Notificaciones Push"
+- [x] Deduplicar suscripciones push por endpoint (evitar múltiples registros del mismo dispositivo)
+- [x] Agregar requireInteraction:true en las notificaciones push para que no desaparezcan solas
+- [x] Agregar tag 'nutriser-promo' para que notificaciones se reemplacen en lugar de acumularse

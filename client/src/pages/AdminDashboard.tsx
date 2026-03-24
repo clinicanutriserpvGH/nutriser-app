@@ -878,51 +878,53 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="memberships" className="space-y-4">
-          <TabsList className="bg-[#C5A55A]/10 flex-wrap h-auto gap-1">
-            <TabsTrigger value="memberships">Membresías</TabsTrigger>
-            <TabsTrigger value="appointments">Citas</TabsTrigger>
-            <TabsTrigger value="giftPurchases">Regalos Pagados</TabsTrigger>
-            <TabsTrigger value="promotions">Promociones</TabsTrigger>
-            <TabsTrigger value="ebook" className="flex items-center gap-1">
-              <BookOpen className="w-4 h-4" />
-              eBook
-            </TabsTrigger>
-            <TabsTrigger value="subscribers" className="flex items-center gap-1">
-              <Bell className="w-4 h-4" />
-              Suscriptores
-              {couponSubscribers && couponSubscribers.length > 0 && (
-                <span className="ml-1 bg-[#C5A55A] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{couponSubscribers.length}</span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="servicePurchases" className="flex items-center gap-1">
-              <ShoppingBag className="w-4 h-4" />
-              Compras Servicios
-              {servicePurchases && servicePurchases.filter(p => p.status === 'pending').length > 0 && (
-                <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicePurchases.filter(p => p.status === 'pending').length}</span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="services" className="flex items-center gap-1">
-              <Settings className="w-4 h-4" />
-              Servicios
-              {servicesCatalog && (
-                <span className="ml-1 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicesCatalog.length}</span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="products" className="flex items-center gap-1">
-              <ShoppingBag className="w-4 h-4" />
-              Productos
-              {productsCatalog && (
-                <span className="ml-1 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{productsCatalog.length}</span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="productPurchases" className="flex items-center gap-1">
-              <ShoppingBag className="w-4 h-4" />
-              Compras Productos
-              {productPurchases && productPurchases.filter((p: any) => p.status === 'pending').length > 0 && (
-                <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{productPurchases.filter((p: any) => p.status === 'pending').length}</span>
-              )}
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 pb-1">
+            <TabsList className="bg-[#C5A55A]/10 h-auto inline-flex flex-nowrap gap-1 min-w-max p-1">
+              <TabsTrigger value="memberships" className="whitespace-nowrap text-xs sm:text-sm px-3 py-2">Membresías</TabsTrigger>
+              <TabsTrigger value="appointments" className="whitespace-nowrap text-xs sm:text-sm px-3 py-2">Citas</TabsTrigger>
+              <TabsTrigger value="giftPurchases" className="whitespace-nowrap text-xs sm:text-sm px-3 py-2">Regalos</TabsTrigger>
+              <TabsTrigger value="promotions" className="whitespace-nowrap text-xs sm:text-sm px-3 py-2">Promociones</TabsTrigger>
+              <TabsTrigger value="ebook" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
+                <BookOpen className="w-3.5 h-3.5" />
+                eBook
+              </TabsTrigger>
+              <TabsTrigger value="subscribers" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
+                <Bell className="w-3.5 h-3.5" />
+                Suscriptores
+                {couponSubscribers && couponSubscribers.length > 0 && (
+                  <span className="ml-1 bg-[#C5A55A] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{couponSubscribers.length}</span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="servicePurchases" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
+                <ShoppingBag className="w-3.5 h-3.5" />
+                Compras Serv.
+                {servicePurchases && servicePurchases.filter(p => p.status === 'pending').length > 0 && (
+                  <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicePurchases.filter(p => p.status === 'pending').length}</span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="services" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
+                <Settings className="w-3.5 h-3.5" />
+                Servicios
+                {servicesCatalog && (
+                  <span className="ml-1 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicesCatalog.length}</span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="products" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
+                <ShoppingBag className="w-3.5 h-3.5" />
+                Productos
+                {productsCatalog && (
+                  <span className="ml-1 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{productsCatalog.length}</span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="productPurchases" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
+                <ShoppingBag className="w-3.5 h-3.5" />
+                Compras Prod.
+                {productPurchases && productPurchases.filter((p: any) => p.status === 'pending').length > 0 && (
+                  <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{productPurchases.filter((p: any) => p.status === 'pending').length}</span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Memberships Tab */}
           <TabsContent value="memberships" className="space-y-4">

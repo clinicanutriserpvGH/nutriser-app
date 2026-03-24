@@ -653,3 +653,4 @@
 - [x] Página pública /tienda con catálogo de productos y modal de compra
 - [x] Botón "Tienda de Productos" en el Hero de la página principal
 - [x] Texto "Cuponera de Descuentos" en lugar de "Cuponera de Promociones"
+- [x] Reorganizar tabs del AdminDashboard para que no se amonten en móvil

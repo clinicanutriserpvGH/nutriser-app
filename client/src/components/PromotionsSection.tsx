@@ -27,11 +27,18 @@ export default function PromotionsSection() {
   }, [isLoading, promotions]);
 
   // ─── Subscription modal state ─────────────────────────────────────────────
+  // Persistir estado en localStorage para que no se olvide entre visitas
   const [subModalOpen, setSubModalOpen] = useState(false);
   const [subEmail, setSubEmail] = useState("");
   const [subSubmitting, setSubSubmitting] = useState(false);
   const [subSuccess, setSubSuccess] = useState(false);
-  const [pushEnabled, setPushEnabled] = useState(false);
+  // pushEnabled: inicializar desde localStorage Y verificar permiso real del navegador
+  const [pushEnabled, setPushEnabled] = useState(() => {
+    const saved = localStorage.getItem('nutriser_push_enabled') === 'true';
+    // También verificar que el permiso del navegador siga activo
+    const hasPermission = 'Notification' in window && Notification.permission === 'granted';
+    return saved && hasPermission;
+  });
   const [pushLoading, setPushLoading] = useState(false);
 
   // Detect iOS/Safari
@@ -45,6 +52,7 @@ export default function PromotionsSection() {
     onSuccess: () => {
       setSubSuccess(true);
       setSubSubmitting(false);
+      localStorage.setItem('nutriser_email_subscribed', 'true');
     },
     onError: (err) => {
       toast.error("Error al suscribirse: " + err.message);
@@ -55,6 +63,7 @@ export default function PromotionsSection() {
   const pushSubscribeMutation = trpc.push.subscribe.useMutation({
     onSuccess: () => {
       setPushEnabled(true);
+      localStorage.setItem('nutriser_push_enabled', 'true');
       toast.success("🔔 ¡Notificaciones activadas!");
     },
     onError: () => {
@@ -258,17 +267,36 @@ export default function PromotionsSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="inline-block"
           >
-            <button
-              onClick={() => setSubModalOpen(true)}
-              className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] hover:from-[#2d2416] hover:to-[#1A1A1A] text-white px-8 py-4 rounded-2xl font-bold text-base shadow-2xl border-2 border-[#C5A55A] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(197,165,90,0.4)]"
-            >
-              <span className="relative">
-                <BellRing className="w-6 h-6 text-[#C5A55A] animate-bounce" />
-              </span>
-              <span className="text-[#C5A55A] font-black tracking-wide">🔔 Suscribirse a Ofertas</span>
-              <span className="text-white/70 text-sm font-normal hidden sm:inline">— Recibe nuevos cupones al instante</span>
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">GRATIS</span>
-            </button>
+            {localStorage.getItem('nutriser_email_subscribed') === 'true' && pushEnabled ? (
+              /* Ya suscrito por correo Y push activo */
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-800 to-green-900 text-white px-8 py-4 rounded-2xl font-bold text-base shadow-xl border-2 border-green-500">
+                <Check className="w-5 h-5 text-green-400" />
+                <span className="text-green-300 font-black">✅ Suscrito y notificaciones activas</span>
+              </div>
+            ) : localStorage.getItem('nutriser_email_subscribed') === 'true' ? (
+              /* Ya suscrito por correo, pero push no activo */
+              <button
+                onClick={() => setSubModalOpen(true)}
+                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-green-800 to-green-900 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-bold text-base shadow-xl border-2 border-green-500 transition-all duration-300"
+              >
+                <Check className="w-5 h-5 text-green-400" />
+                <span className="text-green-300 font-black">✅ Suscrito por correo</span>
+                <span className="text-white/60 text-sm font-normal hidden sm:inline">— Activar notificaciones push</span>
+              </button>
+            ) : (
+              /* No suscrito */
+              <button
+                onClick={() => setSubModalOpen(true)}
+                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] hover:from-[#2d2416] hover:to-[#1A1A1A] text-white px-8 py-4 rounded-2xl font-bold text-base shadow-2xl border-2 border-[#C5A55A] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(197,165,90,0.4)]"
+              >
+                <span className="relative">
+                  <BellRing className="w-6 h-6 text-[#C5A55A] animate-bounce" />
+                </span>
+                <span className="text-[#C5A55A] font-black tracking-wide">🔔 Suscribirse a Ofertas</span>
+                <span className="text-white/70 text-sm font-normal hidden sm:inline">— Recibe nuevos cupones al instante</span>
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">GRATIS</span>
+              </button>
+            )}
           </motion.div>
           <p className="text-xs text-[#999] mt-3">Correo + notificaciones en tu celular cuando publiquemos nuevas ofertas</p>
         </motion.div>

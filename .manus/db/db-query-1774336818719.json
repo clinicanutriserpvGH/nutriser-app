@@ -1,0 +1,18 @@
+{
+  "query": "SHOW COLUMNS FROM giftPurchases WHERE Field = 'status';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SHOW COLUMNS FROM giftPurchases WHERE Field = 'status';",
+  "rows": [
+    {
+      "Field": "status",
+      "Type": "enum('pending','approved','rejected','used')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "pending",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nstatus\tenum('pending','approved','rejected','used')\tNO\t\tpending\t\n",
+  "stderr": "",
+  "execution_time_ms": 67
+}

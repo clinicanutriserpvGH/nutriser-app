@@ -483,3 +483,8 @@
 - [x] Fix: Agregar función deleteGiftPurchase en db.ts usando Drizzle ORM (en lugar de SQL raw)
 - [x] Fix: Reemplazar SQL raw en markUsed y delete por llamadas a funciones de db.ts
 - [x] Todos los 18 tests siguen pasando
+
+## Bug Fix - Migración BD giftPurchases (Mar 24 - Fix 3)
+- [x] Causa raíz: el ENUM del campo status en la tabla giftPurchases en MySQL solo tenía ('pending','approved','rejected') - faltaba 'used'
+- [x] Fix: ALTER TABLE giftPurchases MODIFY COLUMN status ENUM('pending','approved','rejected','used') NOT NULL DEFAULT 'pending'
+- [x] Verificado: markUsed y delete funcionan correctamente en producción (nutriserpv.com)

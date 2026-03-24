@@ -476,3 +476,10 @@
 - [x] Bug logout: corregido nombre de cookie en auth.logout (usaba 'session' en vez de COOKIE_NAME)
 - [x] Test memberships.uploadProof: corregido para crear membresía válida antes de subir comprobante
 - [x] Todos los 18 tests pasan correctamente
+
+## Bug Fix - Marcar Cupón como Usado (Mar 24 - Fix 2)
+- [x] Bug: updateGiftPurchaseStatus solo aceptaba "pending"|"approved"|"rejected", no "used"
+- [x] Fix: Actualizar firma de updateGiftPurchaseStatus para incluir "used" en los tipos aceptados
+- [x] Fix: Agregar función deleteGiftPurchase en db.ts usando Drizzle ORM (en lugar de SQL raw)
+- [x] Fix: Reemplazar SQL raw en markUsed y delete por llamadas a funciones de db.ts
+- [x] Todos los 18 tests siguen pasando

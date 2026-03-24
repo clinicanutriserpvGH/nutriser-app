@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
@@ -427,12 +427,9 @@ export const appRouter = router({
     markUsed: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        const { getDb } = await import('./db');
-        const db = await getDb();
-        if (!db) throw new Error('DB no disponible');
-        await db.execute(
-          `UPDATE giftPurchases SET status = 'used', updatedAt = NOW() WHERE id = ${input.id}`
-        );
+        const purchase = await getGiftPurchaseById(input.id);
+        if (!purchase) throw new Error('Compra no encontrada');
+        await updateGiftPurchaseStatus(input.id, 'used');
         return { success: true };
       }),
 
@@ -442,12 +439,9 @@ export const appRouter = router({
         const purchase = await getGiftPurchaseById(input.id);
         if (!purchase) throw new Error('Compra no encontrada');
         if (purchase.status !== 'used' && purchase.status !== 'rejected') {
-          throw new Error('Solo se pueden eliminar cupones usados o rechazados');
+          throw new Error('Solo se pueden eliminar cupónes usados o rechazados');
         }
-        const { getDb } = await import('./db');
-        const db = await getDb();
-        if (!db) throw new Error('DB no disponible');
-        await db.execute(`DELETE FROM giftPurchases WHERE id = ${input.id}`);
+        await deleteGiftPurchase(input.id);
         return { success: true };
       }),
   }),

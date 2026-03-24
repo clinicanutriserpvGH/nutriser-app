@@ -360,7 +360,7 @@ export async function getGiftPurchaseById(id: number) {
   return result[0] || null;
 }
 
-export async function updateGiftPurchaseStatus(id: number, status: "pending" | "approved" | "rejected") {
+export async function updateGiftPurchaseStatus(id: number, status: "pending" | "approved" | "rejected" | "used") {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
@@ -368,6 +368,13 @@ export async function updateGiftPurchaseStatus(id: number, status: "pending" | "
     status,
     approvedAt: status === "approved" ? new Date() : undefined,
   }).where(eq(giftPurchases.id, id));
+  return { success: true };
+}
+
+export async function deleteGiftPurchase(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(giftPurchases).where(eq(giftPurchases.id, id));
   return { success: true };
 }
 

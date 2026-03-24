@@ -134,6 +134,13 @@
       "when": 1774347495010,
       "tag": "0018_windy_menace",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1774363007533,
+      "tag": "0019_real_george_stacy",
+      "breakpoints": true
     }
   ]
 }

@@ -599,3 +599,33 @@
 - [x] Crear nueva ruta /cupon/:id que siempre devuelve HTML con OG tags (sin depender de bot detection)
 - [x] Actualizar URL compartida en WhatsApp y Copiar Link a https://nutriserpv.com/cupon/:id
 - [x] Verificar que el endpoint devuelve la imagen real del cupón en og:image
+
+## Gestión de Servicios - Mar 24 2026
+- [ ] Corregir "Vacunterapia" → "Vacuumterapia" en ServicesSection
+- [ ] Agregar tabla `services` en la BD con campos: nombre, descripción, categoría, precio, imagen
+- [ ] Migrar servicios estáticos a la BD (seed inicial)
+- [ ] Procedimientos tRPC: services.list, services.create, services.update, services.delete
+- [ ] Admin: tab "Servicios" con tabla, botón agregar, editar, eliminar y subir imagen
+- [ ] Frontend ServicesSection: leer servicios desde la BD en lugar de datos estáticos
+
+## Gestión Servicios + OG Image Cupón - Mar 24 2026
+- [ ] Corregir "Vacunterapia" → "Vacuumterapia" en ServicesSection
+- [ ] Tabla `services` en BD: nombre, descripción, categoría, precio, imageUrl, isActive
+- [ ] Seed inicial de los 27 servicios en la BD
+- [ ] tRPC: services.list, services.create, services.update, services.delete
+- [ ] Admin: tab "Servicios" con tabla, agregar/editar/eliminar, subir imagen
+- [ ] ServicesSection: leer desde BD en lugar de datos estáticos
+- [ ] OG Image: generar imagen del cupón completo con canvas/sharp en el servidor
+- [ ] Usar imagen generada como og:image en el endpoint /cupon/:id
+
+## Correcciones Sesión Actual - Servicios y Cupón WhatsApp
+
+- [x] Corregir tipografía "Vacunterapia" → "Vacuumterapia" en ServicesSection
+- [x] Crear tabla `services` en la base de datos (schema + migración)
+- [x] Agregar procedimientos tRPC: services.listAll, services.create, services.update, services.delete
+- [x] Agregar tab "Servicios" en AdminDashboard con formulario crear/editar y tabla editable
+- [x] Instalar @resvg/resvg-js para generación de imágenes PNG desde SVG en el servidor
+- [x] Crear módulo couponImageGenerator.ts que genera imagen 1200x630 del cupón en SVG/PNG
+- [x] Agregar endpoint GET /api/og/cupon-image/:id que devuelve PNG del cupón
+- [x] Actualizar buildCouponOGPage para usar la imagen PNG generada como og:image
+- [x] Meta tags OG actualizados: og:image apunta a /api/og/cupon-image/:id (PNG 1200x630)

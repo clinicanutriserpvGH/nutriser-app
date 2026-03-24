@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOpen, Upload, Eye, Bell, BellRing, ShoppingBag, Trash2 } from "lucide-react";
+import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOpen, Upload, Eye, Bell, BellRing, ShoppingBag, Trash2, Settings, Plus, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
@@ -33,6 +33,21 @@ export default function AdminDashboard() {
   const [editPromoImage, setEditPromoImage] = useState<File | null>(null);
   const [editPromoImagePreview, setEditPromoImagePreview] = useState<string | null>(null);
   const [editPromoMaxCoupons, setEditPromoMaxCoupons] = useState("");
+
+  // Estado para servicios
+  const [serviceForm, setServiceForm] = useState({
+    name: '',
+    description: '',
+    category: 'general',
+    price: '',
+    imageUrl: '',
+    isActive: true,
+    sortOrder: 0,
+  });
+  const [serviceImage, setServiceImage] = useState<File | null>(null);
+  const [serviceImagePreview, setServiceImagePreview] = useState<string | null>(null);
+  const [editingServiceId, setEditingServiceId] = useState<number | null>(null);
+  const [isUploadingServiceImage, setIsUploadingServiceImage] = useState(false);
 
   // Estado para eBook
   const [ebookTitle, setEbookTitle] = useState("");
@@ -114,6 +129,43 @@ export default function AdminDashboard() {
       refetchSubscribers();
     },
     onError: (error) => toast.error('Error: ' + error.message),
+  });
+
+  // Catálogo de servicios
+  const { data: servicesCatalog, refetch: refetchServices } = trpc.services.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const createServiceMutation = trpc.services.create.useMutation({
+    onSuccess: () => {
+      toast.success('Servicio creado exitosamente');
+      refetchServices();
+      setServiceForm({ name: '', description: '', category: 'general', price: '', imageUrl: '', isActive: true, sortOrder: 0 });
+      setServiceImage(null);
+      setServiceImagePreview(null);
+      setEditingServiceId(null);
+    },
+    onError: (error) => toast.error('Error al crear servicio: ' + error.message),
+  });
+
+  const updateServiceMutation = trpc.services.update.useMutation({
+    onSuccess: () => {
+      toast.success('Servicio actualizado exitosamente');
+      refetchServices();
+      setServiceForm({ name: '', description: '', category: 'general', price: '', imageUrl: '', isActive: true, sortOrder: 0 });
+      setServiceImage(null);
+      setServiceImagePreview(null);
+      setEditingServiceId(null);
+    },
+    onError: (error) => toast.error('Error al actualizar servicio: ' + error.message),
+  });
+
+  const deleteServiceCatalogMutation = trpc.services.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Servicio eliminado');
+      refetchServices();
+    },
+    onError: (error) => toast.error('Error al eliminar servicio: ' + error.message),
   });
 
   // Compras de servicios
@@ -464,6 +516,76 @@ export default function AdminDashboard() {
     }
   }, [activeEbook]);
 
+  // Manejar imagen de servicio
+  const handleServiceImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error('La imagen no debe superar 5MB'); return; }
+    setServiceImage(file);
+    const preview = URL.createObjectURL(file);
+    setServiceImagePreview(preview);
+  };
+
+  const handleSaveService = async () => {
+    if (!serviceForm.name.trim()) {
+      toast.error('El nombre del servicio es requerido');
+      return;
+    }
+    let imageUrl = serviceForm.imageUrl;
+    // Si hay imagen nueva, subirla
+    if (serviceImage) {
+      setIsUploadingServiceImage(true);
+      try {
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve) => {
+          reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
+          reader.readAsDataURL(serviceImage);
+        });
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': serviceImage.type },
+          body: Buffer.from ? Buffer.from(base64, 'base64') : Uint8Array.from(atob(base64), c => c.charCodeAt(0)),
+        });
+        const data = await response.json();
+        if (data.url) imageUrl = data.url;
+      } catch (e) {
+        toast.error('Error al subir imagen');
+        setIsUploadingServiceImage(false);
+        return;
+      }
+      setIsUploadingServiceImage(false);
+    }
+    const payload = {
+      name: serviceForm.name,
+      description: serviceForm.description || undefined,
+      category: serviceForm.category,
+      price: serviceForm.price || undefined,
+      imageUrl: imageUrl || undefined,
+      isActive: serviceForm.isActive,
+      sortOrder: serviceForm.sortOrder,
+    };
+    if (editingServiceId) {
+      updateServiceMutation.mutate({ id: editingServiceId, ...payload });
+    } else {
+      createServiceMutation.mutate(payload);
+    }
+  };
+
+  const handleEditService = (service: any) => {
+    setEditingServiceId(service.id);
+    setServiceForm({
+      name: service.name,
+      description: service.description || '',
+      category: service.category || 'general',
+      price: service.price || '',
+      imageUrl: service.imageUrl || '',
+      isActive: service.isActive,
+      sortOrder: service.sortOrder || 0,
+    });
+    setServiceImagePreview(service.imageUrl || null);
+    setServiceImage(null);
+  };
+
   const handlePublishPromotion = async () => {
     if (!promotionTitle.trim()) {
       toast.error("Ingresa un título para la promoción");
@@ -643,6 +765,13 @@ export default function AdminDashboard() {
               Compras Servicios
               {servicePurchases && servicePurchases.filter(p => p.status === 'pending').length > 0 && (
                 <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicePurchases.filter(p => p.status === 'pending').length}</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="services" className="flex items-center gap-1">
+              <Settings className="w-4 h-4" />
+              Servicios
+              {servicesCatalog && (
+                <span className="ml-1 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicesCatalog.length}</span>
               )}
             </TabsTrigger>
           </TabsList>
@@ -1787,6 +1916,212 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Tab de Catálogo de Servicios */}
+          <TabsContent value="services" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Formulario crear/editar servicio */}
+              <Card className="border-[#C5A55A]/20">
+                <CardHeader>
+                  <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                    {editingServiceId ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                    {editingServiceId ? 'Editar Servicio' : 'Agregar Servicio'}
+                  </CardTitle>
+                  <CardDescription>
+                    {editingServiceId ? 'Modifica los datos del servicio seleccionado' : 'Crea un nuevo servicio para el catálogo'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del servicio *</label>
+                    <input
+                      type="text"
+                      value={serviceForm.name}
+                      onChange={e => setServiceForm(f => ({ ...f, name: e.target.value }))}
+                      placeholder="Ej: Cavitación 80K"
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                    <textarea
+                      value={serviceForm.description}
+                      onChange={e => setServiceForm(f => ({ ...f, description: e.target.value }))}
+                      placeholder="Breve descripción del servicio..."
+                      rows={3}
+                      className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A] resize-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                      <select
+                        value={serviceForm.category}
+                        onChange={e => setServiceForm(f => ({ ...f, category: e.target.value }))}
+                        className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
+                      >
+                        <option value="nutricion">Nutrición</option>
+                        <option value="corporales">Corporales</option>
+                        <option value="faciales">Faciales</option>
+                        <option value="medicina">Medicina</option>
+                        <option value="otros">Otros</option>
+                        <option value="productos">Productos</option>
+                        <option value="general">General</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                      <input
+                        type="text"
+                        value={serviceForm.price}
+                        onChange={e => setServiceForm(f => ({ ...f, price: e.target.value }))}
+                        placeholder="Ej: $1,500 MXN"
+                        className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Orden (número)</label>
+                      <input
+                        type="number"
+                        value={serviceForm.sortOrder}
+                        onChange={e => setServiceForm(f => ({ ...f, sortOrder: parseInt(e.target.value) || 0 }))}
+                        className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
+                      />
+                    </div>
+                    <div className="flex items-end pb-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={serviceForm.isActive}
+                          onChange={e => setServiceForm(f => ({ ...f, isActive: e.target.checked }))}
+                          className="w-4 h-4 accent-[#C5A55A]"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Activo (visible)</span>
+                      </label>
+                    </div>
+                  </div>
+                  {/* Imagen */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Imagen del servicio</label>
+                    <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-[#C5A55A]/50 rounded-xl cursor-pointer hover:bg-[#C5A55A]/5 transition">
+                      <input type="file" accept="image/*" onChange={handleServiceImageChange} className="hidden" />
+                      {serviceImagePreview ? (
+                        <img src={serviceImagePreview} alt="preview" className="h-24 object-contain rounded-lg" />
+                      ) : (
+                        <div className="text-center p-3">
+                          <Upload className="w-6 h-6 text-[#C5A55A] mx-auto mb-1" />
+                          <div className="text-sm text-gray-500">Toca para subir imagen</div>
+                          <div className="text-xs text-gray-400 mt-1">JPG, PNG · máx 5MB</div>
+                        </div>
+                      )}
+                    </label>
+                    {serviceImagePreview && (
+                      <button
+                        onClick={() => { setServiceImage(null); setServiceImagePreview(null); setServiceForm(f => ({ ...f, imageUrl: '' })); }}
+                        className="mt-1 text-xs text-red-500 hover:underline"
+                      >
+                        × Quitar imagen
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleSaveService}
+                      disabled={createServiceMutation.isPending || updateServiceMutation.isPending || isUploadingServiceImage}
+                      className="flex-1 bg-[#C5A55A] hover:bg-[#B8963E] text-white"
+                    >
+                      {isUploadingServiceImage ? 'Subiendo imagen...' :
+                       createServiceMutation.isPending || updateServiceMutation.isPending ? 'Guardando...' :
+                       editingServiceId ? 'Guardar Cambios' : 'Crear Servicio'}
+                    </Button>
+                    {editingServiceId && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEditingServiceId(null);
+                          setServiceForm({ name: '', description: '', category: 'general', price: '', imageUrl: '', isActive: true, sortOrder: 0 });
+                          setServiceImage(null);
+                          setServiceImagePreview(null);
+                        }}
+                        className="border-gray-300 text-gray-600"
+                      >
+                        Cancelar
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Lista de servicios */}
+              <Card className="border-[#C5A55A]/20">
+                <CardHeader>
+                  <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Catálogo de Servicios
+                  </CardTitle>
+                  <CardDescription>{servicesCatalog?.length || 0} servicios registrados</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+                    {servicesCatalog && servicesCatalog.length > 0 ? (
+                      servicesCatalog.map((svc) => (
+                        <div key={svc.id} className={`flex items-start gap-3 p-3 rounded-xl border ${svc.isActive ? 'border-[#C5A55A]/20 bg-white' : 'border-gray-200 bg-gray-50 opacity-60'}`}>
+                          {svc.imageUrl ? (
+                            <img src={svc.imageUrl} alt={svc.name} className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                          ) : (
+                            <div className="w-14 h-14 bg-[#FAF7F2] rounded-lg flex items-center justify-center flex-shrink-0">
+                              <Settings className="w-6 h-6 text-[#C5A55A]/40" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <p className="font-semibold text-sm text-[#1A1A1A] truncate">{svc.name}</p>
+                              {!svc.isActive && <span className="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full">Inactivo</span>}
+                            </div>
+                            <p className="text-xs text-gray-500 truncate">{svc.description || 'Sin descripción'}</p>
+                            <div className="flex gap-2 mt-1">
+                              <span className="text-[10px] bg-[#C5A55A]/10 text-[#C5A55A] px-1.5 py-0.5 rounded-full">{svc.category}</span>
+                              {svc.price && <span className="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded-full">{svc.price}</span>}
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1 flex-shrink-0">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs h-7 px-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                              onClick={() => handleEditService(svc)}
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs h-7 px-2 text-red-600 border-red-200 hover:bg-red-50"
+                              onClick={() => {
+                                if (confirm(`¿Eliminar el servicio "${svc.name}"?`)) {
+                                  deleteServiceCatalogMutation.mutate({ id: svc.id });
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-12 text-[#999]">
+                        <Settings className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <p className="text-sm">No hay servicios en el catálogo.</p>
+                        <p className="text-xs mt-1">Usa el formulario de la izquierda para agregar servicios.</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Tab de Compras de Servicios */}

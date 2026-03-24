@@ -289,3 +289,24 @@ export const pushSubscriptions = mysqlTable("pushSubscriptions", {
 });
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+
+/**
+ * Catálogo de servicios del sitio
+ * Los servicios se muestran en la sección de servicios de la página principal
+ * El admin puede crear, editar y eliminar servicios desde el panel de administración
+ */
+export const services = mysqlTable("services", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }).notNull().default("general"),
+  price: varchar("price", { length: 100 }), // Precio libre: "$1,500 MXN" o "Desde $800"
+  imageUrl: text("imageUrl"), // URL de la imagen en S3
+  isActive: boolean("isActive").default(true).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(), // Para ordenar los servicios
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Service = typeof services.$inferSelect;
+export type InsertService = typeof services.$inferInsert;

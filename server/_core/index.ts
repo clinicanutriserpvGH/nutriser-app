@@ -83,16 +83,14 @@ async function startServer() {
 
       const title = promo.title || "Promoci\u00f3n Nutriser";
       const description = promo.description || "Aprovecha esta promoci\u00f3n especial en Nutriser Aesthetic & Nutrition";
-      // Use the coupon's own image, or fall back to the Nutriser logo
-      const image = (promo.imageUrl && promo.imageUrl.startsWith('http'))
-        ? promo.imageUrl
-        : "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_87a5c3e9.png";
       const priceInfo = promo.regularPrice && promo.price
         ? ` | Antes: ${promo.regularPrice} \u2192 Ahora: ${promo.price}`
         : promo.price ? ` | ${promo.price}` : "";
       const fullDescription = description + priceInfo;
       const canonicalUrl = `https://nutriserpv.com/cupon/${promoId}`;
       const redirectUrl = `https://nutriserpv.com/#cupon-${promoId}`;
+      // Use the generated coupon PNG image as og:image (1200x630)
+      const ogImage = `https://nutriserpv.com/api/og/cupon-image/${promoId}`;
 
       // Always return OG HTML — WhatsApp/bots read the meta tags, users get JS redirect
       const html = `<!DOCTYPE html>
@@ -105,16 +103,16 @@ async function startServer() {
   <meta property="og:url" content="${canonicalUrl}" />
   <meta property="og:title" content="\ud83c\udf81 ${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(fullDescription)}" />
-  <meta property="og:image" content="${image}" />
-  <meta property="og:image:secure_url" content="${image}" />
+  <meta property="og:image" content="${ogImage}" />
+  <meta property="og:image:secure_url" content="${ogImage}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:type" content="image/png" />
   <meta property="og:site_name" content="Nutriser | Aesthetic &amp; Nutrition" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="\ud83c\udf81 ${escapeHtml(title)}" />
   <meta name="twitter:description" content="${escapeHtml(fullDescription)}" />
-  <meta name="twitter:image" content="${image}" />
+  <meta name="twitter:image" content="${ogImage}" />
 </head>
 <body>
   <p>Cargando oferta... <a href="${redirectUrl}">${escapeHtml(title)}</a></p>
@@ -129,6 +127,31 @@ async function startServer() {
       res.redirect("https://nutriserpv.com/");
     }
   }
+
+  // Endpoint para generar imagen PNG del cupón (para og:image)
+  app.get("/api/og/cupon-image/:id", async (req, res) => {
+    try {
+      const promoId = parseInt(req.params.id);
+      if (isNaN(promoId)) return res.status(400).send('Invalid ID');
+      const { getPromotionById } = await import("../db");
+      const promo = await getPromotionById(promoId);
+      if (!promo) return res.status(404).send('Not found');
+      const { generateCouponImage } = await import("../couponImageGenerator");
+      const pngBuffer = await generateCouponImage({
+        title: promo.title || 'Oferta Especial',
+        description: promo.description || undefined,
+        price: promo.price || undefined,
+        regularPrice: promo.regularPrice || undefined,
+        imageUrl: promo.imageUrl || undefined,
+      });
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.send(pngBuffer);
+    } catch (err) {
+      console.error('[CouponImage] Error:', err);
+      res.status(500).send('Error generating image');
+    }
+  });
 
   // /cupon/:id — shareable URL for coupons (used in WhatsApp, etc.)
   app.get("/cupon/:id", async (req, res) => {

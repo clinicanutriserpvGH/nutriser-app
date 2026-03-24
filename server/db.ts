@@ -1,6 +1,6 @@
 import { eq, desc, and, lt, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, couponSubscribers, InsertCouponSubscriber } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, couponSubscribers, InsertCouponSubscriber, services, InsertService } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -606,5 +606,48 @@ export async function deleteCouponSubscriber(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(couponSubscribers).where(eq(couponSubscribers.id, id));
+  return { success: true };
+}
+
+// ===== SERVICES CATALOG =====
+export async function getAllServices() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(services).orderBy(services.sortOrder, services.id);
+}
+
+export async function getAllActiveServices() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(services)
+    .where(eq(services.isActive, true))
+    .orderBy(services.sortOrder, services.id);
+}
+
+export async function getServiceById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(services).where(eq(services.id, id));
+  return rows[0] ?? null;
+}
+
+export async function createService(data: InsertService) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(services).values(data);
+  return { id: Number((result as any)[0]?.insertId ?? 0) };
+}
+
+export async function updateService(id: number, data: Partial<InsertService>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(services).set(data).where(eq(services.id, id));
+  return { success: true };
+}
+
+export async function deleteService(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(services).where(eq(services.id, id));
   return { success: true };
 }

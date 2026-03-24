@@ -49,7 +49,7 @@ const categories = [
         price: "Consultar precio",
       },
       {
-        name: "Vacunterapia",
+        name: "Vacuumterapia",
         desc: "Mejora la circulación, moldea y ayuda en la reducción de celulitis.",
         price: "Consultar precio",
       },

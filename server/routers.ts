@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber, getAllServices, getAllActiveServices, createService, updateService, deleteService } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
@@ -842,6 +842,58 @@ export const appRouter = router({
     getVapidPublicKey: publicProcedure.query(() => {
       return { publicKey: ENV.vapidPublicKey || process.env.VITE_VAPID_PUBLIC_KEY || '' };
     }),
+  }),
+
+  // ─── Catálogo de servicios (admin CRUD + público) ──────────────────────────
+  services: router({
+    // Listar todos los servicios activos (público)
+    list: publicProcedure.query(async () => {
+      return await getAllActiveServices();
+    }),
+
+    // Listar todos los servicios (admin)
+    listAll: publicProcedure.query(async () => {
+      return await getAllServices();
+    }),
+
+    // Crear servicio (admin)
+    create: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        category: z.string().min(1).default('general'),
+        price: z.string().optional(),
+        imageUrl: z.string().optional(),
+        isActive: z.boolean().default(true),
+        sortOrder: z.number().int().default(0),
+      }))
+      .mutation(async ({ input }) => {
+        return await createService(input);
+      }),
+
+    // Actualizar servicio (admin)
+    update: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        price: z.string().optional(),
+        imageUrl: z.string().optional(),
+        isActive: z.boolean().optional(),
+        sortOrder: z.number().int().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await updateService(id, data);
+      }),
+
+    // Eliminar servicio (admin)
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteService(input.id);
+      }),
   }),
 
   // ─── Compras de servicios ────────────────────────────────────────────────────

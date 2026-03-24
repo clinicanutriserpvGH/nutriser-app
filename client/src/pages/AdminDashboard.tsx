@@ -18,6 +18,13 @@ export default function AdminDashboard() {
   const [promotionTitle, setPromotionTitle] = useState("");
   const [promotionDescription, setPromotionDescription] = useState("");
   const [promotionExpiresAt, setPromotionExpiresAt] = useState("");
+  const [promotionPrice, setPromotionPrice] = useState("");
+  // Estado para edición de promoción
+  const [editingPromoId, setEditingPromoId] = useState<number | null>(null);
+  const [editPromoTitle, setEditPromoTitle] = useState("");
+  const [editPromoDescription, setEditPromoDescription] = useState("");
+  const [editPromoPrice, setEditPromoPrice] = useState("");
+  const [editPromoExpiresAt, setEditPromoExpiresAt] = useState("");
 
   // Estado para eBook
   const [ebookTitle, setEbookTitle] = useState("");
@@ -28,6 +35,7 @@ export default function AdminDashboard() {
   const [ebookCoverPreview, setEbookCoverPreview] = useState<string | null>(null);
   const [ebookPdfName, setEbookPdfName] = useState<string | null>(null);
   const [ebookComingSoon, setEbookComingSoon] = useState(false);
+  const [ebookPresalePrice, setEbookPresalePrice] = useState("");
   const [isUploadingEbook, setIsUploadingEbook] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -127,6 +135,22 @@ export default function AdminDashboard() {
       refetchGifts();
     },
     onError: () => toast.error('Error al rechazar'),
+  });
+
+  const markUsedGiftMutation = trpc.giftPurchases.markUsed.useMutation({
+    onSuccess: () => {
+      toast.success('Cupón marcado como usado');
+      refetchGifts();
+    },
+    onError: () => toast.error('Error al marcar como usado'),
+  });
+
+  const deleteGiftMutation = trpc.giftPurchases.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Registro eliminado');
+      refetchGifts();
+    },
+    onError: (error) => toast.error('Error: ' + error.message),
   });
 
   const utils = trpc.useUtils();
@@ -301,6 +325,18 @@ export default function AdminDashboard() {
     },
   });
 
+  const updatePromotionMutation = trpc.promotions.update.useMutation({
+    onSuccess: () => {
+      toast.success("Promoción actualizada exitosamente");
+      setEditingPromoId(null);
+      utils.promotions.listForAdmin.invalidate();
+      utils.promotions.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error al actualizar promoción: " + error.message);
+    },
+  });
+
   // Funciones para eBook
   const handleFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -346,6 +382,7 @@ export default function AdminDashboard() {
       title: ebookTitle,
       description: ebookDescription,
       price: ebookPrice,
+      presalePrice: ebookPresalePrice.trim() || null,
       coverBase64: ebookCoverBase64 ?? undefined,
       pdfBase64: ebookPdfBase64 ?? undefined,
       comingSoon: ebookComingSoon,
@@ -358,6 +395,7 @@ export default function AdminDashboard() {
       setEbookTitle(activeEbook.title || '');
       setEbookDescription(activeEbook.description || '');
       setEbookPrice(activeEbook.price?.toString() || '');
+      setEbookPresalePrice((activeEbook as any).presalePrice?.toString() || '');
       if (activeEbook.coverUrl) setEbookCoverPreview(activeEbook.coverUrl);
       setEbookComingSoon(activeEbook.comingSoon ?? false);
     }
@@ -371,7 +409,23 @@ export default function AdminDashboard() {
     createPromotionMutation.mutate({
       title: promotionTitle,
       description: promotionDescription,
+      price: promotionPrice.trim() || undefined,
       expiresAt: promotionExpiresAt ? new Date(promotionExpiresAt).toISOString() : undefined,
+    });
+    setPromotionPrice("");
+  };
+
+  const handleSaveEditPromotion = () => {
+    if (!editingPromoId || !editPromoTitle.trim()) {
+      toast.error("El título es requerido");
+      return;
+    }
+    updatePromotionMutation.mutate({
+      id: editingPromoId,
+      title: editPromoTitle,
+      description: editPromoDescription,
+      price: editPromoPrice.trim() || null,
+      expiresAt: editPromoExpiresAt ? new Date(editPromoExpiresAt).toISOString() : null,
     });
   };
 
@@ -775,27 +829,58 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Acciones */}
-                          {purchase.status === 'pending' && (
-                            <div className="flex flex-col gap-2 justify-center">
+                          <div className="flex flex-col gap-2 justify-center">
+                            {purchase.status === 'pending' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  onClick={() => approveGiftMutation.mutate({ id: purchase.id })}
+                                  disabled={approveGiftMutation.isPending}
+                                >
+                                  Autorizar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-red-400 text-red-600 hover:bg-red-50"
+                                  onClick={() => rejectGiftMutation.mutate({ id: purchase.id })}
+                                  disabled={rejectGiftMutation.isPending}
+                                >
+                                  Rechazar
+                                </Button>
+                              </>
+                            )}
+                            {purchase.status === 'approved' && (
                               <Button
                                 size="sm"
-                                className="bg-green-600 hover:bg-green-700 text-white"
-                                onClick={() => approveGiftMutation.mutate({ id: purchase.id })}
-                                disabled={approveGiftMutation.isPending}
+                                className="bg-amber-500 hover:bg-amber-600 text-white"
+                                onClick={() => {
+                                  if (confirm('\u00bfMarcar este cup\u00f3n como usado? Ya no podr\u00e1 ser canjeado nuevamente.')) {
+                                    markUsedGiftMutation.mutate({ id: purchase.id });
+                                  }
+                                }}
+                                disabled={markUsedGiftMutation.isPending}
                               >
-                                Autorizar
+                                ✓ Marcar como Usado
                               </Button>
+                            )}
+                            {(purchase.status === 'used' || purchase.status === 'rejected') && (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 className="border-red-400 text-red-600 hover:bg-red-50"
-                                onClick={() => rejectGiftMutation.mutate({ id: purchase.id })}
-                                disabled={rejectGiftMutation.isPending}
+                                onClick={() => {
+                                  if (confirm('\u00bfEliminar este registro? Esta acci\u00f3n no se puede deshacer.')) {
+                                    deleteGiftMutation.mutate({ id: purchase.id });
+                                  }
+                                }}
+                                disabled={deleteGiftMutation.isPending}
                               >
-                                Rechazar
+                                🗑 Eliminar
                               </Button>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -838,6 +923,19 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+                      Precio del cupón
+                      <span className="text-[#999] font-normal ml-2">(opcional, ej: $2,499 MXN)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: $2,499 MXN"
+                      value={promotionPrice}
+                      onChange={(e) => setPromotionPrice(e.target.value)}
+                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
                       Fecha límite para canjear
                       <span className="text-[#999] font-normal ml-2">(opcional)</span>
                     </label>
@@ -873,43 +971,110 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {promotions.map((promo) => (
+                      {promotions.map((promo: any) => (
                         <div key={promo.id} className="bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
-                          {/* Cupón preview */}
-                          <div className="bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-lg p-4 mb-3 text-white">
-                            <div className="flex justify-between items-start mb-2">
-                              <span className="text-sm font-bold">CUPÓN</span>
-                              <span className="text-lg">🎁</span>
-                            </div>
-                            <p className="text-xs font-light line-clamp-2">{promo.title}</p>
-                          </div>
-                          <h4 className="font-bold text-[#1A1A1A]">{promo.title}</h4>
-                          <p className="text-sm text-[#666] mt-2">{promo.description}</p>
-                          {promo.expiresAt ? (
-                            <div className="mt-2 flex items-center gap-1">
-                              {new Date(promo.expiresAt) < new Date() ? (
-                                <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-semibold">
-                                  ❌ Vencido el {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                </span>
-                              ) : (
-                                <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full font-semibold">
-                                  📅 Válido hasta {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                </span>
-                              )}
+                          {editingPromoId === promo.id ? (
+                            /* Formulario de edición */
+                            <div className="space-y-3">
+                              <h4 className="font-bold text-[#1A1A1A] mb-2">Editar Promoción</h4>
+                              <input
+                                type="text"
+                                value={editPromoTitle}
+                                onChange={(e) => setEditPromoTitle(e.target.value)}
+                                placeholder="Título"
+                                className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
+                              />
+                              <textarea
+                                value={editPromoDescription}
+                                onChange={(e) => setEditPromoDescription(e.target.value)}
+                                placeholder="Descripción"
+                                rows={2}
+                                className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
+                              />
+                              <input
+                                type="text"
+                                value={editPromoPrice}
+                                onChange={(e) => setEditPromoPrice(e.target.value)}
+                                placeholder="Precio (ej: $2,499 MXN)"
+                                className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
+                              />
+                              <input
+                                type="date"
+                                value={editPromoExpiresAt}
+                                onChange={(e) => setEditPromoExpiresAt(e.target.value)}
+                                className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={handleSaveEditPromotion}
+                                  disabled={updatePromotionMutation.isPending}
+                                  className="flex-1 px-3 py-2 bg-[#C5A55A] text-white rounded hover:bg-[#B39548] transition text-sm font-medium disabled:opacity-50"
+                                >
+                                  {updatePromotionMutation.isPending ? 'Guardando...' : 'Guardar'}
+                                </button>
+                                <button
+                                  onClick={() => setEditingPromoId(null)}
+                                  className="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition text-sm font-medium"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
                             </div>
                           ) : (
-                            <p className="text-xs text-[#999] mt-2">Sin fecha límite</p>
+                            /* Vista normal */
+                            <>
+                              <div className="bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-lg p-4 mb-3 text-white">
+                                <div className="flex justify-between items-start mb-2">
+                                  <span className="text-sm font-bold">CUPÓN</span>
+                                  <span className="text-lg">🎁</span>
+                                </div>
+                                <p className="text-xs font-light line-clamp-2">{promo.title}</p>
+                                {promo.price && <p className="text-sm font-bold mt-1">{promo.price}</p>}
+                              </div>
+                              <h4 className="font-bold text-[#1A1A1A]">{promo.title}</h4>
+                              {promo.price && <p className="text-sm font-semibold text-[#C5A55A] mt-1">💰 {promo.price}</p>}
+                              <p className="text-sm text-[#666] mt-1">{promo.description}</p>
+                              {promo.expiresAt ? (
+                                <div className="mt-2 flex items-center gap-1">
+                                  {new Date(promo.expiresAt) < new Date() ? (
+                                    <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-semibold">
+                                      ❌ Vencido el {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full font-semibold">
+                                      📅 Válido hasta {new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-[#999] mt-2">Sin fecha límite</p>
+                              )}
+                              <div className="flex gap-2 mt-4">
+                                <button
+                                  onClick={() => {
+                                    setEditingPromoId(promo.id);
+                                    setEditPromoTitle(promo.title || '');
+                                    setEditPromoDescription(promo.description || '');
+                                    setEditPromoPrice(promo.price || '');
+                                    setEditPromoExpiresAt(promo.expiresAt ? new Date(promo.expiresAt).toISOString().split('T')[0] : '');
+                                  }}
+                                  className="flex-1 px-3 py-2 bg-[#C5A55A]/20 text-[#C5A55A] border border-[#C5A55A]/40 rounded hover:bg-[#C5A55A]/30 transition text-sm font-medium"
+                                >
+                                  ✏️ Editar
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (confirm(`¿Estás seguro de que deseas eliminar la promoción "${promo.title}"?`)) {
+                                      deletePromotionMutation.mutate({ id: promo.id });
+                                    }
+                                  }}
+                                  className="flex-1 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm font-medium"
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                            </>
                           )}
-                          <button
-                            onClick={() => {
-                              if (confirm(`¿Estás seguro de que deseas eliminar la promoción "${promo.title}"?`)) {
-                                deletePromotionMutation.mutate({ id: promo.id });
-                              }
-                            }}
-                            className="w-full mt-4 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm font-medium"
-                          >
-                            Eliminar
-                          </button>
                         </div>
                       ))}
                     </div>
@@ -958,6 +1123,21 @@ export default function AdminDashboard() {
                         className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
+                        Precio de Pre-venta (MXN)
+                        <span className="text-[#999] font-normal ml-2">(opcional, para pre-venta)</span>
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Ej: 349"
+                        value={ebookPresalePrice}
+                        onChange={(e) => setEbookPresalePrice(e.target.value)}
+                        min="1"
+                        className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
+                      />
+                      <p className="text-xs text-[#999] mt-1">Si se activa "Próxima publicación", se mostrará la comparativa de precios</p>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Descripción</label>
@@ -978,6 +1158,8 @@ export default function AdminDashboard() {
                         title: ebookTitle,
                         description: ebookDescription,
                         price: ebookPrice,
+                        presalePrice: ebookPresalePrice.trim() || null,
+                        comingSoon: ebookComingSoon,
                       });
                     }}
                     disabled={upsertEbookMutation.isPending}

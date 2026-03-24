@@ -91,8 +91,15 @@ describe("memberships", () => {
     const ctx = createPublicContext();
     const caller = appRouter.createCaller(ctx);
 
+    // Primero crear una membresía para obtener un ID válido
+    const membership = await caller.memberships.create({
+      clientName: "Test User",
+      clientEmail: "testupload@example.com",
+      programType: "basic",
+    });
+
     const result = await caller.memberships.uploadProof({
-      membershipId: 1,
+      membershipId: membership.id,
       proofData: "base64encodedimagedata",
       fileName: "proof.jpg",
     });

@@ -17,7 +17,7 @@ export const appRouter = router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie("session", { ...cookieOptions, maxAge: -1 });
+      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return {
         success: true,
       } as const;
@@ -423,6 +423,33 @@ export const appRouter = router({
         await updateGiftPurchaseStatus(input.id, 'rejected');
         return { success: true };
       }),
+
+    markUsed: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { getDb } = await import('./db');
+        const db = await getDb();
+        if (!db) throw new Error('DB no disponible');
+        await db.execute(
+          `UPDATE giftPurchases SET status = 'used', updatedAt = NOW() WHERE id = ${input.id}`
+        );
+        return { success: true };
+      }),
+
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const purchase = await getGiftPurchaseById(input.id);
+        if (!purchase) throw new Error('Compra no encontrada');
+        if (purchase.status !== 'used' && purchase.status !== 'rejected') {
+          throw new Error('Solo se pueden eliminar cupones usados o rechazados');
+        }
+        const { getDb } = await import('./db');
+        const db = await getDb();
+        if (!db) throw new Error('DB no disponible');
+        await db.execute(`DELETE FROM giftPurchases WHERE id = ${input.id}`);
+        return { success: true };
+      }),
   }),
 
   promotions: router({
@@ -434,12 +461,14 @@ export const appRouter = router({
       .input(z.object({
         title: z.string().min(1),
         description: z.string().optional(),
+        price: z.string().optional(), // Precio del cupón (opcional)
         expiresAt: z.string().optional(), // ISO date string
       }))
       .mutation(async ({ input }) => {
         return await createPromotion({
           title: input.title,
           description: input.description,
+          price: input.price ?? null,
           expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
           isActive: true,
         });
@@ -450,6 +479,7 @@ export const appRouter = router({
         id: z.number(),
         title: z.string().optional(),
         description: z.string().optional(),
+        price: z.string().nullable().optional(),
         isActive: z.boolean().optional(),
         expiresAt: z.string().nullable().optional(), // ISO date string or null
       }))
@@ -494,6 +524,7 @@ export const appRouter = router({
         title: z.string().min(1),
         description: z.string().optional(),
         price: z.string().min(1),
+        presalePrice: z.string().nullable().optional(), // Precio de pre-venta (para comparativa)
         coverBase64: z.string().optional(),
         pdfBase64: z.string().optional(),
         isActive: z.boolean().optional(),

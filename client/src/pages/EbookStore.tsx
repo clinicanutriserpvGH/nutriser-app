@@ -52,7 +52,7 @@ export default function EbookStore() {
   const utils = trpc.useUtils();
 
   // Calcular precio final con descuento
-  const originalPrice = ebook ? Number(ebook.price) : 0;
+  const originalPrice = ebook ? (ebook.comingSoon && (ebook as any).presalePrice ? Number((ebook as any).presalePrice) : Number(ebook.price)) : 0;
   const discountAmount = Math.round(originalPrice * discountPercent / 100);
   const finalPrice = Math.max(0, originalPrice - discountAmount);
   const isFree = finalPrice === 0;
@@ -320,12 +320,35 @@ export default function EbookStore() {
                 <div className="space-y-6">
                   {/* Price */}
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#C5A55A]/20">
-                    <p className="text-sm text-[#999] uppercase tracking-wider mb-1">Precio</p>
-                    <p className="font-serif text-5xl text-[#C5A55A] font-bold">
-                      ${Number(ebook.price).toLocaleString('es-MX')}
-                      <span className="text-xl text-[#999] font-normal ml-2">MXN</span>
-                    </p>
-                    <p className="text-sm text-[#666] mt-2">Acceso de por vida · Lectura en línea</p>
+                    {ebook.comingSoon && (ebook as any).presalePrice ? (
+                      <>
+                        <p className="text-sm text-[#999] uppercase tracking-wider mb-1">Pre-venta especial</p>
+                        <div className="flex items-end gap-3">
+                          <p className="font-serif text-5xl text-[#C5A55A] font-bold">
+                            ${Number((ebook as any).presalePrice).toLocaleString('es-MX')}
+                            <span className="text-xl text-[#999] font-normal ml-2">MXN</span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-sm text-[#999] line-through">
+                            Precio regular: ${Number(ebook.price).toLocaleString('es-MX')} MXN
+                          </span>
+                          <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                            Ahorra ${(Number(ebook.price) - Number((ebook as any).presalePrice)).toLocaleString('es-MX')} MXN
+                          </span>
+                        </div>
+                        <p className="text-sm text-[#666] mt-2">Precio de pre-venta · Acceso de por vida</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm text-[#999] uppercase tracking-wider mb-1">Precio</p>
+                        <p className="font-serif text-5xl text-[#C5A55A] font-bold">
+                          ${Number(ebook.price).toLocaleString('es-MX')}
+                          <span className="text-xl text-[#999] font-normal ml-2">MXN</span>
+                        </p>
+                        <p className="text-sm text-[#666] mt-2">Acceso de por vida · Lectura en línea</p>
+                      </>
+                    )}
                   </div>
 
                   {/* Description */}
@@ -378,7 +401,9 @@ export default function EbookStore() {
                     className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-4 px-8 rounded-xl font-bold text-lg tracking-wide transition-all duration-300 hover:shadow-lg hover:shadow-[#C5A55A]/30 flex items-center justify-center gap-3"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    {ebook.comingSoon ? `Pre-comprar — $${Number(ebook.price).toLocaleString('es-MX')} MXN` : `Comprar ahora — $${Number(ebook.price).toLocaleString('es-MX')} MXN`}
+                    {ebook.comingSoon
+                      ? `Pre-comprar — $${Number((ebook as any).presalePrice || ebook.price).toLocaleString('es-MX')} MXN`
+                      : `Comprar ahora — $${Number(ebook.price).toLocaleString('es-MX')} MXN`}
                   </button>
 
                   <p className="text-xs text-center text-[#999]">

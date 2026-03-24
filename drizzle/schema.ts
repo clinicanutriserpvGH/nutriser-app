@@ -139,6 +139,7 @@ export const promotions = mysqlTable("promotions", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   imageUrl: text("imageUrl"), // URL de imagen (opcional)
+  price: decimal("price", { precision: 10, scale: 2 }), // Precio del cupón (opcional)
   isActive: boolean("isActive").default(true).notNull(),
   expiresAt: timestamp("expiresAt"), // Fecha límite para canjear el cupón (null = sin vencimiento)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -187,6 +188,7 @@ export const ebooks = mysqlTable("ebooks", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   coverUrl: text("coverUrl"), // URL portada en S3
   pdfUrl: text("pdfUrl"), // URL del PDF en S3 (protegido)
+  presalePrice: decimal("presalePrice", { precision: 10, scale: 2 }), // Precio de pre-venta (opcional, para comparativa)
   isActive: boolean("isActive").default(true).notNull(),
   comingSoon: boolean("comingSoon").default(false).notNull(), // true = próxima publicación, sin compra
   createdAt: timestamp("createdAt").defaultNow().notNull(),

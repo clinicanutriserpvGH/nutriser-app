@@ -459,3 +459,20 @@
 - [x] Asegurar que todos los correos se envíen desde clinicanutriserpv@gmail.com
 - [x] Eliminar cualquier referencia a Manus en el contenido de los correos
 - [x] Verificar que el correo de confirmación de membresía solo se envíe al aprobar el admin
+
+## Mejoras Cupones y eBook - Sesión Mar 24
+
+- [x] DB: campo usedAt no necesario, se usa status='used' en giftPurchases
+- [x] DB: campo price (decimal nullable) en promotions ya existe
+- [x] DB: campo presalePrice (decimal nullable) en ebooks ya existe
+- [x] Admin: cupones adquiridos - botón "Marcar como usado" implementado
+- [x] Admin: cupones adquiridos - botón "Eliminar" visible solo cuando status='used' o 'rejected'
+- [x] Admin: promociones - botón "Editar" implementado con formulario inline
+- [x] Admin: promociones - campo precio al publicar nueva promoción
+- [x] Admin: eBook - campo "Precio de pre-venta" separado del precio normal
+- [x] EbookStore: comparativa precio normal vs precio de pre-venta cuando comingSoon
+
+## Correcciones Sesión Mar 24 - Adicionales
+- [x] Bug logout: corregido nombre de cookie en auth.logout (usaba 'session' en vez de COOKIE_NAME)
+- [x] Test memberships.uploadProof: corregido para crear membresía válida antes de subir comprobante
+- [x] Todos los 18 tests pasan correctamente

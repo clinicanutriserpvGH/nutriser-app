@@ -72,6 +72,76 @@ async function startServer() {
   
   // Serve uploaded images
   app.use("/uploads", express.static("dist/uploads"));
+
+  // SSR endpoint for coupon Open Graph meta tags (WhatsApp, Facebook, etc.)
+  app.get("/cupon/:id", async (req, res) => {
+    try {
+      const { getPromotionById } = await import("../db");
+      const promoId = parseInt(req.params.id);
+      if (isNaN(promoId)) {
+        return res.redirect("https://nutriserpv.com/");
+      }
+      const promo = await getPromotionById(promoId);
+      if (!promo) {
+        return res.redirect("https://nutriserpv.com/");
+      }
+
+      const title = promo.title || "Promoci\u00f3n Nutriser";
+      const description = promo.description || "Aprovecha esta promoci\u00f3n especial en Nutriser Aesthetic & Nutrition";
+      const image = promo.imageUrl || "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_87a5c3e9.png";
+      const priceInfo = promo.regularPrice && promo.price
+        ? ` | Antes: ${promo.regularPrice} \u2192 Ahora: ${promo.price}`
+        : promo.price ? ` | ${promo.price}` : "";
+      const fullDescription = description + priceInfo;
+      const canonicalUrl = `https://nutriserpv.com/cupon/${promoId}`;
+      const redirectUrl = `https://nutriserpv.com/#cupon-${promoId}`;
+
+      // Detect if request is from a bot/crawler (WhatsApp, Facebook, Twitter, etc.)
+      const ua = (req.headers["user-agent"] || "").toLowerCase();
+      const isBot = /whatsapp|facebookexternalhit|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|bot|crawler|spider/i.test(ua);
+
+      if (!isBot) {
+        // Regular users get redirected to the SPA with the anchor
+        return res.redirect(redirectUrl);
+      }
+
+      // Bots get a minimal HTML page with OG meta tags
+      const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(title)} - Nutriser</title>
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="${canonicalUrl}" />
+  <meta property="og:title" content="\ud83c\udf81 ${escapeHtml(title)}" />
+  <meta property="og:description" content="${escapeHtml(fullDescription)}" />
+  <meta property="og:image" content="${image}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="Nutriser | Aesthetic & Nutrition" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="\ud83c\udf81 ${escapeHtml(title)}" />
+  <meta name="twitter:description" content="${escapeHtml(fullDescription)}" />
+  <meta name="twitter:image" content="${image}" />
+  <meta http-equiv="refresh" content="0;url=${redirectUrl}" />
+</head>
+<body>
+  <p>Redirigiendo a <a href="${redirectUrl}">${escapeHtml(title)}</a>...</p>
+</body>
+</html>`;
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=300");
+      res.send(html);
+    } catch (err) {
+      console.error("[OG Cupon] Error:", err);
+      res.redirect("https://nutriserpv.com/");
+    }
+  });
+
+  function escapeHtml(str: string): string {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
   
   // tRPC API
   app.use(

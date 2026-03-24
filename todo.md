@@ -498,3 +498,8 @@
 - [x] Cuponera pública: imagen del cupón con badge "OFERTA" y gradiente
 - [x] Cuponera pública: comparativa de precios (regular tachado → flecha → promocional destacado + mensaje)
 - [x] Tests: 18 tests pasan correctamente
+
+## Open Graph dinámico para cupones (Mar 24)
+- [x] Endpoint SSR /cupon/:id con meta tags OG dinámicas (imagen, título, descripción, precios)
+- [x] Enlaces de compartir actualizados: WhatsApp, Email, Copiar usan /cupon/:id
+- [x] Bots (WhatsApp, Facebook, etc.) reciben HTML con OG; usuarios normales redirigidos a /#cupon-:id

@@ -270,6 +270,13 @@ export async function getAllPromotions() {
   return await db.select().from(promotions).where(eq(promotions.isActive, true)).orderBy(desc(promotions.createdAt));
 }
 
+export async function getPromotionById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(promotions).where(eq(promotions.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
 export async function createPromotion(data: InsertPromotion) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

@@ -141,17 +141,17 @@ export default function PromotionsSection() {
   };
 
   const handleShareWhatsApp = (title: string, description: string, promoId: number) => {
-    const shareUrl = `https://nutriserpv.com/#cupon-${promoId}`;
+    const shareUrl = `https://nutriserpv.com/cupon/${promoId}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(`🎁 *${title}*\n\n${description}\n\n${shareUrl}`)}`, "_blank");
   };
 
   const handleShareEmail = (title: string, description: string, promoId: number) => {
-    const shareUrl = `https://nutriserpv.com/#cupon-${promoId}`;
+    const shareUrl = `https://nutriserpv.com/cupon/${promoId}`;
     window.open(`mailto:?subject=${encodeURIComponent(`Promoción Nutriser: ${title}`)}&body=${encodeURIComponent(`${title}\n\n${description}\n\n${shareUrl}`)}`, "_blank");
   };
 
   const handleCopyLink = (id: number, title: string, description: string | null) => {
-    const shareUrl = `https://nutriserpv.com/#cupon-${id}`;
+    const shareUrl = `https://nutriserpv.com/cupon/${id}`;
     navigator.clipboard.writeText(`🎁 *${title}*\n\n${description || ""}\n\n${shareUrl}`);
     setCopiedId(id);
     toast.success("Cupón copiado al portapapeles");

@@ -574,7 +574,7 @@ export default function PromotionsSection() {
                             Para activar notificaciones en iPhone, primero agrega esta página a tu pantalla de inicio:
                           </p>
                           <ol className="text-white/60 text-[11px] space-y-1 list-decimal list-inside">
-                            <li>Toca 👉 el ícono <strong className="text-white">Compartir</strong> (cuadro con flecha ↑)</li>
+                            <li>Toca el ícono <strong className="text-white">Compartir</strong>: <span className="inline-flex items-center justify-center bg-white/20 rounded px-1.5 py-0.5 text-white font-bold text-xs mx-0.5" style={{fontFamily:'system-ui'}}>⬆️</span> (cuadro con flecha arriba, en la barra inferior)</li>
                             <li>Selecciona <strong className="text-white">&quot;Agregar a pantalla de inicio&quot;</strong></li>
                             <li>Abre la app desde tu pantalla de inicio</li>
                             <li>Regresa aquí y presiona el botón de abajo</li>

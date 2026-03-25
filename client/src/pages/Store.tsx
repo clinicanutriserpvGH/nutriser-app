@@ -296,7 +296,8 @@ export default function Store() {
                   <p className="font-bold text-amber-800 mb-2">💳 Realiza tu pago:</p>
                   <p className="text-amber-700 text-xs">Transferencia bancaria a:</p>
                   <p className="font-mono font-bold text-amber-900 mt-1 text-sm">CLABE: 002470701448743487</p>
-                  <p className="text-amber-700 text-xs mt-1">Banco: Banamex · Titular: Nutriser</p>
+                  <p className="text-amber-700 text-xs mt-1">Banco: Banamex</p>
+                  <p className="text-amber-700 text-xs mt-1">Concepto: <span className="font-semibold">{buyerName ? `${buyerName} – ${selectedProduct?.name}` : `Tu nombre – ${selectedProduct?.name}`}</span></p>
                   <p className="text-amber-600 text-xs mt-2">Después sube tu comprobante aquí abajo.</p>
                 </div>
 

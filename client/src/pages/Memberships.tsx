@@ -353,7 +353,7 @@ export default function Memberships() {
                     <strong>CLABE Interbancaria:</strong> {BANK_INFO.account}
                   </p>
                   <p className="text-xs text-[#1A1A1A]/50 mt-2">
-                    Concepto: {PROGRAMS.find(p => p.id === selectedProgram)?.name}
+                    Concepto: <strong>{formData.clientName ? `${formData.clientName} – ` : "Tu nombre – "}{PROGRAMS.find(p => p.id === selectedProgram)?.name}</strong>
                   </p>
                 </div>
 

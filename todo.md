@@ -702,3 +702,7 @@
 - [x] Verificar campo de código en formulario de compra de programas de nutrición
 - [x] Agregar tab "Códigos de Descuento" en panel admin para activar/desactivar
 - [x] Mostrar descuento aplicado visualmente en el formulario de compra
+
+## Corrección Formularios de Pago - Mar 25 2026
+- [x] Eliminar campo "Titular: Nutriser" de todos los formularios de pago
+- [x] Dejar solo el concepto con nombre del cliente y servicio/producto adquirido

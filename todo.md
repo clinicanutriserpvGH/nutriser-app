@@ -752,3 +752,9 @@
 - [x] Panel admin Cursos: corregido getAllCourses para incluir videos y documentos de cada curso
 - [x] Códigos de descuento activados en BD (Nutriser10 al Nutriser30, free, 2x1 todos activos)
 - [x] Tests actualizados para reflejar estado real de la BD (37/37 pasando)
+
+## Sesión Mar 25 - Códigos de descuento universales
+- [x] Corregido: Memberships.tsx usa utils.discountCodes.validate.fetch() en lugar de useQuery+refetch
+- [x] Corregido: ServicesSection.tsx usa utils.discountCodes.validate.fetch() en lugar de useQuery+refetch
+- [x] Corregido: Store.tsx usa utils.discountCodes.validate.fetch() en lugar de useQuery+refetch
+- [x] Los 3 formularios ahora validan el código correctamente sin problemas de caché

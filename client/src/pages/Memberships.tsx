@@ -62,23 +62,30 @@ export default function Memberships() {
   const createMutation = trpc.memberships.create.useMutation();
   const uploadProofMutation = trpc.memberships.uploadProof.useMutation();
   const cancelMutation = trpc.memberships.cancel.useMutation();
-  const validateDiscountCodeQuery = trpc.discountCodes.validate.useQuery(
-    { code: formData.discountCode.trim() },
-    { enabled: false }
-  );
+  const utils = trpc.useUtils();
 
   const handleValidateDiscount = async () => {
-    if (!formData.discountCode.trim()) { toast.error("Ingresa un código de descuento"); return; }
+    const code = formData.discountCode.trim();
+    if (!code) { toast.error("Ingresa un código de descuento"); return; }
     setDiscountValidating(true);
     try {
-      const result = await validateDiscountCodeQuery.refetch();
-      if (result.data?.valid) {
-        setDiscountInfo({ valid: true, discount: result.data.discount, isGift: result.data.isGift ?? false, isTwoForOne: result.data.isTwoForOne ?? false, description: result.data.description ?? null });
-        toast.success(`¡Código válido! ${result.data.discount}% de descuento aplicado.`);
+      // Usar fetch directo para evitar problemas de caché con useQuery
+      const result = await utils.discountCodes.validate.fetch({ code });
+      if (result?.valid) {
+        setDiscountInfo({ valid: true, discount: result.discount, isGift: result.isGift ?? false, isTwoForOne: result.isTwoForOne ?? false, description: result.description ?? null });
+        if (result.isTwoForOne) {
+          toast.success("¡Código 2x1 aplicado! Compras un programa y obtienes el siguiente a mitad de precio.");
+        } else if (result.isGift) {
+          toast.success("¡Código de regalo aplicado! Tu programa es completamente gratis.");
+        } else {
+          toast.success(`¡Código válido! ${result.discount}% de descuento aplicado.`);
+        }
       } else {
         setDiscountInfo({ valid: false, discount: null, isGift: false, isTwoForOne: false, description: null });
         toast.error("Código inválido o no está activo.");
       }
+    } catch {
+      toast.error("Error al validar el código.");
     } finally {
       setDiscountValidating(false);
     }

@@ -68,20 +68,29 @@ export default function Store() {
     setPurchaseModal(true);
   };
 
-  const validateDiscountCodeMutation = trpc.discountCodes.validate.useQuery(
-    { code: discountCode.trim() },
-    { enabled: false }
-  );
+  const utils = trpc.useUtils();
 
   const handleValidateDiscount = async () => {
-    if (!discountCode.trim()) return;
-    const result = await validateDiscountCodeMutation.refetch();
-    if (result.data?.valid) {
-      setDiscountInfo({ valid: true, discount: result.data.discount, isGift: result.data.isGift ?? false, isTwoForOne: result.data.isTwoForOne ?? false, description: result.data.description ?? null });
-      toast.success(`¡Código válido! ${result.data.discount}% de descuento aplicado.`);
-    } else {
-      setDiscountInfo({ valid: false, discount: null, isGift: false, isTwoForOne: false, description: null });
-      toast.error("Código inválido o no está activo.");
+    const code = discountCode.trim();
+    if (!code) return;
+    try {
+      // Usar fetch directo para evitar problemas de caché con useQuery
+      const result = await utils.discountCodes.validate.fetch({ code });
+      if (result?.valid) {
+        setDiscountInfo({ valid: true, discount: result.discount, isGift: result.isGift ?? false, isTwoForOne: result.isTwoForOne ?? false, description: result.description ?? null });
+        if (result.isTwoForOne) {
+          toast.success("¡Código 2x1 aplicado! Compras un producto y obtienes uno doble.");
+        } else if (result.isGift) {
+          toast.success("¡Código de regalo aplicado! Tu producto es completamente gratis.");
+        } else {
+          toast.success(`¡Código válido! ${result.discount}% de descuento aplicado.`);
+        }
+      } else {
+        setDiscountInfo({ valid: false, discount: null, isGift: false, isTwoForOne: false, description: null });
+        toast.error("Código inválido o no está activo.");
+      }
+    } catch {
+      toast.error("Error al validar el código.");
     }
   };
 

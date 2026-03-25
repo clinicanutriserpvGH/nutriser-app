@@ -93,25 +93,24 @@ export default function ServicesSection() {
     description: string | null;
   } | null>(null);
 
-  const validateCodeQuery = trpc.discountCodes.validate.useQuery(
-    { code: discountCode.trim() },
-    { enabled: false }
-  );
+  const utils = trpc.useUtils();
 
   const handleValidateCode = async () => {
-    if (!discountCode.trim()) { toast.error("Ingresa un código de descuento"); return; }
+    const code = discountCode.trim();
+    if (!code) { toast.error("Ingresa un código de descuento"); return; }
     setDiscountValidating(true);
     try {
-      const result = await validateCodeQuery.refetch();
-      if (result.data) {
-        setDiscountInfo(result.data);
-        if (result.data.valid) {
-          if (result.data.isTwoForOne) {
+      // Usar fetch directo para evitar problemas de caché con useQuery
+      const result = await utils.discountCodes.validate.fetch({ code });
+      if (result) {
+        setDiscountInfo(result);
+        if (result.valid) {
+          if (result.isTwoForOne) {
             toast.success("¡Código 2x1 aplicado! Compras un servicio y obtienes uno doble.");
-          } else if (result.data.isGift) {
+          } else if (result.isGift) {
             toast.success("¡Código de regalo aplicado! Tu servicio es completamente gratis.");
           } else {
-            toast.success(`¡Código válido! ${result.data.discount}% de descuento aplicado.`);
+            toast.success(`¡Código válido! ${result.discount}% de descuento aplicado.`);
           }
         } else {
           toast.error("Código inválido o no está activo.");

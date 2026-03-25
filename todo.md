@@ -758,3 +758,7 @@
 - [x] Corregido: ServicesSection.tsx usa utils.discountCodes.validate.fetch() en lugar de useQuery+refetch
 - [x] Corregido: Store.tsx usa utils.discountCodes.validate.fetch() en lugar de useQuery+refetch
 - [x] Los 3 formularios ahora validan el código correctamente sin problemas de caché
+
+## Sesión Mar 25 - Códigos case-insensitive
+- [x] Corregido validateDiscountCode en db.ts: usa UPPER() en SQL para comparación case-insensitive
+- [x] Todos los códigos activados en BD de producción (Nutriser10, 15, 20, 25, 30, free, 2x1)

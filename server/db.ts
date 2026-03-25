@@ -726,8 +726,13 @@ export async function getAllDiscountCodes() {
 export async function validateDiscountCode(code: string): Promise<DiscountCode | null> {
   const db = await getDb();
   if (!db) return null;
+  // Case-insensitive: normalize both sides to uppercase
+  const normalizedCode = code.trim().toUpperCase();
   const result = await db.select().from(discountCodes)
-    .where(and(eq(discountCodes.code, code), eq(discountCodes.isActive, true)))
+    .where(and(
+      sql`UPPER(${discountCodes.code}) = ${normalizedCode}`,
+      eq(discountCodes.isActive, true)
+    ))
     .limit(1);
   return result.length > 0 ? result[0] : null;
 }

@@ -1,0 +1,73 @@
+{
+  "query": "SELECT id, code, discountPercent, isActive, isTwoForOne, isGift, usageCount FROM discountCodes ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT id, code, discountPercent, isActive, isTwoForOne, isGift, usageCount FROM discountCodes ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "code": "Nutriser10",
+      "discountPercent": "10",
+      "isActive": "1",
+      "isTwoForOne": "0",
+      "isGift": "0",
+      "usageCount": "0"
+    },
+    {
+      "id": "2",
+      "code": "Nutriser15",
+      "discountPercent": "15",
+      "isActive": "0",
+      "isTwoForOne": "0",
+      "isGift": "0",
+      "usageCount": "0"
+    },
+    {
+      "id": "3",
+      "code": "Nutriser20",
+      "discountPercent": "20",
+      "isActive": "1",
+      "isTwoForOne": "0",
+      "isGift": "0",
+      "usageCount": "0"
+    },
+    {
+      "id": "4",
+      "code": "Nutriser25",
+      "discountPercent": "25",
+      "isActive": "0",
+      "isTwoForOne": "0",
+      "isGift": "0",
+      "usageCount": "0"
+    },
+    {
+      "id": "5",
+      "code": "Nutriser30",
+      "discountPercent": "30",
+      "isActive": "0",
+      "isTwoForOne": "0",
+      "isGift": "0",
+      "usageCount": "0"
+    },
+    {
+      "id": "6",
+      "code": "Nutriserfree",
+      "discountPercent": "100",
+      "isActive": "0",
+      "isTwoForOne": "0",
+      "isGift": "1",
+      "usageCount": "0"
+    },
+    {
+      "id": "30007",
+      "code": "Nutriser2x1",
+      "discountPercent": "0",
+      "isActive": "0",
+      "isTwoForOne": "1",
+      "isGift": "0",
+      "usageCount": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcode\tdiscountPercent\tisActive\tisTwoForOne\tisGift\tusageCount\n1\tNutriser10\t10\t1\t0\t0\t0\n2\tNutriser15\t15\t0\t0\t0\t0\n3\tNutriser20\t20\t1\t0\t0\t0\n4\tNutriser25\t25\t0\t0\t0\t0\n5\tNutriser30\t30\t0\t0\t0\t0\n6\tNutriserfree\t100\t0\t0\t1\t0\n30007\tNutriser2x1\t0\t0\t1\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 356
+}

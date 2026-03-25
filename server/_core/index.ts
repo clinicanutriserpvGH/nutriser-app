@@ -38,7 +38,12 @@ async function startServer() {
   registerOAuthRoutes(app);
   
   // Upload endpoint for promotions, course videos, and documents - save to S3
-  app.post("/api/upload", async (req, res) => {
+  app.post("/api/upload", (req, res, next) => {
+    // Extender timeout a 10 minutos para archivos grandes (videos 4K)
+    req.setTimeout(600000);
+    res.setTimeout(600000);
+    next();
+  }, async (req, res) => {
     try {
       const { storagePut } = await import("../storage");
       const busboy = await import("busboy");
@@ -228,6 +233,11 @@ async function startServer() {
   if (port !== preferredPort) {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
+
+  // Timeout extendido para subida de archivos grandes (10 minutos)
+  server.timeout = 600000;
+  server.keepAliveTimeout = 620000;
+  server.headersTimeout = 630000;
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);

@@ -762,3 +762,11 @@
 ## Sesión Mar 25 - Códigos case-insensitive
 - [x] Corregido validateDiscountCode en db.ts: usa UPPER() en SQL para comparación case-insensitive
 - [x] Todos los códigos activados en BD de producción (Nutriser10, 15, 20, 25, 30, free, 2x1)
+
+## Sesión Mar 25 - Limpieza y Cursos
+- [ ] Eliminar todas las membresías de prueba de la BD (Test User, María García, Juan Pérez)
+- [ ] Rediseñar panel admin Cursos: subida de videos y documentos visible e inmediata
+
+## Sesión Mar 25 - Error subida videos
+- [ ] Corregir error al subir videos en /api/upload (error en producción)
+- [ ] Agregar sección de material de apoyo (PDF/Word) visible desde el mismo formulario del video

@@ -363,6 +363,7 @@ export default function AdminDashboard() {
   const [courseDocFile, setCourseDocFile] = useState<File | null>(null);
   const [uploadingCourseVideo, setUploadingCourseVideo] = useState(false);
   const [selectedVideoForDoc, setSelectedVideoForDoc] = useState<number | null>(null);
+  const pendingDocFileRef = useRef<File | null>(null);
 
   const createCourseMutation = trpc.courses.create.useMutation({
     onSuccess: () => { toast.success('Curso creado'); refetchCourses(); setCourseForm({ title: '', description: '', category: '' }); },
@@ -377,7 +378,30 @@ export default function AdminDashboard() {
     onError: () => toast.error('Error al eliminar curso'),
   });
   const createVideoMutation = trpc.courses.createVideo.useMutation({
-    onSuccess: () => { toast.success('Video agregado'); refetchCourses(); setVideoForm({ title: '', description: '', videoUrl: '', duration: '', courseId: 0 }); setUploadingCourseVideo(false); },
+    onSuccess: async (newVideo) => {
+      // Si hay un documento pendiente, subirlo ahora que tenemos el videoId
+      if (courseDocFile && pendingDocFileRef.current) {
+        const docFile = pendingDocFileRef.current;
+        const formData = new FormData();
+        formData.append('file', docFile);
+        try {
+          const res = await fetch('/api/upload', { method: 'POST', body: formData });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data.url) {
+            addDocumentMutation.mutate({ videoId: newVideo.id, title: docFile.name, fileUrl: data.url, fileType: docFile.type });
+          }
+        } catch {
+          toast.error('Video subido, pero falló el material de apoyo');
+        }
+        pendingDocFileRef.current = null;
+        setCourseDocFile(null);
+      }
+      toast.success('Video agregado correctamente');
+      refetchCourses();
+      setVideoForm({ title: '', description: '', videoUrl: '', duration: '', courseId: 0 });
+      setUploadingCourseVideo(false);
+    },
     onError: () => { toast.error('Error al agregar video'); setUploadingCourseVideo(false); },
   });
   const deleteVideoMutation = trpc.courses.deleteVideo.useMutation({
@@ -407,15 +431,23 @@ export default function AdminDashboard() {
       return;
     }
     setUploadingCourseVideo(true);
+    // Guardar el documento en el ref para que createVideoMutation.onSuccess lo pueda usar
+    pendingDocFileRef.current = courseDocFile;
     const formData = new FormData();
     formData.append('file', courseVideoFile);
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => `HTTP ${res.status}`);
+        throw new Error(errText);
+      }
       const data = await res.json();
-      if (!data.url) throw new Error('No URL');
+      if (!data.url) throw new Error('El servidor no devolvió una URL válida');
       createVideoMutation.mutate({ ...videoForm, videoUrl: data.url });
-    } catch {
-      toast.error('Error al subir el video');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al subir el video: ${msg}`);
+      pendingDocFileRef.current = null;
       setUploadingCourseVideo(false);
     }
   };
@@ -2844,8 +2876,9 @@ export default function AdminDashboard() {
                         value={videoForm.courseId === course.id ? videoForm.duration : ''}
                         onChange={e => setVideoForm(p => ({ ...p, duration: e.target.value, courseId: course.id }))}
                       />
+                      {/* Selector de video */}
                       <div className="space-y-2">
-                        <p className="text-xs font-semibold text-blue-600">Archivo de video (MP4, MOV, AVI, MKV — hasta 500MB)</p>
+                        <p className="text-xs font-semibold text-blue-600">📹 Archivo de video (MP4, MOV, AVI, MKV — hasta 500MB)</p>
                         <label className="block cursor-pointer border-2 border-dashed border-blue-300 rounded-xl p-4 text-center hover:bg-blue-100 transition-colors">
                           <input
                             type="file"
@@ -2866,19 +2899,44 @@ export default function AdminDashboard() {
                             </div>
                           )}
                         </label>
-                        <Button
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2"
-                          onClick={handleUploadCourseVideo}
-                          disabled={uploadingCourseVideo || videoForm.courseId !== course.id || !courseVideoFile || !videoForm.title}
-                        >
-                          {uploadingCourseVideo && videoForm.courseId === course.id ? (
-                            <span className="flex items-center justify-center gap-2">
-                              <span className="animate-spin">⏳</span> Subiendo video... (puede tardar varios minutos)
-                            </span>
-                          ) : '⬆️ Subir Video al Curso'}
-                        </Button>
-                        {!videoForm.title && <p className="text-xs text-red-400">* Ingresa un título para el video antes de subir</p>}
                       </div>
+                      {/* Selector de material de apoyo (PDF/Documento) */}
+                      <div className="space-y-2 border-t border-blue-200 pt-3">
+                        <p className="text-xs font-semibold text-[#C5A55A]">📚 Material de Apoyo (PDF, Word, Excel — opcional)</p>
+                        <label className="block cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-xl p-3 text-center hover:bg-[#FAF7F2] transition-colors">
+                          <input
+                            type="file"
+                            accept=".pdf,.doc,.docx,.ppt,.pptx,.xlsx,.xls"
+                            className="hidden"
+                            onChange={e => setCourseDocFile(e.target.files?.[0] || null)}
+                          />
+                          {courseDocFile ? (
+                            <div>
+                              <p className="text-sm font-semibold text-[#C5A55A]">📄 {courseDocFile.name}</p>
+                              <p className="text-xs text-gray-400">{(courseDocFile.size / 1024).toFixed(0)} KB — Listo para subir</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="text-xl">📄</p>
+                              <p className="text-sm text-gray-500">Toca para seleccionar PDF o documento</p>
+                              <p className="text-xs text-gray-400">PDF, Word, Excel, PowerPoint</p>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                      {/* Botón de subida */}
+                      <Button
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2"
+                        onClick={handleUploadCourseVideo}
+                        disabled={uploadingCourseVideo || videoForm.courseId !== course.id || !courseVideoFile || !videoForm.title}
+                      >
+                        {uploadingCourseVideo && videoForm.courseId === course.id ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <span className="animate-spin">⏳</span> Subiendo... (puede tardar varios minutos)
+                          </span>
+                        ) : '⬆️ Subir Video al Curso'}
+                      </Button>
+                      {!videoForm.title && <p className="text-xs text-red-400">* Ingresa un título para el video antes de subir</p>}
                     </div>
 
                     {/* Videos del curso */}

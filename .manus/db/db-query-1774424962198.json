@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM paymentProofs WHERE membershipId IN (SELECT id FROM memberships WHERE clientEmail IN ('testupload@example.com', 'maria@example.com', 'juan@example.com'));\nDELETE FROM memberships WHERE clientEmail IN ('testupload@example.com', 'maria@example.com', 'juan@example.com');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute DELETE FROM paymentProofs WHERE membershipId IN (SELECT id FROM memberships WHERE clientEmail IN ('testupload@example.com', 'maria@example.com', 'juan@example.com'));\nDELETE FROM memberships WHERE clientEmail IN ('testupload@example.com', 'maria@example.com', 'juan@example.com');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 407
+}

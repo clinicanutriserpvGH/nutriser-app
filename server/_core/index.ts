@@ -3,7 +3,8 @@ import { createServer } from "http";
 import net from "net";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { writeFile, readFile, unlink } from "fs/promises";
+import { writeFile, readFile, unlink, mkdir, appendFile, stat } from "fs/promises";
+import { existsSync } from "fs";
 import { tmpdir } from "os";
 import path from "path";
 import { createRequire } from "module";
@@ -161,6 +162,136 @@ async function startServer() {
     }
   });
   
+  // ─── Chunked Upload Endpoints ──────────────────────────────────────────────
+  // POST /api/upload-chunk — recibe un chunk del video y lo guarda en disco
+  app.post("/api/upload-chunk", (req, res, next) => {
+    req.setTimeout(120000);
+    res.setTimeout(120000);
+    next();
+  }, async (req, res) => {
+    try {
+      const busboy = await import("busboy");
+      const bb = busboy.default({ headers: req.headers, limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB max per chunk
+      let chunkBuffer: Buffer | null = null;
+      let uploadId = '';
+      let chunkIndex = 0;
+      let totalChunks = 0;
+      let originalFilename = 'file';
+
+      bb.on('field', (name: string, val: string) => {
+        if (name === 'uploadId') uploadId = val;
+        if (name === 'chunkIndex') chunkIndex = parseInt(val);
+        if (name === 'totalChunks') totalChunks = parseInt(val);
+        if (name === 'filename') originalFilename = val;
+      });
+
+      bb.on('file', (_: string, file: any) => {
+        const chunks: Buffer[] = [];
+        file.on('data', (chunk: Buffer) => chunks.push(chunk));
+        file.on('end', () => { chunkBuffer = Buffer.concat(chunks); });
+      });
+
+      bb.on('close', async () => {
+        try {
+          if (!chunkBuffer || !uploadId) {
+            return res.status(400).json({ error: 'Missing chunk data or uploadId' });
+          }
+          // Guardar chunk en disco temporal
+          const chunkDir = path.join(tmpdir(), `upload-${uploadId}`);
+          if (!existsSync(chunkDir)) await mkdir(chunkDir, { recursive: true });
+          const chunkPath = path.join(chunkDir, `chunk-${String(chunkIndex).padStart(6, '0')}`);
+          await writeFile(chunkPath, chunkBuffer);
+          console.log(`[Chunk] Saved chunk ${chunkIndex + 1}/${totalChunks} for upload ${uploadId}`);
+          res.json({ ok: true, chunkIndex });
+        } catch (err) {
+          console.error('[Chunk] Error saving chunk:', err);
+          res.status(500).json({ error: 'Failed to save chunk' });
+        }
+      });
+
+      req.pipe(bb);
+    } catch (err) {
+      console.error('[Chunk] Error:', err);
+      res.status(500).json({ error: 'Chunk upload failed' });
+    }
+  });
+
+  // POST /api/upload-chunk-finalize — ensambla todos los chunks, convierte a MP4 y sube a S3
+  app.post("/api/upload-chunk-finalize", async (req, res) => {
+    const { uploadId, filename, mimeType } = req.body;
+    if (!uploadId || !filename) {
+      return res.status(400).json({ error: 'Missing uploadId or filename' });
+    }
+    const chunkDir = path.join(tmpdir(), `upload-${uploadId}`);
+    const assembledPath = path.join(tmpdir(), `assembled-${uploadId}-${filename}`);
+    const ext = filename.includes('.') ? filename.split('.').pop()?.toLowerCase() || 'bin' : 'bin';
+    try {
+      // Leer y ensamblar todos los chunks en orden
+      const { readdirSync } = await import('fs');
+      const chunkFiles = readdirSync(chunkDir)
+        .filter((f: string) => f.startsWith('chunk-'))
+        .sort();
+      console.log(`[Finalize] Assembling ${chunkFiles.length} chunks for ${filename}`);
+      for (const chunkFile of chunkFiles) {
+        const chunkData = await readFile(path.join(chunkDir, chunkFile));
+        await appendFile(assembledPath, chunkData);
+      }
+      const assembledStat = await stat(assembledPath);
+      console.log(`[Finalize] Assembled file size: ${assembledStat.size} bytes`);
+
+      const { storagePut } = await import('../storage');
+      const videoExts = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v', 'wmv', 'flv', '3gp'];
+      const isVideo = (mimeType || '').startsWith('video/') || videoExts.includes(ext);
+
+      let finalBuffer: Buffer;
+      let finalExt = ext;
+      let uploadMimeType = mimeType || 'application/octet-stream';
+
+      if (isVideo && ext !== 'mp4' && ext !== 'webm') {
+        // Convertir a MP4
+        const tmpOutput = path.join(tmpdir(), `converted-${uploadId}.mp4`);
+        console.log(`[Finalize] Converting ${ext} to mp4...`);
+        try {
+          await execFileAsync(ffmpegBinary, [
+            '-i', assembledPath,
+            '-c:v', 'libx264',
+            '-c:a', 'aac',
+            '-movflags', '+faststart',
+            '-preset', 'fast',
+            '-crf', '23',
+            '-y',
+            tmpOutput
+          ], { timeout: 600000 });
+          finalBuffer = await readFile(tmpOutput);
+          finalExt = 'mp4';
+          uploadMimeType = 'video/mp4';
+          console.log(`[Finalize] Conversion OK: ${assembledStat.size} -> ${finalBuffer.length} bytes`);
+          unlink(tmpOutput).catch(() => {});
+        } catch (convErr) {
+          console.error('[Finalize] FFmpeg failed, uploading original:', convErr);
+          finalBuffer = await readFile(assembledPath);
+        }
+      } else {
+        finalBuffer = await readFile(assembledPath);
+        if (ext === 'mp4') uploadMimeType = 'video/mp4';
+      }
+
+      const folder = isVideo ? 'course-videos' : ((mimeType || '').startsWith('image/') ? 'promotions' : 'course-docs');
+      const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${finalExt}`;
+      const { url } = await storagePut(`${folder}/${safeName}`, finalBuffer, uploadMimeType);
+      console.log(`[Finalize] Uploaded to S3: ${url}`);
+      res.json({ url });
+    } catch (err) {
+      console.error('[Finalize] Error:', err);
+      res.status(500).json({ error: 'Finalize failed: ' + (err instanceof Error ? err.message : 'Unknown') });
+    } finally {
+      // Limpiar archivos temporales
+      unlink(assembledPath).catch(() => {});
+      const { rm } = await import('fs/promises');
+      rm(chunkDir, { recursive: true, force: true }).catch(() => {});
+    }
+  });
+
   // Endpoint para servir logo como fallback (no se usa, pero lo dejamos por compatibilidad)
   app.get("/api/logo", (req, res) => {
     res.setHeader("Content-Type", "image/jpeg");

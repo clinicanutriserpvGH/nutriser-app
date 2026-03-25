@@ -793,3 +793,4 @@
 - [x] Página de restablecer contraseña con token seguro
 - [x] Botón "¿Olvidaste tu contraseña?" en login del admin
 - [x] Mostrar código único de acceso en cada membresía del panel admin
+- [x] Implementar subida de videos en chunks para evitar error 413 del proxy

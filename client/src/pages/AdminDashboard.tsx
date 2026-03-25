@@ -363,6 +363,7 @@ export default function AdminDashboard() {
   const [courseDocFile, setCourseDocFile] = useState<File | null>(null); // Para el formulario de nuevo video
   const [existingVideoDocFile, setExistingVideoDocFile] = useState<File | null>(null); // Para agregar doc a video existente
   const [uploadingCourseVideo, setUploadingCourseVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0); // 0-100 para la barra de progreso
   const [selectedVideoForDoc, setSelectedVideoForDoc] = useState<number | null>(null);
   const pendingDocFileRef = useRef<File | null>(null);
 
@@ -432,24 +433,60 @@ export default function AdminDashboard() {
       return;
     }
     setUploadingCourseVideo(true);
+    setUploadProgress(0);
     // Guardar el documento en el ref para que createVideoMutation.onSuccess lo pueda usar
     pendingDocFileRef.current = courseDocFile;
-    const formData = new FormData();
-    formData.append('file', courseVideoFile);
+
+    const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB por chunk
+    const file = courseVideoFile;
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    const uploadId = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      if (!res.ok) {
-        const errText = await res.text().catch(() => `HTTP ${res.status}`);
+      // Subir chunks uno por uno
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, file.size);
+        const chunk = file.slice(start, end);
+
+        const formData = new FormData();
+        formData.append('uploadId', uploadId);
+        formData.append('chunkIndex', String(i));
+        formData.append('totalChunks', String(totalChunks));
+        formData.append('filename', file.name);
+        formData.append('file', chunk, file.name);
+
+        const res = await fetch('/api/upload-chunk', { method: 'POST', body: formData });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => `HTTP ${res.status}`);
+          throw new Error(`Error en chunk ${i + 1}: ${errText}`);
+        }
+
+        // Actualizar progreso (chunks = 80% del progreso total, conversión = 20%)
+        setUploadProgress(Math.round(((i + 1) / totalChunks) * 80));
+      }
+
+      // Finalizar: ensamblar, convertir y subir a S3
+      setUploadProgress(85);
+      const finalRes = await fetch('/api/upload-chunk-finalize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uploadId, filename: file.name, mimeType: file.type }),
+      });
+      if (!finalRes.ok) {
+        const errText = await finalRes.text().catch(() => `HTTP ${finalRes.status}`);
         throw new Error(errText);
       }
-      const data = await res.json();
+      const data = await finalRes.json();
       if (!data.url) throw new Error('El servidor no devolvió una URL válida');
+      setUploadProgress(100);
       createVideoMutation.mutate({ ...videoForm, videoUrl: data.url });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`Error al subir el video: ${msg}`);
       pendingDocFileRef.current = null;
       setUploadingCourseVideo(false);
+      setUploadProgress(0);
     }
   };
 
@@ -2949,10 +2986,33 @@ export default function AdminDashboard() {
                       >
                         {uploadingCourseVideo && videoForm.courseId === course.id ? (
                           <span className="flex items-center justify-center gap-2">
-                            <span className="animate-spin">⏳</span> Subiendo video... espera un momento
+                            <span className="animate-spin">⏳</span>
+                            {uploadProgress < 80
+                              ? `Subiendo... ${uploadProgress}%`
+                              : uploadProgress < 100
+                              ? 'Convirtiendo a MP4...'
+                              : '¡Listo!'}
                           </span>
                         ) : '⬆️ Subir Video al Curso'}
                       </Button>
+                      {/* Barra de progreso */}
+                      {uploadingCourseVideo && videoForm.courseId === course.id && (
+                        <div className="w-full mt-1">
+                          <div className="w-full bg-[#E8E0D0] rounded-full h-2.5 overflow-hidden">
+                            <div
+                              className="bg-[#C5A55A] h-2.5 rounded-full transition-all duration-300"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-[#999] text-center mt-1">
+                            {uploadProgress < 80
+                              ? `Enviando video en partes... ${uploadProgress}%`
+                              : uploadProgress < 100
+                              ? 'Convirtiendo a MP4 para compatibilidad universal...'
+                              : 'Guardando en servidor...'}
+                          </p>
+                        </div>
+                      )}
                       {!videoForm.title && videoForm.courseId === course.id && courseVideoFile && (
                         <p className="text-xs text-red-500 text-center">Falta el título del video</p>
                       )}

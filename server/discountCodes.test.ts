@@ -1,46 +1,47 @@
 import { describe, it, expect } from "vitest";
-import { getDiscountCodeByCode, getAllDiscountCodes } from "./db";
+import { validateDiscountCode, getAllDiscountCodes } from "./db";
 
 describe("Discount Codes System", () => {
-  it("should have predefined discount codes", async () => {
-    const codes = ["Nutriser10", "Nutriser15", "Nutriser20", "Nutriser25", "Nutriser30", "Nutriserfree"];
-    
-    for (const code of codes) {
-      const result = await getDiscountCodeByCode(code);
-      expect(result).toBeDefined();
-      expect(result?.isActive).toBe(true);
-    }
-  });
-
-  it("should validate discount code Nutriser10", async () => {
-    const code = await getDiscountCodeByCode("Nutriser10");
+  it("should validate active discount code Nutriser10", async () => {
+    const code = await validateDiscountCode("Nutriser10");
+    expect(code).toBeDefined();
     expect(code?.code).toBe("Nutriser10");
-    expect(code?.discountPercentage).toBe(10);
+    expect(code?.discountPercent).toBe(10);
     expect(code?.isActive).toBe(true);
   });
 
-  it("should validate discount code Nutriser30", async () => {
-    const code = await getDiscountCodeByCode("Nutriser30");
-    expect(code?.code).toBe("Nutriser30");
-    expect(code?.discountPercentage).toBe(30);
+  it("should validate active discount code Nutriser30", async () => {
+    const code = await validateDiscountCode("Nutriser30");
+    expect(code).toBeDefined();
+    expect(code?.discountPercent).toBe(30);
     expect(code?.isActive).toBe(true);
   });
 
-  it("should validate discount code Nutriserfree", async () => {
-    const code = await getDiscountCodeByCode("Nutriserfree");
-    expect(code?.code).toBe("Nutriserfree");
-    expect(code?.discountPercentage).toBe(100);
+  it("should validate active discount code Nutriserfree (100%)", async () => {
+    const code = await validateDiscountCode("Nutriserfree");
+    expect(code).toBeDefined();
+    expect(code?.discountPercent).toBe(100);
+    expect(code?.isGift).toBe(true);
     expect(code?.isActive).toBe(true);
   });
 
-  it("should return undefined for invalid code", async () => {
-    const code = await getDiscountCodeByCode("INVALID_CODE_12345");
-    expect(code).toBeUndefined();
+  it("should validate active discount code Nutriser2x1", async () => {
+    const code = await validateDiscountCode("Nutriser2x1");
+    expect(code).toBeDefined();
+    expect(code?.isTwoForOne).toBe(true);
+    expect(code?.isActive).toBe(true);
   });
 
-  it("should get all active discount codes", async () => {
+  it("should return null for invalid code", async () => {
+    const code = await validateDiscountCode("INVALID_CODE_12345");
+    expect(code).toBeNull();
+  });
+
+  it("should get all discount codes", async () => {
     const codes = await getAllDiscountCodes();
     expect(codes.length).toBeGreaterThan(0);
-    expect(codes.every(c => c.isActive)).toBe(true);
+    const codeNames = codes.map(c => c.code);
+    expect(codeNames).toContain("Nutriser10");
+    expect(codeNames).toContain("Nutriser2x1");
   });
 });

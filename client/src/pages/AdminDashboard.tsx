@@ -348,6 +348,92 @@ export default function AdminDashboard() {
     onError: () => toast.error('Error al actualizar código'),
   });
 
+  // Hooks de Cursos
+  const { data: coursesData, refetch: refetchCourses } = trpc.courses.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const { data: pendingCommentsData, refetch: refetchPendingComments } = trpc.courses.getPendingComments.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const [courseForm, setCourseForm] = useState({ title: '', description: '', category: '' });
+  const [videoForm, setVideoForm] = useState({ title: '', description: '', videoUrl: '', duration: '', courseId: 0 });
+  const [editingCourseId, setEditingCourseId] = useState<number | null>(null);
+  const [selectedCourseForVideos, setSelectedCourseForVideos] = useState<number | null>(null);
+  const [courseVideoFile, setCourseVideoFile] = useState<File | null>(null);
+  const [courseDocFile, setCourseDocFile] = useState<File | null>(null);
+  const [uploadingCourseVideo, setUploadingCourseVideo] = useState(false);
+  const [selectedVideoForDoc, setSelectedVideoForDoc] = useState<number | null>(null);
+
+  const createCourseMutation = trpc.courses.create.useMutation({
+    onSuccess: () => { toast.success('Curso creado'); refetchCourses(); setCourseForm({ title: '', description: '', category: '' }); },
+    onError: () => toast.error('Error al crear curso'),
+  });
+  const updateCourseMutation = trpc.courses.update.useMutation({
+    onSuccess: () => { toast.success('Curso actualizado'); refetchCourses(); setEditingCourseId(null); },
+    onError: () => toast.error('Error al actualizar curso'),
+  });
+  const deleteCourseMutation = trpc.courses.delete.useMutation({
+    onSuccess: () => { toast.success('Curso eliminado'); refetchCourses(); },
+    onError: () => toast.error('Error al eliminar curso'),
+  });
+  const createVideoMutation = trpc.courses.createVideo.useMutation({
+    onSuccess: () => { toast.success('Video agregado'); refetchCourses(); setVideoForm({ title: '', description: '', videoUrl: '', duration: '', courseId: 0 }); setUploadingCourseVideo(false); },
+    onError: () => { toast.error('Error al agregar video'); setUploadingCourseVideo(false); },
+  });
+  const deleteVideoMutation = trpc.courses.deleteVideo.useMutation({
+    onSuccess: () => { toast.success('Video eliminado'); refetchCourses(); },
+    onError: () => toast.error('Error al eliminar video'),
+  });
+  const approveCommentMutation = trpc.courses.approveComment.useMutation({
+    onSuccess: () => { toast.success('Comentario aprobado'); refetchPendingComments(); },
+    onError: () => toast.error('Error al aprobar comentario'),
+  });
+  const rejectCommentMutation = trpc.courses.rejectComment.useMutation({
+    onSuccess: () => { toast.success('Comentario rechazado'); refetchPendingComments(); },
+    onError: () => toast.error('Error al rechazar comentario'),
+  });
+  const addDocumentMutation = trpc.courses.createDocument.useMutation({
+    onSuccess: () => { toast.success('Documento agregado'); refetchCourses(); setSelectedVideoForDoc(null); setCourseDocFile(null); },
+    onError: () => toast.error('Error al agregar documento'),
+  });
+  const deleteDocumentMutation = trpc.courses.deleteDocument.useMutation({
+    onSuccess: () => { toast.success('Documento eliminado'); refetchCourses(); },
+    onError: () => toast.error('Error al eliminar documento'),
+  });
+
+  const handleUploadCourseVideo = async () => {
+    if (!courseVideoFile || !videoForm.title || !videoForm.courseId) {
+      toast.error('Completa el título, selecciona el curso y el archivo de video');
+      return;
+    }
+    setUploadingCourseVideo(true);
+    const formData = new FormData();
+    formData.append('file', courseVideoFile);
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!data.url) throw new Error('No URL');
+      createVideoMutation.mutate({ ...videoForm, videoUrl: data.url });
+    } catch {
+      toast.error('Error al subir el video');
+      setUploadingCourseVideo(false);
+    }
+  };
+
+  const handleUploadCourseDoc = async (videoId: number) => {
+    if (!courseDocFile) { toast.error('Selecciona un documento'); return; }
+    const formData = new FormData();
+    formData.append('file', courseDocFile);
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!data.url) throw new Error('No URL');
+      addDocumentMutation.mutate({ videoId, title: courseDocFile.name, fileUrl: data.url, fileType: courseDocFile.type });
+    } catch {
+      toast.error('Error al subir el documento');
+    }
+  };
+
   const utils = trpc.useUtils();
   const updateStatusMutation = trpc.memberships.updateStatus.useMutation({
     onSuccess: () => {
@@ -930,8 +1016,12 @@ export default function AdminDashboard() {
                 )}
               </TabsTrigger>
               <TabsTrigger value="discountCodes" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
-                🏷️
-                Cód. Descuento
+                <span>🏷️</span>
+                <span>Cód. Descuento</span>
+              </TabsTrigger>
+              <TabsTrigger value="courses" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
+                <span>🎓</span>
+                <span>Cursos</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -2662,6 +2752,145 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* ===== TAB: CURSOS ===== */}
+          <TabsContent value="courses" className="space-y-6">
+            {/* Comentarios pendientes */}
+            {pendingCommentsData && pendingCommentsData.length > 0 && (
+              <Card className="border-red-200 bg-red-50">
+                <CardHeader>
+                  <CardTitle className="text-red-700">💬 Comentarios Pendientes de Moderación ({pendingCommentsData.length})</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {pendingCommentsData.map((comment: any) => (
+                    <div key={comment.id} className="bg-white border border-red-100 rounded-xl p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="font-semibold text-gray-800">{comment.authorName}</p>
+                          <p className="text-xs text-gray-400">{comment.authorEmail} • Video ID: {comment.videoId}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => approveCommentMutation.mutate({ id: comment.id })}>✓ Aprobar</Button>
+                          <Button size="sm" variant="outline" className="text-red-600 border-red-200" onClick={() => rejectCommentMutation.mutate({ id: comment.id })}>Rechazar</Button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-700 bg-gray-50 rounded p-2">{comment.content}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Crear nuevo curso */}
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A]">➕ Crear Nuevo Curso</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Título del curso *" value={courseForm.title} onChange={e => setCourseForm(p => ({ ...p, title: e.target.value }))} />
+                <textarea className="w-full border rounded-lg px-3 py-2 text-sm" rows={3} placeholder="Descripción" value={courseForm.description} onChange={e => setCourseForm(p => ({ ...p, description: e.target.value }))} />
+                <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Categoría (ej: Nutrición, Bienestar)" value={courseForm.category} onChange={e => setCourseForm(p => ({ ...p, category: e.target.value }))} />
+                <Button className="bg-[#C5A55A] hover:bg-[#B8963E] text-white" onClick={() => createCourseMutation.mutate(courseForm)} disabled={!courseForm.title || createCourseMutation.isPending}>
+                  {createCourseMutation.isPending ? 'Creando...' : 'Crear Curso'}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Lista de cursos */}
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A]">🎓 Cursos ({coursesData?.length ?? 0})</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!coursesData || coursesData.length === 0 ? (
+                  <p className="text-gray-400 text-sm text-center py-8">No hay cursos creados aún.</p>
+                ) : coursesData.map((course: any) => (
+                  <div key={course.id} className="border border-[#C5A55A]/20 rounded-xl p-4 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-bold text-[#1A1A1A]">{course.title}</h3>
+                        <p className="text-xs text-gray-500">{course.category} • {course.isPublished ? '🟢 Publicado' : '🔴 Borrador'}</p>
+                        <p className="text-sm text-gray-600 mt-1">{course.description}</p>
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0">
+                        <Button size="sm" variant="outline" onClick={() => updateCourseMutation.mutate({ id: course.id, isPublished: !course.isPublished })}>
+                          {course.isPublished ? 'Despublicar' : 'Publicar'}
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-red-600" onClick={() => { if(confirm('\u00bfEliminar curso?')) deleteCourseMutation.mutate({ id: course.id }); }}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Agregar video al curso */}
+                    <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                      <p className="text-xs font-bold text-gray-600 uppercase tracking-wide">🎥 Agregar Video</p>
+                      <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Título del video *" value={videoForm.courseId === course.id ? videoForm.title : ''} onChange={e => setVideoForm(p => ({ ...p, title: e.target.value, courseId: course.id }))} />
+                      <textarea className="w-full border rounded px-2 py-1.5 text-sm" rows={2} placeholder="Descripción" value={videoForm.courseId === course.id ? videoForm.description : ''} onChange={e => setVideoForm(p => ({ ...p, description: e.target.value, courseId: course.id }))} />
+                      <input className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Duración (ej: 15:30)" value={videoForm.courseId === course.id ? videoForm.duration : ''} onChange={e => setVideoForm(p => ({ ...p, duration: e.target.value, courseId: course.id }))} />
+                      <div className="flex gap-2 items-center">
+                        <input type="file" accept="video/*" className="text-xs flex-1" onChange={e => { setCourseVideoFile(e.target.files?.[0] || null); setVideoForm(p => ({ ...p, courseId: course.id })); }} />
+                        <Button size="sm" className="bg-[#C5A55A] hover:bg-[#B8963E] text-white whitespace-nowrap" onClick={handleUploadCourseVideo} disabled={uploadingCourseVideo || videoForm.courseId !== course.id}>
+                          {uploadingCourseVideo && videoForm.courseId === course.id ? 'Subiendo...' : 'Subir Video'}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Videos del curso */}
+                    {course.videos && course.videos.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold text-gray-600 uppercase tracking-wide">📺 Videos ({course.videos.length})</p>
+                        {course.videos.map((video: any) => (
+                          <div key={video.id} className="bg-white border rounded-lg p-3">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-sm">{video.title}</p>
+                                <p className="text-xs text-gray-400">{video.duration}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline" className="text-xs" onClick={() => setSelectedVideoForDoc(selectedVideoForDoc === video.id ? null : video.id)}>
+                                  📄 Doc
+                                </Button>
+                                <Button size="sm" variant="outline" className="text-red-600 text-xs" onClick={() => { if(confirm('\u00bfEliminar video?')) deleteVideoMutation.mutate({ id: video.id }); }}>
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Documentos del video */}
+                            {selectedVideoForDoc === video.id && (
+                              <div className="mt-3 pt-3 border-t space-y-2">
+                                <p className="text-xs font-bold text-gray-500">Agregar documento de apoyo:</p>
+                                <div className="flex gap-2 items-center">
+                                  <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xlsx,.xls" className="text-xs flex-1" onChange={e => setCourseDocFile(e.target.files?.[0] || null)} />
+                                  <Button size="sm" className="bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs whitespace-nowrap" onClick={() => handleUploadCourseDoc(video.id)} disabled={addDocumentMutation.isPending}>
+                                    {addDocumentMutation.isPending ? 'Subiendo...' : 'Subir'}
+                                  </Button>
+                                </div>
+                                {video.documents && video.documents.length > 0 && (
+                                  <div className="space-y-1">
+                                    {video.documents.map((doc: any) => (
+                                      <div key={doc.id} className="flex justify-between items-center text-xs bg-gray-50 rounded p-2">
+                                        <span>📄 {doc.title}</span>
+                                        <Button size="sm" variant="ghost" className="text-red-500 h-5 px-1" onClick={() => deleteDocumentMutation.mutate({ id: doc.id })}>
+                                          <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
         </Tabs>
         {/* Modal de Aprobar Cita */}
         {selectedAppointmentId !== null && selectedAppointment && (

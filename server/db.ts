@@ -746,3 +746,182 @@ export async function incrementDiscountCodeUsage(code: string) {
     .set({ usageCount: sql`${discountCodes.usageCount} + 1` })
     .where(eq(discountCodes.code, code));
 }
+
+// ===== CURSOS GRATUITOS =====
+import { courses, courseVideos, courseDocuments, courseComments, courseSubscribers } from "../drizzle/schema";
+
+export async function getAllCourses() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(courses).orderBy(desc(courses.createdAt));
+}
+
+export async function getPublishedCourses() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(courses).where(eq(courses.isPublished, true)).orderBy(desc(courses.createdAt));
+}
+
+export async function getCourseById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [course] = await db.select().from(courses).where(eq(courses.id, id)).limit(1);
+  return course;
+}
+
+export async function createCourse(data: { title: string; description?: string; thumbnailUrl?: string; category?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(courses).values(data);
+  const [inserted] = await db.select().from(courses).orderBy(desc(courses.id)).limit(1);
+  return inserted;
+}
+
+export async function updateCourse(id: number, data: Partial<{ title: string; description: string; thumbnailUrl: string; category: string; isPublished: boolean }>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(courses).set({ ...data, updatedAt: new Date() }).where(eq(courses.id, id));
+  return { success: true };
+}
+
+export async function deleteCourse(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Obtener todos los videos del curso para eliminar sus comentarios y documentos
+  const videos = await db.select().from(courseVideos).where(eq(courseVideos.courseId, id));
+  for (const video of videos) {
+    await db.delete(courseDocuments).where(eq(courseDocuments.videoId, video.id));
+    await db.delete(courseComments).where(eq(courseComments.videoId, video.id));
+  }
+  await db.delete(courseVideos).where(eq(courseVideos.courseId, id));
+  await db.delete(courses).where(eq(courses.id, id));
+  return { success: true };
+}
+
+// Videos
+export async function getVideosByCourse(courseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(courseVideos).where(eq(courseVideos.courseId, courseId)).orderBy(courseVideos.sortOrder);
+}
+
+export async function getVideoById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [video] = await db.select().from(courseVideos).where(eq(courseVideos.id, id)).limit(1);
+  return video;
+}
+
+export async function createCourseVideo(data: { courseId: number; title: string; description?: string; videoUrl: string; thumbnailUrl?: string; duration?: string; sortOrder?: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(courseVideos).values(data);
+  const [inserted] = await db.select().from(courseVideos).orderBy(desc(courseVideos.id)).limit(1);
+  return inserted;
+}
+
+export async function updateCourseVideo(id: number, data: Partial<{ title: string; description: string; thumbnailUrl: string; duration: string; sortOrder: number; isPublished: boolean }>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(courseVideos).set({ ...data, updatedAt: new Date() }).where(eq(courseVideos.id, id));
+  return { success: true };
+}
+
+export async function deleteCourseVideo(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(courseDocuments).where(eq(courseDocuments.videoId, id));
+  await db.delete(courseComments).where(eq(courseComments.videoId, id));
+  await db.delete(courseVideos).where(eq(courseVideos.id, id));
+  return { success: true };
+}
+
+// Documentos
+export async function getDocumentsByVideo(videoId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(courseDocuments).where(eq(courseDocuments.videoId, videoId));
+}
+
+export async function createCourseDocument(data: { videoId: number; title: string; fileUrl: string; fileType?: string; fileSize?: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(courseDocuments).values(data);
+  const [inserted] = await db.select().from(courseDocuments).orderBy(desc(courseDocuments.id)).limit(1);
+  return inserted;
+}
+
+export async function deleteCourseDocument(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(courseDocuments).where(eq(courseDocuments.id, id));
+  return { success: true };
+}
+
+// Comentarios
+export async function getApprovedCommentsByVideo(videoId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(courseComments)
+    .where(and(eq(courseComments.videoId, videoId), eq(courseComments.status, "approved")))
+    .orderBy(desc(courseComments.createdAt));
+}
+
+export async function getPendingComments() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(courseComments).where(eq(courseComments.status, "pending")).orderBy(desc(courseComments.createdAt));
+}
+
+export async function getAllCourseComments() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(courseComments).orderBy(desc(courseComments.createdAt));
+}
+
+export async function createCourseComment(data: { videoId: number; authorName: string; authorEmail?: string; content: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(courseComments).values(data);
+  const [inserted] = await db.select().from(courseComments).orderBy(desc(courseComments.id)).limit(1);
+  return inserted;
+}
+
+export async function updateCommentStatus(id: number, status: "approved" | "rejected") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(courseComments).set({
+    status,
+    approvedAt: status === "approved" ? new Date() : null,
+  }).where(eq(courseComments.id, id));
+  return { success: true };
+}
+
+export async function deleteCourseComment(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(courseComments).where(eq(courseComments.id, id));
+  return { success: true };
+}
+
+// Suscriptores
+export async function getAllCourseSubscribers() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(courseSubscribers).orderBy(desc(courseSubscribers.createdAt));
+}
+
+export async function createCourseSubscriber(data: { email?: string; name?: string; pushSubscription?: string; notifyByEmail?: boolean; notifyByPush?: boolean }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(courseSubscribers).values(data);
+  const [inserted] = await db.select().from(courseSubscribers).orderBy(desc(courseSubscribers.id)).limit(1);
+  return inserted;
+}
+
+export async function deleteCourseSubscriber(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(courseSubscribers).where(eq(courseSubscribers.id, id));
+  return { success: true };
+}

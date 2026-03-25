@@ -3,26 +3,61 @@
  * Design: Full-screen hero with real clinic reception photo
  * Gold accent lines, Playfair Display headline, fade-in animations
  */
-import { motion } from "framer-motion";
-import { ChevronDown, Gift, BookOpen, Ruler, CalendarCheck, ShoppingBag } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, Gift, BookOpen, Ruler, CalendarCheck, ShoppingBag, GraduationCap } from "lucide-react";
+import { useState, useEffect } from "react";
 
-const HERO_IMG =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-reception_c595cea6.jpeg";
+const HERO_IMAGES = [
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-reception_c595cea6.jpeg",
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hero-clinic-1_5c6ba72c.jpg",
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hero-clinic-2_d6662dc0.jpg",
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hero-clinic-3_c9c66a2b.webp",
+];
 
 export default function HeroSection() {
+  const [currentImg, setCurrentImg] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImg((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section
       id="inicio"
       className="relative min-h-screen flex items-center justify-start overflow-hidden"
     >
-      {/* Background image - real clinic photo */}
+      {/* Background image carousel */}
       <div className="absolute inset-0">
-        <img
-          src={HERO_IMG}
-          alt="Recepción de Nutriser - Clínica de Estética en Puerto Vallarta"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35" />
+        <AnimatePresence mode="sync">
+          <motion.img
+            key={currentImg}
+            src={HERO_IMAGES[currentImg]}
+            alt="Clínica Nutriser - Puerto Vallarta"
+            className="absolute inset-0 w-full h-full object-cover"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+          />
+        </AnimatePresence>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
+      </div>
+
+      {/* Carousel dots */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+        {HERO_IMAGES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentImg(i)}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              i === currentImg ? "bg-[#C5A55A] w-6" : "bg-white/40"
+            }`}
+            aria-label={`Imagen ${i + 1}`}
+          />
+        ))}
       </div>
 
       {/* Decorative gold line */}
@@ -121,6 +156,13 @@ export default function HeroSection() {
             >
               <ShoppingBag className="w-5 h-5" />
               Tienda de Productos
+            </a>
+            <a
+              href="/cursos"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
+            >
+              <GraduationCap className="w-5 h-5" />
+              Cursos Nutriser
             </a>
             <motion.button
               onClick={(e) => {

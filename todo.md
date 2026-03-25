@@ -709,3 +709,28 @@
 
 ## Corrección Formulario Cupones - Mar 25 2026
 - [x] Hacer teléfono obligatorio en formulario de adquirir cupón
+
+## Sección Cursos Gratuitos - Mar 25 2026
+- [ ] Crear tablas BD: courses, courseVideos, courseDocuments, courseComments, courseSubscribers
+- [ ] Procedimientos tRPC: listar cursos, videos, documentos, comentarios, suscripción push/email
+- [ ] Página pública /cursos con lista de videos y reproductor (solo visualización, sin descarga)
+- [ ] Reproductor de video en alta calidad (hasta 4K) con controles básicos
+- [ ] Sección de documentos descargables por video
+- [ ] Foro de comentarios por video con moderación del admin
+- [ ] Botón de suscripción a notificaciones push en página de cursos
+- [ ] Notificación por correo cuando se sube nuevo curso
+- [ ] Panel admin: subir/editar/eliminar cursos y videos
+- [ ] Panel admin: subir/eliminar documentos por video
+- [ ] Panel admin: moderar y aprobar/rechazar comentarios
+- [ ] Agregar enlace a Cursos en la navegación principal
+
+## Mejora Visual Página Principal - Mar 25 2026
+- [ ] Mejorar el hero con imagen más profesional y tipografía más impactante
+- [ ] Actualizar sección de servicios con mejor presentación visual
+- [ ] Agregar sección de testimonios o estadísticas de impacto
+
+## Sesión Mar 25 2026 - Continuación
+- [x] HeroSection: carrusel automático de 4 imágenes de clínica con transición suave
+- [x] HeroSection: botón 'Cursos Nutriser' agregado al grid de botones
+- [x] Cursos: push notifications integradas en modal de suscripción (checkbox + solicitud de permiso)
+- [x] Corregir test discountCodes.test.ts para usar funciones correctas (validateDiscountCode)

@@ -162,6 +162,13 @@
       "when": 1774417531955,
       "tag": "0022_uneven_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1774419729051,
+      "tag": "0023_military_george_stacy",
+      "breakpoints": true
     }
   ]
 }

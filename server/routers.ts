@@ -9,6 +9,7 @@ import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
 import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
+import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll } from "./pushNotifications";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
@@ -1107,6 +1108,192 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return await deleteProductPurchase(input.id);
+      }),
+  }),
+  courses: router({
+    // Público: listar cursos publicados
+    list: publicProcedure.query(async () => {
+      return await getPublishedCourses();
+    }),
+    // Admin: listar todos los cursos
+    listAll: publicProcedure.query(async () => {
+      return await getAllCourses();
+    }),
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await getCourseById(input.id);
+      }),
+    create: publicProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        description: z.string().optional(),
+        thumbnailUrl: z.string().optional(),
+        category: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await createCourse(input);
+      }),
+    update: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        thumbnailUrl: z.string().optional(),
+        category: z.string().optional(),
+        isPublished: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await updateCourse(id, data);
+      }),
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteCourse(input.id);
+      }),
+    // Videos
+    getVideos: publicProcedure
+      .input(z.object({ courseId: z.number() }))
+      .query(async ({ input }) => {
+        return await getVideosByCourse(input.courseId);
+      }),
+    getVideoById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await getVideoById(input.id);
+      }),
+    createVideo: publicProcedure
+      .input(z.object({
+        courseId: z.number(),
+        title: z.string().min(1),
+        description: z.string().optional(),
+        videoUrl: z.string().min(1),
+        thumbnailUrl: z.string().optional(),
+        duration: z.string().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await createCourseVideo(input);
+      }),
+    updateVideo: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        thumbnailUrl: z.string().optional(),
+        duration: z.string().optional(),
+        sortOrder: z.number().optional(),
+        isPublished: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await updateCourseVideo(id, data);
+      }),
+    deleteVideo: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteCourseVideo(input.id);
+      }),
+    // Documentos
+    getDocuments: publicProcedure
+      .input(z.object({ videoId: z.number() }))
+      .query(async ({ input }) => {
+        return await getDocumentsByVideo(input.videoId);
+      }),
+    createDocument: publicProcedure
+      .input(z.object({
+        videoId: z.number(),
+        title: z.string().min(1),
+        fileUrl: z.string().min(1),
+        fileType: z.string().optional(),
+        fileSize: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await createCourseDocument(input);
+      }),
+    deleteDocument: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteCourseDocument(input.id);
+      }),
+    // Comentarios
+    getComments: publicProcedure
+      .input(z.object({ videoId: z.number() }))
+      .query(async ({ input }) => {
+        return await getApprovedCommentsByVideo(input.videoId);
+      }),
+    getPendingComments: publicProcedure.query(async () => {
+      return await getPendingComments();
+    }),
+    getAllComments: publicProcedure.query(async () => {
+      return await getAllCourseComments();
+    }),
+    createComment: publicProcedure
+      .input(z.object({
+        videoId: z.number(),
+        authorName: z.string().min(1),
+        authorEmail: z.string().email().optional(),
+        content: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const comment = await createCourseComment(input);
+        await notifyOwner({
+          title: 'Nuevo comentario pendiente de moderación',
+          content: `Video ID: ${input.videoId}\nAutor: ${input.authorName}\nComentario: ${input.content}`,
+        });
+        return comment;
+      }),
+    approveComment: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await updateCommentStatus(input.id, 'approved');
+      }),
+    rejectComment: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await updateCommentStatus(input.id, 'rejected');
+      }),
+    deleteComment: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteCourseComment(input.id);
+      }),
+    // Suscriptores
+    subscribe: publicProcedure
+      .input(z.object({
+        email: z.string().email().optional(),
+        name: z.string().optional(),
+        pushSubscription: z.string().optional(),
+        notifyByEmail: z.boolean().optional(),
+        notifyByPush: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await createCourseSubscriber(input);
+      }),
+    getSubscribers: publicProcedure.query(async () => {
+      return await getAllCourseSubscribers();
+    }),
+    deleteSubscriber: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteCourseSubscriber(input.id);
+      }),
+    // Notificar a suscriptores cuando se sube un nuevo curso
+    notifySubscribers: publicProcedure
+      .input(z.object({
+        courseTitle: z.string(),
+        courseDescription: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const subscribers = await getAllCourseSubscribers();
+        const emailSubscribers = subscribers.filter(s => s.notifyByEmail && s.email);
+        // Enviar notificación al owner
+        await notifyOwner({
+          title: `Nuevo curso publicado: ${input.courseTitle}`,
+          content: `Se notificó a ${emailSubscribers.length} suscriptores por email.`,
+        });
+        return { notified: emailSubscribers.length };
       }),
   }),
   discountCodes: router({

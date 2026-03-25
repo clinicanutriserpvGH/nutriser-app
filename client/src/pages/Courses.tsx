@@ -1,0 +1,629 @@
+import { useState, useMemo, useEffect } from "react";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { PlayCircle, FileText, MessageSquare, Bell, BellOff, ChevronLeft, Download, Clock, BookOpen, Send, CheckCircle } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
+
+type Video = {
+  id: number;
+  courseId: number;
+  title: string;
+  description: string | null;
+  videoUrl: string;
+  thumbnailUrl: string | null;
+  duration: string | null;
+  sortOrder: number;
+  isPublished: boolean;
+};
+
+type Course = {
+  id: number;
+  title: string;
+  description: string | null;
+  thumbnailUrl: string | null;
+  category: string | null;
+  isPublished: boolean;
+};
+
+type Document = {
+  id: number;
+  videoId: number;
+  title: string;
+  fileUrl: string;
+  fileType: string | null;
+  fileSize: number | null;
+};
+
+type Comment = {
+  id: number;
+  videoId: number;
+  authorName: string;
+  content: string;
+  createdAt: Date;
+};
+
+export default function Courses() {
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
+  const [subscribeEmail, setSubscribeEmail] = useState("");
+  const [subscribeName, setSubscribeName] = useState("");
+  const [subscribeEmailNotify, setSubscribeEmailNotify] = useState(true);
+  const [subscribePushNotify, setSubscribePushNotify] = useState(false);
+  const [pushSupported, setPushSupported] = useState(false);
+  const [commentName, setCommentName] = useState("");
+  const [commentEmail, setCommentEmail] = useState("");
+  const [commentContent, setCommentContent] = useState("");
+  const [commentSubmitted, setCommentSubmitted] = useState(false);
+  const [activeTab, setActiveTab] = useState<"videos" | "comments" | "documents">("videos");
+
+  const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
+  const pushSubscribeMutation = trpc.push.subscribe.useMutation();
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      setPushSupported(true);
+    }
+  }, []);
+
+  const { data: courses = [], isLoading } = trpc.courses.list.useQuery();
+  const { data: videos = [] } = trpc.courses.getVideos.useQuery(
+    { courseId: selectedCourse?.id ?? 0 },
+    { enabled: !!selectedCourse }
+  );
+  const { data: documents = [] } = trpc.courses.getDocuments.useQuery(
+    { videoId: selectedVideo?.id ?? 0 },
+    { enabled: !!selectedVideo }
+  );
+  const { data: comments = [] } = trpc.courses.getComments.useQuery(
+    { videoId: selectedVideo?.id ?? 0 },
+    { enabled: !!selectedVideo }
+  );
+
+  const subscribeMutation = trpc.courses.subscribe.useMutation({
+    onSuccess: () => {
+      toast.success("¡Suscrito! Te notificaremos cuando haya nuevos cursos.");
+      setShowSubscribeModal(false);
+      setSubscribeEmail("");
+      setSubscribeName("");
+    },
+    onError: () => {
+      toast.error("No se pudo completar la suscripción.");
+    },
+  });
+
+  const createCommentMutation = trpc.courses.createComment.useMutation({
+    onSuccess: () => {
+      setCommentSubmitted(true);
+      setCommentName("");
+      setCommentEmail("");
+      setCommentContent("");
+    },
+    onError: () => {
+      toast.error("No se pudo enviar el comentario.");
+    },
+  });
+
+  const urlBase64ToUint8Array = (base64String: string) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
+  };
+
+  const handleSubscribe = async () => {
+    if (!subscribeEmail) {
+      toast.error("Por favor ingresa tu correo electrónico.");
+      return;
+    }
+    let pushSubscriptionStr: string | undefined;
+    if (subscribePushNotify && pushSupported && vapidData?.publicKey) {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const registration = await navigator.serviceWorker.ready;
+          const sub = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidData.publicKey),
+          });
+          const subJson = sub.toJSON();
+          const p256dhKey = sub.getKey('p256dh')!;
+          const authKey = sub.getKey('auth')!;
+          const p256dhArray = Array.from(new Uint8Array(p256dhKey));
+          const authArray = Array.from(new Uint8Array(authKey));
+          await pushSubscribeMutation.mutateAsync({
+            endpoint: subJson.endpoint!,
+            p256dh: btoa(String.fromCharCode(...p256dhArray)),
+            auth: btoa(String.fromCharCode(...authArray)),
+          });
+          pushSubscriptionStr = JSON.stringify(subJson);
+        } else {
+          toast.error('Permiso de notificaciones denegado. Solo se suscribirá por correo.');
+        }
+      } catch (e) {
+        console.error('Error subscribing to push:', e);
+        toast.error('No se pudo activar las notificaciones push. Solo correo.');
+      }
+    }
+    subscribeMutation.mutate({
+      email: subscribeEmail,
+      name: subscribeName,
+      notifyByEmail: subscribeEmailNotify,
+      notifyByPush: subscribePushNotify && !!pushSubscriptionStr,
+      pushSubscription: pushSubscriptionStr,
+    });
+  };
+
+  const handleSubmitComment = () => {
+    if (!commentName || !commentContent) {
+      toast.error("Por favor completa tu nombre y comentario.");
+      return;
+    }
+    if (!selectedVideo) return;
+    createCommentMutation.mutate({
+      videoId: selectedVideo.id,
+      authorName: commentName,
+      authorEmail: commentEmail || undefined,
+      content: commentContent,
+    });
+  };
+
+  const categoryLabels: Record<string, string> = {
+    nutricion: "Nutrición",
+    recetas: "Recetas",
+    bienestar: "Bienestar",
+    estetica: "Estética",
+    general: "General",
+  };
+
+  const categoryColors: Record<string, string> = {
+    nutricion: "bg-green-100 text-green-800",
+    recetas: "bg-orange-100 text-orange-800",
+    bienestar: "bg-blue-100 text-blue-800",
+    estetica: "bg-pink-100 text-pink-800",
+    general: "bg-gray-100 text-gray-800",
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
+      <Navbar />
+
+      {/* Hero de Cursos */}
+      <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <BookOpen className="w-8 h-8 text-[#C5A55A]" />
+            <span className="text-[#C5A55A] font-semibold text-sm uppercase tracking-widest">Nutriser Academy</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
+            Cursos Gratuitos
+          </h1>
+          <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8">
+            Aprende sobre nutrición, bienestar y estética con nuestros expertos. Contenido exclusivo y actualizado para ti.
+          </p>
+          <Button
+            onClick={() => setShowSubscribeModal(true)}
+            className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
+          >
+            <Bell className="w-5 h-5" />
+            Recibir notificaciones de nuevos cursos
+          </Button>
+        </div>
+      </section>
+
+      <main className="flex-1 max-w-6xl mx-auto px-4 py-12 w-full">
+
+        {/* Vista de video seleccionado */}
+        {selectedVideo && selectedCourse ? (
+          <div>
+            {/* Breadcrumb */}
+            <button
+              onClick={() => { setSelectedVideo(null); setCommentSubmitted(false); setActiveTab("videos"); }}
+              className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8944A] mb-6 font-medium"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              Volver a {selectedCourse.title}
+            </button>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Reproductor principal */}
+              <div className="lg:col-span-2">
+                <div className="bg-black rounded-2xl overflow-hidden shadow-2xl aspect-video">
+                  <video
+                    key={selectedVideo.id}
+                    controls
+                    controlsList="nodownload"
+                    className="w-full h-full"
+                    poster={selectedVideo.thumbnailUrl || undefined}
+                    onContextMenu={(e) => e.preventDefault()}
+                  >
+                    <source src={selectedVideo.videoUrl} />
+                    Tu navegador no soporta la reproducción de video.
+                  </video>
+                </div>
+                <div className="mt-4">
+                  <h2 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-2">{selectedVideo.title}</h2>
+                  {selectedVideo.duration && (
+                    <div className="flex items-center gap-1 text-gray-500 text-sm mb-3">
+                      <Clock className="w-4 h-4" />
+                      <span>{selectedVideo.duration}</span>
+                    </div>
+                  )}
+                  {selectedVideo.description && (
+                    <p className="text-gray-600 leading-relaxed">{selectedVideo.description}</p>
+                  )}
+                </div>
+
+                {/* Tabs: Documentos y Comentarios */}
+                <div className="mt-8">
+                  <div className="flex gap-1 border-b border-gray-200 mb-6">
+                    <button
+                      onClick={() => setActiveTab("documents")}
+                      className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-colors ${activeTab === "documents" ? "bg-[#C5A55A] text-white" : "text-gray-600 hover:text-[#C5A55A]"}`}
+                    >
+                      <span className="flex items-center gap-2"><FileText className="w-4 h-4" />Material ({documents.length})</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("comments")}
+                      className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-colors ${activeTab === "comments" ? "bg-[#C5A55A] text-white" : "text-gray-600 hover:text-[#C5A55A]"}`}
+                    >
+                      <span className="flex items-center gap-2"><MessageSquare className="w-4 h-4" />Comentarios ({comments.length})</span>
+                    </button>
+                  </div>
+
+                  {/* Documentos */}
+                  {activeTab === "documents" && (
+                    <div>
+                      {documents.length === 0 ? (
+                        <p className="text-gray-500 text-center py-8">No hay material de apoyo para este video.</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {documents.map((doc) => (
+                            <a
+                              key={doc.id}
+                              href={doc.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-100 hover:border-[#C5A55A] hover:shadow-md transition-all group"
+                            >
+                              <div className="w-10 h-10 bg-[#C5A55A]/10 rounded-lg flex items-center justify-center group-hover:bg-[#C5A55A]/20">
+                                <FileText className="w-5 h-5 text-[#C5A55A]" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-[#1A1A1A] truncate">{doc.title}</p>
+                                <p className="text-xs text-gray-500 uppercase">{doc.fileType || "PDF"}{doc.fileSize ? ` · ${(doc.fileSize / 1024 / 1024).toFixed(1)} MB` : ""}</p>
+                              </div>
+                              <Download className="w-5 h-5 text-[#C5A55A] opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Comentarios */}
+                  {activeTab === "comments" && (
+                    <div>
+                      {/* Formulario de comentario */}
+                      {commentSubmitted ? (
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center mb-6">
+                          <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                          <p className="font-medium text-green-800">¡Comentario enviado!</p>
+                          <p className="text-green-600 text-sm">Tu comentario está pendiente de revisión y será publicado pronto.</p>
+                          <button onClick={() => setCommentSubmitted(false)} className="mt-3 text-sm text-[#C5A55A] hover:underline">Escribir otro comentario</button>
+                        </div>
+                      ) : (
+                        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+                          <h3 className="font-semibold text-[#1A1A1A] mb-4">Deja tu comentario</h3>
+                          <p className="text-xs text-gray-500 mb-4">Los comentarios son revisados antes de publicarse.</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                            <Input
+                              placeholder="Tu nombre *"
+                              value={commentName}
+                              onChange={(e) => setCommentName(e.target.value)}
+                            />
+                            <Input
+                              placeholder="Tu correo (opcional)"
+                              type="email"
+                              value={commentEmail}
+                              onChange={(e) => setCommentEmail(e.target.value)}
+                            />
+                          </div>
+                          <Textarea
+                            placeholder="Escribe tu comentario o pregunta..."
+                            value={commentContent}
+                            onChange={(e) => setCommentContent(e.target.value)}
+                            rows={3}
+                            className="mb-3"
+                          />
+                          <Button
+                            onClick={handleSubmitComment}
+                            disabled={createCommentMutation.isPending}
+                            className="bg-[#C5A55A] hover:bg-[#B8944A] text-white flex items-center gap-2"
+                          >
+                            <Send className="w-4 h-4" />
+                            {createCommentMutation.isPending ? "Enviando..." : "Enviar comentario"}
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Lista de comentarios aprobados */}
+                      {comments.length === 0 ? (
+                        <p className="text-gray-500 text-center py-4">Sé el primero en comentar.</p>
+                      ) : (
+                        <div className="space-y-4">
+                          {comments.map((comment) => (
+                            <div key={comment.id} className="bg-white rounded-xl border border-gray-100 p-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 bg-[#C5A55A]/20 rounded-full flex items-center justify-center text-[#C5A55A] font-bold text-sm">
+                                  {comment.authorName.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-[#1A1A1A] text-sm">{comment.authorName}</p>
+                                  <p className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}</p>
+                                </div>
+                              </div>
+                              <p className="text-gray-700 text-sm leading-relaxed">{comment.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Lista de videos del curso */}
+              <div className="lg:col-span-1">
+                <h3 className="font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
+                  <PlayCircle className="w-5 h-5 text-[#C5A55A]" />
+                  Videos del curso ({videos.length})
+                </h3>
+                <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+                  {videos.map((video, idx) => (
+                    <button
+                      key={video.id}
+                      onClick={() => { setSelectedVideo(video); setCommentSubmitted(false); }}
+                      className={`w-full text-left p-3 rounded-xl border transition-all ${selectedVideo.id === video.id ? "border-[#C5A55A] bg-[#C5A55A]/5" : "border-gray-100 bg-white hover:border-[#C5A55A]/50"}`}
+                    >
+                      <div className="flex gap-3">
+                        <div className="relative flex-shrink-0 w-16 h-12 bg-gray-100 rounded-lg overflow-hidden">
+                          {video.thumbnailUrl ? (
+                            <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-[#1A1A1A]">
+                              <PlayCircle className="w-6 h-6 text-[#C5A55A]" />
+                            </div>
+                          )}
+                          {selectedVideo.id === video.id && (
+                            <div className="absolute inset-0 bg-[#C5A55A]/30 flex items-center justify-center">
+                              <PlayCircle className="w-5 h-5 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-xs font-medium mb-0.5 ${selectedVideo.id === video.id ? "text-[#C5A55A]" : "text-gray-400"}`}>Video {idx + 1}</p>
+                          <p className="text-sm font-medium text-[#1A1A1A] line-clamp-2 leading-tight">{video.title}</p>
+                          {video.duration && <p className="text-xs text-gray-400 mt-1 flex items-center gap-1"><Clock className="w-3 h-3" />{video.duration}</p>}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : selectedCourse ? (
+          /* Vista de videos de un curso */
+          <div>
+            <button
+              onClick={() => setSelectedCourse(null)}
+              className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8944A] mb-6 font-medium"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              Todos los cursos
+            </button>
+
+            <div className="flex items-start gap-4 mb-8">
+              {selectedCourse.thumbnailUrl && (
+                <img src={selectedCourse.thumbnailUrl} alt={selectedCourse.title} className="w-24 h-24 rounded-xl object-cover shadow-md" />
+              )}
+              <div>
+                <Badge className={`mb-2 ${categoryColors[selectedCourse.category || "general"] || "bg-gray-100 text-gray-800"}`}>
+                  {categoryLabels[selectedCourse.category || "general"] || selectedCourse.category}
+                </Badge>
+                <h2 className="text-3xl font-serif font-bold text-[#1A1A1A]">{selectedCourse.title}</h2>
+                {selectedCourse.description && <p className="text-gray-600 mt-2">{selectedCourse.description}</p>}
+                <p className="text-sm text-gray-400 mt-1">{videos.length} video{videos.length !== 1 ? "s" : ""}</p>
+              </div>
+            </div>
+
+            {videos.length === 0 ? (
+              <div className="text-center py-16">
+                <PlayCircle className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                <p className="text-gray-500">Este curso aún no tiene videos publicados.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {videos.map((video, idx) => (
+                  <button
+                    key={video.id}
+                    onClick={() => { setSelectedVideo(video); setActiveTab("videos"); }}
+                    className="text-left bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-[#C5A55A] hover:shadow-lg transition-all group"
+                  >
+                    <div className="relative aspect-video bg-[#1A1A1A]">
+                      {video.thumbnailUrl ? (
+                        <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <PlayCircle className="w-12 h-12 text-[#C5A55A]" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                        <div className="w-14 h-14 bg-[#C5A55A] rounded-full flex items-center justify-center shadow-lg">
+                          <PlayCircle className="w-8 h-8 text-white" />
+                        </div>
+                      </div>
+                      {video.duration && (
+                        <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded flex items-center gap-1">
+                          <Clock className="w-3 h-3" />{video.duration}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <p className="text-xs text-[#C5A55A] font-medium mb-1">Video {idx + 1}</p>
+                      <h3 className="font-semibold text-[#1A1A1A] line-clamp-2 leading-tight">{video.title}</h3>
+                      {video.description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{video.description}</p>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Vista principal: lista de cursos */
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-serif font-bold text-[#1A1A1A]">Todos los cursos</h2>
+                <p className="text-gray-500 text-sm mt-1">{courses.length} curso{courses.length !== 1 ? "s" : ""} disponible{courses.length !== 1 ? "s" : ""}</p>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1,2,3].map(i => (
+                  <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
+                    <div className="aspect-video bg-gray-100" />
+                    <div className="p-5">
+                      <div className="h-4 bg-gray-100 rounded w-1/3 mb-3" />
+                      <div className="h-6 bg-gray-100 rounded w-3/4 mb-2" />
+                      <div className="h-4 bg-gray-100 rounded w-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : courses.length === 0 ? (
+              <div className="text-center py-24">
+                <BookOpen className="w-20 h-20 text-gray-200 mx-auto mb-6" />
+                <h3 className="text-xl font-semibold text-gray-400 mb-2">Próximamente</h3>
+                <p className="text-gray-400 max-w-md mx-auto">Estamos preparando contenido exclusivo para ti. Suscríbete para ser el primero en enterarte.</p>
+                <Button
+                  onClick={() => setShowSubscribeModal(true)}
+                  className="mt-6 bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full"
+                >
+                  <Bell className="w-4 h-4 mr-2" />
+                  Notifícame cuando haya cursos
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {courses.map((course) => (
+                  <button
+                    key={course.id}
+                    onClick={() => setSelectedCourse(course)}
+                    className="text-left bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-[#C5A55A] hover:shadow-xl transition-all group"
+                  >
+                    <div className="relative aspect-video bg-[#1A1A1A]">
+                      {course.thumbnailUrl ? (
+                        <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <BookOpen className="w-12 h-12 text-[#C5A55A]" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                        <div className="bg-[#C5A55A] text-white text-sm font-semibold px-4 py-2 rounded-full">Ver curso</div>
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      <Badge className={`mb-3 text-xs ${categoryColors[course.category || "general"] || "bg-gray-100 text-gray-800"}`}>
+                        {categoryLabels[course.category || "general"] || course.category}
+                      </Badge>
+                      <h3 className="font-serif font-bold text-[#1A1A1A] text-lg leading-tight mb-2 group-hover:text-[#C5A55A] transition-colors">{course.title}</h3>
+                      {course.description && <p className="text-sm text-gray-500 line-clamp-2">{course.description}</p>}
+                      <div className="flex items-center gap-1 mt-3 text-[#C5A55A] text-sm font-medium">
+                        <PlayCircle className="w-4 h-4" />
+                        <span>Ver videos →</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Modal de suscripción */}
+      <Dialog open={showSubscribeModal} onOpenChange={setShowSubscribeModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl flex items-center gap-2">
+              <Bell className="w-5 h-5 text-[#C5A55A]" />
+              Recibir notificaciones
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-500 text-sm">Te avisaremos cuando publiquemos nuevos cursos y contenido gratuito.</p>
+          <div className="space-y-3 mt-2">
+            <Input
+              placeholder="Tu nombre"
+              value={subscribeName}
+              onChange={(e) => setSubscribeName(e.target.value)}
+            />
+            <Input
+              placeholder="Tu correo electrónico *"
+              type="email"
+              value={subscribeEmail}
+              onChange={(e) => setSubscribeEmail(e.target.value)}
+            />
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={subscribeEmailNotify}
+                onChange={(e) => setSubscribeEmailNotify(e.target.checked)}
+                className="rounded"
+              />
+              Recibir notificaciones por correo
+            </label>
+            {pushSupported && (
+              <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={subscribePushNotify}
+                  onChange={(e) => setSubscribePushNotify(e.target.checked)}
+                  className="rounded"
+                />
+                Recibir notificaciones push en este dispositivo
+              </label>
+            )}
+          </div>
+          <div className="flex gap-3 mt-4">
+            <Button variant="outline" onClick={() => setShowSubscribeModal(false)} className="flex-1">Cancelar</Button>
+            <Button
+              onClick={handleSubscribe}
+              disabled={subscribeMutation.isPending}
+              className="flex-1 bg-[#C5A55A] hover:bg-[#B8944A] text-white"
+            >
+              {subscribeMutation.isPending ? "Suscribiendo..." : "Suscribirme"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Footer />
+      <WhatsAppButton />
+    </div>
+  );
+}

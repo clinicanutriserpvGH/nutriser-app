@@ -16,6 +16,7 @@ const navLinks = [
   { label: "Servicios", href: "#servicios" },
   { label: "Nosotros", href: "#nosotros" },
   { label: "Contacto", href: "#contacto" },
+  { label: "Cursos Gratuitos", href: "/cursos" },
   { label: "Tienda eBook", href: "/ebook" },
   { label: "Comprar Programa Nutrición", href: "/memberships" },
   { label: "Portal de Salud", href: "https://portaldesaludnutriser.club", external: true },

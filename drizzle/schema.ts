@@ -381,3 +381,89 @@ export const discountCodes = mysqlTable("discountCodes", {
 });
 export type DiscountCode = typeof discountCodes.$inferSelect;
 export type InsertDiscountCode = typeof discountCodes.$inferInsert;
+
+/**
+ * Cursos gratuitos de nutrición
+ * El administrador crea y gestiona los cursos desde el panel
+ */
+export const courses = mysqlTable("courses", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  thumbnailUrl: text("thumbnailUrl"), // Imagen de portada del curso
+  category: varchar("category", { length: 100 }).default("nutricion"), // nutricion, recetas, bienestar, etc.
+  isPublished: boolean("isPublished").default(false).notNull(), // Admin publica cuando está listo
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type Course = typeof courses.$inferSelect;
+export type InsertCourse = typeof courses.$inferInsert;
+
+/**
+ * Videos de cada curso
+ * Almacenados en S3, solo visualización (sin descarga)
+ */
+export const courseVideos = mysqlTable("courseVideos", {
+  id: int("id").autoincrement().primaryKey(),
+  courseId: int("courseId").notNull(), // FK a courses.id
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  videoUrl: text("videoUrl").notNull(), // URL de S3 del video
+  thumbnailUrl: text("thumbnailUrl"), // Miniatura del video
+  duration: varchar("duration", { length: 20 }), // ej: "12:34"
+  sortOrder: int("sortOrder").default(0).notNull(), // Orden dentro del curso
+  isPublished: boolean("isPublished").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type CourseVideo = typeof courseVideos.$inferSelect;
+export type InsertCourseVideo = typeof courseVideos.$inferInsert;
+
+/**
+ * Documentos de apoyo por video
+ * PDFs y archivos descargables asociados a cada video
+ */
+export const courseDocuments = mysqlTable("courseDocuments", {
+  id: int("id").autoincrement().primaryKey(),
+  videoId: int("videoId").notNull(), // FK a courseVideos.id
+  title: varchar("title", { length: 255 }).notNull(),
+  fileUrl: text("fileUrl").notNull(), // URL de S3 del documento
+  fileType: varchar("fileType", { length: 50 }).default("pdf"), // pdf, docx, etc.
+  fileSize: int("fileSize"), // Tamaño en bytes
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type CourseDocument = typeof courseDocuments.$inferSelect;
+export type InsertCourseDocument = typeof courseDocuments.$inferInsert;
+
+/**
+ * Comentarios en videos de cursos
+ * Requieren aprobación del admin antes de mostrarse
+ */
+export const courseComments = mysqlTable("courseComments", {
+  id: int("id").autoincrement().primaryKey(),
+  videoId: int("videoId").notNull(), // FK a courseVideos.id
+  authorName: varchar("authorName", { length: 255 }).notNull(),
+  authorEmail: varchar("authorEmail", { length: 320 }),
+  content: text("content").notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  approvedAt: timestamp("approvedAt"),
+});
+export type CourseComment = typeof courseComments.$inferSelect;
+export type InsertCourseComment = typeof courseComments.$inferInsert;
+
+/**
+ * Suscriptores a notificaciones de nuevos cursos
+ * Email y/o push notifications
+ */
+export const courseSubscribers = mysqlTable("courseSubscribers", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }),
+  name: varchar("name", { length: 255 }),
+  pushSubscription: text("pushSubscription"), // JSON del push subscription
+  notifyByEmail: boolean("notifyByEmail").default(true).notNull(),
+  notifyByPush: boolean("notifyByPush").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type CourseSubscriber = typeof courseSubscribers.$inferSelect;
+export type InsertCourseSubscriber = typeof courseSubscribers.$inferInsert;

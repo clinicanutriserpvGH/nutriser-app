@@ -6,6 +6,8 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { generateCouponImage } from "../couponImageGenerator";
+import { getPromotionById } from "../db";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -133,10 +135,8 @@ async function startServer() {
     try {
       const promoId = parseInt(req.params.id);
       if (isNaN(promoId)) return res.status(400).send('Invalid ID');
-      const { getPromotionById } = await import("../db");
       const promo = await getPromotionById(promoId);
       if (!promo) return res.status(404).send('Not found');
-      const { generateCouponImage } = await import("../couponImageGenerator");
       const pngBuffer = await generateCouponImage({
         title: promo.title || 'Oferta Especial',
         description: promo.description || undefined,

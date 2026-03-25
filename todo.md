@@ -661,3 +661,9 @@
 - [x] Crear página dedicada /cupon/:id en React que muestre el cupón directamente
 - [ ] Actualizar redirect del servidor para apuntar a /cupon/:id en lugar de /#cupon-:id
 - [x] Verificar que la imagen OG aparece en el preview de WhatsApp
+
+## Correcciones Imagen OG WhatsApp - Mar 25 2026
+
+- [x] Corregir imagen OG en blanco — activar loadSystemFonts en resvg y usar fuentes Noto disponibles en servidor
+- [x] Descargar imagen del cupón como base64 para incluirla en el SVG (resvg no carga URLs externas HTTP)
+- [x] Panel derecho de imagen OG ahora muestra la foto real del tratamiento con overlay de marca

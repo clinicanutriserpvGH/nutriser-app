@@ -1,6 +1,13 @@
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import { execFile } from "child_process";
+import { promisify } from "util";
+import { writeFile, readFile, unlink } from "fs/promises";
+import { tmpdir } from "os";
+import path from "path";
+
+const execFileAsync = promisify(execFile);
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -71,29 +78,64 @@ async function startServer() {
           const ext = originalFilename.includes('.')
             ? originalFilename.split('.').pop()?.toLowerCase() || 'bin'
             : 'bin';
-          const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
           // Choose S3 folder based on MIME type or extension
           const videoExts = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v', 'wmv', 'flv', '3gp'];
           const docExts = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xlsx', 'xls'];
           let folder = 'uploads';
-          if (fileType.startsWith('video/') || videoExts.includes(ext)) folder = 'course-videos';
-          else if (
-            fileType === 'application/pdf' ||
+          const isVideo = fileType.startsWith('video/') || videoExts.includes(ext);
+          const isDoc = fileType === 'application/pdf' ||
             fileType.includes('document') ||
             fileType.includes('spreadsheet') ||
             fileType.includes('presentation') ||
-            docExts.includes(ext)
-          ) folder = 'course-docs';
+            docExts.includes(ext);
+          if (isVideo) folder = 'course-videos';
+          else if (isDoc) folder = 'course-docs';
           else if (fileType.startsWith('image/')) folder = 'promotions';
-          // Normalizar MIME type para MOV (QuickTime) - algunos navegadores lo envian como application/octet-stream
+
+          let finalBuffer = fileBuffer;
+          let finalExt = ext;
           let uploadMimeType = fileType;
-          if (ext === 'mov' && (fileType === 'application/octet-stream' || !fileType.startsWith('video/'))) {
-            uploadMimeType = 'video/quicktime';
+
+          // Convertir videos no-MP4 (MOV, AVI, MKV, etc.) a MP4 para compatibilidad universal
+          const needsConversion = isVideo && ext !== 'mp4' && ext !== 'webm';
+          if (needsConversion) {
+            console.log(`[Upload] Converting ${ext} to mp4 for browser compatibility...`);
+            const tmpInput = path.join(tmpdir(), `upload-in-${Date.now()}.${ext}`);
+            const tmpOutput = path.join(tmpdir(), `upload-out-${Date.now()}.mp4`);
+            try {
+              await writeFile(tmpInput, fileBuffer);
+              await execFileAsync('ffmpeg', [
+                '-i', tmpInput,
+                '-c:v', 'libx264',   // H.264 codec - compatible con todos los navegadores
+                '-c:a', 'aac',       // AAC audio
+                '-movflags', '+faststart', // Permite reproducción mientras carga
+                '-preset', 'fast',   // Balance entre velocidad y calidad
+                '-crf', '23',        // Calidad visual buena (0=lossless, 51=peor)
+                '-y',                // Sobreescribir si existe
+                tmpOutput
+              ], { timeout: 300000 }); // 5 min timeout para conversión
+              finalBuffer = await readFile(tmpOutput);
+              finalExt = 'mp4';
+              uploadMimeType = 'video/mp4';
+              console.log(`[Upload] Conversion complete: ${fileBuffer.length} bytes -> ${finalBuffer.length} bytes`);
+            } catch (convErr) {
+              console.error('[Upload] FFmpeg conversion failed, uploading original:', convErr);
+              // Si falla la conversión, subir el original
+              finalBuffer = fileBuffer;
+              finalExt = ext;
+              uploadMimeType = ext === 'mov' ? 'video/quicktime' : (fileType || 'video/mp4');
+            } finally {
+              // Limpiar archivos temporales
+              unlink(tmpInput).catch(() => {});
+              unlink(tmpOutput).catch(() => {});
+            }
           } else if (ext === 'mp4' && !fileType.startsWith('video/')) {
             uploadMimeType = 'video/mp4';
           }
+
+          const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${finalExt}`;
           const relKey = `${folder}/${safeName}`;
-          const { url } = await storagePut(relKey, fileBuffer, uploadMimeType);
+          const { url } = await storagePut(relKey, finalBuffer, uploadMimeType);
           res.json({ url });
         } catch (error) {
           console.error("Upload error:", error);

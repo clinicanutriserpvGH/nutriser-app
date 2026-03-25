@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, videoId, title, fileUrl, fileType, fileSize FROM courseDocuments ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT id, videoId, title, fileUrl, fileType, fileSize FROM courseDocuments ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "videoId": "30001",
+      "title": "No_es_la_dieta_es_tu_mente_EDITADO.docx",
+      "fileUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/course-docs/1774443518498-v9ci2w.docx",
+      "fileType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "fileSize": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvideoId\ttitle\tfileUrl\tfileType\tfileSize\n1\t30001\tNo_es_la_dieta_es_tu_mente_EDITADO.docx\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/course-docs/1774443518498-v9ci2w.docx\tapplication/vnd.openxmlformats-officedocument.wordprocessingml.document\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 371
+}

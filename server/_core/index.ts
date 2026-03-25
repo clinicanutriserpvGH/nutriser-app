@@ -37,18 +37,20 @@ async function startServer() {
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   
-  // Upload endpoint for promotions and other images - save to S3
+  // Upload endpoint for promotions, course videos, and documents - save to S3
   app.post("/api/upload", async (req, res) => {
     try {
       const { storagePut } = await import("../storage");
       const busboy = await import("busboy");
-      const bb = busboy.default({ headers: req.headers });
+      const bb = busboy.default({ headers: req.headers, limits: { fileSize: 500 * 1024 * 1024 } }); // 500MB max
       let fileBuffer: Buffer | null = null;
-      let fileType = "image/jpeg";
+      let fileType = "application/octet-stream";
+      let originalFilename = "file";
       
       bb.on("file", (fieldname: string, file: any, info: any) => {
         const chunks: Buffer[] = [];
-        fileType = info.mimeType || "image/jpeg";
+        fileType = info.mimeType || "application/octet-stream";
+        originalFilename = info.filename || "file";
         file.on("data", (chunk: Buffer) => chunks.push(chunk));
         file.on("end", () => {
           fileBuffer = Buffer.concat(chunks);
@@ -60,8 +62,23 @@ async function startServer() {
           if (!fileBuffer) {
             return res.status(400).json({ error: "No file uploaded" });
           }
-          const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-          const relKey = `promotions/${filename}`;
+          // Preserve original extension for correct playback/download
+          const ext = originalFilename.includes('.')
+            ? originalFilename.split('.').pop()?.toLowerCase() || 'bin'
+            : 'bin';
+          const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+          // Choose S3 folder based on MIME type
+          let folder = 'uploads';
+          if (fileType.startsWith('video/')) folder = 'course-videos';
+          else if (
+            fileType === 'application/pdf' ||
+            fileType.includes('document') ||
+            fileType.includes('spreadsheet') ||
+            fileType.includes('presentation') ||
+            ext === 'pdf' || ext === 'doc' || ext === 'docx' || ext === 'ppt' || ext === 'pptx' || ext === 'xlsx'
+          ) folder = 'course-docs';
+          else if (fileType.startsWith('image/')) folder = 'promotions';
+          const relKey = `${folder}/${safeName}`;
           const { url } = await storagePut(relKey, fileBuffer, fileType);
           res.json({ url });
         } catch (error) {

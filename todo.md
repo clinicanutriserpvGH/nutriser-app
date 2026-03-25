@@ -736,8 +736,14 @@
 - [x] Corregir test discountCodes.test.ts para usar funciones correctas (validateDiscountCode)
 
 ## Correcciones Sesión Mar 25 - Formularios y Cursos
-- [ ] Formulario servicios: mostrar precio original tachado + precio con descuento aplicado
-- [ ] Formulario programas nutrición: agregar campo de cupón igual que servicios, sin leyenda genérica
-- [ ] Formulario productos: mostrar precio original tachado + precio con descuento
-- [ ] Página Cursos: quitar 'Gratuitos', cambiar a 'Nutriser Academy' con texto de suscripción
-- [ ] Hero: corregir hueco visual (botón Cursos Nutriser solo en su fila, sin hueco)
+- [x] Formulario servicios: mostrar precio original tachado + precio con descuento aplicado
+- [x] Formulario programas nutrición: agregar campo de cupón igual que servicios, sin leyenda genérica
+- [x] Formulario productos: mostrar precio original tachado + precio con descuento
+- [x] Página Cursos: quitar 'Gratuitos', cambiar a 'Nutriser Academy' con texto de suscripción
+- [x] Hero: corregir hueco visual (botón Cursos Nutriser col-span-2)
+
+## Sesión Mar 25 - Correcciones urgentes
+- [x] Agregar botón de regreso en la página de Cursos
+- [x] Panel admin Cursos: agregar subida de videos por curso (UI mejorada con selector visual)
+- [x] Panel admin Cursos: agregar subida de documentos por video (UI mejorada)
+- [x] Corregir endpoint /api/upload para aceptar videos y documentos con extensión correcta (500MB)

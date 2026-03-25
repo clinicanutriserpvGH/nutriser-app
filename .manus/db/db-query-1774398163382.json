@@ -1,0 +1,14 @@
+{
+  "query": "SELECT id, title FROM promotions LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT id, title FROM promotions LIMIT 5;",
+  "rows": [
+    {
+      "id": "180007",
+      "title": "20 % de Descuento en sesión Hollywood Peel"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\n180007\t20 % de Descuento en sesión Hollywood Peel\n",
+  "stderr": "",
+  "execution_time_ms": 350
+}

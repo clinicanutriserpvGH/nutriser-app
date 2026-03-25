@@ -655,3 +655,9 @@
 - [x] Texto "Cuponera de Descuentos" en lugar de "Cuponera de Promociones"
 - [x] Reorganizar tabs del AdminDashboard para que no se amonten en móvil
 - [ ] Bug crítico: ruta /cupon/:id devuelve 404 en producción al acceder desde WhatsApp
+
+## Correcciones Sesión Actual - Deep Link Cupones WhatsApp
+
+- [x] Crear página dedicada /cupon/:id en React que muestre el cupón directamente
+- [ ] Actualizar redirect del servidor para apuntar a /cupon/:id en lugar de /#cupon-:id
+- [x] Verificar que la imagen OG aparece en el preview de WhatsApp

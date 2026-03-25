@@ -88,7 +88,7 @@ async function startServer() {
         : promo.price ? ` | ${promo.price}` : "";
       const fullDescription = description + priceInfo;
       const canonicalUrl = `https://nutriserpv.com/api/og/cupon/${promoId}`;
-      const redirectUrl = `https://nutriserpv.com/#cupon-${promoId}`;
+      const redirectUrl = `https://nutriserpv.com/cupon/${promoId}`;
       // Use the generated coupon PNG image as og:image (1200x630)
       const ogImage = `https://nutriserpv.com/api/og/cupon-image/${promoId}`;
 
@@ -154,8 +154,18 @@ async function startServer() {
   });
 
   // /cupon/:id — shareable URL for coupons (used in WhatsApp, etc.)
-  app.get("/cupon/:id", async (req, res) => {
-    await buildCouponOGPage(parseInt(req.params.id), res);
+  // Only serve OG HTML to bots (WhatsApp, Facebook, Telegram, etc.)
+  // Human users get the React SPA which handles /cupon/:id as a dedicated page
+  app.get("/cupon/:id", async (req, res, next) => {
+    const ua = req.headers['user-agent'] || '';
+    const isBot = /facebookexternalhit|WhatsApp|Twitterbot|Slackbot|TelegramBot|LinkedInBot|Discordbot|Pinterest|Googlebot|bingbot|Applebot|Embedly|Quora|Snapchat|vkShare|W3C_Validator|curl|wget|python-requests/i.test(ua);
+    if (isBot) {
+      // Serve OG HTML for bots so they can read meta tags
+      await buildCouponOGPage(parseInt(req.params.id), res);
+    } else {
+      // Let Vite/React handle this route for human users
+      next();
+    }
   });
 
   // Legacy /api/og/cupon/:id — keep for backwards compatibility

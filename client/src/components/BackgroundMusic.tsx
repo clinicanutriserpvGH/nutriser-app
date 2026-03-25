@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-const MUSIC_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/bossa-nova-bg_93cdb5ff.mp3";
+const MUSIC_URL = "https://res.cloudinary.com/dikinwkjq/video/upload/v1774456133/nutriser-audio/bossa-nova-bg.mp3";
 
 export default function BackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement | null>(null);

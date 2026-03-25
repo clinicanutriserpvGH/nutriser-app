@@ -784,3 +784,11 @@
 
 - [x] Agregar botón "Eliminar video" en panel admin de cursos
 - [x] Agregar procedimiento tRPC deleteCourseVideo en backend
+
+## Mejoras UX - Sesión Actual
+
+- [x] Pre-llenar correo del admin en la página de login (solo ingresar contraseña)
+- [x] Agregar botón "Copiar" para la CLABE interbancaria en la página de membresías
+- [x] Sistema de recuperación de contraseña por correo (link de restablecimiento)
+- [x] Página de restablecer contraseña con token seguro
+- [x] Botón "¿Olvidaste tu contraseña?" en login del admin

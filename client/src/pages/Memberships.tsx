@@ -4,9 +4,49 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Check, Upload, Clock, ArrowLeft, Tag, CheckCircle2, Loader2 } from "lucide-react";
+import { Check, Upload, Clock, ArrowLeft, Tag, CheckCircle2, Loader2, Copy, CheckCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+
+// Componente reutilizable para copiar texto al portapapeles
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback para navegadores sin clipboard API
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      title="Copiar CLABE"
+      className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all ${
+        copied
+          ? 'bg-green-100 text-green-700 border border-green-300'
+          : 'bg-[#C5A55A]/15 text-[#C5A55A] border border-[#C5A55A]/30 hover:bg-[#C5A55A]/25'
+      }`}
+    >
+      {copied ? (
+        <><CheckCheck className="w-3 h-3" /> Copiado</>
+      ) : (
+        <><Copy className="w-3 h-3" /> Copiar</>
+      )}
+    </button>
+  );
+}
 
 const BANK_INFO = {
   bank: "Banamex",
@@ -426,9 +466,12 @@ export default function Memberships() {
                   <p className="text-sm text-[#1A1A1A]/70">
                     <strong>Banco:</strong> {BANK_INFO.bank}
                   </p>
-                  <p className="text-sm text-[#1A1A1A]/70">
-                    <strong>CLABE Interbancaria:</strong> {BANK_INFO.account}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-sm text-[#1A1A1A]/70 flex-1">
+                      <strong>CLABE Interbancaria:</strong> {BANK_INFO.account}
+                    </p>
+                    <CopyButton text={BANK_INFO.account} />
+                  </div>
                   <p className="text-xs text-[#1A1A1A]/50 mt-2">
                     Concepto: <strong>{formData.clientName ? `${formData.clientName} – ` : "Tu nombre – "}{PROGRAMS.find(p => p.id === selectedProgram)?.name}</strong>
                   </p>

@@ -208,6 +208,31 @@ export async function createAdminCredential(data: InsertAdminCredential) {
   return await db.insert(adminCredentials).values(data);
 }
 
+export async function setAdminResetToken(email: string, token: string, expiresAt: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(adminCredentials)
+    .set({ resetToken: token, resetTokenExpiresAt: expiresAt })
+    .where(eq(adminCredentials.email, email));
+}
+
+export async function getAdminByResetToken(token: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(adminCredentials)
+    .where(eq(adminCredentials.resetToken, token))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateAdminPassword(email: string, newPasswordHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(adminCredentials)
+    .set({ passwordHash: newPasswordHash, resetToken: null, resetTokenExpiresAt: null })
+    .where(eq(adminCredentials.email, email));
+}
+
 
 // Coupon queries
 export async function getCouponByCode(code: string) {

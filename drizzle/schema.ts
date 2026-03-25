@@ -93,6 +93,8 @@ export const adminCredentials = mysqlTable("adminCredentials", {
   id: int("id").autoincrement().primaryKey(),
   email: varchar("email", { length: 320 }).notNull().unique(),
   passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  resetToken: varchar("resetToken", { length: 128 }),       // Token para restablecer contraseña
+  resetTokenExpiresAt: timestamp("resetTokenExpiresAt"),    // Expira en 1 hora
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

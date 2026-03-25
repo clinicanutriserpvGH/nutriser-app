@@ -411,3 +411,48 @@ export async function sendCouponApprovedEmail(
     return false;
   }
 }
+
+export async function sendPasswordResetEmail(adminEmail: string, resetLink: string) {
+  const transporter = getEmailTransporter();
+
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #C5A55A;">Nutriser - Panel de Administración</h1>
+          
+          <p>Recibiste una solicitud para restablecer la contraseña del panel de administración.</p>
+          
+          <div style="background-color: #f5f5f5; padding: 20px; border-left: 4px solid #C5A55A; margin: 20px 0; text-align: center;">
+            <p style="margin-bottom: 16px;">Haz clic en el siguiente botón para crear una nueva contraseña:</p>
+            <a href="${resetLink}" 
+               style="background-color: #C5A55A; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
+              Restablecer Contraseña
+            </a>
+          </div>
+          
+          <p style="color: #666; font-size: 14px;">
+            Este enlace es válido por <strong>1 hora</strong>. Si no solicitaste este cambio, puedes ignorar este correo.
+          </p>
+          
+          <p style="color: #999; font-size: 12px; margin-top: 20px;">
+            Si el botón no funciona, copia y pega este enlace en tu navegador:<br/>
+            <a href="${resetLink}" style="color: #C5A55A;">${resetLink}</a>
+          </p>
+          
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="color: #999; font-size: 12px; text-align: center;">
+            Nutriser Aesthetic &amp; Nutrition — Puerto Vallarta
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from: `"Nutriser Admin" <${ENV.gmailUser}>`,
+    to: adminEmail,
+    subject: "Restablecer contraseña — Panel Admin Nutriser",
+    html: htmlContent,
+  });
+}

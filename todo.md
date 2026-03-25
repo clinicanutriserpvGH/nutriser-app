@@ -792,3 +792,4 @@
 - [x] Sistema de recuperación de contraseña por correo (link de restablecimiento)
 - [x] Página de restablecer contraseña con token seguro
 - [x] Botón "¿Olvidaste tu contraseña?" en login del admin
+- [x] Mostrar código único de acceso en cada membresía del panel admin

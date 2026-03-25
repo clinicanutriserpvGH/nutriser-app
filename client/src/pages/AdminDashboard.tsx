@@ -1099,6 +1099,7 @@ export default function AdminDashboard() {
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Cliente</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Email</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Programa</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Código de Acceso</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Estado</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Comprobante</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Acciones</th>
@@ -1113,6 +1114,15 @@ export default function AdminDashboard() {
                             <td className="py-3 px-4">{membership.clientEmail}</td>
                             <td className="py-3 px-4 capitalize">
                               {membership.programType === "basic" ? "Básico" : "Premium"}
+                            </td>
+                            <td className="py-3 px-4">
+                              {membership.accessCode ? (
+                                <span className="font-mono text-sm font-bold tracking-widest bg-[#C5A55A]/10 border border-[#C5A55A]/30 text-[#C5A55A] px-2 py-1 rounded">
+                                  {membership.accessCode}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-[#999] italic">Sin código</span>
+                              )}
                             </td>
                             <td className="py-3 px-4">
                               <span
@@ -1167,7 +1177,7 @@ export default function AdminDashboard() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={7} className="py-8 text-center text-[#999]">
+                          <td colSpan={8} className="py-8 text-center text-[#999]">
                             No hay membresías
                           </td>
                         </tr>

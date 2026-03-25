@@ -15,7 +15,7 @@ import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
-import { adminCredentials } from "../drizzle/schema";
+import { adminCredentials, pushSubscriptions } from "../drizzle/schema";
 import { getDb } from "./db";
 
 export const appRouter = router({
@@ -906,6 +906,31 @@ export const appRouter = router({
       const subs = await getAllPushSubscriptions();
       return { count: subs.length };
     }),
+
+    // Listar todas las suscripciones push con detalle (solo admin)
+    listSubscriptions: publicProcedure.query(async () => {
+      const subs = await getAllPushSubscriptions();
+      return subs.map(sub => ({
+        id: sub.id,
+        // Detectar tipo de dispositivo por el endpoint
+        deviceType: sub.endpoint.includes('apple.com') ? 'Apple (Safari/iPhone)'
+          : sub.endpoint.includes('googleapis.com') ? 'Android (Chrome)'
+          : sub.endpoint.includes('mozilla.com') || sub.endpoint.includes('firefox') ? 'Firefox'
+          : 'Otro',
+        endpointPreview: sub.endpoint.substring(0, 50) + '...',
+        createdAt: sub.createdAt,
+      }));
+    }),
+
+    // Eliminar una suscripción push por ID (solo admin)
+    deleteById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Base de datos no disponible' });
+        await db.delete(pushSubscriptions).where(eq(pushSubscriptions.id, input.id));
+        return { success: true };
+      }),
   }),
 
   // ─── Catálogo de servicios (admin CRUD + público) ──────────────────────────

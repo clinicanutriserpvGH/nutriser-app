@@ -150,8 +150,9 @@ export default function AdminDashboard() {
   // Notificaciones push de prueba
   const [pushTestTitle, setPushTestTitle] = useState('');
   const [pushTestBody, setPushTestBody] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState<'title' | 'body' | null>(null);
 
-  const { data: pushSubscribersCount } = trpc.push.countSubscribers.useQuery(undefined, {
+  const { data: pushSubscribersCount, refetch: refetchPushCount } = trpc.push.countSubscribers.useQuery(undefined, {
     enabled: isAuthenticated,
   });
 
@@ -166,6 +167,19 @@ export default function AdminDashboard() {
       }
     },
     onError: (error) => toast.error('Error al enviar: ' + error.message),
+  });
+
+  const { data: pushSubscriptionsList = [], refetch: refetchPushList } = trpc.push.listSubscriptions.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const deletePushByIdMutation = trpc.push.deleteById.useMutation({
+    onSuccess: () => {
+      toast.success('Suscripción eliminada');
+      refetchPushList();
+      refetchPushCount();
+    },
+    onError: (error) => toast.error('Error al eliminar: ' + error.message),
   });
 
   // Catálogo de servicios
@@ -2221,38 +2235,92 @@ export default function AdminDashboard() {
                 <div className="bg-gradient-to-r from-[#C5A55A]/10 to-[#C5A55A]/5 border border-[#C5A55A]/30 rounded-xl p-4 mb-4">
                   <h4 className="font-bold text-[#1A1A1A] flex items-center gap-2 mb-1">
                     <BellRing className="w-4 h-4 text-[#C5A55A]" />
-                    Prueba de Notificación Push
+                    Enviar Notificación Push
                   </h4>
                   <p className="text-sm text-[#666] mb-3">
-                    Envía una notificación a todos los dispositivos suscritos para verificar que el sonido funciona.
+                    Envía una notificación a todos los dispositivos suscritos.
                     Dispositivos activos: <strong className="text-[#C5A55A]">{pushSubscribersCount?.count ?? 0}</strong>
                   </p>
-                  <div className="space-y-2 mb-3">
-                    <div>
-                      <label className="text-xs font-semibold text-[#666] block mb-1">Título (opcional)</label>
-                      <input
-                        type="text"
-                        value={pushTestTitle}
-                        onChange={(e) => setPushTestTitle(e.target.value)}
-                        placeholder="🔔 Notificación de Prueba - Nutriser"
-                        className="w-full border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40"
-                        maxLength={100}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-[#666] block mb-1">Mensaje (opcional)</label>
-                      <textarea
-                        value={pushTestBody}
-                        onChange={(e) => setPushTestBody(e.target.value)}
-                        placeholder="Esta es una notificación de prueba. Si escuchas el sonido, ¡todo funciona correctamente!"
-                        className="w-full border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40 resize-none"
-                        rows={2}
-                        maxLength={200}
-                      />
-                    </div>
-                  </div>
+
+                  {/* Selector de emojis */}
+                  {(() => {
+                    const EMOJIS = [
+                      '🔔','🌟','🎁','💪','✨','🌿','💚','😊','🔥','❤️',
+                      '🍎','🍓','🥕','🥦','🍋','🥑','🍒','🥥','🍊','🥝',
+                      '💰','💳','💸','🏷️','📬','📱','💻','📞','📊','📅',
+                      '👨‍⚕️','👩‍⚕️','🏥','📍','⏰','💡','🌈','🎉','🎈','🥂',
+                    ];
+                    return (
+                      <div className="space-y-2 mb-3">
+                        <div className="relative">
+                          <label className="text-xs font-semibold text-[#666] block mb-1">Título (opcional)</label>
+                          <div className="flex gap-1">
+                            <input
+                              type="text"
+                              value={pushTestTitle}
+                              onChange={(e) => setPushTestTitle(e.target.value)}
+                              placeholder="🔔 Notificación de Prueba - Nutriser"
+                              className="flex-1 border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40"
+                              maxLength={100}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowEmojiPicker(showEmojiPicker === 'title' ? null : 'title')}
+                              className="px-3 py-2 border border-[#C5A55A]/30 rounded-lg bg-white hover:bg-[#FAF7F2] text-lg"
+                              title="Agregar emoji al título"
+                            >😊</button>
+                          </div>
+                          {showEmojiPicker === 'title' && (
+                            <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-[#C5A55A]/30 rounded-xl shadow-lg p-2 grid grid-cols-8 gap-1 w-full max-w-xs">
+                              {EMOJIS.map(emoji => (
+                                <button
+                                  key={emoji}
+                                  type="button"
+                                  onClick={() => { setPushTestTitle(prev => prev + emoji); setShowEmojiPicker(null); }}
+                                  className="text-xl hover:bg-[#FAF7F2] rounded p-1"
+                                >{emoji}</button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="relative">
+                          <label className="text-xs font-semibold text-[#666] block mb-1">Mensaje (opcional)</label>
+                          <div className="flex gap-1 items-start">
+                            <textarea
+                              value={pushTestBody}
+                              onChange={(e) => setPushTestBody(e.target.value)}
+                              placeholder="Esta es una notificación de prueba. Si escuchas el sonido, ¡todo funciona correctamente!"
+                              className="flex-1 border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40 resize-none"
+                              rows={2}
+                              maxLength={200}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowEmojiPicker(showEmojiPicker === 'body' ? null : 'body')}
+                              className="px-3 py-2 border border-[#C5A55A]/30 rounded-lg bg-white hover:bg-[#FAF7F2] text-lg flex-shrink-0"
+                              title="Agregar emoji al mensaje"
+                            >😊</button>
+                          </div>
+                          {showEmojiPicker === 'body' && (
+                            <div className="absolute z-50 top-full right-0 mt-1 bg-white border border-[#C5A55A]/30 rounded-xl shadow-lg p-2 grid grid-cols-8 gap-1 w-full max-w-xs">
+                              {EMOJIS.map(emoji => (
+                                <button
+                                  key={emoji}
+                                  type="button"
+                                  onClick={() => { setPushTestBody(prev => prev + emoji); setShowEmojiPicker(null); }}
+                                  className="text-xl hover:bg-[#FAF7F2] rounded p-1"
+                                >{emoji}</button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   <Button
                     onClick={() => {
+                      setShowEmojiPicker(null);
                       sendTestPushMutation.mutate({
                         adminPassword: 'nutriser2024',
                         title: pushTestTitle || undefined,
@@ -2274,6 +2342,44 @@ export default function AdminDashboard() {
                       </>
                     )}
                   </Button>
+                </div>
+
+                {/* Lista de dispositivos push activos */}
+                <div className="bg-white border border-[#C5A55A]/20 rounded-xl p-4 mb-4">
+                  <h4 className="font-bold text-[#1A1A1A] flex items-center gap-2 mb-3">
+                    <BellRing className="w-4 h-4 text-[#C5A55A]" />
+                    Dispositivos Push Activos
+                    <span className="ml-auto text-xs font-normal text-[#999]">({pushSubscriptionsList.length} dispositivos)</span>
+                  </h4>
+                  {pushSubscriptionsList.length === 0 ? (
+                    <p className="text-sm text-[#999] text-center py-3">No hay dispositivos suscritos</p>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {pushSubscriptionsList.map((sub) => (
+                        <div key={sub.id} className="flex items-center justify-between gap-2 p-2 bg-[#FAF7F2] rounded-lg">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">
+                                {sub.deviceType.includes('Apple') ? '🍎' : sub.deviceType.includes('Android') ? '🟢' : '🖥️'}
+                              </span>
+                              <span className="text-xs font-semibold text-[#1A1A1A] truncate">{sub.deviceType}</span>
+                            </div>
+                            <p className="text-xs text-[#999] truncate mt-0.5">
+                              Registrado: {new Date(sub.createdAt).toLocaleDateString('es-VE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => deletePushByIdMutation.mutate({ id: sub.id })}
+                            disabled={deletePushByIdMutation.isPending}
+                            className="flex-shrink-0 text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition-colors"
+                            title="Eliminar suscripción"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">

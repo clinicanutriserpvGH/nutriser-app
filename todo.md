@@ -806,3 +806,9 @@
 - [x] Agregar botón "Enviar notificación de prueba" en el panel admin
 - [x] Crear procedimiento tRPC para enviar push de prueba a todos los suscriptores
 - [x] Mostrar feedback visual (éxito/error) al enviar la notificación
+
+## Push Admin - Lista activa y selector de emojis
+
+- [ ] Agregar procedimiento tRPC para listar suscripciones push con tipo de dispositivo y fecha
+- [ ] Mostrar lista de suscripciones push activas en el panel admin con botón eliminar
+- [ ] Agregar selector de emojis para personalizar título y cuerpo de la notificación

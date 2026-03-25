@@ -1,0 +1,59 @@
+{
+  "query": "SELECT id, code, discountPercent, isActive, description FROM discountCodes ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT id, code, discountPercent, isActive, description FROM discountCodes ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "code": "Nutriser10",
+      "discountPercent": "10",
+      "isActive": "1",
+      "description": "10% de descuento en servicios, productos y programas"
+    },
+    {
+      "id": "2",
+      "code": "Nutriser15",
+      "discountPercent": "15",
+      "isActive": "0",
+      "description": "15% de descuento en servicios, productos y programas"
+    },
+    {
+      "id": "3",
+      "code": "Nutriser20",
+      "discountPercent": "20",
+      "isActive": "0",
+      "description": "20% de descuento en servicios, productos y programas"
+    },
+    {
+      "id": "4",
+      "code": "Nutriser25",
+      "discountPercent": "25",
+      "isActive": "0",
+      "description": "25% de descuento en servicios, productos y programas"
+    },
+    {
+      "id": "5",
+      "code": "Nutriser30",
+      "discountPercent": "30",
+      "isActive": "0",
+      "description": "30% de descuento en servicios, productos y programas"
+    },
+    {
+      "id": "6",
+      "code": "Nutriserfree",
+      "discountPercent": "100",
+      "isActive": "0",
+      "description": "Regalo completo — servicio, producto o programa sin costo"
+    },
+    {
+      "id": "30007",
+      "code": "Nutriser2x1",
+      "discountPercent": "0",
+      "isActive": "0",
+      "description": "2x1 — compra un servicio y obtén uno doble al mismo precio"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcode\tdiscountPercent\tisActive\tdescription\n1\tNutriser10\t10\t1\t10% de descuento en servicios, productos y programas\n2\tNutriser15\t15\t0\t15% de descuento en servicios, productos y programas\n3\tNutriser20\t20\t0\t20% de descuento en servicios, productos y programas\n4\tNutriser25\t25\t0\t25% de descuento en servicios, productos y programas\n5\tNutriser30\t30\t0\t30% de descuento en servicios, productos y programas\n6\tNutriserfree\t100\t0\tRegalo completo — servicio, producto o programa sin costo\n30007\tNutriser2x1\t0\t0\t2x1 — compra un servicio y obtén uno doble al mismo precio\n",
+  "stderr": "",
+  "execution_time_ms": 359
+}

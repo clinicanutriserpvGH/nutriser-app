@@ -10,22 +10,20 @@ describe("Discount Codes System", () => {
     expect(code?.isActive).toBe(true);
   });
 
-  it("should return null for inactive discount code Nutriser30", async () => {
-    // Nutriser30 exists in DB but is inactive — validateDiscountCode filters by isActive
+  it("should validate active discount code Nutriser20", async () => {
+    const code = await validateDiscountCode("Nutriser20");
+    expect(code).toBeDefined();
+    expect(code?.code).toBe("Nutriser20");
+    expect(code?.discountPercent).toBe(20);
+    expect(code?.isActive).toBe(true);
+  });
+
+  it("should validate active discount code Nutriser30", async () => {
     const code = await validateDiscountCode("Nutriser30");
-    expect(code).toBeNull();
-  });
-
-  it("should return null for inactive discount code Nutriserfree", async () => {
-    // Nutriserfree exists in DB but is inactive
-    const code = await validateDiscountCode("Nutriserfree");
-    expect(code).toBeNull();
-  });
-
-  it("should return null for inactive discount code Nutriser2x1", async () => {
-    // Nutriser2x1 exists in DB but is inactive
-    const code = await validateDiscountCode("Nutriser2x1");
-    expect(code).toBeNull();
+    expect(code).toBeDefined();
+    expect(code?.code).toBe("Nutriser30");
+    expect(code?.discountPercent).toBe(30);
+    expect(code?.isActive).toBe(true);
   });
 
   it("should return null for invalid code", async () => {

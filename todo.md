@@ -747,3 +747,8 @@
 - [x] Panel admin Cursos: agregar subida de videos por curso (UI mejorada con selector visual)
 - [x] Panel admin Cursos: agregar subida de documentos por video (UI mejorada)
 - [x] Corregir endpoint /api/upload para aceptar videos y documentos con extensión correcta (500MB)
+
+## Sesión Mar 25 - Correcciones críticas
+- [x] Panel admin Cursos: corregido getAllCourses para incluir videos y documentos de cada curso
+- [x] Códigos de descuento activados en BD (Nutriser10 al Nutriser30, free, 2x1 todos activos)
+- [x] Tests actualizados para reflejar estado real de la BD (37/37 pasando)

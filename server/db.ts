@@ -753,7 +753,17 @@ import { courses, courseVideos, courseDocuments, courseComments, courseSubscribe
 export async function getAllCourses() {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(courses).orderBy(desc(courses.createdAt));
+  const allCourses = await db.select().from(courses).orderBy(desc(courses.createdAt));
+  // Cargar videos y documentos de cada curso para el panel admin
+  const result = await Promise.all(allCourses.map(async (course) => {
+    const videos = await db!.select().from(courseVideos).where(eq(courseVideos.courseId, course.id)).orderBy(courseVideos.sortOrder);
+    const videosWithDocs = await Promise.all(videos.map(async (video) => {
+      const documents = await db!.select().from(courseDocuments).where(eq(courseDocuments.videoId, video.id));
+      return { ...video, documents };
+    }));
+    return { ...course, videos: videosWithDocs };
+  }));
+  return result;
 }
 
 export async function getPublishedCourses() {

@@ -251,27 +251,39 @@ async function startServer() {
       const assembledStat = await stat(assembledPath);
       console.log(`[Finalize] Assembled file size: ${assembledStat.size} bytes`);
 
-      const { storagePut } = await import('../storage');
       const videoExts = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v', 'wmv', 'flv', '3gp'];
       const isVideo = (mimeType || '').startsWith('video/') || videoExts.includes(ext);
 
-      // Subir el video original sin conversión (Safari soporta MOV/H.264 nativamente)
-      const finalBuffer: Buffer = await readFile(assembledPath);
-      const finalExt = ext;
-      // Asignar el MIME type correcto según la extensión
-      const mimeMap: Record<string, string> = {
-        'mp4': 'video/mp4', 'mov': 'video/mp4', 'm4v': 'video/mp4',
-        'webm': 'video/webm', 'avi': 'video/x-msvideo',
-        'mkv': 'video/x-matroska', 'wmv': 'video/x-ms-wmv',
-      };
-      const uploadMimeType = mimeMap[ext] || mimeType || 'video/mp4';
-      console.log(`[Finalize] Uploading original ${ext} as ${uploadMimeType}, size: ${finalBuffer.length} bytes`);
-
-      const folder = isVideo ? 'course-videos' : ((mimeType || '').startsWith('image/') ? 'promotions' : 'course-docs');
-      const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${finalExt}`;
-      const { url } = await storagePut(`${folder}/${safeName}`, finalBuffer, uploadMimeType);
-      console.log(`[Finalize] Uploaded to S3: ${url}`);
-      res.json({ url });
+      if (isVideo) {
+        // Subir a Cloudinary — convierte automáticamente a MP4 H.264 compatible con todos los dispositivos
+        const { ENV } = await import('./env');
+        const { v2: cloudinary } = await import('cloudinary');
+        cloudinary.config({
+          cloud_name: ENV.cloudinaryCloudName,
+          api_key: ENV.cloudinaryApiKey,
+          api_secret: ENV.cloudinaryApiSecret,
+        });
+        console.log(`[Finalize] Uploading video to Cloudinary for conversion, size: ${assembledStat.size} bytes`);
+        const uploadResult = await cloudinary.uploader.upload(assembledPath, {
+          resource_type: 'video',
+          folder: 'nutriser-course-videos',
+          eager: [{ format: 'mp4', transformation: [{ quality: 'auto', fetch_format: 'mp4' }] }],
+          eager_async: false,
+          format: 'mp4',
+        });
+        const videoUrl = uploadResult.secure_url;
+        console.log(`[Finalize] Cloudinary upload OK: ${videoUrl}`);
+        res.json({ url: videoUrl });
+      } else {
+        // Para documentos/imágenes: subir a S3 directamente
+        const { storagePut } = await import('../storage');
+        const finalBuffer: Buffer = await readFile(assembledPath);
+        const folder = (mimeType || '').startsWith('image/') ? 'promotions' : 'course-docs';
+        const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+        const { url } = await storagePut(`${folder}/${safeName}`, finalBuffer, mimeType || 'application/octet-stream');
+        console.log(`[Finalize] Uploaded doc to S3: ${url}`);
+        res.json({ url });
+      }
     } catch (err) {
       console.error('[Finalize] Error:', err);
       res.status(500).json({ error: 'Finalize failed: ' + (err instanceof Error ? err.message : 'Unknown') });

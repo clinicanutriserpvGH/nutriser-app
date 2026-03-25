@@ -2239,7 +2239,12 @@ export default function AdminDashboard() {
                   </h4>
                   <p className="text-sm text-[#666] mb-3">
                     Envía una notificación a todos los dispositivos suscritos.
-                    Dispositivos activos: <strong className="text-[#C5A55A]">{pushSubscribersCount?.count ?? 0}</strong>
+                    <span className="block mt-1">
+                      Personas suscritas: <strong className="text-[#C5A55A]">{pushSubscribersCount?.count ?? 0}</strong>
+                      {pushSubscribersCount?.totalDevices !== undefined && pushSubscribersCount.totalDevices !== pushSubscribersCount.count && (
+                        <span className="text-xs text-[#999] ml-1">({pushSubscribersCount.totalDevices} dispositivos en total)</span>
+                      )}
+                    </span>
                   </p>
 
                   {/* Selector de emojis */}
@@ -2364,6 +2369,11 @@ export default function AdminDashboard() {
                               </span>
                               <span className="text-xs font-semibold text-[#1A1A1A] truncate">{sub.deviceType}</span>
                             </div>
+                            {sub.email ? (
+                              <p className="text-xs text-[#C5A55A] truncate mt-0.5 font-medium">👤 {sub.email}</p>
+                            ) : (
+                              <p className="text-xs text-[#bbb] truncate mt-0.5 italic">Sin email vinculado</p>
+                            )}
                             <p className="text-xs text-[#999] truncate mt-0.5">
                               Registrado: {new Date(sub.createdAt).toLocaleDateString('es-VE', { day: '2-digit', month: 'short', year: 'numeric' })}
                             </p>

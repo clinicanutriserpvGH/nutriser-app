@@ -865,9 +865,10 @@ export const appRouter = router({
         endpoint: z.string().url(),
         p256dh: z.string(),
         auth: z.string(),
+        email: z.string().email().optional(),
       }))
       .mutation(async ({ input }) => {
-        return await savePushSubscription(input.endpoint, input.p256dh, input.auth);
+        return await savePushSubscription(input.endpoint, input.p256dh, input.auth, input.email);
       }),
 
     unsubscribe: publicProcedure
@@ -901,10 +902,15 @@ export const appRouter = router({
         return result;
       }),
 
-    // Contar suscriptores activos
+    // Contar suscriptores activos (personas únicas por email, o total si no tienen email)
     countSubscribers: publicProcedure.query(async () => {
       const subs = await getAllPushSubscriptions();
-      return { count: subs.length };
+      const withEmail = subs.filter(s => s.email);
+      const withoutEmail = subs.filter(s => !s.email);
+      const uniqueEmails = new Set(withEmail.map(s => s.email!.toLowerCase()));
+      // Personas únicas = emails únicos + dispositivos sin email
+      const uniquePeople = uniqueEmails.size + withoutEmail.length;
+      return { count: uniquePeople, totalDevices: subs.length };
     }),
 
     // Listar todas las suscripciones push con detalle (solo admin)
@@ -912,6 +918,7 @@ export const appRouter = router({
       const subs = await getAllPushSubscriptions();
       return subs.map(sub => ({
         id: sub.id,
+        email: sub.email || null,
         // Detectar tipo de dispositivo por el endpoint
         deviceType: sub.endpoint.includes('apple.com') ? 'Apple (Safari/iPhone)'
           : sub.endpoint.includes('googleapis.com') ? 'Android (Chrome)'

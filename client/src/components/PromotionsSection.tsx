@@ -110,7 +110,9 @@ export default function PromotionsSection() {
       const authArr = new Uint8Array(subscription.getKey('auth')!);
       const p256dh = btoa(Array.from(p256dhArr).map(b => String.fromCharCode(b)).join(''));
       const auth = btoa(Array.from(authArr).map(b => String.fromCharCode(b)).join(''));
-      await pushSubscribeMutation.mutateAsync({ endpoint: subscription.endpoint, p256dh, auth });
+      // Obtener email guardado en localStorage (del proceso de suscripción a cupones)
+      const savedEmail = localStorage.getItem('nutriser_subscriber_email') || subEmail || undefined;
+      await pushSubscribeMutation.mutateAsync({ endpoint: subscription.endpoint, p256dh, auth, email: savedEmail || undefined });
     } catch (e: any) {
       console.error('Push subscription error:', e);
       toast.error("Error al activar notificaciones: " + e.message);
@@ -122,6 +124,8 @@ export default function PromotionsSection() {
     e.preventDefault();
     if (!subEmail.trim()) { toast.error("Ingresa tu correo"); return; }
     setSubSubmitting(true);
+    // Guardar email en localStorage para vincularlo con la suscripción push
+    localStorage.setItem('nutriser_subscriber_email', subEmail.trim());
     subscribeMutation.mutate({ email: subEmail, whatsapp: "" });
   };
 

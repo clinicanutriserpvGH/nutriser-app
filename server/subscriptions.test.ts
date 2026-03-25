@@ -193,7 +193,8 @@ describe('push router', () => {
     expect(pushNotifications.savePushSubscription).toHaveBeenCalledWith(
       'https://fcm.googleapis.com/fcm/send/test-endpoint',
       'test-p256dh-key',
-      'test-auth-key'
+      'test-auth-key',
+      undefined
     );
   });
 

@@ -294,6 +294,8 @@ export const pushSubscriptions = mysqlTable("pushSubscriptions", {
   endpoint: text("endpoint").notNull(),
   p256dh: text("p256dh").notNull(),
   auth: varchar("auth", { length: 255 }).notNull(),
+  /** Email del suscriptor (opcional, para vincular con couponSubscribers) */
+  email: varchar("email", { length: 320 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;

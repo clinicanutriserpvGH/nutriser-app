@@ -1,0 +1,60 @@
+{
+  "query": "\nSELECT \n  id,\n  LEFT(endpoint, 80) as endpoint_preview,\n  createdAt\nFROM pushSubscriptions\nORDER BY createdAt DESC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute \nSELECT \n  id,\n  LEFT(endpoint, 80) as endpoint_preview,\n  createdAt\nFROM pushSubscriptions\nORDER BY createdAt DESC;\n",
+  "rows": [
+    {
+      "id": "150003",
+      "endpoint_preview": "https://web.push.apple.com/QMv2Bc87V4-O6FLD-5Ch1rWeS8i0KxKWfKyma0zfkjGB1iM2u4YVU",
+      "createdAt": "2026-03-25 06:45:56"
+    },
+    {
+      "id": "150002",
+      "endpoint_preview": "https://web.push.apple.com/QK3h8L2zCgpRdNHsixDGOte5XaB-0MbRQsax1ul0Und4JlkP9ykvx",
+      "createdAt": "2026-03-25 05:49:10"
+    },
+    {
+      "id": "120001",
+      "endpoint_preview": "https://web.push.apple.com/QPtVrU8bvzR5UhQTz6_KLT4CaVAvsYLUbuZDNGUJ0fEIICgXJq8LZ",
+      "createdAt": "2026-03-25 03:49:03"
+    },
+    {
+      "id": "90001",
+      "endpoint_preview": "https://fcm.googleapis.com/fcm/send/cPDOlLNAWHA:APA91bH6mAh-CoKLfLsmNJ9VZe7C3MEX",
+      "createdAt": "2026-03-25 01:24:05"
+    },
+    {
+      "id": "60003",
+      "endpoint_preview": "https://fcm.googleapis.com/fcm/send/cC63kmytv6I:APA91bGW_Flk0a07qxF7kGszP4k1aKnW",
+      "createdAt": "2026-03-24 21:51:23"
+    },
+    {
+      "id": "60002",
+      "endpoint_preview": "https://fcm.googleapis.com/fcm/send/cgy5Yn8Eetg:APA91bEmmOzPdLebzny9TXPusUc0eX4T",
+      "createdAt": "2026-03-24 21:47:39"
+    },
+    {
+      "id": "30001",
+      "endpoint_preview": "https://fcm.googleapis.com/fcm/send/f-H02DM3BZA:APA91bEmfx7EbRejAlmoFroKjiivEFCv",
+      "createdAt": "2026-03-24 19:36:28"
+    },
+    {
+      "id": "7",
+      "endpoint_preview": "https://web.push.apple.com/QGtdic-0EbG4CCs77FxK4b16C71_ib-T4oSyZWIJQdM5Bhkke4qsa",
+      "createdAt": "2026-03-24 14:46:25"
+    },
+    {
+      "id": "6",
+      "endpoint_preview": "https://web.push.apple.com/QLS2SeR_5T85Df0c1ZBA5etLlnGj2ZEhXaqVLE2WyY5zn5QgF0ulf",
+      "createdAt": "2026-03-24 14:45:53"
+    },
+    {
+      "id": "5",
+      "endpoint_preview": "https://web.push.apple.com/QA_MFQ_d3EzqbqdmgM7B7Ls01NBH0QTAbIqLw75f9KKq_T9BsZ5x_",
+      "createdAt": "2026-03-24 13:37:10"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tendpoint_preview\tcreatedAt\n150003\thttps://web.push.apple.com/QMv2Bc87V4-O6FLD-5Ch1rWeS8i0KxKWfKyma0zfkjGB1iM2u4YVU\t2026-03-25 06:45:56\n150002\thttps://web.push.apple.com/QK3h8L2zCgpRdNHsixDGOte5XaB-0MbRQsax1ul0Und4JlkP9ykvx\t2026-03-25 05:49:10\n120001\thttps://web.push.apple.com/QPtVrU8bvzR5UhQTz6_KLT4CaVAvsYLUbuZDNGUJ0fEIICgXJq8LZ\t2026-03-25 03:49:03\n90001\thttps://fcm.googleapis.com/fcm/send/cPDOlLNAWHA:APA91bH6mAh-CoKLfLsmNJ9VZe7C3MEX\t2026-03-25 01:24:05\n60003\thttps://fcm.googleapis.com/fcm/send/cC63kmytv6I:APA91bGW_Flk0a07qxF7kGszP4k1aKnW\t2026-03-24 21:51:23\n60002\thttps://fcm.googleapis.com/fcm/send/cgy5Yn8Eetg:APA91bEmmOzPdLebzny9TXPusUc0eX4T\t2026-03-24 21:47:39\n30001\thttps://fcm.googleapis.com/fcm/send/f-H02DM3BZA:APA91bEmfx7EbRejAlmoFroKjiivEFCv\t2026-03-24 19:36:28\n7\thttps://web.push.apple.com/QGtdic-0EbG4CCs77FxK4b16C71_ib-T4oSyZWIJQdM5Bhkke4qsa\t2026-03-24 14:46:25\n6\thttps://web.push.apple.com/QLS2SeR_5T85Df0c1ZBA5etLlnGj2ZEhXaqVLE2WyY5zn5QgF0ulf\t2026-03-24 14:45:53\n5\thttps://web.push.apple.com/QA_MFQ_d3EzqbqdmgM7B7Ls01NBH0QTAbIqLw75f9KKq_T9BsZ5x_\t2026-03-24 13:37:10\n",
+  "stderr": "",
+  "execution_time_ms": 368
+}

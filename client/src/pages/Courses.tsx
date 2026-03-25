@@ -145,10 +145,13 @@ export default function Courses() {
           const authKey = sub.getKey('auth')!;
           const p256dhArray = Array.from(new Uint8Array(p256dhKey));
           const authArray = Array.from(new Uint8Array(authKey));
+          // Guardar email en localStorage para vincularlo con la suscripción push
+          localStorage.setItem('nutriser_subscriber_email', subscribeEmail.trim());
           await pushSubscribeMutation.mutateAsync({
             endpoint: subJson.endpoint!,
             p256dh: btoa(String.fromCharCode(...p256dhArray)),
             auth: btoa(String.fromCharCode(...authArray)),
+            email: subscribeEmail.trim(),
           });
           pushSubscriptionStr = JSON.stringify(subJson);
         } else {

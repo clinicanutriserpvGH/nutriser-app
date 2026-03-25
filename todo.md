@@ -812,3 +812,11 @@
 - [ ] Agregar procedimiento tRPC para listar suscripciones push con tipo de dispositivo y fecha
 - [ ] Mostrar lista de suscripciones push activas en el panel admin con botón eliminar
 - [ ] Agregar selector de emojis para personalizar título y cuerpo de la notificación
+
+## Push - Vincular con email de suscriptor
+
+- [ ] Agregar campo email (nullable) a la tabla pushSubscriptions
+- [ ] Actualizar procedimiento push.subscribe para aceptar email opcional
+- [ ] Actualizar frontend para enviar email al suscribirse a push
+- [ ] Mostrar personas únicas en el contador del panel admin
+- [ ] Mostrar lista agrupada por persona con sus dispositivos

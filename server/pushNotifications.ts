@@ -17,17 +17,19 @@ function ensureVapidConfigured() {
   }
 }
 
-export async function savePushSubscription(endpoint: string, p256dh: string, auth: string) {
+export async function savePushSubscription(endpoint: string, p256dh: string, auth: string, email?: string) {
   const db = await getDb();
   if (!db) throw new Error('Database not available');
 
-  // Upsert: if endpoint already exists, update keys
+  // Upsert: if endpoint already exists, update keys and email
   try {
-    await db.insert(pushSubscriptions).values({ endpoint, p256dh, auth });
+    await db.insert(pushSubscriptions).values({ endpoint, p256dh, auth, email: email || null });
   } catch (e: any) {
     if (e?.code === 'ER_DUP_ENTRY') {
+      const updateData: any = { p256dh, auth };
+      if (email) updateData.email = email;
       await db.update(pushSubscriptions)
-        .set({ p256dh, auth })
+        .set(updateData)
         .where(eq(pushSubscriptions.endpoint, endpoint));
     } else {
       throw e;

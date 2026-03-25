@@ -1,0 +1,1 @@
+ALTER TABLE `pushSubscriptions` ADD `email` varchar(320);

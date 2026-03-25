@@ -360,7 +360,8 @@ export default function AdminDashboard() {
   const [editingCourseId, setEditingCourseId] = useState<number | null>(null);
   const [selectedCourseForVideos, setSelectedCourseForVideos] = useState<number | null>(null);
   const [courseVideoFile, setCourseVideoFile] = useState<File | null>(null);
-  const [courseDocFile, setCourseDocFile] = useState<File | null>(null);
+  const [courseDocFile, setCourseDocFile] = useState<File | null>(null); // Para el formulario de nuevo video
+  const [existingVideoDocFile, setExistingVideoDocFile] = useState<File | null>(null); // Para agregar doc a video existente
   const [uploadingCourseVideo, setUploadingCourseVideo] = useState(false);
   const [selectedVideoForDoc, setSelectedVideoForDoc] = useState<number | null>(null);
   const pendingDocFileRef = useRef<File | null>(null);
@@ -417,8 +418,8 @@ export default function AdminDashboard() {
     onError: () => toast.error('Error al rechazar comentario'),
   });
   const addDocumentMutation = trpc.courses.createDocument.useMutation({
-    onSuccess: () => { toast.success('Documento agregado'); refetchCourses(); setSelectedVideoForDoc(null); setCourseDocFile(null); },
-    onError: () => toast.error('Error al agregar documento'),
+    onSuccess: () => { toast.success('Documento agregado'); refetchCourses(); setSelectedVideoForDoc(null); setCourseDocFile(null); setExistingVideoDocFile(null); },
+    onError: (err) => toast.error('Error al agregar documento: ' + err.message),
   });
   const deleteDocumentMutation = trpc.courses.deleteDocument.useMutation({
     onSuccess: () => { toast.success('Documento eliminado'); refetchCourses(); },
@@ -453,16 +454,21 @@ export default function AdminDashboard() {
   };
 
   const handleUploadCourseDoc = async (videoId: number) => {
-    if (!courseDocFile) { toast.error('Selecciona un documento'); return; }
+    if (!existingVideoDocFile) { toast.error('Selecciona un documento primero'); return; }
     const formData = new FormData();
-    formData.append('file', courseDocFile);
+    formData.append('file', existingVideoDocFile);
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => `HTTP ${res.status}`);
+        throw new Error(errText);
+      }
       const data = await res.json();
-      if (!data.url) throw new Error('No URL');
-      addDocumentMutation.mutate({ videoId, title: courseDocFile.name, fileUrl: data.url, fileType: courseDocFile.type });
-    } catch {
-      toast.error('Error al subir el documento');
+      if (!data.url) throw new Error('El servidor no devolvió URL');
+      addDocumentMutation.mutate({ videoId, title: existingVideoDocFile.name, fileUrl: data.url, fileType: existingVideoDocFile.type });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error('Error al subir el documento: ' + msg);
     }
   };
 
@@ -2966,15 +2972,15 @@ export default function AdminDashboard() {
                                         type="file"
                                         accept=".pdf,.doc,.docx,.ppt,.pptx,.xlsx,.xls"
                                         className="hidden"
-                                        onChange={e => setCourseDocFile(e.target.files?.[0] || null)}
+                                        onChange={e => setExistingVideoDocFile(e.target.files?.[0] || null)}
                                       />
-                                      {courseDocFile ? (
-                                        <p className="text-xs text-[#C5A55A]">📄 {courseDocFile.name}</p>
+                                      {existingVideoDocFile ? (
+                                        <p className="text-xs text-[#C5A55A]">📄 {existingVideoDocFile.name}</p>
                                       ) : (
                                         <p className="text-xs text-gray-400">Seleccionar PDF o documento</p>
                                       )}
                                     </label>
-                                    <Button size="sm" className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs" onClick={() => handleUploadCourseDoc(video.id)} disabled={addDocumentMutation.isPending || !courseDocFile}>
+                                    <Button size="sm" className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs" onClick={() => handleUploadCourseDoc(video.id)} disabled={addDocumentMutation.isPending || !existingVideoDocFile}>
                                       {addDocumentMutation.isPending ? 'Subiendo...' : '⬆️ Subir documento'}
                                     </Button>
                                   </div>

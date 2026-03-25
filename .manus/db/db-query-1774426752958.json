@@ -1,0 +1,85 @@
+{
+  "query": "SHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SHOW TABLES;",
+  "rows": [
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "adminCredentials"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "appointments"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "couponSubscribers"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "coupons"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "courseComments"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "courseDocuments"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "courseSubscribers"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "courseVideos"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "courses"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "discountCodes"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "ebookDiscountCodes"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "ebookPurchases"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "ebooks"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "giftPurchases"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "membershipCoupons"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "memberships"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "paymentProofs"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "productPurchases"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "products"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "promotions"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "pushSubscriptions"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "servicePurchases"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "services"
+    },
+    {
+      "Tables_in_7jSTACnGYyADJrX65GKurG": "users"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_7jSTACnGYyADJrX65GKurG\n__drizzle_migrations\nadminCredentials\nappointments\ncouponSubscribers\ncoupons\ncourseComments\ncourseDocuments\ncourseSubscribers\ncourseVideos\ncourses\ndiscountCodes\nebookDiscountCodes\nebookPurchases\nebooks\ngiftPurchases\nmembershipCoupons\nmemberships\npaymentProofs\nproductPurchases\nproducts\npromotions\npushSubscriptions\nservicePurchases\nservices\nusers\n",
+  "stderr": "",
+  "execution_time_ms": 380
+}

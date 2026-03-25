@@ -248,7 +248,7 @@ export default function Courses() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Reproductor principal */}
               <div className="lg:col-span-2">
-                <div className="bg-black rounded-2xl overflow-hidden shadow-2xl aspect-video">
+                <div className="bg-black rounded-2xl overflow-hidden shadow-2xl aspect-video relative">
                   <video
                     key={selectedVideo.id}
                     controls
@@ -257,19 +257,34 @@ export default function Courses() {
                     poster={selectedVideo.thumbnailUrl || undefined}
                     onContextMenu={(e) => e.preventDefault()}
                     playsInline
-                    preload="metadata"
+                    preload="auto"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      target.style.display = 'none';
+                      const errDiv = target.nextElementSibling as HTMLElement;
+                      if (errDiv) errDiv.style.display = 'flex';
+                    }}
                   >
-                    {/* Soportar MOV (QuickTime) y MP4 */}
+                    {/* Intentar con el tipo correcto según extensión */}
                     {selectedVideo.videoUrl.toLowerCase().includes('.mov') ? (
-                      <source src={selectedVideo.videoUrl} type="video/mp4" />
+                      <>
+                        <source src={selectedVideo.videoUrl} type="video/quicktime" />
+                        <source src={selectedVideo.videoUrl} type="video/mp4" />
+                      </>
                     ) : selectedVideo.videoUrl.toLowerCase().includes('.webm') ? (
                       <source src={selectedVideo.videoUrl} type="video/webm" />
+                    ) : selectedVideo.videoUrl.toLowerCase().includes('.avi') ? (
+                      <source src={selectedVideo.videoUrl} type="video/x-msvideo" />
                     ) : (
                       <source src={selectedVideo.videoUrl} type="video/mp4" />
                     )}
-                    <source src={selectedVideo.videoUrl} />
                     Tu navegador no soporta la reproducción de video.
                   </video>
+                  <div className="absolute inset-0 flex-col items-center justify-center bg-black text-white text-center p-4 hidden">
+                    <p className="text-lg font-semibold mb-2">⚠️ No se puede reproducir el video</p>
+                    <p className="text-sm text-gray-400 mb-4">El formato del video puede no ser compatible con tu navegador.</p>
+                    <a href={selectedVideo.videoUrl} download className="px-4 py-2 bg-[#C5A55A] text-white rounded-lg text-sm hover:bg-[#B8963E] transition-colors">Descargar video</a>
+                  </div>
                 </div>
                 <div className="mt-4">
                   <h2 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-2">{selectedVideo.title}</h2>

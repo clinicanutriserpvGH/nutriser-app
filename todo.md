@@ -800,3 +800,9 @@
 
 - [x] Mover botón de música a esquina inferior izquierda para que no choque con botón de WhatsApp (esquina inferior derecha)
 - [x] El botón ahora es visible en todas las páginas incluyendo el inicio
+
+## Notificaciones Push - Botón de Prueba en Admin
+
+- [x] Agregar botón "Enviar notificación de prueba" en el panel admin
+- [x] Crear procedimiento tRPC para enviar push de prueba a todos los suscriptores
+- [x] Mostrar feedback visual (éxito/error) al enviar la notificación

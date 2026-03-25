@@ -210,6 +210,31 @@ describe('push router', () => {
     const result = await caller.push.getVapidPublicKey();
     expect(result.publicKey).toBe('test-vapid-public');
   });
+
+  it('countSubscribers: should return the count of push subscriptions', async () => {
+    vi.mocked(pushNotifications.getAllPushSubscriptions).mockResolvedValue([
+      { endpoint: 'https://fcm.test/1', p256dh: 'key1', auth: 'auth1' } as any,
+      { endpoint: 'https://fcm.test/2', p256dh: 'key2', auth: 'auth2' } as any,
+    ]);
+
+    const result = await caller.push.countSubscribers();
+    expect(result.count).toBe(2);
+  });
+
+  it('sendTest: should reject with wrong admin password', async () => {
+    vi.mocked(db.getAdminByEmail).mockResolvedValue({
+      id: 1,
+      email: 'clinicanutriserpv@gmail.com',
+      passwordHash: '$2b$10$invalidhash',
+      resetToken: null,
+      resetTokenExpiresAt: null,
+      createdAt: new Date(),
+    } as any);
+
+    await expect(
+      caller.push.sendTest({ adminPassword: 'wrongpassword' })
+    ).rejects.toThrow();
+  });
 });
 
 describe('servicePurchases router', () => {

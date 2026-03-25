@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, setAdminResetToken, getAdminByResetToken, updateAdminPassword, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber, getAllServices, getAllActiveServices, createService, updateService, deleteService } from "./db";
 import { notifyOwner } from "./_core/notification";
@@ -10,7 +11,7 @@ import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotif
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
 import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
-import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll } from "./pushNotifications";
+import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions } from "./pushNotifications";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
@@ -875,6 +876,33 @@ export const appRouter = router({
 
     getVapidPublicKey: publicProcedure.query(() => {
       return { publicKey: ENV.vapidPublicKey || process.env.VITE_VAPID_PUBLIC_KEY || '' };
+    }),
+
+    // Enviar notificación push de prueba (solo admin)
+    sendTest: publicProcedure
+      .input(z.object({
+        adminPassword: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // Verificar contraseña de admin usando el email fijo de la clínica
+        const ADMIN_EMAIL = 'clinicanutriserpv@gmail.com';
+        const admin = await getAdminByEmail(ADMIN_EMAIL);
+        if (!admin) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Admin no configurado' });
+        const valid = await bcrypt.compare(input.adminPassword, admin.passwordHash);
+        if (!valid) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Contraseña incorrecta' });
+
+        const result = await sendPushNotificationToAll(
+          '🔔 Notificación de Prueba - Nutriser',
+          'Esta es una notificación de prueba. Si escuchas el sonido, ¡todo funciona correctamente!',
+          'https://nutriserpv.com',
+        );
+        return result;
+      }),
+
+    // Contar suscriptores activos
+    countSubscribers: publicProcedure.query(async () => {
+      const subs = await getAllPushSubscriptions();
+      return { count: subs.length };
     }),
   }),
 

@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOpen, Upload, Eye, Bell, BellRing, ShoppingBag, Trash2, Settings, Plus, Pencil } from "lucide-react";
+import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOpen, Upload, Eye, Bell, BellRing, ShoppingBag, Trash2, Settings, Plus, Pencil, Send } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
@@ -145,6 +145,24 @@ export default function AdminDashboard() {
       refetchSubscribers();
     },
     onError: (error) => toast.error('Error: ' + error.message),
+  });
+
+  // Notificaciones push de prueba
+  const { data: pushSubscribersCount } = trpc.push.countSubscribers.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const sendTestPushMutation = trpc.push.sendTest.useMutation({
+    onSuccess: (data) => {
+      if (data.sent > 0) {
+        toast.success(`🔔 Notificación enviada a ${data.sent} dispositivo${data.sent !== 1 ? 's' : ''}${data.failed > 0 ? ` (${data.failed} fallaron)` : ''}`);
+      } else if (data.failed > 0) {
+        toast.error(`No se pudo enviar a ninguno de los ${data.failed} dispositivos`);
+      } else {
+        toast.warning('No hay dispositivos suscritos a notificaciones push');
+      }
+    },
+    onError: (error) => toast.error('Error al enviar: ' + error.message),
   });
 
   // Catálogo de servicios
@@ -2196,6 +2214,44 @@ export default function AdminDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
+                {/* Tarjeta de prueba de notificación push */}
+                <div className="bg-gradient-to-r from-[#C5A55A]/10 to-[#C5A55A]/5 border border-[#C5A55A]/30 rounded-xl p-4 mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h4 className="font-bold text-[#1A1A1A] flex items-center gap-2 mb-1">
+                        <BellRing className="w-4 h-4 text-[#C5A55A]" />
+                        Prueba de Notificación Push
+                      </h4>
+                      <p className="text-sm text-[#666]">
+                        Envía una notificación de prueba a todos los dispositivos suscritos para verificar que el sonido funciona.
+                      </p>
+                      <p className="text-xs text-[#999] mt-1">
+                        Dispositivos con notificaciones push activas: <strong className="text-[#C5A55A]">{pushSubscribersCount?.count ?? 0}</strong>
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        const ADMIN_PASSWORD = 'nutriser2024';
+                        sendTestPushMutation.mutate({ adminPassword: ADMIN_PASSWORD });
+                      }}
+                      disabled={sendTestPushMutation.isPending}
+                      className="bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold whitespace-nowrap flex-shrink-0"
+                    >
+                      {sendTestPushMutation.isPending ? (
+                        <>
+                          <svg className="animate-spin w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Enviar Prueba
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
                   <p className="text-sm text-amber-700">
                     <strong>⚠️ Automático:</strong> Cuando publicas una nueva promoción, todos los suscriptores reciben un correo electrónico desde <strong>clinicanutriserpv@gmail.com</strong> y una notificación push en su celular.

@@ -734,3 +734,10 @@
 - [x] HeroSection: botón 'Cursos Nutriser' agregado al grid de botones
 - [x] Cursos: push notifications integradas en modal de suscripción (checkbox + solicitud de permiso)
 - [x] Corregir test discountCodes.test.ts para usar funciones correctas (validateDiscountCode)
+
+## Correcciones Sesión Mar 25 - Formularios y Cursos
+- [ ] Formulario servicios: mostrar precio original tachado + precio con descuento aplicado
+- [ ] Formulario programas nutrición: agregar campo de cupón igual que servicios, sin leyenda genérica
+- [ ] Formulario productos: mostrar precio original tachado + precio con descuento
+- [ ] Página Cursos: quitar 'Gratuitos', cambiar a 'Nutriser Academy' con texto de suscripción
+- [ ] Hero: corregir hueco visual (botón Cursos Nutriser solo en su fila, sin hueco)

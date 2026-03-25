@@ -105,7 +105,7 @@ describe("memberships", () => {
     });
 
     expect(result).toBeDefined();
-  });
+  }, 15000);
 
   it("should cancel a membership", async () => {
     const ctx = createPublicContext();

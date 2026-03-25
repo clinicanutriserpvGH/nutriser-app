@@ -206,17 +206,17 @@ export default function Courses() {
             <span className="text-[#C5A55A] font-semibold text-sm uppercase tracking-widest">Nutriser Academy</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
-            Cursos Gratuitos
+            Nutrición <span className="text-[#C5A55A] italic">en Video</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8">
-            Aprende sobre nutrición, bienestar y estética con nuestros expertos. Contenido exclusivo y actualizado para ti.
+            Aprende sobre nutrición, bienestar y estética con nuestros expertos. Suscríbete para estar al tanto de cada nuevo contenido.
           </p>
           <Button
             onClick={() => setShowSubscribeModal(true)}
             className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
           >
             <Bell className="w-5 h-5" />
-            Recibir notificaciones de nuevos cursos
+            Suscríbete para recibir nuevos cursos
           </Button>
         </div>
       </section>
@@ -515,17 +515,50 @@ export default function Courses() {
                 ))}
               </div>
             ) : courses.length === 0 ? (
-              <div className="text-center py-24">
-                <BookOpen className="w-20 h-20 text-gray-200 mx-auto mb-6" />
-                <h3 className="text-xl font-semibold text-gray-400 mb-2">Próximamente</h3>
-                <p className="text-gray-400 max-w-md mx-auto">Estamos preparando contenido exclusivo para ti. Suscríbete para ser el primero en enterarte.</p>
-                <Button
-                  onClick={() => setShowSubscribeModal(true)}
-                  className="mt-6 bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full"
-                >
-                  <Bell className="w-4 h-4 mr-2" />
-                  Notifícame cuando haya cursos
-                </Button>
+              <div className="text-center py-12 px-4">
+                <div className="max-w-2xl mx-auto">
+                  <div className="relative inline-block mb-8">
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#C5A55A]/20 to-[#C5A55A]/5 flex items-center justify-center mx-auto">
+                      <BookOpen className="w-14 h-14 text-[#C5A55A]/60" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#C5A55A]/20 flex items-center justify-center">
+                      <Bell className="w-4 h-4 text-[#C5A55A]" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-3">Contenido en preparación</h3>
+                  <p className="text-gray-500 max-w-md mx-auto mb-2">Estamos creando contenido exclusivo de nutrición y bienestar para ti.</p>
+                  <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete y sé el primero en enterarte cuando publiquemos nuevos cursos, tutoriales y material de apoyo.</p>
+                  <Button
+                    onClick={() => setShowSubscribeModal(true)}
+                    className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3.5 rounded-full font-semibold shadow-lg shadow-[#C5A55A]/20"
+                  >
+                    <Bell className="w-4 h-4 mr-2" />
+                    Suscríbeme para recibir notificaciones
+                  </Button>
+                  <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                    <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
+                      <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">
+                        <Bell className="w-4 h-4 text-[#C5A55A]" />
+                      </div>
+                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Notificaciones instantáneas</p>
+                      <p className="text-xs text-gray-400">Recibe un aviso en el momento que se publique nuevo contenido.</p>
+                    </div>
+                    <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
+                      <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">
+                        <FileText className="w-4 h-4 text-[#C5A55A]" />
+                      </div>
+                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Material de apoyo</p>
+                      <p className="text-xs text-gray-400">Cada curso incluye documentos y recursos descargables.</p>
+                    </div>
+                    <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
+                      <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">
+                        <MessageSquare className="w-4 h-4 text-[#C5A55A]" />
+                      </div>
+                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Foro de comentarios</p>
+                      <p className="text-xs text-gray-400">Participa con preguntas y comentarios en cada video.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

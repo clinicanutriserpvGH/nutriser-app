@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Check, Upload, Clock, ArrowLeft } from "lucide-react";
+import { Check, Upload, Clock, ArrowLeft, Tag, CheckCircle2, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
@@ -50,7 +50,8 @@ export default function Memberships() {
     clientPhone: "",
     discountCode: "",
   });
-  const [discountInfo, setDiscountInfo] = useState<{ discount: number | null; description?: string | null } | null>(null);
+  const [discountInfo, setDiscountInfo] = useState<{ valid: boolean; discount: number | null; isGift: boolean; isTwoForOne: boolean; description: string | null } | null>(null);
+  const [discountValidating, setDiscountValidating] = useState(false);
   const [membershipId, setMembershipId] = useState<number | null>(null);
   const [step, setStep] = useState<"select" | "form" | "proof">("select");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -61,20 +62,25 @@ export default function Memberships() {
   const createMutation = trpc.memberships.create.useMutation();
   const uploadProofMutation = trpc.memberships.uploadProof.useMutation();
   const cancelMutation = trpc.memberships.cancel.useMutation();
-  const validateDiscountCodeMutation = trpc.discountCodes.validate.useQuery(
-    { code: formData.discountCode },
-    { enabled: formData.discountCode.length > 0 }
+  const validateDiscountCodeQuery = trpc.discountCodes.validate.useQuery(
+    { code: formData.discountCode.trim() },
+    { enabled: false }
   );
 
   const handleValidateDiscount = async () => {
-    if (!formData.discountCode.trim()) return;
-    const result = await validateDiscountCodeMutation.refetch();
-    if (result.data?.valid) {
-      setDiscountInfo({ discount: result.data.discount, description: result.data.description });
-      toast.success(`Descuento aplicado: ${result.data.discount}% off`);
-    } else {
-      setDiscountInfo(null);
-      toast.error("Código de descuento inválido o inactivo");
+    if (!formData.discountCode.trim()) { toast.error("Ingresa un código de descuento"); return; }
+    setDiscountValidating(true);
+    try {
+      const result = await validateDiscountCodeQuery.refetch();
+      if (result.data?.valid) {
+        setDiscountInfo({ valid: true, discount: result.data.discount, isGift: result.data.isGift ?? false, isTwoForOne: result.data.isTwoForOne ?? false, description: result.data.description ?? null });
+        toast.success(`¡Código válido! ${result.data.discount}% de descuento aplicado.`);
+      } else {
+        setDiscountInfo({ valid: false, discount: null, isGift: false, isTwoForOne: false, description: null });
+        toast.error("Código inválido o no está activo.");
+      }
+    } finally {
+      setDiscountValidating(false);
     }
   };
 
@@ -300,6 +306,70 @@ export default function Memberships() {
                     required
                   />
                 </div>
+                {/* ─── Código de Descuento ─────────────────────────────── */}
+                <div className="border border-[#C5A55A]/30 rounded-xl p-4 bg-[#FAF7F2]">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                    <Tag className="w-4 h-4 text-[#C5A55A]" />
+                    Código de Promoción (opcional)
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={formData.discountCode}
+                      onChange={(e) => { setFormData({ ...formData, discountCode: e.target.value.toUpperCase() }); setDiscountInfo(null); }}
+                      placeholder="Ej: Nutriser20"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleValidateDiscount}
+                      disabled={discountValidating || !formData.discountCode.trim()}
+                      className="bg-[#C5A55A] hover:bg-[#B8963E] text-white px-4"
+                    >
+                      {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Aplicar"}
+                    </Button>
+                  </div>
+                  {discountInfo && discountInfo.valid && (
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                        <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                        <span>
+                          {discountInfo.isTwoForOne
+                            ? "¡2x1 aplicado! Adquieres un programa y obtienes el siguiente a mitad de precio."
+                            : discountInfo.isGift
+                            ? "¡Regalo aplicado! Tu programa es completamente gratis."
+                            : `¡Código válido! ${discountInfo.discount}% de descuento aplicado.`}
+                        </span>
+                      </div>
+                      {selectedProgram && !discountInfo.isTwoForOne && (
+                        (() => {
+                          const program = PROGRAMS.find(p => p.id === selectedProgram);
+                          if (!program) return null;
+                          const discounted = discountInfo.isGift ? 0 : program.price * (1 - (discountInfo.discount ?? 0) / 100);
+                          return (
+                            <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl px-4 py-3 flex items-center justify-between">
+                              <div>
+                                <p className="text-xs text-gray-500 mb-0.5">Precio original</p>
+                                <p className="text-sm text-gray-400 line-through">${program.price.toLocaleString()} MXN</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-[#C5A55A] font-semibold mb-0.5">Tu precio con descuento</p>
+                                {discountInfo.isGift ? (
+                                  <p className="text-xl font-black text-green-600">¡GRATIS!</p>
+                                ) : (
+                                  <p className="text-xl font-black text-[#C5A55A]">${discounted.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MXN</p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()
+                      )}
+                    </div>
+                  )}
+                  {discountInfo && !discountInfo.valid && (
+                    <p className="mt-2 text-red-600 text-xs">Código inválido o no está activo.</p>
+                  )}
+                </div>
+
                 <div className="flex gap-3">
                   <Button
                     type="button"

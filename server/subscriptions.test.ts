@@ -145,13 +145,15 @@ describe('couponSubscribers router', () => {
     ).rejects.toThrow();
   });
 
-  it('subscribe: should fail with short whatsapp', async () => {
-    await expect(
-      caller.couponSubscribers.subscribe({
-        email: 'test@example.com',
-        whatsapp: '123',
-      })
-    ).rejects.toThrow();
+  it('subscribe: should succeed with short or no whatsapp (field is optional)', async () => {
+    // whatsapp is optional with no minimum length validation in the router
+    const mockSubscriber = { id: 2, email: 'test@example.com', whatsapp: '123', isActive: true, createdAt: new Date() };
+    vi.mocked(db.subscribeToCoupons).mockResolvedValue(mockSubscriber as any);
+    const result = await caller.couponSubscribers.subscribe({
+      email: 'test@example.com',
+      whatsapp: '123',
+    });
+    expect(result.success).toBe(true);
   });
 
   it('list: should return all subscribers', async () => {

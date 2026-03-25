@@ -440,16 +440,39 @@ export default function ServicesSection() {
                     </button>
                   </div>
                   {discountInfo && discountInfo.valid && (
-                    <div className="mt-2 flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                      <span>
-                        {discountInfo.isTwoForOne
-                          ? "¡2x1 aplicado! Compras un servicio y obtienes uno doble."
-                          : discountInfo.isGift
-                          ? "¡Regalo aplicado! Tu servicio es completamente gratis."
-                          : `${discountInfo.discount}% de descuento aplicado.`}
-                        {discountInfo.description && ` — ${discountInfo.description}`}
-                      </span>
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                        <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                        <span>
+                          {discountInfo.isTwoForOne
+                            ? "¡2x1 aplicado! Compras un servicio y obtienes uno doble."
+                            : discountInfo.isGift
+                            ? "¡Regalo aplicado! Tu servicio es completamente gratis."
+                            : `¡Código válido! ${discountInfo.discount}% de descuento aplicado.`}
+                        </span>
+                      </div>
+                      {selectedServicePrice && !discountInfo.isTwoForOne && (
+                        <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl px-4 py-3 flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500 mb-0.5">Precio original</p>
+                            <p className="text-sm text-gray-400 line-through">{selectedServicePrice}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-[#C5A55A] font-semibold mb-0.5">Tu precio con descuento</p>
+                            {discountInfo.isGift ? (
+                              <p className="text-xl font-black text-green-600">¡GRATIS!</p>
+                            ) : (() => {
+                              const numericPrice = parseFloat(selectedServicePrice.replace(/[^0-9.]/g, ''));
+                              if (!isNaN(numericPrice) && discountInfo.discount) {
+                                const discounted = numericPrice * (1 - discountInfo.discount / 100);
+                                const currency = selectedServicePrice.match(/[^0-9.,\s]/g)?.join('') || '';
+                                return <p className="text-xl font-black text-[#C5A55A]">{currency}{discounted.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>;
+                              }
+                              return <p className="text-sm font-bold text-[#C5A55A]">{discountInfo.discount}% OFF</p>;
+                            })()}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   {discountInfo && !discountInfo.valid && (

@@ -48,7 +48,7 @@ export default function Store() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successCode, setSuccessCode] = useState("");
   const [discountCode, setDiscountCode] = useState("");
-  const [discountInfo, setDiscountInfo] = useState<{ discount: number | null; description?: string | null } | null>(null);
+  const [discountInfo, setDiscountInfo] = useState<{ valid: boolean; discount: number | null; isGift: boolean; isTwoForOne: boolean; description: string | null } | null>(null);
 
   const purchaseMutation = trpc.productPurchases.create.useMutation({
     onSuccess: (data) => {
@@ -69,19 +69,19 @@ export default function Store() {
   };
 
   const validateDiscountCodeMutation = trpc.discountCodes.validate.useQuery(
-    { code: discountCode },
-    { enabled: discountCode.length > 0 }
+    { code: discountCode.trim() },
+    { enabled: false }
   );
 
   const handleValidateDiscount = async () => {
     if (!discountCode.trim()) return;
     const result = await validateDiscountCodeMutation.refetch();
     if (result.data?.valid) {
-      setDiscountInfo({ discount: result.data.discount, description: result.data.description });
-      toast.success(`Descuento aplicado: ${result.data.discount}% off`);
+      setDiscountInfo({ valid: true, discount: result.data.discount, isGift: result.data.isGift ?? false, isTwoForOne: result.data.isTwoForOne ?? false, description: result.data.description ?? null });
+      toast.success(`¡Código válido! ${result.data.discount}% de descuento aplicado.`);
     } else {
-      setDiscountInfo(null);
-      toast.error("Código de descuento inválido o inactivo");
+      setDiscountInfo({ valid: false, discount: null, isGift: false, isTwoForOne: false, description: null });
+      toast.error("Código inválido o no está activo.");
     }
   };
 
@@ -323,7 +323,49 @@ export default function Store() {
                     <input type="text" value={discountCode} onChange={e => { setDiscountCode(e.target.value.toUpperCase()); setDiscountInfo(null); }} placeholder="Ej: Nutriser10" className="flex-1 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
                     <button type="button" onClick={handleValidateDiscount} className="bg-[#C5A55A]/20 hover:bg-[#C5A55A]/30 text-[#C5A55A] px-4 py-2.5 rounded-lg font-semibold text-sm transition">Aplicar</button>
                   </div>
-                  {discountInfo && <p className="text-green-600 text-xs mt-2">✓ {discountInfo.discount}% de descuento aplicado</p>}
+                  {discountInfo && discountInfo.valid && (
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                        <span className="text-green-600 font-bold">✓</span>
+                        <span>
+                          {discountInfo.isTwoForOne
+                            ? "¡2x1 aplicado! Llevas dos productos al precio de uno."
+                            : discountInfo.isGift
+                            ? "¡Regalo aplicado! Tu producto es completamente gratis."
+                            : `¡Código válido! ${discountInfo.discount}% de descuento aplicado.`}
+                        </span>
+                      </div>
+                      {selectedProduct?.price && !discountInfo.isTwoForOne && (
+                        (() => {
+                          const numericPrice = parseFloat(selectedProduct.price.replace(/[^0-9.]/g, ''));
+                          if (!isNaN(numericPrice) && discountInfo.discount) {
+                            const discounted = discountInfo.isGift ? 0 : numericPrice * (1 - discountInfo.discount / 100);
+                            const currency = selectedProduct.price.match(/[^0-9.,\s]/g)?.join('') || '';
+                            return (
+                              <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl px-4 py-3 flex items-center justify-between">
+                                <div>
+                                  <p className="text-xs text-gray-500 mb-0.5">Precio original</p>
+                                  <p className="text-sm text-gray-400 line-through">{selectedProduct.price}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs text-[#C5A55A] font-semibold mb-0.5">Tu precio con descuento</p>
+                                  {discountInfo.isGift ? (
+                                    <p className="text-xl font-black text-green-600">¡GRATIS!</p>
+                                  ) : (
+                                    <p className="text-xl font-black text-[#C5A55A]">{currency}{discounted.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()
+                      )}
+                    </div>
+                  )}
+                  {discountInfo && !discountInfo.valid && (
+                    <p className="mt-2 text-red-600 text-xs">Código inválido o no está activo.</p>
+                  )}
                 </div>
 
                 <div>

@@ -159,10 +159,10 @@ export default function HeroSection() {
             </a>
             <a
               href="/cursos"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
+              className="col-span-2 inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
             >
               <GraduationCap className="w-5 h-5" />
-              Cursos Nutriser
+              Nutriser Academy
             </a>
             <motion.button
               onClick={(e) => {

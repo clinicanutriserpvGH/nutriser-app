@@ -18,6 +18,7 @@ import EbookLogin from "./pages/EbookLogin";
 import Store from "@/pages/Store";
 import CouponPage from "@/pages/CouponPage";
 import Courses from "@/pages/Courses";
+import BackgroundMusic from "@/components/BackgroundMusic";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -49,6 +50,7 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
+          <BackgroundMusic />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

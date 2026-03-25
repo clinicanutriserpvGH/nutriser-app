@@ -38,6 +38,9 @@ export const memberships = mysqlTable("memberships", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   status: mysqlEnum("status", ["pending", "verified", "rejected"]).default("pending").notNull(),
   depositConcept: text("depositConcept"), // Concepto del depósito (nombre + programa)
+  discountCode: varchar("discountCode", { length: 50 }), // Código de descuento aplicado
+  discountPercent: int("discountPercent"), // Porcentaje de descuento aplicado
+  originalPrice: decimal("originalPrice", { precision: 10, scale: 2 }), // Precio antes del descuento
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   verifiedAt: timestamp("verifiedAt"),
@@ -254,6 +257,9 @@ export const servicePurchases = mysqlTable("servicePurchases", {
   serviceCode: varchar("serviceCode", { length: 20 }).notNull().unique(), // Código único NUT-SRV-XXXX
   status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
   adminNotes: text("adminNotes"), // Notas del administrador
+  discountCode: varchar("discountCode", { length: 50 }), // Código de descuento aplicado
+  discountPercent: int("discountPercent"), // Porcentaje de descuento aplicado
+  originalPrice: varchar("originalPrice", { length: 100 }), // Precio antes del descuento
   approvedAt: timestamp("approvedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -347,8 +353,30 @@ export const productPurchases = mysqlTable("productPurchases", {
   status: mysqlEnum("status", ["pending", "verified", "rejected"]).default("pending").notNull(),
   purchaseCode: varchar("purchaseCode", { length: 30 }).notNull(),
   notes: text("notes"),
+  discountCode: varchar("discountCode", { length: 50 }), // Código de descuento aplicado
+  discountPercent: int("discountPercent"), // Porcentaje de descuento aplicado
+  originalPrice: varchar("originalPrice", { length: 100 }), // Precio antes del descuento
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type ProductPurchase = typeof productPurchases.$inferSelect;
 export type InsertProductPurchase = typeof productPurchases.$inferInsert;
+
+/**
+ * Códigos de descuento generales
+ * Aplican a programas de nutrición, productos y servicios
+ * El administrador activa/desactiva cada código desde el panel
+ */
+export const discountCodes = mysqlTable("discountCodes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(), // ej: Nutriser10
+  discountPercent: int("discountPercent").notNull(), // 10, 15, 20, 25, 30, 100
+  isGift: boolean("isGift").default(false).notNull(), // true = Nutriserfree (100% = regalo)
+  isActive: boolean("isActive").default(false).notNull(), // Admin debe activar
+  description: varchar("description", { length: 255 }), // ej: "10% de descuento en todo"
+  usageCount: int("usageCount").default(0).notNull(), // Contador de usos
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type DiscountCode = typeof discountCodes.$inferSelect;
+export type InsertDiscountCode = typeof discountCodes.$inferInsert;

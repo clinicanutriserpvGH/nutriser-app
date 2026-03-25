@@ -667,3 +667,22 @@
 - [x] Corregir imagen OG en blanco — activar loadSystemFonts en resvg y usar fuentes Noto disponibles en servidor
 - [x] Descargar imagen del cupón como base64 para incluirla en el SVG (resvg no carga URLs externas HTTP)
 - [x] Panel derecho de imagen OG ahora muestra la foto real del tratamiento con overlay de marca
+
+## Sistema de Códigos de Descuento General - Mar 25 2026
+
+- [ ] Crear tabla `discountCodes` en drizzle/schema.ts (código, porcentaje, isActive, isGift)
+- [ ] Migrar schema con pnpm db:push
+- [ ] Seed de los 6 códigos predefinidos: Nutriser10(10%), Nutriser15(15%), Nutriser20(20%), Nutriser25(25%), Nutriser30(30%), Nutriserfree(100%)
+- [ ] Procedimientos tRPC: discountCodes.validate, discountCodes.list, discountCodes.toggle
+- [ ] Agregar campo de código de descuento en formulario de compra de programas de nutrición
+- [ ] Agregar campo de código de descuento en formulario de compra de productos
+- [ ] Agregar campo de código de descuento en formulario de servicios (si aplica)
+- [ ] Mostrar precio final con descuento aplicado en tiempo real
+- [ ] Tab "Códigos de Descuento" en AdminDashboard para activar/desactivar códigos
+- [ ] Guardar código usado en cada compra (membresías y productos)
+- [ ] Agregar botón visible "Ver Catálogo de Servicios" en la página principal (Hero o sección dedicada)
+
+## Bug: Admin Servicios - Edición y Foto - Mar 25 2026
+
+- [ ] Corregir tab Servicios en AdminDashboard: el botón Editar no abre el formulario de edición
+- [ ] Corregir subida de foto en el formulario de servicios (crear y editar)

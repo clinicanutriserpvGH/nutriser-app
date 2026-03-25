@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO `discountCodes` (`code`, `discountPercent`, `isGift`, `isActive`, `description`) VALUES\n('Nutriser10', 10, false, false, '10% de descuento en programas, productos y servicios'),\n('Nutriser15', 15, false, false, '15% de descuento en programas, productos y servicios'),\n('Nutriser20', 20, false, false, '20% de descuento en programas, productos y servicios'),\n('Nutriser25', 25, false, false, '25% de descuento en programas, productos y servicios'),\n('Nutriser30', 30, false, false, '30% de descuento en programas, productos y servicios'),\n('Nutriserfree', 100, true, false, 'Regalo especial — 100% de descuento');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute INSERT INTO `discountCodes` (`code`, `discountPercent`, `isGift`, `isActive`, `description`) VALUES\n('Nutriser10', 10, false, false, '10% de descuento en programas, productos y servicios'),\n('Nutriser15', 15, false, false, '15% de descuento en programas, productos y servicios'),\n('Nutriser20', 20, false, false, '20% de descuento en programas, productos y servicios'),\n('Nutriser25', 25, false, false, '25% de descuento en programas, productos y servicios'),\n('Nutriser30', 30, false, false, '30% de descuento en programas, productos y servicios'),\n('Nutriserfree', 100, true, false, 'Regalo especial — 100% de descuento');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 367
+}

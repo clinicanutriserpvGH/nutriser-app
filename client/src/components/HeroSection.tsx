@@ -108,8 +108,16 @@ export default function HeroSection() {
               Agenda tu Cita
             </a>
             <a
+              href="#servicios"
+              onClick={(e) => { e.preventDefault(); const el = document.querySelector("#servicios"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              Ver Servicios
+            </a>
+            <a
               href="/tienda"
-              className="col-span-2 inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30"
             >
               <ShoppingBag className="w-5 h-5" />
               Tienda de Productos

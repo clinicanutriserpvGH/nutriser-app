@@ -8,7 +8,7 @@ import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin } from "./_core/email";
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
-import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase } from './db';
+import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll } from "./pushNotifications";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
@@ -1096,6 +1096,28 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return await deleteProductPurchase(input.id);
+      }),
+  }),
+  discountCodes: router({
+    validate: publicProcedure
+      .input(z.object({ code: z.string() }))
+      .query(async ({ input }) => {
+        const code = await validateDiscountCode(input.code);
+        if (!code) return { valid: false, discount: null };
+        return {
+          valid: true,
+          discount: code.discountPercent,
+          isGift: code.isGift,
+          description: code.description,
+        };
+      }),
+    listAll: publicProcedure.query(async () => {
+      return await getAllDiscountCodes();
+    }),
+    toggle: publicProcedure
+      .input(z.object({ id: z.number(), isActive: z.boolean() }))
+      .mutation(async ({ input }) => {
+        return await toggleDiscountCode(input.id, input.isActive);
       }),
   }),
 });

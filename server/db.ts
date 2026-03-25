@@ -2,7 +2,7 @@ import { eq, desc, and, lt, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, couponSubscribers, InsertCouponSubscriber, services, InsertService } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { products, InsertProduct, productPurchases, InsertProductPurchase } from '../drizzle/schema';
+import { products, InsertProduct, productPurchases, InsertProductPurchase, discountCodes, InsertDiscountCode, DiscountCode } from '../drizzle/schema';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -714,4 +714,35 @@ export async function deleteProductPurchase(id: number) {
   if (!db) throw new Error("Database not available");
   await db.delete(productPurchases).where(eq(productPurchases.id, id));
   return { success: true };
+}
+
+// ===== DISCOUNT CODES (GENERAL) =====
+export async function getAllDiscountCodes() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(discountCodes).orderBy(discountCodes.discountPercent);
+}
+
+export async function validateDiscountCode(code: string): Promise<DiscountCode | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(discountCodes)
+    .where(and(eq(discountCodes.code, code), eq(discountCodes.isActive, true)))
+    .limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function toggleDiscountCode(id: number, isActive: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(discountCodes).set({ isActive }).where(eq(discountCodes.id, id));
+  return { success: true };
+}
+
+export async function incrementDiscountCodeUsage(code: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(discountCodes)
+    .set({ usageCount: sql`${discountCodes.usageCount} + 1` })
+    .where(eq(discountCodes.code, code));
 }

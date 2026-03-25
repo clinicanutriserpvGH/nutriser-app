@@ -47,6 +47,8 @@ export default function Store() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successCode, setSuccessCode] = useState("");
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountInfo, setDiscountInfo] = useState<{ discount: number | null; description?: string | null } | null>(null);
 
   const purchaseMutation = trpc.productPurchases.create.useMutation({
     onSuccess: (data) => {
@@ -62,7 +64,25 @@ export default function Store() {
   const handleOpenPurchase = (product: (typeof products)[0]) => {
     setSelectedProduct(product);
     setBuyerName(""); setBuyerEmail(""); setBuyerPhone(""); setQuantity(1); setProofFile(null); setSuccessCode("");
+    setDiscountCode(""); setDiscountInfo(null);
     setPurchaseModal(true);
+  };
+
+  const validateDiscountCodeMutation = trpc.discountCodes.validate.useQuery(
+    { code: discountCode },
+    { enabled: discountCode.length > 0 }
+  );
+
+  const handleValidateDiscount = async () => {
+    if (!discountCode.trim()) return;
+    const result = await validateDiscountCodeMutation.refetch();
+    if (result.data?.valid) {
+      setDiscountInfo({ discount: result.data.discount, description: result.data.description });
+      toast.success(`Descuento aplicado: ${result.data.discount}% off`);
+    } else {
+      setDiscountInfo(null);
+      toast.error("Código de descuento inválido o inactivo");
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -295,6 +315,14 @@ export default function Store() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
                   <input type="number" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} min={1} max={selectedProduct.stock || 99} className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Código de descuento (opcional)</label>
+                  <div className="flex gap-2">
+                    <input type="text" value={discountCode} onChange={e => { setDiscountCode(e.target.value.toUpperCase()); setDiscountInfo(null); }} placeholder="Ej: Nutriser10" className="flex-1 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                    <button type="button" onClick={handleValidateDiscount} className="bg-[#C5A55A]/20 hover:bg-[#C5A55A]/30 text-[#C5A55A] px-4 py-2.5 rounded-lg font-semibold text-sm transition">Aplicar</button>
+                  </div>
+                  {discountInfo && <p className="text-green-600 text-xs mt-2">✓ {discountInfo.discount}% de descuento aplicado</p>}
                 </div>
 
                 <div>

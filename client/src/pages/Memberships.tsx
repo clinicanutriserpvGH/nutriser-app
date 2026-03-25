@@ -48,7 +48,9 @@ export default function Memberships() {
     clientName: "",
     clientEmail: "",
     clientPhone: "",
+    discountCode: "",
   });
+  const [discountInfo, setDiscountInfo] = useState<{ discount: number | null; description?: string | null } | null>(null);
   const [membershipId, setMembershipId] = useState<number | null>(null);
   const [step, setStep] = useState<"select" | "form" | "proof">("select");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -59,6 +61,22 @@ export default function Memberships() {
   const createMutation = trpc.memberships.create.useMutation();
   const uploadProofMutation = trpc.memberships.uploadProof.useMutation();
   const cancelMutation = trpc.memberships.cancel.useMutation();
+  const validateDiscountCodeMutation = trpc.discountCodes.validate.useQuery(
+    { code: formData.discountCode },
+    { enabled: formData.discountCode.length > 0 }
+  );
+
+  const handleValidateDiscount = async () => {
+    if (!formData.discountCode.trim()) return;
+    const result = await validateDiscountCodeMutation.refetch();
+    if (result.data?.valid) {
+      setDiscountInfo({ discount: result.data.discount, description: result.data.description });
+      toast.success(`Descuento aplicado: ${result.data.discount}% off`);
+    } else {
+      setDiscountInfo(null);
+      toast.error("Código de descuento inválido o inactivo");
+    }
+  };
 
   // Contador de tiempo
   useEffect(() => {
@@ -158,7 +176,8 @@ export default function Memberships() {
 
           toast.success("Comprobante recibido. En cuanto confirmemos tu pago, recibirás un correo con las instrucciones de acceso.");
           setStep("select");
-          setFormData({ clientName: "", clientEmail: "", clientPhone: "" });
+          setFormData({ clientName: "", clientEmail: "", clientPhone: "", discountCode: "" });
+          setDiscountInfo(null);
           setSelectedProgram(null);
           setMembershipId(null);
           setSelectedFile(null);

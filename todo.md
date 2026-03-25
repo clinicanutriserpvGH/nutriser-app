@@ -795,3 +795,8 @@
 - [x] Mostrar código único de acceso en cada membresía del panel admin
 - [x] Implementar subida de videos en chunks para evitar error 413 del proxy
 - [x] Música de fondo bossa nova en página principal con autoplay
+
+## Correcciones Sesión - Botón de Música
+
+- [x] Mover botón de música a esquina inferior izquierda para que no choque con botón de WhatsApp (esquina inferior derecha)
+- [x] El botón ahora es visible en todas las páginas incluyendo el inicio

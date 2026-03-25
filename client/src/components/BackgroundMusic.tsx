@@ -45,17 +45,19 @@ export default function BackgroundMusic() {
     <button
       onClick={handleClick}
       aria-label={playing ? "Pausar música" : "Reproducir música de fondo"}
+      title={playing ? "Pausar música de fondo" : "Reproducir música de fondo"}
       style={{
         position: "fixed",
-        bottom: "90px",
-        right: "16px",
+        // Posición: esquina inferior izquierda para no chocar con WhatsApp (esquina inferior derecha)
+        bottom: "24px",
+        left: "16px",
         zIndex: 9999,
         width: "44px",
         height: "44px",
         borderRadius: "50%",
         background: "rgba(197, 165, 90, 0.95)",
         border: "2px solid rgba(255,255,255,0.3)",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",

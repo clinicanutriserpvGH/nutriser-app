@@ -693,3 +693,12 @@
 - [x] Corregir handleServiceImageChange para subir a S3 correctamente
 - [x] Corregir handleProductImageChange para subir a S3 correctamente
 - [x] Verificar que funcione igual que en tienda de eBook
+
+## Sistema de Códigos de Promoción (Sesión Mar 25)
+- [x] Actualizar tabla discountCodes con los 7 códigos correctos (Nutriser10/15/20/25/30, Nutriserfree, Nutriser2x1)
+- [x] Agregar tipo "2x1" en la lógica de descuentos
+- [x] Agregar campo de código de descuento en formulario de compra de servicios
+- [x] Verificar campo de código en formulario de compra de productos
+- [x] Verificar campo de código en formulario de compra de programas de nutrición
+- [x] Agregar tab "Códigos de Descuento" en panel admin para activar/desactivar
+- [x] Mostrar descuento aplicado visualmente en el formulario de compra

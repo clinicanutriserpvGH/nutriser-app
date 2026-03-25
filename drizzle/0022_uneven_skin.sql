@@ -1,0 +1,1 @@
+ALTER TABLE `discountCodes` ADD `isTwoForOne` boolean DEFAULT false NOT NULL;

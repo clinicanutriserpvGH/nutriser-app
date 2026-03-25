@@ -17,6 +17,8 @@ import {
   Loader2,
   Upload,
   Package,
+  Tag,
+  CheckCircle2,
 } from "lucide-react";
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -72,12 +74,55 @@ export default function ServicesSection() {
   // ─── Modal de Adquirir Servicio ─────────────────────────────────────────────
   const [purchaseModal, setPurchaseModal] = useState(false);
   const [selectedService, setSelectedService] = useState<string>("");
+  const [selectedServicePrice, setSelectedServicePrice] = useState<string>("");
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successCode, setSuccessCode] = useState("");
+
+  // ─── Código de descuento ─────────────────────────────────────────────────────
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountValidating, setDiscountValidating] = useState(false);
+  const [discountInfo, setDiscountInfo] = useState<{
+    valid: boolean;
+    discount: number | null;
+    isGift: boolean;
+    isTwoForOne: boolean;
+    description: string | null;
+  } | null>(null);
+
+  const validateCodeQuery = trpc.discountCodes.validate.useQuery(
+    { code: discountCode.trim() },
+    { enabled: false }
+  );
+
+  const handleValidateCode = async () => {
+    if (!discountCode.trim()) { toast.error("Ingresa un código de descuento"); return; }
+    setDiscountValidating(true);
+    try {
+      const result = await validateCodeQuery.refetch();
+      if (result.data) {
+        setDiscountInfo(result.data);
+        if (result.data.valid) {
+          if (result.data.isTwoForOne) {
+            toast.success("¡Código 2x1 aplicado! Compras un servicio y obtienes uno doble.");
+          } else if (result.data.isGift) {
+            toast.success("¡Código de regalo aplicado! Tu servicio es completamente gratis.");
+          } else {
+            toast.success(`¡Código válido! ${result.data.discount}% de descuento aplicado.`);
+          }
+        } else {
+          toast.error("Código inválido o no está activo.");
+        }
+      }
+    } catch {
+      toast.error("Error al validar el código.");
+    } finally {
+      setDiscountValidating(false);
+    }
+  };
 
   const purchaseMutation = trpc.servicePurchases.create.useMutation({
     onSuccess: (data) => {
@@ -90,10 +135,13 @@ export default function ServicesSection() {
     },
   });
 
-  const handleOpenPurchase = (serviceName: string) => {
+  const handleOpenPurchase = (serviceName: string, servicePrice?: string | null) => {
     setSelectedService(serviceName);
+    setSelectedServicePrice(servicePrice || "");
     setBuyerName(""); setBuyerEmail(""); setBuyerPhone(""); setProofFile(null);
     setSuccessCode("");
+    setDiscountCode("");
+    setDiscountInfo(null);
     setPurchaseModal(true);
   };
 
@@ -122,6 +170,9 @@ export default function ServicesSection() {
         buyerPhone: buyerPhone || undefined,
         proofData: base64,
         proofMimeType: proofFile.type,
+        discountCode: discountInfo?.valid ? discountCode.trim() : undefined,
+        discountPercent: discountInfo?.valid ? (discountInfo.discount ?? 0) : undefined,
+        originalPrice: selectedServicePrice || undefined,
       });
     };
     reader.readAsDataURL(proofFile);
@@ -248,7 +299,7 @@ export default function ServicesSection() {
                         Precio
                       </a>
                       <button
-                        onClick={() => handleOpenPurchase(service.name)}
+                        onClick={() => handleOpenPurchase(service.name, service.price)}
                         className="flex-1 flex items-center justify-center gap-1.5 bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs font-bold py-2.5 rounded-lg transition-colors shadow-sm"
                       >
                         <ShoppingBag className="w-3.5 h-3.5" />
@@ -362,6 +413,47 @@ export default function ServicesSection() {
                     placeholder="322 000 0000"
                     className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
                   />
+                </div>
+
+                {/* ─── Código de Descuento ─────────────────────────────── */}
+                <div className="border border-[#C5A55A]/30 rounded-xl p-4 bg-[#FAF7F2]">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                    <Tag className="w-4 h-4 text-[#C5A55A]" />
+                    Código de Promoción (opcional)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={discountCode}
+                      onChange={e => { setDiscountCode(e.target.value); setDiscountInfo(null); }}
+                      placeholder="Ej: Nutriser20"
+                      className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleValidateCode}
+                      disabled={discountValidating || !discountCode.trim()}
+                      className="px-3 py-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white text-xs font-bold rounded-lg transition"
+                    >
+                      {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Aplicar"}
+                    </button>
+                  </div>
+                  {discountInfo && discountInfo.valid && (
+                    <div className="mt-2 flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                      <span>
+                        {discountInfo.isTwoForOne
+                          ? "¡2x1 aplicado! Compras un servicio y obtienes uno doble."
+                          : discountInfo.isGift
+                          ? "¡Regalo aplicado! Tu servicio es completamente gratis."
+                          : `${discountInfo.discount}% de descuento aplicado.`}
+                        {discountInfo.description && ` — ${discountInfo.description}`}
+                      </span>
+                    </div>
+                  )}
+                  {discountInfo && !discountInfo.valid && (
+                    <p className="mt-2 text-red-600 text-xs">Código inválido o no está activo.</p>
+                  )}
                 </div>
 
                 <div>

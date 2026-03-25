@@ -372,6 +372,7 @@ export const discountCodes = mysqlTable("discountCodes", {
   code: varchar("code", { length: 50 }).notNull().unique(), // ej: Nutriser10
   discountPercent: int("discountPercent").notNull(), // 10, 15, 20, 25, 30, 100
   isGift: boolean("isGift").default(false).notNull(), // true = Nutriserfree (100% = regalo)
+  isTwoForOne: boolean("isTwoForOne").default(false).notNull(), // true = Nutriser2x1 (2 por precio de 1)
   isActive: boolean("isActive").default(false).notNull(), // Admin debe activar
   description: varchar("description", { length: 255 }), // ej: "10% de descuento en todo"
   usageCount: int("usageCount").default(0).notNull(), // Contador de usos

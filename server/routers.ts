@@ -907,6 +907,9 @@ export const appRouter = router({
         buyerPhone: z.string().optional(),
         proofData: z.string(), // base64
         proofMimeType: z.string(),
+        discountCode: z.string().optional(),
+        discountPercent: z.number().optional(),
+        originalPrice: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         // Generate unique service code: NUT-SRV-XXXX
@@ -920,6 +923,11 @@ export const appRouter = router({
         const fileName = `service-proof-${Date.now()}.${ext}`;
         const { url } = await storagePut(`service-proofs/${fileName}`, buffer, input.proofMimeType);
 
+        // Increment discount code usage if provided
+        if (input.discountCode) {
+          try { await incrementDiscountCodeUsage(input.discountCode); } catch {}
+        }
+
         const purchase = await createServicePurchase({
           serviceName: input.serviceName,
           buyerName: input.buyerName,
@@ -928,6 +936,9 @@ export const appRouter = router({
           proofUrl: url,
           serviceCode,
           status: 'pending',
+          discountCode: input.discountCode,
+          discountPercent: input.discountPercent,
+          originalPrice: input.originalPrice,
         });
 
         // Notify admin via email
@@ -1103,11 +1114,12 @@ export const appRouter = router({
       .input(z.object({ code: z.string() }))
       .query(async ({ input }) => {
         const code = await validateDiscountCode(input.code);
-        if (!code) return { valid: false, discount: null };
+        if (!code) return { valid: false, discount: null, isGift: false, isTwoForOne: false, description: null };
         return {
           valid: true,
           discount: code.discountPercent,
           isGift: code.isGift,
+          isTwoForOne: code.isTwoForOne ?? false,
           description: code.description,
         };
       }),

@@ -336,6 +336,18 @@ export default function AdminDashboard() {
     onError: (error) => toast.error('Error: ' + error.message),
   });
 
+  // ─── Códigos de Descuento Generales ────────────────────────────────────────
+  const { data: generalDiscountCodes, refetch: refetchGeneralCodes } = trpc.discountCodes.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const toggleGeneralCodeMutation = trpc.discountCodes.toggle.useMutation({
+    onSuccess: (_, variables) => {
+      toast.success(variables.isActive ? 'Código activado' : 'Código desactivado');
+      refetchGeneralCodes();
+    },
+    onError: () => toast.error('Error al actualizar código'),
+  });
+
   const utils = trpc.useUtils();
   const updateStatusMutation = trpc.memberships.updateStatus.useMutation({
     onSuccess: () => {
@@ -916,6 +928,10 @@ export default function AdminDashboard() {
                 {productPurchases && productPurchases.filter((p: any) => p.status === 'pending').length > 0 && (
                   <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{productPurchases.filter((p: any) => p.status === 'pending').length}</span>
                 )}
+              </TabsTrigger>
+              <TabsTrigger value="discountCodes" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
+                🏷️
+                Cód. Descuento
               </TabsTrigger>
             </TabsList>
           </div>
@@ -2566,6 +2582,82 @@ export default function AdminDashboard() {
                       )}
                     </tbody>
                   </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Códigos de Descuento Generales Tab */}
+          <TabsContent value="discountCodes" className="space-y-4">
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A]">🏷️ Códigos de Descuento Generales</CardTitle>
+                <CardDescription>
+                  Activa o desactiva los códigos de promoción para servicios, productos y programas de nutrición.
+                  El código del eBook se gestiona en el tab "eBook".
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {generalDiscountCodes && generalDiscountCodes.length > 0 ? (
+                    generalDiscountCodes.map((code: any) => (
+                      <div key={code.id} className={`border-2 rounded-xl p-4 transition-all ${
+                        code.isActive
+                          ? 'border-[#C5A55A] bg-[#FAF7F2]'
+                          : 'border-gray-200 bg-gray-50 opacity-60'
+                      }`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <p className="font-mono font-bold text-lg text-[#1A1A1A]">{code.code}</p>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {code.isTwoForOne
+                                ? '🎁 2x1 — Compras uno y obtienes doble'
+                                : code.isGift
+                                ? '🎁 Regalo — 100% gratis'
+                                : `${code.discountPercent}% de descuento`
+                              }
+                            </p>
+                            {code.description && (
+                              <p className="text-xs text-gray-400 mt-1">{code.description}</p>
+                            )}
+                          </div>
+                          <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                            code.isActive
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-500'
+                          }`}>
+                            {code.isActive ? 'Activo' : 'Inactivo'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-400 mb-3">
+                          Usos: <span className="font-semibold text-gray-600">{code.usageCount || 0}</span>
+                        </div>
+                        <button
+                          onClick={() => toggleGeneralCodeMutation.mutate({ id: code.id, isActive: !code.isActive })}
+                          className={`w-full py-2 rounded-lg text-sm font-bold transition ${
+                            code.isActive
+                              ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                              : 'bg-[#C5A55A] text-white hover:bg-[#B8963E]'
+                          }`}
+                        >
+                          {code.isActive ? '⏸ Desactivar' : '▶ Activar'}
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-400 text-sm col-span-3 py-8 text-center">Cargando códigos...</p>
+                  )}
+                </div>
+
+                <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm">
+                  <p className="font-bold text-amber-800 mb-2">ℹ️ Cómo funcionan los códigos:</p>
+                  <ul className="text-amber-700 space-y-1 text-xs">
+                    <li>• Los clientes ingresan el código al momento de comprar un servicio, producto o programa de nutrición.</li>
+                    <li>• Solo los códigos <strong>Activos</strong> pueden ser usados por los clientes.</li>
+                    <li>• El código <strong>Nutriserfree</strong> hace que el servicio/producto sea completamente gratis.</li>
+                    <li>• El código <strong>Nutriser2x1</strong> permite al cliente obtener 2 servicios al precio de 1.</li>
+                    <li>• Los códigos del eBook se gestionan en el tab "eBook".</li>
+                  </ul>
                 </div>
               </CardContent>
             </Card>

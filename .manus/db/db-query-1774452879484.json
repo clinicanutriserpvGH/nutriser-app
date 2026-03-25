@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, title, videoUrl, createdAt FROM courseVideos ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT id, title, videoUrl, createdAt FROM courseVideos ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "60001",
+      "title": "L",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/course-videos/1774452803433-70v7h3.mp4",
+      "createdAt": "2026-03-25 15:33:23"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tvideoUrl\tcreatedAt\n60001\tL\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/course-videos/1774452803433-70v7h3.mp4\t2026-03-25 15:33:23\n",
+  "stderr": "",
+  "execution_time_ms": 443
+}

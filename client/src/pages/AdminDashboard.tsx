@@ -471,7 +471,7 @@ export default function AdminDashboard() {
       const finalRes = await fetch('/api/upload-chunk-finalize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uploadId, filename: file.name, mimeType: file.type }),
+        body: JSON.stringify({ uploadId, filename: file.name, mimeType: file.type, totalChunks }),
       });
       if (!finalRes.ok) {
         const errText = await finalRes.text().catch(() => `HTTP ${finalRes.status}`);

@@ -218,20 +218,32 @@ async function startServer() {
 
   // POST /api/upload-chunk-finalize — ensambla todos los chunks, convierte a MP4 y sube a S3
   app.post("/api/upload-chunk-finalize", async (req, res) => {
-    const { uploadId, filename, mimeType } = req.body;
+    const { uploadId, filename, mimeType, totalChunks } = req.body;
     if (!uploadId || !filename) {
       return res.status(400).json({ error: 'Missing uploadId or filename' });
     }
+    const expectedChunks = parseInt(totalChunks || '0');
     const chunkDir = path.join(tmpdir(), `upload-${uploadId}`);
     const assembledPath = path.join(tmpdir(), `assembled-${uploadId}-${filename}`);
     const ext = filename.includes('.') ? filename.split('.').pop()?.toLowerCase() || 'bin' : 'bin';
     try {
-      // Leer y ensamblar todos los chunks en orden
+      // Esperar hasta que todos los chunks estén presentes (máx 30s)
       const { readdirSync } = await import('fs');
+      if (expectedChunks > 0) {
+        let waited = 0;
+        while (waited < 30000) {
+          const present = readdirSync(chunkDir).filter((f: string) => f.startsWith('chunk-')).length;
+          console.log(`[Finalize] Waiting for chunks: ${present}/${expectedChunks}`);
+          if (present >= expectedChunks) break;
+          await new Promise(r => setTimeout(r, 500));
+          waited += 500;
+        }
+      }
+      // Leer y ensamblar todos los chunks en orden
       const chunkFiles = readdirSync(chunkDir)
         .filter((f: string) => f.startsWith('chunk-'))
         .sort();
-      console.log(`[Finalize] Assembling ${chunkFiles.length} chunks for ${filename}`);
+      console.log(`[Finalize] Assembling ${chunkFiles.length} chunks for ${filename} (expected: ${expectedChunks})`);
       for (const chunkFile of chunkFiles) {
         const chunkData = await readFile(path.join(chunkDir, chunkFile));
         await appendFile(assembledPath, chunkData);

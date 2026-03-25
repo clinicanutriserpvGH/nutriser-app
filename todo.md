@@ -779,3 +779,8 @@
 - [ ] Rediseñar frontend: flujo de 3 pasos (datos → datos bancarios → subir comprobante)
 - [ ] Enviar solo UNA notificación al admin por membresía (al subir comprobante)
 - [ ] Eliminar notificaciones duplicadas del flujo actual
+
+## Correcciones Sesión Actual - Videos
+
+- [x] Agregar botón "Eliminar video" en panel admin de cursos
+- [x] Agregar procedimiento tRPC deleteCourseVideo en backend

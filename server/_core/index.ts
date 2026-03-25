@@ -6,8 +6,19 @@ import { promisify } from "util";
 import { writeFile, readFile, unlink } from "fs/promises";
 import { tmpdir } from "os";
 import path from "path";
+import { createRequire } from "module";
 
 const execFileAsync = promisify(execFile);
+
+// Obtener el binario de ffmpeg-static (incluido en node_modules, no requiere instalación en el servidor)
+const _require = createRequire(import.meta.url);
+let ffmpegBinary: string = 'ffmpeg'; // fallback al ffmpeg del sistema
+try {
+  ffmpegBinary = _require('ffmpeg-static');
+  console.log('[FFmpeg] Using bundled ffmpeg-static:', ffmpegBinary);
+} catch (e) {
+  console.log('[FFmpeg] ffmpeg-static not found, using system ffmpeg');
+}
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -104,7 +115,7 @@ async function startServer() {
             const tmpOutput = path.join(tmpdir(), `upload-out-${Date.now()}.mp4`);
             try {
               await writeFile(tmpInput, fileBuffer);
-              await execFileAsync('ffmpeg', [
+              await execFileAsync(ffmpegBinary, [
                 '-i', tmpInput,
                 '-c:v', 'libx264',   // H.264 codec - compatible con todos los navegadores
                 '-c:a', 'aac',       // AAC audio

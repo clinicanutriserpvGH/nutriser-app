@@ -15,6 +15,8 @@ import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
+import { adminCredentials } from "../drizzle/schema";
+import { getDb } from "./db";
 
 export const appRouter = router({
   system: systemRouter,
@@ -882,20 +884,22 @@ export const appRouter = router({
     sendTest: publicProcedure
       .input(z.object({
         adminPassword: z.string(),
+        title: z.string().optional(),
+        body: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        // Verificar contraseña de admin usando el email fijo de la clínica
-        const ADMIN_EMAIL = 'clinicanutriserpv@gmail.com';
-        const admin = await getAdminByEmail(ADMIN_EMAIL);
-        if (!admin) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Admin no configurado' });
-        const valid = await bcrypt.compare(input.adminPassword, admin.passwordHash);
+        // Verificar contraseña: buscar el primer admin disponible en la base de datos
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Base de datos no disponible' });
+        const admins = await db.select().from(adminCredentials).limit(1);
+        if (!admins.length) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Admin no configurado' });
+        const valid = await bcrypt.compare(input.adminPassword, admins[0].passwordHash);
         if (!valid) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Contraseña incorrecta' });
 
-        const result = await sendPushNotificationToAll(
-          '🔔 Notificación de Prueba - Nutriser',
-          'Esta es una notificación de prueba. Si escuchas el sonido, ¡todo funciona correctamente!',
-          'https://nutriserpv.com',
-        );
+        const title = input.title?.trim() || '🔔 Notificación de Prueba - Nutriser';
+        const body = input.body?.trim() || 'Esta es una notificación de prueba. Si escuchas el sonido, ¡todo funciona correctamente!';
+
+        const result = await sendPushNotificationToAll(title, body, 'https://nutriserpv.com');
         return result;
       }),
 

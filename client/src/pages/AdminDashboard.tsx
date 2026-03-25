@@ -148,6 +148,9 @@ export default function AdminDashboard() {
   });
 
   // Notificaciones push de prueba
+  const [pushTestTitle, setPushTestTitle] = useState('');
+  const [pushTestBody, setPushTestBody] = useState('');
+
   const { data: pushSubscribersCount } = trpc.push.countSubscribers.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -2216,40 +2219,61 @@ export default function AdminDashboard() {
               <CardContent>
                 {/* Tarjeta de prueba de notificación push */}
                 <div className="bg-gradient-to-r from-[#C5A55A]/10 to-[#C5A55A]/5 border border-[#C5A55A]/30 rounded-xl p-4 mb-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <h4 className="font-bold text-[#1A1A1A] flex items-center gap-2 mb-1">
+                    <BellRing className="w-4 h-4 text-[#C5A55A]" />
+                    Prueba de Notificación Push
+                  </h4>
+                  <p className="text-sm text-[#666] mb-3">
+                    Envía una notificación a todos los dispositivos suscritos para verificar que el sonido funciona.
+                    Dispositivos activos: <strong className="text-[#C5A55A]">{pushSubscribersCount?.count ?? 0}</strong>
+                  </p>
+                  <div className="space-y-2 mb-3">
                     <div>
-                      <h4 className="font-bold text-[#1A1A1A] flex items-center gap-2 mb-1">
-                        <BellRing className="w-4 h-4 text-[#C5A55A]" />
-                        Prueba de Notificación Push
-                      </h4>
-                      <p className="text-sm text-[#666]">
-                        Envía una notificación de prueba a todos los dispositivos suscritos para verificar que el sonido funciona.
-                      </p>
-                      <p className="text-xs text-[#999] mt-1">
-                        Dispositivos con notificaciones push activas: <strong className="text-[#C5A55A]">{pushSubscribersCount?.count ?? 0}</strong>
-                      </p>
+                      <label className="text-xs font-semibold text-[#666] block mb-1">Título (opcional)</label>
+                      <input
+                        type="text"
+                        value={pushTestTitle}
+                        onChange={(e) => setPushTestTitle(e.target.value)}
+                        placeholder="🔔 Notificación de Prueba - Nutriser"
+                        className="w-full border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40"
+                        maxLength={100}
+                      />
                     </div>
-                    <Button
-                      onClick={() => {
-                        const ADMIN_PASSWORD = 'nutriser2024';
-                        sendTestPushMutation.mutate({ adminPassword: ADMIN_PASSWORD });
-                      }}
-                      disabled={sendTestPushMutation.isPending}
-                      className="bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold whitespace-nowrap flex-shrink-0"
-                    >
-                      {sendTestPushMutation.isPending ? (
-                        <>
-                          <svg className="animate-spin w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                          Enviando...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          Enviar Prueba
-                        </>
-                      )}
-                    </Button>
+                    <div>
+                      <label className="text-xs font-semibold text-[#666] block mb-1">Mensaje (opcional)</label>
+                      <textarea
+                        value={pushTestBody}
+                        onChange={(e) => setPushTestBody(e.target.value)}
+                        placeholder="Esta es una notificación de prueba. Si escuchas el sonido, ¡todo funciona correctamente!"
+                        className="w-full border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40 resize-none"
+                        rows={2}
+                        maxLength={200}
+                      />
+                    </div>
                   </div>
+                  <Button
+                    onClick={() => {
+                      sendTestPushMutation.mutate({
+                        adminPassword: 'nutriser2024',
+                        title: pushTestTitle || undefined,
+                        body: pushTestBody || undefined,
+                      });
+                    }}
+                    disabled={sendTestPushMutation.isPending}
+                    className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold"
+                  >
+                    {sendTestPushMutation.isPending ? (
+                      <>
+                        <svg className="animate-spin w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4 mr-2" />
+                        Enviar Notificación
+                      </>
+                    )}
+                  </Button>
                 </div>
 
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">

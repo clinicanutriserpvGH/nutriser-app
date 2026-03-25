@@ -41,23 +41,36 @@ async function startServer() {
   app.post("/api/upload", async (req, res) => {
     try {
       const { storagePut } = await import("../storage");
-      const chunks: Buffer[] = [];
-      req.on("data", (chunk) => chunks.push(chunk));
-      req.on("end", async () => {
+      const busboy = await import("busboy");
+      const bb = busboy.default({ headers: req.headers });
+      let fileBuffer: Buffer | null = null;
+      let fileType = "image/jpeg";
+      
+      bb.on("file", (fieldname: string, file: any, info: any) => {
+        const chunks: Buffer[] = [];
+        fileType = info.mimeType || "image/jpeg";
+        file.on("data", (chunk: Buffer) => chunks.push(chunk));
+        file.on("end", () => {
+          fileBuffer = Buffer.concat(chunks);
+        });
+      });
+      
+      bb.on("close", async () => {
         try {
-          const { storagePut } = await import("../storage");
-          const buffer = Buffer.concat(chunks);
+          if (!fileBuffer) {
+            return res.status(400).json({ error: "No file uploaded" });
+          }
           const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
           const relKey = `promotions/${filename}`;
-          
-          // Upload to S3
-          const { url } = await storagePut(relKey, buffer, "image/jpeg");
+          const { url } = await storagePut(relKey, fileBuffer, fileType);
           res.json({ url });
         } catch (error) {
           console.error("Upload error:", error);
           res.status(500).json({ error: "Upload failed: " + (error instanceof Error ? error.message : "Unknown error") });
         }
       });
+      
+      req.pipe(bb);
     } catch (error) {
       console.error("Upload error:", error);
       res.status(500).json({ error: "Upload failed" });

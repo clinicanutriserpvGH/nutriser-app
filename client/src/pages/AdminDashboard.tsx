@@ -609,20 +609,17 @@ export default function AdminDashboard() {
     if (serviceImage) {
       setIsUploadingServiceImage(true);
       try {
-        const reader = new FileReader();
-        const base64 = await new Promise<string>((resolve) => {
-          reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
-          reader.readAsDataURL(serviceImage);
-        });
+        const formData = new FormData();
+        formData.append('file', serviceImage);
         const response = await fetch('/api/upload', {
           method: 'POST',
-          headers: { 'Content-Type': serviceImage.type },
-          body: Buffer.from ? Buffer.from(base64, 'base64') : Uint8Array.from(atob(base64), c => c.charCodeAt(0)),
+          body: formData,
         });
         const data = await response.json();
         if (data.url) imageUrl = data.url;
+        else throw new Error(data.error || 'Upload failed');
       } catch (e) {
-        toast.error('Error al subir imagen');
+        toast.error('Error al subir imagen: ' + (e instanceof Error ? e.message : 'Unknown error'));
         setIsUploadingServiceImage(false);
         return;
       }
@@ -668,20 +665,17 @@ export default function AdminDashboard() {
     if (productImage) {
       setIsUploadingProductImage(true);
       try {
-        const reader = new FileReader();
-        const base64 = await new Promise<string>((resolve) => {
-          reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
-          reader.readAsDataURL(productImage);
-        });
+        const formData = new FormData();
+        formData.append('file', productImage);
         const response = await fetch('/api/upload', {
           method: 'POST',
-          headers: { 'Content-Type': productImage.type },
-          body: Uint8Array.from(atob(base64), c => c.charCodeAt(0)),
+          body: formData,
         });
         const data = await response.json();
         if (data.url) imageUrl = data.url;
+        else throw new Error(data.error || 'Upload failed');
       } catch (e) {
-        toast.error('Error al subir imagen');
+        toast.error('Error al subir imagen: ' + (e instanceof Error ? e.message : 'Unknown error'));
         setIsUploadingProductImage(false);
         return;
       }

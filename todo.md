@@ -686,3 +686,10 @@
 
 - [ ] Corregir tab Servicios en AdminDashboard: el botón Editar no abre el formulario de edición
 - [ ] Corregir subida de foto en el formulario de servicios (crear y editar)
+
+
+## Bug: Carga de Imágenes en Servicios y Productos
+- [x] Diagnosticar por qué no se cargan imágenes en catálogo de servicios
+- [x] Corregir handleServiceImageChange para subir a S3 correctamente
+- [x] Corregir handleProductImageChange para subir a S3 correctamente
+- [x] Verificar que funcione igual que en tienda de eBook

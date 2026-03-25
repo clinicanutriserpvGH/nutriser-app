@@ -1,0 +1,13 @@
+{
+  "query": "DELETE FROM memberships WHERE clientEmail = 'tbdulas@gmail.com' AND status = 'pending'; SELECT COUNT(*) as remaining FROM memberships;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute DELETE FROM memberships WHERE clientEmail = 'tbdulas@gmail.com' AND status = 'pending'; SELECT COUNT(*) as remaining FROM memberships;",
+  "rows": [
+    {
+      "remaining": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "remaining\n0\n",
+  "stderr": "",
+  "execution_time_ms": 429
+}

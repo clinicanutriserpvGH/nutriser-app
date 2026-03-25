@@ -65,21 +65,8 @@ export const appRouter = router({
           depositConcept: `${input.clientName} - Programa ${input.programType === "basic" ? "Básico" : "Premium"}`,
         });
         
-        // Send membership notification to admin from client email
-        await sendMembershipNotificationToAdmin(
-          ENV.gmailUser || "clinicanutriserpv@gmail.com",
-          input.clientName,
-          input.clientEmail,
-          input.clientPhone,
-          input.programType
-        );
-        
-        // Notify owner via system notification
-        await notifyOwner({
-          title: "Nueva Inscripción a Membresía",
-          content: `Cliente: ${input.clientName}\nEmail: ${input.clientEmail}\nTeléfono: ${input.clientPhone || "No proporcionado"}\nPrograma: ${input.programType === "basic" ? "Básico" : "Premium"}`,
-        });
-        
+        // NO enviar notificaciones aquí - solo crear la membresía
+        // Las notificaciones se envían cuando el cliente sube el comprobante (uploadProof)
         return membership;
       }),
     
@@ -144,12 +131,14 @@ export const appRouter = router({
         // Admin validation is done on client-side via localStorage
         const membership = await updateMembershipStatus(input.id, input.status);
         
-        // If status is verified, send activation email
+        // If status is verified, send activation email with access code
         if (input.status === "verified" && membership) {
-          const membershipData = await getMembershipById(input.id);
-          if (membershipData) {
-            await sendConfirmationEmail(membershipData.clientEmail, membershipData.clientName, membershipData.programType);
-          }
+          await sendConfirmationEmail(
+            membership.clientEmail,
+            membership.clientName,
+            membership.programType,
+            membership.accessCode || undefined
+          );
         }
         
         return membership;

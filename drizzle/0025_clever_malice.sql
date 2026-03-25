@@ -1,0 +1,1 @@
+ALTER TABLE `memberships` ADD `accessCode` varchar(20);

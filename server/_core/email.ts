@@ -19,7 +19,8 @@ export function getEmailTransporter() {
 export async function sendConfirmationEmail(
   clientEmail: string,
   clientName: string,
-  programType: "basic" | "premium"
+  programType: "basic" | "premium",
+  accessCode?: string
 ) {
   const transporter = getEmailTransporter();
 
@@ -60,7 +61,15 @@ export async function sendConfirmationEmail(
           
           <p>¡Tu pago ha sido <strong>confirmado y aprobado</strong> por nuestro equipo! 🎉</p>
           
-          <p>En breve nos pondremos en contacto contigo para darte las instrucciones de acceso a tu programa y coordinar tus primeras asesorías.</p>
+          ${accessCode ? `
+          <div style="background-color: #C5A55A; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+            <p style="margin: 0 0 8px 0; font-size: 14px;">Tu código de acceso exclusivo es:</p>
+            <p style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 6px; font-family: monospace;">${accessCode}</p>
+            <p style="margin: 8px 0 0 0; font-size: 12px; opacity: 0.9;">Guarda este código — lo necesitarás para acceder a tu programa</p>
+          </div>
+          ` : ''}
+          
+          <p>En breve nos pondremos en contacto contigo para coordinar tus primeras asesorías.</p>
           
           <p>Si tienes alguna pregunta, no dudes en contactarnos por WhatsApp: <strong>+52 322 100 7799</strong> o por correo a <strong>clinicanutriserpv@gmail.com</strong>.</p>
           

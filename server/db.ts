@@ -121,7 +121,22 @@ export async function updateMembershipStatus(id: number, status: "pending" | "ve
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  return await db.update(memberships).set({ status, verifiedAt: status === "verified" ? new Date() : undefined }).where(eq(memberships.id, id));
+  let accessCode: string | undefined = undefined;
+  if (status === "verified") {
+    // Generar código único de 8 caracteres alfanuméricos en mayúsculas
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sin O, I, 0, 1 para evitar confusión
+    accessCode = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  }
+  
+  await db.update(memberships).set({
+    status,
+    verifiedAt: status === "verified" ? new Date() : undefined,
+    ...(accessCode ? { accessCode } : {}),
+  }).where(eq(memberships.id, id));
+  
+  // Devolver la membresía actualizada con el accessCode
+  const updated = await db.select().from(memberships).where(eq(memberships.id, id)).limit(1);
+  return updated.length > 0 ? updated[0] : undefined;
 }
 
 export async function deleteMembership(id: number) {

@@ -44,6 +44,7 @@ export const memberships = mysqlTable("memberships", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   verifiedAt: timestamp("verifiedAt"),
+  accessCode: varchar("accessCode", { length: 20 }), // Código único generado al aprobar
 });
 
 export type Membership = typeof memberships.$inferSelect;

@@ -176,6 +176,13 @@
       "when": 1774427256219,
       "tag": "0024_boring_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1774444208118,
+      "tag": "0025_clever_malice",
+      "breakpoints": true
     }
   ]
 }

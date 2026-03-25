@@ -139,7 +139,7 @@ export default function Memberships() {
       setCreatedAt(Date.now());
       setTimeRemaining(900); // Reiniciar contador a 15 minutos
       setStep("proof");
-      toast.success("Membresía creada. Tienes 15 minutos para subir el comprobante.");
+      toast.success("Datos guardados. Ahora sube tu comprobante de pago para completar la inscripción.");
     } catch (error) {
       toast.error("Error al crear la membresía");
       console.error(error);

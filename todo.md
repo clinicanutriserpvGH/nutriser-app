@@ -770,3 +770,12 @@
 ## Sesión Mar 25 - Error subida videos
 - [ ] Corregir error al subir videos en /api/upload (error en producción)
 - [ ] Agregar sección de material de apoyo (PDF/Word) visible desde el mismo formulario del video
+
+## Correcciones de Flujo de Membresías (Mar 25)
+- [ ] Limpiar datos de prueba (@example.com) de la BD de producción
+- [ ] Rediseñar flujo: NO crear membresía hasta que se suba el comprobante
+- [ ] Agregar campo accessCode a la tabla memberships para código único
+- [ ] Al aprobar membresía: generar código único automáticamente y enviarlo por correo
+- [ ] Rediseñar frontend: flujo de 3 pasos (datos → datos bancarios → subir comprobante)
+- [ ] Enviar solo UNA notificación al admin por membresía (al subir comprobante)
+- [ ] Eliminar notificaciones duplicadas del flujo actual

@@ -706,3 +706,6 @@
 ## Corrección Formularios de Pago - Mar 25 2026
 - [x] Eliminar campo "Titular: Nutriser" de todos los formularios de pago
 - [x] Dejar solo el concepto con nombre del cliente y servicio/producto adquirido
+
+## Corrección Formulario Cupones - Mar 25 2026
+- [x] Hacer teléfono obligatorio en formulario de adquirir cupón

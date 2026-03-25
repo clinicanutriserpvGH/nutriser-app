@@ -183,6 +183,7 @@ export default function PromotionsSection() {
     e.preventDefault();
     if (!buyerName.trim()) { toast.error("Ingresa tu nombre"); return; }
     if (!buyerEmail.trim()) { toast.error("Ingresa tu email"); return; }
+    if (!buyerPhone.trim()) { toast.error("Ingresa tu número de teléfono"); return; }
     setStep("type");
   };
 
@@ -696,8 +697,8 @@ export default function PromotionsSection() {
                   <input type="email" value={buyerEmail} onChange={e => setBuyerEmail(e.target.value)} placeholder="tu@correo.com" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input type="tel" value={buyerPhone} onChange={e => setBuyerPhone(e.target.value)} placeholder="322 000 0000" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+                  <input type="tel" value={buyerPhone} onChange={e => setBuyerPhone(e.target.value)} placeholder="322 000 0000" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" required />
                 </div>
                 <button type="submit" className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition">Continuar →</button>
               </form>

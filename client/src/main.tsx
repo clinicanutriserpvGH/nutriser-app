@@ -8,6 +8,21 @@ import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
+// Escuchar mensajes del Service Worker para reproducir sonido de notificación
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data?.type === 'PLAY_NOTIFICATION_SOUND') {
+      try {
+        const audio = new Audio(event.data.url);
+        audio.volume = 0.8;
+        audio.play().catch(() => {});
+      } catch (e) {
+        // Silenciar errores si el navegador bloquea el audio
+      }
+    }
+  });
+}
+
 const queryClient = new QueryClient();
 
 // Error logging sin redirect automático a OAuth

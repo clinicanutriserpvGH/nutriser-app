@@ -75,6 +75,20 @@ self.addEventListener('fetch', (event) => {
 
 // ─── Push Notifications ────────────────────────────────────────────────────────
 
+const NOTIFICATION_SOUND_URL = 'https://res.cloudinary.com/dikinwkjq/video/upload/v1774457153/nutriser-audio/notification-bell.mp3';
+
+// Reproduce el sonido de notificación en todas las pestañas abiertas
+async function playNotificationSound() {
+  try {
+    const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of allClients) {
+      client.postMessage({ type: 'PLAY_NOTIFICATION_SOUND', url: NOTIFICATION_SOUND_URL });
+    }
+  } catch (e) {
+    // Silenciar errores si no hay clientes abiertos
+  }
+}
+
 self.addEventListener('push', (event) => {
   let data = {};
   try {
@@ -108,7 +122,10 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(title, options)
+    Promise.all([
+      self.registration.showNotification(title, options),
+      playNotificationSound(),
+    ])
   );
 });
 

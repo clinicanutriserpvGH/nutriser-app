@@ -1,0 +1,46 @@
+{
+  "query": "SELECT COUNT(*) as total FROM pushSubscriptions; SELECT LEFT(endpoint, 60) as endpoint_preview, COUNT(*) as count FROM pushSubscriptions GROUP BY endpoint ORDER BY count DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT COUNT(*) as total FROM pushSubscriptions; SELECT LEFT(endpoint, 60) as endpoint_preview, COUNT(*) as count FROM pushSubscriptions GROUP BY endpoint ORDER BY count DESC LIMIT 20;",
+  "rows": [
+    {
+      "total": "15"
+    },
+    {
+      "total": "endpoint_preview\tcount"
+    },
+    {
+      "total": "https://web.push.apple.com/QA_MFQ_d3EzqbqdmgM7B7Ls01NBH0QTAb\t5"
+    },
+    {
+      "total": "https://web.push.apple.com/QMv2Bc87V4-O6FLD-5Ch1rWeS8i0KxKWf\t2"
+    },
+    {
+      "total": "https://fcm.googleapis.com/fcm/send/f-H02DM3BZA:APA91bEmfx7E\t1"
+    },
+    {
+      "total": "https://web.push.apple.com/QGtdic-0EbG4CCs77FxK4b16C71_ib-T4\t1"
+    },
+    {
+      "total": "https://web.push.apple.com/QK3h8L2zCgpRdNHsixDGOte5XaB-0MbRQ\t1"
+    },
+    {
+      "total": "https://web.push.apple.com/QLS2SeR_5T85Df0c1ZBA5etLlnGj2ZEhX\t1"
+    },
+    {
+      "total": "https://fcm.googleapis.com/fcm/send/cC63kmytv6I:APA91bGW_Flk\t1"
+    },
+    {
+      "total": "https://fcm.googleapis.com/fcm/send/cgy5Yn8Eetg:APA91bEmmOzP\t1"
+    },
+    {
+      "total": "https://web.push.apple.com/QPtVrU8bvzR5UhQTz6_KLT4CaVAvsYLUb\t1"
+    },
+    {
+      "total": "https://fcm.googleapis.com/fcm/send/cPDOlLNAWHA:APA91bH6mAh-\t1"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n15\nendpoint_preview\tcount\nhttps://web.push.apple.com/QA_MFQ_d3EzqbqdmgM7B7Ls01NBH0QTAb\t5\nhttps://web.push.apple.com/QMv2Bc87V4-O6FLD-5Ch1rWeS8i0KxKWf\t2\nhttps://fcm.googleapis.com/fcm/send/f-H02DM3BZA:APA91bEmfx7E\t1\nhttps://web.push.apple.com/QGtdic-0EbG4CCs77FxK4b16C71_ib-T4\t1\nhttps://web.push.apple.com/QK3h8L2zCgpRdNHsixDGOte5XaB-0MbRQ\t1\nhttps://web.push.apple.com/QLS2SeR_5T85Df0c1ZBA5etLlnGj2ZEhX\t1\nhttps://fcm.googleapis.com/fcm/send/cC63kmytv6I:APA91bGW_Flk\t1\nhttps://fcm.googleapis.com/fcm/send/cgy5Yn8Eetg:APA91bEmmOzP\t1\nhttps://web.push.apple.com/QPtVrU8bvzR5UhQTz6_KLT4CaVAvsYLUb\t1\nhttps://fcm.googleapis.com/fcm/send/cPDOlLNAWHA:APA91bH6mAh-\t1\n",
+  "stderr": "",
+  "execution_time_ms": 415
+}

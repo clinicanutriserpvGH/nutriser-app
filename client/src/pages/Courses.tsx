@@ -132,10 +132,14 @@ export default function Courses() {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           const registration = await navigator.serviceWorker.ready;
-          const sub = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(vapidData.publicKey),
-          });
+          // Reusar suscripción existente si ya hay una activa (evita duplicados)
+          let sub = await registration.pushManager.getSubscription();
+          if (!sub) {
+            sub = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(vapidData.publicKey),
+            });
+          }
           const subJson = sub.toJSON();
           const p256dhKey = sub.getKey('p256dh')!;
           const authKey = sub.getKey('auth')!;

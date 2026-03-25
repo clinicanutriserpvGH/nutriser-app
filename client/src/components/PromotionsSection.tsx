@@ -97,10 +97,15 @@ export default function PromotionsSection() {
       const rawData = window.atob(base64);
       const outputArray = new Uint8Array(rawData.length);
       for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: outputArray,
-      });
+
+      // Reusar suscripción existente si ya hay una activa (evita duplicados)
+      let subscription = await reg.pushManager.getSubscription();
+      if (!subscription) {
+        subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: outputArray,
+        });
+      }
       const p256dhArr = new Uint8Array(subscription.getKey('p256dh')!);
       const authArr = new Uint8Array(subscription.getKey('auth')!);
       const p256dh = btoa(Array.from(p256dhArr).map(b => String.fromCharCode(b)).join(''));

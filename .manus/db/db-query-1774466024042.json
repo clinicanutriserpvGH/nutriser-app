@@ -1,0 +1,9 @@
+{
+  "query": "DELETE ps1 FROM pushSubscriptions ps1 INNER JOIN pushSubscriptions ps2 WHERE ps1.endpoint = ps2.endpoint AND ps1.id < ps2.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute DELETE ps1 FROM pushSubscriptions ps1 INNER JOIN pushSubscriptions ps2 WHERE ps1.endpoint = ps2.endpoint AND ps1.id < ps2.id;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 368
+}

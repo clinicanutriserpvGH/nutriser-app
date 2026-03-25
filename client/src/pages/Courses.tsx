@@ -265,19 +265,10 @@ export default function Courses() {
                       if (errDiv) errDiv.style.display = 'flex';
                     }}
                   >
-                    {/* Intentar con el tipo correcto según extensión */}
-                    {selectedVideo.videoUrl.toLowerCase().includes('.mov') ? (
-                      <>
-                        <source src={selectedVideo.videoUrl} type="video/quicktime" />
-                        <source src={selectedVideo.videoUrl} type="video/mp4" />
-                      </>
-                    ) : selectedVideo.videoUrl.toLowerCase().includes('.webm') ? (
-                      <source src={selectedVideo.videoUrl} type="video/webm" />
-                    ) : selectedVideo.videoUrl.toLowerCase().includes('.avi') ? (
-                      <source src={selectedVideo.videoUrl} type="video/x-msvideo" />
-                    ) : (
-                      <source src={selectedVideo.videoUrl} type="video/mp4" />
-                    )}
+                    {/* Servir todos los videos como video/mp4 — Safari acepta MOV/H.264 con este MIME type */}
+                    <source src={selectedVideo.videoUrl} type="video/mp4" />
+                    <source src={selectedVideo.videoUrl} type="video/quicktime" />
+                    <source src={selectedVideo.videoUrl} type="video/webm" />
                     Tu navegador no soporta la reproducción de video.
                   </video>
                   <div className="absolute inset-0 flex-col items-center justify-center bg-black text-white text-center p-4 hidden">

@@ -255,38 +255,17 @@ async function startServer() {
       const videoExts = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v', 'wmv', 'flv', '3gp'];
       const isVideo = (mimeType || '').startsWith('video/') || videoExts.includes(ext);
 
-      let finalBuffer: Buffer;
-      let finalExt = ext;
-      let uploadMimeType = mimeType || 'application/octet-stream';
-
-      if (isVideo && ext !== 'mp4' && ext !== 'webm') {
-        // Convertir a MP4
-        const tmpOutput = path.join(tmpdir(), `converted-${uploadId}.mp4`);
-        console.log(`[Finalize] Converting ${ext} to mp4...`);
-        try {
-          await execFileAsync(ffmpegBinary, [
-            '-i', assembledPath,
-            '-c:v', 'libx264',
-            '-c:a', 'aac',
-            '-movflags', '+faststart',
-            '-preset', 'fast',
-            '-crf', '23',
-            '-y',
-            tmpOutput
-          ], { timeout: 600000 });
-          finalBuffer = await readFile(tmpOutput);
-          finalExt = 'mp4';
-          uploadMimeType = 'video/mp4';
-          console.log(`[Finalize] Conversion OK: ${assembledStat.size} -> ${finalBuffer.length} bytes`);
-          unlink(tmpOutput).catch(() => {});
-        } catch (convErr) {
-          console.error('[Finalize] FFmpeg failed, uploading original:', convErr);
-          finalBuffer = await readFile(assembledPath);
-        }
-      } else {
-        finalBuffer = await readFile(assembledPath);
-        if (ext === 'mp4') uploadMimeType = 'video/mp4';
-      }
+      // Subir el video original sin conversión (Safari soporta MOV/H.264 nativamente)
+      const finalBuffer: Buffer = await readFile(assembledPath);
+      const finalExt = ext;
+      // Asignar el MIME type correcto según la extensión
+      const mimeMap: Record<string, string> = {
+        'mp4': 'video/mp4', 'mov': 'video/mp4', 'm4v': 'video/mp4',
+        'webm': 'video/webm', 'avi': 'video/x-msvideo',
+        'mkv': 'video/x-matroska', 'wmv': 'video/x-ms-wmv',
+      };
+      const uploadMimeType = mimeMap[ext] || mimeType || 'video/mp4';
+      console.log(`[Finalize] Uploading original ${ext} as ${uploadMimeType}, size: ${finalBuffer.length} bytes`);
 
       const folder = isVideo ? 'course-videos' : ((mimeType || '').startsWith('image/') ? 'promotions' : 'course-docs');
       const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${finalExt}`;

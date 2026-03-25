@@ -1,0 +1,17 @@
+{
+  "query": "SELECT v.id, v.title, v.videoUrl, v.courseId, c.title as courseName FROM courseVideos v JOIN courses c ON v.courseId = c.id LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute SELECT v.id, v.title, v.videoUrl, v.courseId, c.title as courseName FROM courseVideos v JOIN courses c ON v.courseId = c.id LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Hhh",
+      "videoUrl": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/course-videos/1774425812453-6gae6z.mov",
+      "courseId": "2",
+      "courseName": "Mmmmm"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tvideoUrl\tcourseId\tcourseName\n1\tHhh\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/course-videos/1774425812453-6gae6z.mov\t2\tMmmmm\n",
+  "stderr": "",
+  "execution_time_ms": 352
+}

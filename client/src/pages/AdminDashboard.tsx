@@ -2854,56 +2854,50 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    {/* Agregar video al curso */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
-                      <p className="text-sm font-bold text-blue-700">🎥 Agregar Nuevo Video al Curso</p>
-                      <input
-                        className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
-                        placeholder="Título del video *"
-                        value={videoForm.courseId === course.id ? videoForm.title : ''}
-                        onChange={e => setVideoForm(p => ({ ...p, title: e.target.value, courseId: course.id }))}
-                      />
-                      <textarea
-                        className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
-                        rows={2}
-                        placeholder="Descripción del video (opcional)"
-                        value={videoForm.courseId === course.id ? videoForm.description : ''}
-                        onChange={e => setVideoForm(p => ({ ...p, description: e.target.value, courseId: course.id }))}
-                      />
-                      <input
-                        className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
-                        placeholder="Duración (ej: 15:30 — opcional)"
-                        value={videoForm.courseId === course.id ? videoForm.duration : ''}
-                        onChange={e => setVideoForm(p => ({ ...p, duration: e.target.value, courseId: course.id }))}
-                      />
-                      {/* Selector de video */}
-                      <div className="space-y-2">
-                        <p className="text-xs font-semibold text-blue-600">📹 Archivo de video (MP4, MOV, AVI, MKV — hasta 500MB)</p>
-                        <label className="block cursor-pointer border-2 border-dashed border-blue-300 rounded-xl p-4 text-center hover:bg-blue-100 transition-colors">
+                    {/* Formulario para agregar video + material de apoyo */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+                      <p className="text-sm font-bold text-gray-700">➕ Agregar Video al Curso</p>
+                      
+                      {/* 1. Título */}
+                      <div>
+                        <label className="text-xs font-semibold text-gray-600 block mb-1">1. Título del video *</label>
+                        <input
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
+                          placeholder="Ej: Clase 1 - Introducción a la nutrición"
+                          value={videoForm.courseId === course.id ? videoForm.title : ''}
+                          onChange={e => setVideoForm(p => ({ ...p, title: e.target.value, courseId: course.id }))}
+                        />
+                      </div>
+
+                      {/* 2. Archivo de video */}
+                      <div>
+                        <label className="text-xs font-semibold text-gray-600 block mb-1">2. Archivo de video (MP4, MOV — máx 500MB)</label>
+                        <label className="block cursor-pointer border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-[#C5A55A] hover:bg-[#FAF7F2] transition-colors">
                           <input
                             type="file"
-                            accept="video/*"
+                            accept="video/*,.mp4,.mov,.avi,.mkv"
                             className="hidden"
                             onChange={e => { setCourseVideoFile(e.target.files?.[0] || null); setVideoForm(p => ({ ...p, courseId: course.id })); }}
                           />
                           {courseVideoFile && videoForm.courseId === course.id ? (
-                            <div className="space-y-1">
-                              <p className="text-sm font-semibold text-blue-700">📹 {courseVideoFile.name}</p>
-                              <p className="text-xs text-blue-500">{(courseVideoFile.size / 1024 / 1024).toFixed(1)} MB — Listo para subir</p>
+                            <div>
+                              <p className="text-sm font-semibold text-[#C5A55A]">🎥 {courseVideoFile.name}</p>
+                              <p className="text-xs text-gray-500">{(courseVideoFile.size / 1024 / 1024).toFixed(1)} MB seleccionado</p>
                             </div>
                           ) : (
-                            <div className="space-y-1">
-                              <p className="text-2xl">📁</p>
-                              <p className="text-sm text-blue-500">Toca aquí para seleccionar un video</p>
-                              <p className="text-xs text-blue-400">MP4, MOV, AVI, MKV — máx 500MB</p>
+                            <div>
+                              <p className="text-2xl mb-1">🎥</p>
+                              <p className="text-sm text-gray-500">Toca para seleccionar el video</p>
+                              <p className="text-xs text-gray-400">MP4, MOV, AVI, MKV</p>
                             </div>
                           )}
                         </label>
                       </div>
-                      {/* Selector de material de apoyo (PDF/Documento) */}
-                      <div className="space-y-2 border-t border-blue-200 pt-3">
-                        <p className="text-xs font-semibold text-[#C5A55A]">📚 Material de Apoyo (PDF, Word, Excel — opcional)</p>
-                        <label className="block cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-xl p-3 text-center hover:bg-[#FAF7F2] transition-colors">
+
+                      {/* 3. Material de apoyo */}
+                      <div>
+                        <label className="text-xs font-semibold text-gray-600 block mb-1">3. Material de Apoyo (PDF, Word — opcional)</label>
+                        <label className="block cursor-pointer border-2 border-dashed border-gray-300 rounded-xl p-3 text-center hover:border-[#C5A55A] hover:bg-[#FAF7F2] transition-colors">
                           <input
                             type="file"
                             accept=".pdf,.doc,.docx,.ppt,.pptx,.xlsx,.xls"
@@ -2913,87 +2907,50 @@ export default function AdminDashboard() {
                           {courseDocFile ? (
                             <div>
                               <p className="text-sm font-semibold text-[#C5A55A]">📄 {courseDocFile.name}</p>
-                              <p className="text-xs text-gray-400">{(courseDocFile.size / 1024).toFixed(0)} KB — Listo para subir</p>
+                              <p className="text-xs text-gray-400">{(courseDocFile.size / 1024).toFixed(0)} KB</p>
                             </div>
                           ) : (
                             <div>
-                              <p className="text-xl">📄</p>
-                              <p className="text-sm text-gray-500">Toca para seleccionar PDF o documento</p>
-                              <p className="text-xs text-gray-400">PDF, Word, Excel, PowerPoint</p>
+                              <p className="text-xl mb-1">📄</p>
+                              <p className="text-sm text-gray-500">Toca para seleccionar PDF o documento (opcional)</p>
                             </div>
                           )}
                         </label>
                       </div>
-                      {/* Botón de subida */}
+
+                      {/* Botón subir */}
                       <Button
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2"
+                        className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-semibold py-3 text-base"
                         onClick={handleUploadCourseVideo}
                         disabled={uploadingCourseVideo || videoForm.courseId !== course.id || !courseVideoFile || !videoForm.title}
                       >
                         {uploadingCourseVideo && videoForm.courseId === course.id ? (
                           <span className="flex items-center justify-center gap-2">
-                            <span className="animate-spin">⏳</span> Subiendo... (puede tardar varios minutos)
+                            <span className="animate-spin">⏳</span> Subiendo video... espera un momento
                           </span>
                         ) : '⬆️ Subir Video al Curso'}
                       </Button>
-                      {!videoForm.title && <p className="text-xs text-red-400">* Ingresa un título para el video antes de subir</p>}
+                      {!videoForm.title && videoForm.courseId === course.id && courseVideoFile && (
+                        <p className="text-xs text-red-500 text-center">Falta el título del video</p>
+                      )}
                     </div>
 
-                    {/* Videos del curso */}
+                    {/* Lista de videos existentes */}
                     {course.videos && course.videos.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-xs font-bold text-gray-600 uppercase tracking-wide">📺 Videos ({course.videos.length})</p>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">📺 Videos subidos ({course.videos.length})</p>
                         {course.videos.map((video: any) => (
-                          <div key={video.id} className="bg-white border rounded-lg p-3">
+                          <div key={video.id} className="bg-white border border-gray-200 rounded-lg p-3">
                             <div className="flex justify-between items-start">
-                              <div>
-                                <p className="font-medium text-sm">{video.title}</p>
-                                <p className="text-xs text-gray-400">{video.duration}</p>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline" className="text-xs" onClick={() => setSelectedVideoForDoc(selectedVideoForDoc === video.id ? null : video.id)}>
-                                  📄 Doc
-                                </Button>
-                                <Button size="sm" variant="outline" className="text-red-600 text-xs" onClick={() => { if(confirm('\u00bfEliminar video?')) deleteVideoMutation.mutate({ id: video.id }); }}>
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
-
-                            {/* Documentos del video */}
-                            {selectedVideoForDoc === video.id && (
-                              <div className="mt-3 pt-3 border-t space-y-3">
-                                <p className="text-sm font-bold text-[#C5A55A]">📚 Agregar Material de Apoyo (PDF/Documento)</p>
-                                <label className="block cursor-pointer border-2 border-dashed border-[#C5A55A]/40 rounded-xl p-3 text-center hover:bg-[#FAF7F2] transition-colors">
-                                  <input
-                                    type="file"
-                                    accept=".pdf,.doc,.docx,.ppt,.pptx,.xlsx,.xls"
-                                    className="hidden"
-                                    onChange={e => setCourseDocFile(e.target.files?.[0] || null)}
-                                  />
-                                  {courseDocFile ? (
-                                    <div>
-                                      <p className="text-sm font-semibold text-[#C5A55A]">📄 {courseDocFile.name}</p>
-                                      <p className="text-xs text-gray-400">{(courseDocFile.size / 1024).toFixed(0)} KB — Listo para subir</p>
-                                    </div>
-                                  ) : (
-                                    <div>
-                                      <p className="text-xl">📄</p>
-                                      <p className="text-sm text-gray-500">Toca para seleccionar PDF o documento</p>
-                                      <p className="text-xs text-gray-400">PDF, Word, Excel, PowerPoint</p>
-                                    </div>
-                                  )}
-                                </label>
-                                <div className="flex gap-2">
-                                  <Button size="sm" className="flex-1 bg-[#C5A55A] hover:bg-[#B8963E] text-white" onClick={() => handleUploadCourseDoc(video.id)} disabled={addDocumentMutation.isPending || !courseDocFile}>
-                                    {addDocumentMutation.isPending ? '⏳ Subiendo...' : '⬆️ Subir Material de Apoyo'}
-                                  </Button>
-                                </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm text-gray-800 truncate">{video.title}</p>
+                                {video.duration && <p className="text-xs text-gray-400">⏱ {video.duration}</p>}
+                                {/* Documentos del video */}
                                 {video.documents && video.documents.length > 0 && (
-                                  <div className="space-y-1">
+                                  <div className="mt-2 space-y-1">
                                     {video.documents.map((doc: any) => (
-                                      <div key={doc.id} className="flex justify-between items-center text-xs bg-gray-50 rounded p-2">
-                                        <span>📄 {doc.title}</span>
+                                      <div key={doc.id} className="flex justify-between items-center text-xs bg-amber-50 border border-amber-100 rounded px-2 py-1">
+                                        <span className="text-amber-700">📄 {doc.title}</span>
                                         <Button size="sm" variant="ghost" className="text-red-500 h-5 px-1" onClick={() => deleteDocumentMutation.mutate({ id: doc.id })}>
                                           <Trash2 className="w-3 h-3" />
                                         </Button>
@@ -3001,8 +2958,37 @@ export default function AdminDashboard() {
                                     ))}
                                   </div>
                                 )}
+                                {/* Agregar documento a video existente */}
+                                {selectedVideoForDoc === video.id && (
+                                  <div className="mt-2 space-y-2 pt-2 border-t border-gray-100">
+                                    <label className="block cursor-pointer border border-dashed border-[#C5A55A]/50 rounded-lg p-2 text-center hover:bg-[#FAF7F2] transition-colors">
+                                      <input
+                                        type="file"
+                                        accept=".pdf,.doc,.docx,.ppt,.pptx,.xlsx,.xls"
+                                        className="hidden"
+                                        onChange={e => setCourseDocFile(e.target.files?.[0] || null)}
+                                      />
+                                      {courseDocFile ? (
+                                        <p className="text-xs text-[#C5A55A]">📄 {courseDocFile.name}</p>
+                                      ) : (
+                                        <p className="text-xs text-gray-400">Seleccionar PDF o documento</p>
+                                      )}
+                                    </label>
+                                    <Button size="sm" className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs" onClick={() => handleUploadCourseDoc(video.id)} disabled={addDocumentMutation.isPending || !courseDocFile}>
+                                      {addDocumentMutation.isPending ? 'Subiendo...' : '⬆️ Subir documento'}
+                                    </Button>
+                                  </div>
+                                )}
                               </div>
-                            )}
+                              <div className="flex gap-1 ml-2 flex-shrink-0">
+                                <Button size="sm" variant="outline" className="text-xs px-2" onClick={() => setSelectedVideoForDoc(selectedVideoForDoc === video.id ? null : video.id)}>
+                                  {selectedVideoForDoc === video.id ? 'Cerrar' : '📄 Doc'}
+                                </Button>
+                                <Button size="sm" variant="outline" className="text-red-600 px-2" onClick={() => { if(confirm('¿Eliminar video?')) deleteVideoMutation.mutate({ id: video.id }); }}>
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>

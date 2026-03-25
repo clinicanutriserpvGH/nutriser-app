@@ -72,19 +72,28 @@ async function startServer() {
             ? originalFilename.split('.').pop()?.toLowerCase() || 'bin'
             : 'bin';
           const safeName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
-          // Choose S3 folder based on MIME type
+          // Choose S3 folder based on MIME type or extension
+          const videoExts = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v', 'wmv', 'flv', '3gp'];
+          const docExts = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xlsx', 'xls'];
           let folder = 'uploads';
-          if (fileType.startsWith('video/')) folder = 'course-videos';
+          if (fileType.startsWith('video/') || videoExts.includes(ext)) folder = 'course-videos';
           else if (
             fileType === 'application/pdf' ||
             fileType.includes('document') ||
             fileType.includes('spreadsheet') ||
             fileType.includes('presentation') ||
-            ext === 'pdf' || ext === 'doc' || ext === 'docx' || ext === 'ppt' || ext === 'pptx' || ext === 'xlsx'
+            docExts.includes(ext)
           ) folder = 'course-docs';
           else if (fileType.startsWith('image/')) folder = 'promotions';
+          // Normalizar MIME type para MOV (QuickTime) - algunos navegadores lo envian como application/octet-stream
+          let uploadMimeType = fileType;
+          if (ext === 'mov' && (fileType === 'application/octet-stream' || !fileType.startsWith('video/'))) {
+            uploadMimeType = 'video/quicktime';
+          } else if (ext === 'mp4' && !fileType.startsWith('video/')) {
+            uploadMimeType = 'video/mp4';
+          }
           const relKey = `${folder}/${safeName}`;
-          const { url } = await storagePut(relKey, fileBuffer, fileType);
+          const { url } = await storagePut(relKey, fileBuffer, uploadMimeType);
           res.json({ url });
         } catch (error) {
           console.error("Upload error:", error);

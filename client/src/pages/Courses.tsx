@@ -256,7 +256,17 @@ export default function Courses() {
                     className="w-full h-full"
                     poster={selectedVideo.thumbnailUrl || undefined}
                     onContextMenu={(e) => e.preventDefault()}
+                    playsInline
+                    preload="metadata"
                   >
+                    {/* Soportar MOV (QuickTime) y MP4 */}
+                    {selectedVideo.videoUrl.toLowerCase().includes('.mov') ? (
+                      <source src={selectedVideo.videoUrl} type="video/mp4" />
+                    ) : selectedVideo.videoUrl.toLowerCase().includes('.webm') ? (
+                      <source src={selectedVideo.videoUrl} type="video/webm" />
+                    ) : (
+                      <source src={selectedVideo.videoUrl} type="video/mp4" />
+                    )}
                     <source src={selectedVideo.videoUrl} />
                     Tu navegador no soporta la reproducción de video.
                   </video>

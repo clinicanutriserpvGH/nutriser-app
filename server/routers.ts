@@ -888,13 +888,11 @@ export const appRouter = router({
         body: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        // Verificar contraseña: buscar el primer admin disponible en la base de datos
-        const db = await getDb();
-        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Base de datos no disponible' });
-        const admins = await db.select().from(adminCredentials).limit(1);
-        if (!admins.length) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Admin no configurado' });
-        const valid = await bcrypt.compare(input.adminPassword, admins[0].passwordHash);
-        if (!valid) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Contraseña incorrecta' });
+        // El admin usa contraseña hardcodeada (igual que el login del admin)
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Contraseña incorrecta' });
+        }
 
         const title = input.title?.trim() || '🔔 Notificación de Prueba - Nutriser';
         const body = input.body?.trim() || 'Esta es una notificación de prueba. Si escuchas el sonido, ¡todo funciona correctamente!';

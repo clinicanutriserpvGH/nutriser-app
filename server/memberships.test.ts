@@ -1,6 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import { getDb } from "./db";
+import { memberships } from "../drizzle/schema";
+import { inArray } from "drizzle-orm";
+
+// IDs creados durante los tests para limpiarlos al final
+const createdMembershipIds: number[] = [];
 
 function createPublicContext(): TrpcContext {
   return {
@@ -38,6 +44,16 @@ function createAdminContext(): TrpcContext {
   };
 }
 
+// Limpiar todos los datos de prueba al terminar
+afterAll(async () => {
+  if (createdMembershipIds.length > 0) {
+    const db = await getDb();
+    if (db) {
+      await db.delete(memberships).where(inArray(memberships.id, createdMembershipIds));
+    }
+  }
+});
+
 describe("memberships", () => {
   it("should create a basic membership", async () => {
     const ctx = createPublicContext();
@@ -51,6 +67,7 @@ describe("memberships", () => {
     });
 
     expect(result).toBeDefined();
+    createdMembershipIds.push(result.id);
   });
 
   it("should create a premium membership", async () => {
@@ -64,6 +81,7 @@ describe("memberships", () => {
     });
 
     expect(result).toBeDefined();
+    createdMembershipIds.push(result.id);
   });
 
   it("should list memberships as admin", async () => {
@@ -97,6 +115,7 @@ describe("memberships", () => {
       clientEmail: "testupload@example.com",
       programType: "basic",
     });
+    createdMembershipIds.push(membership.id);
 
     const result = await caller.memberships.uploadProof({
       membershipId: membership.id,
@@ -117,6 +136,7 @@ describe("memberships", () => {
       clientEmail: "carlos@example.com",
       programType: "basic",
     });
+    createdMembershipIds.push(membership.id);
 
     // Luego cancelarla
     const result = await caller.memberships.cancel({

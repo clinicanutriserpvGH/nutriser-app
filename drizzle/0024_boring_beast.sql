@@ -1,0 +1,1 @@
+ALTER TABLE `courseDocuments` MODIFY COLUMN `fileType` varchar(255) DEFAULT 'pdf';

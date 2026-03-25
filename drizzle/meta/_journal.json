@@ -169,6 +169,13 @@
       "when": 1774419729051,
       "tag": "0023_military_george_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1774427256219,
+      "tag": "0024_boring_beast",
+      "breakpoints": true
     }
   ]
 }

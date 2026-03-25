@@ -2877,7 +2877,11 @@ export default function AdminDashboard() {
 
                       {/* 2. Archivo de video */}
                       <div>
-                        <label className="text-xs font-semibold text-gray-600 block mb-1">2. Archivo de video (MP4, MOV — máx 500MB)</label>
+                        <label className="text-xs font-semibold text-gray-600 block mb-1">2. Archivo de video (máx 500MB)</label>
+                        <div className="mb-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-800">
+                          ✅ <strong>Recomendado: MP4</strong> — funciona en todos los dispositivos.<br/>
+                          ⚠️ MOV (iPhone) puede no reproducirse. En tu iPhone ve a <strong>Ajustes → Cámara → Formatos → Más Compatible</strong> para grabar en MP4.
+                        </div>
                         <label className="block cursor-pointer border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-[#C5A55A] hover:bg-[#FAF7F2] transition-colors">
                           <input
                             type="file"
@@ -2889,12 +2893,15 @@ export default function AdminDashboard() {
                             <div>
                               <p className="text-sm font-semibold text-[#C5A55A]">🎥 {courseVideoFile.name}</p>
                               <p className="text-xs text-gray-500">{(courseVideoFile.size / 1024 / 1024).toFixed(1)} MB seleccionado</p>
+                              {courseVideoFile.name.toLowerCase().endsWith('.mov') && (
+                                <p className="text-xs text-amber-600 mt-1">⚠️ Archivo MOV detectado — puede no reproducirse en algunos navegadores</p>
+                              )}
                             </div>
                           ) : (
                             <div>
                               <p className="text-2xl mb-1">🎥</p>
                               <p className="text-sm text-gray-500">Toca para seleccionar el video</p>
-                              <p className="text-xs text-gray-400">MP4, MOV, AVI, MKV</p>
+                              <p className="text-xs text-gray-400">MP4 recomendado</p>
                             </div>
                           )}
                         </label>

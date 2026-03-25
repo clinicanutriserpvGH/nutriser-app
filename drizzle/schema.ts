@@ -428,7 +428,7 @@ export const courseDocuments = mysqlTable("courseDocuments", {
   videoId: int("videoId").notNull(), // FK a courseVideos.id
   title: varchar("title", { length: 255 }).notNull(),
   fileUrl: text("fileUrl").notNull(), // URL de S3 del documento
-  fileType: varchar("fileType", { length: 50 }).default("pdf"), // pdf, docx, etc.
+  fileType: varchar("fileType", { length: 255 }).default("pdf"), // pdf, docx, etc. (MIME type completo)
   fileSize: int("fileSize"), // Tamaño en bytes
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

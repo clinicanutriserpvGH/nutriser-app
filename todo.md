@@ -837,3 +837,8 @@
 
 - [ ] Cambiar texto del botón "Agenda tu Cita" del hero a "Agenda una Valoración General"
 - [ ] Hacer que el formulario abra con "Valoración General" preseleccionado via query param
+
+## Servicios - Botón Agendar Cita por servicio
+
+- [x] Agregar botón "Agendar Cita" en cada tarjeta de ServicesSection
+- [x] Al presionar, abrir formulario con el servicio de esa tarjeta preseleccionado

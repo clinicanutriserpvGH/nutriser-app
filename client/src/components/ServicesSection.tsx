@@ -19,6 +19,7 @@ import {
   Package,
   Tag,
   CheckCircle2,
+  CalendarCheck,
 } from "lucide-react";
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -285,25 +286,36 @@ export default function ServicesSection() {
                     </div>
 
                     {/* Card footer with buttons */}
-                    <div className="px-6 pb-5 pt-2 border-t border-[#1A1A1A]/5 flex gap-2">
+                    <div className="px-6 pb-5 pt-2 border-t border-[#1A1A1A]/5 flex flex-col gap-2">
+                      {/* Fila 1: Precio + Adquirir */}
+                      <div className="flex gap-2">
+                        <a
+                          href={`https://wa.me/523221007799?text=${encodeURIComponent(`Hola, me gustaría pedir informes y precio sobre: ${service.name}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-1.5 border border-green-500 text-green-600 hover:bg-green-50 text-xs font-semibold py-2.5 rounded-lg transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/>
+                          </svg>
+                          Precio
+                        </a>
+                        <button
+                          onClick={() => handleOpenPurchase(service.name, service.price)}
+                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs font-bold py-2.5 rounded-lg transition-colors shadow-sm"
+                        >
+                          <ShoppingBag className="w-3.5 h-3.5" />
+                          Adquirir
+                        </button>
+                      </div>
+                      {/* Fila 2: Agendar Cita con servicio preseleccionado */}
                       <a
-                        href={`https://wa.me/523221007799?text=${encodeURIComponent(`Hola, me gustaría pedir informes y precio sobre: ${service.name}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-1.5 border border-green-500 text-green-600 hover:bg-green-50 text-xs font-semibold py-2.5 rounded-lg transition-colors"
+                        href={`/appointment-form?service=${encodeURIComponent(service.name)}`}
+                        className="w-full flex items-center justify-center gap-1.5 border border-[#C5A55A]/60 text-[#C5A55A] hover:bg-[#C5A55A] hover:text-white text-xs font-bold py-2.5 rounded-lg transition-all duration-300"
                       >
-                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/>
-                        </svg>
-                        Precio
+                        <CalendarCheck className="w-3.5 h-3.5" />
+                        Agendar Cita
                       </a>
-                      <button
-                        onClick={() => handleOpenPurchase(service.name, service.price)}
-                        className="flex-1 flex items-center justify-center gap-1.5 bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs font-bold py-2.5 rounded-lg transition-colors shadow-sm"
-                      >
-                        <ShoppingBag className="w-3.5 h-3.5" />
-                        Adquirir
-                      </button>
                     </div>
                   </motion.div>
                 ))}

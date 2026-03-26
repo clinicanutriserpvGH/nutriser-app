@@ -44,13 +44,21 @@ const CLINIC_HOURS = [
 
 export default function AppointmentForm() {
   const [, navigate] = useLocation();
+
+  // Leer el servicio preseleccionado desde el query param ?service=...
+  const searchParams = new URLSearchParams(window.location.search);
+  const preselectedService = searchParams.get("service");
+  const initialService = preselectedService && SERVICES.includes(preselectedService)
+    ? preselectedService
+    : "Asesoría Nutricional Personalizada";
+
   const [formData, setFormData] = useState({
     clientName: "",
     clientEmail: "",
     clientPhone: "",
     appointmentDate: "",
     appointmentTime: "",
-    serviceType: "Asesoría Nutricional Personalizada",
+    serviceType: initialService,
   });
   const [isServiceOpen, setIsServiceOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

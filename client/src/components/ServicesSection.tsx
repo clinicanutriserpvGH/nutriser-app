@@ -324,7 +324,7 @@ export default function ServicesSection() {
             personalizada.
           </p>
           <a
-            href="/appointment-form"
+            href="/appointment-form?service=Valoraci%C3%B3n+General"
             className="inline-flex items-center gap-2 bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
           >
             Agendar Cita

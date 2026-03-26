@@ -832,3 +832,8 @@
 
 - [x] Corregir URL del botón "Crear cuenta" (apuntar a portaldesaludnutriser.club directamente)
 - [x] Agregar animación de pulso en el ícono HeartPulse del Portal de Salud
+
+## Hero - Botón Valoración General
+
+- [ ] Cambiar texto del botón "Agenda tu Cita" del hero a "Agenda una Valoración General"
+- [ ] Hacer que el formulario abra con "Valoración General" preseleccionado via query param

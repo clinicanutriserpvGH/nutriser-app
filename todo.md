@@ -842,3 +842,10 @@
 
 - [x] Agregar botón "Agendar Cita" en cada tarjeta de ServicesSection
 - [x] Al presionar, abrir formulario con el servicio de esa tarjeta preseleccionado
+
+## Hero - Botón Crear Cuenta
+- [ ] Encontrar URL del portal que abre directamente en pestaña Crear Cuenta
+- [ ] Actualizar botón "Crear Cuenta" en HeroSection con la URL correcta
+
+## Hero - Botón Portal Genérico
+- [x] Unificar "Iniciar Sesión" y "Crear Cuenta" en un solo botón genérico

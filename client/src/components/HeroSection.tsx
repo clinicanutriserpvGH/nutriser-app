@@ -174,19 +174,10 @@ export default function HeroSection() {
                   href="https://portaldesaludnutriser.club"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2 bg-[#C5A55A] text-[#1A1A1A] px-4 py-3 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#D4B46A] hover:shadow-lg hover:shadow-[#C5A55A]/40 rounded-lg"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#C5A55A] text-[#1A1A1A] px-4 py-3 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#D4B46A] hover:shadow-lg hover:shadow-[#C5A55A]/40 rounded-lg"
                 >
                   <Activity className="w-4 h-4" />
-                  Iniciar sesión
-                </a>
-                <a
-                  href="https://portaldesaludnutriser.club"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-4 py-3 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 border border-[#C5A55A]/60 rounded-lg"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Crear cuenta
+                  Iniciar sesión / Crear cuenta
                 </a>
               </div>
             </div>

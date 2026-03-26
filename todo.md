@@ -820,3 +820,10 @@
 - [ ] Actualizar frontend para enviar email al suscribirse a push
 - [ ] Mostrar personas únicas en el contador del panel admin
 - [ ] Mostrar lista agrupada por persona con sus dispositivos
+
+## Hero Rediseño - Portal de Salud destacado
+
+- [x] Rediseñar hero para que el Portal de Salud sea el elemento más destacado
+- [x] Agregar sección explicativa con funciones del portal (seguimiento, dietas, historial, citas)
+- [x] Agregar CTA de "Crear cuenta" prominente en el portal
+- [x] Mantener los demás botones en segundo plano visual

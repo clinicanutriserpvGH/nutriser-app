@@ -211,7 +211,10 @@ export default function HeroSection() {
               className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg border border-[#C5A55A]/60 rounded-lg"
             >
               <Gift className="w-4 h-4" />
-              Prog. Nutrición
+              <span className="flex flex-col items-center leading-tight">
+                <span>Programa</span>
+                <span>Nutrición</span>
+              </span>
             </a>
             <a
               href="/appointment-form"

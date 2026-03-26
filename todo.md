@@ -827,3 +827,8 @@
 - [x] Agregar sección explicativa con funciones del portal (seguimiento, dietas, historial, citas)
 - [x] Agregar CTA de "Crear cuenta" prominente en el portal
 - [x] Mantener los demás botones en segundo plano visual
+
+## Hero - Correcciones Portal de Salud
+
+- [x] Corregir URL del botón "Crear cuenta" (apuntar a portaldesaludnutriser.club directamente)
+- [x] Agregar animación de pulso en el ícono HeartPulse del Portal de Salud

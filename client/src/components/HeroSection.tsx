@@ -124,7 +124,25 @@ export default function HeroSection() {
             {/* Header del portal */}
             <div className="bg-gradient-to-r from-[#C5A55A] to-[#B8963E] px-5 py-3 flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <HeartPulse className="w-5 h-5 text-white" />
+                {/* Ícono con pulso doble: anillo exterior + latido del ícono */}
+                <div className="relative flex items-center justify-center">
+                  <motion.span
+                    className="absolute w-8 h-8 rounded-full bg-white/30"
+                    animate={{ scale: [1, 1.7, 1], opacity: [0.6, 0, 0.6] }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                  />
+                  <motion.span
+                    className="absolute w-6 h-6 rounded-full bg-white/20"
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut", delay: 0.3 }}
+                  />
+                  <motion.div
+                    animate={{ scale: [1, 1.15, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <HeartPulse className="w-5 h-5 text-white relative z-10" />
+                  </motion.div>
+                </div>
                 <span className="text-white font-bold text-sm tracking-[0.15em] uppercase">
                   Portal de Salud Nutriser
                 </span>
@@ -162,7 +180,7 @@ export default function HeroSection() {
                   Iniciar sesión
                 </a>
                 <a
-                  href="https://portaldesaludnutriser.club/register"
+                  href="https://portaldesaludnutriser.club"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-4 py-3 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 border border-[#C5A55A]/60 rounded-lg"

@@ -239,7 +239,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   // para cubrir el router mientras la página destino se monta
   if (isTransitioning) {
     return (
-      <div className="fixed inset-0 z-[99999] bg-[#0f0f0f] flex flex-col items-center justify-center">
+      <div className="fixed inset-0 z-[99999] bg-white flex flex-col items-center justify-center">
         <div className="flex flex-col items-center gap-6">
           <div className="relative flex items-center justify-center">
             <div className="absolute w-28 h-28 rounded-full border-t-2 border-[#C5A55A] animate-spin" />
@@ -248,7 +248,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
           <div className="flex flex-col items-center gap-1">
             <p className="text-[#C5A55A] text-xs tracking-[0.4em] uppercase font-light animate-pulse">Cargando</p>
-            <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase">Aesthetic &amp; Nutrition</p>
+            <p className="text-black/40 text-[10px] tracking-[0.2em] uppercase">Aesthetic &amp; Nutrition</p>
           </div>
         </div>
       </div>
@@ -257,7 +257,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
   return (
     <div
-      className="fixed inset-0 z-[99999] bg-[#0f0f0f] overflow-y-auto"
+      className="fixed inset-0 z-[99999] bg-white overflow-y-auto"
       style={{ opacity: leaving ? 0 : 1, transition: leaving ? "opacity 0.4s ease" : "none" }}
     >
       {/* ── Contenedor principal: se expande en tablet/desktop ── */}
@@ -268,7 +268,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           <div className="flex flex-col items-center mb-6 md:mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain mb-2" />
             <p className="text-[#C5A55A] text-[10px] md:text-xs tracking-[0.3em] uppercase font-light">Aesthetic & Nutrition</p>
-            <h1 className="text-white text-base md:text-xl lg:text-2xl font-light tracking-widest mt-2 text-center">
+            <h1 className="text-[#1A1A1A] text-base md:text-xl lg:text-2xl font-light tracking-widest mt-2 text-center">
               Selecciona el apartado de tu interés
             </h1>
             <div className="w-10 md:w-16 h-px bg-[#C5A55A] mt-3" />
@@ -356,14 +356,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               !showEmailForm ? (
                 <button
                   onClick={() => setShowEmailForm(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 md:py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 hover:scale-[1.01] bg-[#1A1A1A] border-2 border-[#C5A55A]/50 text-[#C5A55A] hover:border-[#C5A55A] hover:bg-[#C5A55A]/10"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 md:py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 hover:scale-[1.01] bg-white border-2 border-[#C5A55A]/50 text-[#C5A55A] hover:border-[#C5A55A] hover:bg-[#C5A55A]/10"
                 >
                   <Mail className="w-4 h-4 flex-shrink-0" />
                   <span className="text-xs md:text-sm">Recibe descuentos en tu correo</span>
                 </button>
               ) : (
                 <form onSubmit={handleEmailSubmit} className="w-full">
-                  <div className="flex items-center gap-2 bg-[#1A1A1A] border-2 border-[#C5A55A]/60 rounded-xl px-3 py-2.5 focus-within:border-[#C5A55A] transition-colors">
+                  <div className="flex items-center gap-2 bg-white border-2 border-[#C5A55A]/60 rounded-xl px-3 py-2.5 focus-within:border-[#C5A55A] transition-colors">
                     <Mail className="w-4 h-4 text-[#C5A55A] flex-shrink-0" />
                     <input
                       type="email"
@@ -371,7 +371,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                       onChange={e => setEmailInput(e.target.value)}
                       placeholder="tu@correo.com"
                       autoFocus
-                      className="flex-1 bg-transparent text-white text-sm placeholder-white/30 outline-none min-w-0"
+                      className="flex-1 bg-transparent text-[#1A1A1A] text-sm placeholder-black/30 outline-none min-w-0"
                     />
                     <button
                       type="submit"
@@ -380,11 +380,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     >
                       {emailSubmitting ? "..." : "Suscribir"}
                     </button>
-                    <button type="button" onClick={() => setShowEmailForm(false)} className="text-white/40 hover:text-white/70 transition-colors flex-shrink-0">
+                    <button type="button" onClick={() => setShowEmailForm(false)} className="text-black/40 hover:text-black/70 transition-colors flex-shrink-0">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                  <p className="text-white/35 text-[10px] text-center mt-1">Recibirás alertas de promociones y descuentos exclusivos</p>
+                  <p className="text-black/35 text-[10px] text-center mt-1">Recibirás alertas de promociones y descuentos exclusivos</p>
                 </form>
               )
             ) : (
@@ -403,7 +403,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               ) : (
                 <button
                   onClick={() => setShowNotifModal(true)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 md:py-3.5 rounded-xl font-bold text-xs md:text-sm tracking-wide border-2 border-[#C5A55A] text-[#C5A55A] bg-[#1A1A1A] hover:bg-[#C5A55A] hover:text-black transition-all duration-300 hover:scale-[1.01]"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 md:py-3.5 rounded-xl font-bold text-xs md:text-sm tracking-wide border-2 border-[#C5A55A] text-[#C5A55A] bg-white hover:bg-[#C5A55A] hover:text-black transition-all duration-300 hover:scale-[1.01]"
                 >
                   <Bell className="w-4 h-4 flex-shrink-0" />
                   Activa notificaciones de descuentos
@@ -426,7 +426,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
           </div>
 
-          <p className="text-white/25 text-[10px] md:text-xs text-center pb-4">
+          <p className="text-black/30 text-[10px] md:text-xs text-center pb-4">
             El Portal de Salud es exclusivo para pacientes activos de Nutriser
           </p>
         </div>

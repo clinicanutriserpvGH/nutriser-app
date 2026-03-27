@@ -13,13 +13,13 @@
     <link rel="manifest" href="/manifest.json" />
 
     <!-- Theme color (Android Chrome, browser chrome) -->
-    <meta name="theme-color" content="#0f0f0f" />
-    <meta name="msapplication-TileColor" content="#0f0f0f" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
     <meta name="msapplication-TileImage" content="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-144x144_035f955d.png" />
 
     <!-- iOS PWA meta tags -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Nutriser" />
     <link rel="apple-touch-icon" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/apple-touch-icon_8b7d85db.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-152x152_e0881621.png" />
@@ -52,11 +52,11 @@
          Fondo negro + logo Nutriser + spinner dorado en CSS puro
          ═══════════════════════════════════════════════════════════ -->
     <style>
-      /* Fondo negro inmediato en todo el documento */
+      /* Fondo blanco inmediato en todo el documento */
       html, body {
         margin: 0;
         padding: 0;
-        background-color: #0f0f0f;
+        background-color: #FFFFFF;
         height: 100%;
       }
 
@@ -65,7 +65,7 @@
         position: fixed;
         inset: 0;
         z-index: 999999;
-        background-color: #0f0f0f;
+        background-color: #FFFFFF;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -95,7 +95,7 @@
         position: absolute;
         inset: 0;
         border-radius: 50%;
-        border: 1px solid rgba(197, 165, 90, 0.2);
+        border: 1px solid rgba(197, 165, 90, 0.3);
       }
 
       /* Spinner giratorio */
@@ -141,7 +141,7 @@
       }
 
       .nutriser-loader-subtitle {
-        color: rgba(255, 255, 255, 0.35);
+        color: rgba(0, 0, 0, 0.4);
         font-size: 9px;
         letter-spacing: 0.25em;
         text-transform: uppercase;

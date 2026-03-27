@@ -10,7 +10,6 @@ import { ArrowLeft, BookOpen, Upload, Clock, CheckCircle, ShoppingCart, Eye, X, 
 import { useLocation } from "wouter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import BackToSplash from "@/components/BackToSplash";
 import { OFFICIAL_DOMAIN } from "@/const";
 
 const BANK_INFO = {
@@ -220,7 +219,6 @@ export default function EbookStore() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
-      <BackToSplash />
       <Navbar lightBg onShowSplash={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }} />
 
       {/* Modal de imagen */}

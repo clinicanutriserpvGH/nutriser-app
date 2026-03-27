@@ -154,10 +154,11 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
   const handleNavigate = (path: string) => {
     setLeaving(true);
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    // Navegar directamente sin llamar onEnterSite primero para evitar flash del Home.
-    // El splash desaparece con la animación de salida (opacity 0) y luego carga la ruta.
+    // Guardar la ruta destino para que Home.tsx redirija inmediatamente sin renderizarse.
+    // Esto elimina el flash de la página Home al navegar a rutas internas.
+    sessionStorage.setItem("nutriser_pending_route", path);
     setTimeout(() => {
-      window.location.href = path;
+      window.location.href = "/";
     }, 400);
   };
 

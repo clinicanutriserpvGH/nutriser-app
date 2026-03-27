@@ -209,16 +209,7 @@ export default function Courses() {
 
       {/* Hero de Cursos */}
       <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4">
-        {/* Botón de regreso */}
-        <div className="max-w-5xl mx-auto mb-4">
-          <button
-            onClick={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }}
-            className="inline-flex items-center gap-2 text-white/60 hover:text-[#C5A55A] transition-colors text-sm font-medium"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Volver al inicio
-          </button>
-        </div>
+
         <div className="max-w-5xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <BookOpen className="w-8 h-8 text-[#C5A55A]" />

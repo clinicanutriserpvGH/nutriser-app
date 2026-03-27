@@ -865,3 +865,4 @@
 
 - [x] Cambiar botón "Agenda tu Cita" en AboutSection por "Catálogo de Servicios" con scroll a sección #servicios
 - [x] Cambiar botón "Ver Servicios" en HeroSection por "Catálogo de Servicios"
+- [x] Agregar mensaje informativo en formulario de citas explicando que deben seleccionar el servicio deseado

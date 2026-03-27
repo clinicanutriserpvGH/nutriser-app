@@ -125,6 +125,9 @@ export default function AppointmentForm() {
           <p className="text-lg text-[#1A1A1A]/60">
             Completa el formulario y nos pondremos en contacto para confirmar tu cita
           </p>
+          <div className="mt-4 mx-auto max-w-lg bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-lg px-5 py-3 text-sm text-[#7a6030] text-center">
+            💡 <strong>Importante:</strong> Selecciona el <strong>servicio deseado</strong> en el formulario para que podamos preparar tu cita correctamente. La confirmación de fecha y hora la coordinaremos contigo directamente.
+          </div>
         </div>
 
         {/* Form Card */}

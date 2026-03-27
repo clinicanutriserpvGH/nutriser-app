@@ -101,16 +101,10 @@ function AppContent() {
   // Esto evita completamente el flash del Home
   const [navigating, setNavigating] = useState(false);
 
-  // Pantalla de carga inicial: se muestra brevemente mientras React monta todo
-  const [appReady, setAppReady] = useState(false);
-  useEffect(() => {
-    // Marcar app como lista después de que React haya pintado el primer frame
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setAppReady(true);
-      });
-    });
-  }, []);
+  // La pantalla de carga inicial está en index.html (CSS puro) y se oculta
+  // automáticamente cuando React monta el primer componente.
+  // appReady siempre es true aquí porque index.html ya cubrió el flash blanco.
+  const appReady = true;
 
   // Entrar al sitio principal (Nutriser Home)
   const handleEnterSite = () => {

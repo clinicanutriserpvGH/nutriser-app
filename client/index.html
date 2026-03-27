@@ -13,20 +13,17 @@
     <link rel="manifest" href="/manifest.json" />
 
     <!-- Theme color (Android Chrome, browser chrome) -->
-    <meta name="theme-color" content="#C5A55A" />
-    <meta name="msapplication-TileColor" content="#C5A55A" />
+    <meta name="theme-color" content="#0f0f0f" />
+    <meta name="msapplication-TileColor" content="#0f0f0f" />
     <meta name="msapplication-TileImage" content="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-144x144_035f955d.png" />
 
     <!-- iOS PWA meta tags -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Nutriser" />
     <link rel="apple-touch-icon" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/apple-touch-icon_8b7d85db.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-152x152_e0881621.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png" />
-
-    <!-- iOS Splash Screen (iPhone) -->
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <!-- Standard favicon -->
     <link rel="icon" type="image/png" sizes="192x192" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png" />
@@ -49,11 +46,171 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PANTALLA DE CARGA NATIVA — aparece ANTES de que React cargue
+         Fondo negro + logo Nutriser + spinner dorado en CSS puro
+         ═══════════════════════════════════════════════════════════ -->
+    <style>
+      /* Fondo negro inmediato en todo el documento */
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #0f0f0f;
+        height: 100%;
+      }
+
+      /* Pantalla de carga */
+      #nutriser-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        background-color: #0f0f0f;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        transition: opacity 0.4s ease;
+      }
+
+      #nutriser-loading.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Contenedor del logo + spinner */
+      .nutriser-loader-ring {
+        position: relative;
+        width: 112px;
+        height: 112px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Anillo estático de fondo */
+      .nutriser-loader-ring::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 1px solid rgba(197, 165, 90, 0.2);
+      }
+
+      /* Spinner giratorio */
+      .nutriser-loader-ring::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        border-top-color: #C5A55A;
+        animation: nutriser-spin 1s linear infinite;
+      }
+
+      @keyframes nutriser-spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Logo centrado */
+      .nutriser-loader-logo {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Textos */
+      .nutriser-loader-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .nutriser-loader-title {
+        color: #C5A55A;
+        font-size: 11px;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        font-family: 'Lato', sans-serif;
+        font-weight: 300;
+        animation: nutriser-pulse 1.5s ease-in-out infinite;
+      }
+
+      .nutriser-loader-subtitle {
+        color: rgba(255, 255, 255, 0.35);
+        font-size: 9px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        font-family: 'Lato', sans-serif;
+        font-weight: 300;
+      }
+
+      @keyframes nutriser-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+
+      /* Root oculto hasta que React esté listo */
+      #root {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      #root.ready {
+        opacity: 1;
+      }
+    </style>
   </head>
 
   <body>
+    <!-- Pantalla de carga nativa: visible desde el primer byte, sin esperar JS -->
+    <div id="nutriser-loading">
+      <div class="nutriser-loader-ring">
+        <img
+          class="nutriser-loader-logo"
+          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png"
+          alt="Nutriser"
+        />
+      </div>
+      <div class="nutriser-loader-text">
+        <span class="nutriser-loader-title">Cargando</span>
+        <span class="nutriser-loader-subtitle">Aesthetic &amp; Nutrition</span>
+      </div>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Ocultar la pantalla de carga nativa cuando React esté montado -->
+    <script>
+      // Se ejecuta cuando React llama a ReactDOM.createRoot().render()
+      // Usamos MutationObserver para detectar cuando #root tiene contenido
+      var loadingEl = document.getElementById('nutriser-loading');
+      var rootEl = document.getElementById('root');
+      var observer = new MutationObserver(function() {
+        if (rootEl && rootEl.children.length > 0) {
+          observer.disconnect();
+          // Mostrar el contenido de React
+          rootEl.classList.add('ready');
+          // Desvanecer la pantalla de carga
+          if (loadingEl) {
+            loadingEl.classList.add('fade-out');
+            setTimeout(function() {
+              if (loadingEl && loadingEl.parentNode) {
+                loadingEl.parentNode.removeChild(loadingEl);
+              }
+            }, 450);
+          }
+        }
+      });
+      if (rootEl) {
+        observer.observe(rootEl, { childList: true, subtree: false });
+      }
+    </script>
+
     <!-- Register Service Worker for PWA -->
     <script>
       if ('serviceWorker' in navigator) {

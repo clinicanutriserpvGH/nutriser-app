@@ -65,10 +65,12 @@ function AppContent() {
     return !seen;
   });
 
-  // Al elegir desde el splash: marca como visto y oculta el splash.
-  // La navegación real la hace el SplashSelector con window.location.replace
+  // Al elegir desde el splash: marca como visto, navega a / y oculta el splash.
+  // SIEMPRE navega a "/" para que el usuario vea la página principal de Nutriser,
+  // sin importar en qué ruta estaba cuando se mostró el splash.
   const handleEnterSite = () => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
+    navigate("/");
     setShowSplash(false);
   };
 

@@ -490,7 +490,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
 
           <p className="text-black/30 text-[10px] md:text-xs text-center pb-4">
-            El Portal de Salud es exclusivo para pacientes activos de Nutriser
+            © 2025 Nutriser Aesthetic & Nutrition · Todos los derechos reservados · nutriserpv.com
           </p>
         </div>
       </div>

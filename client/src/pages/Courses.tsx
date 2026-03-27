@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from "react";
-import { usePageReady } from "@/App";
 import { useSplash } from "@/contexts/SplashContext";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -53,10 +52,7 @@ type Comment = {
 };
 
 export default function Courses() {
-  const { onPageReady } = usePageReady();
   const { showSplash } = useSplash();
-  // Notificar al splash que esta página está lista (elimina el flash del Home)
-  useEffect(() => { onPageReady(); }, []);
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);

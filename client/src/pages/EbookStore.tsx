@@ -11,7 +11,6 @@ import { useLocation } from "wouter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { OFFICIAL_DOMAIN } from "@/const";
-import { usePageReady } from "@/App";
 import { useSplash } from "@/contexts/SplashContext";
 
 const BANK_INFO = {
@@ -22,10 +21,7 @@ const BANK_INFO = {
 type Step = "view" | "form" | "proof" | "success";
 
 export default function EbookStore() {
-  const { onPageReady } = usePageReady();
   const { showSplash } = useSplash();
-  // Notificar al splash que esta página está lista (elimina el flash del Home)
-  useEffect(() => { onPageReady(); }, []);
 
   const [, navigate] = useLocation();
   const [step, setStep] = useState<Step>("view");

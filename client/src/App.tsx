@@ -21,33 +21,14 @@ import Courses from "@/pages/Courses";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
 import { SplashContext } from "@/contexts/SplashContext";
-import { useState, useCallback, useRef, createContext, useContext } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 
-// Rutas que NUNCA muestran el splash (admin, rutas técnicas)
-const ADMIN_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon"];
+// Rutas que NUNCA muestran el splash
+const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form"];
 
-function isAdminRoute(path: string) {
-  return ADMIN_ROUTES.some((r) => path.startsWith(r));
-}
-
-// ─── Contexto para que las páginas destino notifiquen que están listas ─────────
-// Cuando el usuario navega desde el splash, el splash se mantiene visible
-// hasta que la página destino llama a onPageReady()
-interface NavigationContextValue {
-  /** La página destino llama esto cuando su contenido principal está montado */
-  onPageReady: () => void;
-  /** true si estamos esperando que la página destino confirme que está lista */
-  waitingForPage: boolean;
-}
-
-export const NavigationContext = createContext<NavigationContextValue>({
-  onPageReady: () => {},
-  waitingForPage: false,
-});
-
-export function usePageReady() {
-  return useContext(NavigationContext);
+function isNoSplashRoute(path: string) {
+  return NO_SPLASH_ROUTES.some((r) => path === r || path.startsWith(r + "/") || path.startsWith(r + "?"));
 }
 
 function Router() {
@@ -74,86 +55,56 @@ function Router() {
 }
 
 function AppContent() {
-  const [location, navigate] = useLocation();
+  const [location] = useLocation();
 
-  // Estado del splash
+  // El splash se muestra SOLO en la ruta "/" cuando el usuario no lo ha visto aún
   const [showSplash, setShowSplash] = useState(() => {
-    if (isAdminRoute(location)) return false;
+    // Nunca mostrar splash en rutas de admin/internas
+    if (isNoSplashRoute(location)) return false;
+    // Solo mostrar en "/"
+    if (location !== "/") return false;
     const seen = sessionStorage.getItem("nutriser_splash_seen");
     return !seen;
   });
 
-  // Cuando waitingForPage=true, el splash se mantiene encima aunque el router
-  // ya haya cambiado de ruta. El splash desaparece solo cuando la página
-  // destino llama onPageReady().
-  const [waitingForPage, setWaitingForPage] = useState(false);
-  // Ref para que handlePageReady siempre lea el valor actual (evita closure stale)
-  const waitingForPageRef = useRef(false);
-
-  // Entrar al sitio principal (Nutriser Home)
-  const handleEnterSite = useCallback(() => {
+  // Entrar al sitio principal (Nutriser Home) — solo oculta el splash
+  const handleEnterSite = () => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    navigate("/");
     setShowSplash(false);
-  }, [navigate]);
+  };
 
-  // Volver al splash desde cualquier página
-  const handleShowSplash = useCallback(() => {
-    sessionStorage.removeItem("nutriser_splash_seen");
-    setShowSplash(true);
-    setWaitingForPage(false);
-  }, []);
-
-  // Navegar desde el splash a una ruta interna SIN flash del Home:
-  // 1. Marcar waitingForPage=true → el splash se mantiene visible como overlay
-  // 2. Navegar a la ruta destino (el router cambia pero el splash lo cubre)
-  // 3. La página destino llama onPageReady() cuando su contenido está listo
-  // 4. onPageReady oculta el splash → el usuario ve directamente la página destino
-  const handleNavigateFromSplash = useCallback((path: string) => {
+  // Navegar a una ruta interna desde el splash.
+  // Usamos window.location.href para una navegación real: la URL cambia,
+  // React monta directamente la página destino sin pasar por Home.
+  const handleNavigateFromSplash = (path: string) => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    waitingForPageRef.current = true;
-    setWaitingForPage(true);
-    navigate(path);
-    // Safety timeout: si la página destino no llama onPageReady en 2s,
-    // ocultamos el splash de todas formas para no dejar al usuario bloqueado
-    setTimeout(() => {
-      waitingForPageRef.current = false;
-      setWaitingForPage(false);
-      setShowSplash(false);
-    }, 2000);
-  }, [navigate]);
+    window.location.href = path;
+  };
 
-  // La página destino llama esto cuando su contenido principal está montado.
-  // Usa el ref para evitar el problema de closure stale con useEffect(fn, []).
-  const handlePageReady = useCallback(() => {
-    if (waitingForPageRef.current) {
-      waitingForPageRef.current = false;
-      setWaitingForPage(false);
-      setShowSplash(false);
+  // Volver al splash: navegar a "/" y mostrar el splash
+  const handleShowSplash = () => {
+    sessionStorage.removeItem("nutriser_splash_seen");
+    // Si ya estamos en "/", solo mostrar el splash
+    if (location === "/") {
+      setShowSplash(true);
+    } else {
+      // Navegar a "/" — el splash se mostrará porque borramos la clave
+      window.location.href = "/";
     }
-  }, []);
-
-  const navContextValue: NavigationContextValue = {
-    onPageReady: handlePageReady,
-    waitingForPage,
   };
 
   return (
-    <NavigationContext.Provider value={navContextValue}>
-      <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
-        <BackgroundMusic />
-        {/* El Router siempre renderiza — el splash lo cubre como overlay */}
-        <Router />
-        {/* El splash se superpone sobre cualquier ruta como overlay fixed */}
-        {(showSplash || waitingForPage) && !isAdminRoute(location) && (
-          <SplashSelector
-            onEnterSite={handleEnterSite}
-            onNavigate={handleNavigateFromSplash}
-            isTransitioning={waitingForPage && !showSplash}
-          />
-        )}
-      </SplashContext.Provider>
-    </NavigationContext.Provider>
+    <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
+      <BackgroundMusic />
+      <Router />
+      {/* El splash se superpone como overlay fixed cuando está activo */}
+      {showSplash && (
+        <SplashSelector
+          onEnterSite={handleEnterSite}
+          onNavigate={handleNavigateFromSplash}
+        />
+      )}
+    </SplashContext.Provider>
   );
 }
 

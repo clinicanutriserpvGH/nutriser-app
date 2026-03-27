@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
+import { usePageReady } from "@/App";
+import { useSplash } from "@/contexts/SplashContext";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +53,11 @@ type Comment = {
 };
 
 export default function Courses() {
+  const { onPageReady } = usePageReady();
+  const { showSplash } = useSplash();
+  // Notificar al splash que esta página está lista (elimina el flash del Home)
+  useEffect(() => { onPageReady(); }, []);
+
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
@@ -203,7 +210,7 @@ export default function Courses() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
-      <Navbar onShowSplash={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }} />
+      <Navbar onShowSplash={showSplash} />
 
       {/* Hero de Cursos */}
       <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4">

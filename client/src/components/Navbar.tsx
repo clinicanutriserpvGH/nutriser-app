@@ -7,6 +7,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Phone, Instagram, Facebook, Ruler, Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "wouter";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -29,6 +30,7 @@ interface NavbarProps {
 export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -43,7 +45,8 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
       return;
     }
     if (href.startsWith("/")) {
-      window.location.href = href;
+      // Usar el router de wouter en lugar de recargar la página completa
+      navigate(href);
       return;
     }
     const el = document.querySelector(href);

@@ -8,6 +8,7 @@ import { Check, Upload, Clock, ArrowLeft, Tag, CheckCircle2, Loader2, Copy, Chec
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
+import { usePageReady } from "@/App";
 
 // Componente reutilizable para copiar texto al portapapeles
 function CopyButton({ text }: { text: string }) {
@@ -83,6 +84,7 @@ const PROGRAMS = [
 ];
 
 export default function Memberships() {
+  const { onPageReady } = usePageReady();
   const [, navigate] = useLocation();
   const [selectedProgram, setSelectedProgram] = useState<"basic" | "premium" | null>(null);
   const [formData, setFormData] = useState({
@@ -99,6 +101,9 @@ export default function Memberships() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(900); // 15 minutos en segundos
   const [createdAt, setCreatedAt] = useState<number | null>(null);
+
+  // Notificar al splash que esta página está lista (elimina el flash del Home)
+  useEffect(() => { onPageReady(); }, []);
 
   const createMutation = trpc.memberships.create.useMutation();
   const uploadProofMutation = trpc.memberships.uploadProof.useMutation();

@@ -2,12 +2,13 @@
  * Nutriser - Tienda de Productos
  * Design: "Lujo Orgánico" — catálogo de productos con modal de compra
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { ShoppingBag, X, Upload, Loader2, ArrowLeft, Package } from "lucide-react";
 import { Link } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
+import { usePageReady } from "@/App";
 
 const CATEGORY_LABELS: Record<string, string> = {
   general: "General",
@@ -19,6 +20,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export default function Store() {
+  const { onPageReady } = usePageReady();
+  // Notificar al splash que esta página está lista (elimina el flash del Home)
+  useEffect(() => { onPageReady(); }, []);
+
   const { data: products = [], isLoading } = trpc.products.list.useQuery();
 
   // Group by category

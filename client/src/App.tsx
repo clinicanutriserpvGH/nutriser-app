@@ -21,7 +21,7 @@ import Courses from "@/pages/Courses";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
 import { SplashContext } from "@/contexts/SplashContext";
-import { useState, useEffect } from "react";
+import { useState, useCallback, useRef, createContext, useContext } from "react";
 import { useLocation } from "wouter";
 
 // Rutas que NUNCA muestran el splash (admin, rutas técnicas)
@@ -31,37 +31,23 @@ function isAdminRoute(path: string) {
   return ADMIN_ROUTES.some((r) => path.startsWith(r));
 }
 
-const NUTRISER_LOGO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
+// ─── Contexto para que las páginas destino notifiquen que están listas ─────────
+// Cuando el usuario navega desde el splash, el splash se mantiene visible
+// hasta que la página destino llama a onPageReady()
+interface NavigationContextValue {
+  /** La página destino llama esto cuando su contenido principal está montado */
+  onPageReady: () => void;
+  /** true si estamos esperando que la página destino confirme que está lista */
+  waitingForPage: boolean;
+}
 
-// Pantalla de carga instantánea mientras la app inicializa
-function LoadingScreen() {
-  return (
-    <div className="fixed inset-0 z-[999999] bg-[#0f0f0f] flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center gap-6">
-        {/* Logo real de Nutriser con spinner alrededor */}
-        <div className="relative flex items-center justify-center">
-          {/* Spinner giratorio */}
-          <div className="absolute w-28 h-28 rounded-full border-t-2 border-[#C5A55A] animate-spin" />
-          <div className="absolute w-28 h-28 rounded-full border border-[#C5A55A]/20" />
-          {/* Logo centrado */}
-          <img
-            src={NUTRISER_LOGO}
-            alt="Nutriser"
-            className="w-20 h-20 object-contain"
-          />
-        </div>
-        {/* Texto */}
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-[#C5A55A] text-xs tracking-[0.4em] uppercase font-light animate-pulse">
-            Cargando
-          </p>
-          <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase">
-            Aesthetic & Nutrition
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+export const NavigationContext = createContext<NavigationContextValue>({
+  onPageReady: () => {},
+  waitingForPage: false,
+});
+
+export function usePageReady() {
+  return useContext(NavigationContext);
 }
 
 function Router() {
@@ -97,72 +83,77 @@ function AppContent() {
     return !seen;
   });
 
-  // Estado de navegación pendiente: mientras es true, el Router NO renderiza
-  // Esto evita completamente el flash del Home
-  const [navigating, setNavigating] = useState(false);
-
-  // La pantalla de carga inicial está en index.html (CSS puro) y se oculta
-  // automáticamente cuando React monta el primer componente.
-  // appReady siempre es true aquí porque index.html ya cubrió el flash blanco.
-  const appReady = true;
+  // Cuando waitingForPage=true, el splash se mantiene encima aunque el router
+  // ya haya cambiado de ruta. El splash desaparece solo cuando la página
+  // destino llama onPageReady().
+  const [waitingForPage, setWaitingForPage] = useState(false);
+  // Ref para que handlePageReady siempre lea el valor actual (evita closure stale)
+  const waitingForPageRef = useRef(false);
 
   // Entrar al sitio principal (Nutriser Home)
-  const handleEnterSite = () => {
+  const handleEnterSite = useCallback(() => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    setNavigating(true);
     navigate("/");
-    // Pequeño delay para que el router cambie antes de mostrar el contenido
-    setTimeout(() => {
-      setShowSplash(false);
-      setNavigating(false);
-    }, 50);
-  };
+    setShowSplash(false);
+  }, [navigate]);
 
   // Volver al splash desde cualquier página
-  const handleShowSplash = () => {
+  const handleShowSplash = useCallback(() => {
     sessionStorage.removeItem("nutriser_splash_seen");
     setShowSplash(true);
-  };
+    setWaitingForPage(false);
+  }, []);
 
   // Navegar desde el splash a una ruta interna SIN flash del Home:
-  // 1. Activar estado "navigating" → el Router deja de renderizar (pantalla negra)
-  // 2. Navegar a la ruta destino
-  // 3. Esperar 2 frames para que el componente destino esté listo
-  // 4. Ocultar splash y desactivar navigating → el usuario ve directamente la página destino
-  const handleNavigateFromSplash = (path: string) => {
+  // 1. Marcar waitingForPage=true → el splash se mantiene visible como overlay
+  // 2. Navegar a la ruta destino (el router cambia pero el splash lo cubre)
+  // 3. La página destino llama onPageReady() cuando su contenido está listo
+  // 4. onPageReady oculta el splash → el usuario ve directamente la página destino
+  const handleNavigateFromSplash = useCallback((path: string) => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    setNavigating(true);
+    waitingForPageRef.current = true;
+    setWaitingForPage(true);
     navigate(path);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setShowSplash(false);
-        setNavigating(false);
-      });
-    });
+    // Safety timeout: si la página destino no llama onPageReady en 2s,
+    // ocultamos el splash de todas formas para no dejar al usuario bloqueado
+    setTimeout(() => {
+      waitingForPageRef.current = false;
+      setWaitingForPage(false);
+      setShowSplash(false);
+    }, 2000);
+  }, [navigate]);
+
+  // La página destino llama esto cuando su contenido principal está montado.
+  // Usa el ref para evitar el problema de closure stale con useEffect(fn, []).
+  const handlePageReady = useCallback(() => {
+    if (waitingForPageRef.current) {
+      waitingForPageRef.current = false;
+      setWaitingForPage(false);
+      setShowSplash(false);
+    }
+  }, []);
+
+  const navContextValue: NavigationContextValue = {
+    onPageReady: handlePageReady,
+    waitingForPage,
   };
 
-  // Mostrar pantalla de carga mientras la app inicializa
-  if (!appReady) {
-    return <LoadingScreen />;
-  }
-
   return (
-    <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
-      <BackgroundMusic />
-      {/* El Router solo renderiza cuando no estamos en medio de una navegación desde el splash */}
-      {!navigating && <Router />}
-      {/* El splash se superpone sobre cualquier ruta como overlay fixed */}
-      {showSplash && !isAdminRoute(location) && (
-        <SplashSelector
-          onEnterSite={handleEnterSite}
-          onNavigate={handleNavigateFromSplash}
-        />
-      )}
-      {/* Pantalla de transición durante navegación desde splash */}
-      {navigating && (
-        <div className="fixed inset-0 z-[99998] bg-[#0f0f0f]" />
-      )}
-    </SplashContext.Provider>
+    <NavigationContext.Provider value={navContextValue}>
+      <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
+        <BackgroundMusic />
+        {/* El Router siempre renderiza — el splash lo cubre como overlay */}
+        <Router />
+        {/* El splash se superpone sobre cualquier ruta como overlay fixed */}
+        {(showSplash || waitingForPage) && !isAdminRoute(location) && (
+          <SplashSelector
+            onEnterSite={handleEnterSite}
+            onNavigate={handleNavigateFromSplash}
+            isTransitioning={waitingForPage && !showSplash}
+          />
+        )}
+      </SplashContext.Provider>
+    </NavigationContext.Provider>
   );
 }
 

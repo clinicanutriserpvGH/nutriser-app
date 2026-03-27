@@ -11,6 +11,8 @@ import { useLocation } from "wouter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { OFFICIAL_DOMAIN } from "@/const";
+import { usePageReady } from "@/App";
+import { useSplash } from "@/contexts/SplashContext";
 
 const BANK_INFO = {
   bank: "Banamex",
@@ -20,6 +22,11 @@ const BANK_INFO = {
 type Step = "view" | "form" | "proof" | "success";
 
 export default function EbookStore() {
+  const { onPageReady } = usePageReady();
+  const { showSplash } = useSplash();
+  // Notificar al splash que esta página está lista (elimina el flash del Home)
+  useEffect(() => { onPageReady(); }, []);
+
   const [, navigate] = useLocation();
   const [step, setStep] = useState<Step>("view");
   const [formData, setFormData] = useState({ buyerName: "", buyerEmail: "" });
@@ -219,7 +226,7 @@ export default function EbookStore() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
-      <Navbar lightBg onShowSplash={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }} />
+      <Navbar lightBg onShowSplash={showSplash} />
 
       {/* Modal de imagen */}
       {showCoverModal && (

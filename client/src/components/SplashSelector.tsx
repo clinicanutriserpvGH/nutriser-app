@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, Bell, BookOpen, CalendarCheck, GraduationCap, HeartPulse, MessageCircle, ShoppingBag, Stethoscope } from "lucide-react";
+import { Activity, Bell, BookOpen, CalendarCheck, Gift, GraduationCap, HeartPulse, MessageCircle, ShoppingBag, Stethoscope } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -201,14 +201,32 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
         </button>
       </div>
 
-      {/* ── Fila 2: Tienda Productos · Tienda eBook · Nutriser Academy ── */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl mb-4">
+      {/* ── Fila 2: Programa Nutrición + Tienda Productos ── */}
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl mb-3">
+        {/* Programa Nutrición — destacado en dorado */}
+        <button
+          onClick={() => handleNavigate("/memberships")}
+          className="group relative flex-1 h-32 sm:h-40 rounded-2xl overflow-hidden border-2 border-[#C5A55A]/50 hover:border-[#C5A55A] transition-all duration-300 hover:scale-[1.02] focus:outline-none"
+        >
+          <img src={CLINIC_IMG2} alt="Nutrición" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/60 to-black/30" />
+          <div className="absolute inset-0 flex flex-col justify-end p-3 text-left">
+            <div className="w-6 h-6 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/60 flex items-center justify-center mb-1">
+              <Gift className="w-3 h-3 text-[#C5A55A]" />
+            </div>
+            <h3 className="text-white text-sm font-semibold mb-0.5">Programa Nutrición</h3>
+            <div className="w-full bg-[#C5A55A] text-black text-xs font-bold tracking-widest uppercase py-1.5 rounded-lg text-center group-hover:bg-[#d4b46a] transition-colors">
+              Adquirir programa →
+            </div>
+          </div>
+        </button>
+
         {/* Tienda de Productos */}
         <button
           onClick={() => handleNavigate("/tienda")}
           className="group relative flex-1 h-32 sm:h-40 rounded-2xl overflow-hidden border border-white/10 hover:border-[#C5A55A]/60 transition-all duration-300 hover:scale-[1.02] focus:outline-none"
         >
-          <img src={CLINIC_IMG2} alt="Tienda" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <img src={CLINIC_IMG} alt="Tienda" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25" />
           <div className="absolute inset-0 flex flex-col justify-end p-3 text-left">
             <div className="w-6 h-6 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/40 flex items-center justify-center mb-1">
@@ -220,7 +238,10 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
             </div>
           </div>
         </button>
+      </div>
 
+      {/* ── Fila 3: Tienda eBook + Nutriser Academy ── */}
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl mb-4">
         {/* Tienda eBook */}
         <button
           onClick={() => handleNavigate("/ebook")}
@@ -244,7 +265,7 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
           onClick={() => handleNavigate("/cursos")}
           className="group relative flex-1 h-32 sm:h-40 rounded-2xl overflow-hidden border border-white/10 hover:border-[#C5A55A]/60 transition-all duration-300 hover:scale-[1.02] focus:outline-none"
         >
-          <img src={CLINIC_IMG} alt="Academy" className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" />
+          <img src={CLINIC_IMG2} alt="Academy" className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25" />
           <div className="absolute inset-0 flex flex-col justify-end p-3 text-left">
             <div className="w-6 h-6 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/40 flex items-center justify-center mb-1">
@@ -275,22 +296,29 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
         </a>
 
         {/* Botón Campana — Activar notificaciones */}
-        <button
-          onClick={handleEnablePush}
-          disabled={pushLoading || pushDone}
-          className={`flex-1 flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl font-bold text-sm tracking-wide shadow-lg transition-all duration-300 hover:scale-[1.02] ${
-            pushDone
-              ? "bg-[#C5A55A]/20 border border-[#C5A55A]/40 text-[#C5A55A] cursor-default"
-              : "bg-[#1A1A1A] border-2 border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-black shadow-[#C5A55A]/20"
-          }`}
-        >
-          <Bell className={`w-5 h-5 flex-shrink-0 ${pushLoading ? "animate-bounce" : ""}`} />
-          {pushDone
-            ? "Notificaciones activas ✓"
-            : pushLoading
-            ? "Activando..."
-            : "Activa notificaciones de descuentos"}
-        </button>
+        <div className="flex-1 flex flex-col gap-1">
+          <button
+            onClick={handleEnablePush}
+            disabled={pushLoading || pushDone}
+            className={`w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl font-bold text-sm tracking-wide shadow-lg transition-all duration-300 hover:scale-[1.02] ${
+              pushDone
+                ? "bg-[#C5A55A]/20 border border-[#C5A55A]/40 text-[#C5A55A] cursor-default"
+                : "bg-[#1A1A1A] border-2 border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-black shadow-[#C5A55A]/20"
+            }`}
+          >
+            <Bell className={`w-5 h-5 flex-shrink-0 ${pushLoading ? "animate-bounce" : ""}`} />
+            {pushDone
+              ? "Notificaciones activas ✓"
+              : pushLoading
+              ? "Activando..."
+              : "Activa notificaciones de descuentos"}
+          </button>
+          {!pushDone && (
+            <p className="text-white/40 text-xs text-center leading-snug px-1">
+              Recibe alertas de promociones y descuentos exclusivos de Nutriser
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Nota al pie */}

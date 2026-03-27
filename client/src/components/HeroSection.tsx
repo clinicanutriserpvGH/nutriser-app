@@ -130,14 +130,6 @@ export default function HeroSection() {
               <CalendarCheck className="w-4 h-4" />
               Agenda tu Cita
             </a>
-            {/* 3. Programa Nutrición - ancho completo */}
-            <a
-              href="/memberships"
-              className="col-span-2 inline-flex items-center justify-center gap-2 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg border border-[#C5A55A]/60 rounded-lg"
-            >
-              <Gift className="w-4 h-4" />
-              Programa Nutrición
-            </a>
             <motion.button
               onClick={(e) => {
                 e.preventDefault();

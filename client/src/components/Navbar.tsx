@@ -149,16 +149,32 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
             </div>
           </div>
 
-          {/* Mobile Toggle */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className={`lg:hidden transition-colors duration-300 ${
-              scrolled || lightBg ? "text-[#1A1A1A]" : "text-white"
-            }`}
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile: Botón Inicio + Toggle */}
+          <div className="lg:hidden flex items-center gap-2">
+            {onShowSplash && (
+              <button
+                onClick={onShowSplash}
+                aria-label="Volver al inicio"
+                className={`flex items-center gap-1.5 text-[10px] tracking-[0.12em] uppercase font-bold px-2.5 py-1.5 rounded-full border transition-all duration-300 ${
+                  scrolled || lightBg
+                    ? "border-[#C5A55A]/50 text-[#C5A55A] bg-transparent hover:bg-[#C5A55A] hover:text-[#1A1A1A]"
+                    : "border-white/40 text-white bg-black/30 hover:bg-white/20"
+                }`}
+              >
+                <Home className="w-3 h-3" />
+                Inicio
+              </button>
+            )}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className={`transition-colors duration-300 ${
+                scrolled || lightBg ? "text-[#1A1A1A]" : "text-white"
+              }`}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </nav>
 

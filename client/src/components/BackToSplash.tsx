@@ -11,8 +11,13 @@ export default function BackToSplash() {
   const handleBack = () => {
     // Limpiar sessionStorage para que el splash vuelva a mostrarse
     sessionStorage.removeItem("nutriser_splash_seen");
-    // Navegar a "/" y mostrar splash
-    window.location.href = "/";
+    if (window.location.pathname === "/") {
+      // Ya estamos en Home: usar el contexto directamente para mostrar el splash
+      showSplash();
+    } else {
+      // En páginas internas: navegar a "/" — App.tsx mostrará el splash al ver sessionStorage vacío
+      window.location.href = "/";
+    }
   };
 
   return (

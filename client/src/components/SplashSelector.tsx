@@ -45,7 +45,7 @@ function BigCard({
   img, badge, badgeIcon: Icon, title, subtitle, desc, chips, cta, onClick, highlight,
 }: {
   img: string; badge: string; badgeIcon: React.ElementType; title: string; subtitle?: string;
-  desc: string; chips?: { icon: React.ElementType; label: string }[]; cta: string;
+  desc?: string; chips?: { icon: React.ElementType; label: string }[]; cta: string;
   onClick: () => void; highlight?: boolean;
 }) {
   return (
@@ -71,10 +71,11 @@ function BigCard({
           {title}
           {subtitle && <><br /><span className="text-[#C5A55A] italic font-light text-sm md:text-base drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">{subtitle}</span></>}
         </h2>
-        {/* Descripción con fondo semitransparente para legibilidad */}
-        <div className="bg-black/50 rounded-lg px-3 py-2 mb-3 backdrop-blur-sm">
-          <p className="text-white text-xs md:text-sm leading-relaxed">{desc}</p>
-        </div>
+        {desc && (
+          <div className="bg-black/50 rounded-lg px-3 py-2 mb-3 backdrop-blur-sm">
+            <p className="text-white text-xs md:text-sm leading-relaxed">{desc}</p>
+          </div>
+        )}
         {chips && chips.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {chips.map(({ icon: CIcon, label }) => (
@@ -285,11 +286,12 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               badgeIcon={ShoppingBag}
               title="Nutriser"
               subtitle="Tu salud y belleza en un solo lugar"
-              desc="Tratamientos faciales, corporales, medicina estética, nutrición clínica y cuponera de descuentos exclusivos."
               chips={[
                 { icon: Gift, label: "Cuponera" },
                 { icon: Activity, label: "Estética" },
                 { icon: Stethoscope, label: "Nutrición" },
+                { icon: HeartPulse, label: "Medicina" },
+                { icon: ShoppingBag, label: "Productos" },
               ]}
               cta="Entrar →"
               onClick={handleEnterSite}
@@ -300,11 +302,12 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               badgeIcon={HeartPulse}
               title="Portal de Salud"
               subtitle="Tu seguimiento personalizado"
-              desc="Plan de alimentación, fotos antes/después, mediciones, lista de compras, suplementación, hábitos y registro de conducta alimentaria."
               chips={[
                 { icon: Activity, label: "Mediciones" },
                 { icon: BookOpen, label: "Plan alimentario" },
                 { icon: Stethoscope, label: "Hábitos" },
+                { icon: Gift, label: "Suplementación" },
+                { icon: HeartPulse, label: "Seguimiento" },
               ]}
               cta="Acceder →"
               onClick={() => window.open("https://portaldesaludnutriser.club", "_blank")}

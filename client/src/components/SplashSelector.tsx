@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Activity, Bell, BellRing, BookOpen, CalendarCheck, Check, ClipboardList, FlaskConical, Gift, GraduationCap,
-  HeartPulse, LayoutList, Loader2, Mail, MapPin, ShoppingBag, ShoppingCart, Stethoscope, Tag, TrendingUp, Utensils, X,
+  HeartPulse, LayoutList, Loader2, Mail, MapPin, Pill, ShoppingBag, ShoppingCart, Stethoscope, Tag, TrendingUp, Utensils, X,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -305,7 +305,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 { icon: TrendingUp, label: "Mediciones" },
                 { icon: Utensils, label: "Plan alimentario" },
                 { icon: ClipboardList, label: "Hábitos" },
-                { icon: FlaskConical, label: "Suplementación" },
+                { icon: Pill, label: "Suplementación" },
                 { icon: Activity, label: "Seguimiento" },
                 { icon: ShoppingCart, label: "Lista de compras" },
               ]}

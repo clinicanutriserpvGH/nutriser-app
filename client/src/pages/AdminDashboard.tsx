@@ -567,20 +567,24 @@ export default function AdminDashboard() {
 
   const getProofQuery = trpc.memberships.getProof.useQuery(selectedProofId ?? 0, {
     enabled: selectedProofId !== null,
+    staleTime: 0,
   });
 
   useEffect(() => {
     if (selectedProofId !== null) {
       setIsLoadingProof(true);
+      setProofUrl(null);
     }
   }, [selectedProofId]);
 
   useEffect(() => {
-    if (getProofQuery.data && getProofQuery.data.proofUrl) {
-      setProofUrl(getProofQuery.data.proofUrl);
+    if (!getProofQuery.isFetching) {
+      if (getProofQuery.data && getProofQuery.data.proofUrl) {
+        setProofUrl(getProofQuery.data.proofUrl);
+      }
       setIsLoadingProof(false);
     }
-  }, [getProofQuery.data]);
+  }, [getProofQuery.data, getProofQuery.isFetching]);
 
   const handleViewProof = (membershipId: number) => {
     setSelectedProofId(membershipId);
@@ -3351,7 +3355,10 @@ export default function AdminDashboard() {
                     }}
                   />
                 ) : (
-                  <p className="text-[#999]">No se pudo cargar el comprobante</p>
+                  <div className="text-center">
+                    <p className="text-[#999] font-medium">No hay comprobante disponible</p>
+                    <p className="text-xs text-[#bbb] mt-1">El cliente aún no ha subido su comprobante de pago.</p>
+                  </div>
                 )}
               </div>
               <p className="text-sm text-[#999] mb-4">

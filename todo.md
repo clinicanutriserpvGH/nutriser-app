@@ -869,3 +869,4 @@
 - [ ] Agregar botón de ubicación en HeroSection que abra Google Maps con la dirección de Nutriser
 - [x] Agregar botón de ubicación en HeroSection que abra Google Maps con la dirección de Nutriser
 - [x] Cambiar botón "Precio" en tarjetas de servicios por "Preguntar precio"
+- [x] Corregir modal de comprobantes en admin: estado de carga infinito y caché de query anterior

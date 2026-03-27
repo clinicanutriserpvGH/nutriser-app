@@ -875,3 +875,4 @@
 - [x] Asegurar que todos los correos se envíen solo desde clinicanutriserpv@gmail.com sin referencias a Manus
 - [x] Agregar botón "Compartir" en pantalla Hub que copie el link nutriserpv.com al portapapeles
 - [x] Rediseñar botón de notificaciones push en SplashSelector: grande, con brillo animado y texto llamativo de descuentos
+- [x] Convertir botón de campana push en círculo flotante solo con ícono, igual al botón de WhatsApp

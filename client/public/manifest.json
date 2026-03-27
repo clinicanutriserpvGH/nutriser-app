@@ -1,45 +1,98 @@
 {
+  "id": "com.nutriser.app",
   "name": "Nutriser Aesthetic & Nutrition",
   "short_name": "Nutriser",
-  "description": "Tu salud y belleza personalizada en un solo lugar. Nutrición, tratamientos faciales, corporales y medicina estética.",
+  "description": "Tu salud y belleza personalizada en un solo lugar. Nutrición, tratamientos faciales, corporales y medicina estética con la mejor tecnología y experiencia profesional en Puerto Vallarta.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FAF7F2",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0F0F0F",
   "theme_color": "#C5A55A",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "es-MX",
+  "dir": "ltr",
   "categories": ["health", "lifestyle", "medical"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.nutriser.app",
+      "id": "com.nutriser.app"
+    }
+  ],
   "icons": [
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-144x144_035f955d.png",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-72x72_d7540dc8.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-96x96_fe84315d.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-128x128_0e495350.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-144x144_982e3937.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-152x152_e0881621.png",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-152x152_270da7b6.png",
       "sizes": "152x152",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_9495a1a3.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-384x384_df4db7c7.png",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-384x384_a2742ae4.png",
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_87a5c3e9.png",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-512x512_a3dd381b.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/01_splash_8a8f694c.png",
+      "sizes": "1179x2556",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Selecciona el apartado de tu interés"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/02_home_nutriser_5e633950.png",
+      "sizes": "1179x2556",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tu salud y belleza personalizada en un solo lugar"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/03_cuponeras_a7b6fbc6.png",
+      "sizes": "1179x2556",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Cuponera de Descuentos exclusivos"
     }
   ],
   "shortcuts": [
@@ -50,8 +103,9 @@
       "url": "/appointment-form",
       "icons": [
         {
-          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png",
-          "sizes": "192x192"
+          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_9495a1a3.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
@@ -62,8 +116,9 @@
       "url": "/ebook",
       "icons": [
         {
-          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_90602a41.png",
-          "sizes": "192x192"
+          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/icon-192x192_9495a1a3.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     }

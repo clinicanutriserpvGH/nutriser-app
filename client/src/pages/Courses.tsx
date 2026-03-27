@@ -205,7 +205,7 @@ export default function Courses() {
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
       <BackToSplash />
-      <Navbar />
+      <Navbar onShowSplash={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }} />
 
       {/* Hero de Cursos */}
       <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4">

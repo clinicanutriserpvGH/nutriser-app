@@ -221,7 +221,7 @@ export default function EbookStore() {
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
       <BackToSplash />
-      <Navbar lightBg />
+      <Navbar lightBg onShowSplash={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }} />
 
       {/* Modal de imagen */}
       {showCoverModal && (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, Bell, BookOpen, Gift, GraduationCap, HeartPulse, ShoppingBag, Stethoscope } from "lucide-react";
+import { Activity, Bell, BookOpen, Gift, GraduationCap, HeartPulse, Mail, ShoppingBag, Stethoscope, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -36,6 +36,8 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 
 interface SplashSelectorProps {
   onEnterSite: () => void;
+  /** Callback para navegar a una ruta interna usando el router de React (sin recargar la página) */
+  onNavigate?: (path: string) => void;
 }
 
 /** Tarjeta grande (Nutriser / Portal) */
@@ -121,12 +123,20 @@ function SmallCard({
   );
 }
 
-export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
+export default function SplashSelector({ onEnterSite, onNavigate }: SplashSelectorProps) {
   const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
   const [pushDone, setPushDone] = useState(() =>
     localStorage.getItem("nutriser_push_enabled") === "true"
+  );
+
+  // Estado del formulario de email
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [emailSubmitting, setEmailSubmitting] = useState(false);
+  const [emailDone, setEmailDone] = useState(() =>
+    localStorage.getItem("nutriser_email_subscribed") === "true"
   );
 
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
@@ -141,6 +151,20 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
     },
   });
 
+  const emailSubscribeMutation = trpc.couponSubscribers.subscribe.useMutation({
+    onSuccess: () => {
+      setEmailDone(true);
+      setEmailSubmitting(false);
+      setShowEmailForm(false);
+      localStorage.setItem("nutriser_email_subscribed", "true");
+      toast.success("✉️ ¡Listo! Recibirás alertas de descuentos en tu correo.");
+    },
+    onError: () => {
+      setEmailSubmitting(false);
+      toast.error("No se pudo guardar tu correo. Intenta de nuevo.");
+    },
+  });
+
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 50);
     return () => clearTimeout(t);
@@ -151,13 +175,20 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
     setTimeout(() => onEnterSite(), 500);
   };
 
+  /**
+   * Navegar desde el splash a una ruta interna.
+   * Usa onNavigate (router de wouter) si está disponible — SIN recargar la página, SIN flash del Home.
+   * Fallback a window.location.href solo si no hay router disponible.
+   */
   const handleNavigate = (path: string) => {
-    setLeaving(true);
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    // Navegar DIRECTAMENTE a la ruta destino sin pasar por Home.
-    // El splash cubre toda la pantalla durante la animación de salida, eliminando cualquier flash.
+    setLeaving(true);
     setTimeout(() => {
-      window.location.href = path;
+      if (onNavigate) {
+        onNavigate(path);
+      } else {
+        window.location.href = path;
+      }
     }, 400);
   };
 
@@ -196,12 +227,23 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
       const authArr = new Uint8Array(subscription.getKey("auth")!);
       const p256dh = btoa(Array.from(p256dhArr).map((b) => String.fromCharCode(b)).join(""));
       const auth = btoa(Array.from(authArr).map((b) => String.fromCharCode(b)).join(""));
-      const savedEmail = localStorage.getItem("nutriser_subscriber_email") || undefined;
+      const savedEmail = emailInput || localStorage.getItem("nutriser_subscriber_email") || undefined;
       await pushSubscribeMutation.mutateAsync({ endpoint: subscription.endpoint, p256dh, auth, email: savedEmail });
     } catch (e: any) {
       toast.error("Error al activar notificaciones: " + e.message);
     }
     setPushLoading(false);
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailInput.trim() || !emailInput.includes("@")) {
+      toast.error("Ingresa un correo válido.");
+      return;
+    }
+    setEmailSubmitting(true);
+    localStorage.setItem("nutriser_subscriber_email", emailInput.trim());
+    await emailSubscribeMutation.mutateAsync({ email: emailInput.trim() });
   };
 
   return (
@@ -294,48 +336,103 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
             />
           </div>
 
-          {/* Fila inferior: Campana + WhatsApp */}
-          <div className="flex items-start gap-3 mb-4">
-            {/* Campana */}
-            <div className="flex-1 flex flex-col gap-1">
-              <button
-                onClick={handleEnablePush}
-                disabled={pushLoading || pushDone}
-                className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm tracking-wide shadow-lg transition-all duration-300 hover:scale-[1.02] ${
-                  pushDone
-                    ? "bg-[#C5A55A]/20 border border-[#C5A55A]/40 text-[#C5A55A] cursor-default"
-                    : "bg-[#1A1A1A] border-2 border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-black"
-                }`}
-              >
-                <Bell className={`w-4 h-4 flex-shrink-0 ${pushLoading ? "animate-bounce" : ""}`} />
-                <span className="text-xs">
-                  {pushDone
-                    ? "Notificaciones activas ✓"
-                    : pushLoading
-                    ? "Activando..."
-                    : "Activa notificaciones de descuentos"}
-                </span>
-              </button>
-              {!pushDone && (
-                <p className="text-white/40 text-[10px] text-center leading-snug px-1">
-                  Recibe alertas de promociones y descuentos exclusivos de Nutriser
-                </p>
-              )}
-            </div>
+          {/* Fila inferior: Campana + Email + WhatsApp */}
+          <div className="flex flex-col gap-2 mb-4">
 
-            {/* WhatsApp circular */}
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative flex-shrink-0 w-12 h-12 rounded-full bg-[#25D366] flex items-center justify-center shadow-lg shadow-[#25D366]/40 hover:bg-[#1ebe5d] hover:scale-110 transition-all duration-300"
-              aria-label="WhatsApp"
-            >
-              <span className="absolute inset-0 rounded-full border-2 border-[#25D366] animate-ping opacity-40" />
-              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white" xmlns="http://www.w3.org/2000/svg">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
-            </a>
+            {/* Formulario de correo */}
+            {!emailDone ? (
+              <div className="w-full">
+                {!showEmailForm ? (
+                  <button
+                    onClick={() => setShowEmailForm(true)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm tracking-wide shadow-lg transition-all duration-300 hover:scale-[1.02] bg-[#1A1A1A] border-2 border-[#C5A55A]/50 text-[#C5A55A] hover:border-[#C5A55A] hover:bg-[#C5A55A]/10"
+                  >
+                    <Mail className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-xs">Recibe descuentos en tu correo</span>
+                  </button>
+                ) : (
+                  <form onSubmit={handleEmailSubmit} className="w-full">
+                    <div className="flex items-center gap-2 bg-[#1A1A1A] border-2 border-[#C5A55A]/60 rounded-xl px-3 py-2 focus-within:border-[#C5A55A] transition-colors">
+                      <Mail className="w-4 h-4 text-[#C5A55A] flex-shrink-0" />
+                      <input
+                        type="email"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        placeholder="tu@correo.com"
+                        autoFocus
+                        className="flex-1 bg-transparent text-white text-sm placeholder-white/30 outline-none min-w-0"
+                      />
+                      <button
+                        type="submit"
+                        disabled={emailSubmitting}
+                        className="bg-[#C5A55A] text-black text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-[#d4b46a] transition-colors disabled:opacity-60 flex-shrink-0"
+                      >
+                        {emailSubmitting ? "..." : "Suscribir"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowEmailForm(false)}
+                        className="text-white/40 hover:text-white/70 transition-colors flex-shrink-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <p className="text-white/35 text-[10px] text-center mt-1 px-1">
+                      Recibirás alertas de promociones y descuentos exclusivos
+                    </p>
+                  </form>
+                )}
+              </div>
+            ) : (
+              <div className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#C5A55A]/10 border border-[#C5A55A]/30 text-[#C5A55A] text-xs font-semibold">
+                <Mail className="w-4 h-4" />
+                ¡Suscrito a descuentos por correo! ✓
+              </div>
+            )}
+
+            {/* Fila: Campana + WhatsApp */}
+            <div className="flex items-center gap-3">
+              {/* Campana */}
+              <div className="flex-1 flex flex-col gap-1">
+                <button
+                  onClick={handleEnablePush}
+                  disabled={pushLoading || pushDone}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm tracking-wide shadow-lg transition-all duration-300 hover:scale-[1.02] ${
+                    pushDone
+                      ? "bg-[#C5A55A]/20 border border-[#C5A55A]/40 text-[#C5A55A] cursor-default"
+                      : "bg-[#1A1A1A] border-2 border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-black"
+                  }`}
+                >
+                  <Bell className={`w-4 h-4 flex-shrink-0 ${pushLoading ? "animate-bounce" : ""}`} />
+                  <span className="text-xs">
+                    {pushDone
+                      ? "Notificaciones activas ✓"
+                      : pushLoading
+                      ? "Activando..."
+                      : "Activa notificaciones"}
+                  </span>
+                </button>
+                {!pushDone && (
+                  <p className="text-white/40 text-[10px] text-center leading-snug px-1">
+                    Recibe alertas push de descuentos exclusivos
+                  </p>
+                )}
+              </div>
+
+              {/* WhatsApp circular */}
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative flex-shrink-0 w-12 h-12 rounded-full bg-[#25D366] flex items-center justify-center shadow-lg shadow-[#25D366]/40 hover:bg-[#1ebe5d] hover:scale-110 transition-all duration-300"
+                aria-label="WhatsApp"
+              >
+                <span className="absolute inset-0 rounded-full border-2 border-[#25D366] animate-ping opacity-40" />
+                <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+              </a>
+            </div>
           </div>
 
           {/* Nota al pie */}

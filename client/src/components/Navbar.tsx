@@ -12,14 +12,9 @@ const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 const navLinks = [
-  { label: "Inicio", href: "#inicio" },
   { label: "Servicios", href: "#servicios" },
   { label: "Nosotros", href: "#nosotros" },
   { label: "Contacto", href: "#contacto" },
-  { label: "Cursos Gratuitos", href: "/cursos" },
-  { label: "Tienda eBook", href: "/ebook" },
-  { label: "Comprar Programa Nutrición", href: "/memberships" },
-  { label: "Portal de Salud", href: "https://portaldesaludnutriser.club", external: true },
   { label: "Administración", href: "/admin/login" },
 ];
 

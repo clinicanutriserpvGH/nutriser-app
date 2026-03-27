@@ -55,7 +55,7 @@ function Router() {
 }
 
 function AppContent() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
 
   // El splash se muestra en CUALQUIER ruta al inicio de sesión,
   // excepto rutas de admin/técnicas. sessionStorage se borra al cerrar el navegador.
@@ -73,11 +73,18 @@ function AppContent() {
   };
 
   // Volver al splash desde cualquier página
+  // IMPORTANTE: NO navegamos a "/" — el splash es un overlay fixed que se superpone
+  // sobre cualquier ruta. Navegar a "/" causaría que Home se renderice debajo del splash.
   const handleShowSplash = () => {
     sessionStorage.removeItem("nutriser_splash_seen");
-    // Navegar a "/" y mostrar el splash
-    window.history.pushState({}, "", "/");
     setShowSplash(true);
+  };
+
+  // Navegar desde el splash a una ruta interna usando el router de wouter
+  // Esto evita recargar la página y elimina el flash del Home
+  const handleNavigateFromSplash = (path: string) => {
+    setShowSplash(false);
+    navigate(path);
   };
 
   return (
@@ -86,7 +93,10 @@ function AppContent() {
       <Router />
       {/* El splash se superpone sobre cualquier ruta como overlay fixed */}
       {showSplash && !isAdminRoute(location) && (
-        <SplashSelector onEnterSite={handleEnterSite} />
+        <SplashSelector
+          onEnterSite={handleEnterSite}
+          onNavigate={handleNavigateFromSplash}
+        />
       )}
     </SplashContext.Provider>
   );

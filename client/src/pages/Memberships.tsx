@@ -202,6 +202,8 @@ export default function Memberships() {
         clientEmail: email,
         clientPhone: phone,
         programType: selectedProgram,
+        discountCode: (discountInfo?.valid && formData.discountCode.trim()) ? formData.discountCode.trim() : undefined,
+        discountPercent: (discountInfo?.valid && discountInfo.discount) ? discountInfo.discount : undefined,
       });
 
       setMembershipId(result.id);

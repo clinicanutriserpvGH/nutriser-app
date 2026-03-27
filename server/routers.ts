@@ -99,16 +99,24 @@ export const appRouter = router({
         clientEmail: z.string().email(),
         clientPhone: z.string().optional(),
         programType: z.enum(["basic", "premium"]),
+        discountCode: z.string().optional(),
+        discountPercent: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
-        const price = input.programType === "basic" ? "2000" : "3000";
+        const basePrice = input.programType === "basic" ? 2500 : 4000;
+        const finalPrice = input.discountPercent
+          ? Math.round(basePrice * (1 - input.discountPercent / 100))
+          : basePrice;
         const membership = await createMembership({
           clientName: input.clientName,
           clientEmail: input.clientEmail,
           clientPhone: input.clientPhone,
           programType: input.programType,
-          price: price,
+          price: String(finalPrice),
           depositConcept: `${input.clientName} - Programa ${input.programType === "basic" ? "Básico" : "Premium"}`,
+          discountCode: input.discountCode,
+          discountPercent: input.discountPercent,
+          originalPrice: input.discountPercent ? String(basePrice) : undefined,
         });
         
         // NO enviar notificaciones aquí - solo crear la membresía
@@ -145,7 +153,9 @@ export const appRouter = router({
           membership.clientName,
           membership.clientEmail,
           membership.clientPhone || undefined,
-          membership.programType
+          membership.programType,
+          membership.discountCode || undefined,
+          membership.discountPercent || undefined
         );
         
         await notifyOwner({

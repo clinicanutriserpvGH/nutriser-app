@@ -871,3 +871,4 @@
 - [x] Cambiar botón "Precio" en tarjetas de servicios por "Preguntar precio"
 - [x] Corregir modal de comprobantes en admin: estado de carga infinito y caché de query anterior
 - [x] Mejorar validación en formulario de membresías con mensajes de error específicos por campo
+- [x] Mostrar precio con descuento y código de cupón en el correo de notificación de nueva membresía

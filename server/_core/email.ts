@@ -102,11 +102,20 @@ export async function sendMembershipNotificationToAdmin(
   clientName: string,
   clientEmail: string,
   clientPhone: string | undefined,
-  programType: "basic" | "premium"
+  programType: "basic" | "premium",
+  discountCode?: string,
+  discountPercent?: number
 ) {
   const transporter = getEmailTransporter();
   const programName = programType === "basic" ? "Básico" : "Premium";
-  const price = programType === "basic" ? "$2,500 MXN" : "$4,000 MXN";
+  const basePrice = programType === "basic" ? 2500 : 4000;
+  const finalPrice = discountPercent ? Math.round(basePrice * (1 - discountPercent / 100)) : basePrice;
+  const priceDisplay = `$${finalPrice.toLocaleString('es-MX')} MXN`;
+  const discountLine = discountCode && discountPercent
+    ? `<p><strong>Código aplicado:</strong> ${discountCode} (-${discountPercent}%)</p>
+            <p><strong>Precio original:</strong> <span style="text-decoration:line-through; color:#999;">$${basePrice.toLocaleString('es-MX')} MXN</span></p>
+            <p><strong>Precio con descuento:</strong> <span style="color:#C5A55A; font-size:1.1em; font-weight:bold;">${priceDisplay}</span></p>`
+    : `<p><strong>Precio:</strong> ${priceDisplay}</p>`;
 
   const htmlContent = `
     <html>
@@ -120,7 +129,7 @@ export async function sendMembershipNotificationToAdmin(
             <p><strong>Email:</strong> ${clientEmail}</p>
             <p><strong>Teléfono:</strong> ${clientPhone || "No proporcionado"}</p>
             <p><strong>Programa:</strong> ${programName}</p>
-            <p><strong>Precio:</strong> ${price}</p>
+            ${discountLine}
           </div>
           
           <p>El cliente ha completado su inscripción y está esperando confirmar el pago. Revisa el panel de administración para ver el comprobante cuando lo suba.</p>

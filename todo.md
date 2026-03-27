@@ -872,3 +872,5 @@
 - [x] Corregir modal de comprobantes en admin: estado de carga infinito y caché de query anterior
 - [x] Mejorar validación en formulario de membresías con mensajes de error específicos por campo
 - [x] Mostrar precio con descuento y código de cupón en el correo de notificación de nueva membresía
+- [x] Asegurar que todos los correos se envíen solo desde clinicanutriserpv@gmail.com sin referencias a Manus
+- [x] Agregar botón "Compartir" en pantalla Hub que copie el link nutriserpv.com al portapapeles

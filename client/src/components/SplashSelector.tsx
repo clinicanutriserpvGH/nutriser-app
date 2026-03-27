@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Activity, Bell, BellRing, BookOpen, CalendarCheck, Check, ClipboardList, FlaskConical, Gift, GraduationCap,
-  HeartPulse, LayoutList, Loader2, Mail, MapPin, Pill, ShoppingBag, ShoppingCart, Stethoscope, Tag, TrendingUp, Utensils, X,
+  HeartPulse, LayoutList, Loader2, Mail, MapPin, Pill, Share2, ShoppingBag, ShoppingCart, Stethoscope, Tag, TrendingUp, Utensils, X,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -272,6 +272,25 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               Selecciona el apartado de tu interés
             </h1>
             <div className="w-10 md:w-16 h-px bg-[#C5A55A] mt-3" />
+            {/* Botón compartir */}
+            <button
+              onClick={() => {
+                const url = "https://nutriserpv.com";
+                if (navigator.share) {
+                  navigator.share({ title: "Nutriser Aesthetic & Nutrition", url });
+                } else {
+                  navigator.clipboard.writeText(url).then(() => {
+                    toast.success("¡Enlace copiado! Pégalo donde quieras compartirlo.");
+                  }).catch(() => {
+                    toast.error("No se pudo copiar el enlace.");
+                  });
+                }
+              }}
+              className="mt-4 flex items-center gap-2 px-4 py-2 rounded-full border border-[#C5A55A]/40 text-[#C5A55A] text-xs tracking-widest uppercase hover:bg-[#C5A55A]/10 transition-colors"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              Compartir
+            </button>
           </div>
 
           {/* ── MÓVIL: layout apilado ── */}

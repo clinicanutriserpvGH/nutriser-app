@@ -5,7 +5,7 @@
  * Uses real Nutriser logo
  */
 import { useState, useEffect } from "react";
-import { Menu, X, Phone, Instagram, Facebook, Ruler } from "lucide-react";
+import { Menu, X, Phone, Instagram, Facebook, Ruler, Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const LOGO_URL =
@@ -26,9 +26,11 @@ const navLinks = [
 interface NavbarProps {
   /** Cuando true, el navbar asume fondo claro desde el inicio (no invierte el logo) */
   lightBg?: boolean;
+  /** Callback para volver al splash selector */
+  onShowSplash?: () => void;
 }
 
-export default function Navbar({ lightBg = false }: NavbarProps) {
+export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -77,6 +79,22 @@ export default function Navbar({ lightBg = false }: NavbarProps) {
               className="h-12 w-auto object-contain transition-all duration-500"
             />
           </a>
+
+          {/* Botón Inicio (volver al splash) — solo si se pasa el callback */}
+          {onShowSplash && (
+            <button
+              onClick={onShowSplash}
+              title="Volver al inicio"
+              className={`hidden lg:flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase font-bold px-3 py-1.5 rounded-full border transition-all duration-300 ${
+                scrolled || lightBg
+                  ? "border-[#C5A55A]/50 text-[#C5A55A] hover:bg-[#C5A55A] hover:text-[#1A1A1A]"
+                  : "border-white/30 text-white hover:bg-white/20"
+              }`}
+            >
+              <Home className="w-3.5 h-3.5" />
+              Inicio
+            </button>
+          )}
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
@@ -155,6 +173,19 @@ export default function Navbar({ lightBg = false }: NavbarProps) {
             className="fixed inset-0 z-40 bg-white/98 backdrop-blur-lg pt-24 px-8 overflow-y-auto"
           >
             <div className="flex flex-col gap-6">
+              {/* Botón Inicio en menú móvil */}
+              {onShowSplash && (
+                <motion.button
+                  onClick={() => { setMobileOpen(false); onShowSplash(); }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0 }}
+                  className="font-serif text-3xl text-[#C5A55A] hover:text-[#B8963E] transition-colors flex items-center gap-3"
+                >
+                  <Home className="w-6 h-6" />
+                  Inicio
+                </motion.button>
+              )}
               {navLinks.map((link, i) => (
                 <motion.a
                   key={link.href}

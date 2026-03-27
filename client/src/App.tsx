@@ -20,6 +20,7 @@ import CouponPage from "@/pages/CouponPage";
 import Courses from "@/pages/Courses";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
+import { SplashContext } from "@/contexts/SplashContext";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
@@ -79,22 +80,11 @@ function AppContent() {
   };
 
   return (
-    <>
+    <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
       <BackgroundMusic />
       <Router />
       {showSplash && <SplashSelector onEnterSite={handleEnterSite} />}
-      {/* Botón flotante para volver al selector — solo visible en la página principal */}
-      {isRootPath && !showSplash && (
-        <button
-          onClick={handleShowSplash}
-          title="Volver al inicio"
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 bg-[#1A1A1A]/80 backdrop-blur-sm text-[#C5A55A] border border-[#C5A55A]/50 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase shadow-lg hover:bg-[#C5A55A] hover:text-[#1A1A1A] transition-all duration-300"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          Inicio
-        </button>
-      )}
-    </>
+    </SplashContext.Provider>
   );
 }
 

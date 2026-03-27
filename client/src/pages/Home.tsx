@@ -6,7 +6,6 @@
  * Fonts: Playfair Display (serif titles), Lato (sans body)
  * Uses real clinic photos and official logo
  */
-import { useAuth } from "@/_core/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import PromotionsSection from "@/components/PromotionsSection";
@@ -16,15 +15,14 @@ import AboutSection from "@/components/AboutSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { useSplash } from "@/contexts/SplashContext";
 
 export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  // let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { showSplash } = useSplash();
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar onShowSplash={showSplash} />
       <main>
         <HeroSection />
         <PromotionsSection />

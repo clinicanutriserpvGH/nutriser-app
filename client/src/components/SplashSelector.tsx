@@ -176,8 +176,8 @@ export default function SplashSelector({ onEnterSite, onNavigate }: SplashSelect
   });
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 50);
-    return () => clearTimeout(t);
+    // Visible inmediatamente en el primer frame para eliminar la lentitud de carga
+    requestAnimationFrame(() => setVisible(true));
   }, []);
 
   const handleEnterSite = () => {

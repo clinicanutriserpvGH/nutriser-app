@@ -21,7 +21,7 @@ import Courses from "@/pages/Courses";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
 import { SplashContext } from "@/contexts/SplashContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
 // Rutas que NUNCA muestran el splash (admin, rutas técnicas)
@@ -29,6 +29,36 @@ const ADMIN_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon"];
 
 function isAdminRoute(path: string) {
   return ADMIN_ROUTES.some((r) => path.startsWith(r));
+}
+
+// Pantalla de carga instantánea mientras la app inicializa
+function LoadingScreen() {
+  return (
+    <div className="fixed inset-0 z-[999999] bg-[#0f0f0f] flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center gap-6">
+        {/* Logo animado */}
+        <div className="relative">
+          <div className="w-20 h-20 rounded-full border-2 border-[#C5A55A]/30 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full border-t-2 border-[#C5A55A] animate-spin" />
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-[#C5A55A]/20 flex items-center justify-center">
+              <div className="w-3 h-3 rounded-full bg-[#C5A55A] animate-pulse" />
+            </div>
+          </div>
+        </div>
+        {/* Texto */}
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-[#C5A55A] text-xs tracking-[0.4em] uppercase font-light animate-pulse">
+            Nutriser
+          </p>
+          <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase">
+            Aesthetic & Nutrition
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function Router() {
@@ -57,57 +87,83 @@ function Router() {
 function AppContent() {
   const [location, navigate] = useLocation();
 
-  // El splash se muestra en CUALQUIER ruta al inicio de sesión,
-  // excepto rutas de admin/técnicas. sessionStorage se borra al cerrar el navegador.
+  // Estado del splash
   const [showSplash, setShowSplash] = useState(() => {
     if (isAdminRoute(location)) return false;
     const seen = sessionStorage.getItem("nutriser_splash_seen");
     return !seen;
   });
 
-  // Al elegir desde el splash: marca como visto, navega a / y oculta el splash.
-  // SIEMPRE navega a "/" para que el usuario vea la página principal de Nutriser,
-  // sin importar en qué ruta estaba cuando se mostró el splash.
+  // Estado de navegación pendiente: mientras es true, el Router NO renderiza
+  // Esto evita completamente el flash del Home
+  const [navigating, setNavigating] = useState(false);
+
+  // Pantalla de carga inicial: se muestra brevemente mientras React monta todo
+  const [appReady, setAppReady] = useState(false);
+  useEffect(() => {
+    // Marcar app como lista después de que React haya pintado el primer frame
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setAppReady(true);
+      });
+    });
+  }, []);
+
+  // Entrar al sitio principal (Nutriser Home)
   const handleEnterSite = () => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
+    setNavigating(true);
     navigate("/");
-    setShowSplash(false);
+    // Pequeño delay para que el router cambie antes de mostrar el contenido
+    setTimeout(() => {
+      setShowSplash(false);
+      setNavigating(false);
+    }, 50);
   };
 
   // Volver al splash desde cualquier página
-  // IMPORTANTE: NO navegamos a "/" — el splash es un overlay fixed que se superpone
-  // sobre cualquier ruta. Navegar a "/" causaría que Home se renderice debajo del splash.
   const handleShowSplash = () => {
     sessionStorage.removeItem("nutriser_splash_seen");
     setShowSplash(true);
   };
 
-  // Navegar desde el splash a una ruta interna usando el router de wouter.
-  // ORDEN CORRECTO: primero navegar (el router cambia la ruta debajo del splash),
-  // luego esperar 2 frames para que React renderice el componente destino,
-  // y solo entonces ocultar el splash. Así nunca hay un flash del Home.
+  // Navegar desde el splash a una ruta interna SIN flash del Home:
+  // 1. Activar estado "navigating" → el Router deja de renderizar (pantalla negra)
+  // 2. Navegar a la ruta destino
+  // 3. Esperar 2 frames para que el componente destino esté listo
+  // 4. Ocultar splash y desactivar navigating → el usuario ve directamente la página destino
   const handleNavigateFromSplash = (path: string) => {
-    navigate(path);
-    // Guardar en sessionStorage antes de ocultar para que no reaparezca el splash
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    // Esperar a que el router renderice el componente destino antes de quitar el overlay
+    setNavigating(true);
+    navigate(path);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         setShowSplash(false);
+        setNavigating(false);
       });
     });
   };
 
+  // Mostrar pantalla de carga mientras la app inicializa
+  if (!appReady) {
+    return <LoadingScreen />;
+  }
+
   return (
     <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
       <BackgroundMusic />
-      <Router />
+      {/* El Router solo renderiza cuando no estamos en medio de una navegación desde el splash */}
+      {!navigating && <Router />}
       {/* El splash se superpone sobre cualquier ruta como overlay fixed */}
       {showSplash && !isAdminRoute(location) && (
         <SplashSelector
           onEnterSite={handleEnterSite}
           onNavigate={handleNavigateFromSplash}
         />
+      )}
+      {/* Pantalla de transición durante navegación desde splash */}
+      {navigating && (
+        <div className="fixed inset-0 z-[99998] bg-[#0f0f0f]" />
       )}
     </SplashContext.Provider>
   );

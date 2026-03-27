@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, Bell, BookOpen, CalendarCheck, Gift, GraduationCap, HeartPulse, MessageCircle, ShoppingBag, Stethoscope } from "lucide-react";
+import { Activity, Bell, BookOpen, Gift, GraduationCap, HeartPulse, ShoppingBag, Stethoscope } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -12,10 +12,6 @@ const CLINIC_IMG =
 const PORTAL_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hero-clinic-3_c9c66a2b.webp";
 
-const CLINIC_IMG2 =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hero-clinic-2_d6662dc0.jpg";
-
-// Imágenes temáticas para tarjetas del splash
 const IMG_NUTRICION =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutricion-bowl_314c08fe.jpg";
 const IMG_TIENDA =
@@ -40,6 +36,89 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 
 interface SplashSelectorProps {
   onEnterSite: () => void;
+}
+
+/** Tarjeta grande (Nutriser / Portal) */
+function BigCard({
+  img, badge, badgeIcon: BadgeIcon, title, subtitle, desc, chips, cta, onClick, highlight,
+}: {
+  img: string; badge: string; badgeIcon: React.ElementType; title: string; subtitle?: string;
+  desc: string; chips?: { icon: React.ElementType; label: string }[]; cta: string;
+  onClick: () => void; highlight?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`group relative w-full rounded-2xl overflow-hidden border transition-all duration-300 hover:scale-[1.01] focus:outline-none ${
+        highlight ? "border-[#C5A55A]/50 hover:border-[#C5A55A]" : "border-white/10 hover:border-[#C5A55A]/60"
+      }`}
+      style={{ minHeight: "160px" }}
+    >
+      <img src={img} alt={title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/20" />
+      <div className="relative flex flex-col justify-end p-4 text-left" style={{ minHeight: "160px" }}>
+        <div className="flex items-center gap-2 mb-1">
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${highlight ? "bg-[#C5A55A]/20 border border-[#C5A55A]/60" : "bg-[#C5A55A]/20 border border-[#C5A55A]/40"}`}>
+            <BadgeIcon className="w-3 h-3 text-[#C5A55A]" />
+            {highlight && <span className="absolute inset-0 rounded-full border border-[#C5A55A]/40 animate-ping" />}
+          </div>
+          <span className="text-[#C5A55A] text-xs tracking-widest uppercase font-medium">{badge}</span>
+        </div>
+        <h2 className="text-white text-base font-semibold leading-tight mb-0.5">
+          {title}
+          {subtitle && <><br /><span className="text-[#C5A55A] italic font-light text-sm">{subtitle}</span></>}
+        </h2>
+        <p className="text-white/55 text-xs leading-relaxed mb-2">{desc}</p>
+        {chips && chips.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {chips.map(({ icon: Icon, label }) => (
+              <span key={label} className="flex items-center gap-1 bg-[#C5A55A]/15 rounded-full px-2 py-0.5 text-[#C5A55A] text-xs border border-[#C5A55A]/20">
+                <Icon className="w-3 h-3" />{label}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="w-full bg-[#C5A55A] text-black text-xs font-bold tracking-widest uppercase py-2 rounded-lg text-center group-hover:bg-[#d4b46a] transition-colors">
+          {cta}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+/** Tarjeta pequeña (Nutrición, Tienda, eBook, Academy) */
+function SmallCard({
+  img, icon: Icon, title, cta, onClick, highlight,
+}: {
+  img: string; icon: React.ElementType; title: string; cta: string; onClick: () => void; highlight?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`group relative w-full rounded-xl overflow-hidden border transition-all duration-300 hover:scale-[1.01] focus:outline-none ${
+        highlight ? "border-2 border-[#C5A55A]/60 hover:border-[#C5A55A]" : "border border-white/10 hover:border-[#C5A55A]/50"
+      }`}
+      style={{ minHeight: "90px" }}
+    >
+      <img src={img} alt={title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/60 to-black/25" />
+      <div className="relative flex flex-col justify-end p-3 text-left" style={{ minHeight: "90px" }}>
+        <div className="flex items-center gap-1.5 mb-1">
+          <div className="w-5 h-5 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/50 flex items-center justify-center flex-shrink-0">
+            <Icon className="w-2.5 h-2.5 text-[#C5A55A]" />
+          </div>
+          <h3 className="text-white text-xs font-semibold leading-tight">{title}</h3>
+        </div>
+        <div className={`w-full text-xs font-bold tracking-wide uppercase py-1.5 rounded-lg text-center transition-colors ${
+          highlight
+            ? "bg-[#C5A55A] text-black group-hover:bg-[#d4b46a]"
+            : "bg-white/10 border border-white/20 text-white group-hover:bg-[#C5A55A] group-hover:text-black group-hover:border-[#C5A55A]"
+        }`}>
+          {cta}
+        </div>
+      </div>
+    </button>
+  );
 }
 
 export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
@@ -74,12 +153,9 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
 
   const handleNavigate = (path: string) => {
     setLeaving(true);
-    // Marcar como visto ANTES de la animación para que al cargar la nueva
-    // página el splash no aparezca de nuevo
     sessionStorage.setItem("nutriser_splash_seen", "1");
     setTimeout(() => {
       onEnterSite();
-      // Navegación dura: evita que wouter muestre el Home antes de la ruta
       window.location.href = path;
     }, 350);
   };
@@ -129,217 +205,145 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#0f0f0f] overflow-y-auto py-8 px-4"
+      className="fixed inset-0 z-[99999] bg-[#0f0f0f] overflow-y-auto"
       style={{
         opacity: leaving ? 0 : visible ? 1 : 0,
         transition: "opacity 0.5s ease",
       }}
     >
-      {/* Logo + título */}
-      <div className="flex flex-col items-center mb-5">
-        <img src={LOGO_URL} alt="Nutriser" className="w-16 h-16 object-contain mb-3" />
-        <p className="text-[#C5A55A] text-xs tracking-[0.3em] uppercase font-light">
-          Aesthetic & Nutrition
-        </p>
-        <h1 className="text-white text-lg font-light tracking-widest mt-2 text-center">
-          Selecciona el apartado de tu interés
-        </h1>
-        <div className="w-12 h-px bg-[#C5A55A] mt-3" />
-      </div>
+      {/* Contenedor interno — centrado, padding generoso, max-width para tablet/desktop */}
+      <div className="min-h-full flex flex-col items-center justify-start py-6 px-4">
+        <div className="w-full max-w-lg">
 
-      {/* ── Fila 1: Nutriser principal + Portal de Salud ── */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl mb-3">
-        {/* Tarjeta: Nutriser principal */}
-        <button
-          onClick={handleEnterSite}
-          className="group relative flex-1 h-52 sm:h-60 rounded-2xl overflow-hidden border border-white/10 hover:border-[#C5A55A]/60 transition-all duration-300 hover:scale-[1.02] focus:outline-none"
-        >
-          <img src={CLINIC_IMG} alt="Nutriser" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
-          <div className="absolute inset-0 flex flex-col justify-end p-4 text-left">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-7 h-7 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/40 flex items-center justify-center">
-                <ShoppingBag className="w-3.5 h-3.5 text-[#C5A55A]" />
-              </div>
-              <span className="text-[#C5A55A] text-xs tracking-widest uppercase font-medium">Clínica</span>
-            </div>
-            <h2 className="text-white text-lg font-semibold leading-tight mb-1">
-              Nutriser
-              <br />
-              <span className="text-[#C5A55A] italic font-light text-sm">Aesthetic & Nutrition</span>
-            </h2>
-            <p className="text-white/60 text-xs leading-relaxed mb-2">
-              Servicios, tratamientos, citas y programas de nutrición.
+          {/* Logo + título */}
+          <div className="flex flex-col items-center mb-5">
+            <img src={LOGO_URL} alt="Nutriser" className="w-14 h-14 object-contain mb-2" />
+            <p className="text-[#C5A55A] text-[10px] tracking-[0.3em] uppercase font-light">
+              Aesthetic & Nutrition
             </p>
-            <div className="w-full bg-[#C5A55A] text-black text-xs font-bold tracking-widest uppercase py-2 rounded-lg text-center group-hover:bg-[#d4b46a] transition-colors">
-              Entrar →
-            </div>
+            <h1 className="text-white text-base font-light tracking-widest mt-1.5 text-center">
+              Selecciona el apartado de tu interés
+            </h1>
+            <div className="w-10 h-px bg-[#C5A55A] mt-2.5" />
           </div>
-        </button>
 
-        {/* Tarjeta: Portal de Salud */}
-        <button
-          onClick={handleEnterPortal}
-          className="group relative flex-1 h-52 sm:h-60 rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-300 hover:scale-[1.02] focus:outline-none"
-        >
-          <img src={PORTAL_IMG} alt="Portal de Salud" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/30" />
-          <div className="absolute top-0 right-0 w-20 h-20 bg-[#C5A55A]/10 rounded-full blur-2xl" />
-          <div className="absolute inset-0 flex flex-col justify-end p-4 text-left">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="relative w-7 h-7 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/60 flex items-center justify-center">
-                <HeartPulse className="w-3.5 h-3.5 text-[#C5A55A]" />
-                <span className="absolute inset-0 rounded-full border border-[#C5A55A]/40 animate-ping" />
-              </div>
-              <span className="text-[#C5A55A] text-xs tracking-widest uppercase font-medium">Pacientes activos</span>
-            </div>
-            <h2 className="text-white text-lg font-semibold leading-tight mb-1">
-              Portal de Salud
-              <br />
-              <span className="text-[#C5A55A] italic font-light text-sm">Nutriser</span>
-            </h2>
-            <p className="text-white/60 text-xs leading-relaxed mb-2">
-              Seguimiento de progreso, dietas, historial y citas.
-            </p>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {[{ icon: Activity, label: "Progreso" }, { icon: Stethoscope, label: "Historial" }].map(({ icon: Icon, label }) => (
-                <span key={label} className="flex items-center gap-1 bg-[#C5A55A]/15 rounded-full px-2 py-0.5 text-[#C5A55A] text-xs border border-[#C5A55A]/20">
-                  <Icon className="w-3 h-3" />{label}
+          {/* Fila 1: Nutriser + Portal (en móvil apiladas, en sm lado a lado) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <BigCard
+              img={CLINIC_IMG}
+              badge="Clínica"
+              badgeIcon={ShoppingBag}
+              title="Nutriser"
+              subtitle="Aesthetic & Nutrition"
+              desc="Servicios, tratamientos, citas y programas de nutrición."
+              cta="Entrar →"
+              onClick={handleEnterSite}
+            />
+            <BigCard
+              img={PORTAL_IMG}
+              badge="Pacientes activos"
+              badgeIcon={HeartPulse}
+              title="Portal de Salud"
+              subtitle="Nutriser"
+              desc="Seguimiento de progreso, dietas, historial y citas."
+              chips={[
+                { icon: Activity, label: "Progreso" },
+                { icon: Stethoscope, label: "Historial" },
+              ]}
+              cta="Acceder →"
+              onClick={handleEnterPortal}
+              highlight
+            />
+          </div>
+
+          {/* Fila 2: Programa Nutrición + Tienda Productos */}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <SmallCard
+              img={IMG_NUTRICION}
+              icon={Gift}
+              title="Programa Nutrición"
+              cta="Adquirir →"
+              onClick={() => handleNavigate("/memberships")}
+              highlight
+            />
+            <SmallCard
+              img={IMG_TIENDA}
+              icon={ShoppingBag}
+              title="Tienda Productos"
+              cta="Ver tienda →"
+              onClick={() => handleNavigate("/tienda")}
+            />
+          </div>
+
+          {/* Fila 3: eBook + Academy */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <SmallCard
+              img={IMG_EBOOK}
+              icon={BookOpen}
+              title="Tienda eBook"
+              cta="Ver eBooks →"
+              onClick={() => handleNavigate("/ebook")}
+            />
+            <SmallCard
+              img={IMG_ACADEMY}
+              icon={GraduationCap}
+              title="Nutriser Academy"
+              cta="Ver cursos →"
+              onClick={() => handleNavigate("/cursos")}
+            />
+          </div>
+
+          {/* Fila inferior: Campana + WhatsApp */}
+          <div className="flex items-start gap-3 mb-4">
+            {/* Campana */}
+            <div className="flex-1 flex flex-col gap-1">
+              <button
+                onClick={handleEnablePush}
+                disabled={pushLoading || pushDone}
+                className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm tracking-wide shadow-lg transition-all duration-300 hover:scale-[1.02] ${
+                  pushDone
+                    ? "bg-[#C5A55A]/20 border border-[#C5A55A]/40 text-[#C5A55A] cursor-default"
+                    : "bg-[#1A1A1A] border-2 border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-black"
+                }`}
+              >
+                <Bell className={`w-4 h-4 flex-shrink-0 ${pushLoading ? "animate-bounce" : ""}`} />
+                <span className="text-xs">
+                  {pushDone
+                    ? "Notificaciones activas ✓"
+                    : pushLoading
+                    ? "Activando..."
+                    : "Activa notificaciones de descuentos"}
                 </span>
-              ))}
+              </button>
+              {!pushDone && (
+                <p className="text-white/40 text-[10px] text-center leading-snug px-1">
+                  Recibe alertas de promociones y descuentos exclusivos de Nutriser
+                </p>
+              )}
             </div>
-            <div className="w-full bg-[#C5A55A] text-black text-xs font-bold tracking-widest uppercase py-2 rounded-lg text-center group-hover:bg-[#d4b46a] transition-colors">
-              Acceder →
-            </div>
-          </div>
-        </button>
-      </div>
 
-      {/* ── Fila 2: Programa Nutrición + Tienda Productos ── */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl mb-3">
-        {/* Programa Nutrición — destacado en dorado */}
-        <button
-          onClick={() => handleNavigate("/memberships")}
-          className="group relative flex-1 h-32 sm:h-40 rounded-2xl overflow-hidden border-2 border-[#C5A55A]/50 hover:border-[#C5A55A] transition-all duration-300 hover:scale-[1.02] focus:outline-none"
-        >
-          <img src={IMG_NUTRICION} alt="Nutrición" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/60 to-black/30" />
-          <div className="absolute inset-0 flex flex-col justify-end p-3 text-left">
-            <div className="w-6 h-6 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/60 flex items-center justify-center mb-1">
-              <Gift className="w-3 h-3 text-[#C5A55A]" />
-            </div>
-            <h3 className="text-white text-sm font-semibold mb-0.5">Programa Nutrición</h3>
-            <div className="w-full bg-[#C5A55A] text-black text-xs font-bold tracking-widest uppercase py-1.5 rounded-lg text-center group-hover:bg-[#d4b46a] transition-colors">
-              Adquirir programa →
-            </div>
+            {/* WhatsApp circular */}
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative flex-shrink-0 w-12 h-12 rounded-full bg-[#25D366] flex items-center justify-center shadow-lg shadow-[#25D366]/40 hover:bg-[#1ebe5d] hover:scale-110 transition-all duration-300"
+              aria-label="WhatsApp"
+            >
+              <span className="absolute inset-0 rounded-full border-2 border-[#25D366] animate-ping opacity-40" />
+              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+            </a>
           </div>
-        </button>
 
-        {/* Tienda de Productos */}
-        <button
-          onClick={() => handleNavigate("/tienda")}
-          className="group relative flex-1 h-32 sm:h-40 rounded-2xl overflow-hidden border border-white/10 hover:border-[#C5A55A]/60 transition-all duration-300 hover:scale-[1.02] focus:outline-none"
-        >
-          <img src={IMG_TIENDA} alt="Tienda" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25" />
-          <div className="absolute inset-0 flex flex-col justify-end p-3 text-left">
-            <div className="w-6 h-6 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/40 flex items-center justify-center mb-1">
-              <ShoppingBag className="w-3 h-3 text-[#C5A55A]" />
-            </div>
-            <h3 className="text-white text-sm font-semibold mb-0.5">Tienda de Productos</h3>
-            <div className="w-full bg-white/10 border border-white/20 text-white text-xs font-bold tracking-widest uppercase py-1.5 rounded-lg text-center group-hover:bg-[#C5A55A] group-hover:text-black group-hover:border-[#C5A55A] transition-colors">
-              Ver tienda →
-            </div>
-          </div>
-        </button>
-      </div>
+          {/* Nota al pie */}
+          <p className="text-white/25 text-[10px] text-center px-4 pb-4">
+            El Portal de Salud es exclusivo para pacientes activos de Nutriser
+          </p>
 
-      {/* ── Fila 3: Tienda eBook + Nutriser Academy ── */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl mb-4">
-        {/* Tienda eBook */}
-        <button
-          onClick={() => handleNavigate("/ebook")}
-          className="group relative flex-1 h-32 sm:h-40 rounded-2xl overflow-hidden border border-white/10 hover:border-[#C5A55A]/60 transition-all duration-300 hover:scale-[1.02] focus:outline-none"
-        >
-          <img src={IMG_EBOOK} alt="eBook" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25" />
-          <div className="absolute inset-0 flex flex-col justify-end p-3 text-left">
-            <div className="w-6 h-6 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/40 flex items-center justify-center mb-1">
-              <BookOpen className="w-3 h-3 text-[#C5A55A]" />
-            </div>
-            <h3 className="text-white text-sm font-semibold mb-0.5">Tienda eBook</h3>
-            <div className="w-full bg-white/10 border border-white/20 text-white text-xs font-bold tracking-widest uppercase py-1.5 rounded-lg text-center group-hover:bg-[#C5A55A] group-hover:text-black group-hover:border-[#C5A55A] transition-colors">
-              Ver eBooks →
-            </div>
-          </div>
-        </button>
-
-        {/* Nutriser Academy */}
-        <button
-          onClick={() => handleNavigate("/cursos")}
-          className="group relative flex-1 h-32 sm:h-40 rounded-2xl overflow-hidden border border-white/10 hover:border-[#C5A55A]/60 transition-all duration-300 hover:scale-[1.02] focus:outline-none"
-        >
-          <img src={IMG_ACADEMY} alt="Academy" className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25" />
-          <div className="absolute inset-0 flex flex-col justify-end p-3 text-left">
-            <div className="w-6 h-6 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/40 flex items-center justify-center mb-1">
-              <GraduationCap className="w-3 h-3 text-[#C5A55A]" />
-            </div>
-            <h3 className="text-white text-sm font-semibold mb-0.5">Nutriser Academy</h3>
-            <div className="w-full bg-white/10 border border-white/20 text-white text-xs font-bold tracking-widest uppercase py-1.5 rounded-lg text-center group-hover:bg-[#C5A55A] group-hover:text-black group-hover:border-[#C5A55A] transition-colors">
-              Ver cursos →
-            </div>
-          </div>
-        </button>
-      </div>
-
-      {/* ── Fila inferior: Campana notificaciones + WhatsApp flotante ── */}
-      <div className="flex items-start gap-3 w-full max-w-2xl">
-        {/* Campana — ocupa todo el ancho disponible */}
-        <div className="flex-1 flex flex-col gap-1">
-          <button
-            onClick={handleEnablePush}
-            disabled={pushLoading || pushDone}
-            className={`w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl font-bold text-sm tracking-wide shadow-lg transition-all duration-300 hover:scale-[1.02] ${
-              pushDone
-                ? "bg-[#C5A55A]/20 border border-[#C5A55A]/40 text-[#C5A55A] cursor-default"
-                : "bg-[#1A1A1A] border-2 border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-black shadow-[#C5A55A]/20"
-            }`}
-          >
-            <Bell className={`w-5 h-5 flex-shrink-0 ${pushLoading ? "animate-bounce" : ""}`} />
-            {pushDone
-              ? "Notificaciones activas ✓"
-              : pushLoading
-              ? "Activando..."
-              : "Activa notificaciones de descuentos"}
-          </button>
-          {!pushDone && (
-            <p className="text-white/40 text-xs text-center leading-snug px-1">
-              Recibe alertas de promociones y descuentos exclusivos de Nutriser
-            </p>
-          )}
         </div>
-
-        {/* Ícono WhatsApp circular — igual al flotante de la página */}
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative flex-shrink-0 w-14 h-14 rounded-full bg-[#25D366] flex items-center justify-center shadow-lg shadow-[#25D366]/40 hover:bg-[#1ebe5d] hover:scale-110 transition-all duration-300"
-          aria-label="WhatsApp"
-        >
-          {/* Ping ring */}
-          <span className="absolute inset-0 rounded-full border-2 border-[#25D366] animate-ping opacity-40" />
-          <svg viewBox="0 0 24 24" className="w-7 h-7 fill-white" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-          </svg>
-        </a>
       </div>
-
-      {/* Nota al pie */}
-      <p className="text-white/30 text-xs mt-5 text-center px-4">
-        El Portal de Salud es exclusivo para pacientes activos de Nutriser
-      </p>
     </div>
   );
 }

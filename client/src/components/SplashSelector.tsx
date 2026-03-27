@@ -129,7 +129,7 @@ function SmallCard({
 
 /* ─── Componente principal ───────────────────────────────────────────────── */
 export default function SplashSelector({ onEnterSite, onNavigate, isTransitioning }: SplashSelectorProps) {
-  const [visible, setVisible] = useState(false);
+  const [visible] = useState(true);
   const [leaving, setLeaving] = useState(false);
 
   // Notificaciones push
@@ -177,23 +177,16 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
     },
   });
 
-  useEffect(() => {
-    // Visible inmediatamente en el primer frame para eliminar la lentitud de carga
-    requestAnimationFrame(() => setVisible(true));
-  }, []);
-
   const handleEnterSite = () => {
     setLeaving(true);
-    setTimeout(() => onEnterSite(), 500);
+    setTimeout(() => onEnterSite(), 400);
   };
 
   const handleNavigate = (path: string) => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    setLeaving(true);
-    setTimeout(() => {
-      if (onNavigate) onNavigate(path);
-      else window.location.href = path;
-    }, 400);
+    // Navegar de inmediato sin esperar animación de salida para evitar el flash de Home
+    if (onNavigate) onNavigate(path);
+    else window.location.href = path;
   };
 
   const handleEnablePush = async () => {
@@ -264,7 +257,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   return (
     <div
       className="fixed inset-0 z-[99999] bg-[#0f0f0f] overflow-y-auto"
-      style={{ opacity: leaving ? 0 : visible ? 1 : 0, transition: "opacity 0.5s ease" }}
+      style={{ opacity: leaving ? 0 : 1, transition: leaving ? "opacity 0.4s ease" : "none" }}
     >
       {/* ── Contenedor principal: se expande en tablet/desktop ── */}
       <div className="min-h-full flex flex-col items-center justify-center py-8 px-4 md:px-8 lg:px-12">

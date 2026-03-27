@@ -378,7 +378,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 md:py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 hover:scale-[1.01] bg-white border-2 border-[#C5A55A]/50 text-[#C5A55A] hover:border-[#C5A55A] hover:bg-[#C5A55A]/10"
                 >
                   <Mail className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-xs md:text-sm">Suscríbete y no te pierdas exclusivas promociones y cupones de descuento</span>
+                  <span className="text-xs md:text-sm">Suscríbete a nuestra Cuponera de Descuentos Nutriser</span>
                 </button>
               ) : (
                 <form onSubmit={handleEmailSubmit} className="w-full">

@@ -878,3 +878,4 @@
 - [x] Convertir botón de campana push en círculo flotante solo con ícono, igual al botón de WhatsApp
 - [x] Mejorar texto del botón de correo en SplashSelector: más llamativo sobre exclusivas promociones
 - [x] Agregar etiqueta explicativa junto al botón de campana: "¡Toca la campanita y recibe promociones exclusivas solo para ti!"
+- [x] Cambiar texto botón correo a "Suscríbete a nuestra Cuponera de Descuentos Nutriser"

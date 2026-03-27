@@ -849,3 +849,10 @@
 
 ## Hero - Botón Portal Genérico
 - [x] Unificar "Iniciar Sesión" y "Crear Cuenta" en un solo botón genérico
+
+## Splash Selector - Pantalla de Bienvenida
+- [x] Crear componente SplashSelector con logo, título y dos tarjetas visuales
+- [x] Tarjeta 1: Nutriser Aesthetic & Nutrition (página principal)
+- [x] Tarjeta 2: Portal de Salud Nutriser (portal externo)
+- [x] Integrar en App.tsx para que aparezca al entrar por primera vez
+- [x] Recordar elección del usuario en sessionStorage para no mostrar en cada recarga

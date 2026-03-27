@@ -19,6 +19,9 @@ import Store from "@/pages/Store";
 import CouponPage from "@/pages/CouponPage";
 import Courses from "@/pages/Courses";
 import BackgroundMusic from "@/components/BackgroundMusic";
+import SplashSelector from "@/components/SplashSelector";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -44,14 +47,46 @@ function Router() {
   );
 }
 
+function AppContent() {
+  const [location] = useLocation();
+  // Only show splash on the root path, not on admin or other routes
+  const isRootPath = location === "/";
+
+  // Check sessionStorage to avoid showing splash on every reload
+  const [showSplash, setShowSplash] = useState(() => {
+    if (!isRootPath) return false;
+    const seen = sessionStorage.getItem("nutriser_splash_seen");
+    return !seen;
+  });
+
+  // If navigating to a non-root path, don't show splash
+  useEffect(() => {
+    if (!isRootPath) {
+      setShowSplash(false);
+    }
+  }, [isRootPath]);
+
+  const handleEnterSite = () => {
+    sessionStorage.setItem("nutriser_splash_seen", "1");
+    setShowSplash(false);
+  };
+
+  return (
+    <>
+      <BackgroundMusic />
+      <Router />
+      {showSplash && <SplashSelector onEnterSite={handleEnterSite} />}
+    </>
+  );
+}
+
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
-          <BackgroundMusic />
-          <Router />
+          <AppContent />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -31,26 +31,29 @@ function isAdminRoute(path: string) {
   return ADMIN_ROUTES.some((r) => path.startsWith(r));
 }
 
+const NUTRISER_LOGO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
+
 // Pantalla de carga instantánea mientras la app inicializa
 function LoadingScreen() {
   return (
     <div className="fixed inset-0 z-[999999] bg-[#0f0f0f] flex flex-col items-center justify-center">
       <div className="flex flex-col items-center gap-6">
-        {/* Logo animado */}
-        <div className="relative">
-          <div className="w-20 h-20 rounded-full border-2 border-[#C5A55A]/30 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full border-t-2 border-[#C5A55A] animate-spin" />
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full bg-[#C5A55A]/20 flex items-center justify-center">
-              <div className="w-3 h-3 rounded-full bg-[#C5A55A] animate-pulse" />
-            </div>
-          </div>
+        {/* Logo real de Nutriser con spinner alrededor */}
+        <div className="relative flex items-center justify-center">
+          {/* Spinner giratorio */}
+          <div className="absolute w-28 h-28 rounded-full border-t-2 border-[#C5A55A] animate-spin" />
+          <div className="absolute w-28 h-28 rounded-full border border-[#C5A55A]/20" />
+          {/* Logo centrado */}
+          <img
+            src={NUTRISER_LOGO}
+            alt="Nutriser"
+            className="w-20 h-20 object-contain"
+          />
         </div>
         {/* Texto */}
         <div className="flex flex-col items-center gap-1">
           <p className="text-[#C5A55A] text-xs tracking-[0.4em] uppercase font-light animate-pulse">
-            Nutriser
+            Cargando
           </p>
           <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase">
             Aesthetic & Nutrition

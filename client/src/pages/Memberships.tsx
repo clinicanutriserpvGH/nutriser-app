@@ -164,16 +164,43 @@ export default function Memberships() {
     e.preventDefault();
     if (!selectedProgram) return;
 
-    if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
-      toast.error("Por favor completa todos los campos requeridos");
+    // Validaciones específicas por campo
+    const name = formData.clientName.trim();
+    const email = formData.clientEmail.trim();
+    const phone = formData.clientPhone.trim();
+
+    if (!name) {
+      toast.error("⚠️ El nombre completo es obligatorio");
+      return;
+    }
+    if (name.length < 3 || !/\s/.test(name)) {
+      toast.error("⚠️ Ingresa tu nombre completo (nombre y apellido)");
+      return;
+    }
+    if (!email) {
+      toast.error("⚠️ El correo electrónico es obligatorio");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("⚠️ El correo electrónico no es válido. Ejemplo: tunombre@gmail.com");
+      return;
+    }
+    if (!phone) {
+      toast.error("⚠️ El teléfono es obligatorio");
+      return;
+    }
+    const phoneDigits = phone.replace(/[\s\-\+\(\)]/g, '');
+    if (phoneDigits.length < 10 || !/^\d+$/.test(phoneDigits)) {
+      toast.error("⚠️ El teléfono no es válido. Ingresa al menos 10 dígitos. Ejemplo: 3221007799");
       return;
     }
 
     try {
       const result = await createMutation.mutateAsync({
-        clientName: formData.clientName,
-        clientEmail: formData.clientEmail,
-        clientPhone: formData.clientPhone,
+        clientName: name,
+        clientEmail: email,
+        clientPhone: phone,
         programType: selectedProgram,
       });
 
@@ -182,8 +209,15 @@ export default function Memberships() {
       setTimeRemaining(900); // Reiniciar contador a 15 minutos
       setStep("proof");
       toast.success("Datos guardados. Ahora sube tu comprobante de pago para completar la inscripción.");
-    } catch (error) {
-      toast.error("Error al crear la membresía");
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.includes('email') || msg.includes('correo')) {
+        toast.error("⚠️ El correo electrónico no es válido o ya está registrado.");
+      } else if (msg.includes('phone') || msg.includes('tel')) {
+        toast.error("⚠️ El número de teléfono no es válido.");
+      } else {
+        toast.error("⚠️ No se pudo completar el registro. Verifica que todos tus datos sean correctos e inténtalo de nuevo.");
+      }
       console.error(error);
     }
   };

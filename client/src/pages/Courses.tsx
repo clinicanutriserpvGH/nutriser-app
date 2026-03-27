@@ -11,7 +11,6 @@ import { PlayCircle, FileText, MessageSquare, Bell, BellOff, ChevronLeft, Downlo
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import BackToSplash from "@/components/BackToSplash";
 
 type Video = {
   id: number;
@@ -204,7 +203,6 @@ export default function Courses() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
-      <BackToSplash />
       <Navbar onShowSplash={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }} />
 
       {/* Hero de Cursos */}

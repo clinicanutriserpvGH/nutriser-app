@@ -4,7 +4,7 @@
  */
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Phone, Gift, MessageCircle } from "lucide-react";
+
 import { useLocation } from "wouter";
 
 export default function CtaBanner() {
@@ -51,33 +51,6 @@ export default function CtaBanner() {
             className="inline-flex items-center gap-3 bg-white text-[#B8963E] px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white/90 hover:shadow-2xl hover:shadow-black/20"
           >
             Agendar Cita
-          </button>
-          <a
-            href="https://wa.me/523221007799"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Agenda por WhatsApp
-          </a>
-          <button
-            onClick={() => navigate("/memberships")}
-            className="inline-flex items-center gap-3 bg-[#1A1A1A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#2A2A2A] hover:shadow-2xl hover:shadow-black/20"
-          >
-            <Gift className="w-4 h-4" />
-            Comprar Programa Nutrición
-          </button>
-          <button
-            onClick={() => {
-              const el = document.getElementById("promociones");
-              if (el) el.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="inline-flex items-center gap-3 bg-white/20 border-2 border-white text-white px-8 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-white hover:text-[#B8963E]"
-          >
-            <span className="w-2 h-2 rounded-full bg-white animate-pulse flex-shrink-0" />
-            <Gift className="w-4 h-4" />
-            Cuponera Nutriser
           </button>
         </div>
       </motion.div>

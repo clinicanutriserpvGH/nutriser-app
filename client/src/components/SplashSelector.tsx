@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
-  Activity, Bell, BellRing, BookOpen, Check, Gift, GraduationCap,
-  HeartPulse, Loader2, Mail, ShoppingBag, Stethoscope, X,
+  Activity, Bell, BellRing, BookOpen, CalendarCheck, Check, ClipboardList, FlaskConical, Gift, GraduationCap,
+  HeartPulse, LayoutList, Loader2, Mail, MapPin, ShoppingBag, Stethoscope, Tag, TrendingUp, Utensils, X,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -287,10 +287,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               title="Nutriser"
               subtitle="Tu salud y belleza en un solo lugar"
               chips={[
-                { icon: Stethoscope, label: "Servicios" },
-                { icon: Activity, label: "Agenda tu cita" },
-                { icon: Gift, label: "Cuponera de descuentos" },
-                { icon: HeartPulse, label: "Ubicación" },
+                { icon: LayoutList, label: "Catálogo de servicios" },
+                { icon: CalendarCheck, label: "Agenda tu cita" },
+                { icon: Tag, label: "Cuponera de descuentos" },
+                { icon: MapPin, label: "Ubicación" },
               ]}
               cta="Entrar →"
               onClick={handleEnterSite}
@@ -302,11 +302,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               title="Portal de Salud"
               subtitle="Tu seguimiento personalizado"
               chips={[
-                { icon: Activity, label: "Mediciones" },
-                { icon: BookOpen, label: "Plan alimentario" },
-                { icon: Stethoscope, label: "Hábitos" },
-                { icon: Gift, label: "Suplementación" },
-                { icon: HeartPulse, label: "Seguimiento" },
+                { icon: TrendingUp, label: "Mediciones" },
+                { icon: Utensils, label: "Plan alimentario" },
+                { icon: ClipboardList, label: "Hábitos" },
+                { icon: FlaskConical, label: "Suplementación" },
+                { icon: Activity, label: "Seguimiento" },
               ]}
               cta="Acceder →"
               onClick={() => window.open("https://portaldesaludnutriser.club", "_blank")}

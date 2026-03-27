@@ -5,7 +5,7 @@
   "description": "Tu salud y belleza personalizada en un solo lugar. Nutrición, tratamientos faciales, corporales y medicina estética con la mejor tecnología y experiencia profesional en Puerto Vallarta.",
   "start_url": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "background_color": "#0F0F0F",
   "theme_color": "#C5A55A",
   "orientation": "portrait-primary",
@@ -93,6 +93,20 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Cuponera de Descuentos exclusivos"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/wide_01_splash_e9bf1e01.png",
+      "sizes": "2560x1600",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Nutriser — Selecciona el apartado de tu interés"
+    },
+    {
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/wide_02_home_d04ec5e4.png",
+      "sizes": "2560x1600",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Nutriser — Tu salud y belleza en un solo lugar"
     }
   ],
   "shortcuts": [

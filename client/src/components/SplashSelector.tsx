@@ -154,11 +154,10 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
   const handleNavigate = (path: string) => {
     setLeaving(true);
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    // Guardar la ruta destino para que Home.tsx redirija inmediatamente sin renderizarse.
-    // Esto elimina el flash de la página Home al navegar a rutas internas.
-    sessionStorage.setItem("nutriser_pending_route", path);
+    // Navegar DIRECTAMENTE a la ruta destino sin pasar por Home.
+    // El splash cubre toda la pantalla durante la animación de salida, eliminando cualquier flash.
     setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = path;
     }, 400);
   };
 
@@ -214,8 +213,8 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
       }}
     >
       {/* Contenedor interno — centrado, padding generoso, max-width para tablet/desktop */}
-      <div className="min-h-full flex flex-col items-center justify-start py-6 px-4">
-        <div className="w-full max-w-lg">
+      <div className="min-h-full flex flex-col items-center justify-center py-6 px-4">
+        <div className="w-full" style={{ maxWidth: "min(520px, 100%)" }}>
 
           {/* Logo + título */}
           <div className="flex flex-col items-center mb-5">

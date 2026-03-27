@@ -210,13 +210,7 @@ export default function EbookStore() {
             <p className="text-[#666] mb-6">
               Estamos preparando nuestro eBook. Vuelve pronto para encontrar contenido exclusivo de nutrición y estética.
             </p>
-            <button
-              onClick={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }}
-              className="inline-flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E] transition"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Volver al inicio
-            </button>
+
           </div>
         </div>
         <Footer />
@@ -255,20 +249,15 @@ export default function EbookStore() {
         <div className="max-w-4xl mx-auto">
           {/* Back Button - siempre visible */}
           <div className="mb-8">
-            <button
-              onClick={() => {
-                if (step === "view") {
-                  sessionStorage.removeItem("nutriser_splash_seen");
-                  window.location.href = "/";
-                } else {
-                  setStep("view");
-                }
-              }}
-              className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E] transition font-medium"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {step === "view" ? "Volver al inicio" : "Volver al eBook"}
-            </button>
+            {step !== "view" && (
+              <button
+                onClick={() => setStep("view")}
+                className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E] transition font-medium"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Volver al eBook
+              </button>
+            )}
           </div>
 
           {/* Step: View eBook */}
@@ -746,12 +735,7 @@ export default function EbookStore() {
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }}
-                    className="w-full bg-[#1A1A1A] hover:bg-[#333] text-white py-3 rounded-xl font-bold transition-all duration-300"
-                  >
-                    Volver al inicio
-                  </button>
+
                 </div>
               </div>
             );

@@ -20,16 +20,6 @@ import { useSplash } from "@/contexts/SplashContext";
 export default function Home() {
   const { showSplash } = useSplash();
 
-  // Si el splash guardó una ruta destino, redirigir inmediatamente sin renderizar el Home.
-  // Esto evita el flash de la página Home al navegar desde el splash a rutas internas.
-  const pendingRoute = sessionStorage.getItem("nutriser_pending_route");
-  if (pendingRoute) {
-    sessionStorage.removeItem("nutriser_pending_route");
-    window.location.replace(pendingRoute);
-    // Devolver pantalla negra mientras redirige
-    return <div style={{ position: "fixed", inset: 0, background: "#0f0f0f", zIndex: 99999 }} />;
-  }
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar onShowSplash={showSplash} />

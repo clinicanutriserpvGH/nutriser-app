@@ -134,12 +134,7 @@ export default function Store() {
       {/* Header */}
       <div className="bg-[#1A1A1A] text-white py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <button
-            onClick={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }}
-            className="inline-flex items-center gap-2 text-[#C5A55A] hover:text-[#D4B870] text-sm mb-6 transition"
-          >
-            <ArrowLeft className="w-4 h-4" /> Volver al inicio
-          </button>
+
           <h1 className="font-serif text-4xl lg:text-5xl text-white mb-3">
             Tienda de <span className="text-[#C5A55A] italic">Productos</span>
           </h1>

@@ -58,7 +58,7 @@ function BigCard({
       <img src={img} alt={title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
       {/* Overlay más oscuro para mejor legibilidad */}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/40" />
-      <div className="relative flex flex-col justify-end p-4 md:p-6 text-left min-h-[200px] md:min-h-[240px] lg:min-h-[280px]">
+      <div className="relative flex flex-col justify-end p-3 sm:p-4 md:p-6 text-left min-h-[190px] sm:min-h-[200px] md:min-h-[240px] lg:min-h-[280px]">
         {/* Badge con fondo sólido para máxima legibilidad */}
         <div className="flex items-center gap-2 mb-2">
           <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-[#C5A55A] shadow-lg`}>
@@ -67,7 +67,7 @@ function BigCard({
           <span className="text-[#C5A55A] text-[10px] md:text-xs tracking-widest uppercase font-bold drop-shadow-[0_1px_3px_rgba(0,0,0,1)]">{badge}</span>
         </div>
         {/* Título con sombra de texto fuerte */}
-        <h2 className="text-white text-lg md:text-2xl lg:text-3xl font-bold leading-tight mb-1 drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">
+        <h2 className="text-white text-base sm:text-lg md:text-2xl lg:text-3xl font-bold leading-tight mb-1 drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">
           {title}
           {subtitle && <><br /><span className="text-[#C5A55A] italic font-light text-sm md:text-base drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">{subtitle}</span></>}
         </h2>
@@ -77,9 +77,9 @@ function BigCard({
           </div>
         )}
         {chips && chips.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-3 overflow-hidden">
             {chips.map(({ icon: CIcon, label }) => (
-              <span key={label} className="flex items-center gap-1 bg-[#C5A55A] rounded-full px-2.5 py-1 text-black text-xs font-bold shadow-md">
+              <span key={label} className="flex items-center gap-1 bg-[#C5A55A] rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-black text-[10px] sm:text-xs font-bold shadow-md whitespace-nowrap">
                 <CIcon className="w-3 h-3" />{label}
               </span>
             ))}
@@ -109,7 +109,7 @@ function SmallCard({
       <img src={img} alt={title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
       {/* Overlay oscuro para legibilidad */}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/35" />
-      <div className="relative flex flex-col justify-end p-3 md:p-5 text-left min-h-[120px] md:min-h-[160px] lg:min-h-[190px]">
+      <div className="relative flex flex-col justify-end p-2.5 sm:p-3 md:p-4 text-left min-h-[130px] sm:min-h-[140px] md:min-h-[170px] lg:min-h-[200px]">
         <div className="flex items-center gap-1.5 mb-2">
           <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-[#C5A55A] flex items-center justify-center flex-shrink-0 shadow-md">
             <Icon className="w-2.5 h-2.5 md:w-3 md:h-3 text-black" />
@@ -261,14 +261,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
       style={{ opacity: leaving ? 0 : 1, transition: leaving ? "opacity 0.4s ease" : "none" }}
     >
       {/* ── Contenedor principal: se expande en tablet/desktop ── */}
-      <div className="min-h-full flex flex-col items-center justify-center py-8 px-4 md:px-8 lg:px-12">
-        <div className="w-full max-w-[520px] md:max-w-[800px] lg:max-w-[1100px]">
+      <div className="min-h-full flex flex-col items-center justify-center py-6 px-3 sm:px-4 md:px-8 lg:px-12">
+        <div className="w-full max-w-[100%] sm:max-w-[520px] md:max-w-[800px] lg:max-w-[1100px]">
 
           {/* Logo + título */}
           <div className="flex flex-col items-center mb-6 md:mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain mb-2" />
             <p className="text-[#C5A55A] text-[10px] md:text-xs tracking-[0.3em] uppercase font-light">Aesthetic & Nutrition</p>
-            <h1 className="text-[#1A1A1A] text-base md:text-xl lg:text-2xl font-light tracking-widest mt-2 text-center">
+            <h1 className="text-[#1A1A1A] text-sm sm:text-base md:text-xl lg:text-2xl font-light tracking-wide sm:tracking-widest mt-2 text-center px-2">
               Selecciona el apartado de tu interés
             </h1>
             <div className="w-10 md:w-16 h-px bg-[#C5A55A] mt-3" />

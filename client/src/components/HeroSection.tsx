@@ -112,13 +112,33 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.85 }}
             className="grid grid-cols-2 gap-3 max-w-2xl"
           >
+            {/* 1. Ver Servicios */}
             <a
-              href="/ebook"
+              href="#servicios"
+              onClick={(e) => { e.preventDefault(); const el = document.querySelector("#servicios"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
               className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
             >
-              <BookOpen className="w-4 h-4" />
-              Tienda eBook
+              <ShoppingBag className="w-4 h-4" />
+              Ver Servicios
             </a>
+            {/* 2. Agenda tu Cita */}
+            <a
+              href="/appointment-form"
+              onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
+            >
+              <CalendarCheck className="w-4 h-4" />
+              Agenda tu Cita
+            </a>
+            {/* 3. Tienda Productos */}
+            <a
+              href="/tienda"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              Tienda Productos
+            </a>
+            {/* 4. Programa Nutrición */}
             <a
               href="/memberships"
               className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg border border-[#C5A55A]/60 rounded-lg"
@@ -129,29 +149,15 @@ export default function HeroSection() {
                 <span>Nutrición</span>
               </span>
             </a>
+            {/* 5. Tienda eBook */}
             <a
-              href="/appointment-form"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
+              href="/ebook"
               className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
             >
-              <CalendarCheck className="w-4 h-4" />
-              Agenda tu Cita
+              <BookOpen className="w-4 h-4" />
+              Tienda eBook
             </a>
-            <a
-              href="#servicios"
-              onClick={(e) => { e.preventDefault(); const el = document.querySelector("#servicios"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Ver Servicios
-            </a>
-            <a
-              href="/tienda"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Tienda Productos
-            </a>
+            {/* 6. Nutriser Academy */}
             <a
               href="/cursos"
               className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"

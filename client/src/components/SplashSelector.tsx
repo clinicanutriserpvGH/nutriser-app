@@ -54,29 +54,35 @@ function BigCard({
       }`}
     >
       <img src={img} alt={title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/20" />
-      <div className="relative flex flex-col justify-end p-4 md:p-6 text-left min-h-[180px] md:min-h-[220px] lg:min-h-[260px]">
-        <div className="flex items-center gap-2 mb-1.5">
-          <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0 ${highlight ? "bg-[#C5A55A]/20 border border-[#C5A55A]/60" : "bg-[#C5A55A]/20 border border-[#C5A55A]/40"}`}>
-            <Icon className="w-3 h-3 md:w-3.5 md:h-3.5 text-[#C5A55A]" />
+      {/* Overlay más oscuro para mejor legibilidad */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/40" />
+      <div className="relative flex flex-col justify-end p-4 md:p-6 text-left min-h-[200px] md:min-h-[240px] lg:min-h-[280px]">
+        {/* Badge con fondo sólido para máxima legibilidad */}
+        <div className="flex items-center gap-2 mb-2">
+          <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-[#C5A55A] shadow-lg`}>
+            <Icon className="w-3 h-3 md:w-3.5 md:h-3.5 text-black" />
           </div>
-          <span className="text-[#C5A55A] text-[10px] md:text-xs tracking-widest uppercase font-medium">{badge}</span>
+          <span className="text-[#C5A55A] text-[10px] md:text-xs tracking-widest uppercase font-bold drop-shadow-[0_1px_3px_rgba(0,0,0,1)]">{badge}</span>
         </div>
-        <h2 className="text-white text-base md:text-xl lg:text-2xl font-semibold leading-tight mb-1">
+        {/* Título con sombra de texto fuerte */}
+        <h2 className="text-white text-lg md:text-2xl lg:text-3xl font-bold leading-tight mb-1 drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">
           {title}
-          {subtitle && <><br /><span className="text-[#C5A55A] italic font-light text-sm md:text-base">{subtitle}</span></>}
+          {subtitle && <><br /><span className="text-[#C5A55A] italic font-light text-sm md:text-base drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">{subtitle}</span></>}
         </h2>
-        <p className="text-white/55 text-xs md:text-sm leading-relaxed mb-3">{desc}</p>
+        {/* Descripción con fondo semitransparente para legibilidad */}
+        <div className="bg-black/50 rounded-lg px-3 py-2 mb-3 backdrop-blur-sm">
+          <p className="text-white text-xs md:text-sm leading-relaxed">{desc}</p>
+        </div>
         {chips && chips.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {chips.map(({ icon: CIcon, label }) => (
-              <span key={label} className="flex items-center gap-1 bg-[#C5A55A]/15 rounded-full px-2.5 py-0.5 text-[#C5A55A] text-xs border border-[#C5A55A]/20">
+              <span key={label} className="flex items-center gap-1 bg-[#C5A55A] rounded-full px-2.5 py-1 text-black text-xs font-bold shadow-md">
                 <CIcon className="w-3 h-3" />{label}
               </span>
             ))}
           </div>
         )}
-        <div className="w-full bg-[#C5A55A] text-black text-xs md:text-sm font-bold tracking-widest uppercase py-2.5 md:py-3 rounded-lg text-center group-hover:bg-[#d4b46a] transition-colors">
+        <div className="w-full bg-[#C5A55A] text-black text-xs md:text-sm font-bold tracking-widest uppercase py-2.5 md:py-3 rounded-lg text-center group-hover:bg-[#d4b46a] transition-colors shadow-lg">
           {cta}
         </div>
       </div>
@@ -98,13 +104,14 @@ function SmallCard({
       }`}
     >
       <img src={img} alt={title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/60 to-black/25" />
-      <div className="relative flex flex-col justify-end p-3 md:p-5 text-left min-h-[110px] md:min-h-[150px] lg:min-h-[180px]">
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/50 flex items-center justify-center flex-shrink-0">
-            <Icon className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#C5A55A]" />
+      {/* Overlay oscuro para legibilidad */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/35" />
+      <div className="relative flex flex-col justify-end p-3 md:p-5 text-left min-h-[120px] md:min-h-[160px] lg:min-h-[190px]">
+        <div className="flex items-center gap-1.5 mb-2">
+          <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-[#C5A55A] flex items-center justify-center flex-shrink-0 shadow-md">
+            <Icon className="w-2.5 h-2.5 md:w-3 md:h-3 text-black" />
           </div>
-          <h3 className="text-white text-xs md:text-sm font-semibold leading-tight">{title}</h3>
+          <h3 className="text-white text-xs md:text-sm font-bold leading-tight drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">{title}</h3>
         </div>
         <div className={`w-full text-xs md:text-sm font-bold tracking-wide uppercase py-2 md:py-2.5 rounded-lg text-center transition-colors ${
           highlight

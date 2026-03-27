@@ -82,11 +82,20 @@ function AppContent() {
     setShowSplash(true);
   };
 
-  // Navegar desde el splash a una ruta interna usando el router de wouter
-  // Esto evita recargar la página y elimina el flash del Home
+  // Navegar desde el splash a una ruta interna usando el router de wouter.
+  // ORDEN CORRECTO: primero navegar (el router cambia la ruta debajo del splash),
+  // luego esperar 2 frames para que React renderice el componente destino,
+  // y solo entonces ocultar el splash. Así nunca hay un flash del Home.
   const handleNavigateFromSplash = (path: string) => {
-    setShowSplash(false);
     navigate(path);
+    // Guardar en sessionStorage antes de ocultar para que no reaparezca el splash
+    sessionStorage.setItem("nutriser_splash_seen", "1");
+    // Esperar a que el router renderice el componente destino antes de quitar el overlay
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setShowSplash(false);
+      });
+    });
   };
 
   return (

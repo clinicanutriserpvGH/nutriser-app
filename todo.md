@@ -876,3 +876,5 @@
 - [x] Agregar botón "Compartir" en pantalla Hub que copie el link nutriserpv.com al portapapeles
 - [x] Rediseñar botón de notificaciones push en SplashSelector: grande, con brillo animado y texto llamativo de descuentos
 - [x] Convertir botón de campana push en círculo flotante solo con ícono, igual al botón de WhatsApp
+- [x] Mejorar texto del botón de correo en SplashSelector: más llamativo sobre exclusivas promociones
+- [x] Agregar etiqueta explicativa junto al botón de campana: "¡Toca la campanita y recibe promociones exclusivas solo para ti!"

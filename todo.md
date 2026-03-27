@@ -879,3 +879,4 @@
 - [x] Mejorar texto del botón de correo en SplashSelector: más llamativo sobre exclusivas promociones
 - [x] Agregar etiqueta explicativa junto al botón de campana: "¡Toca la campanita y recibe promociones exclusivas solo para ti!"
 - [x] Cambiar texto botón correo a "Suscríbete a nuestra Cuponera de Descuentos Nutriser"
+- [x] Agregar íconos circulares de Instagram y Facebook junto a campana y WhatsApp en SplashSelector

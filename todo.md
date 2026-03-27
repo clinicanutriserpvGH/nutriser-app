@@ -864,3 +864,4 @@
 ## Cambios Sesión Actual
 
 - [x] Cambiar botón "Agenda tu Cita" en AboutSection por "Catálogo de Servicios" con scroll a sección #servicios
+- [x] Cambiar botón "Ver Servicios" en HeroSection por "Catálogo de Servicios"

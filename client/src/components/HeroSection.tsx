@@ -119,7 +119,7 @@ export default function HeroSection() {
               className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
             >
               <ShoppingBag className="w-4 h-4" />
-              Ver Servicios
+              Catálogo de Servicios
             </a>
             {/* 2. Agenda tu Cita */}
             <a

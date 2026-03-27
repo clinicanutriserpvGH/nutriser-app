@@ -255,28 +255,34 @@ export default function SplashSelector({ onEnterSite, onNavigate }: SplashSelect
           {/* ── TABLET (md): 2 columnas ── */}
           {/* ── DESKTOP (lg): 3 columnas ── */}
 
-          {/* Fila 1: Nutriser + Portal — en desktop ocupan 2 de 3 columnas cada una */}
+          {/* Fila 1: Nutriser + Portal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
             <BigCard
               img={CLINIC_IMG}
-              badge="Clínica"
+              badge="Clínica Aesthetic & Nutrition"
               badgeIcon={ShoppingBag}
               title="Nutriser"
-              subtitle="Aesthetic & Nutrition"
-              desc="Servicios, tratamientos, citas y programas de nutrición."
+              subtitle="Tu salud y belleza en un solo lugar"
+              desc="Tratamientos faciales, corporales, medicina estética, nutrición clínica y cuponera de descuentos exclusivos."
+              chips={[
+                { icon: Gift, label: "Cuponera" },
+                { icon: Activity, label: "Estética" },
+                { icon: Stethoscope, label: "Nutrición" },
+              ]}
               cta="Entrar →"
               onClick={handleEnterSite}
             />
             <BigCard
               img={PORTAL_IMG}
-              badge="Pacientes activos"
+              badge="Pacientes en línea & presencial"
               badgeIcon={HeartPulse}
               title="Portal de Salud"
-              subtitle="Nutriser"
-              desc="Seguimiento de progreso, dietas, historial y citas."
+              subtitle="Tu seguimiento personalizado"
+              desc="Plan de alimentación, fotos antes/después, mediciones, lista de compras, suplementación, hábitos y registro de conducta alimentaria."
               chips={[
-                { icon: Activity, label: "Progreso" },
-                { icon: Stethoscope, label: "Historial" },
+                { icon: Activity, label: "Mediciones" },
+                { icon: BookOpen, label: "Plan alimentario" },
+                { icon: Stethoscope, label: "Hábitos" },
               ]}
               cta="Acceder →"
               onClick={() => window.open("https://portaldesaludnutriser.club", "_blank")}

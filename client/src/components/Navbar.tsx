@@ -185,18 +185,7 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
             className="fixed inset-0 z-40 bg-white/98 backdrop-blur-lg pt-24 px-8 overflow-y-auto"
           >
             <div className="flex flex-col gap-6">
-              {/* Botón Inicio en menú móvil — navega a la página principal de Nutriser */}
-              <motion.a
-                href="/"
-                onClick={(e) => { e.preventDefault(); setMobileOpen(false); window.location.href = '/'; }}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0 }}
-                className="font-serif text-3xl text-[#C5A55A] hover:text-[#B8963E] transition-colors flex items-center gap-3"
-              >
-                <Home className="w-6 h-6" />
-                Inicio
-              </motion.a>
+
               {navLinks.map((link, i) => (
                 <motion.a
                   key={link.href}

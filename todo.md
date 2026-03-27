@@ -868,3 +868,4 @@
 - [x] Agregar mensaje informativo en formulario de citas explicando que deben seleccionar el servicio deseado
 - [ ] Agregar botón de ubicación en HeroSection que abra Google Maps con la dirección de Nutriser
 - [x] Agregar botón de ubicación en HeroSection que abra Google Maps con la dirección de Nutriser
+- [x] Cambiar botón "Precio" en tarjetas de servicios por "Preguntar precio"

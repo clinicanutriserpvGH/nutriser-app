@@ -21,14 +21,20 @@ import Courses from "@/pages/Courses";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
 import { SplashContext } from "@/contexts/SplashContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 
+// Rutas que NUNCA muestran el splash (admin, rutas técnicas)
+const ADMIN_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon"];
+
+function isAdminRoute(path: string) {
+  return ADMIN_ROUTES.some((r) => path.startsWith(r));
+}
+
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-       <Route path={"/"} component={Home} />
+      <Route path={"/"} component={Home} />
       <Route path={"/memberships"} component={Memberships} />
       <Route path={"/appointments"} component={Appointments} />
       <Route path={"/appointment-form"} component={AppointmentForm} />
@@ -50,32 +56,27 @@ function Router() {
 
 function AppContent() {
   const [location] = useLocation();
-  // Only show splash on the root path, not on admin or other routes
-  const isRootPath = location === "/";
 
-  // Siempre mostrar splash al abrir la app (sessionStorage: se limpia al cerrar el navegador/pestaña)
+  // El splash se muestra en CUALQUIER ruta al inicio de sesión,
+  // excepto rutas de admin/técnicas. sessionStorage se borra al cerrar el navegador.
   const [showSplash, setShowSplash] = useState(() => {
-    if (!isRootPath) return false;
-    // Si ya eligió en esta sesión, no mostrar de nuevo
+    if (isAdminRoute(location)) return false;
     const seen = sessionStorage.getItem("nutriser_splash_seen");
     return !seen;
   });
 
-  // Si navega a otra ruta, ocultar splash
-  useEffect(() => {
-    if (!isRootPath) {
-      setShowSplash(false);
-    }
-  }, [isRootPath]);
-
+  // Al elegir desde el splash: marca como visto y oculta el splash.
+  // La navegación real la hace el SplashSelector con window.location.replace
   const handleEnterSite = () => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
     setShowSplash(false);
   };
 
-  // Permite volver al selector desde la página principal
+  // Volver al splash desde cualquier página
   const handleShowSplash = () => {
     sessionStorage.removeItem("nutriser_splash_seen");
+    // Navegar a "/" y mostrar el splash
+    window.history.pushState({}, "", "/");
     setShowSplash(true);
   };
 
@@ -83,7 +84,10 @@ function AppContent() {
     <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
       <BackgroundMusic />
       <Router />
-      {showSplash && <SplashSelector onEnterSite={handleEnterSite} />}
+      {/* El splash se superpone sobre cualquier ruta como overlay fixed */}
+      {showSplash && !isAdminRoute(location) && (
+        <SplashSelector onEnterSite={handleEnterSite} />
+      )}
     </SplashContext.Provider>
   );
 }

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Check, Upload, Clock, ArrowLeft, Tag, CheckCircle2, Loader2, Copy, CheckCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import BackToSplash from "@/components/BackToSplash";
 
 // Componente reutilizable para copiar texto al portapapeles
 function CopyButton({ text }: { text: string }) {
@@ -257,16 +258,17 @@ export default function Memberships() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FAF7F2] to-[#F5F1E8] py-12 px-4">
+      <BackToSplash />
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
           <Button
             variant="ghost"
-            onClick={() => navigate("/")}
+            onClick={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }}
             className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E]"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver
+            Volver al inicio
           </Button>
         </div>
 

@@ -74,12 +74,14 @@ export default function SplashSelector({ onEnterSite }: SplashSelectorProps) {
 
   const handleNavigate = (path: string) => {
     setLeaving(true);
+    // Marcar como visto ANTES de la animación para que al cargar la nueva
+    // página el splash no aparezca de nuevo
+    sessionStorage.setItem("nutriser_splash_seen", "1");
     setTimeout(() => {
-      // Marcar splash como visto y navegar directamente sin pasar por Home
-      sessionStorage.setItem("nutriser_splash_seen", "1");
       onEnterSite();
-      window.location.replace(path);
-    }, 400);
+      // Navegación dura: evita que wouter muestre el Home antes de la ruta
+      window.location.href = path;
+    }, 350);
   };
 
   const handleEnterPortal = () => {

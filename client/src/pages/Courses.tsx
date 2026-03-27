@@ -11,6 +11,7 @@ import { PlayCircle, FileText, MessageSquare, Bell, BellOff, ChevronLeft, Downlo
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import BackToSplash from "@/components/BackToSplash";
 
 type Video = {
   id: number;
@@ -203,19 +204,20 @@ export default function Courses() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
+      <BackToSplash />
       <Navbar />
 
       {/* Hero de Cursos */}
       <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4">
         {/* Botón de regreso */}
         <div className="max-w-5xl mx-auto mb-4">
-          <a
-            href="/"
+          <button
+            onClick={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }}
             className="inline-flex items-center gap-2 text-white/60 hover:text-[#C5A55A] transition-colors text-sm font-medium"
           >
             <ChevronLeft className="w-4 h-4" />
             Volver al inicio
-          </a>
+          </button>
         </div>
         <div className="max-w-5xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-4">

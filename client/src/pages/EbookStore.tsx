@@ -10,6 +10,7 @@ import { ArrowLeft, BookOpen, Upload, Clock, CheckCircle, ShoppingCart, Eye, X, 
 import { useLocation } from "wouter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackToSplash from "@/components/BackToSplash";
 import { OFFICIAL_DOMAIN } from "@/const";
 
 const BANK_INFO = {
@@ -210,7 +211,7 @@ export default function EbookStore() {
               Estamos preparando nuestro eBook. Vuelve pronto para encontrar contenido exclusivo de nutrición y estética.
             </p>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }}
               className="inline-flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E] transition"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -225,6 +226,7 @@ export default function EbookStore() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
+      <BackToSplash />
       <Navbar lightBg />
 
       {/* Modal de imagen */}
@@ -256,6 +258,7 @@ export default function EbookStore() {
             <button
               onClick={() => {
                 if (step === "view") {
+                  sessionStorage.removeItem("nutriser_splash_seen");
                   window.location.href = "/";
                 } else {
                   setStep("view");
@@ -744,7 +747,7 @@ export default function EbookStore() {
                   </div>
 
                   <button
-                    onClick={() => navigate("/")}
+                    onClick={() => { sessionStorage.removeItem("nutriser_splash_seen"); window.location.href = "/"; }}
                     className="w-full bg-[#1A1A1A] hover:bg-[#333] text-white py-3 rounded-xl font-bold transition-all duration-300"
                   >
                     Volver al inicio

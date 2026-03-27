@@ -1,8 +1,19 @@
-// Nutriser PWA Service Worker
-const CACHE_NAME = 'nutriser-v2';
+// Nutriser PWA Service Worker v3
+const CACHE_NAME = 'nutriser-v3';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
+  '/offline.html',
+  '/icons/icon-72x72.png',
+  '/icons/icon-96x96.png',
+  '/icons/icon-128x128.png',
+  '/icons/icon-144x144.png',
+  '/icons/icon-152x152.png',
+  '/icons/icon-192x192.png',
+  '/icons/icon-192x192-maskable.png',
+  '/icons/icon-384x384.png',
+  '/icons/icon-512x512.png',
+  '/icons/icon-512x512-maskable.png',
 ];
 
 // Install: cache static assets
@@ -39,7 +50,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first for HTML navigation
+  // Network-first for HTML navigation with offline fallback
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -48,12 +59,30 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           return response;
         })
-        .catch(() => caches.match('/') || caches.match(request))
+        .catch(() => {
+          return caches.match(request)
+            .then((cached) => cached || caches.match('/offline.html') || caches.match('/'));
+        })
     );
     return;
   }
 
-  // Cache-first for static assets (images, fonts, etc.)
+  // Cache-first for local icons
+  if (url.pathname.startsWith('/icons/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Cache-first for CDN assets (images, fonts, etc.)
   if (
     url.hostname.includes('cloudfront.net') ||
     url.hostname.includes('fonts.googleapis.com') ||
@@ -103,9 +132,9 @@ self.addEventListener('push', (event) => {
     icon: data.icon || '/icons/icon-192x192.png',
     badge: '/icons/icon-72x72.png',
     vibrate: [200, 100, 200],
-    tag: data.tag || 'nutriser-promo',  // Same tag replaces previous notification
-    renotify: false,                     // Don't re-vibrate if tag already shown
-    requireInteraction: true,            // Stays until user taps it
+    tag: data.tag || 'nutriser-promo',
+    renotify: false,
+    requireInteraction: true,
     data: {
       url: data.url || 'https://nutriserpv.com',
     },
@@ -138,7 +167,6 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // If there's already a window open, focus it
       for (const client of clientList) {
         if (client.url.includes('nutriserpv.com') && 'focus' in client) {
           client.focus();
@@ -146,7 +174,6 @@ self.addEventListener('notificationclick', (event) => {
           return;
         }
       }
-      // Otherwise open a new window
       if (clients.openWindow) {
         return clients.openWindow(url);
       }
@@ -155,13 +182,11 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 self.addEventListener('pushsubscriptionchange', (event) => {
-  // Re-subscribe when subscription expires
   event.waitUntil(
     self.registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: event.oldSubscription?.options?.applicationServerKey,
     }).then((subscription) => {
-      // Notify the server about the new subscription
       return fetch('/api/trpc/push.subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

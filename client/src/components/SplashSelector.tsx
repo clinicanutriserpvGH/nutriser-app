@@ -287,11 +287,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               title="Nutriser"
               subtitle="Tu salud y belleza en un solo lugar"
               chips={[
-                { icon: Gift, label: "Cuponera" },
-                { icon: Activity, label: "Estética" },
-                { icon: Stethoscope, label: "Nutrición" },
-                { icon: HeartPulse, label: "Medicina" },
-                { icon: ShoppingBag, label: "Productos" },
+                { icon: Stethoscope, label: "Servicios" },
+                { icon: Activity, label: "Agenda tu cita" },
+                { icon: Gift, label: "Cuponera de descuentos" },
+                { icon: HeartPulse, label: "Ubicación" },
               ]}
               cta="Entrar →"
               onClick={handleEnterSite}

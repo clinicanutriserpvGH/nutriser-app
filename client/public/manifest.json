@@ -86,37 +86,37 @@
   ],
   "screenshots": [
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/splash_381f8eba.png",
+      "src": "/screenshots/splash.jpg",
       "sizes": "1179x2556",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Selecciona el apartado de tu interés"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/home_d0d937b5.png",
+      "src": "/screenshots/home.jpg",
       "sizes": "1179x2556",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Tu salud y belleza personalizada en un solo lugar"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/cuponeras_e21cc595.png",
+      "src": "/screenshots/cuponeras.jpg",
       "sizes": "1179x2556",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Cuponera de Descuentos exclusivos"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/wide_splash_9f64148e.png",
+      "src": "/screenshots/wide_splash.jpg",
       "sizes": "2560x1600",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "wide",
       "label": "Nutriser — Selecciona el apartado de tu interés"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/wide_home_ef670313.png",
+      "src": "/screenshots/wide_home.jpg",
       "sizes": "2560x1600",
-      "type": "image/png",
+      "type": "image/jpeg",
       "form_factor": "wide",
       "label": "Nutriser — Tu salud y belleza en un solo lugar"
     }

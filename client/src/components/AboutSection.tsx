@@ -93,11 +93,11 @@ export default function AboutSection() {
                 acompañarte en tu transformación integral, brindándote
                 resultados visibles y duraderos.
               </p>
-              <button
-                onClick={() => navigate("/appointment-form")}
+                <button
+                onClick={() => { navigate("/"); setTimeout(() => { document.getElementById('servicios')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}
                 className="inline-flex items-center justify-center bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
               >
-                Agenda tu Cita
+                Catálogo de Servicios
               </button>
             </div>
           </div>

@@ -860,3 +860,7 @@
 ## Hero + Splash - Ajustes
 - [ ] Quitar tarjeta Portal de Salud del HeroSection (ya está en el splash)
 - [ ] Cambiar splash de sessionStorage a localStorage con expiración de 24h
+
+## Cambios Sesión Actual
+
+- [x] Cambiar botón "Agenda tu Cita" en AboutSection por "Catálogo de Servicios" con scroll a sección #servicios

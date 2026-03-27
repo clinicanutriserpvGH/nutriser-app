@@ -4,7 +4,7 @@
  * Portal de Salud as the primary featured element
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Gift, CalendarCheck, ShoppingBag } from "lucide-react";
+import { ChevronDown, Gift, CalendarCheck, ShoppingBag, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const HERO_IMAGES = [
@@ -121,11 +121,21 @@ export default function HeroSection() {
               <ShoppingBag className="w-4 h-4" />
               Catálogo de Servicios
             </a>
-            {/* 2. Agenda tu Cita */}
+            {/* 2. Ubicación */}
+            <a
+              href="https://maps.google.com/?q=Nutriser+Aesthetic+%26+Nutrition+Puerto+Vallarta"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
+            >
+              <MapPin className="w-4 h-4" />
+              Ubicación
+            </a>
+            {/* 3. Agenda tu Cita */}
             <a
               href="/appointment-form"
               onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
+              className="col-span-2 inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
             >
               <CalendarCheck className="w-4 h-4" />
               Agenda tu Cita

@@ -412,24 +412,40 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </div>
             )}
 
-            {/* Campana + WhatsApp */}
-            <div className="flex items-center gap-3">
-              {/* Botón campana — abre modal igual que PromotionsSection */}
-              {pushEnabled ? (
-                <div className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#C5A55A]/20 border border-[#C5A55A]/40 text-[#C5A55A] text-xs md:text-sm font-semibold">
-                  <Bell className="w-4 h-4" /> Notificaciones activas ✓
-                </div>
-              ) : (
+            {/* Campana push — botón grande con brillo */}
+            {pushEnabled ? (
+              <div className="w-full flex items-center justify-center gap-3 px-5 py-4 rounded-2xl bg-[#C5A55A]/20 border border-[#C5A55A]/50 text-[#C5A55A] text-sm font-bold">
+                <Bell className="w-5 h-5" />
+                <span>¡Notificaciones de descuentos activadas! ✓</span>
+              </div>
+            ) : (
+              <div className="relative w-full">
+                {/* Anillo de brillo animado */}
+                <span className="absolute inset-0 rounded-2xl bg-[#C5A55A] opacity-30 animate-ping" style={{ animationDuration: "2s" }} />
                 <button
                   onClick={() => setShowNotifModal(true)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 md:py-3.5 rounded-xl font-bold text-xs md:text-sm tracking-wide border-2 border-[#C5A55A] text-[#C5A55A] bg-white hover:bg-[#C5A55A] hover:text-black transition-all duration-300 hover:scale-[1.01]"
+                  className="relative w-full flex items-center gap-4 px-5 py-4 md:py-5 rounded-2xl font-bold text-sm md:text-base tracking-wide bg-gradient-to-r from-[#C5A55A] to-[#e2c47a] text-[#1A1A1A] shadow-lg shadow-[#C5A55A]/40 hover:shadow-[#C5A55A]/60 hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 overflow-hidden"
                 >
-                  <Bell className="w-4 h-4 flex-shrink-0" />
-                  Activa notificaciones de descuentos
+                  {/* Efecto de brillo que cruza el botón */}
+                  <span className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                  <div className="relative flex-shrink-0 w-10 h-10 rounded-full bg-[#1A1A1A]/20 flex items-center justify-center">
+                    <BellRing className="w-5 h-5 text-[#1A1A1A]" />
+                  </div>
+                  <div className="relative flex-1 text-left">
+                    <p className="text-[#1A1A1A] font-black text-sm md:text-base leading-tight">
+                      ¡Activa la campana!
+                    </p>
+                    <p className="text-[#1A1A1A]/70 text-xs md:text-sm font-medium mt-0.5 leading-tight">
+                      No te pierdas los descuentos especiales que Nutriser tiene para ti
+                    </p>
+                  </div>
+                  <BellRing className="relative w-5 h-5 text-[#1A1A1A]/60 flex-shrink-0" />
                 </button>
-              )}
+              </div>
+            )}
 
-              {/* WhatsApp */}
+            {/* WhatsApp */}
+            <div className="flex justify-center">
               <a
                 href={WHATSAPP_URL}
                 target="_blank"

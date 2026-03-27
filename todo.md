@@ -856,3 +856,7 @@
 - [x] Tarjeta 2: Portal de Salud Nutriser (portal externo)
 - [x] Integrar en App.tsx para que aparezca al entrar por primera vez
 - [x] Recordar elección del usuario en sessionStorage para no mostrar en cada recarga
+
+## Hero + Splash - Ajustes
+- [ ] Quitar tarjeta Portal de Salud del HeroSection (ya está en el splash)
+- [ ] Cambiar splash de sessionStorage a localStorage con expiración de 24h

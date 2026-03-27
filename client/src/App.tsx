@@ -52,11 +52,18 @@ function AppContent() {
   // Only show splash on the root path, not on admin or other routes
   const isRootPath = location === "/";
 
-  // Check sessionStorage to avoid showing splash on every reload
+  // Check localStorage with 24h expiration
   const [showSplash, setShowSplash] = useState(() => {
     if (!isRootPath) return false;
-    const seen = sessionStorage.getItem("nutriser_splash_seen");
-    return !seen;
+    try {
+      const stored = localStorage.getItem("nutriser_splash_ts");
+      if (!stored) return true;
+      const ts = parseInt(stored, 10);
+      const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+      return Date.now() - ts > TWENTY_FOUR_HOURS;
+    } catch {
+      return true;
+    }
   });
 
   // If navigating to a non-root path, don't show splash
@@ -67,7 +74,9 @@ function AppContent() {
   }, [isRootPath]);
 
   const handleEnterSite = () => {
-    sessionStorage.setItem("nutriser_splash_seen", "1");
+    try {
+      localStorage.setItem("nutriser_splash_ts", Date.now().toString());
+    } catch {}
     setShowSplash(false);
   };
 

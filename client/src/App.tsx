@@ -52,21 +52,15 @@ function AppContent() {
   // Only show splash on the root path, not on admin or other routes
   const isRootPath = location === "/";
 
-  // Check localStorage with 24h expiration
+  // Siempre mostrar splash al abrir la app (sessionStorage: se limpia al cerrar el navegador/pestaña)
   const [showSplash, setShowSplash] = useState(() => {
     if (!isRootPath) return false;
-    try {
-      const stored = localStorage.getItem("nutriser_splash_ts");
-      if (!stored) return true;
-      const ts = parseInt(stored, 10);
-      const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-      return Date.now() - ts > TWENTY_FOUR_HOURS;
-    } catch {
-      return true;
-    }
+    // Si ya eligió en esta sesión, no mostrar de nuevo
+    const seen = sessionStorage.getItem("nutriser_splash_seen");
+    return !seen;
   });
 
-  // If navigating to a non-root path, don't show splash
+  // Si navega a otra ruta, ocultar splash
   useEffect(() => {
     if (!isRootPath) {
       setShowSplash(false);
@@ -74,10 +68,14 @@ function AppContent() {
   }, [isRootPath]);
 
   const handleEnterSite = () => {
-    try {
-      localStorage.setItem("nutriser_splash_ts", Date.now().toString());
-    } catch {}
+    sessionStorage.setItem("nutriser_splash_seen", "1");
     setShowSplash(false);
+  };
+
+  // Permite volver al selector desde la página principal
+  const handleShowSplash = () => {
+    sessionStorage.removeItem("nutriser_splash_seen");
+    setShowSplash(true);
   };
 
   return (
@@ -85,6 +83,17 @@ function AppContent() {
       <BackgroundMusic />
       <Router />
       {showSplash && <SplashSelector onEnterSite={handleEnterSite} />}
+      {/* Botón flotante para volver al selector — solo visible en la página principal */}
+      {isRootPath && !showSplash && (
+        <button
+          onClick={handleShowSplash}
+          title="Volver al inicio"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 bg-[#1A1A1A]/80 backdrop-blur-sm text-[#C5A55A] border border-[#C5A55A]/50 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase shadow-lg hover:bg-[#C5A55A] hover:text-[#1A1A1A] transition-all duration-300"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Inicio
+        </button>
+      )}
     </>
   );
 }

@@ -4,7 +4,7 @@
  * Portal de Salud as the primary featured element
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Gift, BookOpen, CalendarCheck, ShoppingBag, GraduationCap } from "lucide-react";
+import { ChevronDown, Gift, CalendarCheck, ShoppingBag } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const HERO_IMAGES = [
@@ -130,40 +130,13 @@ export default function HeroSection() {
               <CalendarCheck className="w-4 h-4" />
               Agenda tu Cita
             </a>
-            {/* 3. Tienda Productos */}
-            <a
-              href="/tienda"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Tienda Productos
-            </a>
-            {/* 4. Programa Nutrición */}
+            {/* 3. Programa Nutrición - ancho completo */}
             <a
               href="/memberships"
-              className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg border border-[#C5A55A]/60 rounded-lg"
+              className="col-span-2 inline-flex items-center justify-center gap-2 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg border border-[#C5A55A]/60 rounded-lg"
             >
               <Gift className="w-4 h-4" />
-              <span className="flex flex-col items-center leading-tight">
-                <span>Programa</span>
-                <span>Nutrición</span>
-              </span>
-            </a>
-            {/* 5. Tienda eBook */}
-            <a
-              href="/ebook"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
-            >
-              <BookOpen className="w-4 h-4" />
-              Tienda eBook
-            </a>
-            {/* 6. Nutriser Academy */}
-            <a
-              href="/cursos"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
-            >
-              <GraduationCap className="w-4 h-4" />
-              Nutriser Academy
+              Programa Nutrición
             </a>
             <motion.button
               onClick={(e) => {

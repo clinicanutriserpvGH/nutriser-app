@@ -323,7 +323,13 @@ export default function Memberships() {
                   ? Math.round(program.price * (1 - discountInfo.discount / 100))
                   : null;
                 const consultValue = program.consultCount * PRICE_PER_CONSULT;
-                const savingsVsConsults = consultValue - program.price;
+                // Ahorro total = (vs consultas individuales) + (descuento del cupón si aplica)
+                const couponSavings = isGift
+                  ? program.price
+                  : discountedPrice !== null
+                  ? program.price - discountedPrice
+                  : 0;
+                const totalSavings = (consultValue - program.price) + couponSavings;
 
                 return (
                   <Card
@@ -335,9 +341,9 @@ export default function Memberships() {
                     }`}
                     onClick={() => handleSelectProgram(program.id as "basic" | "premium")}
                   >
-                    {/* Badge de ahorro vs consultas individuales */}
+                    {/* Badge de ahorro total (vs consultas individuales + cupón) */}
                     <div className="absolute top-4 right-4 bg-green-600 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
-                      💰 Ahorras ${savingsVsConsults.toLocaleString('es-MX')} MXN
+                      💰 Ahorras ${totalSavings.toLocaleString('es-MX')} MXN
                     </div>
                     <CardHeader>
                       <CardTitle className="font-serif text-3xl" style={{ color: program.color }}>

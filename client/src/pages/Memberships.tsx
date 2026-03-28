@@ -54,12 +54,15 @@ const BANK_INFO = {
   account: "002470701448743487",
 };
 
+const PRICE_PER_CONSULT = 800;
+
 const PROGRAMS = [
   {
     id: "basic",
     name: "Paquete Básico",
     price: 2500,
     color: "#C5A55A",
+    consultCount: 4,
     features: [
       "4 asesorías nutricionales personalizadas",
       "4 escaneos corporales",
@@ -72,6 +75,7 @@ const PROGRAMS = [
     name: "Paquete Premium",
     price: 4500,
     color: "#D4AF37",
+    consultCount: 8,
     features: [
       "8 asesorías nutricionales personalizadas",
       "8 escaneos corporales",
@@ -318,21 +322,28 @@ export default function Memberships() {
                 const discountedPrice = hasDiscount && !isGift && discountInfo.discount
                   ? Math.round(program.price * (1 - discountInfo.discount / 100))
                   : null;
+                const consultValue = program.consultCount * PRICE_PER_CONSULT;
+                const savingsVsConsults = consultValue - program.price;
+
                 return (
                   <Card
                     key={program.id}
-                    className={`border-2 transition-all cursor-pointer ${
+                    className={`border-2 transition-all cursor-pointer relative overflow-hidden ${
                       hasDiscount
                         ? 'border-[#C5A55A] shadow-lg shadow-[#C5A55A]/20'
                         : 'border-[#C5A55A]/20 hover:border-[#C5A55A]'
                     }`}
                     onClick={() => handleSelectProgram(program.id as "basic" | "premium")}
                   >
+                    {/* Badge de ahorro vs consultas individuales */}
+                    <div className="absolute top-4 right-4 bg-green-600 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
+                      💰 Ahorras ${savingsVsConsults.toLocaleString('es-MX')} MXN
+                    </div>
                     <CardHeader>
                       <CardTitle className="font-serif text-3xl" style={{ color: program.color }}>
                         {program.name}
                       </CardTitle>
-                      <CardDescription className="mt-1">
+                      <CardDescription className="mt-1 space-y-1">
                         {isGift ? (
                           <span className="text-2xl font-black text-green-600">¡GRATIS!</span>
                         ) : discountedPrice ? (
@@ -349,9 +360,14 @@ export default function Memberships() {
                             ${program.price.toLocaleString()} MXN
                           </span>
                         )}
+                        {/* Comparativa vs consultas individuales */}
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+                          <span className="line-through">${consultValue.toLocaleString('es-MX')} MXN</span>
+                          <span className="text-gray-400">si pagaras consultas por separado</span>
+                        </div>
                         {discountedPrice && discountInfo?.discount && (
                           <span className="inline-block mt-1 bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                            Ahorras ${(program.price - discountedPrice).toLocaleString('es-MX')} MXN
+                            Ahorras ${(program.price - discountedPrice).toLocaleString('es-MX')} MXN con tu código
                           </span>
                         )}
                       </CardDescription>

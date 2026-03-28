@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO couponSubscribers (email, whatsapp, isActive) VALUES ('test_debug@test.com', '', true);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute INSERT INTO couponSubscribers (email, whatsapp, isActive) VALUES ('test_debug@test.com', '', true);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 352
+}

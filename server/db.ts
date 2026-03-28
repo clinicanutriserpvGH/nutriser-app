@@ -623,8 +623,12 @@ export async function subscribeToCoupons(data: InsertCouponSubscriber) {
   try {
     await db.insert(couponSubscribers).values(data);
   } catch (e: any) {
-    // Duplicate email: update whatsapp and reactivate
-    if (e?.code === 'ER_DUP_ENTRY') {
+    // Drizzle wraps MySQL errors inside e.cause — check both levels
+    const mysqlCode = e?.code || e?.cause?.code || '';
+    const mysqlMessage = e?.message || e?.cause?.message || '';
+    const isDuplicate = mysqlCode === 'ER_DUP_ENTRY' || mysqlMessage.includes('ER_DUP_ENTRY') || mysqlMessage.includes('Duplicate entry');
+    if (isDuplicate) {
+      // Email already subscribed — silently update whatsapp and reactivate
       await db.update(couponSubscribers)
         .set({ whatsapp: data.whatsapp, isActive: true })
         .where(eq(couponSubscribers.email, data.email));

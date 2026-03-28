@@ -409,11 +409,19 @@ export default function EbookStore() {
                   {/* Botón de recomendar por WhatsApp */}
                   {(() => {
                     const referralUrl = `${OFFICIAL_DOMAIN}/ebook`;
+                    const isPresale = ebook.comingSoon && (ebook as any).presalePrice;
+                    const presalePrice = isPresale ? Number((ebook as any).presalePrice) : null;
+                    const regularPrice = Number(ebook.price);
+                    const savings = isPresale ? regularPrice - presalePrice! : 0;
                     const whatsappMsg = encodeURIComponent(
                       `📚 *¡Te recomiendo este eBook de Nutriser!*\n\n` +
                       `*"${ebook.title}"*\n` +
                       (ebook.description ? `${ebook.description.substring(0, 120)}...\n\n` : `\n`) +
-                      `💰 Precio: $${Number(ebook.price).toLocaleString('es-MX')} MXN\n\n` +
+                      (isPresale
+                        ? `🔥 *PRE-VENTA ESPECIAL: $${presalePrice!.toLocaleString('es-MX')} MXN*\n` +
+                          `~~Precio regular: $${regularPrice.toLocaleString('es-MX')} MXN~~\n` +
+                          `✨ *¡Ahorras $${savings.toLocaleString('es-MX')} MXN!* — Oferta por tiempo limitado\n\n`
+                        : `💰 Precio: $${regularPrice.toLocaleString('es-MX')} MXN\n\n`) +
                       `👉 Cómpralo aquí: ${referralUrl}\n\n` +
                       `✅ Lectura en línea · Acceso de por vida`
                     );
@@ -671,11 +679,18 @@ export default function EbookStore() {
             // Generar link de referido con el nombre del comprador
             const refName = encodeURIComponent(formData.buyerName);
             const referralUrl = `${OFFICIAL_DOMAIN}/ebook?ref=${refName}`;
+            const isPresaleSuccess = ebook.comingSoon && (ebook as any).presalePrice;
+            const presalePriceSuccess = isPresaleSuccess ? Number((ebook as any).presalePrice) : null;
+            const regularPriceSuccess = Number(ebook.price);
+            const savingsSuccess = isPresaleSuccess ? regularPriceSuccess - presalePriceSuccess! : 0;
             const whatsappMsg = encodeURIComponent(
               `📚 *¡Acabo de comprar el eBook "${ebook.title}" de Nutriser!*\n\n` +
               `Es un libro increíble sobre nutrición y hábitos alimentarios. ¡Te lo recomiendo mucho!\n\n` +
-              `👉 Cómpralo aquí: ${referralUrl}\n\n` +
-              `(Precio: $${Number(ebook.price).toLocaleString('es-MX')} MXN)`
+              (isPresaleSuccess
+                ? `🔥 *Precio de pre-venta: $${presalePriceSuccess!.toLocaleString('es-MX')} MXN* (precio regular $${regularPriceSuccess.toLocaleString('es-MX')} MXN)\n` +
+                  `✨ *¡Todavía puedes ahorrar $${savingsSuccess.toLocaleString('es-MX')} MXN!* — Oferta por tiempo limitado\n\n`
+                : `(Precio: $${regularPriceSuccess.toLocaleString('es-MX')} MXN)\n\n`) +
+              `👉 Cómpralo aquí: ${referralUrl}`
             );
             const whatsappUrl = `https://wa.me/?text=${whatsappMsg}`;
 

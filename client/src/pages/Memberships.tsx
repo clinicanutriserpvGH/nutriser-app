@@ -305,42 +305,85 @@ export default function Memberships() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Comprar Paquetes Nutrición</h1>
-          <p className="text-lg text-[#1A1A1A]/60">Elige el programa que mejor se adapte a tus necesidades</p>
+          <p className="text-lg text-[#1A1A1A]/60">Elige el paquete que mejor se adapte a tus necesidades</p>
         </div>
 
         {/* Step: Select Program */}
         {step === "select" && (
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {PROGRAMS.map((program) => (
-              <Card
-                key={program.id}
-                className="border-2 border-[#C5A55A]/20 hover:border-[#C5A55A] transition-all cursor-pointer"
-                onClick={() => handleSelectProgram(program.id as "basic" | "premium")}
-              >
-                <CardHeader>
-                  <CardTitle className="font-serif text-3xl" style={{ color: program.color }}>
-                    {program.name}
-                  </CardTitle>
-                  <CardDescription className="text-2xl font-bold text-[#1A1A1A]">
-                    ${program.price.toLocaleString()} MXN
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {program.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-[#C5A55A] mt-0.5 flex-shrink-0" />
-                        <span className="text-[#1A1A1A]/70">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button className="w-full mt-6" style={{ backgroundColor: program.color }}>
-                    Seleccionar
+          <>
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              {PROGRAMS.map((program) => (
+                <Card
+                  key={program.id}
+                  className="border-2 border-[#C5A55A]/20 hover:border-[#C5A55A] transition-all cursor-pointer"
+                  onClick={() => handleSelectProgram(program.id as "basic" | "premium")}
+                >
+                  <CardHeader>
+                    <CardTitle className="font-serif text-3xl" style={{ color: program.color }}>
+                      {program.name}
+                    </CardTitle>
+                    <CardDescription className="text-2xl font-bold text-[#1A1A1A]">
+                      ${program.price.toLocaleString()} MXN
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {program.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-3">
+                          <Check className="w-5 h-5 text-[#C5A55A] mt-0.5 flex-shrink-0" />
+                          <span className="text-[#1A1A1A]/70">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button className="w-full mt-6" style={{ backgroundColor: program.color }}>
+                      Comprar
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Código de Promoción — visible antes de seleccionar paquete */}
+            <div className="max-w-xl mx-auto">
+              <div className="border border-[#C5A55A]/30 rounded-xl p-5 bg-white shadow-sm">
+                <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-1.5">
+                  <Tag className="w-4 h-4 text-[#C5A55A]" />
+                  ¿Tienes un código de promoción?
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.discountCode}
+                    onChange={(e) => { setFormData({ ...formData, discountCode: e.target.value.toUpperCase() }); setDiscountInfo(null); }}
+                    placeholder="Ej: Nutriser20"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleValidateDiscount}
+                    disabled={discountValidating || !formData.discountCode.trim()}
+                    className="bg-[#C5A55A] hover:bg-[#B8963E] text-white px-4"
+                  >
+                    {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Aplicar"}
                   </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </div>
+                {discountInfo && discountInfo.valid && (
+                  <div className="mt-3 flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                    <span>
+                      {discountInfo.isTwoForOne
+                        ? "¡2x1 aplicado! Adquieres un paquete y obtienes el siguiente a mitad de precio."
+                        : discountInfo.isGift
+                        ? "¡Regalo aplicado! Tu paquete es completamente gratis."
+                        : `¡Código válido! ${discountInfo.discount}% de descuento aplicado. Selecciona tu paquete para ver el precio final.`}
+                    </span>
+                  </div>
+                )}
+                {discountInfo && !discountInfo.valid && (
+                  <p className="mt-2 text-red-600 text-xs">Código inválido o no está activo.</p>
+                )}
+              </div>
+            </div>
+          </>
         )}
 
         {/* Step: Form */}

@@ -215,8 +215,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
   const handleNavigate = (path: string) => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    if (onNavigate) onNavigate(path);
-    else window.location.href = path;
+    setLeaving(true);
+    setTimeout(() => {
+      if (onNavigate) onNavigate(path);
+      else window.location.href = path;
+    }, 400);
   };
 
   const handleEnablePush = async () => {

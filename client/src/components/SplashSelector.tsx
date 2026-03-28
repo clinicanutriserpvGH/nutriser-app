@@ -12,7 +12,9 @@ import { toast } from "sonner";
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 const CLINIC_IMG =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hero-clinic-1_5c6ba72c.jpg";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-recepcion_c1095589.jpeg";
+const CLINIC_IMG2 =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-sala-espera_5f3b9931.jpeg";
 const PORTAL_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hero-clinic-3_c9c66a2b.webp";
 const IMG_NUTRICION =
@@ -332,7 +334,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Widget Nutriser — ancho completo en móvil, mitad en desktop */}
             <div className="col-span-2 md:col-span-1">
               <WidgetLarge
-                img={CLINIC_IMG}
+                img={CLINIC_IMG2}
                 icon={ShoppingBag}
                 label="Clínica"
                 title="Nutriser"

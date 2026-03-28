@@ -884,3 +884,15 @@
 - [x] Corregir diseño responsivo para celulares, tablets y PC en toda la aplicación
 - [x] Corrección profunda de responsividad en SplashSelector: viewport, overflow y layout adaptativo
 - [x] Corregir desbordamiento horizontal en Samsung Fold: overflow-x hidden global y ancho adaptativo
+- [ ] Rediseñar SplashSelector estilo widget iOS: grid compacto, tarjetas visuales sin chips ni texto largo
+
+## Rediseño Hub (SplashSelector) - Sesión actual
+
+- [x] Rediseñar SplashSelector con estilo widget iOS: fondo oscuro, tarjetas con imagen, ícono, título corto
+- [x] Eliminar chips y descripciones largas de las tarjetas
+- [x] WidgetLarge (2:1) para Nutriser y Portal de Salud
+- [x] WidgetSquare (1:1) para Membresía, Tienda, eBook y Academy
+- [x] Barra de acciones rápidas: Cuponera (email), Campana push, WhatsApp
+- [x] Íconos sociales: Instagram, Facebook, TikTok
+- [x] Fondo degradado oscuro tipo app nativa
+- [x] Mantener toda la funcionalidad: push, email, modal de notificaciones, compartir

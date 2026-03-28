@@ -18,7 +18,7 @@ const CLINIC_IMG2 =
 const PORTAL_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-wall_ec00965e.jpeg";
 const IMG_NUTRICION =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutricion-bowl_314c08fe.jpg";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-membresia_cad68daf.png";
 const IMG_TIENDA =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/tienda-productos_2c07d4aa.jpg";
 const IMG_EBOOK =
@@ -533,18 +533,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </svg>
             </a>
 
-            {/* TikTok */}
-            <a
-              href="https://tiktok.com/@nutriserpv"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 rounded-xl bg-black border border-white/10 flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all duration-200"
-              aria-label="TikTok @nutriserpv"
-            >
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/>
-              </svg>
-            </a>
+
           </div>
 
           {/* ── Footer ── */}

@@ -70,7 +70,7 @@ const PROGRAMS = [
   {
     id: "premium",
     name: "Paquete Premium",
-    price: 4000,
+    price: 4500,
     color: "#D4AF37",
     features: [
       "8 asesorías nutricionales personalizadas",

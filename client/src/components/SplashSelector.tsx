@@ -344,7 +344,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 img={CLINIC_IMG}
                 icon={ShoppingBag}
                 label="Clínica"
-                title="Nutriser"
+                title="Nutriser Home"
                 cta="Entrar"
                 onClick={handleEnterSite}
                 imgPosition="center 30%"
@@ -357,8 +357,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 img={PORTAL_IMG}
                 icon={HeartPulse}
                 label="Pacientes"
-                title="Portal de Salud"
-                cta="Acceder"
+                title="Portal de Salud Nutriser"
+                cta="Acceder / Crear Cuenta"
                 onClick={() => window.open("https://portaldesaludnutriser.club", "_blank")}
               />
             </div>

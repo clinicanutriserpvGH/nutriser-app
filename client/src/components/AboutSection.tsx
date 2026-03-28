@@ -9,9 +9,9 @@ import { Shield, Award, Users } from "lucide-react";
 import { useLocation } from "wouter";
 
 const CLINIC_WAITING =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-waiting_b315f67e.jpeg";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-sala-espera-v2_7daaa376.png";
 const CLINIC_RECEPTION =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/clinic-reception_c595cea6.jpeg";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-recepcion-hero_de9ce8ee.png";
 
 const values = [
   {

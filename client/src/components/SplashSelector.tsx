@@ -303,8 +303,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             <p className="text-[#C5A55A] text-[10px] md:text-xs tracking-[0.3em] uppercase font-light mb-1">
               Aesthetic &amp; Nutrition
             </p>
-            <h1 className="text-white/90 text-sm md:text-base font-light tracking-widest text-center">
-              Puerto Vallarta
+            <h1 className="text-[#C5A55A] text-sm md:text-base font-semibold tracking-widest text-center uppercase">
+              Soy Nutriser y Vivo Mejor
             </h1>
             <div className="w-8 h-px bg-[#C5A55A]/60 mt-3 mb-4" />
 

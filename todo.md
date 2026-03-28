@@ -882,3 +882,4 @@
 - [x] Agregar íconos circulares de Instagram y Facebook junto a campana y WhatsApp en SplashSelector
 - [x] Cambiar texto pie de SplashSelector a "Todos los derechos reservados © Nutriserpv"
 - [x] Corregir diseño responsivo para celulares, tablets y PC en toda la aplicación
+- [x] Corrección profunda de responsividad en SplashSelector: viewport, overflow y layout adaptativo

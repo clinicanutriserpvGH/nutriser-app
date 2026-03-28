@@ -77,10 +77,11 @@ function BigCard({
           </div>
         )}
         {chips && chips.length > 0 && (
-          <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-3 overflow-hidden">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-3 w-full overflow-hidden">
             {chips.map(({ icon: CIcon, label }) => (
-              <span key={label} className="flex items-center gap-1 bg-[#C5A55A] rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-black text-[10px] sm:text-xs font-bold shadow-md whitespace-nowrap">
-                <CIcon className="w-3 h-3" />{label}
+              <span key={label} className="flex items-center gap-1 bg-[#C5A55A] rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-black text-[10px] sm:text-xs font-bold shadow-md max-w-full">
+                <CIcon className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate">{label}</span>
               </span>
             ))}
           </div>
@@ -257,12 +258,12 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
   return (
     <div
-      className="fixed inset-0 z-[99999] bg-white overflow-y-auto"
+      className="fixed inset-0 z-[99999] bg-white overflow-x-hidden overflow-y-auto"
       style={{ opacity: leaving ? 0 : 1, transition: leaving ? "opacity 0.4s ease" : "none" }}
     >
       {/* ── Contenedor principal: se expande en tablet/desktop ── */}
-      <div className="min-h-full flex flex-col items-center justify-center py-6 px-3 sm:px-4 md:px-8 lg:px-12">
-        <div className="w-full max-w-[100%] sm:max-w-[520px] md:max-w-[800px] lg:max-w-[1100px]">
+      <div className="min-h-full w-full flex flex-col items-center justify-center py-6 px-3 sm:px-4 md:px-8 lg:px-12 box-border">
+        <div className="w-full max-w-full sm:max-w-[520px] md:max-w-[800px] lg:max-w-[1100px] min-w-0">
 
           {/* Logo + título */}
           <div className="flex flex-col items-center mb-6 md:mb-8">
@@ -298,7 +299,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           {/* ── DESKTOP (lg): 3 columnas ── */}
 
           {/* Fila 1: Nutriser + Portal */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4 w-full min-w-0">
             <BigCard
               img={CLINIC_IMG}
               badge="Clínica Aesthetic & Nutrition"
@@ -335,7 +336,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
 
           {/* Fila 2: 4 tarjetas pequeñas — 2 cols en móvil, 4 cols en tablet+ */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-5 w-full min-w-0">
             <SmallCard
               img={IMG_NUTRICION}
               icon={Gift}

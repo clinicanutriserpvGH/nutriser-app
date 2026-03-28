@@ -319,7 +319,7 @@ export default function PromotionsSection() {
               </button>
             )}
           </motion.div>
-          <p className="text-xs text-[#999] mt-3">Correo + notificaciones en tu celular cuando publiquemos nuevas ofertas</p>
+          <p className="text-xs text-[#999] mt-3">Descuentos exclusivos para suscriptores — sé la primera en aprovecharlos</p>
         </motion.div>
 
         {isLoading ? (
@@ -502,9 +502,9 @@ export default function PromotionsSection() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <BellRing className="w-6 h-6 text-[#C5A55A]" />
-                  <h2 className="text-white font-bold text-xl">Suscribirse a Ofertas</h2>
+                  <h2 className="text-white font-bold text-xl">Accede a Descuentos Exclusivos</h2>
                 </div>
-                <p className="text-white/70 text-sm">Sé el primero en enterarte de nuevos cupones</p>
+                <p className="text-white/70 text-sm">Solo para suscriptores — cupones que no encontrarás en ningún otro lugar</p>
               </div>
               <button onClick={() => { setSubModalOpen(false); setSubSuccess(false); setSubEmail(""); }} className="text-white/60 hover:text-white p-1 rounded-full transition"><X size={20} /></button>
             </div>
@@ -513,10 +513,10 @@ export default function PromotionsSection() {
               /* —— Estado de éxito tras suscribirse al correo —— */
               <div className="p-6 text-center space-y-4">
                 <div className="text-5xl">🎉</div>
-                <h3 className="font-bold text-xl text-[#1A1A1A]">¡Suscrito con éxito!</h3>
-                <p className="text-gray-600 text-sm">Te enviaremos un correo cada vez que publiquemos una nueva oferta o cupón.</p>
+                <h3 className="font-bold text-xl text-[#1A1A1A]">¡Bienvenida a la comunidad Nutriser!</h3>
+                <p className="text-gray-600 text-sm">Recibirás descuentos exclusivos, ofertas sorpresa y acceso anticipado a promociones especiales — solo para ti.</p>
                 <div className="bg-[#FAF7F2] rounded-xl p-4 text-left">
-                  <p className="text-sm font-semibold text-[#1A1A1A] mb-2">¿Quieres recibir también notificaciones instantáneas en tu celular?</p>
+                  <p className="text-sm font-semibold text-[#1A1A1A] mb-2">🔔 ¿Quieres ser la primera en enterarte cuando publiquemos una nueva oferta?</p>
                   {pushEnabled ? (
                     <div className="flex items-center gap-2 text-green-600 text-sm font-semibold">
                       <Check className="w-4 h-4" /> ¡Notificaciones push ya activadas!
@@ -544,13 +544,13 @@ export default function PromotionsSection() {
                 <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-center gap-3">
                   <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
                   <div>
-                    <p className="font-bold text-green-800 text-sm">✅ Ya estás suscrito por correo</p>
-                    <p className="text-green-600 text-xs">Recibirás un aviso cuando publiquemos nuevas ofertas.</p>
+                    <p className="font-bold text-green-800 text-sm">✅ ¡Ya eres parte de la comunidad Nutriser!</p>
+                    <p className="text-green-600 text-xs">Recibirás descuentos exclusivos y acceso anticipado a nuestras mejores ofertas.</p>
                   </div>
                 </div>
                 <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2d2416] rounded-xl p-4 border border-[#C5A55A]/30">
-                  <p className="text-white font-semibold text-sm mb-1">🔔 Notificaciones push al instante</p>
-                  <p className="text-white/60 text-xs mb-3">Aviso en tu celular aunque no estés en el sitio</p>
+                  <p className="text-white font-semibold text-sm mb-1">🔔 Sé la primera en aprovechar cada oferta</p>
+                  <p className="text-white/60 text-xs mb-3">Activa las notificaciones y recibe alertas al instante cuando publiquemos descuentos exclusivos</p>
                   {pushEnabled ? (
                     <div className="flex items-center gap-2 text-green-400 text-sm font-semibold">
                       <Check className="w-4 h-4" /> ¡Notificaciones push ya activadas!
@@ -579,8 +579,8 @@ export default function PromotionsSection() {
                   <div className="flex items-center gap-2">
                     <span className="text-xl">✉️</span>
                     <div>
-                      <p className="font-bold text-[#1A1A1A] text-sm">Recibir por Correo</p>
-                      <p className="text-gray-500 text-xs">Te avisamos cada vez que haya una nueva oferta</p>
+                      <p className="font-bold text-[#1A1A1A] text-sm">✉️ Descuentos exclusivos en tu correo</p>
+                      <p className="text-gray-500 text-xs">Suscríbete a la Cuponera Nutriser y recibe ofertas que no encontrarás en ningún otro lugar</p>
                     </div>
                   </div>
                   <form onSubmit={handleSubscribeSubmit} className="flex gap-2">
@@ -614,8 +614,8 @@ export default function PromotionsSection() {
                   <div className="flex items-start gap-3">
                     <div className="text-2xl mt-0.5">🔔</div>
                     <div className="flex-1">
-                      <p className="text-white font-semibold text-sm">Notificaciones push al instante</p>
-                      <p className="text-white/60 text-xs mt-0.5">Aviso en tu celular aunque no estés en el sitio</p>
+                  <p className="text-white font-semibold text-sm">🔔 Haz clic en la campanita y no te pierdas nada</p>
+                  <p className="text-white/60 text-xs mt-0.5">Recibe promociones exclusivas en tu celular aunque no estés en el sitio — al instante</p>
 
                       {pushEnabled ? (
                         <div className="mt-2 flex items-center gap-1.5 text-green-400 text-xs font-semibold">
@@ -661,7 +661,7 @@ export default function PromotionsSection() {
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-400 text-center">Puedes cancelar tu suscripción en cualquier momento.</p>
+                <p className="text-xs text-gray-400 text-center">Sin spam, solo ofertas reales. Puedes cancelar cuando quieras.</p>
               </div>
             )}
           </div>

@@ -883,3 +883,4 @@
 - [x] Cambiar texto pie de SplashSelector a "Todos los derechos reservados © Nutriserpv"
 - [x] Corregir diseño responsivo para celulares, tablets y PC en toda la aplicación
 - [x] Corrección profunda de responsividad en SplashSelector: viewport, overflow y layout adaptativo
+- [x] Corregir desbordamiento horizontal en Samsung Fold: overflow-x hidden global y ancho adaptativo

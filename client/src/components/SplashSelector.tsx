@@ -64,7 +64,7 @@ function BigCard({
           <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-[#C5A55A] shadow-lg`}>
             <Icon className="w-3 h-3 md:w-3.5 md:h-3.5 text-black" />
           </div>
-          <span className="text-[#C5A55A] text-[10px] md:text-xs tracking-widest uppercase font-bold drop-shadow-[0_1px_3px_rgba(0,0,0,1)]">{badge}</span>
+          <span className="text-[#C5A55A] text-[10px] md:text-xs tracking-wide uppercase font-bold drop-shadow-[0_1px_3px_rgba(0,0,0,1)] truncate">{badge}</span>
         </div>
         {/* Título con sombra de texto fuerte */}
         <h2 className="text-white text-base sm:text-lg md:text-2xl lg:text-3xl font-bold leading-tight mb-1 drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">
@@ -268,8 +268,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           {/* Logo + título */}
           <div className="flex flex-col items-center mb-6 md:mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain mb-2" />
-            <p className="text-[#C5A55A] text-[10px] md:text-xs tracking-[0.3em] uppercase font-light">Aesthetic & Nutrition</p>
-            <h1 className="text-[#1A1A1A] text-sm sm:text-base md:text-xl lg:text-2xl font-light tracking-wide sm:tracking-widest mt-2 text-center px-2">
+            <p className="text-[#C5A55A] text-[10px] md:text-xs tracking-[0.15em] sm:tracking-[0.3em] uppercase font-light">Aesthetic & Nutrition</p>
+            <h1 className="text-[#1A1A1A] text-sm sm:text-base md:text-xl lg:text-2xl font-light tracking-normal sm:tracking-widest mt-2 text-center w-full px-2 break-words">
               Selecciona el apartado de tu interés
             </h1>
             <div className="w-10 md:w-16 h-px bg-[#C5A55A] mt-3" />

@@ -55,7 +55,7 @@ function Router() {
 }
 
 function AppContent() {
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
 
   // El splash se muestra SOLO en la ruta "/" cuando el usuario no lo ha visto aún
   const [showSplash, setShowSplash] = useState(() => {
@@ -74,17 +74,11 @@ function AppContent() {
   };
 
   // Navegar a una ruta interna desde el splash.
-  // Primero ocultamos el splash (setShowSplash(false)), luego usamos setLocation
-  // de wouter para navegar sin recargar la página — evita el flash de Home.
+  // Usamos window.location.href para una navegación real: la URL cambia,
+  // React monta directamente la página destino sin pasar por Home.
   const handleNavigateFromSplash = (path: string) => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    setShowSplash(false);
-    // Extraer solo el pathname (sin hash ni query) para wouter
-    const cleanPath = path.split("#")[0].split("?")[0] || "/";
-    setLocation(cleanPath);
-    // Si hay hash (scroll target), guardarlo para que Home lo procese
-    const hash = path.includes("#") ? path.split("#")[1] : null;
-    if (hash) sessionStorage.setItem("nutriser_scroll_to", hash);
+    window.location.href = path;
   };
 
   // Volver al splash: navegar a "/" y mostrar el splash

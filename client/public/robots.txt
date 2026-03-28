@@ -1,0 +1,14 @@
+# Robots.txt — Nutriser Aesthetic & Nutrition
+# https://nutriserpv.com
+
+User-agent: *
+Allow: /
+
+# Bloquear rutas de administración y API
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /api/trpc/
+
+# Sitemap
+Sitemap: https://nutriserpv.com/sitemap.xml

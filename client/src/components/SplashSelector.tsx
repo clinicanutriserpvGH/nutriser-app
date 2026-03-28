@@ -520,9 +520,9 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             <div className="bg-gradient-to-r from-[#C5A55A]/20 to-[#C5A55A]/5 rounded-t-3xl p-5 flex items-start justify-between border-b border-white/10">
               <div>
                 <h2 className="text-white font-bold text-lg flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-[#C5A55A]" /> Suscribirse a Ofertas
+                  <Bell className="w-5 h-5 text-[#C5A55A]" /> Accede a Descuentos Exclusivos
                 </h2>
-                <p className="text-white/50 text-sm mt-1">Sé el primero en enterarte de nuevos cupones</p>
+                <p className="text-white/50 text-sm mt-1">Cupos limitados — cupones que no encontrarás en ningún otro lugar</p>
               </div>
               <button
                 onClick={() => setShowNotifModal(false)}
@@ -538,13 +538,13 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="flex items-center gap-3">
                   <div className="text-2xl">✉️</div>
                   <div>
-                    <p className="font-bold text-white text-sm">Recibir por Correo</p>
-                    <p className="text-white/50 text-xs">Te avisamos cada vez que haya una nueva oferta</p>
+                    <p className="font-bold text-white text-sm">✉️ Descuentos exclusivos en tu correo</p>
+                    <p className="text-white/50 text-xs">Suscríbete y recibe ofertas que no encontrarás en ningún otro lugar</p>
                   </div>
                 </div>
                 {emailDone ? (
                   <div className="flex items-center gap-2 text-green-400 text-sm font-semibold">
-                    <Check className="w-4 h-4" /> ¡Ya estás suscrito por correo!
+                    <Check className="w-4 h-4" /> ¡Ya eres parte de la comunidad Nutriser!
                   </div>
                 ) : (
                   <form onSubmit={handleEmailSubmit} className="flex gap-2">
@@ -579,8 +579,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="flex items-start gap-3">
                   <div className="text-2xl mt-0.5">🔔</div>
                   <div className="flex-1">
-                    <p className="text-white font-semibold text-sm">Notificaciones push al instante</p>
-                    <p className="text-white/50 text-xs mt-0.5">Aviso en tu celular aunque no estés en el sitio</p>
+                    <p className="text-white font-semibold text-sm">🔔 Haz clic en la campanita y no te pierdas nada</p>
+                    <p className="text-white/50 text-xs mt-0.5">Recibe promociones exclusivas al instante aunque no estés en el sitio</p>
 
                     {pushEnabled ? (
                       <div className="mt-2 flex items-center gap-1.5 text-green-400 text-xs font-semibold">
@@ -635,7 +635,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </div>
 
               <p className="text-xs text-white/30 text-center">
-                Puedes cancelar tu suscripción en cualquier momento.
+                Sin spam, solo ofertas reales. Puedes cancelar cuando quieras.
               </p>
             </div>
           </div>

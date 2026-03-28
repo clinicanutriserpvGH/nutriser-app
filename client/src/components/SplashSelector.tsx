@@ -14,7 +14,7 @@ const LOGO_URL =
 const CLINIC_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-recepcion_c1095589.jpeg";
 const CLINIC_IMG2 =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-recepcion-v2_284927a7.jpeg";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-recepcion-hero_de9ce8ee.png";
 const PORTAL_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-portal-salud-v2_e87113cf.png";
 const IMG_NUTRICION =

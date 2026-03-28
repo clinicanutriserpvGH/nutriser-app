@@ -398,10 +398,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4 md:mb-5">
             {/* Cuponera de Descuentos — siempre activo, navega directo */}
             <button
-              onClick={() => {
-                sessionStorage.setItem('nutriser_scroll_to', 'promociones');
-                handleNavigate('/');
-              }}
+              onClick={() => handleNavigate('/coupons')}
               className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10 transition-all duration-200 group overflow-hidden"
             >
               <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-pulse" style={{ animationDuration: "2s" }} />
@@ -447,10 +444,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Catálogo de Servicios */}
             {!showEmailForm && (
               <button
-                onClick={() => {
-                  sessionStorage.setItem('nutriser_scroll_to', 'servicios');
-                  handleNavigate('/');
-                }}
+                onClick={() => handleNavigate('/services')}
                 className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10 transition-all duration-200 group"
               >
                 <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center group-hover:bg-[#C5A55A]/30 transition-colors">

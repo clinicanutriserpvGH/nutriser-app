@@ -393,69 +393,22 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           {/* ── Barra de acciones rápidas ── */}
           <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4 md:mb-5">
-            {/* Cuponera de Descuentos — navega directo */}
-            {!emailDone ? (
-              !showEmailForm ? (
-                <button
-                  onClick={() => handleNavigate('/#promociones')}
-                  className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10 transition-all duration-200 group"
-                >
-                  {/* Brillo animado */}
-                  <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-pulse" style={{ animationDuration: "2s" }} />
-                  <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
-                    <Tag className="w-5 h-5 text-black" />
-                  </div>
-                  <span className="relative text-white/80 text-[10px] sm:text-xs font-bold text-center leading-tight">
-                    Cuponera de Descuentos
-                  </span>
-                </button>
-              ) : (
-                <div className="col-span-3">
-                  <form onSubmit={handleEmailSubmit}>
-                    <div className="flex items-center gap-2 bg-white/10 border border-[#C5A55A]/40 rounded-2xl px-3 py-2.5 focus-within:border-[#C5A55A] transition-colors">
-                      <Mail className="w-4 h-4 text-[#C5A55A] flex-shrink-0" />
-                      <input
-                        type="email"
-                        value={emailInput}
-                        onChange={e => setEmailInput(e.target.value)}
-                        placeholder="tu@correo.com"
-                        autoFocus
-                        className="flex-1 bg-transparent text-white text-sm placeholder-white/30 outline-none min-w-0"
-                      />
-                      <button
-                        type="submit"
-                        disabled={emailSubmitting}
-                        className="bg-[#C5A55A] text-black text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-[#d4b46a] transition-colors disabled:opacity-60 flex-shrink-0"
-                      >
-                        {emailSubmitting ? "..." : "Suscribir"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowEmailForm(false)}
-                        className="text-white/40 hover:text-white/70 transition-colors flex-shrink-0"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <p className="text-white/30 text-[10px] text-center mt-1.5">
-                      Recibe alertas de promociones y descuentos exclusivos
-                    </p>
-                  </form>
-                </div>
-              )
-            ) : (
-              <button
-                disabled
-                className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-[#C5A55A]/10 border border-[#C5A55A]/30"
-              >
-                <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-[#C5A55A]" />
-                </div>
-                <span className="text-[#C5A55A] text-[10px] sm:text-xs font-semibold text-center leading-tight">
-                  Suscrito ✓
-                </span>
-              </button>
-            )}
+            {/* Cuponera de Descuentos — siempre activo, navega directo */}
+            <button
+              onClick={() => {
+                sessionStorage.setItem('nutriser_scroll_to', 'promociones');
+                handleNavigate('/');
+              }}
+              className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10 transition-all duration-200 group overflow-hidden"
+            >
+              <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-pulse" style={{ animationDuration: "2s" }} />
+              <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
+                <Tag className="w-5 h-5 text-black" />
+              </div>
+              <span className="relative text-white/80 text-[10px] sm:text-xs font-bold text-center leading-tight">
+                Cuponera de Descuentos
+              </span>
+            </button>
 
             {/* Campana push */}
             {!showEmailForm && (
@@ -491,7 +444,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Catálogo de Servicios */}
             {!showEmailForm && (
               <button
-                onClick={() => handleNavigate('/#servicios')}
+                onClick={() => {
+                  sessionStorage.setItem('nutriser_scroll_to', 'servicios');
+                  handleNavigate('/');
+                }}
                 className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10 transition-all duration-200 group"
               >
                 <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center group-hover:bg-[#C5A55A]/30 transition-colors">

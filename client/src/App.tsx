@@ -98,7 +98,6 @@ function AppContent() {
   return (
     <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
       <BackgroundMusic />
-      <Router />
       {/* El splash se superpone como overlay fixed cuando está activo */}
       {showSplash && (
         <SplashSelector
@@ -106,6 +105,8 @@ function AppContent() {
           onNavigate={handleNavigateFromSplash}
         />
       )}
+      {/* El Router solo renderiza cuando el splash NO está activo */}
+      {!showSplash && <Router />}
     </SplashContext.Provider>
   );
 }

@@ -24,7 +24,9 @@ const IMG_TIENDA =
 const IMG_EBOOK =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-ebook-portada_0437617d.png";
 const IMG_ACADEMY =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/academy-nutricion_8ac7b33a.webp";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy_52156a0e.png";
+const IMG_CUPONERA =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/cuponera-widget-Y2Vg4ATLkUTJV3qAkLn8zb.webp";
 const WHATSAPP_URL =
   "https://wa.me/523221007799?text=Hola%2C%20me%20interesa%20agendar%20una%20valoraci%C3%B3n%20en%20Nutriser";
 
@@ -391,18 +393,24 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           {/* ── Barra de acciones rápidas ── */}
           <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4 md:mb-5">
-            {/* Email / Cuponera */}
+            {/* Cuponera de Descuentos — navega directo */}
             {!emailDone ? (
               !showEmailForm ? (
                 <button
-                  onClick={() => setShowEmailForm(true)}
-                  className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10 transition-all duration-200 group"
+                  onClick={() => handleNavigate("/coupons")}
+                  className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl overflow-hidden border border-[#C5A55A]/40 hover:border-[#C5A55A] transition-all duration-200 group"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center group-hover:bg-[#C5A55A]/30 transition-colors">
-                    <Mail className="w-5 h-5 text-[#C5A55A]" />
+                  {/* Imagen de fondo brillante */}
+                  <img src={IMG_CUPONERA} alt="Cuponera" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+                  {/* Overlay dorado */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+                  {/* Brillo animado */}
+                  <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/15 animate-pulse" style={{ animationDuration: "2s" }} />
+                  <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
+                    <Tag className="w-5 h-5 text-black" />
                   </div>
-                  <span className="text-white/70 text-[10px] sm:text-xs font-semibold text-center leading-tight">
-                    Cuponera
+                  <span className="relative text-white text-[10px] sm:text-xs font-bold text-center leading-tight drop-shadow">
+                    Cuponera de Descuentos
                   </span>
                 </button>
               ) : (

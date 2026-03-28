@@ -8,7 +8,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { ArrowLeft, BookOpen, Upload, Clock, CheckCircle, ShoppingCart, Eye, X, Share2 } from "lucide-react";
 import { useLocation } from "wouter";
-import Navbar from "@/components/Navbar";
+import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import { OFFICIAL_DOMAIN } from "@/const";
 import { useSplash } from "@/contexts/SplashContext";
@@ -204,7 +204,7 @@ export default function EbookStore() {
   if (!ebook) {
     return (
       <div className="min-h-screen bg-[#FAF7F2]">
-        <Navbar lightBg />
+        <BackToSplash />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center max-w-md mx-auto px-4">
             <BookOpen className="w-16 h-16 text-[#C5A55A]/30 mx-auto mb-4" />
@@ -222,7 +222,7 @@ export default function EbookStore() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
-      <Navbar lightBg onShowSplash={showSplash} />
+      <BackToSplash />
 
       {/* Modal de imagen */}
       {showCoverModal && (

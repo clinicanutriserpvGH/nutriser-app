@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { PlayCircle, FileText, MessageSquare, Bell, BellOff, ChevronLeft, Download, Clock, BookOpen, Send, CheckCircle } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
@@ -206,7 +206,7 @@ export default function Courses() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
-      <Navbar onShowSplash={showSplash} />
+      <BackToSplash />
 
       {/* Hero de Cursos */}
       <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4">

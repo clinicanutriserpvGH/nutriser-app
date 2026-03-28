@@ -39,7 +39,7 @@ interface SplashSelectorProps {
 
 /* ─── Widget grande (ocupa 2 columnas) ──────────────────────────────────── */
 function WidgetLarge({
-  img, icon: Icon, label, title, cta, onClick, accent = false,
+  img, icon: Icon, label, title, cta, onClick, accent = false, imgPosition = "center",
 }: {
   img: string;
   icon: React.ElementType;
@@ -48,6 +48,7 @@ function WidgetLarge({
   cta: string;
   onClick: () => void;
   accent?: boolean;
+  imgPosition?: string;
 }) {
   return (
     <button
@@ -60,6 +61,7 @@ function WidgetLarge({
         src={img}
         alt={title}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        style={{ objectPosition: imgPosition }}
       />
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/20" />
@@ -339,12 +341,13 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Widget Nutriser — ancho completo en móvil, mitad en desktop */}
             <div className="col-span-2 md:col-span-1">
               <WidgetLarge
-                img={CLINIC_IMG2}
+                img={CLINIC_IMG}
                 icon={ShoppingBag}
                 label="Clínica"
                 title="Nutriser"
                 cta="Entrar"
                 onClick={handleEnterSite}
+                imgPosition="center 30%"
                 accent
               />
             </div>

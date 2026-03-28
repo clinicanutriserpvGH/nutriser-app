@@ -22,7 +22,7 @@ const IMG_NUTRICION =
 const IMG_TIENDA =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/tienda-productos_2c07d4aa.jpg";
 const IMG_EBOOK =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/ebook-nutricion_4d2fbcf3.jpg";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-ebook-portada_0437617d.png";
 const IMG_ACADEMY =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/academy-nutricion_8ac7b33a.webp";
 const WHATSAPP_URL =

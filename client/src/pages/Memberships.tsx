@@ -312,35 +312,66 @@ export default function Memberships() {
         {step === "select" && (
           <>
             <div className="grid md:grid-cols-2 gap-8 mb-8">
-              {PROGRAMS.map((program) => (
-                <Card
-                  key={program.id}
-                  className="border-2 border-[#C5A55A]/20 hover:border-[#C5A55A] transition-all cursor-pointer"
-                  onClick={() => handleSelectProgram(program.id as "basic" | "premium")}
-                >
-                  <CardHeader>
-                    <CardTitle className="font-serif text-3xl" style={{ color: program.color }}>
-                      {program.name}
-                    </CardTitle>
-                    <CardDescription className="text-2xl font-bold text-[#1A1A1A]">
-                      ${program.price.toLocaleString()} MXN
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {program.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <Check className="w-5 h-5 text-[#C5A55A] mt-0.5 flex-shrink-0" />
-                          <span className="text-[#1A1A1A]/70">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button className="w-full mt-6" style={{ backgroundColor: program.color }}>
-                      Comprar
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+              {PROGRAMS.map((program) => {
+                const hasDiscount = discountInfo?.valid && !discountInfo.isTwoForOne;
+                const isGift = discountInfo?.valid && discountInfo.isGift;
+                const discountedPrice = hasDiscount && !isGift && discountInfo.discount
+                  ? Math.round(program.price * (1 - discountInfo.discount / 100))
+                  : null;
+                return (
+                  <Card
+                    key={program.id}
+                    className={`border-2 transition-all cursor-pointer ${
+                      hasDiscount
+                        ? 'border-[#C5A55A] shadow-lg shadow-[#C5A55A]/20'
+                        : 'border-[#C5A55A]/20 hover:border-[#C5A55A]'
+                    }`}
+                    onClick={() => handleSelectProgram(program.id as "basic" | "premium")}
+                  >
+                    <CardHeader>
+                      <CardTitle className="font-serif text-3xl" style={{ color: program.color }}>
+                        {program.name}
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        {isGift ? (
+                          <span className="text-2xl font-black text-green-600">¡GRATIS!</span>
+                        ) : discountedPrice ? (
+                          <div className="flex items-end gap-3">
+                            <span className="text-2xl font-bold text-[#C5A55A]">
+                              ${discountedPrice.toLocaleString('es-MX')} MXN
+                            </span>
+                            <span className="text-base text-gray-400 line-through mb-0.5">
+                              ${program.price.toLocaleString()} MXN
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-2xl font-bold text-[#1A1A1A]">
+                            ${program.price.toLocaleString()} MXN
+                          </span>
+                        )}
+                        {discountedPrice && discountInfo?.discount && (
+                          <span className="inline-block mt-1 bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                            Ahorras ${(program.price - discountedPrice).toLocaleString('es-MX')} MXN
+                          </span>
+                        )}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-3">
+                        {program.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <Check className="w-5 h-5 text-[#C5A55A] mt-0.5 flex-shrink-0" />
+                            <span className="text-[#1A1A1A]/70">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Button className="w-full mt-6" style={{ backgroundColor: program.color }}>
+                        Comprar
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             {/* Código de Promoción — visible antes de seleccionar paquete */}
@@ -428,69 +459,42 @@ export default function Memberships() {
                     required
                   />
                 </div>
-                {/* ─── Código de Descuento ─────────────────────────────── */}
-                <div className="border border-[#C5A55A]/30 rounded-xl p-4 bg-[#FAF7F2]">
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
-                    <Tag className="w-4 h-4 text-[#C5A55A]" />
-                    Código de Promoción (opcional)
-                  </label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={formData.discountCode}
-                      onChange={(e) => { setFormData({ ...formData, discountCode: e.target.value.toUpperCase() }); setDiscountInfo(null); }}
-                      placeholder="Ej: Nutriser20"
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleValidateDiscount}
-                      disabled={discountValidating || !formData.discountCode.trim()}
-                      className="bg-[#C5A55A] hover:bg-[#B8963E] text-white px-4"
-                    >
-                      {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Aplicar"}
-                    </Button>
-                  </div>
-                  {discountInfo && discountInfo.valid && (
-                    <div className="mt-3 space-y-2">
-                      <div className="flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                {/* ─── Resumen de descuento aplicado (solo lectura) ─── */}
+                {discountInfo?.valid && selectedProgram && (() => {
+                  const program = PROGRAMS.find(p => p.id === selectedProgram);
+                  if (!program) return null;
+                  const discounted = discountInfo.isGift ? 0 : Math.round(program.price * (1 - (discountInfo.discount ?? 0) / 100));
+                  return (
+                    <div className="border border-[#C5A55A]/30 rounded-xl p-4 bg-[#FAF7F2]">
+                      <div className="flex items-center gap-2 text-green-700 text-sm font-medium mb-3">
                         <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
                         <span>
                           {discountInfo.isTwoForOne
-                            ? "¡2x1 aplicado! Adquieres un programa y obtienes el siguiente a mitad de precio."
+                            ? `Código ${formData.discountCode} — ¡2x1 aplicado!`
                             : discountInfo.isGift
-                            ? "¡Regalo aplicado! Tu programa es completamente gratis."
-                            : `¡Código válido! ${discountInfo.discount}% de descuento aplicado.`}
+                            ? `Código ${formData.discountCode} — ¡Regalo aplicado!`
+                            : `Código ${formData.discountCode} — ${discountInfo.discount}% de descuento`}
                         </span>
                       </div>
-                      {selectedProgram && !discountInfo.isTwoForOne && (
-                        (() => {
-                          const program = PROGRAMS.find(p => p.id === selectedProgram);
-                          if (!program) return null;
-                          const discounted = discountInfo.isGift ? 0 : program.price * (1 - (discountInfo.discount ?? 0) / 100);
-                          return (
-                            <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl px-4 py-3 flex items-center justify-between">
-                              <div>
-                                <p className="text-xs text-gray-500 mb-0.5">Precio original</p>
-                                <p className="text-sm text-gray-400 line-through">${program.price.toLocaleString()} MXN</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-xs text-[#C5A55A] font-semibold mb-0.5">Tu precio con descuento</p>
-                                {discountInfo.isGift ? (
-                                  <p className="text-xl font-black text-green-600">¡GRATIS!</p>
-                                ) : (
-                                  <p className="text-xl font-black text-[#C5A55A]">${discounted.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MXN</p>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })()
+                      {!discountInfo.isTwoForOne && (
+                        <div className="bg-white border border-[#C5A55A]/20 rounded-xl px-4 py-3 flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500 mb-0.5">Precio original</p>
+                            <p className="text-sm text-gray-400 line-through">${program.price.toLocaleString()} MXN</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-[#C5A55A] font-semibold mb-0.5">Tu precio</p>
+                            {discountInfo.isGift ? (
+                              <p className="text-xl font-black text-green-600">¡GRATIS!</p>
+                            ) : (
+                              <p className="text-xl font-black text-[#C5A55A]">${discounted.toLocaleString('es-MX')} MXN</p>
+                            )}
+                          </div>
+                        </div>
                       )}
                     </div>
-                  )}
-                  {discountInfo && !discountInfo.valid && (
-                    <p className="mt-2 text-red-600 text-xs">Código inválido o no está activo.</p>
-                  )}
-                </div>
+                  );
+                })()}
 
                 <div className="flex gap-3">
                   <Button

@@ -57,7 +57,7 @@ const BANK_INFO = {
 const PROGRAMS = [
   {
     id: "basic",
-    name: "Programa Básico",
+    name: "Paquete Básico",
     price: 2500,
     color: "#C5A55A",
     features: [
@@ -69,7 +69,7 @@ const PROGRAMS = [
   },
   {
     id: "premium",
-    name: "Programa Premium",
+    name: "Paquete Premium",
     price: 4000,
     color: "#D4AF37",
     features: [
@@ -304,7 +304,7 @@ export default function Memberships() {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Comprar Programa Nutrición</h1>
+          <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Comprar Paquetes Nutrición</h1>
           <p className="text-lg text-[#1A1A1A]/60">Elige el programa que mejor se adapte a tus necesidades</p>
         </div>
 

@@ -22,7 +22,7 @@ const IMG_NUTRICION =
 const IMG_TIENDA =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-tienda-productos_71816223.png";
 const IMG_EBOOK =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-ebook-portada_0437617d.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-ebook-tablet_dccb4840.png";
 const IMG_ACADEMY =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy_52156a0e.png";
 const IMG_CUPONERA =
@@ -397,7 +397,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {!emailDone ? (
               !showEmailForm ? (
                 <button
-                  onClick={() => handleNavigate("/coupons")}
+                  onClick={() => { sessionStorage.setItem('nutriser_scroll_to', 'promociones'); handleEnterSite(); }}
                   className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl overflow-hidden border border-[#C5A55A]/40 hover:border-[#C5A55A] transition-all duration-200 group"
                 >
                   {/* Imagen de fondo brillante */}

@@ -16,9 +16,23 @@ import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { useSplash } from "@/contexts/SplashContext";
+import { useEffect } from "react";
 
 export default function Home() {
   const { showSplash } = useSplash();
+
+  // Scroll automático si viene desde el botón Cuponera del Hub
+  useEffect(() => {
+    const scrollTo = sessionStorage.getItem("nutriser_scroll_to");
+    if (scrollTo) {
+      sessionStorage.removeItem("nutriser_scroll_to");
+      const timer = setTimeout(() => {
+        const el = document.getElementById(scrollTo);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">

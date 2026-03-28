@@ -397,19 +397,15 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {!emailDone ? (
               !showEmailForm ? (
                 <button
-                  onClick={() => { sessionStorage.setItem('nutriser_scroll_to', 'promociones'); handleEnterSite(); setTimeout(() => { const el = document.getElementById('promociones'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 1200); }}
-                  className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl overflow-hidden border border-[#C5A55A]/40 hover:border-[#C5A55A] transition-all duration-200 group"
+                  onClick={() => handleNavigate('/#promociones')}
+                  className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10 transition-all duration-200 group"
                 >
-                  {/* Imagen de fondo brillante */}
-                  <img src={IMG_CUPONERA} alt="Cuponera" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-                  {/* Overlay dorado */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
                   {/* Brillo animado */}
-                  <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/15 animate-pulse" style={{ animationDuration: "2s" }} />
+                  <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-pulse" style={{ animationDuration: "2s" }} />
                   <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
                     <Tag className="w-5 h-5 text-black" />
                   </div>
-                  <span className="relative text-white text-[10px] sm:text-xs font-bold text-center leading-tight drop-shadow">
+                  <span className="relative text-white/80 text-[10px] sm:text-xs font-bold text-center leading-tight">
                     Cuponera de Descuentos
                   </span>
                 </button>
@@ -495,14 +491,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Catálogo de Servicios */}
             {!showEmailForm && (
               <button
-                onClick={() => { sessionStorage.setItem('nutriser_scroll_to', 'servicios'); handleEnterSite(); setTimeout(() => { const el = document.getElementById('servicios'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 1200); }}
+                onClick={() => handleNavigate('/#servicios')}
                 className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10 transition-all duration-200 group"
               >
                 <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center group-hover:bg-[#C5A55A]/30 transition-colors">
                   <ClipboardList className="w-5 h-5 text-[#C5A55A]" />
                 </div>
                 <span className="text-white/70 text-[10px] sm:text-xs font-semibold text-center leading-tight">
-                  Catálogo
+                  Servicios
                 </span>
               </button>
             )}

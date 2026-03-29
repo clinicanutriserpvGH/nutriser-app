@@ -901,3 +901,4 @@
 
 - [x] Error 1: Botón "Ver todas las promociones" en CouponPage ahora navega correctamente a la cuponera usando sessionStorage scroll
 - [x] Error 2: Imagen Open Graph del cupón para WhatsApp ahora usa imageUrl de la BD si está disponible, con fallback a imagen generada dinámicamente
+- [x] Error WhatsApp: Botones "Recomendar por WhatsApp" en EbookStore y PromotionsSection corregidos de window.open/target="_blank" a window.location.href para compatibilidad con WebView iOS

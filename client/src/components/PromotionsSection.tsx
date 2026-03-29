@@ -240,7 +240,8 @@ export default function PromotionsSection() {
       ? `\n💰 Antes: ~${promo.regularPrice}~ → *Ahora: ${promo.price}*`
       : promo.price ? `\n💰 Precio: *${promo.price}*` : "";
     const text = `${shareUrl}\n\n🔥 *¡OFERTA ESPECIAL NUTRISER!* 🔥\n\n🎁 *${promo.title}*\n${promo.description || ""}${priceText}\n\n✅ Adquiere tu cupón directamente en el link de arriba`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+    // Usar location.href en lugar de window.open para compatibilidad con WebView iOS
+    window.location.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
   };
 
   const handleCopyLink = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null }) => {

@@ -896,3 +896,8 @@
 - [x] Íconos sociales: Instagram, Facebook, TikTok
 - [x] Fondo degradado oscuro tipo app nativa
 - [x] Mantener toda la funcionalidad: push, email, modal de notificaciones, compartir
+
+## Correcciones Sesión Actual
+
+- [x] Error 1: Botón "Ver todas las promociones" en CouponPage ahora navega correctamente a la cuponera usando sessionStorage scroll
+- [x] Error 2: Imagen Open Graph del cupón para WhatsApp ahora usa imageUrl de la BD si está disponible, con fallback a imagen generada dinámicamente

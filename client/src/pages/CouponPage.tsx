@@ -39,7 +39,8 @@ export default function CouponPage() {
   };
 
   const handleBack = () => {
-    window.location.href = "/#promociones";
+    sessionStorage.setItem("nutriser_scroll_to", "promociones");
+    window.location.replace("/");
   };
 
   return (

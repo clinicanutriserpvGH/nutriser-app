@@ -322,8 +322,11 @@ async function startServer() {
       const fullDescription = description + priceInfo;
       const canonicalUrl = `https://nutriserpv.com/api/og/cupon/${promoId}`;
       const redirectUrl = `https://nutriserpv.com/cupon/${promoId}`;
-      // Use the generated coupon PNG image as og:image (1200x630)
-      const ogImage = `https://nutriserpv.com/api/og/cupon-image/${promoId}`;
+      // Use stored imageUrl directly if available (better WhatsApp compatibility)
+      // Fall back to dynamically generated image if no stored image
+      const ogImage = (promo.imageUrl && promo.imageUrl.startsWith('http'))
+        ? promo.imageUrl
+        : `https://nutriserpv.com/api/og/cupon-image/${promoId}`;
 
       // Always return OG HTML — WhatsApp/bots read the meta tags, users get JS redirect
       const html = `<!DOCTYPE html>

@@ -334,6 +334,47 @@ export default function Memberships() {
         {/* Step: Select Program */}
         {step === "select" && (
           <>
+            {/* Código de Promoción — visible antes de seleccionar paquete */}
+            <div className="max-w-xl mx-auto mb-8">
+              <div className="border border-[#C5A55A]/30 rounded-xl p-5 bg-white shadow-sm">
+                <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-1.5">
+                  <Tag className="w-4 h-4 text-[#C5A55A]" />
+                  ¿Tienes un código de promoción?
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.discountCode}
+                    onChange={(e) => { setFormData({ ...formData, discountCode: e.target.value.toUpperCase() }); setDiscountInfo(null); }}
+                    placeholder="Ej: Nutriser20"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleValidateDiscount}
+                    disabled={discountValidating || !formData.discountCode.trim()}
+                    className="bg-[#C5A55A] hover:bg-[#B8963E] text-white px-4"
+                  >
+                    {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Aplicar"}
+                  </Button>
+                </div>
+                {discountInfo && discountInfo.valid && (
+                  <div className="mt-3 flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                    <span>
+                      {discountInfo.isTwoForOne
+                        ? "¡2x1 aplicado! Adquieres un paquete y obtienes el siguiente a mitad de precio."
+                        : discountInfo.isGift
+                        ? "¡Regalo aplicado! Tu paquete es completamente gratis."
+                        : `¡Código válido! ${discountInfo.discount}% de descuento aplicado. Selecciona tu paquete para ver el precio final.`}
+                    </span>
+                  </div>
+                )}
+                {discountInfo && !discountInfo.valid && (
+                  <p className="mt-2 text-red-600 text-xs">Código inválido o no está activo.</p>
+                )}
+              </div>
+            </div>
+
             {/* Paquetes Nutricionales: Básico y Premium */}
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               {PROGRAMS.filter(p => !p.exclusive).map((program) => {
@@ -485,46 +526,6 @@ export default function Memberships() {
               );
             })()}
 
-            {/* Código de Promoción — visible antes de seleccionar paquete */}
-            <div className="max-w-xl mx-auto">
-              <div className="border border-[#C5A55A]/30 rounded-xl p-5 bg-white shadow-sm">
-                <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-1.5">
-                  <Tag className="w-4 h-4 text-[#C5A55A]" />
-                  ¿Tienes un código de promoción?
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    value={formData.discountCode}
-                    onChange={(e) => { setFormData({ ...formData, discountCode: e.target.value.toUpperCase() }); setDiscountInfo(null); }}
-                    placeholder="Ej: Nutriser20"
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleValidateDiscount}
-                    disabled={discountValidating || !formData.discountCode.trim()}
-                    className="bg-[#C5A55A] hover:bg-[#B8963E] text-white px-4"
-                  >
-                    {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Aplicar"}
-                  </Button>
-                </div>
-                {discountInfo && discountInfo.valid && (
-                  <div className="mt-3 flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                    <span>
-                      {discountInfo.isTwoForOne
-                        ? "¡2x1 aplicado! Adquieres un paquete y obtienes el siguiente a mitad de precio."
-                        : discountInfo.isGift
-                        ? "¡Regalo aplicado! Tu paquete es completamente gratis."
-                        : `¡Código válido! ${discountInfo.discount}% de descuento aplicado. Selecciona tu paquete para ver el precio final.`}
-                    </span>
-                  </div>
-                )}
-                {discountInfo && !discountInfo.valid && (
-                  <p className="mt-2 text-red-600 text-xs">Código inválido o no está activo.</p>
-                )}
-              </div>
-            </div>
           </>
         )}
 

@@ -19,13 +19,13 @@ export function getEmailTransporter() {
 export async function sendConfirmationEmail(
   clientEmail: string,
   clientName: string,
-  programType: "basic" | "premium",
+  programType: "basic" | "premium" | "treatment",
   accessCode?: string
 ) {
   const transporter = getEmailTransporter();
 
-  const programName = programType === "basic" ? "Básico" : "Premium";
-  const price = programType === "basic" ? "$2,500 MXN" : "$4,000 MXN";
+  const programName = programType === "basic" ? "Básico" : programType === "premium" ? "Premium" : "Tratamiento";
+  const price = programType === "basic" ? "$2,500 MXN" : programType === "premium" ? "$4,500 MXN" : "$5,499 MXN";
 
   const htmlContent = `
     <html>
@@ -48,13 +48,22 @@ export async function sendConfirmationEmail(
                 <li>4 Escaneos Corporales</li>
                 <li>5% de descuento en tratamientos corporales</li>
               </ul>
-            ` : `
+            ` : programType === "premium" ? `
               <p><strong>Incluye:</strong></p>
               <ul>
                 <li>8 Asesorías Nutricionales Personalizadas</li>
                 <li>8 Escaneos Corporales</li>
                 <li>10% de descuento en todos los tratamientos</li>
                 <li>Acceso a seguimiento online</li>
+              </ul>
+            ` : `
+              <p><strong>Incluye:</strong></p>
+              <ul>
+                <li>4 sesiones de Cavitación corporal</li>
+                <li>4 sesiones de Radiofrecuencia corporal</li>
+                <li>4 sesiones de Mesoterapia reductora</li>
+                <li>Seguimiento personalizado de tu progreso</li>
+                <li>Válido en Nutriser Puerto Vallarta</li>
               </ul>
             `}
           </div>
@@ -102,13 +111,13 @@ export async function sendMembershipNotificationToAdmin(
   clientName: string,
   clientEmail: string,
   clientPhone: string | undefined,
-  programType: "basic" | "premium",
+  programType: "basic" | "premium" | "treatment",
   discountCode?: string,
   discountPercent?: number
 ) {
   const transporter = getEmailTransporter();
-  const programName = programType === "basic" ? "Básico" : "Premium";
-  const basePrice = programType === "basic" ? 2500 : 4000;
+  const programName = programType === "basic" ? "Básico" : programType === "premium" ? "Premium" : "Tratamiento";
+  const basePrice = programType === "basic" ? 2500 : programType === "premium" ? 4500 : 5499;
   const finalPrice = discountPercent ? Math.round(basePrice * (1 - discountPercent / 100)) : basePrice;
   const priceDisplay = `$${finalPrice.toLocaleString('es-MX')} MXN`;
   const discountLine = discountCode && discountPercent

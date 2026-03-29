@@ -63,6 +63,7 @@ const PROGRAMS = [
     price: 2500,
     color: "#C5A55A",
     consultCount: 4,
+    exclusive: false,
     features: [
       "4 asesorías nutricionales personalizadas",
       "4 escaneos corporales",
@@ -76,6 +77,7 @@ const PROGRAMS = [
     price: 4500,
     color: "#D4AF37",
     consultCount: 8,
+    exclusive: false,
     features: [
       "8 asesorías nutricionales personalizadas",
       "8 escaneos corporales",
@@ -84,11 +86,28 @@ const PROGRAMS = [
       "10% de descuento en compra de eBook",
     ],
   },
+  {
+    id: "treatment",
+    name: "Paquete Tratamiento",
+    price: 5499,
+    color: "#C5A55A",
+    consultCount: 0,
+    exclusive: true,
+    regularPrice: 6500,
+    subtitle: "4 cavitaciones + 4 radiofrecuencias corporales + 4 mesoterapias reductoras",
+    features: [
+      "4 sesiones de Cavitación corporal",
+      "4 sesiones de Radiofrecuencia corporal",
+      "4 sesiones de Mesoterapia reductora",
+      "Seguimiento personalizado de tu progreso",
+      "Válido en Nutriser Puerto Vallarta",
+    ],
+  },
 ];
 
 export default function Memberships() {
   const [, navigate] = useLocation();
-  const [selectedProgram, setSelectedProgram] = useState<"basic" | "premium" | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<"basic" | "premium" | "treatment" | null>(null);
   const [formData, setFormData] = useState({
     clientName: "",
     clientEmail: "",
@@ -159,7 +178,7 @@ export default function Memberships() {
     return () => clearInterval(interval);
   }, [step, createdAt, membershipId, cancelMutation]);
 
-  const handleSelectProgram = (program: "basic" | "premium") => {
+  const handleSelectProgram = (program: "basic" | "premium" | "treatment") => {
     setSelectedProgram(program);
     setStep("form");
   };
@@ -308,22 +327,22 @@ export default function Memberships() {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Comprar Paquetes Nutrición</h1>
+          <h1 className="font-serif text-5xl text-[#1A1A1A] mb-4">Programas Nutriser</h1>
           <p className="text-lg text-[#1A1A1A]/60">Elige el paquete que mejor se adapte a tus necesidades</p>
         </div>
 
         {/* Step: Select Program */}
         {step === "select" && (
           <>
+            {/* Paquetes Nutricionales: Básico y Premium */}
             <div className="grid md:grid-cols-2 gap-8 mb-8">
-              {PROGRAMS.map((program) => {
+              {PROGRAMS.filter(p => !p.exclusive).map((program) => {
                 const hasDiscount = discountInfo?.valid && !discountInfo.isTwoForOne;
                 const isGift = discountInfo?.valid && discountInfo.isGift;
                 const discountedPrice = hasDiscount && !isGift && discountInfo.discount
                   ? Math.round(program.price * (1 - discountInfo.discount / 100))
                   : null;
                 const consultValue = program.consultCount * PRICE_PER_CONSULT;
-                // Ahorro total = (vs consultas individuales) + (descuento del cupón si aplica)
                 const couponSavings = isGift
                   ? program.price
                   : discountedPrice !== null
@@ -339,9 +358,8 @@ export default function Memberships() {
                         ? 'border-[#C5A55A] shadow-lg shadow-[#C5A55A]/20'
                         : 'border-[#C5A55A]/20 hover:border-[#C5A55A]'
                     }`}
-                    onClick={() => handleSelectProgram(program.id as "basic" | "premium")}
+                    onClick={() => handleSelectProgram(program.id as "basic" | "premium" | "treatment")}
                   >
-                    {/* Badge de ahorro total (vs consultas individuales + cupón) */}
                     <div className="absolute top-4 right-4 bg-green-600 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
                       💰 Ahorras ${totalSavings.toLocaleString('es-MX')} MXN
                     </div>
@@ -366,7 +384,6 @@ export default function Memberships() {
                             ${program.price.toLocaleString()} MXN
                           </span>
                         )}
-                        {/* Comparativa vs consultas individuales */}
                         <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
                           <span className="line-through">${consultValue.toLocaleString('es-MX')} MXN</span>
                           <span className="text-gray-400">si pagaras consultas por separado</span>
@@ -395,6 +412,78 @@ export default function Memberships() {
                 );
               })}
             </div>
+
+            {/* Paquete Tratamiento Exclusivo */}
+            {(() => {
+              const tp = PROGRAMS.find(p => p.id === "treatment")!;
+              const hasDiscount = discountInfo?.valid && !discountInfo.isTwoForOne;
+              const isGift = discountInfo?.valid && discountInfo.isGift;
+              const discountedPrice = hasDiscount && !isGift && discountInfo.discount
+                ? Math.round(tp.price * (1 - discountInfo.discount / 100))
+                : null;
+              const savings = (tp as any).regularPrice ? (tp as any).regularPrice - tp.price : 1001;
+              return (
+                <div className="mb-8">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <div className="h-px flex-1 bg-[#C5A55A]/30" />
+                    <span className="text-xs font-black tracking-[0.2em] text-[#C5A55A] uppercase flex items-center gap-1.5">
+                      ★ PAQUETE EXCLUSIVO
+                    </span>
+                    <div className="h-px flex-1 bg-[#C5A55A]/30" />
+                  </div>
+                  <Card
+                    className="border-2 border-[#C5A55A] shadow-xl shadow-[#C5A55A]/20 cursor-pointer transition-all hover:shadow-2xl hover:shadow-[#C5A55A]/30 relative overflow-hidden"
+                    onClick={() => handleSelectProgram("treatment")}
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-2xl">👑</span>
+                            <CardTitle className="font-serif text-3xl text-[#C5A55A]">{tp.name}</CardTitle>
+                          </div>
+                          <p className="text-sm text-[#1A1A1A]/50">{(tp as any).subtitle}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          {(tp as any).regularPrice && (
+                            <p className="text-sm text-gray-400 line-through">${(tp as any).regularPrice.toLocaleString('es-MX')}</p>
+                          )}
+                          {isGift ? (
+                            <span className="text-3xl font-black text-green-600">¡GRATIS!</span>
+                          ) : discountedPrice ? (
+                            <div>
+                              <p className="text-3xl font-black text-[#C5A55A]">${discountedPrice.toLocaleString('es-MX')}</p>
+                              <p className="text-xs text-gray-400 line-through">${tp.price.toLocaleString('es-MX')}</p>
+                            </div>
+                          ) : (
+                            <p className="text-3xl font-black text-[#C5A55A]">${tp.price.toLocaleString('es-MX')}</p>
+                          )}
+                          <p className="text-xs text-[#1A1A1A]/50">MXN · Pago único</p>
+                        </div>
+                      </div>
+                      <div className="mt-2">
+                        <span className="inline-flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full">
+                          <Check className="w-3.5 h-3.5" /> Ahorras ${savings.toLocaleString('es-MX')} MXN vs consultas individuales
+                        </span>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-3">
+                        {tp.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <Check className="w-5 h-5 text-[#C5A55A] mt-0.5 flex-shrink-0" />
+                            <span className="text-[#1A1A1A]/70">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Button className="w-full mt-6 bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold">
+                        Comprar
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              );
+            })()}
 
             {/* Código de Promoción — visible antes de seleccionar paquete */}
             <div className="max-w-xl mx-auto">

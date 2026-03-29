@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `memberships` MODIFY COLUMN `programType` enum('basic','premium','treatment') NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute ALTER TABLE `memberships` MODIFY COLUMN `programType` enum('basic','premium','treatment') NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 2610
+}

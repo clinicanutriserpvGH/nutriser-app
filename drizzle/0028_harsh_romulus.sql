@@ -1,0 +1,1 @@
+ALTER TABLE `memberships` MODIFY COLUMN `programType` enum('basic','premium','treatment') NOT NULL;

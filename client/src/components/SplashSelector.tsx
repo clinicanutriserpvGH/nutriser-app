@@ -369,7 +369,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             <WidgetSquare
               img={IMG_NUTRICION}
               icon={CalendarCheck}
-              title="Paquetes Nutrición"
+              title="Programas Nutriser"
               cta="Comprar"
               onClick={() => handleNavigate("/memberships")}
               accent

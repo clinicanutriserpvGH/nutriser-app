@@ -34,7 +34,7 @@ export const memberships = mysqlTable("memberships", {
   clientName: varchar("clientName", { length: 255 }).notNull(),
   clientEmail: varchar("clientEmail", { length: 320 }).notNull(),
   clientPhone: varchar("clientPhone", { length: 20 }),
-  programType: mysqlEnum("programType", ["basic", "premium"]).notNull(),
+  programType: mysqlEnum("programType", ["basic", "premium", "treatment"]).notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   status: mysqlEnum("status", ["pending", "verified", "rejected"]).default("pending").notNull(),
   depositConcept: text("depositConcept"), // Concepto del depósito (nombre + programa)

@@ -98,22 +98,23 @@ export const appRouter = router({
         clientName: z.string().min(1),
         clientEmail: z.string().email(),
         clientPhone: z.string().optional(),
-        programType: z.enum(["basic", "premium"]),
+        programType: z.enum(["basic", "premium", "treatment"]),
         discountCode: z.string().optional(),
         discountPercent: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
-        const basePrice = input.programType === "basic" ? 2500 : 4000;
+        const basePrice = input.programType === "basic" ? 2500 : input.programType === "premium" ? 4500 : 5499;
         const finalPrice = input.discountPercent
           ? Math.round(basePrice * (1 - input.discountPercent / 100))
           : basePrice;
+        const programLabel = input.programType === "basic" ? "Básico" : input.programType === "premium" ? "Premium" : "Tratamiento";
         const membership = await createMembership({
           clientName: input.clientName,
           clientEmail: input.clientEmail,
           clientPhone: input.clientPhone,
           programType: input.programType,
           price: String(finalPrice),
-          depositConcept: `${input.clientName} - Programa ${input.programType === "basic" ? "Básico" : "Premium"}`,
+          depositConcept: `${input.clientName} - Programa ${programLabel}`,
           discountCode: input.discountCode,
           discountPercent: input.discountPercent,
           originalPrice: input.discountPercent ? String(basePrice) : undefined,

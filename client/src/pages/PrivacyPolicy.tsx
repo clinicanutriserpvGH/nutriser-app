@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
           <p>
             <strong>Nutriser Aesthetic &amp; Nutrition</strong> (en adelante "Nutriser"), con domicilio en Puerto Vallarta, Jalisco, México, es responsable del tratamiento de sus datos personales conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).
           </p>
-          <p className="mt-2">Contacto: <a href="mailto:contacto@nutriserpv.com" className="text-[#C5A55A] underline">contacto@nutriserpv.com</a></p>
+          <p className="mt-2">Contacto: <a href="mailto:clinicanutriserpv@gmail.com" className="text-[#C5A55A] underline">clinicanutriserpv@gmail.com</a></p>
         </section>
 
         <section>
@@ -68,7 +68,7 @@ export default function PrivacyPolicy() {
         <section>
           <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">6. Derechos ARCO</h2>
           <p>
-            Usted tiene derecho a <strong>Acceder, Rectificar, Cancelar u Oponerse</strong> al tratamiento de sus datos personales (derechos ARCO). Para ejercerlos, envíe un correo a <a href="mailto:contacto@nutriserpv.com" className="text-[#C5A55A] underline">contacto@nutriserpv.com</a> con su nombre completo, descripción de la solicitud y copia de identificación oficial.
+            Usted tiene derecho a <strong>Acceder, Rectificar, Cancelar u Oponerse</strong> al tratamiento de sus datos personales (derechos ARCO). Para ejercerlos, envíe un correo a <a href="mailto:clinicanutriserpv@gmail.com" className="text-[#C5A55A] underline">clinicanutriserpv@gmail.com</a> con su nombre completo, descripción de la solicitud y copia de identificación oficial.
           </p>
           <p className="mt-2">Responderemos en un plazo máximo de 20 días hábiles.</p>
         </section>
@@ -93,7 +93,7 @@ export default function PrivacyPolicy() {
             Para cualquier duda o solicitud relacionada con esta política, contáctenos en:
           </p>
           <ul className="mt-2 space-y-1 text-gray-700">
-            <li>📧 <a href="mailto:contacto@nutriserpv.com" className="text-[#C5A55A] underline">contacto@nutriserpv.com</a></li>
+            <li>📧 <a href="mailto:clinicanutriserpv@gmail.com" className="text-[#C5A55A] underline">clinicanutriserpv@gmail.com</a></li>
             <li>🌐 <a href="https://www.nutriserpv.com" className="text-[#C5A55A] underline">www.nutriserpv.com</a></li>
             <li>📍 Puerto Vallarta, Jalisco, México</li>
           </ul>

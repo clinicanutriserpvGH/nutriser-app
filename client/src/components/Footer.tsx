@@ -22,7 +22,15 @@ export default function Footer() {
           <p className="text-sm text-center">
             &copy; {year} Nutriser Soluciones. Todos los derechos reservados.
           </p>
-          <p className="text-sm">Puerto Vallarta, Jalisco, México</p>
+          <div className="flex flex-col items-center md:items-end gap-1">
+            <p className="text-sm">Puerto Vallarta, Jalisco, México</p>
+            <a
+              href="/privacy-policy"
+              className="text-xs text-[#C5A55A]/60 hover:text-[#C5A55A] transition-colors underline"
+            >
+              Política de Privacidad
+            </a>
+          </div>
         </div>
       </div>
     </footer>

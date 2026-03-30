@@ -24,12 +24,21 @@ export default function Footer() {
           </p>
           <div className="flex flex-col items-center md:items-end gap-1">
             <p className="text-sm">Puerto Vallarta, Jalisco, México</p>
-            <a
-              href="/privacy-policy"
-              className="text-xs text-[#C5A55A]/60 hover:text-[#C5A55A] transition-colors underline"
-            >
-              Política de Privacidad
-            </a>
+            <div className="flex gap-3">
+              <a
+                href="/privacy-policy"
+                className="text-xs text-[#C5A55A]/60 hover:text-[#C5A55A] transition-colors underline"
+              >
+                Política de Privacidad
+              </a>
+              <span className="text-[#C5A55A]/30">·</span>
+              <a
+                href="/delete-account"
+                className="text-xs text-[#C5A55A]/60 hover:text-[#C5A55A] transition-colors underline"
+              >
+                Eliminar cuenta
+              </a>
+            </div>
           </div>
         </div>
       </div>

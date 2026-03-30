@@ -1,6 +1,19 @@
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1A1A1A]">
+      {/* Barra de navegación superior */}
+      <div className="bg-[#1A1A1A] border-b border-[#C5A55A]/20 px-4 py-3">
+        <a
+          href="/"
+          className="inline-flex items-center gap-2 text-[#C5A55A] hover:text-[#C5A55A]/80 transition-colors text-sm font-medium"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Regresar al inicio
+        </a>
+      </div>
+
       {/* Header */}
       <div className="bg-[#1A1A1A] py-8 px-4 text-center">
         <img

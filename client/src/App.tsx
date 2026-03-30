@@ -18,6 +18,7 @@ import EbookLogin from "./pages/EbookLogin";
 import Store from "@/pages/Store";
 import CouponPage from "@/pages/CouponPage";
 import Courses from "@/pages/Courses";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
 import { SplashContext } from "@/contexts/SplashContext";
@@ -25,7 +26,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 
 // Rutas que NUNCA muestran el splash
-const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/services"];
+const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/services", "/privacy-policy"];
 
 function isNoSplashRoute(path: string) {
   return NO_SPLASH_ROUTES.some((r) => path === r || path.startsWith(r + "/") || path.startsWith(r + "?"));
@@ -48,6 +49,7 @@ function Router() {
       <Route path={"/tienda"} component={Store} />
       <Route path={"/cupon/:id"} component={CouponPage} />
       <Route path={"/cursos"} component={Courses} />
+      <Route path={"/privacy-policy"} component={PrivacyPolicy} />
       <Route path={"/coupons"} component={() => { sessionStorage.setItem("nutriser_scroll_to", "promociones"); window.location.replace("/"); return null; }} />
       <Route path={"/services"} component={() => { sessionStorage.setItem("nutriser_scroll_to", "servicios"); window.location.replace("/"); return null; }} />
       <Route path={"/404"} component={NotFound} />

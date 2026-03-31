@@ -207,6 +207,26 @@ export type Ebook = typeof ebooks.$inferSelect;
 export type InsertEbook = typeof ebooks.$inferInsert;
 
 /**
+ * Fotos de Antes y Después
+ * Almacena las transformaciones de pacientes para mostrar en la página principal
+ */
+export const beforeAfterPhotos = mysqlTable("beforeAfterPhotos", {
+  id: int("id").autoincrement().primaryKey(),
+  patientName: varchar("patientName", { length: 255 }).notNull(), // Nombre o iniciales del paciente
+  category: mysqlEnum("category", ["nutricion", "estetica", "ambos"]).default("nutricion").notNull(),
+  description: text("description"), // Breve descripción del logro
+  beforeImageUrl: text("beforeImageUrl").notNull(), // URL imagen ANTES en S3
+  afterImageUrl: text("afterImageUrl").notNull(),  // URL imagen DESPUÉS en S3
+  isVisible: boolean("isVisible").default(true).notNull(), // Mostrar/ocultar en la página
+  sortOrder: int("sortOrder").default(0).notNull(), // Orden de aparición
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BeforeAfterPhoto = typeof beforeAfterPhotos.$inferSelect;
+export type InsertBeforeAfterPhoto = typeof beforeAfterPhotos.$inferInsert;
+
+/**
  * Compras de ebook
  * Registra cada compra del ebook con su comprobante de pago
  */

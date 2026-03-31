@@ -1401,6 +1401,85 @@ export const appRouter = router({
         return { notified: emailSubscribers.length };
       }),
   }),
+  beforeAfter: router({
+    // Obtener todas las fotos visibles (para la página pública)
+    list: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new Error("DB not available");
+      const { beforeAfterPhotos } = await import("../drizzle/schema");
+      return db.select().from(beforeAfterPhotos)
+        .where(eq(beforeAfterPhotos.isVisible, true))
+        .orderBy(beforeAfterPhotos.sortOrder);
+    }),
+    // Obtener todas las fotos (para el admin)
+    listAll: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new Error("DB not available");
+      const { beforeAfterPhotos } = await import("../drizzle/schema");
+      return db.select().from(beforeAfterPhotos).orderBy(beforeAfterPhotos.sortOrder);
+    }),
+    // Crear nueva foto (admin)
+    create: publicProcedure
+      .input(z.object({
+        patientName: z.string().min(1),
+        category: z.enum(["nutricion", "estetica", "ambos"]),
+        description: z.string().optional(),
+        beforeImageUrl: z.string().url(),
+        afterImageUrl: z.string().url(),
+        sortOrder: z.number().default(0),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("DB not available");
+        const { beforeAfterPhotos } = await import("../drizzle/schema");
+        await db.insert(beforeAfterPhotos).values({
+          patientName: input.patientName,
+          category: input.category,
+          description: input.description,
+          beforeImageUrl: input.beforeImageUrl,
+          afterImageUrl: input.afterImageUrl,
+          isVisible: true,
+          sortOrder: input.sortOrder,
+        });
+        return { success: true };
+      }),
+    // Eliminar foto (admin)
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("DB not available");
+        const { beforeAfterPhotos } = await import("../drizzle/schema");
+        await db.delete(beforeAfterPhotos).where(eq(beforeAfterPhotos.id, input.id));
+        return { success: true };
+      }),
+    // Cambiar visibilidad (admin)
+    toggleVisibility: publicProcedure
+      .input(z.object({ id: z.number(), isVisible: z.boolean() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("DB not available");
+        const { beforeAfterPhotos } = await import("../drizzle/schema");
+        await db.update(beforeAfterPhotos)
+          .set({ isVisible: input.isVisible })
+          .where(eq(beforeAfterPhotos.id, input.id));
+        return { success: true };
+      }),
+    // Subir imagen a S3 y retornar URL
+    uploadImage: publicProcedure
+      .input(z.object({
+        base64: z.string(),
+        filename: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const buffer = Buffer.from(input.base64, "base64");
+        const suffix = Math.random().toString(36).substring(2, 8);
+        const key = `before-after/${Date.now()}-${suffix}-${input.filename}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        return { url };
+      }),
+  }),
   discountCodes: router({
     validate: publicProcedure
       .input(z.object({ code: z.string() }))

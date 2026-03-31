@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
+import AdminBeforeAfterTab from "@/components/AdminBeforeAfterTab";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1136,6 +1137,10 @@ export default function AdminDashboard() {
               <TabsTrigger value="courses" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
                 <span>🎓</span>
                 <span>Cursos</span>
+              </TabsTrigger>
+              <TabsTrigger value="beforeAfter" className="flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm px-3 py-2">
+                <span>📸</span>
+                <span>Antes/Después</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -3280,6 +3285,11 @@ export default function AdminDashboard() {
                 ))}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Antes/Después Tab */}
+          <TabsContent value="beforeAfter" className="space-y-4">
+            <AdminBeforeAfterTab />
           </TabsContent>
 
         </Tabs>

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `beforeAfterPhotos` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`patientName` varchar(255) NOT NULL,\n\t`category` enum('nutricion','estetica','ambos') NOT NULL DEFAULT 'nutricion',\n\t`description` text,\n\t`beforeImageUrl` text NOT NULL,\n\t`afterImageUrl` text NOT NULL,\n\t`isVisible` boolean NOT NULL DEFAULT true,\n\t`sortOrder` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `beforeAfterPhotos_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3pDkbRKa2qti5hK.root --database 7jSTACnGYyADJrX65GKurG --execute CREATE TABLE `beforeAfterPhotos` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`patientName` varchar(255) NOT NULL,\n\t`category` enum('nutricion','estetica','ambos') NOT NULL DEFAULT 'nutricion',\n\t`description` text,\n\t`beforeImageUrl` text NOT NULL,\n\t`afterImageUrl` text NOT NULL,\n\t`isVisible` boolean NOT NULL DEFAULT true,\n\t`sortOrder` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `beforeAfterPhotos_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 3363
+}

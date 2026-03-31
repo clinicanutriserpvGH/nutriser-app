@@ -53,8 +53,9 @@ export default function BeforeAfterSection() {
         <div className="flex justify-center gap-3 mb-10 flex-wrap">
           {(["all", "nutricion", "estetica", "ambos"] as const).map((f) => (
             <button
+              type="button"
               key={f}
-              onClick={() => setActiveFilter(f)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveFilter(f); }}
               className={`px-5 py-2 rounded-full text-xs tracking-widest uppercase transition-all duration-200 border ${
                 activeFilter === f
                   ? "bg-[#C5A55A] border-[#C5A55A] text-black font-semibold"

@@ -218,8 +218,9 @@ export default function ServicesSection() {
                 const isActive = activeId === cat.id;
                 return (
                   <button
+                    type="button"
                     key={cat.id}
-                    onClick={() => setActiveCategory(cat.id)}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCategory(cat.id); }}
                     className={`flex items-center gap-2 px-5 py-3 text-sm tracking-[0.05em] transition-all duration-300 border ${
                       isActive
                         ? "bg-[#C5A55A] text-white border-[#C5A55A] shadow-lg shadow-[#C5A55A]/20"
@@ -301,6 +302,7 @@ export default function ServicesSection() {
                           Preguntar precio
                         </a>
                         <button
+                          type="button"
                           onClick={() => handleOpenPurchase(service.name, service.price)}
                           className="flex-1 flex items-center justify-center gap-1.5 bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs font-bold py-2.5 rounded-lg transition-colors shadow-sm"
                         >
@@ -357,6 +359,7 @@ export default function ServicesSection() {
                 <p className="text-white/80 text-sm mt-0.5 line-clamp-1">{selectedService}</p>
               </div>
               <button
+                type="button"
                 onClick={() => setPurchaseModal(false)}
                 className="text-white hover:bg-white/20 p-2 rounded-full transition"
               >
@@ -377,7 +380,8 @@ export default function ServicesSection() {
                   <p className="text-xs text-gray-400 mt-2">Guarda este código como referencia</p>
                 </div>
                 <button
-                  onClick={() => setPurchaseModal(false)}
+                   type="button"
+                   onClick={() => setPurchaseModal(false)}
                   className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition"
                 >
                   Cerrar

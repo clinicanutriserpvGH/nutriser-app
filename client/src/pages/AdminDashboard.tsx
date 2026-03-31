@@ -8,8 +8,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOpen, Upload, Eye, Bell, BellRing, ShoppingBag, Trash2, Settings, Plus, Pencil, Send } from "lucide-react";
 import { toast } from "sonner";
 
+const ADMIN_TABS = [
+  { value: 'memberships', label: 'Membresías', emoji: '👥' },
+  { value: 'appointments', label: 'Citas', emoji: '📅' },
+  { value: 'giftPurchases', label: 'Regalos', emoji: '🎁' },
+  { value: 'promotions', label: 'Promociones', emoji: '🏷️' },
+  { value: 'ebook', label: 'eBook', emoji: '📖' },
+  { value: 'subscribers', label: 'Suscriptores', emoji: '🔔' },
+  { value: 'servicePurchases', label: 'Compras Serv.', emoji: '🛍️' },
+  { value: 'services', label: 'Servicios', emoji: '⚙️' },
+  { value: 'products', label: 'Productos', emoji: '📦' },
+  { value: 'productPurchases', label: 'Compras Prod.', emoji: '🛒' },
+  { value: 'discountCodes', label: 'Descuentos', emoji: '💰' },
+  { value: 'courses', label: 'Cursos', emoji: '🎓' },
+  { value: 'beforeAfter', label: 'Antes/Después', emoji: '📸' },
+] as const;
+
+type AdminTabValue = typeof ADMIN_TABS[number]['value'];
+
 export default function AdminDashboard() {
   const [, navigate] = useLocation();
+  const [activeTab, setActiveTab] = useState<AdminTabValue>('memberships');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedProofId, setSelectedProofId] = useState<number | null>(null);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
@@ -1083,50 +1102,38 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="memberships" className="space-y-4">
-          <div className="w-full">
-            <TabsList className="bg-[#C5A55A]/10 h-auto flex flex-wrap gap-1 p-1 w-full justify-start">
-              {([
-                { value: 'memberships', label: 'Membresías' },
-                { value: 'appointments', label: 'Citas' },
-                { value: 'giftPurchases', label: 'Regalos' },
-                { value: 'promotions', label: 'Promociones' },
-                { value: 'ebook', label: 'eBook' },
-                { value: 'subscribers', label: 'Suscriptores' },
-                { value: 'servicePurchases', label: 'Compras Serv.' },
-                { value: 'services', label: 'Servicios' },
-                { value: 'products', label: 'Productos' },
-                { value: 'productPurchases', label: 'Compras Prod.' },
-                { value: 'discountCodes', label: 'Cód. Descuento' },
-                { value: 'courses', label: 'Cursos' },
-                { value: 'beforeAfter', label: 'Antes/Después' },
-              ] as const).map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="whitespace-nowrap text-xs sm:text-sm px-3 py-2 text-[#1A1A1A] data-[state=active]:text-white data-[state=active]:bg-[#C5A55A] data-[state=inactive]:text-[#1A1A1A]/70 hover:text-[#C5A55A] font-medium"
-                >
-                  {tab.label}
-                  {tab.value === 'subscribers' && couponSubscribers && couponSubscribers.length > 0 && (
-                    <span className="ml-1 bg-[#C5A55A] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{couponSubscribers.length}</span>
-                  )}
-                  {tab.value === 'servicePurchases' && servicePurchases && servicePurchases.filter(p => p.status === 'pending').length > 0 && (
-                    <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicePurchases.filter(p => p.status === 'pending').length}</span>
-                  )}
-                  {tab.value === 'services' && servicesCatalog && (
-                    <span className="ml-1 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{servicesCatalog.length}</span>
-                  )}
-                  {tab.value === 'products' && productsCatalog && (
-                    <span className="ml-1 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-1.5 py-0.5 rounded-full">{productsCatalog.length}</span>
-                  )}
-                  {tab.value === 'productPurchases' && productPurchases && productPurchases.filter((p: any) => p.status === 'pending').length > 0 && (
-                    <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{productPurchases.filter((p: any) => p.status === 'pending').length}</span>
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
+        {/* Navegación del panel - cuadrícula siempre visible */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 mb-4">
+          {ADMIN_TABS.map((tab) => {
+            const isActive = activeTab === tab.value;
+            let badge: number | null = null;
+            if (tab.value === 'subscribers' && couponSubscribers) badge = couponSubscribers.length;
+            if (tab.value === 'servicePurchases' && servicePurchases) badge = servicePurchases.filter(p => p.status === 'pending').length;
+            if (tab.value === 'productPurchases' && productPurchases) badge = (productPurchases as any[]).filter(p => p.status === 'pending').length;
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => setActiveTab(tab.value)}
+                className={`relative flex flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-3 text-center transition-all ${
+                  isActive
+                    ? 'border-[#C5A55A] bg-[#C5A55A] text-white shadow-md'
+                    : 'border-[#C5A55A]/30 bg-white text-[#1A1A1A] hover:border-[#C5A55A] hover:bg-[#C5A55A]/10'
+                }`}
+              >
+                <span className="text-lg leading-none">{tab.emoji}</span>
+                <span className="text-[11px] font-semibold leading-tight">{tab.label}</span>
+                {badge !== null && badge > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">{badge}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Contenido de la sección activa */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as AdminTabValue)} className="space-y-4">
+          <TabsList className="hidden" />
 
           {/* Memberships Tab */}
           <TabsContent value="memberships" className="space-y-4">

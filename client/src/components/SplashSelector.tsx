@@ -272,7 +272,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   /* ── Pantalla de transición ── */
   if (isTransitioning) {
     return (
-      <div className="fixed inset-0 z-[99999] bg-white flex flex-col items-center justify-center">
+      <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center">
         <div className="flex flex-col items-center gap-6">
           <div className="relative flex items-center justify-center">
             <div className="absolute w-28 h-28 rounded-full border-t-2 border-[#C5A55A] animate-spin" />
@@ -281,7 +281,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
           <div className="flex flex-col items-center gap-1">
             <p className="text-[#C5A55A] text-xs tracking-[0.4em] uppercase font-light animate-pulse">Cargando</p>
-            <p className="text-black/40 text-[10px] tracking-[0.2em] uppercase">Aesthetic &amp; Nutrition</p>
+            <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase">Aesthetic &amp; Nutrition</p>
           </div>
         </div>
       </div>

@@ -9,7 +9,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function BeforeAfterSection() {
   const { data: photos, isLoading } = trpc.beforeAfter.list.useQuery();
-  const [activeFilter, setActiveFilter] = useState<"all" | "nutricion" | "estetica" | "ambos">("all");
+  const [activeFilter, setActiveFilter] = useState<"all" | "nutricion" | "estetica">("all");
 
   const filtered = photos?.filter(
     (p) => activeFilter === "all" || p.category === activeFilter
@@ -51,7 +51,7 @@ export default function BeforeAfterSection() {
 
         {/* Filtros */}
         <div className="flex justify-center gap-3 mb-10 flex-wrap">
-          {(["all", "nutricion", "estetica", "ambos"] as const).map((f) => (
+          {(["all", "nutricion", "estetica"] as const).map((f) => (
             <button
               type="button"
               key={f}

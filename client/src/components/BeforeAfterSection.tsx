@@ -93,7 +93,7 @@ function BeforeAfterCard({ photo }: { photo: {
         <img
           src={photo.beforeImageUrl}
           alt={`Transformación - ${photo.patientName}`}
-          className="w-full h-72 object-cover object-top"
+          className="w-full object-contain bg-black"
         />
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 flex gap-4">
           <span className="text-white/80 text-xs tracking-widest uppercase font-light">Antes</span>

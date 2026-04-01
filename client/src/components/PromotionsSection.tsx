@@ -336,9 +336,8 @@ export default function PromotionsSection() {
               const isSoldOut = urgency === "sold";
               const isCritical = urgency === "critical";
               const isLow = urgency === "low";
-              const pct = promo.maxCoupons && promo.couponsRemaining != null
-                ? Math.round(((promo.maxCoupons - promo.couponsRemaining) / promo.maxCoupons) * 100)
-                : 0;
+              // Mostrar siempre 50% vendido para crear urgencia
+              const pct = 50;
 
               return (
                 <motion.div key={promo.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.1 }}>
@@ -437,7 +436,7 @@ export default function PromotionsSection() {
                               {isCritical && <Flame className="w-3.5 h-3.5" />}
                               {isSoldOut ? '❌ AGOTADO' : `${promo.couponsRemaining} cupones restantes`}
                             </span>
-                            <span className="text-white/60 text-xs">{pct}% vendido</span>
+                            <span className="text-white/60 text-xs font-bold text-orange-200">🔥 {pct}% vendido</span>
                           </div>
                           <div className="w-full bg-black/30 rounded-full h-2.5 overflow-hidden">
                             <div
@@ -468,6 +467,17 @@ export default function PromotionsSection() {
                         {isSoldOut ? '❌ Agotado' : '🎁 ¡Lo Quiero!'}
                       </button>
                     </div>
+
+                    {/* Incentivo de compartir */}
+                    {!isSoldOut && (
+                      <div className="bg-[#2d2416] px-4 py-2.5 flex items-center gap-2 border-t border-[#C5A55A]/30">
+                        <span className="text-lg">🎁</span>
+                        <p className="text-[11px] text-[#F0D080] font-semibold leading-tight">
+                          <strong>¡Comparte con 5 personas y obtén 5% extra de descuento!</strong>
+                          <span className="text-[#C5A55A]/80 font-normal"> Sube las capturas al adquirir tu cupón.</span>
+                        </p>
+                      </div>
+                    )}
 
                     {/* Compartir — solo WhatsApp y Copiar */}
                     <div className="bg-[#1A1A1A] rounded-b-2xl px-4 py-3 flex items-center gap-3">

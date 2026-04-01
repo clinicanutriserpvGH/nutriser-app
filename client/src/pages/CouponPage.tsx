@@ -542,9 +542,18 @@ export default function CouponPage() {
 
                           {/* Datos del cliente */}
                           <div className="space-y-3 mb-4">
-                            <Input placeholder="Tu nombre *" value={payName} onChange={e => setPayName(e.target.value)} />
-                            <Input placeholder="Tu teléfono (WhatsApp) *" value={payPhone} onChange={e => setPayPhone(e.target.value)} />
-                            <Input placeholder="Tu correo (opcional)" value={payEmail} onChange={e => setPayEmail(e.target.value)} />
+                            <div>
+                              <label className="text-xs font-semibold text-[#1A1A1A] mb-1 block">Nombre completo *</label>
+                              <Input placeholder="Tony Robles" value={payName} onChange={e => setPayName(e.target.value)} className="text-[#1A1A1A] placeholder:text-gray-400" />
+                            </div>
+                            <div>
+                              <label className="text-xs font-semibold text-[#1A1A1A] mb-1 block">Correo electrónico *</label>
+                              <Input placeholder="tu@correo.com" value={payEmail} onChange={e => setPayEmail(e.target.value)} className="text-[#1A1A1A] placeholder:text-gray-400" />
+                            </div>
+                            <div>
+                              <label className="text-xs font-semibold text-[#1A1A1A] mb-1 block">Teléfono *</label>
+                              <Input placeholder="322 000 0000" value={payPhone} onChange={e => setPayPhone(e.target.value)} className="text-[#1A1A1A] placeholder:text-gray-400" />
+                            </div>
                           </div>
 
                           {/* Instrucciones de pago */}

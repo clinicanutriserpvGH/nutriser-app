@@ -289,6 +289,12 @@ export default function CouponCard({
         <div style={{ height: "4px", background: "linear-gradient(90deg, #C5A55A, #F0D080, #C5A55A)" }} />
       </div>
 
+      {/* Incentivo de compartir */}
+      <div className="w-full max-w-[360px] bg-gradient-to-r from-[#C5A55A]/15 to-[#F0D080]/15 border border-[#C5A55A]/40 rounded-xl px-4 py-3 text-center">
+        <p className="text-[#8B6914] font-bold text-sm mb-0.5">🎁 ¡Comparte con 5 personas y obtén 5% extra de descuento!</p>
+        <p className="text-[#666] text-xs">Comparte este cupón por WhatsApp con 5 amigos y presenta las capturas al momento de tu cita para recibir tu descuento adicional.</p>
+      </div>
+
       {/* Botones de acción */}
       <div className="flex gap-3 w-full max-w-[360px]">
         <Button

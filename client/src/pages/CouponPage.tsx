@@ -79,9 +79,8 @@ export default function CouponPage() {
             const isSoldOut = urgency === "sold";
             const isCritical = urgency === "critical";
             const isLow = urgency === "low";
-            const pct = promo.maxCoupons && promo.couponsRemaining != null
-              ? Math.round(((promo.maxCoupons - promo.couponsRemaining) / promo.maxCoupons) * 100)
-              : 0;
+            // Siempre mostrar 50% vendido para crear urgencia
+            const pct = isSoldOut ? 100 : 50;
 
             return (
               <div>
@@ -209,6 +208,12 @@ export default function CouponPage() {
                     >
                       {isSoldOut ? '❌ Agotado' : '🎁 ¡Lo Quiero! — Adquirir Cupón'}
                     </button>
+
+                    {/* Incentivo de compartir */}
+                    <div className="mt-4 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-center">
+                      <p className="text-white font-bold text-sm mb-1">🎁 ¡Comparte con 5 personas y obtén 5% extra!</p>
+                      <p className="text-white/70 text-xs">Comparte este cupón con 5 amigos por WhatsApp y presenta las capturas al momento de tu cita para recibir 5% adicional de descuento.</p>
+                    </div>
 
                     <p className="text-white/60 text-xs text-center mt-3">
                       * Previa cita requerida · Válido en Nutriser Puerto Vallarta

@@ -1626,25 +1626,7 @@ export default function AdminDashboard() {
                       </div>
                     )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
-                      Cupones disponibles
-                      <span className="text-[#999] font-normal ml-2">(opcional, deja vacío para ilimitados)</span>
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Ej: 20 (se muestra contador de urgencia)"
-                      value={promotionMaxCoupons}
-                      onChange={(e) => setPromotionMaxCoupons(e.target.value)}
-                      className="w-full px-4 py-2 border border-[#C5A55A]/30 rounded-lg focus:outline-none focus:border-[#C5A55A]"
-                    />
-                    {promotionMaxCoupons && parseInt(promotionMaxCoupons) > 0 && (
-                      <p className="text-xs text-[#C5A55A] mt-1">
-                        Se mostrará "Quedan {promotionMaxCoupons} cupones" en la cuponera pública
-                      </p>
-                    )}
-                  </div>
+
                   <div>
                     <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
                       Fecha límite para canjear
@@ -1739,17 +1721,7 @@ export default function AdminDashboard() {
                                   <img src={editPromoImagePreview || promo.imageUrl} alt="Preview" className="w-20 h-20 object-cover rounded mt-1 border" />
                                 )}
                               </div>
-                              <div>
-                                <label className="block text-xs font-semibold text-[#1A1A1A] mb-1">Cupones disponibles</label>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  placeholder="Vacío = ilimitados"
-                                  value={editPromoMaxCoupons}
-                                  onChange={(e) => setEditPromoMaxCoupons(e.target.value)}
-                                  className="w-full px-3 py-2 border border-[#C5A55A]/30 rounded-lg text-sm focus:outline-none focus:border-[#C5A55A]"
-                                />
-                              </div>
+
                               <div>
                                 <label className="block text-xs font-semibold text-[#1A1A1A] mb-1">Fecha límite</label>
                                 <input

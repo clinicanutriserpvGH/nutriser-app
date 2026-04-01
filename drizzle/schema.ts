@@ -492,3 +492,35 @@ export const courseSubscribers = mysqlTable("courseSubscribers", {
 });
 export type CourseSubscriber = typeof courseSubscribers.$inferSelect;
 export type InsertCourseSubscriber = typeof courseSubscribers.$inferInsert;
+
+/**
+ * Sugerencias de temas para Nutriser Academy
+ * Los usuarios proponen temas y pueden votar los de otros
+ */
+export const topicSuggestions = mysqlTable("topicSuggestions", {
+  id: int("id").autoincrement().primaryKey(),
+  authorName: varchar("authorName", { length: 255 }).notNull(),
+  authorEmail: varchar("authorEmail", { length: 320 }),
+  title: varchar("title", { length: 255 }).notNull(), // Título del tema sugerido
+  description: text("description"), // Descripción opcional
+  votes: int("votes").default(0).notNull(), // Contador de votos
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "published"]).default("pending").notNull(),
+  // pending = esperando moderación, approved = visible, rejected = rechazado, published = ya se hizo el video
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type TopicSuggestion = typeof topicSuggestions.$inferSelect;
+export type InsertTopicSuggestion = typeof topicSuggestions.$inferInsert;
+
+/**
+ * Votos de sugerencias de temas
+ * Evita que el mismo dispositivo vote dos veces
+ */
+export const topicVotes = mysqlTable("topicVotes", {
+  id: int("id").autoincrement().primaryKey(),
+  suggestionId: int("suggestionId").notNull(),
+  voterFingerprint: varchar("voterFingerprint", { length: 255 }).notNull(), // IP + user agent hash
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type TopicVote = typeof topicVotes.$inferSelect;
+export type InsertTopicVote = typeof topicVotes.$inferInsert;

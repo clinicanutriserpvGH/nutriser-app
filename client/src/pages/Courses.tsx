@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { PlayCircle, FileText, MessageSquare, Bell, BellOff, ChevronLeft, Download, Clock, BookOpen, Send, CheckCircle } from "lucide-react";
+import { PlayCircle, FileText, MessageSquare, Bell, BellOff, ChevronLeft, Download, Clock, BookOpen, Send, CheckCircle, ThumbsUp, Lightbulb, Users } from "lucide-react";
 import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -68,6 +68,27 @@ export default function Courses() {
   const [commentSubmitted, setCommentSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState<"videos" | "comments" | "documents">("videos");
 
+  // Foro de sugerencias
+  const [suggestionTitle, setSuggestionTitle] = useState("");
+  const [suggestionDesc, setSuggestionDesc] = useState("");
+  const [suggestionName, setSuggestionName] = useState("");
+  const [suggestionSubmitted, setSuggestionSubmitted] = useState(false);
+  const [showSuggestionForm, setShowSuggestionForm] = useState(false);
+  const [voterFingerprint] = useState(() => {
+    let fp = localStorage.getItem('nutriser_voter_fp');
+    if (!fp) {
+      fp = Math.random().toString(36).substring(2) + Date.now().toString(36);
+      localStorage.setItem('nutriser_voter_fp', fp);
+    }
+    return fp;
+  });
+  const [votedIds, setVotedIds] = useState<Set<number>>(() => {
+    try {
+      const stored = localStorage.getItem('nutriser_voted_suggestions');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch { return new Set(); }
+  });
+
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
   const pushSubscribeMutation = trpc.push.subscribe.useMutation();
 
@@ -91,9 +112,53 @@ export default function Courses() {
     { enabled: !!selectedVideo }
   );
 
+  const { data: suggestions = [], refetch: refetchSuggestions } = trpc.suggestions.listApproved.useQuery();
+
+  const createSuggestionMutation = trpc.suggestions.create.useMutation({
+    onSuccess: () => {
+      setSuggestionSubmitted(true);
+      setSuggestionTitle("");
+      setSuggestionDesc("");
+      setSuggestionName("");
+      setShowSuggestionForm(false);
+      refetchSuggestions();
+      toast.success("\u00a1Sugerencia enviada! Será revisada por nuestro equipo.");
+    },
+    onError: () => {
+      toast.error("No se pudo enviar la sugerencia.");
+    },
+  });
+
+  const voteMutation = trpc.suggestions.vote.useMutation({
+    onSuccess: (data, variables) => {
+      if (data.alreadyVoted) {
+        toast.info("Ya votaste por esta sugerencia.");
+      } else {
+        const newVoted = new Set(votedIds);
+        newVoted.add(variables.suggestionId);
+        setVotedIds(newVoted);
+        localStorage.setItem('nutriser_voted_suggestions', JSON.stringify(Array.from(newVoted)));
+        refetchSuggestions();
+        toast.success("\u00a1Voto registrado!");
+      }
+    },
+  });
+
+  const handleSubmitSuggestion = () => {
+    if (!suggestionTitle.trim() || suggestionTitle.trim().length < 5) {
+      toast.error("El título debe tener al menos 5 caracteres.");
+      return;
+    }
+    createSuggestionMutation.mutate({
+      title: suggestionTitle.trim(),
+      description: suggestionDesc.trim() || undefined,
+      authorName: suggestionName.trim() || 'Anónimo',
+    });
+  };
+
   const subscribeMutation = trpc.courses.subscribe.useMutation({
     onSuccess: () => {
-      toast.success("¡Suscrito! Te notificaremos cuando haya nuevos cursos.");
+      toast.success("¡Suscrito! Te notificaremos cuando nuestros expertos en salud publiquen nuevo contenido.");
       setShowSubscribeModal(false);
       setSubscribeEmail("");
       setSubscribeName("");
@@ -217,17 +282,17 @@ export default function Courses() {
             <span className="text-[#C5A55A] font-semibold text-sm uppercase tracking-widest">Nutriser Academy</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
-            Nutrición <span className="text-[#C5A55A] italic">en Video</span>
+            Expertos <span className="text-[#C5A55A] italic">en Salud</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8">
-            Aprende sobre nutrición, bienestar y estética con nuestros expertos. Suscríbete para estar al tanto de cada nuevo contenido.
+            Aprende con nuestros expertos en nutrición, bienestar y estética a través de videos, cursos y material exclusivo. Suscríbete para no perderte ningún contenido nuevo.
           </p>
           <Button
             onClick={() => setShowSubscribeModal(true)}
             className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
           >
             <Bell className="w-5 h-5" />
-            Suscríbete para recibir nuevos cursos
+            Suscríbete para recibir contenido de expertos
           </Button>
         </div>
       </section>
@@ -523,7 +588,7 @@ export default function Courses() {
           <div>
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-serif font-bold text-[#1A1A1A]">Todos los cursos</h2>
+                <h2 className="text-2xl font-serif font-bold text-[#1A1A1A]">Cursos de Expertos en Salud</h2>
                 <p className="text-gray-500 text-sm mt-1">{courses.length} curso{courses.length !== 1 ? "s" : ""} disponible{courses.length !== 1 ? "s" : ""}</p>
               </div>
             </div>
@@ -553,14 +618,14 @@ export default function Courses() {
                     </div>
                   </div>
                   <h3 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-3">Contenido en preparación</h3>
-                  <p className="text-gray-500 max-w-md mx-auto mb-2">Estamos creando contenido exclusivo de nutrición y bienestar para ti.</p>
-                  <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete y sé el primero en enterarte cuando publiquemos nuevos cursos, tutoriales y material de apoyo.</p>
+                  <p className="text-gray-500 max-w-md mx-auto mb-2">Nuestros expertos en salud están preparando contenido exclusivo de nutrición, bienestar y estética para ti.</p>
+                  <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete y sé el primero en enterarte cuando publiquemos nuevos cursos, videos y material de apoyo de nuestros expertos.</p>
                   <Button
                     onClick={() => setShowSubscribeModal(true)}
                     className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3.5 rounded-full font-semibold shadow-lg shadow-[#C5A55A]/20"
                   >
                     <Bell className="w-4 h-4 mr-2" />
-                    Suscríbeme para recibir notificaciones
+                    Suscríbeme para recibir contenido de expertos
                   </Button>
                   <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
                     <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
@@ -568,21 +633,21 @@ export default function Courses() {
                         <Bell className="w-4 h-4 text-[#C5A55A]" />
                       </div>
                       <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Notificaciones instantáneas</p>
-                      <p className="text-xs text-gray-400">Recibe un aviso en el momento que se publique nuevo contenido.</p>
+                      <p className="text-xs text-gray-400">Recibe un aviso en el momento que nuestros expertos publiquen nuevo contenido.</p>
                     </div>
                     <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
                       <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">
                         <FileText className="w-4 h-4 text-[#C5A55A]" />
                       </div>
                       <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Material de apoyo</p>
-                      <p className="text-xs text-gray-400">Cada curso incluye documentos y recursos descargables.</p>
+                      <p className="text-xs text-gray-400">Cada curso incluye documentos, guías y recursos descargables de nuestros expertos.</p>
                     </div>
                     <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
                       <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">
                         <MessageSquare className="w-4 h-4 text-[#C5A55A]" />
                       </div>
-                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Foro de comentarios</p>
-                      <p className="text-xs text-gray-400">Participa con preguntas y comentarios en cada video.</p>
+                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Foro de sugerencias</p>
+                      <p className="text-xs text-gray-400">Propón temas y vota por los que más te interesan para que nuestros expertos los aborden.</p>
                     </div>
                   </div>
                 </div>
@@ -604,7 +669,7 @@ export default function Courses() {
                         </div>
                       )}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                        <div className="bg-[#C5A55A] text-white text-sm font-semibold px-4 py-2 rounded-full">Ver curso</div>
+                        <div className="bg-[#C5A55A] text-white text-sm font-semibold px-4 py-2 rounded-full">Ver contenido</div>
                       </div>
                     </div>
                     <div className="p-5">
@@ -615,7 +680,7 @@ export default function Courses() {
                       {course.description && <p className="text-sm text-gray-500 line-clamp-2">{course.description}</p>}
                       <div className="flex items-center gap-1 mt-3 text-[#C5A55A] text-sm font-medium">
                         <PlayCircle className="w-4 h-4" />
-                        <span>Ver videos →</span>
+                        <span>Ver contenido →</span>
                       </div>
                     </div>
                   </button>
@@ -635,7 +700,7 @@ export default function Courses() {
               Recibir notificaciones
             </DialogTitle>
           </DialogHeader>
-          <p className="text-gray-500 text-sm">Te avisaremos cuando publiquemos nuevos cursos y contenido gratuito.</p>
+          <p className="text-gray-500 text-sm">Te avisaremos cuando nuestros expertos en salud publiquen nuevos cursos, videos y material exclusivo.</p>
           <div className="space-y-3 mt-2">
             <Input
               placeholder="Tu nombre"
@@ -681,6 +746,155 @@ export default function Courses() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ============================================================
+           FORO DE SUGERENCIAS DE TEMAS
+           ============================================================ */}
+      <section className="bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Encabezado */}
+          <div className="text-center mb-10">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <Lightbulb className="w-7 h-7 text-[#C5A55A]" />
+              <span className="text-[#C5A55A] font-semibold text-sm uppercase tracking-widest">Foro de Sugerencias</span>
+            </div>
+            <h2 className="text-3xl font-serif font-bold text-white mb-3">
+              ¿Qué tema quieres que aborden nuestros expertos?
+            </h2>
+            <p className="text-gray-400 max-w-xl mx-auto">
+              Propón temas de salud, nutrición o estética y vota por las sugerencias de otros. Los temas más votados serán cubiertos por nuestros expertos.
+            </p>
+          </div>
+
+          {/* Formulario de sugerencia */}
+          {!showSuggestionForm && !suggestionSubmitted ? (
+            <div className="text-center mb-10">
+              <Button
+                onClick={() => setShowSuggestionForm(true)}
+                className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
+              >
+                <Lightbulb className="w-5 h-5" />
+                Sugerir un tema
+              </Button>
+            </div>
+          ) : suggestionSubmitted ? (
+            <div className="bg-white/10 border border-[#C5A55A]/30 rounded-2xl p-6 text-center mb-10">
+              <CheckCircle className="w-10 h-10 text-[#C5A55A] mx-auto mb-3" />
+              <p className="font-semibold text-white text-lg">¡Sugerencia enviada!</p>
+              <p className="text-gray-400 text-sm mt-1">Tu propuesta será revisada y publicada si es aprobada.</p>
+              <button
+                onClick={() => setSuggestionSubmitted(false)}
+                className="mt-4 text-[#C5A55A] text-sm hover:underline"
+              >
+                Enviar otra sugerencia
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-10">
+              <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-[#C5A55A]" />
+                Nueva sugerencia de tema
+              </h3>
+              <div className="space-y-3">
+                <Input
+                  placeholder="Tu nombre (opcional)"
+                  value={suggestionName}
+                  onChange={(e) => setSuggestionName(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
+                />
+                <Input
+                  placeholder="Título del tema * (mín. 5 caracteres)"
+                  value={suggestionTitle}
+                  onChange={(e) => setSuggestionTitle(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
+                />
+                <Textarea
+                  placeholder="Descripción adicional (opcional) — ¿Por qué es importante este tema?"
+                  value={suggestionDesc}
+                  onChange={(e) => setSuggestionDesc(e.target.value)}
+                  rows={3}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
+                />
+              </div>
+              <div className="flex gap-3 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSuggestionForm(false)}
+                  className="border-white/20 text-gray-300 hover:bg-white/10"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSubmitSuggestion}
+                  disabled={createSuggestionMutation.isPending}
+                  className="bg-[#C5A55A] hover:bg-[#B8944A] text-white flex-1"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  {createSuggestionMutation.isPending ? "Enviando..." : "Enviar sugerencia"}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Lista de sugerencias aprobadas */}
+          {suggestions.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-5">
+                <Users className="w-5 h-5 text-[#C5A55A]" />
+                <h3 className="text-white font-semibold">
+                  Sugerencias de la comunidad ({suggestions.length})
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {suggestions.map((s) => (
+                  <div
+                    key={s.id}
+                    className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-start gap-4 hover:border-[#C5A55A]/30 transition-colors"
+                  >
+                    {/* Botón de voto */}
+                    <button
+                      onClick={() => voteMutation.mutate({ suggestionId: s.id, voterFingerprint: voterFingerprint })}
+                      disabled={votedIds.has(s.id) || voteMutation.isPending}
+                      className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl border transition-all ${
+                        votedIds.has(s.id)
+                          ? 'border-[#C5A55A] bg-[#C5A55A]/10 text-[#C5A55A]'
+                          : 'border-white/20 text-gray-400 hover:border-[#C5A55A]/50 hover:text-[#C5A55A]'
+                      }`}
+                    >
+                      <ThumbsUp className="w-4 h-4" />
+                      <span className="text-sm font-bold">{s.votes}</span>
+                    </button>
+                    {/* Contenido */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-white leading-tight">{s.title}</p>
+                      {s.description && (
+                        <p className="text-gray-400 text-sm mt-1 leading-relaxed">{s.description}</p>
+                      )}
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="text-xs text-gray-500">
+                          Por {s.authorName || 'Anónimo'}
+                        </span>
+                        {s.status === 'published' && (
+                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                            ✅ Ya publicado
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {suggestions.length === 0 && (
+            <div className="text-center py-8">
+              <Lightbulb className="w-12 h-12 text-[#C5A55A]/30 mx-auto mb-3" />
+              <p className="text-gray-500">¡Sé el primero en sugerir un tema!</p>
+            </div>
+          )}
+        </div>
+      </section>
 
       <Footer />
       <WhatsAppButton />

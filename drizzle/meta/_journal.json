@@ -211,6 +211,13 @@
       "when": 1774965492055,
       "tag": "0029_black_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1775029057381,
+      "tag": "0030_big_sage",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { eq, desc, and, lt, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, couponSubscribers, InsertCouponSubscriber, services, InsertService } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, couponSubscribers, InsertCouponSubscriber, services, InsertService, topicSuggestions, InsertTopicSuggestion, topicVotes } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { products, InsertProduct, productPurchases, InsertProductPurchase, discountCodes, InsertDiscountCode, DiscountCode } from '../drizzle/schema';
 
@@ -983,4 +983,90 @@ export async function deleteCourseSubscriber(id: number) {
   if (!db) throw new Error("Database not available");
   await db.delete(courseSubscribers).where(eq(courseSubscribers.id, id));
   return { success: true };
+}
+
+
+// ============================================================
+// TOPIC SUGGESTIONS (Foro de sugerencias para Nutriser Academy)
+// ============================================================
+
+export async function getApprovedSuggestions() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(topicSuggestions)
+    .where(eq(topicSuggestions.status, "approved"))
+    .orderBy(desc(topicSuggestions.votes), desc(topicSuggestions.createdAt));
+}
+
+export async function getAllSuggestions() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(topicSuggestions)
+    .orderBy(desc(topicSuggestions.createdAt));
+}
+
+export async function getPendingSuggestions() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(topicSuggestions)
+    .where(eq(topicSuggestions.status, "pending"))
+    .orderBy(desc(topicSuggestions.createdAt));
+}
+
+export async function createTopicSuggestion(data: InsertTopicSuggestion) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(topicSuggestions).values(data);
+  const [inserted] = await db.select().from(topicSuggestions).orderBy(desc(topicSuggestions.id)).limit(1);
+  return inserted;
+}
+
+export async function approveSuggestion(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(topicSuggestions).set({ status: "approved" }).where(eq(topicSuggestions.id, id));
+  return { success: true };
+}
+
+export async function rejectSuggestion(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(topicSuggestions).set({ status: "rejected" }).where(eq(topicSuggestions.id, id));
+  return { success: true };
+}
+
+export async function markSuggestionPublished(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(topicSuggestions).set({ status: "published" }).where(eq(topicSuggestions.id, id));
+  return { success: true };
+}
+
+export async function deleteSuggestion(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(topicVotes).where(eq(topicVotes.suggestionId, id));
+  await db.delete(topicSuggestions).where(eq(topicSuggestions.id, id));
+  return { success: true };
+}
+
+export async function voteForSuggestion(suggestionId: number, voterFingerprint: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Check if already voted
+  const [existing] = await db.select().from(topicVotes)
+    .where(and(eq(topicVotes.suggestionId, suggestionId), eq(topicVotes.voterFingerprint, voterFingerprint)));
+  if (existing) return { alreadyVoted: true };
+  // Register vote
+  await db.insert(topicVotes).values({ suggestionId, voterFingerprint });
+  await db.update(topicSuggestions).set({ votes: sql`votes + 1` }).where(eq(topicSuggestions.id, suggestionId));
+  return { alreadyVoted: false };
+}
+
+export async function hasVoted(suggestionId: number, voterFingerprint: string) {
+  const db = await getDb();
+  if (!db) return false;
+  const [existing] = await db.select().from(topicVotes)
+    .where(and(eq(topicVotes.suggestionId, suggestionId), eq(topicVotes.voterFingerprint, voterFingerprint)));
+  return !!existing;
 }

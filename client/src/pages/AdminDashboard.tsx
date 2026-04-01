@@ -21,6 +21,7 @@ const ADMIN_TABS = [
   { value: 'productPurchases', label: 'Compras Prod.', emoji: '🛒' },
   { value: 'discountCodes', label: 'Descuentos', emoji: '💰' },
   { value: 'courses', label: 'Cursos', emoji: '🎓' },
+  { value: 'suggestions', label: 'Sugerencias', emoji: '💡' },
   { value: 'beforeAfter', label: 'Antes/Después', emoji: '📸' },
 ] as const;
 
@@ -480,6 +481,27 @@ export default function AdminDashboard() {
   const deleteDocumentMutation = trpc.courses.deleteDocument.useMutation({
     onSuccess: () => { toast.success('Documento eliminado'); refetchCourses(); },
     onError: () => toast.error('Error al eliminar documento'),
+  });
+
+  // Hooks de Sugerencias de Temas (Expertos en Salud)
+  const { data: allSuggestions = [], refetch: refetchSuggestions } = trpc.suggestions.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const approveSuggestionMutation = trpc.suggestions.approve.useMutation({
+    onSuccess: () => { toast.success('Sugerencia aprobada'); refetchSuggestions(); },
+    onError: () => toast.error('Error al aprobar sugerencia'),
+  });
+  const rejectSuggestionMutation = trpc.suggestions.reject.useMutation({
+    onSuccess: () => { toast.success('Sugerencia rechazada'); refetchSuggestions(); },
+    onError: () => toast.error('Error al rechazar sugerencia'),
+  });
+  const markPublishedMutation = trpc.suggestions.markPublished.useMutation({
+    onSuccess: () => { toast.success('Marcado como publicado'); refetchSuggestions(); },
+    onError: () => toast.error('Error al marcar como publicado'),
+  });
+  const deleteSuggestionMutation = trpc.suggestions.delete.useMutation({
+    onSuccess: () => { toast.success('Sugerencia eliminada'); refetchSuggestions(); },
+    onError: () => toast.error('Error al eliminar sugerencia'),
   });
 
   const handleUploadCourseVideo = async () => {
@@ -3273,6 +3295,119 @@ export default function AdminDashboard() {
                     )}
                   </div>
                 ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Sugerencias de Temas Tab */}
+          <TabsContent value="suggestions" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                  💡 Sugerencias de Temas — Expertos en Salud
+                </CardTitle>
+                <CardDescription>
+                  Modera las sugerencias de temas que los usuarios proponen para los expertos. Aprueba para que sean visibles, marca como publicado cuando se haya creado el contenido.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Resumen */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-center">
+                    <p className="text-2xl font-bold text-yellow-700">{allSuggestions.filter(s => s.status === 'pending').length}</p>
+                    <p className="text-xs text-yellow-600">Pendientes</p>
+                  </div>
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
+                    <p className="text-2xl font-bold text-green-700">{allSuggestions.filter(s => s.status === 'approved').length}</p>
+                    <p className="text-xs text-green-600">Aprobadas</p>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
+                    <p className="text-2xl font-bold text-blue-700">{allSuggestions.filter(s => s.status === 'published').length}</p>
+                    <p className="text-xs text-blue-600">Publicadas</p>
+                  </div>
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+                    <p className="text-2xl font-bold text-red-700">{allSuggestions.filter(s => s.status === 'rejected').length}</p>
+                    <p className="text-xs text-red-600">Rechazadas</p>
+                  </div>
+                </div>
+
+                {/* Lista de sugerencias */}
+                {allSuggestions.length === 0 ? (
+                  <p className="text-gray-400 text-center py-8">No hay sugerencias todavía.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {allSuggestions.map((s) => (
+                      <div key={s.id} className="border rounded-xl p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                s.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                s.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                s.status === 'published' ? 'bg-blue-100 text-blue-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {s.status === 'pending' ? '⏳ Pendiente' :
+                                 s.status === 'approved' ? '✅ Aprobada' :
+                                 s.status === 'published' ? '🌟 Publicada' : '❌ Rechazada'}
+                              </span>
+                              <span className="text-xs text-gray-400">👍 {s.votes} votos</span>
+                            </div>
+                            <p className="font-semibold text-[#1A1A1A]">{s.title}</p>
+                            {s.description && <p className="text-sm text-gray-500 mt-1">{s.description}</p>}
+                            <p className="text-xs text-gray-400 mt-1">Por: {s.authorName || 'Anónimo'} • {new Date(s.createdAt).toLocaleDateString('es-MX')}</p>
+                          </div>
+                          <div className="flex flex-col gap-2 flex-shrink-0">
+                            {s.status === 'pending' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  className="bg-green-500 hover:bg-green-600 text-white text-xs"
+                                  onClick={() => approveSuggestionMutation.mutate({ id: s.id })}
+                                  disabled={approveSuggestionMutation.isPending}
+                                >
+                                  Aprobar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-red-300 text-red-600 hover:bg-red-50 text-xs"
+                                  onClick={() => rejectSuggestionMutation.mutate({ id: s.id })}
+                                  disabled={rejectSuggestionMutation.isPending}
+                                >
+                                  Rechazar
+                                </Button>
+                              </>
+                            )}
+                            {s.status === 'approved' && (
+                              <Button
+                                size="sm"
+                                className="bg-blue-500 hover:bg-blue-600 text-white text-xs"
+                                onClick={() => markPublishedMutation.mutate({ id: s.id })}
+                                disabled={markPublishedMutation.isPending}
+                              >
+                                Marcar publicado
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-gray-200 text-gray-500 hover:bg-gray-50 text-xs"
+                              onClick={() => {
+                                if (confirm('¿Eliminar esta sugerencia?')) {
+                                  deleteSuggestionMutation.mutate({ id: s.id });
+                                }
+                              }}
+                              disabled={deleteSuggestionMutation.isPending}
+                            >
+                              Eliminar
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

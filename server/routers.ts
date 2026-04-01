@@ -11,6 +11,7 @@ import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotif
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
 import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
+import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions } from "./pushNotifications";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
@@ -1501,6 +1502,74 @@ export const appRouter = router({
       .input(z.object({ id: z.number(), isActive: z.boolean() }))
       .mutation(async ({ input }) => {
         return await toggleDiscountCode(input.id, input.isActive);
+      }),
+  }),
+
+  // ============================================================
+  // TOPIC SUGGESTIONS - Foro de sugerencias para Nutriser Academy
+  // ============================================================
+  suggestions: router({
+    listApproved: publicProcedure.query(async () => {
+      return await getApprovedSuggestions();
+    }),
+    listAll: publicProcedure.query(async () => {
+      return await getAllSuggestions();
+    }),
+    listPending: publicProcedure.query(async () => {
+      return await getPendingSuggestions();
+    }),
+    create: publicProcedure
+      .input(z.object({
+        title: z.string().min(5, 'El título debe tener al menos 5 caracteres').max(200),
+        description: z.string().max(1000).optional(),
+        authorName: z.string().max(100).default('Anónimo'),
+        authorEmail: z.string().email().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await createTopicSuggestion({
+          title: input.title,
+          description: input.description,
+          authorName: input.authorName || 'Anónimo',
+          authorEmail: input.authorEmail,
+          status: 'pending',
+          votes: 0,
+        });
+      }),
+    vote: publicProcedure
+      .input(z.object({
+        suggestionId: z.number(),
+        voterFingerprint: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        return await voteForSuggestion(input.suggestionId, input.voterFingerprint);
+      }),
+    hasVoted: publicProcedure
+      .input(z.object({
+        suggestionId: z.number(),
+        voterFingerprint: z.string().min(1),
+      }))
+      .query(async ({ input }) => {
+        return await hasVoted(input.suggestionId, input.voterFingerprint);
+      }),
+    approve: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await approveSuggestion(input.id);
+      }),
+    reject: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await rejectSuggestion(input.id);
+      }),
+    markPublished: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await markSuggestionPublished(input.id);
+      }),
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deleteSuggestion(input.id);
       }),
   }),
 });

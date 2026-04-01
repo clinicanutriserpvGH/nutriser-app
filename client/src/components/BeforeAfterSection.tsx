@@ -88,32 +88,18 @@ function BeforeAfterCard({ photo }: { photo: {
 } }) {
   return (
     <div className="bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/5 hover:border-[#C5A55A]/30 transition-all duration-300 group">
-      {/* Imágenes lado a lado */}
-      <div className="grid grid-cols-2 relative">
-        {/* ANTES */}
-        <div className="relative">
-          <img
-            src={photo.beforeImageUrl}
-            alt={`Antes - ${photo.patientName}`}
-            className="w-full h-64 object-cover object-top"
-          />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-            <span className="text-white/80 text-xs tracking-widest uppercase font-light">Antes</span>
-          </div>
+      {/* Imagen única (ya contiene antes y después) */}
+      <div className="relative">
+        <img
+          src={photo.beforeImageUrl}
+          alt={`Transformación - ${photo.patientName}`}
+          className="w-full h-72 object-cover object-top"
+        />
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 flex gap-4">
+          <span className="text-white/80 text-xs tracking-widest uppercase font-light">Antes</span>
+          <span className="text-[#C5A55A]/60 text-xs">→</span>
+          <span className="text-[#C5A55A] text-xs tracking-widest uppercase font-semibold">Después</span>
         </div>
-        {/* DESPUÉS */}
-        <div className="relative">
-          <img
-            src={photo.afterImageUrl}
-            alt={`Después - ${photo.patientName}`}
-            className="w-full h-64 object-cover object-top"
-          />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-            <span className="text-[#C5A55A] text-xs tracking-widest uppercase font-semibold">Después</span>
-          </div>
-        </div>
-        {/* Divisor central */}
-        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-[#C5A55A]/40 transform -translate-x-1/2" />
       </div>
 
       {/* Info */}

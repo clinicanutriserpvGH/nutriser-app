@@ -93,6 +93,13 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+  input, textarea, select {
+    color: #111111 !important;
+    background-color: #ffffff !important;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #9ca3af !important;
+  }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),

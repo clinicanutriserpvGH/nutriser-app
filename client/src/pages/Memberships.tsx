@@ -77,7 +77,7 @@ const PROGRAMS = [
     price: 4500,
     color: "#D4AF37",
     consultCount: 4,
-    exclusive: true,
+    exclusive: false,
     regularPrice: 6500,
     subtitle: "4 cavitaciones + 4 radiofrecuencias corporales + 4 mesoterapias reductoras",
     features: [

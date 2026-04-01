@@ -22,6 +22,7 @@ const ADMIN_TABS = [
   { value: 'discountCodes', label: 'Descuentos', emoji: '💰' },
   { value: 'courses', label: 'Cursos', emoji: '🎓' },
   { value: 'suggestions', label: 'Sugerencias', emoji: '💡' },
+  { value: 'shareRequests', label: 'Códigos Extra', emoji: '📲' },
   { value: 'beforeAfter', label: 'Antes/Después', emoji: '📸' },
 ] as const;
 
@@ -502,6 +503,23 @@ export default function AdminDashboard() {
   const deleteSuggestionMutation = trpc.suggestions.delete.useMutation({
     onSuccess: () => { toast.success('Sugerencia eliminada'); refetchSuggestions(); },
     onError: () => toast.error('Error al eliminar sugerencia'),
+  });
+
+  // Hooks de Solicitudes de Código Extra (CUPONEXTRA5)
+  const { data: allShareRequests = [], refetch: refetchShareRequests } = trpc.shareRequests.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const approveShareRequestMutation = trpc.shareRequests.approve.useMutation({
+    onSuccess: () => { toast.success('✅ Solicitud aprobada. Código CUPONEXTRA5 activado'); refetchShareRequests(); },
+    onError: (e) => toast.error('Error al aprobar: ' + e.message),
+  });
+  const rejectShareRequestMutation = trpc.shareRequests.reject.useMutation({
+    onSuccess: () => { toast.success('Solicitud rechazada'); refetchShareRequests(); },
+    onError: (e) => toast.error('Error al rechazar: ' + e.message),
+  });
+  const deleteShareRequestMutation = trpc.shareRequests.delete.useMutation({
+    onSuccess: () => { toast.success('Solicitud eliminada'); refetchShareRequests(); },
+    onError: (e) => toast.error('Error al eliminar: ' + e.message),
   });
 
   const handleUploadCourseVideo = async () => {
@@ -3406,6 +3424,125 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Códigos Extra Tab - Solicitudes CUPONEXTRA5 */}
+          <TabsContent value="shareRequests" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-[#1A1A1A] text-xl">📲 Solicitudes de Código Extra</CardTitle>
+                <CardDescription>
+                  Usuarios que compartieron el cupón con 5 personas y solicitan el código <strong>CUPONEXTRA5</strong> (5% extra de descuento).
+                  Revisa las capturas y aprueba o rechaza cada solicitud.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Estadísticas */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center">
+                    <div className="text-2xl font-black text-yellow-600">{allShareRequests.filter(r => r.status === 'pending').length}</div>
+                    <div className="text-xs text-yellow-700 font-semibold mt-1">Pendientes</div>
+                  </div>
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                    <div className="text-2xl font-black text-green-600">{allShareRequests.filter(r => r.status === 'approved').length}</div>
+                    <div className="text-xs text-green-700 font-semibold mt-1">Aprobadas</div>
+                  </div>
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                    <div className="text-2xl font-black text-red-600">{allShareRequests.filter(r => r.status === 'rejected').length}</div>
+                    <div className="text-xs text-red-700 font-semibold mt-1">Rechazadas</div>
+                  </div>
+                </div>
+
+                {allShareRequests.length === 0 ? (
+                  <div className="text-center py-12 text-gray-400">
+                    <div className="text-5xl mb-3">📲</div>
+                    <p className="font-semibold">No hay solicitudes de código extra aún</p>
+                    <p className="text-sm mt-1">Cuando un usuario suba capturas de compartir con 5 personas, aparecerá aquí.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {allShareRequests.map((req) => {
+                      const screenshots: string[] = (() => { try { return JSON.parse(req.screenshotUrls); } catch { return []; } })();
+                      return (
+                        <div key={req.id} className={`border-2 rounded-xl p-5 ${
+                          req.status === 'approved' ? 'border-green-300 bg-green-50' :
+                          req.status === 'rejected' ? 'border-red-200 bg-red-50' :
+                          'border-yellow-300 bg-yellow-50'
+                        }`}>
+                          {/* Header de la solicitud */}
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
+                                  req.status === 'approved' ? 'bg-green-500 text-white' :
+                                  req.status === 'rejected' ? 'bg-red-500 text-white' :
+                                  'bg-yellow-500 text-white'
+                                }`}>
+                                  {req.status === 'approved' ? '✅ APROBADO' : req.status === 'rejected' ? '❌ RECHAZADO' : '⏳ PENDIENTE'}
+                                </span>
+                                {req.status === 'approved' && (
+                                  <span className="text-xs bg-[#C5A55A] text-white font-bold px-2 py-0.5 rounded-full">CUPONEXTRA5</span>
+                                )}
+                              </div>
+                              <p className="font-bold text-[#1A1A1A]">{req.clientName}</p>
+                              <p className="text-sm text-gray-600">📞 {req.clientPhone}{req.clientEmail ? ` · ✉️ ${req.clientEmail}` : ''}</p>
+                              <p className="text-sm text-gray-500 mt-1">🏷️ Cupón: <strong>{req.promotionTitle}</strong></p>
+                              <p className="text-xs text-gray-400 mt-1">{new Date(req.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => { if (confirm('¿Eliminar esta solicitud?')) deleteShareRequestMutation.mutate({ id: req.id }); }}
+                              className="text-red-500 border-red-200 hover:bg-red-50 text-xs"
+                            >
+                              🗑️
+                            </Button>
+                          </div>
+
+                          {/* Capturas de pantalla */}
+                          {screenshots.length > 0 && (
+                            <div className="mb-4">
+                              <p className="text-xs font-semibold text-gray-600 mb-2">📸 Capturas enviadas ({screenshots.length}):</p>
+                              <div className="grid grid-cols-3 gap-2">
+                                {screenshots.map((url, idx) => (
+                                  <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="block">
+                                    <img src={url} alt={`Captura ${idx + 1}`} className="w-full aspect-square object-cover rounded-lg border border-gray-200 hover:opacity-80 transition" />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Botones de acción */}
+                          {req.status === 'pending' && (
+                            <div className="flex gap-3">
+                              <Button
+                                onClick={() => approveShareRequestMutation.mutate({ id: req.id })}
+                                disabled={approveShareRequestMutation.isPending}
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold"
+                              >
+                                ✅ Aprobar y activar CUPONEXTRA5
+                              </Button>
+                              <Button
+                                onClick={() => rejectShareRequestMutation.mutate({ id: req.id, adminNotes: 'No cumple los requisitos' })}
+                                disabled={rejectShareRequestMutation.isPending}
+                                variant="outline"
+                                className="flex-1 border-red-300 text-red-600 hover:bg-red-50 font-bold"
+                              >
+                                ❌ Rechazar
+                              </Button>
+                            </div>
+                          )}
+                          {req.status === 'approved' && req.adminNotes && (
+                            <p className="text-xs text-gray-500 mt-2">Nota: {req.adminNotes}</p>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>

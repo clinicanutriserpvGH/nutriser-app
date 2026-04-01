@@ -1070,3 +1070,52 @@ export async function hasVoted(suggestionId: number, voterFingerprint: string) {
     .where(and(eq(topicVotes.suggestionId, suggestionId), eq(topicVotes.voterFingerprint, voterFingerprint)));
   return !!existing;
 }
+
+// ─── Share Requests (Código Extra CUPONEXTRA5) ───────────────────────────────
+import { shareRequests, InsertShareRequest } from '../drizzle/schema';
+
+export async function createShareRequest(data: InsertShareRequest) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(shareRequests).values(data);
+  return { id: (result as any).insertId };
+}
+
+export async function listAllShareRequests() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(shareRequests).orderBy(sql`createdAt DESC`);
+}
+
+export async function approveShareRequest(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(shareRequests)
+    .set({ status: 'approved', codeGenerated: 'CUPONEXTRA5', approvedAt: new Date() })
+    .where(eq(shareRequests.id, id));
+  return { code: 'CUPONEXTRA5' };
+}
+
+export async function rejectShareRequest(id: number, adminNotes?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(shareRequests)
+    .set({ status: 'rejected', adminNotes: adminNotes ?? null })
+    .where(eq(shareRequests.id, id));
+  return { success: true };
+}
+
+export async function deleteShareRequest(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(shareRequests).where(eq(shareRequests.id, id));
+  return { success: true };
+}
+
+export async function validateExtraCode(code: string) {
+  // El único código extra válido es CUPONEXTRA5 → 5% de descuento
+  if (code.trim().toUpperCase() === 'CUPONEXTRA5') {
+    return { valid: true, discountPercent: 5, code: 'CUPONEXTRA5' };
+  }
+  return { valid: false, discountPercent: 0, code };
+}

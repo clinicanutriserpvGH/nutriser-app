@@ -392,15 +392,6 @@ export default function CouponPage() {
                       {isSoldOut ? '❌ Agotado' : '🎁 ¡Lo Quiero! — Adquirir Cupón'}
                     </button>
 
-                    {/* Incentivo de compartir */}
-                    <button
-                      onClick={() => setShowShareFlow(true)}
-                      className="mt-4 w-full bg-white/10 border border-white/30 hover:bg-white/20 rounded-xl px-4 py-3 text-center transition-all"
-                    >
-                      <p className="text-white font-bold text-sm mb-0.5">📲 ¡Comparte con 5 personas y obtén 5% extra!</p>
-                      <p className="text-white/70 text-xs">Toca aquí → sube tus capturas → recibe el código de descuento adicional</p>
-                    </button>
-
                     <p className="text-white/60 text-xs text-center mt-3">
                       * Previa cita requerida · Válido en Nutriser Puerto Vallarta
                     </p>
@@ -418,94 +409,7 @@ export default function CouponPage() {
                   </button>
                 </div>
 
-                {/* ═══════════════════════════════════════════════════════
-                     MODAL: SUBIR CAPTURAS PARA CÓDIGO EXTRA
-                    ═══════════════════════════════════════════════════════ */}
-                {showShareFlow && (
-                  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6 my-4 shadow-2xl">
-                      <div className="flex justify-between items-center mb-4">
-                        <h2 className="font-serif text-xl font-bold text-[#1A1A1A]">📲 Solicitar código extra</h2>
-                        <button onClick={() => { setShowShareFlow(false); setShareStep('form'); }} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
-                      </div>
 
-                      {shareStep === 'done' ? (
-                        <div className="text-center py-6">
-                          <CheckCircle className="w-14 h-14 text-green-500 mx-auto mb-3" />
-                          <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">¡Capturas enviadas!</h3>
-                          <p className="text-gray-500 text-sm mb-4">El equipo Nutriser revisará tus capturas y te enviará el código <strong>CUPONEXTRA5</strong> por WhatsApp al número que proporcionaste.</p>
-                          <p className="text-[#C5A55A] font-bold text-sm">Con ese código obtendrás 5% extra de descuento al adquirir tu cupón.</p>
-                          <Button className="mt-5 bg-[#C5A55A] hover:bg-[#B8963E] text-white" onClick={() => { setShowShareFlow(false); setShareStep('form'); }}>
-                            Cerrar
-                          </Button>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl p-3 mb-4 text-sm text-[#8B6914]">
-                            <strong>¿Cómo funciona?</strong><br />
-                            1. Comparte este cupón con 5 amigos por WhatsApp<br />
-                            2. Toma capturas de pantalla de los chats<br />
-                            3. Súbelas aquí → el admin te enviará el código <strong>CUPONEXTRA5</strong><br />
-                            4. Usa el código al pagar para obtener <strong>5% extra de descuento</strong>
-                          </div>
-
-                          <div className="space-y-3 mb-4">
-                            <Input placeholder="Tu nombre *" value={shareName} onChange={e => setShareName(e.target.value)} />
-                            <Input placeholder="Tu teléfono (WhatsApp) *" value={sharePhone} onChange={e => setSharePhone(e.target.value)} />
-                            <Input placeholder="Tu correo (opcional)" value={shareEmail} onChange={e => setShareEmail(e.target.value)} />
-                          </div>
-
-                          {/* Subir capturas */}
-                          <div className="mb-4">
-                            <p className="text-sm font-semibold text-[#1A1A1A] mb-2">Capturas de pantalla ({shareFiles.length}/10)</p>
-                            <button
-                              onClick={() => fileInputRef.current?.click()}
-                              className="w-full border-2 border-dashed border-[#C5A55A]/50 rounded-xl py-4 text-center text-[#C5A55A] hover:bg-[#C5A55A]/5 transition"
-                            >
-                              <Upload className="w-6 h-6 mx-auto mb-1" />
-                              <span className="text-sm font-medium">Toca para subir capturas</span>
-                            </button>
-                            <input
-                              ref={fileInputRef}
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              className="hidden"
-                              onChange={handleShareFilesChange}
-                            />
-                            {sharePreviewUrls.length > 0 && (
-                              <div className="grid grid-cols-3 gap-2 mt-3">
-                                {sharePreviewUrls.map((url, idx) => (
-                                  <div key={idx} className="relative rounded-lg overflow-hidden aspect-square">
-                                    <img src={url} alt={`Captura ${idx + 1}`} className="w-full h-full object-cover" />
-                                    <button
-                                      onClick={() => removeShareFile(idx)}
-                                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          <Button
-                            onClick={handleSubmitShareRequest}
-                            disabled={shareStep === 'uploading' || !shareName || !sharePhone || shareFiles.length === 0}
-                            className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold"
-                          >
-                            {shareStep === 'uploading' ? (
-                              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enviando...</>
-                            ) : (
-                              '📤 Enviar capturas'
-                            )}
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
 
                 {/* ═══════════════════════════════════════════════════════
                      MODAL: PAGO CON COMPROBANTE + CÓDIGO EXTRA

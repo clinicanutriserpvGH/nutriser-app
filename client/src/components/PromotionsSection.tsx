@@ -6,6 +6,40 @@ import { toast } from "sonner";
 
 type Step = "form" | "type" | "payment" | "success";
 
+// Contador regresivo hasta el vencimiento de la promo
+function CountdownTimer({ expiresAt }: { expiresAt: Date | string }) {
+  const [timeLeft, setTimeLeft] = useState('');
+  const [isUrgent, setIsUrgent] = useState(false);
+
+  useEffect(() => {
+    const calc = () => {
+      const now = Date.now();
+      const end = new Date(expiresAt).getTime();
+      const diff = end - now;
+      if (diff <= 0) { setTimeLeft('¡Expirado!'); return; }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      setIsUrgent(days < 2);
+      if (days > 0) setTimeLeft(`${days}d ${hours}h ${mins}m ${secs}s`);
+      else setTimeLeft(`${hours}h ${mins}m ${secs}s`);
+    };
+    calc();
+    const id = setInterval(calc, 1000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+
+  return (
+    <div className={`flex items-center gap-2 mb-3 text-xs font-bold px-3 py-2 rounded-lg ${
+      isUrgent ? 'bg-red-900/40 text-red-200 animate-pulse' : 'bg-black/20 text-white/80'
+    }`}>
+      <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+      <span>{isUrgent ? '🔥 ' : '⏳ '}Oferta termina en: <strong className="text-white">{timeLeft}</strong></span>
+    </div>
+  );
+}
+
 export default function PromotionsSection() {
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
   const [copiedId, setCopiedId] = useState<number | null>(null);
@@ -418,12 +452,9 @@ export default function PromotionsSection() {
                         </div>
                       )}
 
-                      {/* Fecha límite */}
+                      {/* Contador regresivo */}
                       {promo.expiresAt && (
-                        <div className="flex items-center gap-2 mb-3 text-white/80 text-xs">
-                          <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                          <span>Válido hasta el <strong className="text-white">{new Date(promo.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</strong></span>
-                        </div>
+                        <CountdownTimer expiresAt={promo.expiresAt} />
                       )}
 
                       {/* Contador de cupones con barra de progreso */}
@@ -467,17 +498,6 @@ export default function PromotionsSection() {
                         {isSoldOut ? '❌ Agotado' : '🎁 ¡Lo Quiero!'}
                       </button>
                     </div>
-
-                    {/* Incentivo de compartir */}
-                    {!isSoldOut && (
-                      <div className="bg-[#2d2416] px-4 py-2.5 flex items-center gap-2 border-t border-[#C5A55A]/30">
-                        <span className="text-lg">🎁</span>
-                        <p className="text-[11px] text-[#F0D080] font-semibold leading-tight">
-                          <strong>¡Comparte con 5 personas y obtén 5% extra de descuento!</strong>
-                          <span className="text-[#C5A55A]/80 font-normal"> Sube las capturas al adquirir tu cupón.</span>
-                        </p>
-                      </div>
-                    )}
 
                     {/* Compartir — solo WhatsApp y Copiar */}
                     <div className="bg-[#1A1A1A] rounded-b-2xl px-4 py-3 flex items-center gap-3">

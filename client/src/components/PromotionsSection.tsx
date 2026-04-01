@@ -370,8 +370,8 @@ export default function PromotionsSection() {
               const isSoldOut = urgency === "sold";
               const isCritical = urgency === "critical";
               const isLow = urgency === "low";
-              // Mostrar siempre 50% vendido para crear urgencia
-              const pct = 50;
+              // Porcentaje pseudo-aleatorio pero consistente por cupón (40-75%)
+              const pct = 40 + ((promo.id * 17 + 7) % 36);
 
               return (
                 <motion.div key={promo.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.1 }}>

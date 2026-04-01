@@ -257,8 +257,8 @@ export default function CouponPage() {
             const isSoldOut = urgency === "sold";
             const isCritical = urgency === "critical";
             const isLow = urgency === "low";
-            // Siempre mostrar 50% vendido para crear urgencia
-            const pct = isSoldOut ? 100 : 50;
+            // Porcentaje pseudo-aleatorio pero consistente por cupón (40-75%)
+            const pct = isSoldOut ? 100 : 40 + ((promo.id * 17 + 7) % 36);
 
             return (
               <div>

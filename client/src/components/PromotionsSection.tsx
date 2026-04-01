@@ -384,7 +384,7 @@ export default function PromotionsSection() {
                     {/* Urgency ribbon */}
                     {isCritical && !isSoldOut && (
                       <div className="absolute top-0 left-0 right-0 z-20 bg-red-600 text-white text-center py-1.5 text-xs font-black tracking-widest uppercase flex items-center justify-center gap-1 animate-pulse">
-                        <Flame className="w-3.5 h-3.5" /> ¡ÚLTIMOS {promo.couponsRemaining} CUPONES! <Flame className="w-3.5 h-3.5" />
+                        <Flame className="w-3.5 h-3.5" /> ¡ÚTIMOS CUPONES DISPONIBLES! <Flame className="w-3.5 h-3.5" />
                       </div>
                     )}
                     {isLow && !isSoldOut && (
@@ -465,7 +465,7 @@ export default function PromotionsSection() {
                               isCritical ? 'text-red-200' : isLow ? 'text-orange-200' : 'text-white/80'
                             }`}>
                               {isCritical && <Flame className="w-3.5 h-3.5" />}
-                              {isSoldOut ? '❌ AGOTADO' : `${promo.couponsRemaining} cupones restantes`}
+                              {isSoldOut ? '❌ AGOTADO' : '⚡ Cupones limitados'}
                             </span>
                             <span className="text-white/60 text-xs font-bold text-orange-200">🔥 {pct}% vendido</span>
                           </div>

@@ -277,7 +277,7 @@ export default function CouponPage() {
                   {/* Urgency ribbon */}
                   {isCritical && !isSoldOut && (
                     <div className="bg-red-600 text-white text-center py-2 text-sm font-black tracking-widest uppercase flex items-center justify-center gap-2 animate-pulse">
-                      <Flame className="w-4 h-4" /> ¡ÚLTIMOS {promo.couponsRemaining} CUPONES! <Flame className="w-4 h-4" />
+                      <Flame className="w-4 h-4" /> ¡ÚTIMOS CUPONES DISPONIBLES! <Flame className="w-4 h-4" />
                     </div>
                   )}
                   {isLow && !isSoldOut && (
@@ -366,7 +366,7 @@ export default function CouponPage() {
                         <div className="flex justify-between items-center mb-2">
                           <span className={`text-sm font-bold flex items-center gap-1 ${isCritical ? 'text-red-200' : isLow ? 'text-orange-200' : 'text-white/80'}`}>
                             {isCritical && <Flame className="w-4 h-4" />}
-                            {isSoldOut ? '❌ AGOTADO' : `${promo.couponsRemaining} cupones restantes`}
+                            {isSoldOut ? '❌ AGOTADO' : '⚡ Cupones limitados'}
                           </span>
                           <span className="text-white/60 text-sm">{pct}% vendido</span>
                         </div>

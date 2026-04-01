@@ -547,42 +547,11 @@ export default function CouponPage() {
                             <Input placeholder="Tu correo (opcional)" value={payEmail} onChange={e => setPayEmail(e.target.value)} />
                           </div>
 
-                          {/* Campo de código extra */}
-                          <div className="mb-4 bg-gradient-to-r from-[#C5A55A]/10 to-[#F0D080]/10 border border-[#C5A55A]/30 rounded-xl p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Tag className="w-4 h-4 text-[#C5A55A]" />
-                              <p className="text-sm font-bold text-[#8B6914]">¿Tienes código extra de descuento?</p>
-                            </div>
-                            <p className="text-xs text-gray-500 mb-3">Si compartiste con 5 personas y el admin te envió el código, ingrésalo aquí para obtener 5% adicional.</p>
-                            <div className="flex gap-2">
-                              <Input
-                                placeholder="Ej: CUPONEXTRA5"
-                                value={extraCode}
-                                onChange={e => { setExtraCode(e.target.value.toUpperCase()); setExtraCodeValid(null); setExtraDiscount(0); }}
-                                className={`flex-1 font-mono text-sm ${extraCodeValid === true ? 'border-green-500 bg-green-50' : extraCodeValid === false ? 'border-red-400 bg-red-50' : ''}`}
-                              />
-                              <Button
-                                onClick={handleValidateCode}
-                                disabled={!extraCode.trim()}
-                                variant="outline"
-                                className="border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A]/10 text-sm"
-                              >
-                                Aplicar
-                              </Button>
-                            </div>
-                            {extraCodeValid === true && (
-                              <p className="text-green-600 text-xs mt-2 flex items-center gap-1"><CheckCircle className="w-3 h-3" /> ¡Código válido! 5% extra aplicado.</p>
-                            )}
-                            {extraCodeValid === false && (
-                              <p className="text-red-500 text-xs mt-2">Código no válido. Verifica que sea correcto.</p>
-                            )}
-                          </div>
-
                           {/* Instrucciones de pago */}
                           <div className="bg-[#1A1A1A] rounded-xl p-4 mb-4 text-white text-sm">
                             <p className="font-bold mb-2">💳 Datos para transferencia:</p>
-                            <p className="text-gray-300">Banco: BBVA · Cuenta: 4152 3141 7890 1234</p>
-                            <p className="text-gray-300">CLABE: 012 320 00415231789 0</p>
+                            <p className="text-gray-300">Banco: Banamex</p>
+                            <p className="text-gray-300">CLABE Interbancaria: <span className="font-mono font-bold text-white">002470701448743487</span></p>
                             <p className="text-[#C5A55A] font-bold mt-2">
                               Monto a pagar: {extraCodeValid ? calcFinalPrice(promo.price) : promo.price}
                             </p>

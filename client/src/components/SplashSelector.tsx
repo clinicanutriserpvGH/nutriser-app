@@ -370,7 +370,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               img={IMG_NUTRICION}
               icon={CalendarCheck}
               title="Paquetes Nutriser"
-              cta="Comprar"
+              cta="Ver Paquetes"
               onClick={() => handleNavigate("/memberships")}
               accent
             />

@@ -170,6 +170,30 @@ export default function MyTreatments() {
   const [consentScrolled, setConsentScrolled] = useState(false);
   const sigCanvasRef = useRef<SignatureCanvas>(null);
 
+  // Validar sesión contra la BD al cargar (detecta si el admin eliminó al paciente)
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const verifySession = trpc.patients.getById.useQuery(
+    { id: patient?.id ?? 0 },
+    {
+      enabled: sessionChecked === false && !!patient && patient.id > 0,
+      retry: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  useEffect(() => {
+    if (verifySession.isSuccess) {
+      setSessionChecked(true);
+    } else if (verifySession.isError) {
+      // El paciente ya no existe en la BD (fue eliminado por el admin)
+      localStorage.removeItem("nutriser_patient");
+      setPatient(null);
+      setView("auth");
+      setSessionChecked(true);
+      toast.error("Tu cuenta ya no está activa. Por favor crea una nueva cuenta.");
+    }
+  }, [verifySession.isSuccess, verifySession.isError]);
+
   // Persistir sesión en localStorage (sobrevive al cerrar el navegador)
   useEffect(() => {
     const stored = localStorage.getItem("nutriser_patient");

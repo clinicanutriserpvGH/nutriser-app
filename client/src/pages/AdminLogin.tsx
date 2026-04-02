@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Eye, EyeOff, User, Mail, CheckCircle2 } from "lucide-react";
+import { Lock, Eye, EyeOff, User, Mail, CheckCircle2, ArrowLeft } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const ADMIN_EMAIL = "clinicanutriserpv@gmail.com";
@@ -59,6 +59,14 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAF7F2] to-white flex items-center justify-center py-12 px-4">
+      {/* Botón regresar al inicio */}
+      <button
+        onClick={() => navigate("/")}
+        className="fixed top-12 left-4 z-50 flex items-center gap-1.5 text-[#C5A55A] hover:text-[#B8963E] text-sm font-medium bg-white/80 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm border border-[#C5A55A]/20 transition"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Inicio
+      </button>
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="font-serif text-4xl text-[#1A1A1A] mb-2">Nutriser</h1>

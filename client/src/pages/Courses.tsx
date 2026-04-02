@@ -73,6 +73,7 @@ export default function Courses() {
   const [suggestionDesc, setSuggestionDesc] = useState("");
   const [suggestionName, setSuggestionName] = useState("");
   const [suggestionSubmitted, setSuggestionSubmitted] = useState(false);
+  const [submittedSuggestion, setSubmittedSuggestion] = useState<{title: string; description: string; authorName: string} | null>(null);
   const [showSuggestionForm, setShowSuggestionForm] = useState(false);
   const [voterFingerprint] = useState(() => {
     let fp = localStorage.getItem('nutriser_voter_fp');
@@ -116,6 +117,7 @@ export default function Courses() {
 
   const createSuggestionMutation = trpc.suggestions.create.useMutation({
     onSuccess: () => {
+      setSubmittedSuggestion({ title: suggestionTitle.trim(), description: suggestionDesc.trim(), authorName: suggestionName.trim() || 'Anónimo' });
       setSuggestionSubmitted(true);
       setSuggestionTitle("");
       setSuggestionDesc("");
@@ -285,7 +287,7 @@ export default function Courses() {
             Expertos <span className="text-[#C5A55A] italic">en Salud</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8">
-            Aprende con nuestros expertos en nutrición, bienestar y estética a través de videos, cursos y material exclusivo. Suscríbete para no perderte ningún contenido nuevo.
+            Aprende con nuestros expertos en salud y estética a través de videos, cursos y material exclusivo. Suscríbete para no perderte ningún contenido nuevo.
           </p>
           <Button
             onClick={() => setShowSubscribeModal(true)}
@@ -618,7 +620,7 @@ export default function Courses() {
                     </div>
                   </div>
                   <h3 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-3">Contenido en preparación</h3>
-                  <p className="text-gray-500 max-w-md mx-auto mb-2">Nuestros expertos en salud están preparando contenido exclusivo de nutrición, bienestar y estética para ti.</p>
+                  <p className="text-gray-500">Nuestros expertos en salud y estética están preparando contenido exclusivo para ti.</p>
                   <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete y sé el primero en enterarte cuando publiquemos nuevos cursos, videos y material de apoyo de nuestros expertos.</p>
                   <Button
                     onClick={() => setShowSubscribeModal(true)}
@@ -762,7 +764,7 @@ export default function Courses() {
               ¿Qué tema quieres que aborden nuestros expertos?
             </h2>
             <p className="text-gray-400 max-w-xl mx-auto">
-              Propón temas de salud, nutrición o estética y vota por las sugerencias de otros. Los temas más votados serán cubiertos por nuestros expertos.
+              Propón temas de salud y estética, y vota por las sugerencias de otros. Los temas más votados serán cubiertos por nuestros expertos.
             </p>
           </div>
 
@@ -778,16 +780,38 @@ export default function Courses() {
               </Button>
             </div>
           ) : suggestionSubmitted ? (
-            <div className="bg-white/10 border border-[#C5A55A]/30 rounded-2xl p-6 text-center mb-10">
-              <CheckCircle className="w-10 h-10 text-[#C5A55A] mx-auto mb-3" />
-              <p className="font-semibold text-white text-lg">¡Sugerencia enviada!</p>
-              <p className="text-gray-400 text-sm mt-1">Tu propuesta será revisada y publicada si es aprobada.</p>
-              <button
-                onClick={() => setSuggestionSubmitted(false)}
-                className="mt-4 text-[#C5A55A] text-sm hover:underline"
-              >
-                Enviar otra sugerencia
-              </button>
+            <div className="mb-10">
+              {/* Post pendiente - se ve como tarjeta de sugerencia pero con badge de pendiente */}
+              <div className="bg-white/5 border border-[#C5A55A]/40 rounded-2xl p-5 mb-4">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl border border-white/20 text-gray-500">
+                    <ThumbsUp className="w-4 h-4" />
+                    <span className="text-sm font-bold">0</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-semibold text-white leading-tight">{submittedSuggestion?.title}</p>
+                      <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-full">⏳ Pendiente de aprobación</span>
+                    </div>
+                    {submittedSuggestion?.description && (
+                      <p className="text-gray-400 text-sm mt-1 leading-relaxed">{submittedSuggestion.description}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2">Por {submittedSuggestion?.authorName}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 text-[#C5A55A] text-sm mb-3">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Tu sugerencia fue enviada y será visible una vez que el equipo la apruebe.</span>
+                </div>
+                <button
+                  onClick={() => { setSuggestionSubmitted(false); setSubmittedSuggestion(null); }}
+                  className="text-[#C5A55A] text-sm hover:underline"
+                >
+                  Enviar otra sugerencia
+                </button>
+              </div>
             </div>
           ) : (
             <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-10">

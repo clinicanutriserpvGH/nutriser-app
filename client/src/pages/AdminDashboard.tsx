@@ -412,6 +412,13 @@ export default function AdminDashboard() {
   const { data: pendingCommentsData, refetch: refetchPendingComments } = trpc.courses.getPendingComments.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  const { data: allCommentsData = [], refetch: refetchAllComments } = trpc.courses.getAllComments.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const deleteCommentMutation = trpc.courses.deleteComment.useMutation({
+    onSuccess: () => { toast.success('Comentario eliminado'); refetchPendingComments(); refetchAllComments(); },
+    onError: () => toast.error('Error al eliminar comentario'),
+  });
   const [courseForm, setCourseForm] = useState({ title: '', description: '', category: '' });
   const [videoForm, setVideoForm] = useState({ title: '', description: '', videoUrl: '', duration: '', courseId: 0 });
   const [editingCourseId, setEditingCourseId] = useState<number | null>(null);
@@ -3060,11 +3067,37 @@ export default function AdminDashboard() {
                         <div>
                           <p className="font-semibold text-gray-800">{comment.authorName}</p>
                           <p className="text-xs text-gray-400">{comment.authorEmail} • Video ID: {comment.videoId}</p>
+                          <p className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                         </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => approveCommentMutation.mutate({ id: comment.id })}>✓ Aprobar</Button>
+                        <div className="flex gap-2 flex-wrap justify-end">
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => { approveCommentMutation.mutate({ id: comment.id }); refetchAllComments(); }}>✓ Aprobar</Button>
                           <Button size="sm" variant="outline" className="text-red-600 border-red-200" onClick={() => rejectCommentMutation.mutate({ id: comment.id })}>Rechazar</Button>
+                          <Button size="sm" variant="outline" className="text-gray-500 border-gray-200" onClick={() => { if(confirm('\u00bfEliminar este comentario?')) deleteCommentMutation.mutate({ id: comment.id }); }}>Eliminar</Button>
                         </div>
+                      </div>
+                      <p className="text-sm text-gray-700 bg-gray-50 rounded p-2">{comment.content}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+            {/* Todos los comentarios aprobados */}
+            {allCommentsData.filter((c: any) => c.status === 'approved').length > 0 && (
+              <Card className="border-green-200 bg-green-50">
+                <CardHeader>
+                  <CardTitle className="text-green-700">✅ Comentarios Publicados ({allCommentsData.filter((c: any) => c.status === 'approved').length})</CardTitle>
+                  <CardDescription>Comentarios visibles para los usuarios. Puedes eliminar cualquiera.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {allCommentsData.filter((c: any) => c.status === 'approved').map((comment: any) => (
+                    <div key={comment.id} className="bg-white border border-green-100 rounded-xl p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="font-semibold text-gray-800">{comment.authorName}</p>
+                          <p className="text-xs text-gray-400">{comment.authorEmail} • Video ID: {comment.videoId}</p>
+                          <p className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                        </div>
+                        <Button size="sm" variant="outline" className="text-red-600 border-red-200" onClick={() => { if(confirm('\u00bfEliminar este comentario publicado?')) deleteCommentMutation.mutate({ id: comment.id }); }}>Eliminar</Button>
                       </div>
                       <p className="text-sm text-gray-700 bg-gray-50 rounded p-2">{comment.content}</p>
                     </div>

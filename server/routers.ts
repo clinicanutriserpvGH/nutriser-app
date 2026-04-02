@@ -1344,6 +1344,22 @@ export const appRouter = router({
         content: z.string().min(1),
       }))
       .mutation(async ({ input }) => {
+        // Filtro de contenido inapropiado
+        const BLOCKED_WORDS = [
+          'puta', 'puto', 'pinche', 'chinga', 'chingada', 'mierda', 'cabrón', 'cabron', 'pendejo',
+          'culero', 'verga', 'pene', 'vagina', 'sexo', 'porno', 'xxx', 'coger', 'follar',
+          'mamar', 'mamada', 'culo', 'nalgas', 'tetas', 'pezón', 'pezon', 'desnud',
+          'fuck', 'shit', 'bitch', 'asshole', 'dick', 'cock', 'pussy', 'sex', 'porn',
+        ];
+        const contentLower = input.content.toLowerCase();
+        const nameLower = input.authorName.toLowerCase();
+        const hasInappropriate = BLOCKED_WORDS.some(w => contentLower.includes(w) || nameLower.includes(w));
+        if (hasInappropriate) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Tu comentario contiene contenido inapropiado y no puede ser enviado.',
+          });
+        }
         const comment = await createCourseComment(input);
         await notifyOwner({
           title: 'Nuevo comentario pendiente de moderación',
@@ -1527,6 +1543,23 @@ export const appRouter = router({
         authorEmail: z.string().email().optional(),
       }))
       .mutation(async ({ input }) => {
+        // Filtro de contenido inapropiado
+        const BLOCKED_WORDS = [
+          'puta', 'puto', 'pinche', 'chinga', 'chingada', 'mierda', 'cabrón', 'cabron', 'pendejo',
+          'culero', 'verga', 'pene', 'vagina', 'sexo', 'porno', 'xxx', 'coger', 'follar',
+          'mamar', 'mamada', 'culo', 'nalgas', 'tetas', 'pezón', 'pezon', 'desnud',
+          'fuck', 'shit', 'bitch', 'asshole', 'dick', 'cock', 'pussy', 'sex', 'porn',
+        ];
+        const titleLower = input.title.toLowerCase();
+        const descLower = (input.description || '').toLowerCase();
+        const nameLower = (input.authorName || '').toLowerCase();
+        const hasInappropriate = BLOCKED_WORDS.some(w => titleLower.includes(w) || descLower.includes(w) || nameLower.includes(w));
+        if (hasInappropriate) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Tu sugerencia contiene contenido inapropiado y no puede ser enviada.',
+          });
+        }
         return await createTopicSuggestion({
           title: input.title,
           description: input.description,

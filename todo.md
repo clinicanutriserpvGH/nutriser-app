@@ -904,3 +904,14 @@
 - [x] Error WhatsApp: Botones "Recomendar por WhatsApp" en EbookStore y PromotionsSection corregidos de window.open/target="_blank" a window.location.href para compatibilidad con WebView iOS
 - [x] Cambiar "Programas Nutrición" a "Programas Nutriser" en el splash
 - [x] Agregar Paquete Tratamiento ($5,499 MXN) gestionable desde admin: 4 cavitaciones + 4 radiofrecuencias + 4 mesoterapias reductoras
+
+## Correcciones Sesión Academy - Textos y Comentarios
+
+- [x] Quitar "nutrición" de descripción de Nutriser Academy, generalizar a "salud y estética"
+- [x] Quitar "nutrición" del Foro de Sugerencias, generalizar a "salud y estética"
+- [x] Sugerencias de temas: mostrar como posts/comentarios visibles tras aprobación del admin
+- [x] Moderación de sugerencias: admin aprueba antes de que aparezcan públicamente, puede eliminar
+- [x] Comentarios en videos: cada video puede recibir comentarios
+- [x] Comentarios en videos: filtro de contenido inapropiado (groserías, contenido sexual)
+- [x] Comentarios en videos: aprobación del admin antes de publicarse
+- [x] Panel admin: pestaña de moderación de comentarios de videos (aprobar/rechazar/eliminar)

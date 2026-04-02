@@ -32,34 +32,129 @@ type Appointment = { id: number; patientId: number; treatmentId: number; appoint
 type Photo = { id: number; patientId: number; treatmentId?: number | null; type: "before" | "after" | "progress"; photoUrl: string; photoDate: string; notes?: string | null; createdAt: Date; };
 
 // ─── Texto del consentimiento ─────────────────────────────────────────────────
-const CONSENT_TEXT = `CONTRATO DE CONSENTIMIENTO INFORMADO
-Nutriser Aesthetic & Nutrition — Puerto Vallarta, Jalisco, México
-Fecha: 31 de marzo de 2026
+const CONSENT_TEXT = `CARTA DE CONSENTIMIENTO INFORMADO PARA TRATAMIENTOS ESTÉTICOS Y NUTRICIONALES
 
-Yo, el/la paciente que firma el presente documento, declaro haber sido informado/a de manera clara y comprensible sobre los tratamientos estéticos y de nutrición que recibiré en Nutriser Aesthetic & Nutrition.
+ESTABLECIMIENTO: Nutriser Aesthetic & Nutrition
+DOMICILIO: Puerto Vallarta, Jalisco, México
+TELÉFONO: +52 (322) 100-7799
+CORREO: clinicanutriserpv@gmail.com
+FECHA DE EMISIÓN: 31 de marzo de 2026
 
-1. NATURALEZA DE LOS TRATAMIENTOS
-Los tratamientos ofrecidos por Nutriser incluyen procedimientos estéticos no invasivos e invasivos, planes nutricionales personalizados y terapias de bienestar. Todos los procedimientos son realizados por profesionales certificados.
+Documento elaborado en cumplimiento de la NOM-004-SSA3-2012 del Expediente Clínico, el Artículo 51 Bis 2 de la Ley General de Salud, y la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).
 
-2. RIESGOS Y BENEFICIOS
-Entiendo que, como en cualquier procedimiento estético o médico, pueden existir riesgos asociados, incluyendo pero no limitados a: reacciones alérgicas, irritación cutánea, inflamación temporal u otros efectos secundarios. Declaro haber informado al equipo de Nutriser sobre cualquier alergia, condición médica preexistente o medicamento que esté tomando.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-3. RESPONSABILIDAD DEL PACIENTE
-Me comprometo a:
-- Informar verazmente sobre mi estado de salud y antecedentes médicos.
-- Seguir las indicaciones post-tratamiento proporcionadas por el equipo.
-- No responsabilizar a Nutriser por consecuencias derivadas de información ocultada o de un manejo inadecuado de las indicaciones post-tratamiento por parte del paciente.
+I. IDENTIFICACIÓN DE LAS PARTES
 
-4. CONFIDENCIALIDAD
-Nutriser se compromete a proteger mis datos personales y fotografías de acuerdo con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).
+PRESTADOR DEL SERVICIO: Nutriser Aesthetic & Nutrition, establecimiento de salud y bienestar estético ubicado en Puerto Vallarta, Jalisco, México, con atención por profesionales certificados en nutrición clínica y procedimientos estéticos no invasivos.
 
-5. CONSENTIMIENTO
-Al firmar este documento, confirmo que:
-- He leído y comprendido el contenido de este consentimiento.
-- Acepto voluntariamente los tratamientos y sus condiciones.
-- Libero a Nutriser Aesthetic & Nutrition de responsabilidad por consecuencias derivadas de información omitida o mal manejo post-tratamiento por parte del paciente.
+PACIENTE: El/la suscrito/a, cuyos datos personales constan en el expediente clínico del establecimiento, y cuya firma al calce del presente documento acredita su identidad y conformidad.
 
-Este documento tiene validez legal y no podrá ser modificado una vez firmado.`;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+II. ACTO MÉDICO AUTORIZADO
+
+El presente consentimiento ampara la realización de tratamientos estéticos no invasivos y/o mínimamente invasivos, así como asesorías y planes nutricionales personalizados, que pueden incluir, según el caso clínico de cada paciente:
+
+• Cavitación ultrasónica (reducción de grasa localizada)
+• Radiofrecuencia corporal y facial (reafirmación de tejidos)
+• Mesoterapia reductora (aplicación de microinyecciones con principios activos)
+• Tratamientos para estrías, cicatrices de acné, celulitis e hiperpigmentación
+• Asesoría y seguimiento nutricional personalizado
+• Otros procedimientos estéticos no invasivos indicados por el profesional tratante
+
+El tratamiento específico a realizar será informado verbalmente y por escrito al paciente antes de cada sesión, con la posibilidad de hacer preguntas y recibir respuestas claras.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+III. OBJETIVOS Y BENEFICIOS ESPERADOS
+
+Los tratamientos ofrecidos por Nutriser tienen como objetivo la mejoría estética y el bienestar del paciente. El prestador del servicio se compromete a informar de manera realista sobre los resultados esperados, los cuales pueden variar según las características individuales de cada persona (tipo de piel, metabolismo, edad, condición física y adherencia a las indicaciones post-tratamiento). Nutriser NO garantiza resultados específicos, sino una mejoría progresiva y proporcional al seguimiento del plan indicado.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+IV. RIESGOS Y POSIBLES COMPLICACIONES
+
+El paciente declara haber sido informado sobre los siguientes riesgos asociados a los procedimientos estéticos:
+
+Riesgos frecuentes (leves y transitorios):
+• Enrojecimiento, inflamación o sensibilidad en la zona tratada
+• Hematomas o equimosis temporales
+• Sensación de calor o molestia durante el procedimiento
+• Cambios temporales en la pigmentación de la piel
+
+Riesgos infrecuentes (que requieren atención médica):
+• Reacciones alérgicas a los productos o principios activos utilizados
+• Infección en el sitio de aplicación (en procedimientos con microinyecciones)
+• Quemaduras superficiales por mal manejo de equipos térmicos
+• Irregularidades en el contorno corporal
+
+Riesgos personalizados: El paciente declara haber informado al equipo de Nutriser sobre todas sus condiciones médicas preexistentes, alergias conocidas, medicamentos en uso, embarazo o lactancia, y cualquier otro factor de salud relevante. La omisión de esta información exime de responsabilidad al establecimiento por complicaciones derivadas de dicha omisión.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+V. ALTERNATIVAS AL TRATAMIENTO
+
+El paciente ha sido informado de que existen alternativas a los procedimientos propuestos, incluyendo tratamientos quirúrgicos, otros procedimientos no invasivos, o la opción de no realizar ningún tratamiento. La elección del tratamiento ha sido libre y voluntaria, con base en la información proporcionada por el profesional tratante.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VI. CUIDADOS POST-TRATAMIENTO
+
+El paciente se compromete a seguir las indicaciones post-tratamiento proporcionadas por el equipo de Nutriser, que pueden incluir:
+
+• Evitar exposición solar directa en las zonas tratadas por el tiempo indicado
+• Aplicar los productos recomendados por el profesional tratante
+• Mantener hidratación adecuada y seguir el plan nutricional asignado
+• Evitar actividad física intensa durante las primeras horas post-sesión
+• Reportar de inmediato cualquier reacción adversa inusual
+
+El incumplimiento de estas indicaciones puede afectar los resultados del tratamiento y exime al establecimiento de responsabilidad por complicaciones derivadas de dicho incumplimiento.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VII. AUTORIZACIÓN PARA CONTINGENCIAS
+
+El paciente autoriza al personal de salud de Nutriser Aesthetic & Nutrition para atender cualquier contingencia o urgencia derivada del acto médico autorizado, de conformidad con el principio de libertad prescriptiva establecido en la NOM-004-SSA3-2012.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VIII. PROTECCIÓN DE DATOS PERSONALES
+
+En cumplimiento de la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) y su Reglamento, Nutriser Aesthetic & Nutrition informa al paciente que:
+
+• Sus datos personales (nombre, correo electrónico, teléfono, fecha de nacimiento, fotografías y expediente clínico) serán tratados con la finalidad de prestar los servicios contratados, llevar el seguimiento de su tratamiento y comunicar resultados y citas.
+• Los datos no serán compartidos con terceros sin consentimiento expreso del paciente, salvo obligación legal.
+• El paciente puede ejercer sus derechos ARCO (Acceso, Rectificación, Cancelación y Oposición) enviando una solicitud al correo clinicanutriserpv@gmail.com.
+• Las fotografías de antes/después tomadas durante el tratamiento son propiedad del paciente y solo podrán ser utilizadas con fines de seguimiento clínico, salvo autorización expresa por escrito para uso promocional.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+IX. DERECHO DE REVOCACIÓN
+
+El paciente tiene el derecho de revocar el presente consentimiento en cualquier momento antes del inicio del procedimiento, sin necesidad de expresar causa alguna y sin que ello afecte la calidad de la atención que recibirá en el establecimiento. La revocación deberá comunicarse verbalmente o por escrito al profesional tratante.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+X. DECLARACIÓN DE CONSENTIMIENTO
+
+Yo, el/la paciente que suscribe el presente documento, declaro bajo protesta de decir verdad que:
+
+1. He recibido información clara, completa, veraz y oportuna sobre los tratamientos, sus objetivos, riesgos, beneficios y alternativas.
+2. He tenido la oportunidad de realizar todas las preguntas que consideré necesarias y estas fueron respondidas satisfactoriamente.
+3. Comprendo que los resultados pueden variar según mis características individuales y mi adherencia a las indicaciones.
+4. Otorgo mi consentimiento de manera libre, voluntaria y sin coacción alguna para la realización de los tratamientos indicados.
+5. He informado verazmente sobre mi estado de salud, antecedentes médicos, alergias y medicamentos en uso.
+6. He leído íntegramente el presente documento y acepto todas sus cláusulas.
+
+Este documento tiene plena validez legal conforme a los artículos 1803 y 1834 del Código Civil Federal, el artículo 51 Bis 2 de la Ley General de Salud, y la NOM-004-SSA3-2012. No podrá ser modificado una vez firmado digitalmente.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Firma del paciente: [FIRMA DIGITAL AL CALCE]
+Fecha de firma: [FECHA DE FIRMA]
+Nombre del profesional tratante: Equipo Nutriser Aesthetic & Nutrition
+Establecimiento: Nutriser Aesthetic & Nutrition, Puerto Vallarta, Jalisco, México`;
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function MyTreatments() {

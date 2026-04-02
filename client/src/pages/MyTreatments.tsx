@@ -75,20 +75,22 @@ export default function MyTreatments() {
   const [consentScrolled, setConsentScrolled] = useState(false);
   const sigCanvasRef = useRef<SignatureCanvas>(null);
 
-  // Persistir sesión en sessionStorage
+  // Persistir sesión en localStorage (sobrevive al cerrar el navegador)
   useEffect(() => {
-    const stored = sessionStorage.getItem("nutriser_patient");
+    const stored = localStorage.getItem("nutriser_patient");
     if (stored) {
       try {
         const p = JSON.parse(stored);
         setPatient(p);
         setView(p.consentAcceptedAt ? "portal" : "consent");
-      } catch {}
+      } catch {
+        localStorage.removeItem("nutriser_patient");
+      }
     }
   }, []);
 
   const persistPatient = (p: PatientSafe) => {
-    sessionStorage.setItem("nutriser_patient", JSON.stringify(p));
+    localStorage.setItem("nutriser_patient", JSON.stringify(p));
     setPatient(p);
   };
 
@@ -188,7 +190,7 @@ export default function MyTreatments() {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("nutriser_patient");
+    localStorage.removeItem("nutriser_patient");
     setPatient(null);
     setView("auth");
     setAuthMode("login");

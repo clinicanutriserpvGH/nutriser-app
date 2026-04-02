@@ -180,6 +180,15 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   // Modal de notificaciones
   const [showNotifModal, setShowNotifModal] = useState(false);
 
+  // Detectar sesión activa del paciente
+  const [activePatient] = useState<{ name: string } | null>(() => {
+    try {
+      const stored = localStorage.getItem("nutriser_patient");
+      if (stored) return JSON.parse(stored) as { name: string };
+    } catch {}
+    return null;
+  });
+
   // Detectar iOS/Safari
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -478,12 +487,18 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-white font-bold text-sm sm:text-base">Mis Tratamientos</p>
-                  <p className="text-white/70 text-[10px] sm:text-xs leading-tight mt-0.5">
-                    Accede al seguimiento de tus tratamientos y descuentos exclusivos en tratamientos faciales y corporales
-                  </p>
+                  {activePatient ? (
+                    <p className="text-[#C5A55A] text-[10px] sm:text-xs leading-tight mt-0.5 font-semibold">
+                      ✓ Sesión activa — {activePatient.name.split(' ')[0]}
+                    </p>
+                  ) : (
+                    <p className="text-white/70 text-[10px] sm:text-xs leading-tight mt-0.5">
+                      Accede al seguimiento de tus tratamientos y descuentos exclusivos en tratamientos faciales y corporales
+                    </p>
+                  )}
                 </div>
                 <div className="flex-shrink-0 bg-[#C5A55A]/20 rounded-xl px-2 py-1">
-                  <span className="text-[#C5A55A] text-[10px] font-bold">Entrar ›</span>
+                  <span className="text-[#C5A55A] text-[10px] font-bold">{activePatient ? 'Continuar ›' : 'Entrar ›'}</span>
                 </div>
               </div>
             </button>

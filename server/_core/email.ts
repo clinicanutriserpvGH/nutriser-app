@@ -474,3 +474,46 @@ export async function sendPasswordResetEmail(adminEmail: string, resetLink: stri
     html: htmlContent,
   });
 }
+
+export async function sendPatientNotificationEmail(
+  patientEmail: string,
+  subject: string,
+  title: string,
+  message: string
+) {
+  const transporter = getEmailTransporter();
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f6f1;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 0;">
+          <div style="background-color: #1A1A1A; padding: 28px 32px; text-align: center;">
+            <h1 style="color: #C5A55A; margin: 0; font-size: 22px; letter-spacing: 1px;">NUTRISER</h1>
+            <p style="color: #C5A55A; margin: 4px 0 0; font-size: 12px; letter-spacing: 2px;">AESTHETIC &amp; NUTRITION</p>
+          </div>
+          <div style="background-color: #ffffff; padding: 32px;">
+            <h2 style="color: #1A1A1A; font-size: 20px; margin-top: 0;">${title}</h2>
+            <div style="color: #444; font-size: 15px; white-space: pre-line;">${message}</div>
+            <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #eee;">
+              <a href="https://nutriserpv.com/mis-tratamientos"
+                 style="background-color: #C5A55A; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 15px; display: inline-block;">
+                Ver mi portal
+              </a>
+            </div>
+          </div>
+          <div style="background-color: #1A1A1A; padding: 20px 32px; text-align: center;">
+            <p style="color: #888; font-size: 12px; margin: 0;">
+              Nutriser Aesthetic &amp; Nutrition — Puerto Vallarta, Jalisco, México<br/>
+              <a href="mailto:clinicanutriserpv@gmail.com" style="color: #C5A55A;">clinicanutriserpv@gmail.com</a>
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  await transporter.sendMail({
+    from: `"Nutriser Aesthetic & Nutrition" <${ENV.gmailUser}>`,
+    to: patientEmail,
+    subject,
+    html: htmlContent,
+  });
+}

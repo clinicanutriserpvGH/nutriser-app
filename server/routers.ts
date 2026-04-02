@@ -7,7 +7,7 @@ import { z } from "zod";
 import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, setAdminResetToken, getAdminByResetToken, updateAdminPassword, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber, getAllServices, getAllActiveServices, createService, updateService, deleteService } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
-import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail } from "./_core/email";
+import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail } from "./_core/email";
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
 import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
@@ -2127,11 +2127,44 @@ export const appRouter = router({
         let sent = 0;
         for (const patient of patients) {
           try {
-            await sendPasswordResetEmail(patient.email, `${input.message}\n\n---\nNutriser Aesthetic & Nutrition`);
+            await sendPatientNotificationEmail(
+              patient.email,
+              input.subject || 'Mensaje de Nutriser Aesthetic & Nutrition',
+              input.subject || 'Mensaje de Nutriser',
+              input.message
+            );
             sent++;
           } catch {}
         }
         return { success: true, sent };
+      }),
+    // Notificar push a un paciente específico (admin)
+    notifyOnePatient: publicProcedure
+      .input(z.object({ patientId: z.number(), title: z.string(), body: z.string() }))
+      .mutation(async ({ input }) => {
+        const patient = await getPatientById(input.patientId);
+        if (!patient?.pushSubscription) return { success: false, reason: 'no_subscription' };
+        try {
+          await sendPushToPatient(patient.pushSubscription, input.title, input.body, '/mis-tratamientos');
+          return { success: true };
+        } catch (e) {
+          console.warn('[Push] Error notifyOnePatient:', e);
+          return { success: false, reason: 'send_failed' };
+        }
+      }),
+    // Enviar email a un paciente específico (admin)
+    emailOnePatient: publicProcedure
+      .input(z.object({ patientId: z.number(), subject: z.string(), message: z.string() }))
+      .mutation(async ({ input }) => {
+        const patient = await getPatientById(input.patientId);
+        if (!patient?.email) return { success: false, reason: 'no_email' };
+        await sendPatientNotificationEmail(
+          patient.email,
+          input.subject || 'Mensaje de Nutriser',
+          input.subject || 'Mensaje de Nutriser',
+          input.message
+        );
+        return { success: true };
       }),
   }),
 });

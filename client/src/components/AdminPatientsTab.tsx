@@ -44,6 +44,10 @@ export default function AdminPatientsTab() {
   const [notifyTitle, setNotifyTitle] = useState("");
   const [notifyMsg, setNotifyMsg] = useState("");
   const [notifyType, setNotifyType] = useState<"push" | "email" | "both">("both");
+  const [showNotifyOneModal, setShowNotifyOneModal] = useState(false);
+  const [notifyOneTitle, setNotifyOneTitle] = useState("");
+  const [notifyOneMsg, setNotifyOneMsg] = useState("");
+  const [notifyOneType, setNotifyOneType] = useState<"push" | "email" | "both">("both");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const [photoType, setPhotoType] = useState<"before" | "after" | "progress">("before");
@@ -125,6 +129,14 @@ export default function AdminPatientsTab() {
     onSuccess: (d) => { toast.success(`Email enviado a ${d.sent} pacientes`); },
     onError: (e) => toast.error(e.message),
   });
+  const notifyOnePushMutation = trpc.patients.notifyOnePatient.useMutation({
+    onSuccess: (d) => { toast.success(d.success ? "Push enviado al paciente" : "El paciente no tiene notificaciones activadas"); setShowNotifyOneModal(false); },
+    onError: (e) => toast.error(e.message),
+  });
+  const notifyOneEmailMutation = trpc.patients.emailOnePatient.useMutation({
+    onSuccess: () => { toast.success("Email enviado al paciente"); setShowNotifyOneModal(false); },
+    onError: (e) => toast.error(e.message),
+  });
   const deleteAccountMutation = trpc.patients.deleteAccount.useMutation({
     onSuccess: () => { setSelectedPatient(null); refetchPatients(); toast.success("Paciente eliminado correctamente"); },
     onError: (e) => toast.error(e.message),
@@ -185,6 +197,18 @@ export default function AdminPatientsTab() {
     }
     setShowNotifyModal(false);
     setNotifyTitle(""); setNotifyMsg("");
+  };
+
+  const handleSendNotifyOne = async () => {
+    if (!selectedPatient) return;
+    if (!notifyOneTitle.trim() || !notifyOneMsg.trim()) { toast.error("Completa título y mensaje"); return; }
+    if (notifyOneType === "push" || notifyOneType === "both") {
+      notifyOnePushMutation.mutate({ patientId: selectedPatient.id, title: notifyOneTitle, body: notifyOneMsg });
+    }
+    if (notifyOneType === "email" || notifyOneType === "both") {
+      notifyOneEmailMutation.mutate({ patientId: selectedPatient.id, subject: notifyOneTitle, message: notifyOneMsg });
+    }
+    setNotifyOneTitle(""); setNotifyOneMsg("");
   };
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -282,6 +306,13 @@ export default function AdminPatientsTab() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowNotifyOneModal(true)}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-[#C5A55A] hover:bg-[#C5A55A]/10 border border-[#C5A55A]/30 transition-all"
+                title="Notificar a este paciente"
+              >
+                <Bell className="w-3.5 h-3.5" /> Notificar
+              </button>
               <button
                 onClick={() => {
                   if (confirm(`¿Eliminar al paciente ${selectedPatient.name}? Esta acción no se puede deshacer.`)) {
@@ -605,6 +636,48 @@ export default function AdminPatientsTab() {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* ── Modal notificar paciente individual ── */}
+      {showNotifyOneModal && selectedPatient && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-[#1A1A1A] flex items-center gap-2">
+                <Bell className="w-5 h-5 text-[#C5A55A]" /> Notificar a {selectedPatient.name}
+              </h3>
+              <button onClick={() => setShowNotifyOneModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+              {(["push", "email", "both"] as const).map(t => (
+                <button key={t} onClick={() => setNotifyOneType(t)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${notifyOneType === t ? "bg-[#C5A55A] text-black" : "text-gray-500"}`}>
+                  {t === "push" ? "🔔 Push" : t === "email" ? "📧 Email" : "Ambos"}
+                </button>
+              ))}
+            </div>
+            <Input placeholder="Asunto / Título" value={notifyOneTitle} onChange={e => setNotifyOneTitle(e.target.value)} className="text-sm" />
+            <textarea
+              placeholder="Mensaje..."
+              value={notifyOneMsg}
+              onChange={e => setNotifyOneMsg(e.target.value)}
+              rows={4}
+              className="w-full border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30"
+            />
+            <div className="flex gap-2">
+              <Button onClick={handleSendNotifyOne}
+                disabled={notifyOnePushMutation.isPending || notifyOneEmailMutation.isPending}
+                className="flex-1 bg-[#C5A55A] hover:bg-[#d4b46a] text-black text-sm">
+                {(notifyOnePushMutation.isPending || notifyOneEmailMutation.isPending)
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <><Send className="w-4 h-4 mr-1.5" /> Enviar</>}
+              </Button>
+              <Button variant="outline" onClick={() => setShowNotifyOneModal(false)} className="text-sm">Cancelar</Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ── Modal de notificaciones ── */}

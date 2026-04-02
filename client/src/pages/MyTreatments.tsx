@@ -856,10 +856,20 @@ export default function MyTreatments() {
                   Firmado el {new Date(patient.consentAcceptedAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}
                 </p>
                 {patient.consentPdfUrl && (
-                  <a href={patient.consentPdfUrl} target="_blank" rel="noopener noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 text-[#C5A55A] text-xs hover:underline">
+                  <button
+                    onClick={() => {
+                      // En iOS WKWebView, target="_blank" no funciona — usar location directa
+                      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                      if (isIOS) {
+                        window.location.href = patient.consentPdfUrl!;
+                      } else {
+                        window.open(patient.consentPdfUrl!, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                    className="mt-3 inline-flex items-center gap-1.5 text-[#C5A55A] text-xs hover:underline cursor-pointer"
+                  >
                     <FileText className="w-4 h-4" /> Ver PDF firmado
-                  </a>
+                  </button>
                 )}
               </div>
             ) : (

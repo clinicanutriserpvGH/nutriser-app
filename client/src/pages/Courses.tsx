@@ -383,13 +383,17 @@ export default function Courses() {
                       ) : (
                         <div className="space-y-3">
                           {documents.map((doc) => (
-                            <a
+                            <button
                               key={doc.id}
-                              href={doc.fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              download
-                              className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-100 hover:border-[#C5A55A] hover:shadow-md transition-all group"
+                              onClick={() => {
+                                const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                                if (isIOS) {
+                                  window.location.href = doc.fileUrl;
+                                } else {
+                                  window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
+                                }
+                              }}
+                              className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-100 hover:border-[#C5A55A] hover:shadow-md transition-all group w-full text-left"
                             >
                               <div className="w-10 h-10 bg-[#C5A55A]/10 rounded-lg flex items-center justify-center group-hover:bg-[#C5A55A]/20">
                                 <FileText className="w-5 h-5 text-[#C5A55A]" />
@@ -399,7 +403,7 @@ export default function Courses() {
                                 <p className="text-xs text-gray-500 uppercase">{doc.fileType || "PDF"}{doc.fileSize ? ` · ${(doc.fileSize / 1024 / 1024).toFixed(1)} MB` : ""}</p>
                               </div>
                               <Download className="w-5 h-5 text-[#C5A55A] opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </a>
+                            </button>
                           ))}
                         </div>
                       )}

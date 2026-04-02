@@ -63,7 +63,7 @@ export default function HeroSection() {
       <div className="absolute left-8 top-1/4 bottom-1/4 w-[1px] bg-gradient-to-b from-transparent via-[#C5A55A]/50 to-transparent hidden lg:block" />
 
       {/* Content */}
-      <div className="relative z-10 container py-28 lg:py-0">
+      <div className="relative z-10 container py-28 lg:py-0" style={{ paddingTop: 'max(8rem, calc(6rem + env(safe-area-inset-top, 0px)))' }}>
         <div className="max-w-2xl lg:ml-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

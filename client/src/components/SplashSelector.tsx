@@ -238,8 +238,24 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   };
 
   const handleEnablePush = async () => {
+    // iOS Safari solo soporta push si la app está instalada en pantalla de inicio (PWA)
+    if (isIOS && !isPWA && !isWKWebView) {
+      toast(
+        <div className="text-sm">
+          <p className="font-bold mb-1">📱 Paso previo en iPhone:</p>
+          <ol className="list-decimal list-inside space-y-1 text-xs">
+            <li>Toca el ícono <strong>Compartir</strong> (cuadro con flecha ↑) en Safari</li>
+            <li>Selecciona <strong>"Agregar a pantalla de inicio"</strong></li>
+            <li>Abre la app desde tu pantalla de inicio</li>
+            <li>Regresa aquí y activa las notificaciones</li>
+          </ol>
+        </div>,
+        { duration: 8000 }
+      );
+      return;
+    }
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-      toast.error("Tu navegador no soporta notificaciones push.");
+      toast.error("Las notificaciones push no están disponibles en este navegador.");
       return;
     }
     setPushLoading(true);
@@ -613,7 +629,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 )}
               </div>
 
-              {/* Separador y opción push: solo visible fuera de la app nativa de iOS */}
+              {/* Separador y opción push: solo visible fuera de la app nativa de iOS (WKWebView) */}
               {!isWKWebView && (<>
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-white/10" />
@@ -626,8 +642,21 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="flex items-start gap-3">
                   <div className="text-2xl mt-0.5">🔔</div>
                   <div className="flex-1">
-                    <p className="text-white font-semibold text-sm">Suscríbete y recibe descuentos exclusivos</p>
-                    <p className="text-white/50 text-xs mt-0.5">Recibe promociones y cupones especiales al instante</p>
+                    <p className="text-white font-semibold text-sm">Activa las notificaciones y no te pierdas nada</p>
+                    <p className="text-white/50 text-xs mt-0.5">Recibe promociones y cupones exclusivos al instante</p>
+
+                    {/* Instrucciones especiales para iOS Safari (no PWA) */}
+                    {isIOS && !isPWA && (
+                      <div className="mt-2 bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl p-3">
+                        <p className="text-[#C5A55A] text-xs font-bold mb-1">📱 Para activar en iPhone:</p>
+                        <ol className="text-white/60 text-[11px] space-y-0.5 list-decimal list-inside">
+                          <li>Toca el ícono <strong className="text-white/80">Compartir</strong> (↑) en Safari</li>
+                          <li>Selecciona <strong className="text-white/80">"Agregar a pantalla de inicio"</strong></li>
+                          <li>Abre la app desde tu pantalla de inicio</li>
+                          <li>Regresa aquí y activa las notificaciones</li>
+                        </ol>
+                      </div>
+                    )}
 
                     {pushEnabled ? (
                       <div className="mt-2 flex items-center gap-1.5 text-green-400 text-xs font-semibold">
@@ -642,7 +671,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                         >
                           {pushLoading
                             ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</>
-                            : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones</>}
+                            : <><BellRing className="w-3.5 h-3.5" /> {isIOS && !isPWA ? 'Ver instrucciones' : 'Activar Notificaciones'}</>}
                         </button>
                       </div>
                     )}

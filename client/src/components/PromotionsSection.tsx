@@ -110,8 +110,29 @@ export default function PromotionsSection() {
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
 
   const handleEnablePush = async () => {
+    // iOS Safari solo soporta push si la app está instalada en pantalla de inicio (PWA)
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    
+    if (isIOS && !isInStandaloneMode) {
+      // Mostrar instrucciones para agregar a pantalla de inicio
+      toast(
+        <div className="text-sm">
+          <p className="font-bold mb-1">📱 Paso previo en iPhone:</p>
+          <ol className="list-decimal list-inside space-y-1 text-xs">
+            <li>Toca el ícono <strong>Compartir</strong> (cuadro con flecha ↑) en Safari</li>
+            <li>Selecciona <strong>"Agregar a pantalla de inicio"</strong></li>
+            <li>Abre la app desde tu pantalla de inicio</li>
+            <li>Regresa aquí y activa las notificaciones</li>
+          </ol>
+        </div>,
+        { duration: 8000 }
+      );
+      return;
+    }
+    
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      toast.error("Tu navegador no soporta notificaciones push.");
+      toast.error("Las notificaciones push no están disponibles en este navegador.");
       return;
     }
     setPushLoading(true);
@@ -645,46 +666,21 @@ export default function PromotionsSection() {
                   <div className="flex items-start gap-3">
                     <div className="text-2xl mt-0.5">🔔</div>
                     <div className="flex-1">
-                  <p className="text-white font-semibold text-sm">🔔 Haz clic en la campanita y no te pierdas nada</p>
-                  <p className="text-white/60 text-xs mt-0.5">Recibe promociones exclusivas en tu celular aunque no estés en el sitio — al instante</p>
+                      <p className="text-white font-semibold text-sm">Suscríbete y recibe descuentos exclusivos</p>
+                      <p className="text-white/60 text-xs mt-0.5">Recibe promociones exclusivas en tu celular aunque no estés en el sitio</p>
 
                       {pushEnabled ? (
                         <div className="mt-2 flex items-center gap-1.5 text-green-400 text-xs font-semibold">
                           <Check className="w-4 h-4" /> ¡Notificaciones activadas!
                         </div>
-                      ) : isIOSSafari && !isPWA ? (
-                        /* iPhone en Safari normal: instrucciones para agregar a pantalla de inicio */
-                        <div className="mt-3 space-y-2">
-                          <p className="text-amber-300 text-xs font-semibold">📱 iPhone: un paso previo</p>
-                          <p className="text-white/70 text-[11px] leading-relaxed">
-                            Para activar notificaciones en iPhone, primero agrega esta página a tu pantalla de inicio:
-                          </p>
-                          <ol className="text-white/60 text-[11px] space-y-1 list-decimal list-inside">
-                            <li>Toca el ícono <strong className="text-white">Compartir</strong>: <span className="inline-flex items-center justify-center bg-white/20 rounded-md px-1 py-0.5 mx-0.5" style={{verticalAlign:'middle'}}><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><rect x="4" y="11" width="16" height="11" rx="2"/></svg></span> (en la barra inferior del navegador)</li>
-                            <li>Selecciona <strong className="text-white">&quot;Agregar a pantalla de inicio&quot;</strong></li>
-                            <li>Abre la app desde tu pantalla de inicio</li>
-                            <li>Regresa aquí y presiona el botón de abajo</li>
-                          </ol>
-                          <button
-                            onClick={handleEnablePush}
-                            disabled={pushLoading}
-                            className="mt-1 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
-                          >
-                            {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones Push</>}
-                          </button>
-                        </div>
                       ) : (
-                        /* Android y Chrome: activa directo con un clic */
-                        <div className="mt-2 space-y-2">
-                          {!isIOSSafari && (
-                            <p className="text-white/60 text-[11px]">✅ En Android/Chrome se activa con un solo clic</p>
-                          )}
+                        <div className="mt-3">
                           <button
                             onClick={handleEnablePush}
                             disabled={pushLoading}
-                            className="bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
+                            className="bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition flex items-center gap-2 w-full justify-center"
                           >
-                            {pushLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</> : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones</>}
+                            {pushLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Activando...</> : <><BellRing className="w-4 h-4" /> Activar Notificaciones</>}
                           </button>
                         </div>
                       )}

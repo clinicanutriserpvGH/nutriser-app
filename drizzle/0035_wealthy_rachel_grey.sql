@@ -1,0 +1,1 @@
+ALTER TABLE `patientAccounts` ADD `apnsToken` varchar(200);

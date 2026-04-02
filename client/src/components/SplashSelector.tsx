@@ -626,46 +626,15 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="flex items-start gap-3">
                   <div className="text-2xl mt-0.5">🔔</div>
                   <div className="flex-1">
-                    <p className="text-white font-semibold text-sm">🔔 Haz clic en la campanita y no te pierdas nada</p>
-                    <p className="text-white/50 text-xs mt-0.5">Recibe promociones exclusivas al instante aunque no estés en el sitio</p>
+                    <p className="text-white font-semibold text-sm">Suscríbete y recibe descuentos exclusivos</p>
+                    <p className="text-white/50 text-xs mt-0.5">Recibe promociones y cupones especiales al instante</p>
 
                     {pushEnabled ? (
                       <div className="mt-2 flex items-center gap-1.5 text-green-400 text-xs font-semibold">
                         <Check className="w-4 h-4" /> ¡Notificaciones activadas!
                       </div>
-                    ) : isIOSSafari && !isPWA ? (
-                      <div className="mt-3 space-y-2">
-                        <p className="text-amber-300 text-xs font-semibold">📱 iPhone: un paso previo</p>
-                        <p className="text-white/60 text-[11px] leading-relaxed">
-                          Para activar notificaciones en iPhone, primero agrega esta página a tu pantalla de inicio:
-                        </p>
-                        <ol className="text-white/50 text-[11px] space-y-1 list-decimal list-inside">
-                          <li>Toca el ícono <strong className="text-white">Compartir</strong>{" "}
-                            <span className="inline-flex items-center justify-center bg-white/20 rounded-md px-1 py-0.5 mx-0.5" style={{ verticalAlign: "middle" }}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><rect x="4" y="11" width="16" height="11" rx="2"/>
-                              </svg>
-                            </span>
-                          </li>
-                          <li>Selecciona <strong className="text-white">"Agregar a pantalla de inicio"</strong></li>
-                          <li>Abre la app desde tu pantalla de inicio</li>
-                          <li>Regresa aquí y presiona el botón de abajo</li>
-                        </ol>
-                        <button
-                          onClick={handleEnablePush}
-                          disabled={pushLoading}
-                          className="mt-1 bg-[#C5A55A] hover:bg-[#d4b46a] disabled:opacity-50 text-black px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
-                        >
-                          {pushLoading
-                            ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</>
-                            : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones Push</>}
-                        </button>
-                      </div>
                     ) : (
-                      <div className="mt-2 space-y-2">
-                        {!isIOSSafari && (
-                          <p className="text-white/50 text-[11px]">✅ En Android/Chrome se activa con un solo clic</p>
-                        )}
+                      <div className="mt-2">
                         <button
                           onClick={handleEnablePush}
                           disabled={pushLoading}

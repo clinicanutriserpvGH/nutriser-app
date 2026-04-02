@@ -571,6 +571,7 @@ export const patientAccounts = mysqlTable("patientAccounts", {
   resetToken: varchar("resetToken", { length: 128 }),
   resetTokenExpiresAt: timestamp("resetTokenExpiresAt"),
   pushSubscription: text("pushSubscription"),
+  apnsToken: varchar("apnsToken", { length: 200 }), // Token APNs para notificaciones nativas en iOS
   consentAcceptedAt: timestamp("consentAcceptedAt"), // Fecha en que aceptó el contrato
   consentPdfUrl: text("consentPdfUrl"), // URL del PDF firmado en S3
   consentSignature: text("consentSignature"), // URL de la firma o imagen base64

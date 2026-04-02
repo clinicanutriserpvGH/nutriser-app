@@ -553,3 +553,80 @@ export const shareRequests = mysqlTable("shareRequests", {
 });
 export type ShareRequest = typeof shareRequests.$inferSelect;
 export type InsertShareRequest = typeof shareRequests.$inferInsert;
+
+// ============================================================
+// MÓDULO MIS TRATAMIENTOS — Pacientes presenciales
+// ============================================================
+
+/**
+ * Cuentas de pacientes presenciales de la clínica
+ */
+export const patientAccounts = mysqlTable("patientAccounts", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 20 }).notNull(),
+  birthday: varchar("birthday", { length: 10 }),
+  resetToken: varchar("resetToken", { length: 128 }),
+  resetTokenExpiresAt: timestamp("resetTokenExpiresAt"),
+  pushSubscription: text("pushSubscription"),
+  consentAcceptedAt: timestamp("consentAcceptedAt"), // Fecha en que aceptó el contrato
+  consentPdfUrl: text("consentPdfUrl"), // URL del PDF firmado en S3
+  consentSignature: varchar("consentSignature", { length: 255 }), // Nombre con el que firmó
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PatientAccount = typeof patientAccounts.$inferSelect;
+export type InsertPatientAccount = typeof patientAccounts.$inferInsert;
+
+/**
+ * Tratamientos asignados a cada paciente por el administrador
+ */
+export const patientTreatments = mysqlTable("patientTreatments", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull(),
+  serviceName: varchar("serviceName", { length: 255 }).notNull(),
+  totalSessions: int("totalSessions").default(1).notNull(),
+  completedSessions: int("completedSessions").default(0).notNull(),
+  status: mysqlEnum("status", ["pending", "in_progress", "completed"]).default("pending").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PatientTreatment = typeof patientTreatments.$inferSelect;
+export type InsertPatientTreatment = typeof patientTreatments.$inferInsert;
+
+/**
+ * Citas programadas para cada tratamiento de un paciente
+ */
+export const patientAppointments = mysqlTable("patientAppointments", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull(),
+  treatmentId: int("treatmentId").notNull(),
+  appointmentDate: varchar("appointmentDate", { length: 10 }).notNull(),
+  appointmentTime: varchar("appointmentTime", { length: 5 }).notNull(),
+  status: mysqlEnum("status", ["scheduled", "completed", "cancelled"]).default("scheduled").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PatientAppointment = typeof patientAppointments.$inferSelect;
+export type InsertPatientAppointment = typeof patientAppointments.$inferInsert;
+
+/**
+ * Fotos de antes y después por paciente y tratamiento
+ * El admin las sube, el paciente las ve en su portal
+ */
+export const patientPhotos = mysqlTable("patientPhotos", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull(),
+  treatmentId: int("treatmentId"), // FK a patientTreatments.id (opcional, puede ser general)
+  type: mysqlEnum("type", ["before", "after", "progress"]).notNull(),
+  photoUrl: text("photoUrl").notNull(),
+  photoDate: varchar("photoDate", { length: 10 }).notNull(), // "YYYY-MM-DD"
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PatientPhoto = typeof patientPhotos.$inferSelect;
+export type InsertPatientPhoto = typeof patientPhotos.$inferInsert;

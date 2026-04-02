@@ -915,3 +915,35 @@
 - [x] Comentarios en videos: filtro de contenido inapropiado (groserías, contenido sexual)
 - [x] Comentarios en videos: aprobación del admin antes de publicarse
 - [x] Panel admin: pestaña de moderación de comentarios de videos (aprobar/rechazar/eliminar)
+
+## Módulo Mis Tratamientos + Fix Foro Expertos
+
+- [x] Fix: Foro Expertos admin — "Marcar publicado" no debe eliminar, agregar botón Eliminar separado
+- [x] BD: tablas patient_accounts, patient_treatments, patient_appointments
+- [x] Backend: registro/login de pacientes (email + contraseña), CRUD tratamientos y citas por admin
+- [x] Portal paciente: página Mis Tratamientos con estados (pendiente/tomado/finalizado), citas, cupones y catálogo
+- [x] Splash: botón "Mis Tratamientos" pequeño
+- [x] Admin: pestaña para gestionar pacientes y asignar tratamientos/citas
+
+## Módulo Mis Tratamientos (Detalle Completo)
+
+- [x] Fix: getApprovedSuggestions incluir status "published" para que no desaparezcan
+- [x] Fix: Foro Expertos admin — botón Eliminar separado y visible siempre
+- [x] BD: tabla patient_accounts (nombre, correo, hash contraseña, teléfono, fecha nacimiento, reset token)
+- [x] BD: tabla patient_treatments (paciente, servicio nombre, estado: pendiente/tomado/finalizado, notas)
+- [x] BD: tabla patient_appointments (paciente, tratamiento, fecha, hora, notas)
+- [x] Backend: registro paciente (nombre, correo, contraseña, teléfono, cumpleaños)
+- [x] Backend: login paciente con JWT cookie
+- [x] Backend: recuperación de contraseña por email (clinicanutriserpv@gmail.com)
+- [x] Backend: CRUD tratamientos por admin (asignar, cambiar estado, eliminar)
+- [x] Backend: CRUD citas por admin (crear, editar, eliminar)
+- [x] Backend: enviar notificaciones email + push a todos los pacientes desde admin
+- [x] Portal paciente: página Mis Tratamientos (tratamientos con estados, citas, cupones, catálogo)
+- [x] Portal paciente: suscripción push desde la página
+- [x] Splash: botón pequeño "Mis Tratamientos"
+- [x] Admin: pestaña "Pacientes" con lista, detalle, asignar tratamientos/citas, notificaciones
+- [x] BD: tabla patient_photos (fotos antes/después por paciente y tratamiento, con fecha)
+- [x] BD: campo consentAcceptedAt en patientAccounts (fecha de aceptación del contrato)
+- [x] Contrato de confidencialidad: el paciente debe aceptar al registrarse (queda registrado)
+- [x] Admin: subir fotos antes/después vinculadas al paciente y tratamiento
+- [x] Portal paciente: galería de fotos antes/después ordenadas por fecha y tratamiento

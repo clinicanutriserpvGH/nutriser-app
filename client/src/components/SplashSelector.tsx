@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Activity, Bell, BellRing, BookOpen, CalendarCheck, Check,
   ClipboardList, GraduationCap, HeartPulse, Loader2, Mail,
-  MapPin, Pill, Share2, ShoppingBag, ShoppingCart, Tag,
+  MapPin, Pill, Share2, ShoppingBag, ShoppingCart, Sparkles, Tag,
   TrendingUp, Utensils, X,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -29,6 +29,8 @@ const IMG_CUPONERA =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/cuponera-widget-Y2Vg4ATLkUTJV3qAkLn8zb.webp";
 const WHATSAPP_URL =
   "https://wa.me/523221007799?text=Hola%2C%20me%20interesa%20agendar%20una%20valoraci%C3%B3n%20en%20Nutriser";
+const IMG_TREATMENTS =
+  "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80";
 
 /* ─── Props ─────────────────────────────────────────────────────────────── */
 interface SplashSelectorProps {
@@ -458,6 +460,33 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 </span>
               </button>
             )}
+          </div>
+
+          {/* ── Mis Tratamientos ── */}
+          <div className="mb-4 md:mb-5">
+            <button
+              onClick={() => handleNavigate('/mis-tratamientos')}
+              className="relative w-full rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-200 group"
+            >
+              <div className="absolute inset-0">
+                <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+              </div>
+              <div className="relative flex items-center gap-3 p-4">
+                <div className="w-12 h-12 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
+                  <Sparkles className="w-6 h-6 text-black" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-white font-bold text-sm sm:text-base">Mis Tratamientos</p>
+                  <p className="text-white/70 text-[10px] sm:text-xs leading-tight mt-0.5">
+                    Registra tus tratamientos y accede a promociones exclusivas
+                  </p>
+                </div>
+                <div className="flex-shrink-0 bg-[#C5A55A]/20 rounded-xl px-2 py-1">
+                  <span className="text-[#C5A55A] text-[10px] font-bold">Entrar ›</span>
+                </div>
+              </div>
+            </button>
           </div>
 
           {/* ── Íconos sociales ── */}

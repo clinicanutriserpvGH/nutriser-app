@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import AdminBeforeAfterTab from "@/components/AdminBeforeAfterTab";
+import AdminPatientsTab from "@/components/AdminPatientsTab";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +25,7 @@ const ADMIN_TABS = [
   { value: 'suggestions', label: 'Foro Expertos', emoji: '💡' },
   { value: 'shareRequests', label: 'Códigos Extra', emoji: '📲' },
   { value: 'beforeAfter', label: 'Antes/Después', emoji: '📸' },
+  { value: 'patients', label: 'Pacientes', emoji: '🏥' },
 ] as const;
 
 type AdminTabValue = typeof ADMIN_TABS[number]['value'];
@@ -3558,7 +3560,9 @@ export default function AdminDashboard() {
           <TabsContent value="beforeAfter" className="space-y-4">
             <AdminBeforeAfterTab />
           </TabsContent>
-
+          <TabsContent value="patients" className="space-y-4">
+            <AdminPatientsTab />
+          </TabsContent>
         </Tabs>
         {/* Modal de Aprobar Cita */}
         {selectedAppointmentId !== null && selectedAppointment && (

@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, couponSubscribers, InsertCouponSubscriber, services, InsertService, topicSuggestions, InsertTopicSuggestion, topicVotes } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { products, InsertProduct, productPurchases, InsertProductPurchase, discountCodes, InsertDiscountCode, DiscountCode } from '../drizzle/schema';
+import { patientAccounts, InsertPatientAccount, PatientAccount, patientTreatments, InsertPatientTreatment, patientAppointments, InsertPatientAppointment, patientPhotos, InsertPatientPhoto } from '../drizzle/schema';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -994,7 +995,7 @@ export async function getApprovedSuggestions() {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(topicSuggestions)
-    .where(eq(topicSuggestions.status, "approved"))
+    .where(inArray(topicSuggestions.status, ['approved', 'published']))
     .orderBy(desc(topicSuggestions.votes), desc(topicSuggestions.createdAt));
 }
 
@@ -1118,4 +1119,161 @@ export async function validateExtraCode(code: string) {
     return { valid: true, discountPercent: 5, code: 'CUPONEXTRA5' };
   }
   return { valid: false, discountPercent: 0, code };
+}
+
+// ============================================================
+// MÓDULO MIS TRATAMIENTOS — Helpers de pacientes
+// ============================================================
+
+export async function createPatientAccount(data: InsertPatientAccount) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(patientAccounts).values(data);
+  const inserted = await db.select().from(patientAccounts).where(eq(patientAccounts.email, data.email)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create patient account");
+  return inserted[0];
+}
+
+export async function getPatientByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(patientAccounts).where(eq(patientAccounts.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getPatientById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(patientAccounts).where(eq(patientAccounts.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllPatients() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(patientAccounts).orderBy(desc(patientAccounts.createdAt));
+}
+
+export async function updatePatientConsent(id: number, signature: string, pdfUrl: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(patientAccounts).set({
+    consentAcceptedAt: new Date(),
+    consentSignature: signature,
+    consentPdfUrl: pdfUrl,
+  }).where(eq(patientAccounts.id, id));
+  return { success: true };
+}
+
+export async function setPatientResetToken(email: string, token: string, expiresAt: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(patientAccounts).set({ resetToken: token, resetTokenExpiresAt: expiresAt }).where(eq(patientAccounts.email, email));
+  return { success: true };
+}
+
+export async function getPatientByResetToken(token: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(patientAccounts).where(eq(patientAccounts.resetToken, token)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updatePatientPassword(id: number, passwordHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(patientAccounts).set({ passwordHash, resetToken: null, resetTokenExpiresAt: null }).where(eq(patientAccounts.id, id));
+  return { success: true };
+}
+
+export async function updatePatientPushSubscription(id: number, pushSubscription: string | null) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(patientAccounts).set({ pushSubscription }).where(eq(patientAccounts.id, id));
+  return { success: true };
+}
+
+// Patient Treatments
+export async function createPatientTreatment(data: InsertPatientTreatment) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(patientTreatments).values(data);
+  const inserted = await db.select().from(patientTreatments).orderBy(desc(patientTreatments.id)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create treatment");
+  return inserted[0];
+}
+
+export async function getPatientTreatments(patientId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(patientTreatments).where(eq(patientTreatments.patientId, patientId)).orderBy(desc(patientTreatments.createdAt));
+}
+
+export async function updatePatientTreatment(id: number, data: Partial<InsertPatientTreatment>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(patientTreatments).set(data).where(eq(patientTreatments.id, id));
+  const updated = await db.select().from(patientTreatments).where(eq(patientTreatments.id, id)).limit(1);
+  return updated.length > 0 ? updated[0] : undefined;
+}
+
+export async function deletePatientTreatment(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(patientAppointments).where(eq(patientAppointments.treatmentId, id));
+  await db.delete(patientTreatments).where(eq(patientTreatments.id, id));
+  return { success: true };
+}
+
+// Patient Appointments
+export async function createPatientAppointment(data: InsertPatientAppointment) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(patientAppointments).values(data);
+  const inserted = await db.select().from(patientAppointments).orderBy(desc(patientAppointments.id)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create appointment");
+  return inserted[0];
+}
+
+export async function getPatientAppointments(patientId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(patientAppointments).where(eq(patientAppointments.patientId, patientId)).orderBy(patientAppointments.appointmentDate, patientAppointments.appointmentTime);
+}
+
+export async function updatePatientAppointment(id: number, data: Partial<InsertPatientAppointment>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(patientAppointments).set(data).where(eq(patientAppointments.id, id));
+  return { success: true };
+}
+
+export async function deletePatientAppointment(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(patientAppointments).where(eq(patientAppointments.id, id));
+  return { success: true };
+}
+
+// Patient Photos
+export async function createPatientPhoto(data: InsertPatientPhoto) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(patientPhotos).values(data);
+  const inserted = await db.select().from(patientPhotos).orderBy(desc(patientPhotos.id)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create photo");
+  return inserted[0];
+}
+
+export async function getPatientPhotos(patientId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(patientPhotos).where(eq(patientPhotos.patientId, patientId)).orderBy(patientPhotos.photoDate, patientPhotos.createdAt);
+}
+
+export async function deletePatientPhoto(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(patientPhotos).where(eq(patientPhotos.id, id));
+  return { success: true };
 }

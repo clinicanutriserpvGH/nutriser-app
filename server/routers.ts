@@ -13,6 +13,7 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createShareRequest, listAllShareRequests, approveShareRequest, rejectShareRequest, deleteShareRequest, validateExtraCode } from './db';
+import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions } from "./pushNotifications";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
@@ -1667,6 +1668,259 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return await deleteShareRequest(input.id);
+      }),
+  }),
+
+  // ─── MÓDULO MIS TRATAMIENTOS — Pacientes Presenciales ──────────────────────────────────────────────
+  patients: router({
+    // Registro de nuevo paciente
+    register: publicProcedure
+      .input(z.object({
+        name: z.string().min(2),
+        email: z.string().email(),
+        password: z.string().min(6),
+        phone: z.string().min(8),
+        birthday: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const existing = await getPatientByEmail(input.email);
+        if (existing) throw new TRPCError({ code: 'CONFLICT', message: 'Ya existe una cuenta con ese correo.' });
+        const passwordHash = await bcrypt.hash(input.password, 10);
+        const patient = await createPatientAccount({
+          name: input.name,
+          email: input.email,
+          passwordHash,
+          phone: input.phone,
+          birthday: input.birthday,
+        });
+        // Devolver sin el hash
+        const { passwordHash: _, resetToken: __, ...safe } = patient;
+        return safe;
+      }),
+
+    // Login de paciente
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const patient = await getPatientByEmail(input.email);
+        if (!patient) throw new TRPCError({ code: 'NOT_FOUND', message: 'Correo o contraseña incorrectos.' });
+        const valid = await bcrypt.compare(input.password, patient.passwordHash);
+        if (!valid) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Correo o contraseña incorrectos.' });
+        const { passwordHash: _, resetToken: __, ...safe } = patient;
+        return safe;
+      }),
+
+    // Obtener datos del paciente por ID
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const patient = await getPatientById(input.id);
+        if (!patient) throw new TRPCError({ code: 'NOT_FOUND', message: 'Paciente no encontrado.' });
+        const { passwordHash: _, resetToken: __, ...safe } = patient;
+        return safe;
+      }),
+
+    // Listar todos los pacientes (admin)
+    listAll: publicProcedure.query(async () => {
+      const patients = await getAllPatients();
+      return patients.map(({ passwordHash: _, resetToken: __, ...safe }) => safe);
+    }),
+
+    // Guardar consentimiento firmado
+    saveConsent: publicProcedure
+      .input(z.object({
+        patientId: z.number(),
+        signature: z.string(),
+        pdfData: z.string(), // base64 del PDF
+      }))
+      .mutation(async ({ input }) => {
+        const base64Data = input.pdfData.split(',')[1] || input.pdfData;
+        const buffer = Buffer.from(base64Data, 'base64');
+        const fileKey = `patient-consents/${input.patientId}-consent-${Date.now()}.pdf`;
+        const { url } = await storagePut(fileKey, buffer, 'application/pdf');
+        await updatePatientConsent(input.patientId, input.signature, url);
+        return { success: true, pdfUrl: url };
+      }),
+
+    // Solicitar reset de contraseña
+    requestPasswordReset: publicProcedure
+      .input(z.object({ email: z.string().email(), origin: z.string() }))
+      .mutation(async ({ input }) => {
+        const patient = await getPatientByEmail(input.email);
+        if (!patient) return { success: true }; // No revelar si existe
+        const crypto = await import('crypto');
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+        await setPatientResetToken(input.email, token, expiresAt);
+        const resetLink = `${input.origin}/mis-tratamientos/reset-password?token=${token}`;
+        await sendPasswordResetEmail(input.email, resetLink);
+        return { success: true };
+      }),
+
+    // Restablecer contraseña
+    resetPassword: publicProcedure
+      .input(z.object({ token: z.string(), newPassword: z.string().min(6) }))
+      .mutation(async ({ input }) => {
+        const patient = await getPatientByResetToken(input.token);
+        if (!patient) throw new TRPCError({ code: 'NOT_FOUND', message: 'Token inválido o expirado.' });
+        if (!patient.resetTokenExpiresAt || new Date() > patient.resetTokenExpiresAt) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'El enlace ha expirado. Solicita uno nuevo.' });
+        }
+        const hash = await bcrypt.hash(input.newPassword, 10);
+        await updatePatientPassword(patient.id, hash);
+        return { success: true };
+      }),
+
+    // Guardar suscripción push del paciente
+    savePush: publicProcedure
+      .input(z.object({ patientId: z.number(), pushSubscription: z.string().nullable() }))
+      .mutation(async ({ input }) => {
+        await updatePatientPushSubscription(input.patientId, input.pushSubscription);
+        return { success: true };
+      }),
+
+    // ─── Tratamientos (admin asigna) ───
+    addTreatment: publicProcedure
+      .input(z.object({
+        patientId: z.number(),
+        serviceName: z.string().min(1),
+        totalSessions: z.number().min(1).default(1),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await createPatientTreatment({
+          patientId: input.patientId,
+          serviceName: input.serviceName,
+          totalSessions: input.totalSessions,
+          notes: input.notes,
+        });
+      }),
+
+    updateTreatment: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        serviceName: z.string().optional(),
+        totalSessions: z.number().optional(),
+        completedSessions: z.number().optional(),
+        status: z.enum(['pending', 'in_progress', 'completed']).optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await updatePatientTreatment(id, data);
+      }),
+
+    deleteTreatment: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deletePatientTreatment(input.id);
+      }),
+
+    getTreatments: publicProcedure
+      .input(z.object({ patientId: z.number() }))
+      .query(async ({ input }) => {
+        return await getPatientTreatments(input.patientId);
+      }),
+
+    // ─── Citas (admin asigna) ───
+    addAppointment: publicProcedure
+      .input(z.object({
+        patientId: z.number(),
+        treatmentId: z.number(),
+        appointmentDate: z.string(),
+        appointmentTime: z.string(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await createPatientAppointment(input);
+      }),
+
+    updateAppointment: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        appointmentDate: z.string().optional(),
+        appointmentTime: z.string().optional(),
+        status: z.enum(['scheduled', 'completed', 'cancelled']).optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await updatePatientAppointment(id, data);
+      }),
+
+    deleteAppointment: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deletePatientAppointment(input.id);
+      }),
+
+    getAppointments: publicProcedure
+      .input(z.object({ patientId: z.number() }))
+      .query(async ({ input }) => {
+        return await getPatientAppointments(input.patientId);
+      }),
+
+    // ─── Fotos antes/después (admin sube) ───
+    addPhoto: publicProcedure
+      .input(z.object({
+        patientId: z.number(),
+        treatmentId: z.number().optional(),
+        type: z.enum(['before', 'after', 'progress']),
+        photoData: z.string(), // base64
+        photoDate: z.string(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const base64Data = input.photoData.split(',')[1] || input.photoData;
+        const buffer = Buffer.from(base64Data, 'base64');
+        const fileKey = `patient-photos/${input.patientId}-${input.type}-${Date.now()}.jpg`;
+        const { url } = await storagePut(fileKey, buffer, 'image/jpeg');
+        return await createPatientPhoto({
+          patientId: input.patientId,
+          treatmentId: input.treatmentId,
+          type: input.type,
+          photoUrl: url,
+          photoDate: input.photoDate,
+          notes: input.notes,
+        });
+      }),
+
+    deletePhoto: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deletePatientPhoto(input.id);
+      }),
+
+    getPhotos: publicProcedure
+      .input(z.object({ patientId: z.number() }))
+      .query(async ({ input }) => {
+        return await getPatientPhotos(input.patientId);
+      }),
+
+    // Enviar notificación push a todos los pacientes (admin)
+    notifyAllPatients: publicProcedure
+      .input(z.object({ title: z.string(), body: z.string() }))
+      .mutation(async ({ input }) => {
+        const result = await sendPushNotificationToAll(input.title, input.body, '/');
+        return { success: true, sent: result.sent };
+      }),
+
+    // Enviar email a todos los pacientes (admin)
+    emailAllPatients: publicProcedure
+      .input(z.object({ subject: z.string(), message: z.string() }))
+      .mutation(async ({ input }) => {
+        const patients = await getAllPatients();
+        let sent = 0;
+        for (const patient of patients) {
+          try {
+            await sendPasswordResetEmail(patient.email, `${input.message}\n\n---\nNutriser Aesthetic & Nutrition`);
+            sent++;
+          } catch {}
+        }
+        return { success: true, sent };
       }),
   }),
 });

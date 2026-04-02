@@ -962,3 +962,5 @@
 - [x] Fix: campo fecha cumpleaños invisible (blanco)
 - [x] Fix: "Volver al inicio" debe redirigir al splash (/)
 - [x] Fix: descripción del botón Mis Tratamientos en splash más descriptiva
+- [x] Consentimiento: nombre del paciente pre-llenado en el documento (tomado del registro)
+- [x] Consentimiento: firma digital con canvas (dibujo con dedo/mouse), no solo texto

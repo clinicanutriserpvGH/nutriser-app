@@ -4,7 +4,8 @@
  * Tras autenticarse ven sus tratamientos, citas, fotos antes/después,
  * consentimiento informado, cupones y catálogo de servicios.
  */
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import SignatureCanvas from "react-signature-canvas";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -68,10 +69,11 @@ export default function MyTreatments() {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState<"treatments" | "photos" | "consent" | "coupons">("treatments");
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
-  const [signature, setSignature] = useState("");
   const [signingConsent, setSigningConsent] = useState(false);
+  const [signatureEmpty, setSignatureEmpty] = useState(true);
   const consentScrollRef = useRef<HTMLDivElement>(null);
   const [consentScrolled, setConsentScrolled] = useState(false);
+  const sigCanvasRef = useRef<SignatureCanvas>(null);
 
   // Persistir sesión en sessionStorage
   useEffect(() => {
@@ -131,7 +133,7 @@ export default function MyTreatments() {
   const consentMutation = trpc.patients.saveConsent.useMutation({
     onSuccess: (data) => {
       if (patient) {
-        const updated = { ...patient, consentAcceptedAt: new Date(), consentPdfUrl: data.pdfUrl, consentSignature: signature };
+        const updated = { ...patient, consentAcceptedAt: new Date(), consentPdfUrl: data.pdfUrl, consentSignature: data.pdfUrl };
         persistPatient(updated as PatientSafe);
       }
       setView("portal");
@@ -166,15 +168,29 @@ export default function MyTreatments() {
   };
 
   const handleSignConsent = async () => {
-    if (!signature.trim()) { toast.error("Por favor escribe tu nombre completo para firmar."); return; }
+    if (!sigCanvasRef.current || sigCanvasRef.current.isEmpty()) {
+      toast.error("Por favor dibuja tu firma para continuar.");
+      return;
+    }
     if (!patient) return;
     setSigningConsent(true);
     try {
+      // Obtener imagen de la firma como PNG base64
+      const signatureDataUrl = sigCanvasRef.current.toDataURL("image/png");
+      const signatureBase64 = signatureDataUrl; // data:image/png;base64,...
+
       // Generar PDF
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      const lines = doc.splitTextToSize(CONSENT_TEXT, 170);
+
+      // Personalizar el texto del consentimiento con el nombre del paciente
+      const personalizedText = CONSENT_TEXT.replace(
+        "Yo, el/la paciente que firma el presente documento,",
+        `Yo, ${patient.name}, paciente que firma el presente documento,`
+      );
+
+      const lines = doc.splitTextToSize(personalizedText, 170);
       let y = 20;
       for (const line of lines) {
         if (y > 270) { doc.addPage(); y = 20; }
@@ -184,20 +200,19 @@ export default function MyTreatments() {
       y += 10;
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text("FIRMA DEL PACIENTE:", 20, y);
-      y += 8;
-      doc.setFont("helvetica", "italic");
-      doc.setFontSize(14);
-      doc.text(signature, 20, y);
-      y += 8;
+      doc.text("FIRMA AUTÓGRAFA DEL PACIENTE:", 20, y);
+      y += 6;
+      // Insertar imagen de la firma en el PDF
+      doc.addImage(signatureDataUrl, "PNG", 20, y, 80, 30);
+      y += 35;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
-      doc.text(`Nombre: ${patient.name}`, 20, y); y += 5;
+      doc.text(`Nombre completo: ${patient.name}`, 20, y); y += 5;
       doc.text(`Email: ${patient.email}`, 20, y); y += 5;
       doc.text(`Teléfono: ${patient.phone}`, 20, y); y += 5;
       doc.text(`Fecha y hora de firma: ${new Date().toLocaleString("es-MX")}`, 20, y);
       const pdfBase64 = doc.output("datauristring");
-      await consentMutation.mutateAsync({ patientId: patient.id, signature, pdfData: pdfBase64 });
+      await consentMutation.mutateAsync({ patientId: patient.id, signature: signatureDataUrl, pdfData: pdfBase64 });
     } finally {
       setSigningConsent(false);
     }
@@ -362,7 +377,10 @@ export default function MyTreatments() {
               }}
               className="h-64 overflow-y-auto bg-black/30 rounded-2xl p-4 mb-4 text-white/70 text-xs leading-relaxed whitespace-pre-line border border-white/10"
             >
-              {CONSENT_TEXT}
+              {patient ? CONSENT_TEXT.replace(
+                "Yo, el/la paciente que firma el presente documento,",
+                `Yo, ${patient.name}, paciente que firma el presente documento,`
+              ) : CONSENT_TEXT}
             </div>
             {!consentScrolled && (
               <p className="text-yellow-400/80 text-xs text-center mb-3 flex items-center justify-center gap-1">
@@ -370,25 +388,41 @@ export default function MyTreatments() {
               </p>
             )}
 
-            {/* Firma */}
+            {/* Firma digital */}
             <div className="space-y-3">
-              <label className="text-white/70 text-sm font-semibold">Firma (escribe tu nombre completo):</label>
-              <Input
-                value={signature}
-                onChange={e => setSignature(e.target.value)}
-                placeholder="Tu nombre completo"
-                disabled={!consentScrolled}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 font-serif text-lg"
-              />
-              <Button
-                onClick={handleSignConsent}
-                disabled={!consentScrolled || !signature.trim() || signingConsent || consentMutation.isPending}
-                className="w-full bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold"
-              >
-                {signingConsent || consentMutation.isPending
-                  ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Guardando PDF...</>
-                  : <><FileText className="w-4 h-4 mr-2" /> Firmar y continuar</>}
-              </Button>
+              <label className="text-white/70 text-sm font-semibold">Firma digital (dibuja con tu dedo o mouse):</label>
+              <div className="bg-white rounded-2xl p-2">
+                <SignatureCanvas
+                  ref={sigCanvasRef}
+                  canvasProps={{
+                    className: "w-full h-32 border border-gray-300 rounded-xl",
+                  }}
+                  onEnd={() => setSignatureEmpty(sigCanvasRef.current?.isEmpty() ?? true)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    sigCanvasRef.current?.clear();
+                    setSignatureEmpty(true);
+                  }}
+                  variant="outline"
+                  className="flex-1 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
+                  disabled={!consentScrolled}
+                >
+                  <X className="w-4 h-4 mr-2" /> Borrar
+                </Button>
+                <Button
+                  onClick={handleSignConsent}
+                  disabled={!consentScrolled || signatureEmpty || signingConsent || consentMutation.isPending}
+                  className="flex-1 bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold"
+                >
+                  {signingConsent || consentMutation.isPending
+                    ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Guardando PDF...</>
+                    : <><FileText className="w-4 h-4 mr-2" /> Firmar y continuar</>}
+                </Button>
+              </div>
             </div>
           </div>
 

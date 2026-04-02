@@ -110,12 +110,12 @@ export default function PromotionsSection() {
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
 
   const handleEnablePush = async () => {
-    // iOS Safari solo soporta push si la app está instalada en pantalla de inicio (PWA)
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
-    
-    if (isIOS && !isInStandaloneMode) {
-      // Mostrar instrucciones para agregar a pantalla de inicio
+    // WKWebView (app nativa Xcode) no tiene serviceWorker — en ese caso no mostrar instrucciones de Safari
+    const isWKWebView = isIOS && !('serviceWorker' in navigator);
+
+    if (isIOS && !isInStandaloneMode && !isWKWebView) {
       toast(
         <div className="text-sm">
           <p className="font-bold mb-1">📱 Paso previo en iPhone:</p>

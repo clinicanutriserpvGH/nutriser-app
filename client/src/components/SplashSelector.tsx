@@ -645,8 +645,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <p className="text-white font-semibold text-sm">Activa las notificaciones y no te pierdas nada</p>
                     <p className="text-white/50 text-xs mt-0.5">Recibe promociones y cupones exclusivos al instante</p>
 
-                    {/* Instrucciones especiales para iOS Safari (no PWA) */}
-                    {isIOS && !isPWA && (
+                    {/* Instrucciones especiales para iOS Safari (no PWA, no app nativa) */}
+                    {isIOS && !isPWA && !isWKWebView && (
                       <div className="mt-2 bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl p-3">
                         <p className="text-[#C5A55A] text-xs font-bold mb-1">📱 Para activar en iPhone:</p>
                         <ol className="text-white/60 text-[11px] space-y-0.5 list-decimal list-inside">
@@ -671,7 +671,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                         >
                           {pushLoading
                             ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Activando...</>
-                            : <><BellRing className="w-3.5 h-3.5" /> {isIOS && !isPWA ? 'Ver instrucciones' : 'Activar Notificaciones'}</>}
+                            : <><BellRing className="w-3.5 h-3.5" /> Activar Notificaciones</>}
                         </button>
                       </div>
                     )}

@@ -189,11 +189,13 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
     return null;
   });
 
-  // Detectar iOS/Safari
+  // Detectar iOS/Safari y WKWebView (app nativa de Xcode)
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const isIOSSafari = isIOS && isSafari;
   const isPWA = window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
+  // WKWebView no tiene serviceWorker — es la app nativa de Xcode
+  const isWKWebView = isIOS && !("serviceWorker" in navigator);
 
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
 
@@ -611,7 +613,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 )}
               </div>
 
-              {/* Separador */}
+              {/* Separador y opción push: solo visible fuera de la app nativa de iOS */}
+              {!isWKWebView && (<>
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-white/10" />
                 <span className="text-xs text-white/30 uppercase tracking-wider">o también</span>
@@ -681,6 +684,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               <p className="text-xs text-white/30 text-center">
                 Sin spam, solo ofertas reales. Puedes cancelar cuando quieras.
               </p>
+              </>)}
             </div>
           </div>
         </div>

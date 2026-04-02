@@ -1,0 +1,1 @@
+ALTER TABLE `patientAccounts` MODIFY COLUMN `consentSignature` text;

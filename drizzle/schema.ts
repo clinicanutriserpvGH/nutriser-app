@@ -573,7 +573,7 @@ export const patientAccounts = mysqlTable("patientAccounts", {
   pushSubscription: text("pushSubscription"),
   consentAcceptedAt: timestamp("consentAcceptedAt"), // Fecha en que aceptó el contrato
   consentPdfUrl: text("consentPdfUrl"), // URL del PDF firmado en S3
-  consentSignature: varchar("consentSignature", { length: 255 }), // Nombre con el que firmó
+  consentSignature: text("consentSignature"), // URL de la firma o imagen base64
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

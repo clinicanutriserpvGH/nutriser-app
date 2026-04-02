@@ -388,7 +388,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 label="Pacientes"
                 title="Portal de Salud Nutriser"
                 cta="Acceder / Crear Cuenta"
-                onClick={() => window.open("https://portaldesaludnutriser.club", "_blank")}
+                onClick={() => { window.location.href = "https://portaldesaludnutriser.club"; }}
               />
             </div>
           </div>

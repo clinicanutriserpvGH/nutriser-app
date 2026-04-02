@@ -539,7 +539,10 @@ export default function MyTreatments() {
   return (
     <div className="min-h-screen bg-[#0D0D0D]">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-[#0D0D0D]/95 backdrop-blur-sm border-b border-white/10 px-4 py-3">
+      <div
+        className="sticky top-0 z-40 bg-[#0D0D0D]/95 backdrop-blur-sm border-b border-white/10 px-4 py-3"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}
+      >
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={LOGO_URL} alt="Nutriser" className="h-8" />

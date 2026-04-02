@@ -61,6 +61,7 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
             ? "bg-white/95 backdrop-blur-md shadow-[0_2px_20px_rgba(197,165,90,0.08)]"
             : "bg-transparent"
         }`}
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
         <div className="container flex items-center justify-between h-20">
           {/* Logo */}
@@ -185,7 +186,8 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-white/98 backdrop-blur-lg pt-24 px-8 overflow-y-auto"
+            className="fixed inset-0 z-40 bg-white/98 backdrop-blur-lg px-8 overflow-y-auto"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 6rem)' }}
           >
             <div className="flex flex-col gap-6">
 

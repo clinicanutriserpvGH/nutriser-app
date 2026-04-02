@@ -657,9 +657,6 @@ export default function MyTreatments() {
                 <p className="text-white/50 text-xs">
                   Firmado el {new Date(patient.consentAcceptedAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}
                 </p>
-                {patient.consentSignature && (
-                  <p className="text-white/40 text-xs mt-1">Firma: <span className="font-serif italic text-white/60">{patient.consentSignature}</span></p>
-                )}
                 {patient.consentPdfUrl && (
                   <a href={patient.consentPdfUrl} target="_blank" rel="noopener noreferrer"
                     className="mt-3 inline-flex items-center gap-1.5 text-[#C5A55A] text-xs hover:underline">
@@ -676,11 +673,7 @@ export default function MyTreatments() {
                 </Button>
               </div>
             )}
-            {/* Texto del contrato */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-              <h4 className="text-white/70 text-xs font-semibold mb-2">Contenido del contrato:</h4>
-              <pre className="text-white/40 text-[10px] leading-relaxed whitespace-pre-wrap">{CONSENT_TEXT}</pre>
-            </div>
+
           </div>
         )}
       </div>

@@ -175,44 +175,13 @@ export default function MyTreatments() {
     if (!patient) return;
     setSigningConsent(true);
     try {
-      // Obtener imagen de la firma como PNG base64
+      // Solo enviar la imagen de la firma — el servidor genera el PDF
       const signatureDataUrl = sigCanvasRef.current.toDataURL("image/png");
-      const signatureBase64 = signatureDataUrl; // data:image/png;base64,...
-
-      // Generar PDF
-      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-
-      // Personalizar el texto del consentimiento con el nombre del paciente
-      const personalizedText = CONSENT_TEXT.replace(
-        "Yo, el/la paciente que firma el presente documento,",
-        `Yo, ${patient.name}, paciente que firma el presente documento,`
-      );
-
-      const lines = doc.splitTextToSize(personalizedText, 170);
-      let y = 20;
-      for (const line of lines) {
-        if (y > 270) { doc.addPage(); y = 20; }
-        doc.text(line, 20, y);
-        y += 5;
-      }
-      y += 10;
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.text("FIRMA AUTÓGRAFA DEL PACIENTE:", 20, y);
-      y += 6;
-      // Insertar imagen de la firma en el PDF
-      doc.addImage(signatureDataUrl, "PNG", 20, y, 80, 30);
-      y += 35;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.text(`Nombre completo: ${patient.name}`, 20, y); y += 5;
-      doc.text(`Email: ${patient.email}`, 20, y); y += 5;
-      doc.text(`Teléfono: ${patient.phone}`, 20, y); y += 5;
-      doc.text(`Fecha y hora de firma: ${new Date().toLocaleString("es-MX")}`, 20, y);
-      const pdfBase64 = doc.output("datauristring");
-      await consentMutation.mutateAsync({ patientId: patient.id, signature: signatureDataUrl, pdfData: pdfBase64 });
+      await consentMutation.mutateAsync({
+        patientId: patient.id,
+        signature: signatureDataUrl,
+        patientName: patient.name,
+      });
     } finally {
       setSigningConsent(false);
     }
@@ -395,7 +364,8 @@ export default function MyTreatments() {
                 <SignatureCanvas
                   ref={sigCanvasRef}
                   canvasProps={{
-                    className: "w-full h-32 border border-gray-300 rounded-xl",
+                    className: "w-full border border-gray-300 rounded-xl",
+                    style: { height: '180px', touchAction: 'none', display: 'block' },
                   }}
                   onEnd={() => setSignatureEmpty(sigCanvasRef.current?.isEmpty() ?? true)}
                 />

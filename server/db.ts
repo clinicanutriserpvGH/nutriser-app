@@ -1277,3 +1277,15 @@ export async function deletePatientPhoto(id: number) {
   await db.delete(patientPhotos).where(eq(patientPhotos.id, id));
   return { success: true };
 }
+
+// Delete patient account and all related data
+export async function deletePatientAccount(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Delete related data first (cascade)
+  await db.delete(patientPhotos).where(eq(patientPhotos.patientId, id));
+  await db.delete(patientAppointments).where(eq(patientAppointments.patientId, id));
+  await db.delete(patientTreatments).where(eq(patientTreatments.patientId, id));
+  await db.delete(patientAccounts).where(eq(patientAccounts.id, id));
+  return { success: true };
+}

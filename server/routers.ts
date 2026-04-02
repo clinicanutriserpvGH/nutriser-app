@@ -13,7 +13,7 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createShareRequest, listAllShareRequests, approveShareRequest, rejectShareRequest, deleteShareRequest, validateExtraCode } from './db';
-import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto } from './db';
+import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions } from "./pushNotifications";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
@@ -1733,16 +1733,83 @@ export const appRouter = router({
     saveConsent: publicProcedure
       .input(z.object({
         patientId: z.number(),
-        signature: z.string(),
-        pdfData: z.string(), // base64 del PDF
+        signature: z.string(), // base64 de la imagen de la firma
+        patientName: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const base64Data = input.pdfData.split(',')[1] || input.pdfData;
-        const buffer = Buffer.from(base64Data, 'base64');
+        // Generar PDF con pdfkit en el servidor
+        const PDFDocument = (await import('pdfkit')).default;
+        const patient = await getPatientById(input.patientId);
+        const patientName = input.patientName || patient?.name || 'Paciente';
+        
+        const doc = new PDFDocument({ margin: 50 });
+        const chunks: Buffer[] = [];
+        doc.on('data', (chunk: Buffer) => chunks.push(chunk));
+        
+        await new Promise<void>((resolve) => {
+          doc.on('end', resolve);
+          
+          // Encabezado
+          doc.fontSize(20).font('Helvetica-Bold').text('NUTRISER AESTHETIC & NUTRITION', { align: 'center' });
+          doc.fontSize(14).font('Helvetica').text('Consentimiento Informado', { align: 'center' });
+          doc.moveDown();
+          doc.fontSize(10).text(`Fecha: ${new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}`, { align: 'right' });
+          doc.moveDown();
+          
+          // Datos del paciente
+          doc.fontSize(12).font('Helvetica-Bold').text('Datos del Paciente:');
+          doc.fontSize(11).font('Helvetica').text(`Nombre: ${patientName}`);
+          if (patient?.email) doc.text(`Email: ${patient.email}`);
+          if (patient?.phone) doc.text(`Teléfono: ${patient.phone}`);
+          doc.moveDown();
+          
+          // Texto del consentimiento
+          doc.fontSize(12).font('Helvetica-Bold').text('Consentimiento Informado:');
+          doc.moveDown(0.5);
+          doc.fontSize(10).font('Helvetica').text(
+            'Yo, el paciente abajo firmante, declaro que he sido informado/a de manera clara y comprensible sobre los tratamientos estéticos y nutricionales que recibiré en Nutriser Aesthetic & Nutrition. Entiendo los procedimientos, beneficios, riesgos potenciales y alternativas disponibles.\n\n' +
+            'Autorizo a Nutriser Aesthetic & Nutrition a realizar los tratamientos acordados, incluyendo pero no limitado a: tratamientos de nutrición, procedimientos estéticos no invasivos, y cualquier otro servicio contratado.\n\n' +
+            'Declaro que he informado sobre mis condiciones médicas relevantes, alergias, medicamentos actuales y cualquier contraindicación conocida. Me comprometo a seguir las indicaciones del equipo profesional para obtener los mejores resultados.\n\n' +
+            'Autorizo el uso de fotografías antes/después con fines de seguimiento de mi tratamiento. Estas imágenes serán tratadas con absoluta confidencialidad.\n\n' +
+            'He leído y comprendido este documento en su totalidad y doy mi consentimiento de manera libre y voluntaria.',
+            { align: 'justify' }
+          );
+          doc.moveDown(2);
+          
+          // Firma
+          doc.fontSize(12).font('Helvetica-Bold').text('Firma del Paciente:');
+          doc.moveDown(0.5);
+          
+          // Insertar imagen de la firma si existe
+          if (input.signature && input.signature.startsWith('data:image')) {
+            try {
+              const sigBase64 = input.signature.split(',')[1];
+              const sigBuffer = Buffer.from(sigBase64, 'base64');
+              doc.image(sigBuffer, { width: 200, height: 80 });
+            } catch (e) {
+              doc.text('[Firma digital adjunta]');
+            }
+          }
+          
+          doc.moveDown();
+          doc.fontSize(10).font('Helvetica').text(`Nombre: ${patientName}`);
+          doc.text(`Fecha: ${new Date().toLocaleDateString('es-MX')}`);
+          
+          doc.end();
+        });
+        
+        const pdfBuffer = Buffer.concat(chunks);
         const fileKey = `patient-consents/${input.patientId}-consent-${Date.now()}.pdf`;
-        const { url } = await storagePut(fileKey, buffer, 'application/pdf');
+        const { url } = await storagePut(fileKey, pdfBuffer, 'application/pdf');
         await updatePatientConsent(input.patientId, input.signature, url);
         return { success: true, pdfUrl: url };
+      }),
+
+    // Eliminar cuenta de paciente (admin)
+    deleteAccount: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await deletePatientAccount(input.id);
       }),
 
     // Solicitar reset de contraseña

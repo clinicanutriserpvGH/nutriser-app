@@ -33,7 +33,7 @@ export default function PrivacyPolicy() {
         <section>
           <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">1. Responsable del tratamiento</h2>
           <p>
-            <strong>Nutriser Aesthetic &amp; Nutrition</strong> (en adelante "Nutriser"), con domicilio en Puerto Vallarta, Jalisco, México, es responsable del tratamiento de sus datos personales conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).
+            <strong>Nutriser Aesthetic &amp; Nutrition</strong> (en adelante "Nutriser") es responsable del tratamiento de sus datos personales conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).
           </p>
           <p className="mt-2">Contacto: <a href="mailto:clinicanutriserpv@gmail.com" className="text-[#C5A55A] underline">clinicanutriserpv@gmail.com</a></p>
         </section>
@@ -108,7 +108,7 @@ export default function PrivacyPolicy() {
           <ul className="mt-2 space-y-1 text-gray-700">
             <li>📧 <a href="mailto:clinicanutriserpv@gmail.com" className="text-[#C5A55A] underline">clinicanutriserpv@gmail.com</a></li>
             <li>🌐 <a href="https://www.nutriserpv.com" className="text-[#C5A55A] underline">www.nutriserpv.com</a></li>
-            <li>📍 Puerto Vallarta, Jalisco, México</li>
+
           </ul>
         </section>
 

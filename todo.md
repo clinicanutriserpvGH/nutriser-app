@@ -964,3 +964,8 @@
 - [x] Fix: descripción del botón Mis Tratamientos en splash más descriptiva
 - [x] Consentimiento: nombre del paciente pre-llenado en el documento (tomado del registro)
 - [x] Consentimiento: firma digital con canvas (dibujo con dedo/mouse), no solo texto
+
+## Correcciones Sesión Actual
+
+- [x] Corregir bug firma consentimiento: canvas más grande, servidor genera PDF con pdfkit
+- [x] Agregar botón eliminar paciente en panel admin (Gestión de Pacientes)

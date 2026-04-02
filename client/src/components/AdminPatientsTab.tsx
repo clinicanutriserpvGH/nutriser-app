@@ -125,6 +125,10 @@ export default function AdminPatientsTab() {
     onSuccess: (d) => { toast.success(`Email enviado a ${d.sent} pacientes`); },
     onError: (e) => toast.error(e.message),
   });
+  const deleteAccountMutation = trpc.patients.deleteAccount.useMutation({
+    onSuccess: () => { setSelectedPatient(null); refetchPatients(); toast.success("Paciente eliminado correctamente"); },
+    onError: (e) => toast.error(e.message),
+  });
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleAddTreatment = (e: React.FormEvent<HTMLFormElement>) => {
@@ -277,9 +281,24 @@ export default function AdminPatientsTab() {
                 {selectedPatient.birthday && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />Cumpleaños: {selectedPatient.birthday}</span>}
               </div>
             </div>
-            <button onClick={() => setSelectedPatient(null)} className="text-gray-400 hover:text-gray-600">
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (confirm(`¿Eliminar al paciente ${selectedPatient.name}? Esta acción no se puede deshacer.`)) {
+                    deleteAccountMutation.mutate({ id: selectedPatient.id });
+                  }
+                }}
+                disabled={deleteAccountMutation.isPending}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 border border-red-200 transition-all"
+                title="Eliminar paciente"
+              >
+                {deleteAccountMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                Eliminar
+              </button>
+              <button onClick={() => setSelectedPatient(null)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Sub-tabs */}

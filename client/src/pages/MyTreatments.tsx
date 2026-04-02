@@ -240,7 +240,7 @@ export default function MyTreatments() {
           <div className="flex flex-col items-center mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="h-16 mb-3" />
             <h1 className="text-2xl font-bold text-white">Mis Tratamientos</h1>
-            <p className="text-white/50 text-sm mt-1 text-center">Accede al seguimiento de tus tratamientos y promociones exclusivas</p>
+            <p className="text-white/50 text-sm mt-1 text-center">Accede al seguimiento de tus tratamientos y descuentos exclusivos en tratamientos faciales y corporales</p>
           </div>
 
           <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm">
@@ -296,7 +296,10 @@ export default function MyTreatments() {
                 </div>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <Input name="birthday" type="date" placeholder="Fecha de nacimiento" className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+                  <div className="pl-10 pr-3 py-2 bg-white/5 border border-white/10 rounded-md flex items-center">
+                    <label className="text-white/40 text-sm mr-2 whitespace-nowrap">Fecha de nacimiento:</label>
+                    <input name="birthday" type="date" className="bg-transparent text-white text-sm flex-1 outline-none [color-scheme:dark]" />
+                  </div>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
@@ -330,7 +333,7 @@ export default function MyTreatments() {
           </div>
 
           {/* Back to splash */}
-          <button onClick={() => window.history.back()} className="mt-6 w-full text-center text-white/30 text-xs hover:text-white/50 transition-colors">
+          <button onClick={() => window.location.href = '/'} className="mt-6 w-full text-center text-white/30 text-xs hover:text-white/50 transition-colors">
             ← Volver al inicio
           </button>
         </div>

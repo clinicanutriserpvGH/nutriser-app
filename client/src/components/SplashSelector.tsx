@@ -479,7 +479,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="flex-1 text-left">
                   <p className="text-white font-bold text-sm sm:text-base">Mis Tratamientos</p>
                   <p className="text-white/70 text-[10px] sm:text-xs leading-tight mt-0.5">
-                    Registra tus tratamientos y accede a promociones exclusivas
+                    Accede al seguimiento de tus tratamientos y descuentos exclusivos en tratamientos faciales y corporales
                   </p>
                 </div>
                 <div className="flex-shrink-0 bg-[#C5A55A]/20 rounded-xl px-2 py-1">

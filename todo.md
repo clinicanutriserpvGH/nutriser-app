@@ -953,3 +953,12 @@
 - [x] Job recordatorio de citas: enviar email 24h antes de la cita al paciente desde clinicanutriserpv@gmail.com
 - [x] Job cumpleaños: detectar pacientes con cumpleaños hoy y enviarles email con cupón de descuento especial
 - [x] Registrar ambos jobs como cron en el servidor (se ejecutan diariamente)
+
+## Correcciones Mis Tratamientos
+
+- [ ] Fix: Error SQL al crear cuenta de paciente (Failed query on INSERT)
+- [ ] Fix: Campo fecha de cumpleaños aparece en blanco (problema de contraste)
+- [x] Migración BD: crear tablas patientAccounts, patientTreatments, patientAppointments, patientPhotos
+- [x] Fix: campo fecha cumpleaños invisible (blanco)
+- [x] Fix: "Volver al inicio" debe redirigir al splash (/)
+- [x] Fix: descripción del botón Mis Tratamientos en splash más descriptiva

@@ -252,8 +252,8 @@ export default function MyTreatments() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                   <Input name="password" type={showPassword ? "text" : "password"} placeholder="Contraseña" required className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
-                  <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-[#C5A55A] transition-colors">
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 <Button type="submit" disabled={loginMutation.isPending} className="w-full bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold">
@@ -290,8 +290,8 @@ export default function MyTreatments() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                   <Input name="password" type={showPassword ? "text" : "password"} placeholder="Contraseña (mín. 6 caracteres)" required minLength={6} className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
-                  <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-[#C5A55A] transition-colors">
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 <Button type="submit" disabled={registerMutation.isPending} className="w-full bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold">

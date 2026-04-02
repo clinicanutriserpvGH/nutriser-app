@@ -21,7 +21,7 @@ const ADMIN_TABS = [
   { value: 'productPurchases', label: 'Compras Prod.', emoji: '🛒' },
   { value: 'discountCodes', label: 'Descuentos', emoji: '💰' },
   { value: 'courses', label: 'Cursos', emoji: '🎓' },
-  { value: 'suggestions', label: 'Sugerencias', emoji: '💡' },
+  { value: 'suggestions', label: 'Foro Expertos', emoji: '💡' },
   { value: 'shareRequests', label: 'Códigos Extra', emoji: '📲' },
   { value: 'beforeAfter', label: 'Antes/Después', emoji: '📸' },
 ] as const;
@@ -3327,10 +3327,10 @@ export default function AdminDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-[#C5A55A] flex items-center gap-2">
-                  💡 Sugerencias de Temas — Expertos en Salud
+                  💡 Aprobación de Comentarios — Foro Expertos en Salud
                 </CardTitle>
                 <CardDescription>
-                  Modera las sugerencias de temas que los usuarios proponen para los expertos. Aprueba para que sean visibles, marca como publicado cuando se haya creado el contenido.
+                  Aquí aparecen los temas que los usuarios proponen en el Foro de Expertos en Salud de la app. Aprueba los que quieras que sean visibles públicamente, rechaza los inapropiados, y marca como “publicado” cuando ya hayas creado contenido sobre ese tema.
                 </CardDescription>
               </CardHeader>
               <CardContent>

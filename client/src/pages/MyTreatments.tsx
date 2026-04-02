@@ -317,7 +317,13 @@ export default function MyTreatments() {
           </div>
 
           {/* Back to splash */}
-          <button onClick={() => window.location.href = '/'} className="mt-6 w-full text-center text-white/30 text-xs hover:text-white/50 transition-colors">
+          <button
+            onClick={() => {
+              sessionStorage.removeItem('nutriser_splash_seen');
+              window.location.href = '/';
+            }}
+            className="mt-6 w-full text-center text-white/30 text-xs hover:text-white/50 transition-colors"
+          >
             ← Volver al inicio
           </button>
         </div>

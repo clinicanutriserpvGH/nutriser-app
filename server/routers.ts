@@ -14,7 +14,7 @@ import { getAllCourses, getPublishedCourses, getCourseById, createCourse, update
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createShareRequest, listAllShareRequests, approveShareRequest, rejectShareRequest, deleteShareRequest, validateExtraCode } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
-import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions } from "./pushNotifications";
+import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
@@ -1955,12 +1955,27 @@ export const appRouter = router({
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        return await createPatientTreatment({
+        const result = await createPatientTreatment({
           patientId: input.patientId,
           serviceName: input.serviceName,
           totalSessions: input.totalSessions,
           notes: input.notes,
         });
+        // Enviar push al paciente si tiene suscripción activa
+        try {
+          const patient = await getPatientById(input.patientId);
+          if (patient?.pushSubscription) {
+            await sendPushToPatient(
+              patient.pushSubscription,
+              '🌿 Nuevo tratamiento asignado',
+              `Se te ha asignado el tratamiento: ${input.serviceName}. Entra a tu portal para ver los detalles.`,
+              '/mis-tratamientos'
+            );
+          }
+        } catch (e) {
+          console.warn('[Push] Error enviando push de tratamiento:', e);
+        }
+        return result;
       }),
 
     updateTreatment: publicProcedure
@@ -1999,7 +2014,22 @@ export const appRouter = router({
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        return await createPatientAppointment(input);
+        const result = await createPatientAppointment(input);
+        // Enviar push al paciente si tiene suscripción activa
+        try {
+          const patient = await getPatientById(input.patientId);
+          if (patient?.pushSubscription) {
+            await sendPushToPatient(
+              patient.pushSubscription,
+              '📅 Nueva cita agendada',
+              `Tienes una cita programada para el ${input.appointmentDate} a las ${input.appointmentTime}. ¡Te esperamos en Nutriser!`,
+              '/mis-tratamientos'
+            );
+          }
+        } catch (e) {
+          console.warn('[Push] Error enviando push de cita:', e);
+        }
+        return result;
       }),
 
     updateAppointment: publicProcedure

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Calendar, Camera, CheckCircle2, ChevronLeft, Clock, Eye, EyeOff,
+  Bell, BellOff, Calendar, Camera, CheckCircle2, ChevronLeft, Clock, Eye, EyeOff,
   FileText, Heart, Loader2, Lock, LogOut, Mail, Phone, Scissors,
   ShieldCheck, Sparkles, Star, Tag, User, X,
 } from "lucide-react";
@@ -250,6 +250,60 @@ export default function MyTreatments() {
     onSuccess: () => toast.success("Si el correo existe, recibirás un enlace de recuperación."),
     onError: (e) => toast.error(e.message),
   });
+
+  // ─── Notificaciones push ────────────────────────────────────────────────────
+  const [notifStatus, setNotifStatus] = useState<'idle' | 'loading' | 'granted' | 'denied'>('idle');
+  const savePushMutation = trpc.patients.savePush.useMutation();
+
+  const handleEnableNotifications = async () => {
+    if (!patient) return;
+    setNotifStatus('loading');
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        setNotifStatus('denied');
+        toast.error('Debes permitir las notificaciones en tu navegador para activarlas.');
+        return;
+      }
+      const reg = await navigator.serviceWorker.ready;
+      const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: vapidKey,
+      });
+      const subJson = JSON.stringify(sub);
+      await savePushMutation.mutateAsync({ patientId: patient.id, pushSubscription: subJson });
+      persistPatient({ ...patient, pushSubscription: subJson });
+      setNotifStatus('granted');
+      toast.success('¡Notificaciones activadas! Te avisaremos cuando tengas nuevas citas o tratamientos.');
+    } catch (e) {
+      console.error('[Push]', e);
+      setNotifStatus('idle');
+      toast.error('No se pudieron activar las notificaciones. Intenta de nuevo.');
+    }
+  };
+
+  const handleDisableNotifications = async () => {
+    if (!patient) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) await sub.unsubscribe();
+      await savePushMutation.mutateAsync({ patientId: patient.id, pushSubscription: null });
+      persistPatient({ ...patient, pushSubscription: null });
+      setNotifStatus('idle');
+      toast.success('Notificaciones desactivadas.');
+    } catch (e) {
+      toast.error('No se pudieron desactivar las notificaciones.');
+    }
+  };
+
+  // Detectar si ya tiene notificaciones activas al cargar
+  useEffect(() => {
+    if (patient?.pushSubscription && Notification.permission === 'granted') {
+      setNotifStatus('granted');
+    }
+  }, [patient?.id]);
 
   const consentMutation = trpc.patients.saveConsent.useMutation({
     onSuccess: (data) => {
@@ -552,6 +606,28 @@ export default function MyTreatments() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Botón notificaciones */}
+            <button
+              onClick={notifStatus === 'granted' ? handleDisableNotifications : handleEnableNotifications}
+              disabled={notifStatus === 'loading'}
+              title={notifStatus === 'granted' ? 'Desactivar notificaciones' : 'Activar notificaciones'}
+              className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 ${
+                notifStatus === 'granted'
+                  ? 'bg-[#C5A55A]/20 text-[#C5A55A] hover:bg-[#C5A55A]/30'
+                  : 'text-white/40 hover:text-[#C5A55A]'
+              }`}
+            >
+              {notifStatus === 'loading' ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : notifStatus === 'granted' ? (
+                <>
+                  <Bell className="w-4 h-4" />
+                  <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[#C5A55A] rounded-full" />
+                </>
+              ) : (
+                <BellOff className="w-4 h-4" />
+              )}
+            </button>
             <button
               onClick={() => {
                 sessionStorage.removeItem('nutriser_splash_seen');

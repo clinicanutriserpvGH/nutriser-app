@@ -51,6 +51,50 @@ export async function getAllPushSubscriptions() {
   return await db.select().from(pushSubscriptions);
 }
 
+export async function sendPushToPatient(
+  pushSubscriptionJson: string,
+  title: string,
+  body: string,
+  url: string,
+  icon?: string
+) {
+  ensureVapidConfigured();
+  if (!ENV.vapidPublicKey || !ENV.vapidPrivateKey) {
+    console.warn('[Push] VAPID keys not configured, skipping push notification');
+    return { sent: 0, failed: 0 };
+  }
+  let sub: any;
+  try {
+    sub = JSON.parse(pushSubscriptionJson);
+  } catch {
+    console.warn('[Push] Invalid pushSubscription JSON');
+    return { sent: 0, failed: 0 };
+  }
+  const payload = JSON.stringify({
+    title,
+    body,
+    url,
+    icon: icon || '/icons/icon-192x192.png',
+    requireInteraction: true,
+    tag: 'nutriser-patient-' + Date.now(),
+    renotify: true,
+  });
+  try {
+    await webpush.sendNotification(
+      {
+        endpoint: sub.endpoint,
+        keys: { p256dh: sub.keys?.p256dh, auth: sub.keys?.auth },
+      },
+      payload
+    );
+    console.log('[Push] Sent to patient successfully');
+    return { sent: 1, failed: 0 };
+  } catch (err: any) {
+    console.warn('[Push] Failed to send to patient:', err?.statusCode, err?.message);
+    return { sent: 0, failed: 1 };
+  }
+}
+
 export async function sendPushNotificationToAll(
   title: string,
   body: string,

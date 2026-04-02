@@ -1989,7 +1989,24 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         const { id, ...data } = input;
-        return await updatePatientTreatment(id, data);
+        const result = await updatePatientTreatment(id, data);
+        // Enviar push al paciente cuando el tratamiento se marca como completado
+        if (input.status === 'completed' && result?.patientId) {
+          try {
+            const patient = await getPatientById(result.patientId);
+            if (patient?.pushSubscription) {
+              await sendPushToPatient(
+                patient.pushSubscription,
+                '✅ ¡Tratamiento completado!',
+                `Tu tratamiento "${result.serviceName}" ha sido completado. ¡Felicidades por tu progreso en Nutriser!`,
+                '/mis-tratamientos'
+              );
+            }
+          } catch (e) {
+            console.warn('[Push] Error enviando push de tratamiento completado:', e);
+          }
+        }
+        return result;
       }),
 
     deleteTreatment: publicProcedure

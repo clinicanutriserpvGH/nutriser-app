@@ -1763,15 +1763,112 @@ export const appRouter = router({
           if (patient?.phone) doc.text(`Teléfono: ${patient.phone}`);
           doc.moveDown();
           
-          // Texto del consentimiento
-          doc.fontSize(12).font('Helvetica-Bold').text('Consentimiento Informado:');
+          // Nota legal
+          doc.fontSize(8).font('Helvetica').fillColor('#555555').text(
+            'Documento elaborado en cumplimiento de la NOM-004-SSA3-2012 del Expediente Clínico, el Artículo 51 Bis 2 de la Ley General de Salud, y la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).',
+            { align: 'justify' }
+          );
+          doc.fillColor('#000000');
+          doc.moveDown();
+
+          // I. Identificación de las partes
+          doc.fontSize(11).font('Helvetica-Bold').text('I. IDENTIFICACIÓN DE LAS PARTES');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'PRESTADOR DEL SERVICIO: Nutriser Aesthetic & Nutrition, establecimiento de salud y bienestar estético ubicado en Puerto Vallarta, Jalisco, México. Tel: +52 (322) 100-7799. Correo: clinicanutriserpv@gmail.com.',
+            { align: 'justify' }
+          );
           doc.moveDown(0.5);
           doc.fontSize(10).font('Helvetica').text(
-            'Yo, el paciente abajo firmante, declaro que he sido informado/a de manera clara y comprensible sobre los tratamientos estéticos y nutricionales que recibiré en Nutriser Aesthetic & Nutrition. Entiendo los procedimientos, beneficios, riesgos potenciales y alternativas disponibles.\n\n' +
-            'Autorizo a Nutriser Aesthetic & Nutrition a realizar los tratamientos acordados, incluyendo pero no limitado a: tratamientos de nutrición, procedimientos estéticos no invasivos, y cualquier otro servicio contratado.\n\n' +
-            'Declaro que he informado sobre mis condiciones médicas relevantes, alergias, medicamentos actuales y cualquier contraindicación conocida. Me comprometo a seguir las indicaciones del equipo profesional para obtener los mejores resultados.\n\n' +
-            'Autorizo el uso de fotografías antes/después con fines de seguimiento de mi tratamiento. Estas imágenes serán tratadas con absoluta confidencialidad.\n\n' +
-            'He leído y comprendido este documento en su totalidad y doy mi consentimiento de manera libre y voluntaria.',
+            'PACIENTE: El/la suscrito/a, cuyos datos personales constan en el expediente clínico del establecimiento, y cuya firma al calce del presente documento acredita su identidad y conformidad.',
+            { align: 'justify' }
+          );
+          doc.moveDown();
+
+          // II. Acto médico autorizado
+          doc.fontSize(11).font('Helvetica-Bold').text('II. ACTO MÉDICO AUTORIZADO');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'El presente consentimiento ampara la realización de tratamientos estéticos no invasivos y/o mínimamente invasivos, así como asesorías y planes nutricionales personalizados, que pueden incluir según el caso clínico: cavitación ultrasónica, radiofrecuencia corporal y facial, mesoterapia reductora, tratamientos para estrías, cicatrices de acné, celulitis e hiperpigmentación, asesoría nutricional personalizada, y otros procedimientos estéticos no invasivos indicados por el profesional tratante. El tratamiento específico será informado verbalmente y por escrito antes de cada sesión.',
+            { align: 'justify' }
+          );
+          doc.moveDown();
+
+          // III. Objetivos y beneficios
+          doc.fontSize(11).font('Helvetica-Bold').text('III. OBJETIVOS Y BENEFICIOS ESPERADOS');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'Los tratamientos tienen como objetivo la mejoría estética y el bienestar del paciente. Los resultados pueden variar según las características individuales (tipo de piel, metabolismo, edad, condición física y adherencia a las indicaciones). Nutriser NO garantiza resultados específicos, sino una mejoría progresiva y proporcional al seguimiento del plan indicado.',
+            { align: 'justify' }
+          );
+          doc.moveDown();
+
+          // IV. Riesgos
+          doc.fontSize(11).font('Helvetica-Bold').text('IV. RIESGOS Y POSIBLES COMPLICACIONES');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'Riesgos frecuentes (leves y transitorios): enrojecimiento, inflamación o sensibilidad en la zona tratada, hematomas o equimosis temporales, sensación de calor o molestia durante el procedimiento, cambios temporales en la pigmentación.\n\nRiesgos infrecuentes (que requieren atención médica): reacciones alérgicas a los productos utilizados, infección en el sitio de aplicación en procedimientos con microinyecciones, quemaduras superficiales por mal manejo de equipos térmicos, irregularidades en el contorno corporal.\n\nEl paciente declara haber informado al equipo sobre todas sus condiciones médicas preexistentes, alergias conocidas, medicamentos en uso, embarazo o lactancia. La omisión de esta información exime de responsabilidad al establecimiento.',
+            { align: 'justify' }
+          );
+          doc.moveDown();
+
+          // V. Alternativas
+          doc.fontSize(11).font('Helvetica-Bold').text('V. ALTERNATIVAS AL TRATAMIENTO');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'El paciente ha sido informado de que existen alternativas a los procedimientos propuestos, incluyendo tratamientos quirúrgicos, otros procedimientos no invasivos, o la opción de no realizar ningún tratamiento. La elección del tratamiento ha sido libre y voluntaria.',
+            { align: 'justify' }
+          );
+          doc.moveDown();
+
+          // VI. Cuidados post-tratamiento
+          doc.fontSize(11).font('Helvetica-Bold').text('VI. CUIDADOS POST-TRATAMIENTO');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'El paciente se compromete a: evitar exposición solar directa en las zonas tratadas, aplicar los productos recomendados, mantener hidratación adecuada y seguir el plan nutricional asignado, evitar actividad física intensa durante las primeras horas post-sesión, y reportar de inmediato cualquier reacción adversa inusual. El incumplimiento exime al establecimiento de responsabilidad por complicaciones derivadas de dicho incumplimiento.',
+            { align: 'justify' }
+          );
+          doc.moveDown();
+
+          // VII. Autorización para contingencias
+          doc.fontSize(11).font('Helvetica-Bold').text('VII. AUTORIZACIÓN PARA CONTINGENCIAS');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'El paciente autoriza al personal de salud de Nutriser Aesthetic & Nutrition para atender cualquier contingencia o urgencia derivada del acto médico autorizado, de conformidad con el principio de libertad prescriptiva establecido en la NOM-004-SSA3-2012.',
+            { align: 'justify' }
+          );
+          doc.moveDown();
+
+          // VIII. Protección de datos
+          doc.fontSize(11).font('Helvetica-Bold').text('VIII. PROTECCIÓN DE DATOS PERSONALES (LFPDPPP)');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'Los datos personales del paciente (nombre, correo, teléfono, fotografías y expediente clínico) serán tratados únicamente para prestar los servicios contratados y llevar el seguimiento del tratamiento. No serán compartidos con terceros sin consentimiento expreso, salvo obligación legal. El paciente puede ejercer sus derechos ARCO (Acceso, Rectificación, Cancelación y Oposición) enviando solicitud a clinicanutriserpv@gmail.com. Las fotografías de antes/después solo podrán usarse con fines promocionales con autorización expresa por escrito.',
+            { align: 'justify' }
+          );
+          doc.moveDown();
+
+          // IX. Derecho de revocación
+          doc.fontSize(11).font('Helvetica-Bold').text('IX. DERECHO DE REVOCACIÓN');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'El paciente tiene el derecho de revocar el presente consentimiento en cualquier momento antes del inicio del procedimiento, sin necesidad de expresar causa alguna y sin que ello afecte la calidad de la atención que recibirá.',
+            { align: 'justify' }
+          );
+          doc.moveDown();
+
+          // X. Declaración de consentimiento
+          doc.fontSize(11).font('Helvetica-Bold').text('X. DECLARACIÓN DE CONSENTIMIENTO');
+          doc.moveDown(0.3);
+          doc.fontSize(10).font('Helvetica').text(
+            'Yo, el/la paciente que suscribe el presente documento, declaro bajo protesta de decir verdad que:\n\n' +
+            '1. He recibido información clara, completa, veraz y oportuna sobre los tratamientos, sus objetivos, riesgos, beneficios y alternativas.\n' +
+            '2. He tenido la oportunidad de realizar todas las preguntas que consideré necesarias y estas fueron respondidas satisfactoriamente.\n' +
+            '3. Comprendo que los resultados pueden variar según mis características individuales y mi adherencia a las indicaciones.\n' +
+            '4. Otorgo mi consentimiento de manera libre, voluntaria y sin coacción alguna para la realización de los tratamientos indicados.\n' +
+            '5. He informado verazmente sobre mi estado de salud, antecedentes médicos, alergias y medicamentos en uso.\n' +
+            '6. He leído íntegramente el presente documento y acepto todas sus cláusulas.\n\n' +
+            'Este documento tiene plena validez legal conforme a los artículos 1803 y 1834 del Código Civil Federal, el artículo 51 Bis 2 de la Ley General de Salud, y la NOM-004-SSA3-2012.',
             { align: 'justify' }
           );
           doc.moveDown(2);

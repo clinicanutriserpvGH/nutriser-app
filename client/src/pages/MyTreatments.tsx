@@ -429,9 +429,20 @@ export default function MyTreatments() {
               <p className="text-white/40 text-xs">Mis Tratamientos</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-1.5 text-white/40 hover:text-white/70 text-xs transition-colors">
-            <LogOut className="w-4 h-4" /> Salir
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('nutriser_splash_seen');
+                window.location.href = '/';
+              }}
+              className="flex items-center gap-1 text-white/40 hover:text-[#C5A55A] text-xs transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" /> Inicio
+            </button>
+            <button onClick={handleLogout} className="flex items-center gap-1.5 text-white/40 hover:text-white/70 text-xs transition-colors">
+              <LogOut className="w-4 h-4" /> Salir
+            </button>
+          </div>
         </div>
       </div>
 

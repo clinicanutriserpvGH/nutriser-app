@@ -947,3 +947,9 @@
 - [x] Contrato de confidencialidad: el paciente debe aceptar al registrarse (queda registrado)
 - [x] Admin: subir fotos antes/después vinculadas al paciente y tratamiento
 - [x] Portal paciente: galería de fotos antes/después ordenadas por fecha y tratamiento
+
+## Automatizaciones Pacientes
+
+- [x] Job recordatorio de citas: enviar email 24h antes de la cita al paciente desde clinicanutriserpv@gmail.com
+- [x] Job cumpleaños: detectar pacientes con cumpleaños hoy y enviarles email con cupón de descuento especial
+- [x] Registrar ambos jobs como cron en el servidor (se ejecutan diariamente)

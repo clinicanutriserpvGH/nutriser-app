@@ -441,6 +441,24 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+
+  // ─── Jobs automáticos (cron) ─────────────────────────────────────────────
+  const cron = await import('node-cron');
+  const { sendAppointmentReminders, sendBirthdayGreetings } = await import('../jobs');
+
+  // Recordatorio de citas: cada día a las 10:00 AM hora de México
+  cron.default.schedule('0 0 10 * * *', async () => {
+    console.log('[Cron] Ejecutando recordatorio de citas...');
+    await sendAppointmentReminders();
+  }, { timezone: 'America/Mexico_City' });
+
+  // Felicitaciones de cumpleaños: cada día a las 9:00 AM hora de México
+  cron.default.schedule('0 0 9 * * *', async () => {
+    console.log('[Cron] Ejecutando felicitaciones de cumpleaños...');
+    await sendBirthdayGreetings();
+  }, { timezone: 'America/Mexico_City' });
+
+  console.log('[Cron] Jobs programados: cumpleaños (9:00 AM) y recordatorio de citas (10:00 AM)');
 }
 
 startServer().catch(console.error);

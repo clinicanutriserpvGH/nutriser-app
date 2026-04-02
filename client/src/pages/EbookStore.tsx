@@ -246,7 +246,7 @@ export default function EbookStore() {
         </div>
       )}
 
-      <div className="pt-28 pb-12 px-4">
+      <div className="pb-12 px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 7rem)' }}>
         <div className="max-w-4xl mx-auto">
           {/* Back Button - siempre visible */}
           <div className="mb-8">

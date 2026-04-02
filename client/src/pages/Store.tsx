@@ -133,7 +133,7 @@ export default function Store() {
     <div className="min-h-screen bg-[#FAF7F2]">
       <BackToSplash />
       {/* Header */}
-      <div className="bg-[#1A1A1A] text-white py-16 px-4">
+      <div className="bg-[#1A1A1A] text-white py-16 px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4rem)' }}>
         <div className="max-w-6xl mx-auto">
 
           <h1 className="font-serif text-4xl lg:text-5xl text-white mb-3">

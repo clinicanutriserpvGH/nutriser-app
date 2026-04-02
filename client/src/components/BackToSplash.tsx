@@ -28,7 +28,8 @@ export default function BackToSplash() {
   return (
     <button
       onClick={handleBack}
-      className="fixed top-4 left-4 z-50 flex items-center gap-2 bg-black/70 backdrop-blur-sm border border-[#C5A55A]/40 text-[#C5A55A] px-3 py-2 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-[#C5A55A] hover:text-black transition-all duration-300 shadow-lg"
+      style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
+      className="fixed left-4 z-50 flex items-center gap-2 bg-black/70 backdrop-blur-sm border border-[#C5A55A]/40 text-[#C5A55A] px-3 py-2 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-[#C5A55A] hover:text-black transition-all duration-300 shadow-lg"
       aria-label="Volver al inicio"
     >
       <Home className="w-3.5 h-3.5" />

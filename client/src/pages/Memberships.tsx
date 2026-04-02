@@ -304,7 +304,7 @@ export default function Memberships() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAF7F2] to-[#F5F1E8] py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#FAF7F2] to-[#F5F1E8] px-4 pb-12" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4rem)' }}>
       <BackToSplash />
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}

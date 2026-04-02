@@ -276,7 +276,7 @@ export default function Courses() {
       <BackToSplash />
 
       {/* Hero de Cursos */}
-      <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4">
+      <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4rem)' }}>
 
         <div className="max-w-5xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-4">

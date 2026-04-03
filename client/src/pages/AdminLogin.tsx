@@ -59,17 +59,25 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAF7F2] to-white flex items-center justify-center py-12 px-4">
-      {/* Botón regresar al inicio */}
-      <button
-        onClick={() => {
-          sessionStorage.removeItem("nutriser_splash_seen");
-          window.location.href = "/";
-        }}
-        className="fixed top-12 left-4 z-50 flex items-center gap-1.5 text-[#C5A55A] hover:text-[#B8963E] text-sm font-medium bg-white/80 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm border border-[#C5A55A]/20 transition"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Inicio
-      </button>
+      {/* Botones de navegación */}
+      <div className="fixed top-12 left-4 z-50 flex items-center gap-2">
+        <button
+          onClick={() => { window.location.href = '/nutriser-home'; }}
+          className="flex items-center gap-1.5 text-[#C5A55A] hover:text-[#B8963E] text-sm font-medium bg-white/80 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm border border-[#C5A55A]/20 transition"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Regresar
+        </button>
+        <button
+          onClick={() => {
+            sessionStorage.removeItem("nutriser_splash_seen");
+            window.location.href = "/";
+          }}
+          className="flex items-center gap-1.5 text-white/60 hover:text-[#C5A55A] text-sm font-medium bg-white/50 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm border border-gray-200 transition"
+        >
+          Inicio
+        </button>
+      </div>
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="font-serif text-4xl text-[#1A1A1A] mb-2">Nutriser</h1>

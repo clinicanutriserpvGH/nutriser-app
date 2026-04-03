@@ -1056,14 +1056,24 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#FAF7F2] py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
-        <div className="mb-6">
+        <div className="mb-6 flex items-center gap-2">
           <Button
             variant="ghost"
-            onClick={() => navigate("/")}
+            onClick={() => { window.location.href = '/nutriser-home'; }}
             className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E]"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver
+            Regresar
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              sessionStorage.removeItem('nutriser_splash_seen');
+              window.location.href = '/';
+            }}
+            className="flex items-center gap-2 text-gray-400 hover:text-[#C5A55A] text-sm"
+          >
+            Inicio
           </Button>
         </div>
 

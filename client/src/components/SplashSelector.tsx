@@ -381,7 +381,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
                       <ShoppingBag className="w-4 h-4 text-black" />
                     </div>
-                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Clínica</span>
+                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Shop</span>
                   </div>
                   <div>
                     <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Nutriser Home</h2>

@@ -596,9 +596,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </svg>
             </a>
 
-            {/* Correo electrónico */}
+            {/* Correo electrónico → Gmail web */}
             <a
-              href="mailto:clinicanutriserpv@gmail.com"
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=clinicanutriserpv@gmail.com&su=Consulta%20Nutriser"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-10 h-10 rounded-xl bg-[#D44638] flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all duration-200"
               aria-label="Enviar correo a Nutriser"
             >

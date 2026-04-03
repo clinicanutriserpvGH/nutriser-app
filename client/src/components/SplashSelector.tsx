@@ -365,23 +365,65 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           {/* ── Grid de widgets ── */}
 
-          {/* Fila 1: dos widgets grandes (2 cols) */}
+          {/* Fila 1: Nutriser Home | Página Web (2 columnas iguales) */}
           <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
-            {/* Widget Nutriser — ancho completo en móvil, mitad en desktop */}
-            <div className="col-span-2 md:col-span-1">
-              <WidgetLarge
-                img={CLINIC_IMG}
-                icon={ShoppingBag}
-                label="Clínica"
-                title="Nutriser Home"
-                cta="Entrar"
+            {/* Widget Nutriser Home */}
+            <div className="col-span-1">
+              <button
                 onClick={() => handleNavigate('/nutriser-home')}
-                imgPosition="center 30%"
-                accent
-              />
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
+                style={{ aspectRatio: "1 / 1" }}
+              >
+                <img src={CLINIC_IMG} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
+                <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/20" />
+                <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
+                      <ShoppingBag className="w-4 h-4 text-black" />
+                    </div>
+                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Clínica</span>
+                  </div>
+                  <div>
+                    <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Nutriser Home</h2>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
+                      Entrar
+                    </span>
+                  </div>
+                </div>
+              </button>
             </div>
+
+            {/* Widget Página Web */}
+            <div className="col-span-1">
+              <button
+                onClick={() => handleEnterSite()}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
+                style={{ aspectRatio: "1 / 1" }}
+              >
+                <img src={CLINIC_IMG2} alt="Página Web Nutriser" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
+                <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/20" />
+                <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
+                      <Activity className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Sitio Web</span>
+                  </div>
+                  <div>
+                    <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Página Web</h2>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/30">
+                      Visitar
+                    </span>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Fila 2: Portal de Salud (ancho completo) */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
             {/* Widget Portal de Salud */}
-            <div className="col-span-2 md:col-span-1">
+            <div className="col-span-2">
               <button
                 onClick={() => { window.location.href = "https://portaldesaludnutriser.club"; }}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"

@@ -1,9 +1,9 @@
 /*
  * NutriserHomePage — Página intermedia de Nutriser Home
- * Orden: Página Web → Paquetes → Tienda Productos → (Academy | eBook)
+ * Orden: Paquetes → Tienda Productos → (Academy | eBook)
  */
 import {
-  BookOpen, CalendarCheck, GraduationCap, Globe, ShoppingBag, ChevronLeft,
+  BookOpen, CalendarCheck, GraduationCap, ShoppingBag, ChevronLeft,
 } from "lucide-react";
 
 /* ─── Assets ────────────────────────────────────────────────────────────── */
@@ -134,23 +134,7 @@ export default function NutriserHomePage() {
             <div className="w-8 h-px bg-[#C5A55A]/60 mt-3" />
           </div>
 
-          {/* ── 1. Página Web (ancho completo, primera posición) ── */}
-          <div className="mb-3 md:mb-4">
-            <CardFull
-              img={CLINIC_IMG}
-              icon={Globe}
-              label="Sitio Web"
-              title="Página Web Nutriser"
-              cta="Visitar"
-              onClick={() => {
-                sessionStorage.setItem("nutriser_splash_seen", "1");
-                window.location.href = "/";
-              }}
-              imgPosition="center center"
-            />
-          </div>
-
-          {/* ── 2. Paquetes Nutriser (ancho completo) ── */}
+          {/* ── 1. Paquetes Nutriser (ancho completo) ── */}
           <div className="mb-3 md:mb-4">
             <CardFull
               img={IMG_NUTRICION}

@@ -547,7 +547,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="text-center">
                   <p className="text-white font-bold text-xs sm:text-sm">Agendar Cita</p>
                   <p className="text-white/60 text-[9px] sm:text-[10px] leading-tight mt-0.5">
-                    Reserva tu consulta
+                    Reserva tu servicio personalizado
                   </p>
                 </div>
               </div>

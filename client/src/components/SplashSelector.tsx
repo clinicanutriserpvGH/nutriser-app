@@ -410,7 +410,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Sitio Web</span>
                   </div>
                   <div>
-                    <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Página Web</h2>
+                    <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Nutriser Web</h2>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/30">
                       Visitar
                     </span>

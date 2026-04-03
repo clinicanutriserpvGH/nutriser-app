@@ -81,20 +81,9 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
             />
           </a>
 
-          {/* Botones Regresar + Inicio — solo si se pasa el callback */}
+          {/* Botón Inicio — solo si se pasa el callback */}
           {onShowSplash && (
             <div className="hidden lg:flex items-center gap-2">
-              <button
-                onClick={() => { window.location.href = '/nutriser-home'; }}
-                title="Regresar al menú"
-                className={`flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase font-bold px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                  scrolled || lightBg
-                    ? "border-[#C5A55A]/50 text-[#C5A55A] hover:bg-[#C5A55A] hover:text-[#1A1A1A]"
-                    : "border-white/30 text-white hover:bg-white/20"
-                }`}
-              >
-                ← Regresar
-              </button>
               <button
                 onClick={onShowSplash}
                 title="Volver al inicio"
@@ -163,21 +152,10 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
             </div>
           </div>
 
-          {/* Mobile: Botones Regresar + Inicio + Toggle */}
+          {/* Mobile: Botón Inicio + Toggle */}
           <div className="lg:hidden flex items-center gap-1.5">
             {onShowSplash && (
               <>
-                <button
-                  onClick={() => { window.location.href = '/nutriser-home'; }}
-                  aria-label="Regresar al menú"
-                  className={`flex items-center gap-1 text-[10px] tracking-[0.1em] uppercase font-bold px-2.5 py-1.5 rounded-full border transition-all duration-300 ${
-                    scrolled || lightBg
-                      ? "border-[#C5A55A]/50 text-[#C5A55A] bg-transparent hover:bg-[#C5A55A] hover:text-[#1A1A1A]"
-                      : "border-white/40 text-white bg-black/30 hover:bg-white/20"
-                  }`}
-                >
-                  ← Regresar
-                </button>
                 <button
                   onClick={onShowSplash}
                   aria-label="Volver al inicio"

@@ -375,7 +375,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 label="Clínica"
                 title="Nutriser Home"
                 cta="Entrar"
-                onClick={handleEnterSite}
+                onClick={() => handleNavigate('/nutriser-home')}
                 imgPosition="center 30%"
                 accent
               />
@@ -436,39 +436,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 </div>
               </button>
             </div>
-          </div>
-
-          {/* Fila 2: 4 widgets cuadrados */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 mb-3 md:mb-4">
-            <WidgetSquare
-              img={IMG_NUTRICION}
-              icon={CalendarCheck}
-              title="Paquetes Nutriser"
-              cta="Ver Paquetes"
-              onClick={() => handleNavigate("/memberships")}
-              accent
-            />
-            <WidgetSquare
-              img={IMG_TIENDA}
-              icon={ShoppingBag}
-              title="Tienda Productos"
-              cta="Ver tienda"
-              onClick={() => handleNavigate("/tienda")}
-            />
-            <WidgetSquare
-              img={IMG_EBOOK}
-              icon={BookOpen}
-              title="Tienda eBook"
-              cta="Ver eBooks"
-              onClick={() => handleNavigate("/ebook")}
-            />
-            <WidgetSquare
-              img={IMG_ACADEMY}
-              icon={GraduationCap}
-              title="Nutriser Academy"
-              cta="Ver cursos"
-              onClick={() => handleNavigate("/cursos")}
-            />
           </div>
 
           {/* ── Barra de acciones rápidas ── */}

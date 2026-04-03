@@ -991,3 +991,10 @@
 - [x] Formulario de eBook ahora es condicional (solo visible al crear/editar)
 - [x] Estado editingEbookId para distinguir entre crear nuevo y editar existente
 - [x] Tests unitarios para ebook.listAll y ebook.setActive
+
+## Mejoras Responsive Desktop/Tablet - Sesión Actual
+
+- [x] Limitar ancho máximo del SplashSelector en desktop (max ~480px centrado)
+- [x] Limitar ancho máximo del NutriserHomePage en desktop (max ~480px centrado)
+- [x] Contenido centrado con fondo oscuro a los lados en desktop/tablet
+- [x] Eliminar escalado excesivo en md/lg breakpoints

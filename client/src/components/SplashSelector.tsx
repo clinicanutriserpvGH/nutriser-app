@@ -327,8 +327,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
         transition: leaving ? "opacity 0.4s ease" : "none",
       }}
     >
-      <div className="min-h-full w-full flex flex-col items-center py-8 px-3 sm:px-4 md:px-6 box-border">
-        <div className="w-full max-w-[480px] md:max-w-[700px] lg:max-w-[960px]">
+      <div className="min-h-full w-full flex flex-col items-center py-6 px-3 sm:px-4 box-border">
+        <div className="w-full max-w-[480px]">
 
           {/* ── Header ── */}
           <div className="flex flex-col items-center mb-6 md:mb-8">

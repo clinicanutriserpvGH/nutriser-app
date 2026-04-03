@@ -427,6 +427,21 @@ export default function MyTreatments() {
     return (
       <div className="min-h-screen bg-[#0D0D0D] flex flex-col items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
+
+          {/* Botón Inicio — arriba, visible */}
+          <div className="flex justify-start mb-6">
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('nutriser_splash_seen');
+                window.location.href = '/';
+              }}
+              className="flex items-center gap-2 bg-white/10 hover:bg-[#C5A55A]/20 border border-white/20 hover:border-[#C5A55A]/50 text-white/70 hover:text-[#C5A55A] px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Inicio
+            </button>
+          </div>
+
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="h-16 mb-3" />
@@ -523,16 +538,7 @@ export default function MyTreatments() {
             )}
           </div>
 
-          {/* Back to splash */}
-          <button
-            onClick={() => {
-              sessionStorage.removeItem('nutriser_splash_seen');
-              window.location.href = '/';
-            }}
-            className="mt-6 w-full text-center text-white/30 text-xs hover:text-white/50 transition-colors"
-          >
-            ← Volver al inicio
-          </button>
+
         </div>
       </div>
     );

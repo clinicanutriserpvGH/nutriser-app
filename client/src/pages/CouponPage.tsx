@@ -19,25 +19,12 @@ export default function CouponPage() {
   const couponId = parseInt(params.id || "0", 10);
 
   // Estados principales
-  const [showShareFlow, setShowShareFlow] = useState(false);
   const [showPaymentFlow, setShowPaymentFlow] = useState(false);
-
-  // Estados del flujo de capturas (para solicitar código extra)
-  const [shareStep, setShareStep] = useState<'form' | 'uploading' | 'done'>('form');
-  const [shareName, setShareName] = useState('');
-  const [sharePhone, setSharePhone] = useState('');
-  const [shareEmail, setShareEmail] = useState('');
-  const [shareFiles, setShareFiles] = useState<File[]>([]);
-  const [sharePreviewUrls, setSharePreviewUrls] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Estados del flujo de pago
   const [payName, setPayName] = useState('');
   const [payPhone, setPayPhone] = useState('');
   const [payEmail, setPayEmail] = useState('');
-  const [extraCode, setExtraCode] = useState('');
-  const [extraCodeValid, setExtraCodeValid] = useState<boolean | null>(null);
-  const [extraDiscount, setExtraDiscount] = useState(0);
   const [payProofFile, setPayProofFile] = useState<File | null>(null);
   const [payStep, setPayStep] = useState<'form' | 'uploading' | 'done'>('form');
   const payProofRef = useRef<HTMLInputElement>(null);
@@ -46,17 +33,6 @@ export default function CouponPage() {
   const promo = promotions?.find((p) => p.id === couponId);
 
   // Mutaciones
-  const createShareRequestMutation = trpc.shareRequests.create.useMutation({
-    onSuccess: () => {
-      setShareStep('done');
-      toast.success('¡Capturas enviadas! El admin revisará y te enviará el código.');
-    },
-    onError: (e) => {
-      setShareStep('form');
-      toast.error('Error al enviar: ' + e.message);
-    },
-  });
-
   const createServicePurchaseMutation = trpc.servicePurchases.create.useMutation({
     onSuccess: () => {
       setPayStep('done');
@@ -85,92 +61,6 @@ export default function CouponPage() {
     window.location.replace("/");
   };
 
-  // Manejo de archivos de capturas
-  const handleShareFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length + shareFiles.length > 10) {
-      toast.error('Máximo 10 capturas');
-      return;
-    }
-    const newFiles = [...shareFiles, ...files].slice(0, 10);
-    setShareFiles(newFiles);
-    const urls = newFiles.map(f => URL.createObjectURL(f));
-    setSharePreviewUrls(urls);
-  };
-
-  const removeShareFile = (idx: number) => {
-    const newFiles = shareFiles.filter((_, i) => i !== idx);
-    setShareFiles(newFiles);
-    setSharePreviewUrls(newFiles.map(f => URL.createObjectURL(f)));
-  };
-
-  // Subir capturas y crear solicitud
-  const handleSubmitShareRequest = async () => {
-    if (!shareName.trim() || !sharePhone.trim()) {
-      toast.error('Nombre y teléfono son requeridos');
-      return;
-    }
-    if (shareFiles.length < 1) {
-      toast.error('Sube al menos 1 captura de pantalla');
-      return;
-    }
-    if (!promo) return;
-
-    setShareStep('uploading');
-    try {
-      // Subir cada captura
-      const uploadedUrls: string[] = [];
-      for (const file of shareFiles) {
-        const formData = new FormData();
-        formData.append('file', file);
-        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-        if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-        const data = await res.json();
-        uploadedUrls.push(data.url);
-      }
-
-      await createShareRequestMutation.mutateAsync({
-        clientName: shareName.trim(),
-        clientPhone: sharePhone.trim(),
-        clientEmail: shareEmail.trim() || undefined,
-        promotionId: promo.id,
-        promotionTitle: promo.title,
-        screenshotUrls: uploadedUrls,
-      });
-    } catch (err: any) {
-      setShareStep('form');
-      toast.error('Error al subir capturas: ' + err.message);
-    }
-  };
-
-  // Validar código extra
-  const handleValidateCode = async () => {
-    if (!extraCode.trim()) return;
-    const code = extraCode.trim().toUpperCase();
-    if (code === 'CUPONEXTRA5') {
-      setExtraCodeValid(true);
-      setExtraDiscount(5);
-      toast.success('¡Código válido! Se aplicará 5% extra de descuento.');
-    } else {
-      setExtraCodeValid(false);
-      setExtraDiscount(0);
-      toast.error('Código no válido. Verifica que sea correcto.');
-    }
-  };
-
-  // Calcular precio con descuento extra
-  const calcFinalPrice = (priceStr: string | null | undefined) => {
-    if (!priceStr) return null;
-    const numStr = priceStr.replace(/[^0-9.]/g, '');
-    const num = parseFloat(numStr);
-    if (isNaN(num)) return priceStr;
-    if (extraCodeValid && extraDiscount > 0) {
-      const discounted = num * (1 - extraDiscount / 100);
-      return `$${discounted.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-    }
-    return priceStr;
-  };
-
   // Enviar comprobante de pago
   const handleSubmitPayment = async () => {
     if (!payName.trim() || !payPhone.trim()) {
@@ -192,13 +82,6 @@ export default function CouponPage() {
       const data = await res.json();
       const proofUrl = data.url;
 
-      const finalPrice = calcFinalPrice(promo.price);
-      const notes = [
-        `Cupón: ${promo.title}`,
-        `Precio original: ${promo.price || 'N/A'}`,
-        extraCodeValid ? `Código extra: CUPONEXTRA5 (-5%) → Precio final: ${finalPrice}` : '',
-      ].filter(Boolean).join(' | ');
-
       // Convertir el archivo a base64 para enviarlo al servidor
       const reader = new FileReader();
       const base64Data: string = await new Promise((resolve, reject) => {
@@ -214,8 +97,6 @@ export default function CouponPage() {
         serviceName: promo.title,
         proofData: base64Data,
         proofMimeType: payProofFile.type || 'image/jpeg',
-        discountCode: extraCodeValid ? 'CUPONEXTRA5' : undefined,
-        discountPercent: extraCodeValid ? 5 : undefined,
         originalPrice: promo.price || undefined,
       });
     } catch (err: any) {
@@ -342,13 +223,7 @@ export default function CouponPage() {
                             </div>
                           )}
                         </div>
-                        {/* Precio con código extra */}
-                        {extraCodeValid && extraDiscount > 0 && promo.price && (
-                          <div className="mt-3 pt-3 border-t border-white/20 flex items-center justify-between">
-                            <span className="text-yellow-200 text-sm font-bold">Con código CUPONEXTRA5 (-5%):</span>
-                            <span className="text-white text-2xl font-black">{calcFinalPrice(promo.price)}</span>
-                          </div>
-                        )}
+
                       </div>
                     )}
 
@@ -439,8 +314,7 @@ export default function CouponPage() {
                             <p className="font-semibold text-[#1A1A1A] text-sm mb-1">{promo.title}</p>
                             <div className="flex items-center gap-3">
                               {promo.regularPrice && <span className="text-gray-400 line-through text-sm">{promo.regularPrice}</span>}
-                              {promo.price && <span className="text-[#C5A55A] font-black text-xl">{extraCodeValid ? calcFinalPrice(promo.price) : promo.price}</span>}
-                              {extraCodeValid && <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">-5% extra</span>}
+                              {promo.price && <span className="text-[#C5A55A] font-black text-xl">{promo.price}</span>}
                             </div>
                           </div>
 
@@ -466,7 +340,7 @@ export default function CouponPage() {
                             <p className="text-gray-300">Banco: Banamex</p>
                             <p className="text-gray-300">CLABE Interbancaria: <span className="font-mono font-bold text-white">002470701448743487</span></p>
                             <p className="text-[#C5A55A] font-bold mt-2">
-                              Monto a pagar: {extraCodeValid ? calcFinalPrice(promo.price) : promo.price}
+                              Monto a pagar: {promo.price}
                             </p>
                           </div>
 

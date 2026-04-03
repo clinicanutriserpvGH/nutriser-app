@@ -971,4 +971,5 @@
 - [x] Agregar botón eliminar paciente en panel admin (Gestión de Pacientes)
 
 ## Rediseño Tienda Ebook - Sesión Actual
-- [ ] Reducir imagen de portada del ebook a tamaño pequeño estilo Amazon (layout 2 columnas)
+- [x] Reducir imagen de portada del ebook a tamaño pequeño estilo Amazon (layout 2 columnas)
+- [x] Eliminar módulo "Códigos Extra" (compartir con 5 personas / CUPONEXTRA5) del proyecto

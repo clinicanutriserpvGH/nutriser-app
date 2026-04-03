@@ -525,35 +525,6 @@ export const topicVotes = mysqlTable("topicVotes", {
 export type TopicVote = typeof topicVotes.$inferSelect;
 export type InsertTopicVote = typeof topicVotes.$inferInsert;
 
-/**
- * Solicitudes de código extra por compartir
- * El usuario sube capturas de haber compartido con 5 personas
- * El admin revisa y activa el código CUPONEXTRA5 (5% extra)
- */
-export const shareRequests = mysqlTable("shareRequests", {
-  id: int("id").autoincrement().primaryKey(),
-  // Datos del solicitante
-  clientName: varchar("clientName", { length: 255 }).notNull(),
-  clientPhone: varchar("clientPhone", { length: 20 }).notNull(),
-  clientEmail: varchar("clientEmail", { length: 320 }),
-  // Cupón al que aplica
-  promotionId: int("promotionId").notNull(),
-  promotionTitle: varchar("promotionTitle", { length: 255 }).notNull(),
-  // Capturas de pantalla subidas (URLs separadas por coma o JSON array)
-  screenshotUrls: text("screenshotUrls").notNull(), // JSON array de URLs
-  // Estado de la solicitud
-  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
-  // Código generado al aprobar (siempre CUPONEXTRA5)
-  codeGenerated: varchar("codeGenerated", { length: 50 }),
-  // Notas del admin
-  adminNotes: text("adminNotes"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  approvedAt: timestamp("approvedAt"),
-});
-export type ShareRequest = typeof shareRequests.$inferSelect;
-export type InsertShareRequest = typeof shareRequests.$inferInsert;
-
 // ============================================================
 // MÓDULO MIS TRATAMIENTOS — Pacientes presenciales
 // ============================================================

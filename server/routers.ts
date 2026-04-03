@@ -12,7 +12,6 @@ import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotification
 import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
-import { createShareRequest, listAllShareRequests, approveShareRequest, rejectShareRequest, deleteShareRequest, validateExtraCode } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { storagePut } from "./storage";
@@ -1608,68 +1607,6 @@ export const appRouter = router({
       }),
   }),
 
-  // ─── Share Requests: Código Extra CUPONEXTRA5 ───────────────────────────────
-  shareRequests: router({
-    // Validar código extra (público, para recalcular precio en frontend)
-    validateCode: publicProcedure
-      .input(z.object({ code: z.string() }))
-      .query(async ({ input }) => {
-        return await validateExtraCode(input.code);
-      }),
-
-    // Crear solicitud de código extra (usuario sube capturas)
-    create: publicProcedure
-      .input(z.object({
-        clientName: z.string().min(2),
-        clientPhone: z.string().min(8),
-        clientEmail: z.string().email().optional(),
-        promotionId: z.number(),
-        promotionTitle: z.string(),
-        screenshotUrls: z.array(z.string().url()).min(1).max(10),
-      }))
-      .mutation(async ({ input }) => {
-        const result = await createShareRequest({
-          clientName: input.clientName,
-          clientPhone: input.clientPhone,
-          clientEmail: input.clientEmail,
-          promotionId: input.promotionId,
-          promotionTitle: input.promotionTitle,
-          screenshotUrls: JSON.stringify(input.screenshotUrls),
-        });
-        // Notificar al admin
-        await notifyOwner({
-          title: '📸 Nueva solicitud de código extra',
-          content: `${input.clientName} (${input.clientPhone}) subió ${input.screenshotUrls.length} captura(s) para el cupón "${input.promotionTitle}". Revisa en el panel admin → Códigos Extra.`,
-        });
-        return result;
-      }),
-
-    // Listar todas las solicitudes (solo admin)
-    listAll: publicProcedure.query(async () => {
-      return await listAllShareRequests();
-    }),
-
-    // Aprobar solicitud y generar código CUPONEXTRA5
-    approve: publicProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
-        return await approveShareRequest(input.id);
-      }),
-
-    // Rechazar solicitud
-    reject: publicProcedure
-      .input(z.object({ id: z.number(), adminNotes: z.string().optional() }))
-      .mutation(async ({ input }) => {
-        return await rejectShareRequest(input.id, input.adminNotes);
-      }),
-
-    // Eliminar solicitud
-    delete: publicProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
-        return await deleteShareRequest(input.id);
-      }),
-  }),
 
   // ─── MÓDULO MIS TRATAMIENTOS — Pacientes Presenciales ──────────────────────────────────────────────
   patients: router({

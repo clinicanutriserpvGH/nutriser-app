@@ -1,6 +1,7 @@
 /*
  * NutriserHomePage — Página intermedia de Nutriser Home
- * Muestra: Paquetes, Tienda Productos, Tienda eBook, Nutriser Academy + Página Web
+ * Todas las tarjetas del mismo tamaño grande.
+ * Última fila: Nutriser Academy + Página Web en 2 columnas iguales.
  */
 import { useLocation } from "wouter";
 import {
@@ -21,8 +22,8 @@ const IMG_EBOOK =
 const IMG_ACADEMY =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy_52156a0e.png";
 
-/* ─── Tarjeta grande ─────────────────────────────────────────────────────── */
-function CardLarge({
+/* ─── Tarjeta grande (ancho completo) ───────────────────────────────────── */
+function CardFull({
   img,
   icon: Icon,
   label,
@@ -86,50 +87,58 @@ function CardLarge({
   );
 }
 
-/* ─── Tarjeta cuadrada ───────────────────────────────────────────────────── */
-function CardSquare({
+/* ─── Tarjeta media (mitad de ancho) ────────────────────────────────────── */
+function CardHalf({
   img,
   icon: Icon,
+  label,
   title,
   cta,
   onClick,
   accent = false,
+  imgPosition = "center",
 }: {
   img: string;
   icon: React.ElementType;
+  label: string;
   title: string;
   cta: string;
   onClick: () => void;
   accent?: boolean;
+  imgPosition?: string;
 }) {
   return (
     <button
       onClick={onClick}
       className="group relative w-full rounded-2xl overflow-hidden focus:outline-none"
-      style={{ aspectRatio: "1 / 1" }}
+      style={{ aspectRatio: "4 / 5" }}
     >
       <img
         src={img}
         alt={title}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        style={{ objectPosition: imgPosition }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/80" />
-      <div className="relative h-full flex flex-col justify-between p-3 sm:p-4">
-        <div className="flex justify-end">
+      <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
+        <div className="flex items-center gap-1.5">
           <div
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shadow-md flex-shrink-0 ${
+            className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-md flex-shrink-0 ${
               accent ? "bg-[#C5A55A]" : "bg-white/20 backdrop-blur-sm"
             }`}
           >
-            <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${accent ? "text-black" : "text-white"}`} />
+            <Icon className={`w-4 h-4 ${accent ? "text-black" : "text-white"}`} />
           </div>
+          <span className="text-white/70 text-[10px] font-semibold tracking-wide uppercase drop-shadow">
+            {label}
+          </span>
         </div>
         <div>
-          <h3 className="text-white text-sm sm:text-base font-bold leading-tight mb-2 drop-shadow-lg">
+          <h3 className="text-white text-base sm:text-lg font-bold leading-tight mb-2 drop-shadow-lg">
             {title}
           </h3>
           <span
-            className={`inline-flex items-center px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow transition-all duration-200 group-hover:scale-105 ${
+            className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase shadow transition-all duration-200 group-hover:scale-105 ${
               accent
                 ? "bg-[#C5A55A] text-black"
                 : "bg-white/20 backdrop-blur-sm text-white border border-white/30"
@@ -169,7 +178,6 @@ export default function NutriserHomePage() {
 
           {/* ── Header ── */}
           <div className="flex flex-col items-center mb-6">
-            {/* Botón volver */}
             <div className="w-full flex items-center mb-4">
               <button
                 onClick={goBack}
@@ -193,9 +201,9 @@ export default function NutriserHomePage() {
             <div className="w-8 h-px bg-[#C5A55A]/60 mt-3" />
           </div>
 
-          {/* ── Tarjeta grande: Paquetes Nutriser ── */}
+          {/* ── Tarjeta 1: Paquetes Nutriser (ancho completo) ── */}
           <div className="mb-3 md:mb-4">
-            <CardLarge
+            <CardFull
               img={IMG_NUTRICION}
               icon={CalendarCheck}
               label="Nutrición"
@@ -207,27 +215,35 @@ export default function NutriserHomePage() {
             />
           </div>
 
-          {/* ── Grid 2 columnas: Tienda + eBook ── */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
-            <CardSquare
+          {/* ── Tarjeta 2: Tienda Productos (ancho completo) ── */}
+          <div className="mb-3 md:mb-4">
+            <CardFull
               img={IMG_TIENDA}
               icon={ShoppingBag}
+              label="Tienda"
               title="Tienda Productos"
               cta="Ver Tienda"
               onClick={() => goTo("/tienda")}
-            />
-            <CardSquare
-              img={IMG_EBOOK}
-              icon={BookOpen}
-              title="Tienda eBook"
-              cta="Ver eBooks"
-              onClick={() => goTo("/ebook")}
+              imgPosition="center 50%"
             />
           </div>
 
-          {/* ── Tarjeta grande: Nutriser Academy ── */}
+          {/* ── Tarjeta 3: Tienda eBook (ancho completo) ── */}
           <div className="mb-3 md:mb-4">
-            <CardLarge
+            <CardFull
+              img={IMG_EBOOK}
+              icon={BookOpen}
+              label="eBooks"
+              title="Tienda eBook"
+              cta="Ver eBooks"
+              onClick={() => goTo("/ebook")}
+              imgPosition="center 30%"
+            />
+          </div>
+
+          {/* ── Fila final: Nutriser Academy + Página Web (2 columnas) ── */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
+            <CardHalf
               img={IMG_ACADEMY}
               icon={GraduationCap}
               label="Educación"
@@ -236,39 +252,18 @@ export default function NutriserHomePage() {
               onClick={() => goTo("/cursos")}
               imgPosition="center 30%"
             />
-          </div>
-
-          {/* ── Botón Página Web ── */}
-          <div className="mb-6">
-            <button
+            <CardHalf
+              img={CLINIC_IMG}
+              icon={Globe}
+              label="Sitio web"
+              title="Página Web"
+              cta="Visitar"
               onClick={() => {
-                // Marcar splash como visto para ir directo al Home (con cupones, servicios, etc.)
                 sessionStorage.setItem("nutriser_splash_seen", "1");
                 window.location.href = "/";
               }}
-              className="group relative w-full rounded-2xl overflow-hidden flex items-center gap-4 p-4 border border-white/10 hover:border-[#C5A55A]/50 bg-white/5 hover:bg-white/10 transition-all duration-200"
-            >
-              {/* Imagen de fondo con overlay */}
-              <img
-                src={CLINIC_IMG}
-                alt="Página Web Nutriser"
-                className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity"
-                style={{ objectPosition: "center 30%" }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-
-              {/* Contenido */}
-              <div className="relative w-12 h-12 rounded-xl bg-[#C5A55A]/20 border border-[#C5A55A]/30 flex items-center justify-center flex-shrink-0 group-hover:bg-[#C5A55A]/30 transition-colors">
-                <Globe className="w-6 h-6 text-[#C5A55A]" />
-              </div>
-              <div className="relative flex-1 text-left">
-                <p className="text-white font-bold text-sm sm:text-base">Página Web Nutriser</p>
-                <p className="text-white/50 text-xs mt-0.5">nutriserpv.com — Sitio oficial</p>
-              </div>
-              <div className="relative flex-shrink-0">
-                <span className="text-[#C5A55A] text-xs font-bold">Visitar ›</span>
-              </div>
-            </button>
+              imgPosition="center 30%"
+            />
           </div>
 
           {/* ── Footer ── */}

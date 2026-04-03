@@ -596,6 +596,17 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </svg>
             </a>
 
+            {/* Correo electrónico */}
+            <a
+              href="mailto:clinicanutriserpv@gmail.com"
+              className="w-10 h-10 rounded-xl bg-[#D44638] flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all duration-200"
+              aria-label="Enviar correo a Nutriser"
+            >
+              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+              </svg>
+            </a>
+
             {/* Ubicación → Google Maps */}
             <a
               href="https://maps.google.com/?q=Nutriser+Aesthetic+%26+Nutrition+Puerto+Vallarta"

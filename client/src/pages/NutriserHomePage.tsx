@@ -108,7 +108,7 @@ export default function NutriserHomePage() {
       style={{ background: "linear-gradient(160deg, #0f0f0f 0%, #1a1208 50%, #0f0f0f 100%)" }}
     >
       <div className="w-full flex flex-col items-center px-3 sm:px-4 md:px-6 box-border" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 16px, 32px)', paddingBottom: '24px' }}>
-        <div className="w-full max-w-[480px]">
+        <div className="w-full max-w-[480px] sm:max-w-[580px] md:max-w-[700px] lg:max-w-[820px] xl:max-w-[900px]">
 
           {/* ── Header ── */}
           <div className="flex flex-col items-center mb-6">

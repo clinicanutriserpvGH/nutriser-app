@@ -388,9 +388,6 @@ export default function Memberships() {
                     }`}
                     onClick={() => handleSelectProgram(program.id as "basic" | "premium")}
                   >
-                    <div className="absolute top-4 right-4 bg-green-600 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
-                      💰 Ahorras ${totalSavings.toLocaleString('es-MX')} MXN
-                    </div>
                     <CardHeader>
                       <CardTitle className="font-serif text-3xl" style={{ color: program.color }}>
                         {program.name}
@@ -416,6 +413,12 @@ export default function Memberships() {
                           <span className="line-through">${consultValue.toLocaleString('es-MX')} MXN</span>
                           <span className="text-gray-400">si pagaras consultas por separado</span>
                         </div>
+                        {/* Etiqueta de ahorro total */}
+                        {totalSavings > 0 && (
+                          <div className="inline-flex items-center gap-1 mt-2 bg-green-600 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-sm">
+                            💰 Ahorras ${totalSavings.toLocaleString('es-MX')} MXN
+                          </div>
+                        )}
                         {discountedPrice && discountInfo?.discount && (
                           <span className="inline-block mt-1 bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
                             Ahorras ${(program.price - discountedPrice).toLocaleString('es-MX')} MXN con tu código

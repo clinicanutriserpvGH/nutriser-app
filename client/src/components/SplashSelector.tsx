@@ -397,39 +397,39 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-black/55 to-black/25" />
 
                 {/* Content */}
-                <div className="relative h-full flex flex-col justify-between p-4 sm:p-5 text-left">
+                <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   {/* Top: icon + label */}
-                  <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
-                      <HeartPulse className="w-5 h-5 text-white" />
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
+                      <HeartPulse className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-white/80 text-[11px] sm:text-xs font-semibold tracking-wide uppercase drop-shadow">
+                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">
                       Pacientes
                     </span>
                   </div>
 
                   {/* Bottom: title + mini-iconitos + CTA */}
                   <div>
-                    <h2 className="text-white text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-2 drop-shadow-lg">
+                    <h2 className="text-white text-base sm:text-xl md:text-2xl font-bold leading-tight mb-1.5 drop-shadow-lg">
                       Portal de Salud Nutriser
                     </h2>
-                    {/* Mini-iconitos de funciones */}
-                    <div className="flex flex-wrap gap-1.5 mb-3">
+                    {/* Mini-iconitos de funciones — 2 filas de 3 */}
+                    <div className="grid grid-cols-3 gap-1 mb-2">
                       {[
                         { icon: Utensils, label: "Mi Dieta" },
-                        { icon: Flame, label: "Calorías" },
+                        { icon: Flame, label: "Monitor Cal." },
                         { icon: ClipboardList, label: "Detonantes" },
                         { icon: ShoppingCart, label: "Lista Compras" },
                         { icon: BookOpen, label: "Recetario" },
                         { icon: Ruler, label: "Mediciones" },
                       ].map(({ icon: Ic, label }) => (
-                        <div key={label} className="flex items-center gap-1 bg-black/40 backdrop-blur-sm border border-white/20 rounded-full px-2 py-0.5">
+                        <div key={label} className="flex items-center gap-1 bg-black/40 backdrop-blur-sm border border-white/20 rounded-full px-1.5 py-0.5">
                           <Ic className="w-2.5 h-2.5 text-[#C5A55A] flex-shrink-0" />
-                          <span className="text-white/80 text-[9px] sm:text-[10px] font-medium leading-none whitespace-nowrap">{label}</span>
+                          <span className="text-white/80 text-[8px] sm:text-[9px] font-medium leading-none truncate">{label}</span>
                         </div>
                       ))}
                     </div>
-                    <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/30">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/30">
                       Acceder / Crear Cuenta
                     </span>
                   </div>

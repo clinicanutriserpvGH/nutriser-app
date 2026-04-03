@@ -978,3 +978,5 @@
 - [x] Mejorar cupones en Mis Tratamientos: fecha límite, contador vendidos y botón "Lo quiero comprar"
 - [x] Corregir error PromoCountdown en cupones de MyTreatments
 - [x] Agregar iconitos de funciones en recuadro Portal de Salud (pantalla principal)
+- [x] Corregir Portal de Salud en iPad: botón "Acceder/Crear Cuenta" no se ve por falta de espacio
+- [x] Cambiar etiqueta "Calorías" por "Monitor Cal." con icono en Portal de Salud

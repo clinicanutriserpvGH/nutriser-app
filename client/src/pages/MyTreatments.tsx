@@ -12,14 +12,46 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Bell, BellOff, Calendar, Camera, CheckCircle2, ChevronLeft, Clock, Eye, EyeOff,
-  FileText, Heart, Loader2, Lock, LogOut, Mail, Phone, Scissors,
+  AlertTriangle, ArrowRight, Bell, BellOff, Calendar, Camera, CheckCircle2, ChevronLeft, Clock, Eye, EyeOff,
+  FileText, Flame, Heart, Loader2, Lock, LogOut, Mail, Phone, Scissors,
   ShieldCheck, Sparkles, Star, Tag, User, X,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
+
+// ─── Componente contador regresivo para cupones ─────────────────────────────
+function PromoCountdown({ expiresAt }: { expiresAt: Date | string }) {
+  const [timeLeft, setTimeLeft] = useState('');
+  const [isUrgent, setIsUrgent] = useState(false);
+  useEffect(() => {
+    const calc = () => {
+      const now = Date.now();
+      const end = new Date(expiresAt).getTime();
+      const diff = end - now;
+      if (diff <= 0) { setTimeLeft('¡Expirado!'); return; }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      setIsUrgent(days < 2);
+      if (days > 0) setTimeLeft(`${days}d ${hours}h ${mins}m ${secs}s`);
+      else setTimeLeft(`${hours}h ${mins}m ${secs}s`);
+    };
+    calc();
+    const id = setInterval(calc, 1000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+  return (
+    <div className={`flex items-center gap-2 mb-3 text-xs font-bold px-3 py-2 rounded-lg ${
+      isUrgent ? 'bg-red-900/40 text-red-200 animate-pulse' : 'bg-black/20 text-white/80'
+    }`}>
+      <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+      <span>{isUrgent ? '🔥 ' : '⏳ '}Oferta termina en: <strong className="text-white">{timeLeft}</strong></span>
+    </div>
+  );
+}
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 type PatientSafe = {
@@ -817,28 +849,145 @@ export default function MyTreatments() {
                 <p className="text-white/40 text-sm">Próximamente habrá cupones disponibles para ti.</p>
               </div>
             ) : (
-              (promotions as any[]).map((promo: any) => (
-                <div key={promo.id} className="bg-white/5 border border-[#C5A55A]/20 rounded-2xl p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="text-white font-bold text-sm">{promo.title}</h4>
-                      {promo.description && <p className="text-white/50 text-xs mt-1">{promo.description}</p>}
-                    </div>
-                    {promo.discountPercent && (
-                      <span className="bg-[#C5A55A] text-black text-xs font-bold px-2 py-1 rounded-xl whitespace-nowrap">
-                        {promo.discountPercent}% OFF
-                      </span>
+              (promotions as any[]).map((promo: any) => {
+                const maxC = promo.maxCoupons ?? null;
+                const remaining = promo.couponsRemaining ?? null;
+                const pct = maxC && remaining != null ? Math.round(((maxC - remaining) / maxC) * 100) : null;
+                const isSoldOut = remaining === 0;
+                const isCritical = pct != null && pct >= 80 && !isSoldOut;
+                const isLow = pct != null && pct >= 50 && pct < 80 && !isSoldOut;
+                return (
+                  <div key={promo.id} className={`relative rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-0.5 ${isSoldOut ? 'opacity-70 grayscale' : ''}`}>
+                    {/* Urgency ribbon */}
+                    {isCritical && !isSoldOut && (
+                      <div className="absolute top-0 left-0 right-0 z-20 bg-red-600 text-white text-center py-1.5 text-xs font-black tracking-widest uppercase flex items-center justify-center gap-1 animate-pulse">
+                        <Flame className="w-3.5 h-3.5" /> ¡ÚTIMOS CUPONES! <Flame className="w-3.5 h-3.5" />
+                      </div>
                     )}
-                  </div>
-                  {promo.code && (
-                    <div className="mt-3 bg-black/30 rounded-xl px-3 py-2 flex items-center justify-between">
-                      <span className="text-[#C5A55A] font-mono font-bold text-sm">{promo.code}</span>
-                      <button onClick={() => { navigator.clipboard.writeText(promo.code); toast.success("Código copiado"); }}
-                        className="text-white/40 hover:text-white/70 text-xs transition-colors">Copiar</button>
+                    {isLow && !isSoldOut && (
+                      <div className="absolute top-0 left-0 right-0 z-20 bg-orange-500 text-white text-center py-1.5 text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1">
+                        <AlertTriangle className="w-3.5 h-3.5" /> Pocos cupones disponibles
+                      </div>
+                    )}
+
+                    {/* Imagen o header */}
+                    {promo.imageUrl ? (
+                      <div className={`relative overflow-hidden ${isCritical || isLow ? 'mt-7' : ''}`} style={{ height: '180px' }}>
+                        <img src={promo.imageUrl} alt={promo.title} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        {promo.regularPrice && promo.price && (
+                          <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black shadow-lg">
+                            🔥 OFERTA
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="font-serif text-lg text-white leading-tight drop-shadow-lg">{promo.title}</h3>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`bg-gradient-to-br from-[#1A1A1A] to-[#2a2a2a] p-4 ${isCritical || isLow ? 'mt-7' : ''}`}>
+                        {promo.regularPrice && promo.price && (
+                          <div className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black mb-2">🔥 OFERTA</div>
+                        )}
+                        <h3 className="font-serif text-lg text-white leading-tight">{promo.title}</h3>
+                      </div>
+                    )}
+
+                    {/* Cuerpo dorado */}
+                    <div className="bg-gradient-to-br from-[#C5A55A] via-[#B8963E] to-[#9E7D2A] p-4">
+                      {promo.description && (
+                        <p className="text-white/90 text-sm leading-relaxed mb-3">{promo.description}</p>
+                      )}
+
+                      {/* Precio comparativo */}
+                      {(promo.regularPrice || promo.price) && (
+                        <div className="bg-black/20 rounded-xl p-3 mb-3 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {promo.regularPrice && (
+                              <div className="text-center">
+                                <div className="text-white/50 text-[10px] uppercase tracking-wider">Antes</div>
+                                <div className="text-white/60 text-base line-through font-semibold">{promo.regularPrice}</div>
+                              </div>
+                            )}
+                            {promo.regularPrice && promo.price && (
+                              <ArrowRight className="w-4 h-4 text-white/60 flex-shrink-0" />
+                            )}
+                            {promo.price && (
+                              <div className="text-center">
+                                <div className="text-yellow-200 text-[10px] uppercase tracking-wider font-bold">Ahora</div>
+                                <div className="text-white text-xl font-black">{promo.price}</div>
+                              </div>
+                            )}
+                          </div>
+                          {promo.regularPrice && promo.price && (
+                            <div className="bg-green-500 text-white text-xs font-black px-2 py-1 rounded-lg text-center">
+                              ¡AHORRA!
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Contador regresivo */}
+                      {promo.expiresAt && (
+                        <PromoCountdown expiresAt={promo.expiresAt} />
+                      )}
+
+                      {/* Barra de vendidos */}
+                      {maxC != null && remaining != null && (
+                        <div className="mb-3">
+                          <div className="flex justify-between items-center mb-1.5">
+                            <span className={`text-xs font-bold flex items-center gap-1 ${
+                              isCritical ? 'text-red-200' : isLow ? 'text-orange-200' : 'text-white/80'
+                            }`}>
+                              {isCritical && <Flame className="w-3.5 h-3.5" />}
+                              {isSoldOut ? '❌ AGOTADO' : '⚡ Cupones limitados'}
+                            </span>
+                            <span className="text-white/70 text-xs font-bold">🔥 {pct}% vendido</span>
+                          </div>
+                          <div className="w-full bg-black/30 rounded-full h-2.5 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-700 ${
+                                isCritical ? 'bg-red-500 animate-pulse' : isLow ? 'bg-orange-400' : 'bg-green-400'
+                              }`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Código de descuento si tiene */}
+                      {promo.code && (
+                        <div className="mb-3 bg-black/20 rounded-xl px-3 py-2 flex items-center justify-between">
+                          <span className="text-yellow-200 font-mono font-black text-sm tracking-widest">{promo.code}</span>
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(promo.code); toast.success("Código copiado"); }}
+                            className="text-white/60 hover:text-white text-xs transition-colors font-bold"
+                          >
+                            Copiar
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Botón Lo Quiero */}
+                      <button
+                        onClick={() => {
+                          if (isSoldOut) { toast.error("Esta promoción ya no tiene cupones disponibles"); return; }
+                          const waUrl = `https://wa.me/526441234567?text=${encodeURIComponent(`Hola, me interesa la promoción: ${promo.title}`)}`;
+                          window.open(waUrl, '_blank');
+                        }}
+                        disabled={isSoldOut}
+                        className={`block w-full py-3 px-4 rounded-xl font-black text-sm text-center uppercase tracking-widest transition-all duration-200 shadow-lg ${
+                          isSoldOut
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            : 'bg-white text-[#8B6914] hover:bg-[#FAF7F2] hover:scale-[1.02] active:scale-[0.98]'
+                        }`}
+                      >
+                        {isSoldOut ? '❌ Agotado' : '🎁 ¡Lo Quiero!'}
+                      </button>
                     </div>
-                  )}
-                </div>
-              ))
+                  </div>
+                );
+              })
             )}
           </div>
         )}

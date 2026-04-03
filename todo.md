@@ -975,3 +975,6 @@
 - [x] Eliminar módulo "Códigos Extra" (compartir con 5 personas / CUPONEXTRA5) del proyecto
 - [x] Agregar botón "Editar" en Antes/Después del admin para modificar nombre, descripción y categoría
 - [x] Reposicionar etiqueta verde de ahorro en paquetes para que no tape el nombre
+- [x] Mejorar cupones en Mis Tratamientos: fecha límite, contador vendidos y botón "Lo quiero comprar"
+- [x] Corregir error PromoCountdown en cupones de MyTreatments
+- [x] Agregar iconitos de funciones en recuadro Portal de Salud (pantalla principal)

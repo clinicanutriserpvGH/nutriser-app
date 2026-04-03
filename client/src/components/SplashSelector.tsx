@@ -442,8 +442,12 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   {/* Top: icon + label */}
                   <div className="flex items-center gap-1.5">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
-                      <HeartPulse className="w-4 h-4 text-white" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 bg-black/30 backdrop-blur-sm overflow-hidden">
+                      <img
+                        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-silhouette-icon_f9345ac8.png"
+                        alt="Nutriser"
+                        className="w-full h-full object-contain p-0.5"
+                      />
                     </div>
                     <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">
                       App Pacientes

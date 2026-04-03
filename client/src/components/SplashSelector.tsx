@@ -446,7 +446,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                       <HeartPulse className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">
-                      Pacientes
+                      App Pacientes
                     </span>
                   </div>
 

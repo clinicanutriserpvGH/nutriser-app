@@ -107,15 +107,15 @@ export default function NutriserHomePage() {
       className="min-h-screen w-full overflow-x-hidden overflow-y-auto"
       style={{ background: "linear-gradient(160deg, #0f0f0f 0%, #1a1208 50%, #0f0f0f 100%)" }}
     >
-      <div className="w-full flex flex-col items-center py-8 px-3 sm:px-4 md:px-6 box-border">
+      <div className="w-full flex flex-col items-center px-3 sm:px-4 md:px-6 box-border" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 16px, 32px)', paddingBottom: '24px' }}>
         <div className="w-full max-w-[480px] md:max-w-[700px] lg:max-w-[960px]">
 
           {/* ── Header ── */}
           <div className="flex flex-col items-center mb-6">
-            <div className="w-full flex items-center mb-4">
+            <div className="w-full flex items-center mb-4 pt-safe" style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
               <button
                 onClick={goBack}
-                className="flex items-center gap-1.5 text-white/50 hover:text-[#C5A55A] transition-colors text-sm font-medium"
+                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white/70 hover:text-[#C5A55A] transition-all text-sm font-medium px-3 py-1.5 rounded-full border border-white/10"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Inicio

@@ -63,17 +63,17 @@ export default function AdminLogin() {
       <div className="fixed top-12 left-4 z-50 flex items-center gap-2">
         <button
           onClick={() => { window.location.href = '/nutriser-home'; }}
-          className="flex items-center gap-1.5 text-[#C5A55A] hover:text-[#B8963E] text-sm font-medium bg-white/80 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm border border-[#C5A55A]/20 transition"
+          className="flex items-center gap-1.5 bg-[#C5A55A] hover:bg-[#B8963E] text-black text-sm font-semibold px-4 py-2 rounded-full shadow-md transition"
         >
           <ArrowLeft className="w-4 h-4" />
-          Regresar
+          ← Regresar
         </button>
         <button
           onClick={() => {
             sessionStorage.removeItem("nutriser_splash_seen");
             window.location.href = "/";
           }}
-          className="flex items-center gap-1.5 text-white/60 hover:text-[#C5A55A] text-sm font-medium bg-white/50 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm border border-gray-200 transition"
+          className="flex items-center gap-1.5 text-gray-500 hover:text-[#C5A55A] text-sm font-medium bg-white/80 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm border border-gray-200 transition"
         >
           Inicio
         </button>

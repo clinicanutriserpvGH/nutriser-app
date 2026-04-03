@@ -501,37 +501,58 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             )}
           </div>
 
-          {/* ── Mis Tratamientos ── */}
-          <div className="mb-4 md:mb-5">
+          {/* ── Mis Tratamientos + Agendar Cita ── */}
+          <div className="grid grid-cols-2 gap-3 mb-4 md:mb-5">
+
+            {/* Mis Tratamientos */}
             <button
               onClick={() => handleNavigate('/mis-tratamientos')}
-              className="relative w-full rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-200 group"
+              className="relative rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-200 group"
+              style={{ minHeight: "90px" }}
             >
               <div className="absolute inset-0">
                 <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
               </div>
-              <div className="relative flex items-center gap-3 p-4">
-                <div className="w-12 h-12 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
-                  <Sparkles className="w-6 h-6 text-black" />
+              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
+                <div className="w-10 h-10 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-black" />
                 </div>
-                <div className="flex-1 text-left">
-                  <p className="text-white font-bold text-sm sm:text-base">Mis Tratamientos</p>
+                <div className="text-center">
+                  <p className="text-white font-bold text-xs sm:text-sm">Mis Tratamientos</p>
                   {activePatient ? (
-                    <p className="text-[#C5A55A] text-[10px] sm:text-xs leading-tight mt-0.5 font-semibold">
-                      ✓ Sesión activa — {activePatient.name.split(' ')[0]}
+                    <p className="text-[#C5A55A] text-[9px] sm:text-[10px] leading-tight mt-0.5 font-semibold">
+                      ✓ {activePatient.name.split(' ')[0]}
                     </p>
                   ) : (
-                    <p className="text-white/70 text-[10px] sm:text-xs leading-tight mt-0.5">
-                      Accede al seguimiento de tus tratamientos y descuentos exclusivos en tratamientos faciales y corporales
+                    <p className="text-white/60 text-[9px] sm:text-[10px] leading-tight mt-0.5">
+                      Seguimiento y descuentos
                     </p>
                   )}
                 </div>
-                <div className="flex-shrink-0 bg-[#C5A55A]/20 rounded-xl px-2 py-1">
-                  <span className="text-[#C5A55A] text-[10px] font-bold">{activePatient ? 'Continuar ›' : 'Entrar ›'}</span>
+              </div>
+            </button>
+
+            {/* Agendar Cita */}
+            <button
+              onClick={() => handleNavigate('/appointment-form')}
+              className="relative rounded-2xl overflow-hidden border border-white/20 hover:border-[#C5A55A]/60 transition-all duration-200 group"
+              style={{ minHeight: "90px", background: "linear-gradient(135deg, #1a1208 0%, #2a1f0a 100%)" }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-[#C5A55A]/10 to-transparent" />
+              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
+                <div className="w-10 h-10 rounded-xl bg-white/10 border border-[#C5A55A]/40 flex items-center justify-center shadow-md flex-shrink-0 group-hover:bg-[#C5A55A]/20 transition-colors">
+                  <CalendarCheck className="w-5 h-5 text-[#C5A55A]" />
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-bold text-xs sm:text-sm">Agendar Cita</p>
+                  <p className="text-white/60 text-[9px] sm:text-[10px] leading-tight mt-0.5">
+                    Reserva tu consulta
+                  </p>
                 </div>
               </div>
             </button>
+
           </div>
 
           {/* ── Íconos sociales ── */}

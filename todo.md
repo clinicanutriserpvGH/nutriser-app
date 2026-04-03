@@ -973,3 +973,4 @@
 ## Rediseño Tienda Ebook - Sesión Actual
 - [x] Reducir imagen de portada del ebook a tamaño pequeño estilo Amazon (layout 2 columnas)
 - [x] Eliminar módulo "Códigos Extra" (compartir con 5 personas / CUPONEXTRA5) del proyecto
+- [x] Agregar botón "Editar" en Antes/Después del admin para modificar nombre, descripción y categoría

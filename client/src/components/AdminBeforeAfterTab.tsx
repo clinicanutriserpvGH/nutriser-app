@@ -3,12 +3,23 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Trash2, Eye, EyeOff, Plus, Upload } from "lucide-react";
+import { Trash2, Eye, EyeOff, Plus, Upload, Pencil, X, Check } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
   nutricion: "Nutrición",
   estetica: "Estética",
   ambos: "Nutrición & Estética",
+};
+
+type Photo = {
+  id: number;
+  patientName: string;
+  category: string;
+  description: string | null;
+  beforeImageUrl: string;
+  afterImageUrl: string;
+  isVisible: boolean;
+  sortOrder: number;
 };
 
 export default function AdminBeforeAfterTab() {
@@ -33,6 +44,7 @@ export default function AdminBeforeAfterTab() {
   });
 
   const [showForm, setShowForm] = useState(false);
+  const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
 
   return (
     <div className="space-y-6">
@@ -110,6 +122,17 @@ export default function AdminBeforeAfterTab() {
                       <p className="text-xs text-gray-500 mb-2 line-clamp-2">{photo.description}</p>
                     )}
                     <div className="flex gap-2 mt-2">
+                      {/* Botón Editar */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 text-xs text-[#C5A55A] border-[#C5A55A]/40 hover:bg-[#C5A55A]/10"
+                        onClick={() => setEditingPhoto(photo as Photo)}
+                      >
+                        <Pencil className="w-3 h-3 mr-1" />
+                        Editar
+                      </Button>
+                      {/* Botón Ocultar/Mostrar */}
                       <Button
                         variant="outline"
                         size="sm"
@@ -125,6 +148,7 @@ export default function AdminBeforeAfterTab() {
                           <><Eye className="w-3 h-3 mr-1" /> Mostrar</>
                         )}
                       </Button>
+                      {/* Botón Eliminar */}
                       <Button
                         variant="outline"
                         size="sm"
@@ -147,6 +171,143 @@ export default function AdminBeforeAfterTab() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Edición */}
+      {editingPhoto && (
+        <EditPhotoModal
+          photo={editingPhoto}
+          onClose={() => setEditingPhoto(null)}
+          onSuccess={() => {
+            setEditingPhoto(null);
+            utils.beforeAfter.listAll.invalidate();
+            utils.beforeAfter.list.invalidate();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EditPhotoModal({
+  photo,
+  onClose,
+  onSuccess,
+}: {
+  photo: Photo;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [patientName, setPatientName] = useState(photo.patientName);
+  const [category, setCategory] = useState<"nutricion" | "estetica" | "ambos">(
+    photo.category as "nutricion" | "estetica" | "ambos"
+  );
+  const [description, setDescription] = useState(photo.description ?? "");
+
+  const updateMutation = trpc.beforeAfter.update.useMutation({
+    onSuccess: () => {
+      toast.success("Foto actualizada correctamente");
+      onSuccess();
+    },
+    onError: () => toast.error("Error al actualizar la foto"),
+  });
+
+  const handleSave = () => {
+    if (!patientName.trim()) {
+      toast.error("El nombre es requerido");
+      return;
+    }
+    updateMutation.mutate({
+      id: photo.id,
+      patientName: patientName.trim(),
+      category,
+      description: description.trim() || undefined,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold text-[#1A1A1A]">Editar Transformación</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Preview de imágenes */}
+        <div className="grid grid-cols-2 gap-2 mb-5 h-32 rounded-lg overflow-hidden">
+          <div className="relative">
+            <img src={photo.beforeImageUrl} alt="Antes" className="w-full h-full object-cover object-top" />
+            <div className="absolute bottom-1 left-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded">Antes</div>
+          </div>
+          <div className="relative">
+            <img src={photo.afterImageUrl} alt="Después" className="w-full h-full object-cover object-top" />
+            <div className="absolute bottom-1 left-1 bg-[#C5A55A]/80 text-black text-xs px-2 py-0.5 rounded font-semibold">Después</div>
+          </div>
+        </div>
+
+        {/* Campos editables */}
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs font-semibold text-gray-600 mb-1 block">Nombre o iniciales del paciente *</label>
+            <input
+              type="text"
+              value={patientName}
+              onChange={(e) => setPatientName(e.target.value)}
+              placeholder="Ej: Juana M."
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C5A55A] text-[#1A1A1A]"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-gray-600 mb-1 block">Categoría *</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as "nutricion" | "estetica" | "ambos")}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C5A55A] text-[#1A1A1A]"
+            >
+              <option value="nutricion">Nutrición</option>
+              <option value="estetica">Estética</option>
+              <option value="ambos">Nutrición & Estética</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-gray-600 mb-1 block">Descripción (opcional)</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Ej: Increíble transformación con dedicación y esfuerzo."
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C5A55A] text-[#1A1A1A] resize-none"
+            />
+          </div>
+        </div>
+
+        {/* Botones */}
+        <div className="flex gap-3 mt-6">
+          <Button
+            variant="outline"
+            className="flex-1 text-sm"
+            onClick={onClose}
+            disabled={updateMutation.isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            className="flex-1 bg-[#C5A55A] hover:bg-[#b8944d] text-black text-sm"
+            onClick={handleSave}
+            disabled={updateMutation.isPending}
+          >
+            <Check className="w-4 h-4 mr-1" />
+            {updateMutation.isPending ? "Guardando..." : "Guardar Cambios"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

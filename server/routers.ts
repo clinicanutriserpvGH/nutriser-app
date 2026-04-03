@@ -1483,6 +1483,27 @@ export const appRouter = router({
           .where(eq(beforeAfterPhotos.id, input.id));
         return { success: true };
       }),
+    // Editar datos de foto (admin)
+    update: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        patientName: z.string().min(1),
+        category: z.enum(["nutricion", "estetica", "ambos"]),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("DB not available");
+        const { beforeAfterPhotos } = await import("../drizzle/schema");
+        await db.update(beforeAfterPhotos)
+          .set({
+            patientName: input.patientName,
+            category: input.category,
+            description: input.description ?? null,
+          })
+          .where(eq(beforeAfterPhotos.id, input.id));
+        return { success: true };
+      }),
     // Subir imagen a S3 y retornar URL
     uploadImage: publicProcedure
       .input(z.object({

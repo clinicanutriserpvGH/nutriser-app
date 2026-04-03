@@ -1,8 +1,8 @@
 import { useState } from "react";
 import {
-  Activity, Bell, BellRing, BookOpen, CalendarCheck, Check,
+  Activity, Bell, BellRing, BookOpen, CalendarCheck, Camera, Check,
   ClipboardList, Flame, GraduationCap, HeartPulse, Loader2, Mail,
-  MapPin, Pill, Ruler, Share2, ShoppingBag, ShoppingCart, Sparkles, Tag,
+  MapPin, PauseCircle, Pill, Ruler, Share2, ShoppingBag, ShoppingCart, Sparkles, Tag,
   TrendingUp, Utensils, X,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -459,9 +459,9 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <div className="flex flex-wrap gap-2 mb-2">
                       {[
                         { icon: Utensils, label: "Mi Dieta" },
-                        { icon: Flame, label: "Calorías" },
+                        { icon: Camera, label: "Scan Food" },
                         { icon: ClipboardList, label: "Detonantes" },
-                        { icon: ShoppingCart, label: "Compras" },
+                        { icon: PauseCircle, label: "Pausa" },
                         { icon: BookOpen, label: "Recetario" },
                         { icon: Ruler, label: "Mediciones" },
                       ].map(({ icon: Ic, label }) => (

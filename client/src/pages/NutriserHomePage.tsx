@@ -240,10 +240,12 @@ export default function NutriserHomePage() {
 
           {/* ── Botón Página Web ── */}
           <div className="mb-6">
-            <a
-              href="https://nutriserpv.com"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => {
+                // Marcar splash como visto para ir directo al Home (con cupones, servicios, etc.)
+                sessionStorage.setItem("nutriser_splash_seen", "1");
+                window.location.href = "/";
+              }}
               className="group relative w-full rounded-2xl overflow-hidden flex items-center gap-4 p-4 border border-white/10 hover:border-[#C5A55A]/50 bg-white/5 hover:bg-white/10 transition-all duration-200"
             >
               {/* Imagen de fondo con overlay */}
@@ -266,7 +268,7 @@ export default function NutriserHomePage() {
               <div className="relative flex-shrink-0">
                 <span className="text-[#C5A55A] text-xs font-bold">Visitar ›</span>
               </div>
-            </a>
+            </button>
           </div>
 
           {/* ── Footer ── */}

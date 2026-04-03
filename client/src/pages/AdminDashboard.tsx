@@ -99,6 +99,8 @@ export default function AdminDashboard() {
   const [ebookComingSoon, setEbookComingSoon] = useState(false);
   const [ebookPresalePrice, setEbookPresalePrice] = useState("");
   const [isUploadingEbook, setIsUploadingEbook] = useState(false);
+  const [editingEbookId, setEditingEbookId] = useState<number | null>(null); // null = nuevo ebook
+  const [showEbookForm, setShowEbookForm] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
 
@@ -137,6 +139,10 @@ export default function AdminDashboard() {
     enabled: isAuthenticated,
   });
 
+  const { data: allEbooks, refetch: refetchAllEbooks } = trpc.ebook.listAll.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
   const { data: ebookPurchases, refetch: refetchEbookPurchases } = trpc.ebook.listPurchases.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -145,12 +151,23 @@ export default function AdminDashboard() {
     onSuccess: () => {
       toast.success('eBook guardado exitosamente');
       refetchEbook();
+      refetchAllEbooks();
       setIsUploadingEbook(false);
+      setShowEbookForm(false);
     },
     onError: (error) => {
       toast.error('Error al guardar eBook: ' + error.message);
       setIsUploadingEbook(false);
     },
+  });
+
+  const setActiveEbookMutation = trpc.ebook.setActive.useMutation({
+    onSuccess: () => {
+      toast.success('eBook activo actualizado');
+      refetchEbook();
+      refetchAllEbooks();
+    },
+    onError: (error: { message: string }) => toast.error('Error: ' + error.message),
   });
 
   const { data: ebookDiscountCodes, refetch: refetchDiscountCodes } = trpc.ebook.listDiscountCodes.useQuery(undefined, {
@@ -830,7 +847,7 @@ export default function AdminDashboard() {
     }
     setIsUploadingEbook(true);
     upsertEbookMutation.mutate({
-      id: activeEbook?.id,
+      id: editingEbookId ?? undefined,
       title: ebookTitle,
       description: ebookDescription,
       price: ebookPrice,
@@ -841,9 +858,37 @@ export default function AdminDashboard() {
     });
   };
 
-  // Cargar datos del ebook activo al formulario
+  const loadEbookToForm = (ebook: NonNullable<typeof activeEbook>) => {
+    setEditingEbookId(ebook.id);
+    setEbookTitle(ebook.title || '');
+    setEbookDescription(ebook.description || '');
+    setEbookPrice(ebook.price?.toString() || '');
+    setEbookPresalePrice((ebook as any).presalePrice?.toString() || '');
+    if (ebook.coverUrl) setEbookCoverPreview(ebook.coverUrl);
+    setEbookComingSoon(ebook.comingSoon ?? false);
+    setEbookCoverBase64(null);
+    setEbookPdfBase64(null);
+    setEbookPdfName(null);
+    setShowEbookForm(true);
+  };
+
+  const openNewEbookForm = () => {
+    setEditingEbookId(null);
+    setEbookTitle('');
+    setEbookDescription('');
+    setEbookPrice('');
+    setEbookPresalePrice('');
+    setEbookCoverPreview(null);
+    setEbookCoverBase64(null);
+    setEbookPdfBase64(null);
+    setEbookPdfName(null);
+    setEbookComingSoon(false);
+    setShowEbookForm(true);
+  };
+
+  // Cargar datos del ebook activo al formulario al inicio
   useEffect(() => {
-    if (activeEbook) {
+    if (activeEbook && !showEbookForm) {
       setEbookTitle(activeEbook.title || '');
       setEbookDescription(activeEbook.description || '');
       setEbookPrice(activeEbook.price?.toString() || '');
@@ -1830,17 +1875,97 @@ export default function AdminDashboard() {
 
           {/* eBook Tab */}
           <TabsContent value="ebook" className="space-y-6">
+
+            {/* Lista de todos los eBooks */}
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    Mis eBooks
+                  </CardTitle>
+                  <CardDescription>Gestiona todos tus eBooks. El eBook activo aparece en la tienda.</CardDescription>
+                </div>
+                <button
+                  onClick={openNewEbookForm}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white"
+                  style={{ background: 'linear-gradient(135deg, #C5A55A, #A8893F)' }}
+                >
+                  <Plus className="w-4 h-4" />
+                  Nuevo eBook
+                </button>
+              </CardHeader>
+              <CardContent>
+                {(!allEbooks || allEbooks.length === 0) ? (
+                  <div className="text-center py-8 text-[#999]">
+                    <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p>No hay eBooks aún. ¡Crea el primero!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {allEbooks.map((ebook) => (
+                      <div key={ebook.id} className={`flex items-center gap-3 p-3 rounded-lg border ${
+                        activeEbook?.id === ebook.id
+                          ? 'border-[#C5A55A] bg-[#C5A55A]/5'
+                          : 'border-gray-200 bg-gray-50'
+                      }`}>
+                        {ebook.coverUrl ? (
+                          <img src={ebook.coverUrl} alt={ebook.title} className="w-12 h-16 object-cover rounded" />
+                        ) : (
+                          <div className="w-12 h-16 bg-gray-200 rounded flex items-center justify-center">
+                            <BookOpen className="w-5 h-5 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-[#1A1A1A] truncate">{ebook.title}</p>
+                            {activeEbook?.id === ebook.id && (
+                              <span className="text-xs px-2 py-0.5 rounded-full text-white font-semibold" style={{ background: 'linear-gradient(135deg, #C5A55A, #A8893F)' }}>Activo</span>
+                            )}
+                            {ebook.comingSoon && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold">Próximamente</span>
+                            )}
+                          </div>
+                          <p className="text-sm text-[#666]">${ebook.price} MXN</p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {activeEbook?.id !== ebook.id && (
+                            <button
+                              onClick={() => setActiveEbookMutation.mutate({ id: ebook.id })}
+                              className="text-xs px-3 py-1.5 rounded-lg border border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A]/10 font-semibold"
+                            >
+                              Activar
+                            </button>
+                          )}
+                          <button
+                            onClick={() => loadEbookToForm(ebook)}
+                            className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100"
+                            title="Editar"
+                          >
+                            <Pencil className="w-4 h-4 text-[#666]" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Formulario de eBook - Solo visible cuando showEbookForm es true */}
+            {showEbookForm && (
+            <>
             {/* Formulario de eBook - Sección 1: Información de texto */}
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
                 <CardTitle className="text-[#C5A55A] flex items-center gap-2">
                   <BookOpen className="w-5 h-5" />
-                  {activeEbook ? 'Editar información del eBook' : 'Publicar eBook'}
+                  {editingEbookId ? 'Editar eBook' : 'Nuevo eBook'}
                 </CardTitle>
                 <CardDescription>
-                  {activeEbook
-                    ? `Edita el título, descripción o precio. Los cambios se guardan de inmediato.`
-                    : 'Completa la información para publicar tu eBook.'}
+                  {editingEbookId
+                    ? 'Edita el título, descripción o precio. Los cambios se guardan de inmediato.'
+                    : 'Completa la información para publicar tu nuevo eBook.'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -2222,6 +2347,8 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+            </>
+            )}{/* fin showEbookForm */}
           </TabsContent>
           {/* Tab de Suscriptores */}
           <TabsContent value="subscribers" className="space-y-4">

@@ -705,6 +705,20 @@ export const appRouter = router({
         return { success: true, purchaseId: purchase.id };
       }),
 
+    // Activar un ebook específico (admin)
+    setActive: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await (await import('./db')).getDb();
+        if (!db) throw new Error('DB no disponible');
+        const { ebooks } = await import('../drizzle/schema');
+        // Desactivar todos
+        await db.update(ebooks).set({ isActive: false });
+        // Activar el seleccionado
+        await db.update(ebooks).set({ isActive: true }).where((await import('drizzle-orm')).eq(ebooks.id, input.id));
+        return { success: true };
+      }),
+
     // Listar compras (admin)
     listPurchases: publicProcedure.query(async () => {
       return await getAllEbookPurchases();

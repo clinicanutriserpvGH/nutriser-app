@@ -980,3 +980,14 @@
 - [x] Agregar iconitos de funciones en recuadro Portal de Salud (pantalla principal)
 - [x] Corregir Portal de Salud en iPad: botón "Acceder/Crear Cuenta" no se ve por falta de espacio
 - [x] Cambiar etiqueta "Calorías" por "Monitor Cal." con icono en Portal de Salud
+
+## Gestión de Múltiples eBooks - Sesión Actual
+
+- [x] Agregar lista de todos los eBooks en el tab de eBook del panel admin
+- [x] Agregar botón "Nuevo eBook" para crear eBooks adicionales
+- [x] Agregar botón "Activar" para marcar qué eBook aparece en la tienda
+- [x] Agregar botón "Editar" (lápiz) para cada eBook en la lista
+- [x] Mostrar badge "Activo" en el eBook actualmente publicado en tienda
+- [x] Formulario de eBook ahora es condicional (solo visible al crear/editar)
+- [x] Estado editingEbookId para distinguir entre crear nuevo y editar existente
+- [x] Tests unitarios para ebook.listAll y ebook.setActive

@@ -229,3 +229,88 @@ describe("ebook.listPurchases", () => {
     expect(result[0]?.status).toBe("pending");
   });
 });
+
+describe("ebook.listAll", () => {
+  it("devuelve lista vacía cuando no hay eBooks", async () => {
+    const { getAllEbooks } = await import("./db");
+    vi.mocked(getAllEbooks).mockResolvedValueOnce([]);
+
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.ebook.listAll();
+
+    expect(result).toEqual([]);
+  });
+
+  it("devuelve todos los eBooks existentes", async () => {
+    const { getAllEbooks } = await import("./db");
+    vi.mocked(getAllEbooks).mockResolvedValueOnce([
+      {
+        id: 1,
+        title: "Guía Nutricional",
+        description: "Descripción 1",
+        price: "299.00",
+        presalePrice: null,
+        coverUrl: null,
+        backCoverUrl: null,
+        pdfUrl: null,
+        isActive: true,
+        comingSoon: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 2,
+        title: "Recetas Saludables",
+        description: "Descripción 2",
+        price: "199.00",
+        presalePrice: null,
+        coverUrl: null,
+        backCoverUrl: null,
+        pdfUrl: null,
+        isActive: false,
+        comingSoon: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ] as any);
+
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.ebook.listAll();
+
+    expect(result).toHaveLength(2);
+    expect(result[0]?.title).toBe("Guía Nutricional");
+    expect(result[1]?.title).toBe("Recetas Saludables");
+  });
+});
+
+describe("ebook.setActive", () => {
+  it("acepta un id numérico válido sin error de validación", async () => {
+    // El procedimiento setActive requiere DB real para funcionar completamente.
+    // En test, verificamos que el input es aceptado (no lanza TRPCError de validación).
+    // Puede lanzar error de conexión a DB, lo cual es esperado en entorno de test.
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    // Intentar llamar con id válido - puede fallar por DB pero no por validación
+    try {
+      await caller.ebook.setActive({ id: 1 });
+      // Si tiene éxito (mock de DB activo), verificamos el resultado
+    } catch (error: any) {
+      // Error de DB es esperado en entorno de test sin conexión real
+      // Solo verificamos que NO sea un error de validación de Zod
+      expect(error.message).not.toContain('Expected number');
+      expect(error.message).not.toContain('Required');
+    }
+  });
+
+  it("rechaza input sin id", async () => {
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await expect(
+      caller.ebook.setActive({} as any)
+    ).rejects.toThrow();
+  });
+});

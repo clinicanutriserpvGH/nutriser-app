@@ -273,17 +273,17 @@ export default function EbookStore() {
                 <h1 className="font-serif text-4xl md:text-5xl text-[#1A1A1A] mb-4">{ebook.title}</h1>
               </div>
 
-              {/* Content Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-                {/* Images */}
-                <div className="space-y-4">
+              {/* Content Grid — estilo Amazon: imagen pequeña izq, info derecha */}
+              <div className="flex flex-col sm:flex-row gap-6 items-start">
+                {/* Imagen pequeña — columna izquierda */}
+                <div className="flex-shrink-0 w-36 sm:w-44 mx-auto sm:mx-0">
                   {/* Portada */}
                   {ebook.coverUrl ? (
                     <div className="relative group">
                       <img
                         src={ebook.coverUrl}
                         alt={`Portada: ${ebook.title}`}
-                        className="w-full rounded-lg shadow-xl"
+                        className="w-full rounded-md shadow-md"
                       />
                       <button
                         onClick={() => setShowCoverModal("front")}
@@ -296,8 +296,8 @@ export default function EbookStore() {
                       </button>
                     </div>
                   ) : (
-                    <div className="w-full aspect-[3/4] bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-lg shadow-xl flex items-center justify-center">
-                      <BookOpen className="w-24 h-24 text-white/50" />
+                    <div className="w-full aspect-[3/4] bg-gradient-to-br from-[#C5A55A] to-[#B8963E] rounded-md shadow-md flex items-center justify-center">
+                      <BookOpen className="w-10 h-10 text-white/50" />
                     </div>
                   )}
 
@@ -309,17 +309,17 @@ export default function EbookStore() {
                   )}
                 </div>
 
-                {/* Info */}
-                <div className="space-y-6">
+                {/* Info — columna principal */}
+                <div className="flex-1 space-y-5">
                   {/* Price */}
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#C5A55A]/20">
                     {ebook.comingSoon && (ebook as any).presalePrice ? (
                       <>
                         <p className="text-sm text-[#999] uppercase tracking-wider mb-1">Pre-venta especial</p>
                         <div className="flex items-end gap-3">
-                          <p className="font-serif text-5xl text-[#C5A55A] font-bold">
+                          <p className="font-serif text-3xl text-[#C5A55A] font-bold">
                             ${Number((ebook as any).presalePrice).toLocaleString('es-MX')}
-                            <span className="text-xl text-[#999] font-normal ml-2">MXN</span>
+                            <span className="text-base text-[#999] font-normal ml-1">MXN</span>
                           </p>
                         </div>
                         <div className="flex items-center gap-2 mt-2">
@@ -335,9 +335,9 @@ export default function EbookStore() {
                     ) : (
                       <>
                         <p className="text-sm text-[#999] uppercase tracking-wider mb-1">Precio</p>
-                        <p className="font-serif text-5xl text-[#C5A55A] font-bold">
+                        <p className="font-serif text-3xl text-[#C5A55A] font-bold">
                           ${Number(ebook.price).toLocaleString('es-MX')}
-                          <span className="text-xl text-[#999] font-normal ml-2">MXN</span>
+                          <span className="text-base text-[#999] font-normal ml-1">MXN</span>
                         </p>
                         <p className="text-sm text-[#666] mt-2">Acceso de por vida · Lectura en línea</p>
                       </>

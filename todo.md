@@ -969,3 +969,6 @@
 
 - [x] Corregir bug firma consentimiento: canvas más grande, servidor genera PDF con pdfkit
 - [x] Agregar botón eliminar paciente en panel admin (Gestión de Pacientes)
+
+## Rediseño Tienda Ebook - Sesión Actual
+- [ ] Reducir imagen de portada del ebook a tamaño pequeño estilo Amazon (layout 2 columnas)

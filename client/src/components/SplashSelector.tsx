@@ -417,7 +417,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <div className="grid grid-cols-3 gap-1 mb-2">
                       {[
                         { icon: Utensils, label: "Mi Dieta" },
-                        { icon: Flame, label: "Monitor Cal." },
+                        { icon: Flame, label: "Monitor Calorías" },
                         { icon: ClipboardList, label: "Detonantes" },
                         { icon: ShoppingCart, label: "Lista Compras" },
                         { icon: BookOpen, label: "Recetario" },

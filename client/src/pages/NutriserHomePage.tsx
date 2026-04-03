@@ -134,9 +134,9 @@ export default function NutriserHomePage() {
             <div className="w-8 h-px bg-[#C5A55A]/60 mt-3" />
           </div>
 
-          {/* ── 1. Paquetes Nutriser (ancho completo) ── */}
-          <div className="mb-3 md:mb-4">
-            <CardFull
+          {/* ── 1. Paquetes + Tienda Productos (2 columnas) ── */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
+            <CardHalf
               img={IMG_NUTRICION}
               icon={CalendarCheck}
               label="Nutrición"
@@ -146,11 +146,7 @@ export default function NutriserHomePage() {
               accent
               imgPosition="center 40%"
             />
-          </div>
-
-          {/* ── 3. Tienda Productos (ancho completo) ── */}
-          <div className="mb-3 md:mb-4">
-            <CardFull
+            <CardHalf
               img={IMG_TIENDA}
               icon={ShoppingBag}
               label="Tienda"

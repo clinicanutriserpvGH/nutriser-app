@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
-  Activity, Bell, BellRing, BookOpen, CalendarCheck, Camera, Check,
-  ClipboardList, Flame, GraduationCap, HeartPulse, Loader2, Mail,
+  Bell, BellRing, BookOpen, CalendarCheck, Camera, Check,
+  ClipboardList, Flame, Globe, GraduationCap, HeartPulse, Loader2, Mail,
   MapPin, PauseCircle, Pill, Repeat2, Ruler, Share2, ShoppingBag, ShoppingCart, Sparkles, Tag,
   TrendingUp, Utensils, X,
 } from "lucide-react";
@@ -405,7 +405,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
-                      <Activity className="w-4 h-4 text-white" />
+                      <Globe className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Sitio Web</span>
                   </div>

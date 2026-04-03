@@ -262,7 +262,7 @@ export default function NutriserHomePage() {
                 sessionStorage.setItem("nutriser_splash_seen", "1");
                 window.location.href = "/";
               }}
-              imgPosition="center 30%"
+              imgPosition="55% center"
             />
           </div>
 

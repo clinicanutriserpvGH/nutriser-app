@@ -462,6 +462,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                         { icon: Camera, label: "Scan Food" },
                         { icon: ClipboardList, label: "Detonantes" },
                         { icon: PauseCircle, label: "Pausa" },
+                        { icon: ShoppingCart, label: "Lista Súper" },
                         { icon: BookOpen, label: "Recetario" },
                         { icon: Ruler, label: "Mediciones" },
                       ].map(({ icon: Ic, label }) => (

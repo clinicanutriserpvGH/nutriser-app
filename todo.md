@@ -1004,3 +1004,9 @@
 
 ## Botón Admin en Splash 1
 - [x] Agregar botón de acceso al panel de administración en el Splash 1 igual al del Splash 2
+
+## Mover botón Compartir
+- [x] Quitar botón Compartir del header del Splash 1 y ponerlo junto al botón Administración al final
+
+## Reordenar Widgets Splash 1
+- [x] Poner Mis Tratamientos y Agendar Cita antes de Cuponera, Campana y Servicios

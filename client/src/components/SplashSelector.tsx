@@ -347,23 +347,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </h1>
             <div className="w-8 h-px bg-[#C5A55A]/60 mt-3 mb-4" />
 
-            {/* Botón compartir */}
-            <button
-              onClick={() => {
-                const url = "https://nutriserpv.com";
-                if (navigator.share) {
-                  navigator.share({ title: "Nutriser Aesthetic & Nutrition", url });
-                } else {
-                  navigator.clipboard.writeText(url)
-                    .then(() => toast.success("¡Enlace copiado! Pégalo donde quieras compartirlo."))
-                    .catch(() => toast.error("No se pudo copiar el enlace."));
-                }
-              }}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white/60 text-[11px] tracking-widest uppercase hover:border-[#C5A55A]/60 hover:text-[#C5A55A] transition-all duration-200"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              Compartir
-            </button>
+
           </div>
 
           {/* ── Grid de widgets ── */}
@@ -491,6 +475,67 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
           </div>
 
+          {/* ── Mis Tratamientos + Agendar Cita ── */}
+          <div className="grid grid-cols-2 gap-3 mb-4 md:mb-5">
+
+            {/* Mis Tratamientos */}
+            <button
+              onClick={() => handleNavigate('/mis-tratamientos')}
+              className="relative rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-200 group"
+              style={{ minHeight: "90px" }}
+            >
+              <div className="absolute inset-0">
+                <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+              </div>
+              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
+                <div className="w-10 h-10 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-black" />
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-bold text-xs sm:text-sm">Mis Tratamientos</p>
+                  {activePatient ? (
+                    <p className="text-[#C5A55A] text-[9px] sm:text-[10px] leading-tight mt-0.5 font-semibold">
+                      ✓ {activePatient.name.split(' ')[0]}
+                    </p>
+                  ) : (
+                    <p className="text-white/60 text-[9px] sm:text-[10px] leading-tight mt-0.5">
+                      Seguimiento y descuentos
+                    </p>
+                  )}
+                </div>
+              </div>
+            </button>
+
+            {/* Agendar Cita */}
+            <button
+              onClick={() => handleNavigate('/appointment-form')}
+              className="relative rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-200 group"
+              style={{ minHeight: "90px" }}
+            >
+              <div className="absolute inset-0">
+                <img
+                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-agendar-cita_49e2eca2.jpg"
+                  alt="Agendar Cita"
+                  className="w-full h-full object-cover opacity-45 group-hover:opacity-55 transition-opacity"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+              </div>
+              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
+                <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/80 flex items-center justify-center shadow-lg shadow-[#C5A55A]/30 flex-shrink-0">
+                  <CalendarCheck className="w-5 h-5 text-black" />
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-bold text-xs sm:text-sm">Agendar Cita</p>
+                  <p className="text-white/60 text-[9px] sm:text-[10px] leading-tight mt-0.5">
+                    Reserva tu servicio personalizado
+                  </p>
+                </div>
+              </div>
+            </button>
+
+          </div>
+
           {/* ── Barra de acciones rápidas ── */}
           <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4 md:mb-5">
             {/* Cuponera de Descuentos — siempre activo, navega directo */}
@@ -552,67 +597,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 </span>
               </button>
             )}
-          </div>
-
-          {/* ── Mis Tratamientos + Agendar Cita ── */}
-          <div className="grid grid-cols-2 gap-3 mb-4 md:mb-5">
-
-            {/* Mis Tratamientos */}
-            <button
-              onClick={() => handleNavigate('/mis-tratamientos')}
-              className="relative rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-200 group"
-              style={{ minHeight: "90px" }}
-            >
-              <div className="absolute inset-0">
-                <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
-              </div>
-              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
-                <div className="w-10 h-10 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-black" />
-                </div>
-                <div className="text-center">
-                  <p className="text-white font-bold text-xs sm:text-sm">Mis Tratamientos</p>
-                  {activePatient ? (
-                    <p className="text-[#C5A55A] text-[9px] sm:text-[10px] leading-tight mt-0.5 font-semibold">
-                      ✓ {activePatient.name.split(' ')[0]}
-                    </p>
-                  ) : (
-                    <p className="text-white/60 text-[9px] sm:text-[10px] leading-tight mt-0.5">
-                      Seguimiento y descuentos
-                    </p>
-                  )}
-                </div>
-              </div>
-            </button>
-
-            {/* Agendar Cita */}
-            <button
-              onClick={() => handleNavigate('/appointment-form')}
-              className="relative rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-200 group"
-              style={{ minHeight: "90px" }}
-            >
-              <div className="absolute inset-0">
-                <img
-                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-agendar-cita_49e2eca2.jpg"
-                  alt="Agendar Cita"
-                  className="w-full h-full object-cover opacity-45 group-hover:opacity-55 transition-opacity"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
-              </div>
-              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
-                <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/80 flex items-center justify-center shadow-lg shadow-[#C5A55A]/30 flex-shrink-0">
-                  <CalendarCheck className="w-5 h-5 text-black" />
-                </div>
-                <div className="text-center">
-                  <p className="text-white font-bold text-xs sm:text-sm">Agendar Cita</p>
-                  <p className="text-white/60 text-[9px] sm:text-[10px] leading-tight mt-0.5">
-                    Reserva tu servicio personalizado
-                  </p>
-                </div>
-              </div>
-            </button>
-
           </div>
 
           {/* ── Íconos sociales con etiquetas ── */}
@@ -677,8 +661,24 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           </div>
 
-          {/* ── Botón Administración ── */}
-          <div className="flex justify-center mb-5">
+          {/* ── Botones Compartir + Administración ── */}
+          <div className="flex justify-center gap-3 mb-5">
+            <button
+              onClick={() => {
+                const url = "https://nutriserpv.com";
+                if (navigator.share) {
+                  navigator.share({ title: "Nutriser Aesthetic & Nutrition", url });
+                } else {
+                  navigator.clipboard.writeText(url)
+                    .then(() => toast.success("¡Enlace copiado! Pégalo donde quieras compartirlo."))
+                    .catch(() => toast.error("No se pudo copiar el enlace."));
+                }
+              }}
+              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              Compartir
+            </button>
             <button
               onClick={() => { window.location.href = '/admin/login'; }}
               className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200"

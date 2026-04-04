@@ -677,6 +677,20 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           </div>
 
+          {/* ── Botón Administración ── */}
+          <div className="flex justify-center mb-5">
+            <button
+              onClick={() => { window.location.href = '/admin/login'; }}
+              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Administración
+            </button>
+          </div>
+
           {/* ── Footer ── */}
           <p className="text-white/20 text-[10px] text-center pb-4">
             © 2025 Nutriser Aesthetic &amp; Nutrition · Todos los derechos reservados · nutriserpv.com

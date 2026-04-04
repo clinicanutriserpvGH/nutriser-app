@@ -1001,3 +1001,6 @@
 
 ## Fix Dynamic Island / Safe Area
 - [x] Agregar safe-area-inset-top al logo del SplashSelector para que no quede tapado por el Dynamic Island
+
+## Botón Admin en Splash 1
+- [x] Agregar botón de acceso al panel de administración en el Splash 1 igual al del Splash 2

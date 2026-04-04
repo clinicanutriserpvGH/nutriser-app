@@ -1010,3 +1010,6 @@
 
 ## Reordenar Widgets Splash 1
 - [x] Poner Mis Tratamientos y Agendar Cita antes de Cuponera, Campana y Servicios
+
+## Quitar botón Regresar del AdminLogin
+- [x] Eliminar el botón Regresar de la página de login del panel de administración

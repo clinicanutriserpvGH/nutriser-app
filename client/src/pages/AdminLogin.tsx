@@ -59,15 +59,8 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAF7F2] to-white flex items-center justify-center py-12 px-4">
-      {/* Botones de navegación */}
-      <div className="fixed top-12 left-4 z-50 flex items-center gap-2">
-        <button
-          onClick={() => { window.location.href = '/nutriser-home'; }}
-          className="flex items-center gap-1.5 bg-[#C5A55A] hover:bg-[#B8963E] text-black text-sm font-semibold px-4 py-2 rounded-full shadow-md transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          ← Regresar
-        </button>
+      {/* Botón de navegación */}
+      <div className="fixed top-12 left-4 z-50">
         <button
           onClick={() => {
             sessionStorage.removeItem("nutriser_splash_seen");

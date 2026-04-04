@@ -208,7 +208,7 @@ export default function NutriserHomePage() {
           {/* ── Botón Administración ── */}
           <div className="flex justify-center mb-5">
             <button
-              onClick={() => { window.location.href = '/admin/login'; }}
+              onClick={() => { window.location.href = '/admin/login?from=splash2'; }}
               className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -1013,3 +1013,6 @@
 
 ## Quitar botón Regresar del AdminLogin
 - [x] Eliminar el botón Regresar de la página de login del panel de administración
+
+## Botón Regresar condicional en AdminLogin
+- [x] Mostrar Regresar en AdminLogin solo si el usuario viene del Splash 2 (/nutriser-home)

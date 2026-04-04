@@ -998,3 +998,6 @@
 - [x] Limitar ancho máximo del NutriserHomePage en desktop (max ~480px centrado)
 - [x] Contenido centrado con fondo oscuro a los lados en desktop/tablet
 - [x] Eliminar escalado excesivo en md/lg breakpoints
+
+## Fix Dynamic Island / Safe Area
+- [x] Agregar safe-area-inset-top al logo del SplashSelector para que no quede tapado por el Dynamic Island

@@ -1096,3 +1096,7 @@
 ## Corrección Paquete Nutrición
 
 - [x] Cambiar "10% de descuento en tratamientos faciales" por "10% de descuento en tratamientos corporales" en Paquete Nutrición
+
+## Corrección Paquete Reductor
+
+- [x] Quitar "10% de descuento en compra de eBook" del Paquete Reductor Nutriser

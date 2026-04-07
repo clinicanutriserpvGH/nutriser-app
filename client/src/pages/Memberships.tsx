@@ -87,7 +87,6 @@ const PROGRAMS = [
       "4 sesiones de Mesoterapia reductora",
       "10% de descuento en tratamientos faciales",
       "10% de descuento en compra de productos",
-      "10% de descuento en compra de eBook",
     ],
   },
 ];

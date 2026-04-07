@@ -28,7 +28,7 @@ interface SplashSelectorProps {
   isTransitioning?: boolean;
 }
 
-/* ─── Toggle palanca Modo Claro / Oscuro ─────────────────────────────────── */
+/* ─── Toggle palanca Modo Claro / Oscuro (discreto, pie de página) ──────────── */
 function ThemeToggle({
   isLight,
   isAuto,
@@ -41,53 +41,46 @@ function ThemeToggle({
   onResetAuto: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1">
-      {/* Palanca principal */}
+    <div className="flex flex-col items-end gap-0.5">
+      {/* Palanca mínima */}
       <button
         onClick={onToggle}
         aria-label={isLight ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
-        className={`
-          relative flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-semibold
-          transition-all duration-300 border
-          ${isLight
-            ? "bg-[#FAF7F2] border-[#C5A55A]/40 text-[#7a6030]"
-            : "bg-white/10 border-white/20 text-white/60"
-          }
-        `}
+        className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] transition-all duration-300 ${
+          isLight ? "text-[#9a8050]/50 hover:text-[#7a6030]" : "text-white/20 hover:text-white/50"
+        }`}
       >
         {isLight ? (
-          <Sun className="w-3.5 h-3.5 text-[#C5A55A]" />
+          <Sun className="w-3 h-3" />
         ) : (
-          <Moon className="w-3.5 h-3.5 text-white/60" />
+          <Moon className="w-3 h-3" />
         )}
-        <span>{isLight ? "Modo Claro" : "Modo Oscuro"}</span>
+        <span className="tracking-wide">{isLight ? "Claro" : "Oscuro"}</span>
         <span
-          className={`
-            relative inline-block w-8 h-4 rounded-full transition-colors duration-300 flex-shrink-0
-            ${isLight ? "bg-[#C5A55A]" : "bg-white/20"}
-          `}
+          className={`relative inline-block w-6 h-3 rounded-full transition-colors duration-300 flex-shrink-0 ${
+            isLight ? "bg-[#C5A55A]/50" : "bg-white/15"
+          }`}
         >
           <span
-            className={`
-              absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform duration-300
-              ${isLight ? "translate-x-4" : "translate-x-0.5"}
-            `}
+            className={`absolute top-0.5 w-2 h-2 rounded-full bg-white/70 shadow transition-transform duration-300 ${
+              isLight ? "translate-x-3" : "translate-x-0.5"
+            }`}
           />
         </span>
       </button>
-      {/* Indicador de modo automático / botón para volver a auto */}
+      {/* Sub-etiqueta auto / restablecer */}
       {isAuto ? (
-        <span className={`text-[9px] tracking-wide ${isLight ? "text-[#9a8050]/70" : "text-white/30"}`}>
-          ✦ automático por horario
+        <span className={`text-[8px] pr-1 ${isLight ? "text-[#9a8050]/30" : "text-white/15"}`}>
+          auto
         </span>
       ) : (
         <button
           onClick={onResetAuto}
-          className={`text-[9px] underline underline-offset-2 transition-colors ${
-            isLight ? "text-[#9a8050]/70 hover:text-[#7a6030]" : "text-white/30 hover:text-white/60"
+          className={`text-[8px] pr-1 underline underline-offset-1 transition-colors ${
+            isLight ? "text-[#9a8050]/40 hover:text-[#7a6030]" : "text-white/20 hover:text-white/50"
           }`}
         >
-          restablecer automático
+          auto
         </button>
       )}
     </div>
@@ -301,10 +294,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             <h1 className={`text-[#C5A55A] text-sm md:text-base font-semibold tracking-widest text-center uppercase`}>
               Soy Nutriser y Vivo Mejor
             </h1>
-            <div className="w-8 h-px bg-[#C5A55A]/60 mt-3 mb-4" />
-
-            {/* ── Toggle de tema ── */}
-            <ThemeToggle isLight={isLight} isAuto={isAuto} onToggle={toggleSplashTheme} onResetAuto={resetToAuto} />
+            <div className="w-8 h-px bg-[#C5A55A]/60 mt-3" />
           </div>
 
           {/* ── Grid de widgets ── */}
@@ -639,9 +629,13 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
 
           {/* ── Footer ── */}
-          <p className={`text-[10px] text-center pb-4 ${isLight ? "text-[#9a8050]/50" : "text-white/20"}`}>
-            © 2025 Nutriser Aesthetic &amp; Nutrition · Todos los derechos reservados · nutriserpv.com
-          </p>
+          <div className="flex items-center justify-between pb-4 pt-2">
+            <p className={`text-[10px] ${isLight ? "text-[#9a8050]/50" : "text-white/20"}`}>
+              © 2025 Nutriser Aesthetic &amp; Nutrition · nutriserpv.com
+            </p>
+            {/* Toggle discreto en esquina inferior derecha */}
+            <ThemeToggle isLight={isLight} isAuto={isAuto} onToggle={toggleSplashTheme} onResetAuto={resetToAuto} />
+          </div>
 
         </div>
       </div>

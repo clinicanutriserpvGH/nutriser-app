@@ -155,8 +155,8 @@ export default function NutriserHomePage() {
 
           {/* ── Header ── */}
           <div className="flex flex-col items-center mb-6">
-            {/* Fila: botón Inicio + toggle */}
-            <div className="w-full flex items-center justify-between mb-4" style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
+            {/* Fila: botón Inicio */}
+            <div className="w-full flex items-center mb-4" style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
               <button
                 onClick={goBack}
                 className={`flex items-center gap-1.5 transition-all text-sm font-medium px-3 py-1.5 rounded-full ${backBtn}`}
@@ -164,7 +164,6 @@ export default function NutriserHomePage() {
                 <ChevronLeft className="w-4 h-4" />
                 Inicio
               </button>
-              <ThemeToggle isLight={isLight} isAuto={isAuto} onToggle={toggleSplashTheme} onResetAuto={resetToAuto} />
             </div>
 
             <div className="relative mb-3">
@@ -270,9 +269,13 @@ export default function NutriserHomePage() {
           </div>
 
           {/* ── Footer ── */}
-          <p className={`text-[10px] text-center pb-4 ${isLight ? "text-[#9a8050]/50" : "text-white/20"}`}>
-            © 2025 Nutriser Aesthetic &amp; Nutrition · Todos los derechos reservados · nutriserpv.com
-          </p>
+          <div className="flex items-center justify-between pb-4 pt-2">
+            <p className={`text-[10px] ${isLight ? "text-[#9a8050]/50" : "text-white/20"}`}>
+              © 2025 Nutriser Aesthetic &amp; Nutrition · nutriserpv.com
+            </p>
+            {/* Toggle discreto en esquina inferior derecha */}
+            <ThemeToggle isLight={isLight} isAuto={isAuto} onToggle={toggleSplashTheme} onResetAuto={resetToAuto} />
+          </div>
 
         </div>
       </div>

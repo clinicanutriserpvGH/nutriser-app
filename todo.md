@@ -1058,3 +1058,7 @@
 - [x] Actualizar SplashThemeContext para detectar hora del dispositivo (6am-7pm = claro, 7pm-6am = oscuro)
 - [x] Permitir override manual con el toggle (guarda preferencia en localStorage)
 - [x] Actualizar toggle para mostrar si está en modo automático o manual
+
+## Toggle Discreto al Pie de Página
+
+- [x] Mover toggle de modo claro/oscuro del header al pie de página (esquina inferior discreta) en Splash 1 y Splash 2

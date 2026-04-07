@@ -1100,3 +1100,10 @@
 ## Corrección Paquete Reductor
 
 - [x] Quitar "10% de descuento en compra de eBook" del Paquete Reductor Nutriser
+
+## Foro Academia - Suscripción Obligatoria
+
+- [x] Hacer campo "Nombre" obligatorio en el formulario del foro
+- [x] Agregar campo "Correo electrónico" obligatorio en el formulario del foro
+- [x] Al enviar sugerencia, suscribir automáticamente el correo al canal de la comunidad
+- [x] Unificar lógica: suscribirse = poder comentar en el foro

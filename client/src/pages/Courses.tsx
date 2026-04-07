@@ -72,6 +72,7 @@ export default function Courses() {
   const [suggestionTitle, setSuggestionTitle] = useState("");
   const [suggestionDesc, setSuggestionDesc] = useState("");
   const [suggestionName, setSuggestionName] = useState("");
+  const [suggestionEmail, setSuggestionEmail] = useState("");
   const [suggestionSubmitted, setSuggestionSubmitted] = useState(false);
   const [submittedSuggestion, setSubmittedSuggestion] = useState<{title: string; description: string; authorName: string} | null>(null);
   const [showSuggestionForm, setShowSuggestionForm] = useState(false);
@@ -117,14 +118,15 @@ export default function Courses() {
 
   const createSuggestionMutation = trpc.suggestions.create.useMutation({
     onSuccess: () => {
-      setSubmittedSuggestion({ title: suggestionTitle.trim(), description: suggestionDesc.trim(), authorName: suggestionName.trim() || 'Anónimo' });
+      setSubmittedSuggestion({ title: suggestionTitle.trim(), description: suggestionDesc.trim(), authorName: suggestionName.trim() });
       setSuggestionSubmitted(true);
       setSuggestionTitle("");
       setSuggestionDesc("");
       setSuggestionName("");
+      setSuggestionEmail("");
       setShowSuggestionForm(false);
       refetchSuggestions();
-      toast.success("\u00a1Sugerencia enviada! Será revisada por nuestro equipo.");
+      toast.success("¡Sugerencia enviada y ya eres parte de la comunidad Nutriser!");
     },
     onError: () => {
       toast.error("No se pudo enviar la sugerencia.");
@@ -147,14 +149,29 @@ export default function Courses() {
   });
 
   const handleSubmitSuggestion = () => {
+    if (!suggestionName.trim()) {
+      toast.error("El nombre es obligatorio para participar en el foro.");
+      return;
+    }
+    if (!suggestionEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(suggestionEmail.trim())) {
+      toast.error("Ingresa un correo electrónico válido para unirte a la comunidad.");
+      return;
+    }
     if (!suggestionTitle.trim() || suggestionTitle.trim().length < 5) {
       toast.error("El título debe tener al menos 5 caracteres.");
       return;
     }
+    // Suscribir automáticamente al canal de la comunidad
+    subscribeMutation.mutate({
+      email: suggestionEmail.trim(),
+      name: suggestionName.trim(),
+      notifyByEmail: true,
+    });
     createSuggestionMutation.mutate({
       title: suggestionTitle.trim(),
       description: suggestionDesc.trim() || undefined,
-      authorName: suggestionName.trim() || 'Anónimo',
+      authorName: suggestionName.trim(),
+      authorEmail: suggestionEmail.trim(),
     });
   };
 
@@ -825,11 +842,21 @@ export default function Courses() {
               </h3>
               <div className="space-y-3">
                 <Input
-                  placeholder="Tu nombre (opcional)"
+                  placeholder="Tu nombre *"
                   value={suggestionName}
                   onChange={(e) => setSuggestionName(e.target.value)}
                   className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
                 />
+                <Input
+                  type="email"
+                  placeholder="Tu correo electrónico * (para unirte a la comunidad)"
+                  value={suggestionEmail}
+                  onChange={(e) => setSuggestionEmail(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
+                />
+                <p className="text-[11px] text-[#C5A55A]/70 -mt-1 px-1">
+                  ✓ Al enviar quedarás suscrito a la comunidad Nutriser Academy
+                </p>
                 <Input
                   placeholder="Título del tema * (mín. 5 caracteres)"
                   value={suggestionTitle}

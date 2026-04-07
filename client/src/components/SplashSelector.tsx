@@ -283,20 +283,24 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
         <div className="w-full max-w-[480px] sm:max-w-[580px] md:max-w-[700px] lg:max-w-[820px] xl:max-w-[900px]">
 
           {/* ── Header horizontal compacto ── */}
-          <div className="flex items-center gap-3 mb-4 md:mb-5">
+          <div className={`flex items-center gap-3 mb-4 md:mb-5 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
+            isLight
+              ? "bg-[#2a1f0a]/90 shadow-lg shadow-[#C5A55A]/10"
+              : "bg-transparent"
+          }`}>
             {/* Logo */}
             <div className="relative flex-shrink-0">
-              <div className="absolute inset-0 rounded-full bg-[#C5A55A]/20 blur-lg scale-150" />
+              <div className="absolute inset-0 rounded-full bg-[#C5A55A]/30 blur-lg scale-150" />
               <img src={LOGO_URL} alt="Nutriser" className="relative w-12 h-12 md:w-14 md:h-14 object-contain" />
             </div>
             {/* Separador vertical */}
-            <div className="w-px h-10 bg-[#C5A55A]/30 flex-shrink-0" />
+            <div className="w-px h-10 bg-[#C5A55A]/50 flex-shrink-0" />
             {/* Textos */}
             <div className="flex flex-col justify-center min-w-0 flex-1">
               <p className="text-[#C5A55A] text-[9px] md:text-[10px] tracking-[0.25em] uppercase font-light leading-tight">
                 Aesthetic &amp; Nutrition
               </p>
-              <h1 className="text-[#C5A55A] text-xs md:text-sm font-semibold tracking-wider uppercase leading-tight mt-0.5">
+              <h1 className="text-white text-xs md:text-sm font-semibold tracking-wider uppercase leading-tight mt-0.5">
                 Soy Nutriser y Vivo Mejor
               </h1>
             </div>
@@ -515,13 +519,17 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Cuponera de Descuentos */}
             <button
               onClick={() => handleNavigate('/coupons')}
-              className={`relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group overflow-hidden ${isLight ? "bg-[#EDE5D5]/60 border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-[#E8DEC8]/80" : "bg-white/5 border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10"}`}
+              className={`relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group overflow-hidden ${
+                isLight
+                  ? "bg-[#2a1f0a]/85 border-[#C5A55A]/60 hover:border-[#C5A55A] hover:bg-[#2a1f0a]"
+                  : "bg-white/5 border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10"
+              }`}
             >
               <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-pulse" style={{ animationDuration: "2s" }} />
               <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
                 <Tag className="w-5 h-5 text-black" />
               </div>
-              <span className={`relative text-[10px] sm:text-xs font-bold text-center leading-tight ${isLight ? "text-[#5a3a10]" : "text-white/80"}`}>
+              <span className="relative text-[10px] sm:text-xs font-bold text-center leading-tight text-white">
                 Cuponera de Descuentos
               </span>
             </button>
@@ -530,12 +538,16 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {!showEmailForm && (
               <button
                 onClick={() => handleNavigate('/services')}
-                className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group ${isLight ? "bg-[#EDE5D5]/40 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 hover:bg-[#E8DEC8]/60" : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10"}`}
+                className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group ${
+                  isLight
+                    ? "bg-[#2a1f0a]/75 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]/90"
+                    : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10"
+                }`}
               >
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isLight ? "bg-[#C5A55A]/20 group-hover:bg-[#C5A55A]/30" : "bg-[#C5A55A]/20 group-hover:bg-[#C5A55A]/30"}`}>
+                <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/30 group-hover:bg-[#C5A55A]/50 flex items-center justify-center transition-colors">
                   <ClipboardList className="w-5 h-5 text-[#C5A55A]" />
                 </div>
-                <span className={`text-[10px] sm:text-xs font-semibold text-center leading-tight ${isLight ? "text-[#5a3a10]" : "text-white/70"}`}>
+                <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
                   Servicios
                 </span>
               </button>

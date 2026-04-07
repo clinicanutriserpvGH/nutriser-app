@@ -3,7 +3,7 @@
  * Soporta modo claro (crema) y oscuro (negro) con toggle palanca persistente
  */
 import {
-  BookOpen, CalendarCheck, GraduationCap, ShoppingBag, ChevronLeft, Moon, Sun,
+  BookOpen, CalendarCheck, GraduationCap, ShoppingBag, ChevronLeft,
 } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
@@ -19,63 +19,7 @@ const IMG_EBOOK =
 const IMG_ACADEMY =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy_52156a0e.png";
 
-/*/* ─── Toggle palanca ──────────────────────────────────────────────────── */
-function ThemeToggle({
-  isLight, isAuto, onToggle, onResetAuto,
-}: {
-  isLight: boolean; isAuto: boolean; onToggle: () => void; onResetAuto: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <button
-        onClick={onToggle}
-        aria-label={isLight ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
-        className={`
-          relative flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-semibold
-          transition-all duration-300 border
-          ${isLight
-            ? "bg-[#FAF7F2] border-[#C5A55A]/40 text-[#7a6030]"
-            : "bg-white/10 border-white/20 text-white/60"
-          }
-        `}
-      >
-        {isLight ? (
-          <Sun className="w-3.5 h-3.5 text-[#C5A55A]" />
-        ) : (
-          <Moon className="w-3.5 h-3.5 text-white/60" />
-        )}
-        <span>{isLight ? "Modo Claro" : "Modo Oscuro"}</span>
-        <span
-          className={`
-            relative inline-block w-8 h-4 rounded-full transition-colors duration-300 flex-shrink-0
-            ${isLight ? "bg-[#C5A55A]" : "bg-white/20"}
-          `}
-        >
-          <span
-            className={`
-              absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform duration-300
-              ${isLight ? "translate-x-4" : "translate-x-0.5"}
-            `}
-          />
-        </span>
-      </button>
-      {isAuto ? (
-        <span className={`text-[9px] tracking-wide ${isLight ? "text-[#9a8050]/70" : "text-white/30"}`}>
-          ✦ automático por horario
-        </span>
-      ) : (
-        <button
-          onClick={onResetAuto}
-          className={`text-[9px] underline underline-offset-2 transition-colors ${
-            isLight ? "text-[#9a8050]/70 hover:text-[#7a6030]" : "text-white/30 hover:text-white/60"
-          }`}
-        >
-          restablecer automático
-        </button>
-      )}
-    </div>
-  );
-}
+
 
 /* ─── Tarjeta media (mitad de ancho) ────────────────────────────────────── */
 function CardHalf({
@@ -120,7 +64,7 @@ function CardHalf({
 
 /* ─── Componente principal ───────────────────────────────────────────────── */
 export default function NutriserHomePage() {
-  const { isLight, isAuto, toggleSplashTheme, resetToAuto } = useSplashTheme();
+  const { isLight } = useSplashTheme();
 
   const goTo = (path: string) => { window.location.href = path; };
   const goBack = () => {
@@ -273,13 +217,9 @@ export default function NutriserHomePage() {
           </div>
 
           {/* ── Footer ── */}
-          <div className="flex items-center justify-between pb-4 pt-2">
-            <p className={`text-[10px] ${isLight ? "text-[#9a8050]/50" : "text-white/20"}`}>
-              © 2025 Nutriser Aesthetic &amp; Nutrition · nutriserpv.com
-            </p>
-            {/* Toggle discreto en esquina inferior derecha */}
-            <ThemeToggle isLight={isLight} isAuto={isAuto} onToggle={toggleSplashTheme} onResetAuto={resetToAuto} />
-          </div>
+          <p className={`text-[10px] text-center pb-4 pt-2 ${isLight ? "text-[#9a8050]/40" : "text-white/20"}`}>
+            © 2025 Nutriser Aesthetic &amp; Nutrition · nutriserpv.com
+          </p>
 
         </div>
       </div>

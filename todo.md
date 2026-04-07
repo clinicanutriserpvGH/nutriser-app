@@ -1072,3 +1072,14 @@
 - [x] Mover botón campana al header (al lado del texto "Soy Nutriser y Vivo Mejor")
 - [x] Dejar barra de acciones rápidas solo con Cuponera y Servicios (quitar campana de ahí)
 - [x] Rediseñar header de Splash 2 (NutriserHomePage): logo al lado del texto en fila horizontal compacta
+
+## Toggle Solo en Splash 1
+
+- [ ] Quitar ThemeToggle del footer de Splash 2 (NutriserHomePage) — solo cambia automáticamente por horario
+
+## Mejoras Modo Claro Splash 1
+
+- [x] Quitar ThemeToggle del footer de Splash 2 (solo cambia por horario automático)
+- [x] Header Splash 1 modo claro: agregar fondo sutil detrás del logo+texto para que resalte sobre el crema
+- [x] Textos "Aesthetic & Nutrition" y "Soy Nutriser y Vivo Mejor" más oscuros/definidos en modo claro
+- [x] Botones Cuponera y Servicios más visibles y elegantes en modo claro

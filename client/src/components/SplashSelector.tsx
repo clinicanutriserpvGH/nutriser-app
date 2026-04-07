@@ -352,23 +352,23 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           {/* ── Grid de widgets ── */}
 
-          {/* Fila 1: Nutriser Home | Página Web (2 columnas iguales) */}
+          {/* Fila 1: Nutriser Home | Nutriser Mall (2 columnas iguales) */}
           <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
-            {/* Widget Nutriser Home */}
+            {/* Widget Nutriser Home (sitio web) — izquierda, prioridad */}
             <div className="col-span-1">
               <button
-                onClick={() => handleNavigate('/nutriser-home')}
+                onClick={() => handleEnterSite()}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
                 style={{ aspectRatio: "1 / 1" }}
               >
-                <img src={CLINIC_IMG} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
+                <img src={CLINIC_IMG2} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
                 <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/20" />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
-                      <ShoppingBag className="w-4 h-4 text-black" />
+                      <Globe className="w-4 h-4 text-black" />
                     </div>
-                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Shop</span>
+                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Sitio Web</span>
                   </div>
                   <div>
                     <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Nutriser Home</h2>
@@ -380,24 +380,24 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </button>
             </div>
 
-            {/* Widget Página Web */}
+            {/* Widget Nutriser Mall (tienda/shop) — derecha */}
             <div className="col-span-1">
               <button
-                onClick={() => handleEnterSite()}
+                onClick={() => handleNavigate('/nutriser-home')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
                 style={{ aspectRatio: "1 / 1" }}
               >
-                <img src={CLINIC_IMG2} alt="Página Web Nutriser" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
+                <img src={CLINIC_IMG} alt="Nutriser Mall" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
                 <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/20" />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
-                      <Globe className="w-4 h-4 text-white" />
+                      <ShoppingBag className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Sitio Web</span>
+                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Tienda</span>
                   </div>
                   <div>
-                    <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Nutriser Web</h2>
+                    <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Nutriser Mall</h2>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/30">
                       Visitar
                     </span>

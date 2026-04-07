@@ -1025,3 +1025,8 @@
 
 ## Reorganizar íconos Portal de Salud
 - [x] Cambiar íconos del widget Portal de Salud de fila horizontal a grid 4×2 alineado
+
+## Renombrar widgets Splash 1
+- [x] Cambiar "Nutriser Home" → "Nutriser Mall" (tienda/shop)
+- [x] Cambiar "Nutriser Web" → "Nutriser Home"
+- [x] Intercambiar posiciones: Nutriser Home a la izquierda, Nutriser Mall a la derecha

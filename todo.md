@@ -1107,3 +1107,14 @@
 - [x] Agregar campo "Correo electrónico" obligatorio en el formulario del foro
 - [x] Al enviar sugerencia, suscribir automáticamente el correo al canal de la comunidad
 - [x] Unificar lógica: suscribirse = poder comentar en el foro
+
+## Textos Suscripción Academia
+
+- [x] Actualizar textos de suscripción en Academia: agregar que suscribirse permite pertenecer a la comunidad y participar en el foro
+
+## Suscripción Academia - Mejoras
+
+- [x] Actualizar textos de suscripción para mencionar comunidad y foro
+- [x] Agregar campo nombre en el modal de suscripción
+- [x] Guardar nombre y email en localStorage al suscribirse para autocompletar el foro
+- [x] Si ya está suscrito, el foro no pide nombre ni correo (campos ocultos y prellenados)

@@ -68,11 +68,23 @@ export default function Courses() {
   const [commentSubmitted, setCommentSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState<"videos" | "comments" | "documents">("videos");
 
+  // Datos del suscriptor guardados en localStorage
+  const [savedSubscriber] = useState<{name: string; email: string} | null>(() => {
+    try {
+      const saved = localStorage.getItem('nutriser_academy_subscriber');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
+
   // Foro de sugerencias
   const [suggestionTitle, setSuggestionTitle] = useState("");
   const [suggestionDesc, setSuggestionDesc] = useState("");
-  const [suggestionName, setSuggestionName] = useState("");
-  const [suggestionEmail, setSuggestionEmail] = useState("");
+  const [suggestionName, setSuggestionName] = useState(() => {
+    try { const s = localStorage.getItem('nutriser_academy_subscriber'); return s ? JSON.parse(s).name || '' : ''; } catch { return ''; }
+  });
+  const [suggestionEmail, setSuggestionEmail] = useState(() => {
+    try { const s = localStorage.getItem('nutriser_academy_subscriber'); return s ? JSON.parse(s).email || '' : ''; } catch { return ''; }
+  });
   const [suggestionSubmitted, setSuggestionSubmitted] = useState(false);
   const [submittedSuggestion, setSubmittedSuggestion] = useState<{title: string; description: string; authorName: string} | null>(null);
   const [showSuggestionForm, setShowSuggestionForm] = useState(false);
@@ -161,6 +173,11 @@ export default function Courses() {
       toast.error("El título debe tener al menos 5 caracteres.");
       return;
     }
+    // Guardar datos en localStorage para futuras visitas
+    localStorage.setItem('nutriser_academy_subscriber', JSON.stringify({
+      name: suggestionName.trim(),
+      email: suggestionEmail.trim(),
+    }));
     // Suscribir automáticamente al canal de la comunidad
     subscribeMutation.mutate({
       email: suggestionEmail.trim(),
@@ -177,7 +194,12 @@ export default function Courses() {
 
   const subscribeMutation = trpc.courses.subscribe.useMutation({
     onSuccess: () => {
-      toast.success("¡Suscrito! Te notificaremos cuando nuestros expertos en salud publiquen nuevo contenido.");
+      // Guardar datos en localStorage para autocompletar el foro
+      localStorage.setItem('nutriser_academy_subscriber', JSON.stringify({
+        name: subscribeName.trim(),
+        email: subscribeEmail.trim(),
+      }));
+      toast.success("¡Bienvenido a la comunidad Nutriser Academy! Ya puedes participar en el foro.");
       setShowSubscribeModal(false);
       setSubscribeEmail("");
       setSubscribeName("");
@@ -209,6 +231,10 @@ export default function Courses() {
   };
 
   const handleSubscribe = async () => {
+    if (!subscribeName.trim()) {
+      toast.error("Por favor ingresa tu nombre.");
+      return;
+    }
     if (!subscribeEmail) {
       toast.error("Por favor ingresa tu correo electrónico.");
       return;
@@ -642,13 +668,13 @@ export default function Courses() {
                   </div>
                   <h3 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-3">Contenido en preparación</h3>
                   <p className="text-gray-500">Nuestros expertos en salud y estética están preparando contenido exclusivo para ti.</p>
-                  <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete y sé el primero en enterarte cuando publiquemos nuevos cursos, videos y material de apoyo de nuestros expertos.</p>
+                  <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete para recibir notificaciones de nuevo contenido, pertenecer a la comunidad Nutriser Academy y poder participar en el foro de sugerencias.</p>
                   <Button
                     onClick={() => setShowSubscribeModal(true)}
                     className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3.5 rounded-full font-semibold shadow-lg shadow-[#C5A55A]/20"
                   >
                     <Bell className="w-4 h-4 mr-2" />
-                    Suscríbeme para recibir contenido de expertos
+                    Suscríbeme y únete a la comunidad
                   </Button>
                   <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
                     <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
@@ -669,8 +695,8 @@ export default function Courses() {
                       <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">
                         <MessageSquare className="w-4 h-4 text-[#C5A55A]" />
                       </div>
-                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Foro de sugerencias</p>
-                      <p className="text-xs text-gray-400">Propón temas y vota por los que más te interesan para que nuestros expertos los aborden.</p>
+                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Foro de la comunidad</p>
+                      <p className="text-xs text-gray-400">Al suscribirte puedes proponer temas y votar en el foro. Solo miembros de la comunidad pueden participar.</p>
                     </div>
                   </div>
                 </div>
@@ -720,13 +746,13 @@ export default function Courses() {
           <DialogHeader>
             <DialogTitle className="font-serif text-xl flex items-center gap-2">
               <Bell className="w-5 h-5 text-[#C5A55A]" />
-              Recibir notificaciones
+              Únete a la comunidad Nutriser Academy
             </DialogTitle>
           </DialogHeader>
-          <p className="text-gray-500 text-sm">Te avisaremos cuando nuestros expertos en salud publiquen nuevos cursos, videos y material exclusivo.</p>
+          <p className="text-gray-500 text-sm">Suscríbete para recibir notificaciones de nuevo contenido y pertenecer a la comunidad. Solo los miembros pueden participar en el foro de sugerencias.</p>
           <div className="space-y-3 mt-2">
             <Input
-              placeholder="Tu nombre"
+              placeholder="Tu nombre *"
               value={subscribeName}
               onChange={(e) => setSubscribeName(e.target.value)}
             />
@@ -841,22 +867,31 @@ export default function Courses() {
                 Nueva sugerencia de tema
               </h3>
               <div className="space-y-3">
-                <Input
-                  placeholder="Tu nombre *"
-                  value={suggestionName}
-                  onChange={(e) => setSuggestionName(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
-                />
-                <Input
-                  type="email"
-                  placeholder="Tu correo electrónico * (para unirte a la comunidad)"
-                  value={suggestionEmail}
-                  onChange={(e) => setSuggestionEmail(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
-                />
-                <p className="text-[11px] text-[#C5A55A]/70 -mt-1 px-1">
-                  ✓ Al enviar quedarás suscrito a la comunidad Nutriser Academy
-                </p>
+                {savedSubscriber ? (
+                  <div className="flex items-center gap-2 bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-lg px-3 py-2">
+                    <span className="text-[#C5A55A] text-sm">✓</span>
+                    <span className="text-[#C5A55A] text-sm font-medium">Participando como <strong>{savedSubscriber.name || savedSubscriber.email}</strong></span>
+                  </div>
+                ) : (
+                  <>
+                    <Input
+                      placeholder="Tu nombre *"
+                      value={suggestionName}
+                      onChange={(e) => setSuggestionName(e.target.value)}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
+                    />
+                    <Input
+                      type="email"
+                      placeholder="Tu correo electrónico * (para unirte a la comunidad)"
+                      value={suggestionEmail}
+                      onChange={(e) => setSuggestionEmail(e.target.value)}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
+                    />
+                    <p className="text-[11px] text-[#C5A55A]/70 -mt-1 px-1">
+                      ✓ Al enviar quedarás suscrito a la comunidad Nutriser Academy
+                    </p>
+                  </>
+                )}
                 <Input
                   placeholder="Título del tema * (mín. 5 caracteres)"
                   value={suggestionTitle}

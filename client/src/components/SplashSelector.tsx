@@ -2,11 +2,12 @@ import { useState } from "react";
 import {
   Bell, BellRing, BookOpen, CalendarCheck, Camera, Check,
   ClipboardList, Flame, Globe, GraduationCap, HeartPulse, Loader2, Mail,
-  MapPin, PauseCircle, Pill, Repeat2, Ruler, Share2, ShoppingBag, ShoppingCart, Sparkles, Tag,
+  MapPin, Moon, PauseCircle, Pill, Repeat2, Ruler, Share2, ShoppingBag, ShoppingCart, Sparkles, Sun, Tag,
   TrendingUp, Utensils, X,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
 /* ─── Assets ────────────────────────────────────────────────────────────── */
 const LOGO_URL =
@@ -17,18 +18,6 @@ const CLINIC_IMG2 =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-imac-web-T2sERsyMxZB3iGgxpbi7eW.webp";
 const PORTAL_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-portal-salud-v2_e87113cf.png";
-const IMG_NUTRICION =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-kit-nutricional_9ec4a70f.png";
-const IMG_TIENDA =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-tienda-productos_71816223.png";
-const IMG_EBOOK =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-ebook-tablet_dccb4840.png";
-const IMG_ACADEMY =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy_52156a0e.png";
-const IMG_CUPONERA =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/cuponera-widget-Y2Vg4ATLkUTJV3qAkLn8zb.webp";
-const WHATSAPP_URL =
-  "https://wa.me/523221007799?text=Hola%2C%20me%20interesa%20agendar%20una%20valoraci%C3%B3n%20en%20Nutriser";
 const IMG_TREATMENTS =
   "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80";
 
@@ -39,126 +28,43 @@ interface SplashSelectorProps {
   isTransitioning?: boolean;
 }
 
-/* ─── Widget grande (ocupa 2 columnas) ──────────────────────────────────── */
-function WidgetLarge({
-  img, icon: Icon, label, title, cta, onClick, accent = false, imgPosition = "center",
-}: {
-  img: string;
-  icon: React.ElementType;
-  label: string;
-  title: string;
-  cta: string;
-  onClick: () => void;
-  accent?: boolean;
-  imgPosition?: string;
-}) {
+/* ─── Toggle palanca Modo Claro / Oscuro ─────────────────────────────────── */
+function ThemeToggle({ isLight, onToggle }: { isLight: boolean; onToggle: () => void }) {
   return (
     <button
-      onClick={onClick}
-      className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-      style={{ aspectRatio: "2 / 1" }}
+      onClick={onToggle}
+      aria-label={isLight ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
+      className={`
+        relative flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-semibold
+        transition-all duration-300 border
+        ${isLight
+          ? "bg-[#FAF7F2] border-[#C5A55A]/40 text-[#7a6030]"
+          : "bg-white/10 border-white/20 text-white/60"
+        }
+      `}
     >
-      {/* Background image */}
-      <img
-        src={img}
-        alt={title}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        style={{ objectPosition: imgPosition }}
-      />
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/20" />
-
-      {/* Content */}
-      <div className="relative h-full flex flex-col justify-between p-4 sm:p-5 text-left">
-        {/* Top: icon + label */}
-        <div className="flex items-center gap-2">
-          <div
-            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 ${
-              accent ? "bg-[#C5A55A]" : "bg-white/20 backdrop-blur-sm"
-            }`}
-          >
-            <Icon className={`w-5 h-5 ${accent ? "text-black" : "text-white"}`} />
-          </div>
-          <span className="text-white/80 text-[11px] sm:text-xs font-semibold tracking-wide uppercase drop-shadow">
-            {label}
-          </span>
-        </div>
-
-        {/* Bottom: title + CTA */}
-        <div>
-          <h2 className="text-white text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-3 drop-shadow-lg">
-            {title}
-          </h2>
-          <span
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 ${
-              accent
-                ? "bg-[#C5A55A] text-black"
-                : "bg-white/20 backdrop-blur-sm text-white border border-white/30"
-            }`}
-          >
-            {cta}
-          </span>
-        </div>
-      </div>
-    </button>
-  );
-}
-
-/* ─── Widget cuadrado (1 columna) ────────────────────────────────────────── */
-function WidgetSquare({
-  img, icon: Icon, title, cta, onClick, accent = false,
-}: {
-  img: string;
-  icon: React.ElementType;
-  title: string;
-  cta: string;
-  onClick: () => void;
-  accent?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="group relative w-full rounded-2xl overflow-hidden focus:outline-none"
-      style={{ aspectRatio: "1 / 1" }}
-    >
-      {/* Background image */}
-      <img
-        src={img}
-        alt={title}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-      />
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/80" />
-
-      {/* Content */}
-      <div className="relative h-full flex flex-col justify-between p-3 sm:p-4">
-        {/* Top: icon */}
-        <div className="flex justify-end">
-          <div
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shadow-md flex-shrink-0 ${
-              accent ? "bg-[#C5A55A]" : "bg-white/20 backdrop-blur-sm"
-            }`}
-          >
-            <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${accent ? "text-black" : "text-white"}`} />
-          </div>
-        </div>
-
-        {/* Bottom: title + CTA */}
-        <div>
-          <h3 className="text-white text-sm sm:text-base font-bold leading-tight mb-2 drop-shadow-lg">
-            {title}
-          </h3>
-          <span
-            className={`inline-flex items-center px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow transition-all duration-200 group-hover:scale-105 ${
-              accent
-                ? "bg-[#C5A55A] text-black"
-                : "bg-white/20 backdrop-blur-sm text-white border border-white/30"
-            }`}
-          >
-            {cta}
-          </span>
-        </div>
-      </div>
+      {/* Icono */}
+      {isLight ? (
+        <Sun className="w-3.5 h-3.5 text-[#C5A55A]" />
+      ) : (
+        <Moon className="w-3.5 h-3.5 text-white/60" />
+      )}
+      {/* Texto */}
+      <span>{isLight ? "Modo Claro" : "Modo Oscuro"}</span>
+      {/* Palanca visual */}
+      <span
+        className={`
+          relative inline-block w-8 h-4 rounded-full transition-colors duration-300 flex-shrink-0
+          ${isLight ? "bg-[#C5A55A]" : "bg-white/20"}
+        `}
+      >
+        <span
+          className={`
+            absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform duration-300
+            ${isLight ? "translate-x-4" : "translate-x-0.5"}
+          `}
+        />
+      </span>
     </button>
   );
 }
@@ -166,6 +72,7 @@ function WidgetSquare({
 /* ─── Componente principal ───────────────────────────────────────────────── */
 export default function SplashSelector({ onEnterSite, onNavigate, isTransitioning }: SplashSelectorProps) {
   const [leaving, setLeaving] = useState(false);
+  const { isLight, toggleSplashTheme } = useSplashTheme();
 
   // Notificaciones push
   const [pushLoading, setPushLoading] = useState(false);
@@ -194,7 +101,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const isIOSSafari = isIOS && isSafari;
   const isPWA = window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
-  // WKWebView no tiene serviceWorker — es la app nativa de Xcode
   const isWKWebView = isIOS && !("serviceWorker" in navigator);
 
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
@@ -238,7 +144,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   };
 
   const handleEnablePush = async () => {
-    // iOS Safari solo soporta push si la app está instalada en pantalla de inicio (PWA)
     if (isIOS && !isPWA && !isWKWebView) {
       toast(
         <div className="text-sm">
@@ -267,36 +172,62 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
         return;
       }
       const reg = await navigator.serviceWorker.ready;
-      const publicKey = vapidData?.publicKey || import.meta.env.VITE_VAPID_PUBLIC_KEY;
-      if (!publicKey) { toast.error("Error de configuración."); setPushLoading(false); return; }
-      const padding = "=".repeat((4 - publicKey.length % 4) % 4);
-      const base64 = (publicKey + padding).replace(/-/g, "+").replace(/_/g, "/");
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-      for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
-      let subscription = await reg.pushManager.getSubscription();
-      if (!subscription) {
-        subscription = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: outputArray });
-      }
-      const p256dhArr = new Uint8Array(subscription.getKey("p256dh")!);
-      const authArr = new Uint8Array(subscription.getKey("auth")!);
-      const p256dh = btoa(Array.from(p256dhArr).map(b => String.fromCharCode(b)).join(""));
-      const auth = btoa(Array.from(authArr).map(b => String.fromCharCode(b)).join(""));
-      const savedEmail = emailInput || localStorage.getItem("nutriser_subscriber_email") || undefined;
-      await pushSubscribeMutation.mutateAsync({ endpoint: subscription.endpoint, p256dh, auth, email: savedEmail });
-    } catch (e: any) {
-      toast.error("Error al activar notificaciones: " + e.message);
+      const publicKey = vapidData?.publicKey;
+      if (!publicKey) throw new Error("No VAPID key");
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: publicKey,
+      });
+      const subJson = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
+      await pushSubscribeMutation.mutateAsync({
+        endpoint: subJson.endpoint,
+        p256dh: subJson.keys.p256dh,
+        auth: subJson.keys.auth,
+      });
+    } catch (err) {
+      toast.error("No se pudieron activar las notificaciones.");
+    } finally {
+      setPushLoading(false);
     }
-    setPushLoading(false);
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailInput.trim() || !emailInput.includes("@")) { toast.error("Ingresa un correo válido."); return; }
+    if (!emailInput.trim()) return;
     setEmailSubmitting(true);
-    localStorage.setItem("nutriser_subscriber_email", emailInput.trim());
     await emailSubscribeMutation.mutateAsync({ email: emailInput.trim() });
   };
+
+  // ── Colores según tema ──────────────────────────────────────────────────
+  // Fondo principal
+  const bg = isLight
+    ? "linear-gradient(160deg, #FAF7F2 0%, #F5EFE4 50%, #FAF7F2 100%)"
+    : "linear-gradient(160deg, #0f0f0f 0%, #1a1208 50%, #0f0f0f 100%)";
+
+  // Texto principal
+  const textPrimary = isLight ? "text-[#2a1f0a]" : "text-white";
+  const textSecondary = isLight ? "text-[#7a6030]" : "text-white/60";
+  const textMuted = isLight ? "text-[#9a8050]/60" : "text-white/20";
+
+  // Bordes y fondos de tarjetas pequeñas
+  const cardBg = isLight ? "bg-[#EDE5D5]/60 border-[#C5A55A]/30 hover:border-[#C5A55A] hover:bg-[#E8DEC8]/80" : "bg-white/5 border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10";
+  const cardBgSubtle = isLight ? "bg-[#EDE5D5]/40 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 hover:bg-[#E8DEC8]/60" : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10";
+  const iconBgSubtle = isLight ? "bg-[#C5A55A]/20 group-hover:bg-[#C5A55A]/30" : "bg-[#C5A55A]/20 group-hover:bg-[#C5A55A]/30";
+  const iconTextSubtle = "text-[#C5A55A]";
+
+  // Botones de footer
+  const footerBtn = isLight
+    ? "bg-[#EDE5D5]/60 hover:bg-[#E0D5C0]/80 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 text-[#9a8050] hover:text-[#7a6030]"
+    : "bg-white/5 hover:bg-white/10 border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70";
+
+  // Íconos sociales
+  const socialBg = isLight
+    ? "background: 'linear-gradient(145deg, #EDE5D5 0%, #E0D5C0 50%, #F5EFE4 100%)', border: '1px solid rgba(197,165,90,0.4)'"
+    : "background: 'linear-gradient(145deg, #2a1f0a 0%, #3d2e10 50%, #1a1208 100%)', border: '1px solid rgba(197,165,90,0.4)'";
+  const socialIconStyle = isLight
+    ? { background: 'linear-gradient(145deg, #EDE5D5 0%, #E0D5C0 50%, #F5EFE4 100%)', border: '1px solid rgba(197,165,90,0.4)' }
+    : { background: 'linear-gradient(145deg, #2a1f0a 0%, #3d2e10 50%, #1a1208 100%)', border: '1px solid rgba(197,165,90,0.4)' };
+  const socialIconFill = isLight ? "#7a6030" : "white";
 
   /* ── Pantalla de transición ── */
   if (isTransitioning) {
@@ -320,11 +251,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   /* ── Hub principal ── */
   return (
     <div
-      className="fixed inset-0 z-[99999] overflow-x-hidden overflow-y-auto"
+      className="fixed inset-0 z-[99999] overflow-x-hidden overflow-y-auto transition-all duration-500"
       style={{
-        background: "linear-gradient(160deg, #0f0f0f 0%, #1a1208 50%, #0f0f0f 100%)",
+        background: bg,
         opacity: leaving ? 0 : 1,
-        transition: leaving ? "opacity 0.4s ease" : "none",
+        transition: leaving ? "opacity 0.4s ease" : "background 0.5s ease",
       }}
     >
       <div
@@ -342,12 +273,13 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             <p className="text-[#C5A55A] text-[10px] md:text-xs tracking-[0.3em] uppercase font-light mb-1">
               Aesthetic &amp; Nutrition
             </p>
-            <h1 className="text-[#C5A55A] text-sm md:text-base font-semibold tracking-widest text-center uppercase">
+            <h1 className={`text-[#C5A55A] text-sm md:text-base font-semibold tracking-widest text-center uppercase`}>
               Soy Nutriser y Vivo Mejor
             </h1>
             <div className="w-8 h-px bg-[#C5A55A]/60 mt-3 mb-4" />
 
-
+            {/* ── Toggle de tema ── */}
+            <ThemeToggle isLight={isLight} onToggle={toggleSplashTheme} />
           </div>
 
           {/* ── Grid de widgets ── */}
@@ -362,16 +294,16 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 style={{ aspectRatio: "1 / 1" }}
               >
                 <img src={CLINIC_IMG2} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
-                <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/20" />
+                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-br from-[#FAF7F2]/60 via-[#F5EFE4]/40 to-[#FAF7F2]/10" : "bg-gradient-to-br from-black/70 via-black/50 to-black/20"}`} />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
                       <Globe className="w-4 h-4 text-black" />
                     </div>
-                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Sitio Web</span>
+                    <span className={`text-[10px] font-semibold tracking-wide uppercase drop-shadow ${isLight ? "text-[#2a1f0a]/80" : "text-white/80"}`}>Sitio Web</span>
                   </div>
                   <div>
-                    <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Nutriser Home</h2>
+                    <h2 className={`text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>Nutriser Home</h2>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
                       Entrar
                     </span>
@@ -388,17 +320,17 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 style={{ aspectRatio: "1 / 1" }}
               >
                 <img src={CLINIC_IMG} alt="Nutriser Mall" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
-                <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/20" />
+                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-br from-[#FAF7F2]/60 via-[#F5EFE4]/40 to-[#FAF7F2]/10" : "bg-gradient-to-br from-black/70 via-black/50 to-black/20"}`} />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
-                      <ShoppingBag className="w-4 h-4 text-white" />
+                    <div className={`w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 ${isLight ? "bg-[#C5A55A]/30" : "bg-white/20 backdrop-blur-sm"}`}>
+                      <ShoppingBag className={`w-4 h-4 ${isLight ? "text-[#7a6030]" : "text-white"}`} />
                     </div>
-                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">Tienda</span>
+                    <span className={`text-[10px] font-semibold tracking-wide uppercase drop-shadow ${isLight ? "text-[#2a1f0a]/80" : "text-white/80"}`}>Tienda</span>
                   </div>
                   <div>
-                    <h2 className="text-white text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg">Nutriser Mall</h2>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/30">
+                    <h2 className={`text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>Nutriser Mall</h2>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 ${isLight ? "bg-[#C5A55A]/20 text-[#7a6030] border border-[#C5A55A]/40" : "bg-white/20 backdrop-blur-sm text-white border border-white/30"}`}>
                       Visitar
                     </span>
                   </div>
@@ -409,44 +341,35 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           {/* Fila 2: Portal de Salud (ancho completo) */}
           <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
-            {/* Widget Portal de Salud */}
             <div className="col-span-2">
               <button
                 onClick={() => { window.location.href = "https://portaldesaludnutriser.club"; }}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
                 style={{ minHeight: "180px" }}
               >
-                {/* Background image */}
                 <img
                   src={PORTAL_IMG}
                   alt="Portal de Salud Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-black/55 to-black/25" />
-
-                {/* Content */}
+                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-br from-[#FAF7F2]/65 via-[#F5EFE4]/45 to-[#FAF7F2]/15" : "bg-gradient-to-br from-black/75 via-black/55 to-black/25"}`} />
                 <div className="relative flex flex-col justify-between p-3 sm:p-4 text-left" style={{ minHeight: "180px" }}>
-                  {/* Top: icon + label */}
                   <div className="flex items-center gap-1.5">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 bg-black/30 backdrop-blur-sm overflow-hidden">
+                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden ${isLight ? "bg-[#C5A55A]/20" : "bg-black/30 backdrop-blur-sm"}`}>
                       <img
                         src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-silhouette-icon_f9345ac8.png"
                         alt="Nutriser"
                         className="w-full h-full object-contain p-0.5"
                       />
                     </div>
-                    <span className="text-white/80 text-[10px] font-semibold tracking-wide uppercase drop-shadow">
+                    <span className={`text-[10px] font-semibold tracking-wide uppercase drop-shadow ${isLight ? "text-[#2a1f0a]/80" : "text-white/80"}`}>
                       App Pacientes
                     </span>
                   </div>
-
-                  {/* Bottom: title + mini-iconitos + CTA */}
                   <div>
-                    <h2 className="text-white text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-1.5 drop-shadow-lg">
+                    <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-1.5 drop-shadow-lg ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>
                       Portal de Salud Nutriser
                     </h2>
-                    {/* Mini-iconitos de funciones — grid 4×2 alineado */}
                     <div className="grid grid-cols-4 gap-x-2 gap-y-3 mb-3 w-full">
                       {[
                         { icon: Utensils, label: "Mi Dieta" },
@@ -459,14 +382,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                         { icon: Repeat2, label: "Hábitos" },
                       ].map(({ icon: Ic, label }) => (
                         <div key={label} className="flex flex-col items-center gap-1">
-                          <div className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                          <div className={`w-9 h-9 rounded-full border flex items-center justify-center ${isLight ? "bg-[#FAF7F2]/70 border-[#C5A55A]/30" : "bg-black/50 backdrop-blur-sm border-white/20"}`}>
                             <Ic className="w-4 h-4 text-[#C5A55A]" />
                           </div>
-                          <span className="text-white/70 text-[8px] font-medium leading-tight text-center w-full">{label}</span>
+                          <span className={`text-[8px] font-medium leading-tight text-center w-full ${isLight ? "text-[#7a6030]/80" : "text-white/70"}`}>{label}</span>
                         </div>
                       ))}
                     </div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/30 mt-1">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 mt-1 ${isLight ? "bg-[#C5A55A]/20 text-[#7a6030] border border-[#C5A55A]/40" : "bg-white/20 backdrop-blur-sm text-white border border-white/30"}`}>
                       Acceder / Crear Cuenta
                     </span>
                   </div>
@@ -481,25 +404,25 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Mis Tratamientos */}
             <button
               onClick={() => handleNavigate('/mis-tratamientos')}
-              className="relative rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-200 group"
+              className={`relative rounded-2xl overflow-hidden border transition-all duration-200 group ${isLight ? "border-[#C5A55A]/30 hover:border-[#C5A55A]" : "border-[#C5A55A]/30 hover:border-[#C5A55A]"}`}
               style={{ minHeight: "90px" }}
             >
               <div className="absolute inset-0">
-                <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+                <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className={`w-full h-full object-cover transition-opacity ${isLight ? "opacity-25 group-hover:opacity-35" : "opacity-40 group-hover:opacity-50"}`} />
+                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-t from-[#FAF7F2]/90 via-[#FAF7F2]/60 to-transparent" : "bg-gradient-to-t from-black/80 via-black/50 to-transparent"}`} />
               </div>
               <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
                 <div className="w-10 h-10 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
                   <Sparkles className="w-5 h-5 text-black" />
                 </div>
                 <div className="text-center">
-                  <p className="text-white font-bold text-xs sm:text-sm">Mis Tratamientos</p>
+                  <p className={`font-bold text-xs sm:text-sm ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>Mis Tratamientos</p>
                   {activePatient ? (
                     <p className="text-[#C5A55A] text-[9px] sm:text-[10px] leading-tight mt-0.5 font-semibold">
                       ✓ {activePatient.name.split(' ')[0]}
                     </p>
                   ) : (
-                    <p className="text-white/60 text-[9px] sm:text-[10px] leading-tight mt-0.5">
+                    <p className={`text-[9px] sm:text-[10px] leading-tight mt-0.5 ${isLight ? "text-[#9a8050]" : "text-white/60"}`}>
                       Seguimiento y descuentos
                     </p>
                   )}
@@ -510,24 +433,24 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Agendar Cita */}
             <button
               onClick={() => handleNavigate('/appointment-form')}
-              className="relative rounded-2xl overflow-hidden border border-[#C5A55A]/30 hover:border-[#C5A55A] transition-all duration-200 group"
+              className={`relative rounded-2xl overflow-hidden border transition-all duration-200 group ${isLight ? "border-[#C5A55A]/30 hover:border-[#C5A55A]" : "border-[#C5A55A]/30 hover:border-[#C5A55A]"}`}
               style={{ minHeight: "90px" }}
             >
               <div className="absolute inset-0">
                 <img
                   src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-agendar-cita_49e2eca2.jpg"
                   alt="Agendar Cita"
-                  className="w-full h-full object-cover opacity-45 group-hover:opacity-55 transition-opacity"
+                  className={`w-full h-full object-cover transition-opacity ${isLight ? "opacity-25 group-hover:opacity-35" : "opacity-45 group-hover:opacity-55"}`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-t from-[#FAF7F2]/90 via-[#FAF7F2]/60 to-transparent" : "bg-gradient-to-t from-black/80 via-black/50 to-transparent"}`} />
               </div>
               <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
                 <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/80 flex items-center justify-center shadow-lg shadow-[#C5A55A]/30 flex-shrink-0">
                   <CalendarCheck className="w-5 h-5 text-black" />
                 </div>
                 <div className="text-center">
-                  <p className="text-white font-bold text-xs sm:text-sm">Agendar Cita</p>
-                  <p className="text-white/60 text-[9px] sm:text-[10px] leading-tight mt-0.5">
+                  <p className={`font-bold text-xs sm:text-sm ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>Agendar Cita</p>
+                  <p className={`text-[9px] sm:text-[10px] leading-tight mt-0.5 ${isLight ? "text-[#9a8050]" : "text-white/60"}`}>
                     Reserva tu servicio personalizado
                   </p>
                 </div>
@@ -538,16 +461,16 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           {/* ── Barra de acciones rápidas ── */}
           <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4 md:mb-5">
-            {/* Cuponera de Descuentos — siempre activo, navega directo */}
+            {/* Cuponera de Descuentos */}
             <button
               onClick={() => handleNavigate('/coupons')}
-              className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10 transition-all duration-200 group overflow-hidden"
+              className={`relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group overflow-hidden ${isLight ? "bg-[#EDE5D5]/60 border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-[#E8DEC8]/80" : "bg-white/5 border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10"}`}
             >
               <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-pulse" style={{ animationDuration: "2s" }} />
               <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
                 <Tag className="w-5 h-5 text-black" />
               </div>
-              <span className="relative text-white/80 text-[10px] sm:text-xs font-bold text-center leading-tight">
+              <span className={`relative text-[10px] sm:text-xs font-bold text-center leading-tight ${isLight ? "text-[#7a6030]" : "text-white/80"}`}>
                 Cuponera de Descuentos
               </span>
             </button>
@@ -555,7 +478,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Campana push */}
             {!showEmailForm && (
               pushEnabled ? (
-                <div className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-[#C5A55A]/10 border border-[#C5A55A]/30">
+                <div className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border ${isLight ? "bg-[#EDE5D5]/40 border-[#C5A55A]/30" : "bg-[#C5A55A]/10 border-[#C5A55A]/30"}`}>
                   <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center">
                     <Bell className="w-5 h-5 text-[#C5A55A]" />
                     <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-green-500 border border-black flex items-center justify-center">
@@ -569,14 +492,13 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               ) : (
                 <button
                   onClick={() => setShowNotifModal(true)}
-                  className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10 transition-all duration-200 group overflow-hidden"
+                  className={`relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group overflow-hidden ${isLight ? "bg-[#EDE5D5]/40 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 hover:bg-[#E8DEC8]/60" : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10"}`}
                 >
-                  {/* Pulso de fondo */}
                   <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-ping opacity-60" style={{ animationDuration: "2.5s" }} />
                   <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/40 group-hover:bg-[#d4b46a] transition-colors">
                     <BellRing className="w-5 h-5 text-black" />
                   </div>
-                  <span className="relative text-white/70 text-[10px] sm:text-xs font-semibold text-center leading-tight">
+                  <span className={`relative text-[10px] sm:text-xs font-semibold text-center leading-tight ${isLight ? "text-[#7a6030]" : "text-white/70"}`}>
                     Campana
                   </span>
                 </button>
@@ -587,12 +509,12 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {!showEmailForm && (
               <button
                 onClick={() => handleNavigate('/services')}
-                className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10 transition-all duration-200 group"
+                className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group ${isLight ? "bg-[#EDE5D5]/40 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 hover:bg-[#E8DEC8]/60" : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10"}`}
               >
-                <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center group-hover:bg-[#C5A55A]/30 transition-colors">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isLight ? "bg-[#C5A55A]/20 group-hover:bg-[#C5A55A]/30" : "bg-[#C5A55A]/20 group-hover:bg-[#C5A55A]/30"}`}>
                   <ClipboardList className="w-5 h-5 text-[#C5A55A]" />
                 </div>
-                <span className="text-white/70 text-[10px] sm:text-xs font-semibold text-center leading-tight">
+                <span className={`text-[10px] sm:text-xs font-semibold text-center leading-tight ${isLight ? "text-[#7a6030]" : "text-white/70"}`}>
                   Servicios
                 </span>
               </button>
@@ -603,60 +525,60 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           <div className="flex items-center justify-center gap-4 mb-5">
 
             {/* WhatsApp */}
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+            <a href="https://wa.me/523221007799?text=Hola%2C%20me%20interesa%20agendar%20una%20valoraci%C3%B3n%20en%20Nutriser" target="_blank" rel="noopener noreferrer"
               className="flex flex-col items-center gap-1 group" aria-label="WhatsApp Nutriser">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={{ background: 'linear-gradient(145deg, #2a1f0a 0%, #3d2e10 50%, #1a1208 100%)', border: '1px solid rgba(197,165,90,0.4)' }}>
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={socialIconStyle}>
+                <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: socialIconFill }} xmlns="http://www.w3.org/2000/svg">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
               </div>
-              <span className="text-[#C5A55A]/80 text-[9px] font-medium">WhatsApp</span>
+              <span className={`text-[9px] font-medium ${isLight ? "text-[#9a8050]" : "text-[#C5A55A]/80"}`}>WhatsApp</span>
             </a>
 
             {/* Instagram */}
             <a href="https://instagram.com/nutriserpv" target="_blank" rel="noopener noreferrer"
               className="flex flex-col items-center gap-1 group" aria-label="Instagram @nutriserpv">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={{ background: 'linear-gradient(145deg, #2a1f0a 0%, #3d2e10 50%, #1a1208 100%)', border: '1px solid rgba(197,165,90,0.4)' }}>
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={socialIconStyle}>
+                <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: socialIconFill }} xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                 </svg>
               </div>
-              <span className="text-[#C5A55A]/80 text-[9px] font-medium">Instagram</span>
+              <span className={`text-[9px] font-medium ${isLight ? "text-[#9a8050]" : "text-[#C5A55A]/80"}`}>Instagram</span>
             </a>
 
             {/* Facebook */}
             <a href="https://facebook.com/nutriserpv" target="_blank" rel="noopener noreferrer"
               className="flex flex-col items-center gap-1 group" aria-label="Facebook @nutriserpv">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={{ background: 'linear-gradient(145deg, #2a1f0a 0%, #3d2e10 50%, #1a1208 100%)', border: '1px solid rgba(197,165,90,0.4)' }}>
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={socialIconStyle}>
+                <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: socialIconFill }} xmlns="http://www.w3.org/2000/svg">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </div>
-              <span className="text-[#C5A55A]/80 text-[9px] font-medium">Facebook</span>
+              <span className={`text-[9px] font-medium ${isLight ? "text-[#9a8050]" : "text-[#C5A55A]/80"}`}>Facebook</span>
             </a>
 
-            {/* Correo → Gmail web */}
+            {/* Correo */}
             <a href="https://mail.google.com/mail/?view=cm&fs=1&to=clinicanutriserpv@gmail.com&su=Consulta%20Nutriser"
               target="_blank" rel="noopener noreferrer"
               className="flex flex-col items-center gap-1 group" aria-label="Enviar correo a Nutriser">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={{ background: 'linear-gradient(145deg, #2a1f0a 0%, #3d2e10 50%, #1a1208 100%)', border: '1px solid rgba(197,165,90,0.4)' }}>
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={socialIconStyle}>
+                <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: socialIconFill }} xmlns="http://www.w3.org/2000/svg">
                   <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
               </div>
-              <span className="text-[#C5A55A]/80 text-[9px] font-medium">Correo</span>
+              <span className={`text-[9px] font-medium ${isLight ? "text-[#9a8050]" : "text-[#C5A55A]/80"}`}>Correo</span>
             </a>
 
-            {/* Ubicación → Google Maps */}
+            {/* Ubicación */}
             <a href="https://maps.google.com/?q=Nutriser+Aesthetic+%26+Nutrition+Puerto+Vallarta"
               target="_blank" rel="noopener noreferrer"
               className="flex flex-col items-center gap-1 group" aria-label="Cómo llegar a Nutriser">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={{ background: 'linear-gradient(145deg, #2a1f0a 0%, #3d2e10 50%, #1a1208 100%)', border: '1px solid rgba(197,165,90,0.4)' }}>
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200" style={socialIconStyle}>
+                <svg viewBox="0 0 24 24" className="w-5 h-5" style={{ fill: socialIconFill }} xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
               </div>
-              <span className="text-[#C5A55A]/80 text-[9px] font-medium">Ubicación</span>
+              <span className={`text-[9px] font-medium ${isLight ? "text-[#9a8050]" : "text-[#C5A55A]/80"}`}>Ubicación</span>
             </a>
 
           </div>
@@ -674,14 +596,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     .catch(() => toast.error("No se pudo copiar el enlace."));
                 }
               }}
-              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200"
+              className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${footerBtn}`}
             >
               <Share2 className="w-3.5 h-3.5" />
               Compartir
             </button>
             <button
               onClick={() => { window.location.href = '/admin/login'; }}
-              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200"
+              className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${footerBtn}`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
@@ -692,7 +614,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
 
           {/* ── Footer ── */}
-          <p className="text-white/20 text-[10px] text-center pb-4">
+          <p className={`text-[10px] text-center pb-4 ${isLight ? "text-[#9a8050]/50" : "text-white/20"}`}>
             © 2025 Nutriser Aesthetic &amp; Nutrition · Todos los derechos reservados · nutriserpv.com
           </p>
 
@@ -703,7 +625,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
       {showNotifModal && (
         <div className="fixed inset-0 z-[100000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#1a1a1a] border border-white/10 rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            {/* Header */}
             <div className="bg-gradient-to-r from-[#C5A55A]/20 to-[#C5A55A]/5 rounded-t-3xl p-5 flex items-start justify-between border-b border-white/10">
               <div>
                 <h2 className="text-white font-bold text-lg flex items-center gap-2">
@@ -720,7 +641,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
 
             <div className="p-5 space-y-4">
-              {/* Opción 1: Correo */}
               <div className="border border-[#C5A55A]/30 rounded-2xl p-4 space-y-3 bg-white/5">
                 <div className="flex items-center gap-3">
                   <div className="text-2xl">✉️</div>
@@ -754,7 +674,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 )}
               </div>
 
-              {/* Separador y opción push: solo visible fuera de la app nativa de iOS (WKWebView) */}
               {!isWKWebView && (<>
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-white/10" />
@@ -762,7 +681,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="flex-1 h-px bg-white/10" />
               </div>
 
-              {/* Opción 2: Push */}
               <div className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent rounded-2xl p-4 border border-[#C5A55A]/20">
                 <div className="flex items-start gap-3">
                   <div className="text-2xl mt-0.5">🔔</div>
@@ -770,7 +688,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <p className="text-white font-semibold text-sm">Activa las notificaciones y no te pierdas nada</p>
                     <p className="text-white/50 text-xs mt-0.5">Recibe promociones y cupones exclusivos al instante</p>
 
-                    {/* Instrucciones especiales para iOS Safari (no PWA, no app nativa) */}
                     {isIOS && !isPWA && !isWKWebView && (
                       <div className="mt-2 bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl p-3">
                         <p className="text-[#C5A55A] text-xs font-bold mb-1">📱 Para activar en iPhone:</p>

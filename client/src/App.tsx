@@ -25,6 +25,7 @@ import NutriserHomePage from "./pages/NutriserHomePage";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
 import { SplashContext } from "@/contexts/SplashContext";
+import { SplashThemeProvider } from "@/contexts/SplashThemeContext";
 import { useState } from "react";
 import { useLocation } from "wouter";
 
@@ -104,6 +105,7 @@ function AppContent() {
   };
 
   return (
+    <SplashThemeProvider>
     <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
       <BackgroundMusic />
       {/* El splash se superpone como overlay fixed cuando está activo */}
@@ -116,6 +118,7 @@ function AppContent() {
       {/* El Router solo renderiza cuando el splash NO está activo */}
       {!showSplash && <Router />}
     </SplashContext.Provider>
+    </SplashThemeProvider>
   );
 }
 

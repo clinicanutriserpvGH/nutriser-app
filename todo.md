@@ -1038,3 +1038,11 @@
 
 - [x] Cambiar título del Splash 2 de "Nutriser Home" a "Nutriser Mall"
 - [x] Cambiar etiqueta "NUTRICIÓN" del widget de paquetes a "SHOP"
+
+## Toggle Modo Claro/Oscuro
+
+- [x] Crear contexto global SplashThemeContext para persistir preferencia de tema
+- [x] Agregar botón toggle (palanca) en Splash 1 (SplashSelector)
+- [x] Agregar botón toggle (palanca) en Splash 2 (NutriserHomePage)
+- [x] Aplicar fondo crema y textos oscuros en modo claro para Splash 1
+- [x] Aplicar fondo crema y textos oscuros en modo claro para Splash 2

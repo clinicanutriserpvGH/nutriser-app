@@ -1052,3 +1052,9 @@
 - [x] Mejorar overlays sobre fotos en modo claro (más oscuros para que se vean imágenes y texto)
 - [x] Aumentar contraste de textos en modo claro (títulos, etiquetas, botones)
 - [x] Mejorar visibilidad de botones CTA en modo claro
+
+## Detección Automática de Horario (Modo Claro/Oscuro)
+
+- [x] Actualizar SplashThemeContext para detectar hora del dispositivo (6am-7pm = claro, 7pm-6am = oscuro)
+- [x] Permitir override manual con el toggle (guarda preferencia en localStorage)
+- [x] Actualizar toggle para mostrar si está en modo automático o manual

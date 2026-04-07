@@ -78,15 +78,15 @@ export default function NutriserHomePage() {
     : "linear-gradient(160deg, #0f0f0f 0%, #1a1208 50%, #0f0f0f 100%)";
 
   const backBtn = isLight
-    ? "bg-[#EDE5D5]/60 hover:bg-[#E0D5C0]/80 text-[#7a6030] hover:text-[#5a4020] border border-[#C5A55A]/30"
+    ? "bg-[#2a1f0a]/80 hover:bg-[#2a1f0a] text-[#C5A55A] hover:text-[#d4b46a] border border-[#C5A55A]/40"
     : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-[#C5A55A] border border-white/10";
 
   const cardBgSubtle = isLight
-    ? "bg-[#EDE5D5]/40 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 hover:bg-[#E8DEC8]/60"
+    ? "bg-[#2a1f0a]/80 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]"
     : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10";
 
   const footerBtn = isLight
-    ? "bg-[#EDE5D5]/60 hover:bg-[#E0D5C0]/80 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 text-[#9a8050] hover:text-[#7a6030]"
+    ? "bg-[#2a1f0a]/70 hover:bg-[#2a1f0a]/90 border-[#C5A55A]/30 hover:border-[#C5A55A]/60 text-[#C5A55A]/80 hover:text-[#C5A55A]"
     : "bg-white/5 hover:bg-white/10 border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70";
 
   return (
@@ -98,7 +98,9 @@ export default function NutriserHomePage() {
         <div className="w-full max-w-[480px] sm:max-w-[580px] md:max-w-[700px] lg:max-w-[820px] xl:max-w-[900px]">
 
           {/* ── Header horizontal compacto ── */}
-          <div className="flex items-center gap-2 mb-4" style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
+          <div className={`flex items-center gap-2 mb-4 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
+            isLight ? "bg-[#2a1f0a]/90 shadow-lg shadow-[#C5A55A]/10" : "bg-transparent"
+          }`} style={{ paddingTop: isLight ? undefined : 'env(safe-area-inset-top, 12px)' }}>
             {/* Botón Inicio */}
             <button
               onClick={goBack}
@@ -121,7 +123,7 @@ export default function NutriserHomePage() {
               <p className="text-[#C5A55A] text-[8px] md:text-[9px] tracking-[0.2em] uppercase font-light leading-tight">
                 Aesthetic &amp; Nutrition
               </p>
-              <h1 className={`text-xs md:text-sm font-bold tracking-wide leading-tight mt-0.5 ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>
+              <h1 className="text-white text-xs md:text-sm font-bold tracking-wide leading-tight mt-0.5">
                 Nutriser Mall
               </h1>
             </div>
@@ -185,7 +187,7 @@ export default function NutriserHomePage() {
               <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center group-hover:bg-[#C5A55A]/30 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-[#C5A55A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
               </div>
-              <span className={`text-xs font-semibold text-center leading-tight ${isLight ? "text-[#7a6030]" : "text-white/70"}`}>
+              <span className="text-xs font-semibold text-center leading-tight text-white/90">
                 Cuponera de Descuentos
               </span>
             </button>
@@ -196,7 +198,7 @@ export default function NutriserHomePage() {
               <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center group-hover:bg-[#C5A55A]/30 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-[#C5A55A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
               </div>
-              <span className={`text-xs font-semibold text-center leading-tight ${isLight ? "text-[#7a6030]" : "text-white/70"}`}>
+              <span className="text-xs font-semibold text-center leading-tight text-white/90">
                 Catálogo de Servicios
               </span>
             </button>

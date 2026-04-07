@@ -1083,3 +1083,8 @@
 - [x] Header Splash 1 modo claro: agregar fondo sutil detrás del logo+texto para que resalte sobre el crema
 - [x] Textos "Aesthetic & Nutrition" y "Soy Nutriser y Vivo Mejor" más oscuros/definidos en modo claro
 - [x] Botones Cuponera y Servicios más visibles y elegantes en modo claro
+
+## Contraste Modo Claro Splash 2
+
+- [x] Header Splash 2 modo claro: fondo oscuro cálido detrás del logo+texto igual que Splash 1
+- [x] Botones y textos del Splash 2 con mejor contraste en modo claro

@@ -1033,3 +1033,8 @@
 
 ## Fix Paquete Reductor
 - [x] Corregir precio de referencia y agregar badge verde de ahorro al Paquete Reductor
+
+## Cambios Sesión Actual
+
+- [x] Cambiar título del Splash 2 de "Nutriser Home" a "Nutriser Mall"
+- [x] Cambiar etiqueta "NUTRICIÓN" del widget de paquetes a "SHOP"

@@ -129,7 +129,7 @@ export default function NutriserHomePage() {
               Aesthetic &amp; Nutrition
             </p>
             <h1 className="text-white text-lg md:text-xl font-bold tracking-wide text-center">
-              Nutriser Home
+              Nutriser Mall
             </h1>
             <div className="w-8 h-px bg-[#C5A55A]/60 mt-3" />
           </div>
@@ -139,7 +139,7 @@ export default function NutriserHomePage() {
             <CardHalf
               img={IMG_NUTRICION}
               icon={CalendarCheck}
-              label="Nutrición"
+              label="Shop"
               title="Paquetes Nutriser"
               cta="Ver Paquetes"
               onClick={() => goTo("/memberships")}

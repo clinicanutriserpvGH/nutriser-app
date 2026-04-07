@@ -414,7 +414,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               <button
                 onClick={() => { window.location.href = "https://portaldesaludnutriser.club"; }}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-                style={{ aspectRatio: "2 / 1" }}
+                style={{ minHeight: "180px" }}
               >
                 {/* Background image */}
                 <img
@@ -426,7 +426,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-black/55 to-black/25" />
 
                 {/* Content */}
-                <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
+                <div className="relative flex flex-col justify-between p-3 sm:p-4 text-left" style={{ minHeight: "180px" }}>
                   {/* Top: icon + label */}
                   <div className="flex items-center gap-1.5">
                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 bg-black/30 backdrop-blur-sm overflow-hidden">
@@ -466,7 +466,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                         </div>
                       ))}
                     </div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/30">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/30 mt-1">
                       Acceder / Crear Cuenta
                     </span>
                   </div>

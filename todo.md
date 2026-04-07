@@ -1016,3 +1016,6 @@
 
 ## Botón Regresar condicional en AdminLogin
 - [x] Mostrar Regresar en AdminLogin solo si el usuario viene del Splash 2 (/nutriser-home)
+
+## Fix botón ACCEDER/CREAR CUENTA
+- [x] Corregir el botón ACCEDER/CREAR CUENTA del widget Portal de Salud que se ve cortado

@@ -446,8 +446,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <h2 className="text-white text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-1.5 drop-shadow-lg">
                       Portal de Salud Nutriser
                     </h2>
-                    {/* Mini-iconitos de funciones — circulitos compactos */}
-                    <div className="flex flex-wrap gap-2 mb-2">
+                    {/* Mini-iconitos de funciones — grid 4×2 alineado */}
+                    <div className="grid grid-cols-4 gap-x-2 gap-y-3 mb-3 w-full">
                       {[
                         { icon: Utensils, label: "Mi Dieta" },
                         { icon: Camera, label: "Scan Food" },
@@ -458,11 +458,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                         { icon: Ruler, label: "Mediciones" },
                         { icon: Repeat2, label: "Hábitos" },
                       ].map(({ icon: Ic, label }) => (
-                        <div key={label} className="flex flex-col items-center gap-0.5">
-                          <div className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                            <Ic className="w-3.5 h-3.5 text-[#C5A55A]" />
+                        <div key={label} className="flex flex-col items-center gap-1">
+                          <div className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                            <Ic className="w-4 h-4 text-[#C5A55A]" />
                           </div>
-                          <span className="text-white/70 text-[8px] font-medium leading-none text-center">{label}</span>
+                          <span className="text-white/70 text-[8px] font-medium leading-tight text-center w-full">{label}</span>
                         </div>
                       ))}
                     </div>

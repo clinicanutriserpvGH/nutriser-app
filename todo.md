@@ -1022,3 +1022,6 @@
 
 ## Fix botón Servicios Splash 1
 - [x] Corregir enlace del botón Servicios para ir directo a la sección de servicios del sitio web
+
+## Reorganizar íconos Portal de Salud
+- [x] Cambiar íconos del widget Portal de Salud de fila horizontal a grid 4×2 alineado

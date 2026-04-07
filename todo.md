@@ -1066,3 +1066,9 @@
 ## Header Horizontal Splash 1
 
 - [x] Rediseñar header de Splash 1: logo al lado del texto en fila horizontal compacta para que todo quepa en una pantalla
+
+## Reorganización Barra Acciones Splash 1
+
+- [x] Mover botón campana al header (al lado del texto "Soy Nutriser y Vivo Mejor")
+- [x] Dejar barra de acciones rápidas solo con Cuponera y Servicios (quitar campana de ahí)
+- [x] Rediseñar header de Splash 2 (NutriserHomePage): logo al lado del texto en fila horizontal compacta

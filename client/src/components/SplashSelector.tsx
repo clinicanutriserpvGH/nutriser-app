@@ -292,7 +292,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Separador vertical */}
             <div className="w-px h-10 bg-[#C5A55A]/30 flex-shrink-0" />
             {/* Textos */}
-            <div className="flex flex-col justify-center min-w-0">
+            <div className="flex flex-col justify-center min-w-0 flex-1">
               <p className="text-[#C5A55A] text-[9px] md:text-[10px] tracking-[0.25em] uppercase font-light leading-tight">
                 Aesthetic &amp; Nutrition
               </p>
@@ -300,6 +300,37 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 Soy Nutriser y Vivo Mejor
               </h1>
             </div>
+            {/* Campana — al lado del texto */}
+            {!showEmailForm && (
+              pushEnabled ? (
+                <div className={`flex-shrink-0 flex flex-col items-center gap-0.5`}>
+                  <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center">
+                    <Bell className="w-5 h-5 text-[#C5A55A]" />
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-green-500 border border-black flex items-center justify-center">
+                      <span className="text-white text-[7px] font-bold">✓</span>
+                    </span>
+                  </div>
+                  <span className="text-[#C5A55A] text-[8px] font-semibold">Activa ✓</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowNotifModal(true)}
+                  className={`flex-shrink-0 relative flex flex-col items-center gap-0.5 p-1.5 rounded-xl border transition-all duration-200 group overflow-hidden ${
+                    isLight
+                      ? "bg-[#EDE5D5]/40 border-[#C5A55A]/20 hover:border-[#C5A55A]/50"
+                      : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50"
+                  }`}
+                >
+                  <span className="absolute inset-0 rounded-xl bg-[#C5A55A]/10 animate-ping opacity-60" style={{ animationDuration: "2.5s" }} />
+                  <div className="relative w-8 h-8 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/40 group-hover:bg-[#d4b46a] transition-colors">
+                    <BellRing className="w-4 h-4 text-black" />
+                  </div>
+                  <span className={`relative text-[8px] font-semibold text-center leading-tight ${
+                    isLight ? "text-[#5a3a10]" : "text-white/70"
+                  }`}>Campana</span>
+                </button>
+              )
+            )}
           </div>
 
           {/* ── Grid de widgets ── */}
@@ -479,8 +510,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           </div>
 
-          {/* ── Barra de acciones rápidas ── */}
-          <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4 md:mb-5">
+          {/* ── Barra de acciones rápidas: solo Cuponera y Servicios ── */}
+          <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-5">
             {/* Cuponera de Descuentos */}
             <button
               onClick={() => handleNavigate('/coupons')}
@@ -494,36 +525,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 Cuponera de Descuentos
               </span>
             </button>
-
-            {/* Campana push */}
-            {!showEmailForm && (
-              pushEnabled ? (
-                <div className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border ${isLight ? "bg-[#EDE5D5]/40 border-[#C5A55A]/30" : "bg-[#C5A55A]/10 border-[#C5A55A]/30"}`}>
-                  <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A]/20 flex items-center justify-center">
-                    <Bell className="w-5 h-5 text-[#C5A55A]" />
-                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-green-500 border border-black flex items-center justify-center">
-                      <span className="text-white text-[7px] font-bold">✓</span>
-                    </span>
-                  </div>
-                  <span className="text-[#C5A55A] text-[10px] sm:text-xs font-semibold text-center leading-tight">
-                    Activa ✓
-                  </span>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowNotifModal(true)}
-                  className={`relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group overflow-hidden ${isLight ? "bg-[#EDE5D5]/40 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 hover:bg-[#E8DEC8]/60" : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10"}`}
-                >
-                  <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-ping opacity-60" style={{ animationDuration: "2.5s" }} />
-                  <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/40 group-hover:bg-[#d4b46a] transition-colors">
-                    <BellRing className="w-5 h-5 text-black" />
-                  </div>
-<span className={`relative text-[10px] sm:text-xs font-semibold text-center leading-tight ${isLight ? "text-[#5a3a10]" : "text-white/70"}`}>
-                  Campana
-                </span>
-                </button>
-              )
-            )}
 
             {/* Catálogo de Servicios */}
             {!showEmailForm && (

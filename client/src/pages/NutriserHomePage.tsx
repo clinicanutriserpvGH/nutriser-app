@@ -153,30 +153,34 @@ export default function NutriserHomePage() {
       <div className="w-full flex flex-col items-center px-3 sm:px-4 md:px-6 box-border" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 16px, 32px)', paddingBottom: '24px' }}>
         <div className="w-full max-w-[480px] sm:max-w-[580px] md:max-w-[700px] lg:max-w-[820px] xl:max-w-[900px]">
 
-          {/* ── Header ── */}
-          <div className="flex flex-col items-center mb-6">
-            {/* Fila: botón Inicio */}
-            <div className="w-full flex items-center mb-4" style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
-              <button
-                onClick={goBack}
-                className={`flex items-center gap-1.5 transition-all text-sm font-medium px-3 py-1.5 rounded-full ${backBtn}`}
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Inicio
-              </button>
+          {/* ── Header horizontal compacto ── */}
+          <div className="flex items-center gap-2 mb-4" style={{ paddingTop: 'env(safe-area-inset-top, 12px)' }}>
+            {/* Botón Inicio */}
+            <button
+              onClick={goBack}
+              className={`flex items-center gap-1 transition-all text-xs font-medium px-2.5 py-1.5 rounded-full flex-shrink-0 ${backBtn}`}
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              Inicio
+            </button>
+            {/* Separador */}
+            <div className="w-px h-8 bg-[#C5A55A]/20 flex-shrink-0" />
+            {/* Logo */}
+            <div className="relative flex-shrink-0">
+              <div className="absolute inset-0 rounded-full bg-[#C5A55A]/20 blur-lg scale-150" />
+              <img src={LOGO_URL} alt="Nutriser" className="relative w-10 h-10 md:w-12 md:h-12 object-contain" />
             </div>
-
-            <div className="relative mb-3">
-              <div className="absolute inset-0 rounded-full bg-[#C5A55A]/20 blur-xl scale-150" />
-              <img src={LOGO_URL} alt="Nutriser" className="relative w-14 h-14 md:w-16 md:h-16 object-contain" />
+            {/* Separador */}
+            <div className="w-px h-8 bg-[#C5A55A]/30 flex-shrink-0" />
+            {/* Textos */}
+            <div className="flex flex-col justify-center min-w-0 flex-1">
+              <p className="text-[#C5A55A] text-[8px] md:text-[9px] tracking-[0.2em] uppercase font-light leading-tight">
+                Aesthetic &amp; Nutrition
+              </p>
+              <h1 className={`text-xs md:text-sm font-bold tracking-wide leading-tight mt-0.5 ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>
+                Nutriser Mall
+              </h1>
             </div>
-            <p className="text-[#C5A55A] text-[10px] md:text-xs tracking-[0.3em] uppercase font-light mb-1">
-              Aesthetic &amp; Nutrition
-            </p>
-            <h1 className={`text-lg md:text-xl font-bold tracking-wide text-center ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>
-              Nutriser Mall
-            </h1>
-            <div className="w-8 h-px bg-[#C5A55A]/60 mt-3" />
           </div>
 
           {/* ── 1. Paquetes + Tienda Productos (2 columnas) ── */}

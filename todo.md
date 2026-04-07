@@ -1019,3 +1019,6 @@
 
 ## Fix botón ACCEDER/CREAR CUENTA
 - [x] Corregir el botón ACCEDER/CREAR CUENTA del widget Portal de Salud que se ve cortado
+
+## Fix botón Servicios Splash 1
+- [x] Corregir enlace del botón Servicios para ir directo a la sección de servicios del sitio web

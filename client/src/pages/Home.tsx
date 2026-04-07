@@ -22,15 +22,23 @@ import { useEffect } from "react";
 export default function Home() {
   const { showSplash } = useSplash();
 
-  // Scroll automático si viene desde el botón Cuponera del Hub
+  // Scroll automático si viene desde el botón Cuponera/Servicios del Hub
   useEffect(() => {
     const scrollTo = sessionStorage.getItem("nutriser_scroll_to");
     if (scrollTo) {
       sessionStorage.removeItem("nutriser_scroll_to");
-      const timer = setTimeout(() => {
+      // Intentar scroll con reintentos para asegurar que la sección esté cargada
+      let attempts = 0;
+      const tryScroll = () => {
         const el = document.getElementById(scrollTo);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 800);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (attempts < 5) {
+          attempts++;
+          setTimeout(tryScroll, 400);
+        }
+      };
+      const timer = setTimeout(tryScroll, 800);
       return () => clearTimeout(timer);
     }
   }, []);

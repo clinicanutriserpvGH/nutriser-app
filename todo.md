@@ -1092,3 +1092,7 @@
 ## Limpieza Splash 2
 
 - [x] Quitar botones Cuponera y Catálogo de Servicios del Splash 2 (ya están en Splash 1)
+
+## Corrección Paquete Nutrición
+
+- [x] Cambiar "10% de descuento en tratamientos faciales" por "10% de descuento en tratamientos corporales" en Paquete Nutrición

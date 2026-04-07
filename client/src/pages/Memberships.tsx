@@ -67,7 +67,7 @@ const PROGRAMS = [
     features: [
       "4 asesorías nutricionales personalizadas",
       "4 escaneos corporales",
-      "10% de descuento en tratamientos faciales",
+      "10% de descuento en tratamientos corporales",
       "Acceso a seguimiento online",
     ],
   },

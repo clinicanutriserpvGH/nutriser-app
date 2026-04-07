@@ -1088,3 +1088,7 @@
 
 - [x] Header Splash 2 modo claro: fondo oscuro cálido detrás del logo+texto igual que Splash 1
 - [x] Botones y textos del Splash 2 con mejor contraste en modo claro
+
+## Limpieza Splash 2
+
+- [x] Quitar botones Cuponera y Catálogo de Servicios del Splash 2 (ya están en Splash 1)

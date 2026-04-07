@@ -1046,3 +1046,9 @@
 - [x] Agregar botón toggle (palanca) en Splash 2 (NutriserHomePage)
 - [x] Aplicar fondo crema y textos oscuros en modo claro para Splash 1
 - [x] Aplicar fondo crema y textos oscuros en modo claro para Splash 2
+
+## Corrección Modo Claro - Contraste
+
+- [x] Mejorar overlays sobre fotos en modo claro (más oscuros para que se vean imágenes y texto)
+- [x] Aumentar contraste de textos en modo claro (títulos, etiquetas, botones)
+- [x] Mejorar visibilidad de botones CTA en modo claro

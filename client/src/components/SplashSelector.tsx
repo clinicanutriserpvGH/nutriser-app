@@ -294,16 +294,16 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 style={{ aspectRatio: "1 / 1" }}
               >
                 <img src={CLINIC_IMG2} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
-                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-br from-[#FAF7F2]/60 via-[#F5EFE4]/40 to-[#FAF7F2]/10" : "bg-gradient-to-br from-black/70 via-black/50 to-black/20"}`} />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
                       <Globe className="w-4 h-4 text-black" />
                     </div>
-                    <span className={`text-[10px] font-semibold tracking-wide uppercase drop-shadow ${isLight ? "text-[#2a1f0a]/80" : "text-white/80"}`}>Sitio Web</span>
+                    <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">Sitio Web</span>
                   </div>
                   <div>
-                    <h2 className={`text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>Nutriser Home</h2>
+                    <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Home</h2>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
                       Entrar
                     </span>
@@ -320,17 +320,17 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 style={{ aspectRatio: "1 / 1" }}
               >
                 <img src={CLINIC_IMG} alt="Nutriser Mall" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
-                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-br from-[#FAF7F2]/60 via-[#F5EFE4]/40 to-[#FAF7F2]/10" : "bg-gradient-to-br from-black/70 via-black/50 to-black/20"}`} />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
-                    <div className={`w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 ${isLight ? "bg-[#C5A55A]/30" : "bg-white/20 backdrop-blur-sm"}`}>
-                      <ShoppingBag className={`w-4 h-4 ${isLight ? "text-[#7a6030]" : "text-white"}`} />
+                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
+                      <ShoppingBag className="w-4 h-4 text-white" />
                     </div>
-                    <span className={`text-[10px] font-semibold tracking-wide uppercase drop-shadow ${isLight ? "text-[#2a1f0a]/80" : "text-white/80"}`}>Tienda</span>
+                    <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">Tienda</span>
                   </div>
                   <div>
-                    <h2 className={`text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>Nutriser Mall</h2>
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 ${isLight ? "bg-[#C5A55A]/20 text-[#7a6030] border border-[#C5A55A]/40" : "bg-white/20 backdrop-blur-sm text-white border border-white/30"}`}>
+                    <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Mall</h2>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
                       Visitar
                     </span>
                   </div>
@@ -352,7 +352,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                   alt="Portal de Salud Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-br from-[#FAF7F2]/65 via-[#F5EFE4]/45 to-[#FAF7F2]/15" : "bg-gradient-to-br from-black/75 via-black/55 to-black/25"}`} />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/80" />
                 <div className="relative flex flex-col justify-between p-3 sm:p-4 text-left" style={{ minHeight: "180px" }}>
                   <div className="flex items-center gap-1.5">
                     <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden ${isLight ? "bg-[#C5A55A]/20" : "bg-black/30 backdrop-blur-sm"}`}>
@@ -362,12 +362,12 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                         className="w-full h-full object-contain p-0.5"
                       />
                     </div>
-                    <span className={`text-[10px] font-semibold tracking-wide uppercase drop-shadow ${isLight ? "text-[#2a1f0a]/80" : "text-white/80"}`}>
+                    <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">
                       App Pacientes
                     </span>
                   </div>
                   <div>
-                    <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-1.5 drop-shadow-lg ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-1.5 drop-shadow-lg text-white">
                       Portal de Salud Nutriser
                     </h2>
                     <div className="grid grid-cols-4 gap-x-2 gap-y-3 mb-3 w-full">
@@ -382,14 +382,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                         { icon: Repeat2, label: "Hábitos" },
                       ].map(({ icon: Ic, label }) => (
                         <div key={label} className="flex flex-col items-center gap-1">
-                          <div className={`w-9 h-9 rounded-full border flex items-center justify-center ${isLight ? "bg-[#FAF7F2]/70 border-[#C5A55A]/30" : "bg-black/50 backdrop-blur-sm border-white/20"}`}>
+                          <div className="w-9 h-9 rounded-full border flex items-center justify-center bg-black/40 backdrop-blur-sm border-white/30">
                             <Ic className="w-4 h-4 text-[#C5A55A]" />
                           </div>
-                          <span className={`text-[8px] font-medium leading-tight text-center w-full ${isLight ? "text-[#7a6030]/80" : "text-white/70"}`}>{label}</span>
+                          <span className="text-[8px] font-medium leading-tight text-center w-full text-white/80">{label}</span>
                         </div>
                       ))}
                     </div>
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 mt-1 ${isLight ? "bg-[#C5A55A]/20 text-[#7a6030] border border-[#C5A55A]/40" : "bg-white/20 backdrop-blur-sm text-white border border-white/30"}`}>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 mt-1 bg-white/20 backdrop-blur-sm text-white border border-white/40">
                       Acceder / Crear Cuenta
                     </span>
                   </div>
@@ -408,21 +408,21 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               style={{ minHeight: "90px" }}
             >
               <div className="absolute inset-0">
-                <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className={`w-full h-full object-cover transition-opacity ${isLight ? "opacity-25 group-hover:opacity-35" : "opacity-40 group-hover:opacity-50"}`} />
-                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-t from-[#FAF7F2]/90 via-[#FAF7F2]/60 to-transparent" : "bg-gradient-to-t from-black/80 via-black/50 to-transparent"}`} />
+                <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className="w-full h-full object-cover transition-opacity opacity-50 group-hover:opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
               </div>
               <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
                 <div className="w-10 h-10 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
                   <Sparkles className="w-5 h-5 text-black" />
                 </div>
                 <div className="text-center">
-                  <p className={`font-bold text-xs sm:text-sm ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>Mis Tratamientos</p>
+                  <p className="font-bold text-xs sm:text-sm text-white drop-shadow">Mis Tratamientos</p>
                   {activePatient ? (
                     <p className="text-[#C5A55A] text-[9px] sm:text-[10px] leading-tight mt-0.5 font-semibold">
                       ✓ {activePatient.name.split(' ')[0]}
                     </p>
                   ) : (
-                    <p className={`text-[9px] sm:text-[10px] leading-tight mt-0.5 ${isLight ? "text-[#9a8050]" : "text-white/60"}`}>
+                    <p className="text-[9px] sm:text-[10px] leading-tight mt-0.5 text-white/70">
                       Seguimiento y descuentos
                     </p>
                   )}
@@ -440,17 +440,17 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <img
                   src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-agendar-cita_49e2eca2.jpg"
                   alt="Agendar Cita"
-                  className={`w-full h-full object-cover transition-opacity ${isLight ? "opacity-25 group-hover:opacity-35" : "opacity-45 group-hover:opacity-55"}`}
+                  className="w-full h-full object-cover transition-opacity opacity-50 group-hover:opacity-60"
                 />
-                <div className={`absolute inset-0 ${isLight ? "bg-gradient-to-t from-[#FAF7F2]/90 via-[#FAF7F2]/60 to-transparent" : "bg-gradient-to-t from-black/80 via-black/50 to-transparent"}`} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
               </div>
               <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
                 <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/80 flex items-center justify-center shadow-lg shadow-[#C5A55A]/30 flex-shrink-0">
                   <CalendarCheck className="w-5 h-5 text-black" />
                 </div>
                 <div className="text-center">
-                  <p className={`font-bold text-xs sm:text-sm ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>Agendar Cita</p>
-                  <p className={`text-[9px] sm:text-[10px] leading-tight mt-0.5 ${isLight ? "text-[#9a8050]" : "text-white/60"}`}>
+                  <p className="font-bold text-xs sm:text-sm text-white drop-shadow">Agendar Cita</p>
+                  <p className="text-[9px] sm:text-[10px] leading-tight mt-0.5 text-white/70">
                     Reserva tu servicio personalizado
                   </p>
                 </div>
@@ -470,7 +470,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
                 <Tag className="w-5 h-5 text-black" />
               </div>
-              <span className={`relative text-[10px] sm:text-xs font-bold text-center leading-tight ${isLight ? "text-[#7a6030]" : "text-white/80"}`}>
+              <span className={`relative text-[10px] sm:text-xs font-bold text-center leading-tight ${isLight ? "text-[#5a3a10]" : "text-white/80"}`}>
                 Cuponera de Descuentos
               </span>
             </button>
@@ -498,9 +498,9 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                   <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/40 group-hover:bg-[#d4b46a] transition-colors">
                     <BellRing className="w-5 h-5 text-black" />
                   </div>
-                  <span className={`relative text-[10px] sm:text-xs font-semibold text-center leading-tight ${isLight ? "text-[#7a6030]" : "text-white/70"}`}>
-                    Campana
-                  </span>
+<span className={`relative text-[10px] sm:text-xs font-semibold text-center leading-tight ${isLight ? "text-[#5a3a10]" : "text-white/70"}`}>
+                  Campana
+                </span>
                 </button>
               )
             )}
@@ -514,7 +514,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isLight ? "bg-[#C5A55A]/20 group-hover:bg-[#C5A55A]/30" : "bg-[#C5A55A]/20 group-hover:bg-[#C5A55A]/30"}`}>
                   <ClipboardList className="w-5 h-5 text-[#C5A55A]" />
                 </div>
-                <span className={`text-[10px] sm:text-xs font-semibold text-center leading-tight ${isLight ? "text-[#7a6030]" : "text-white/70"}`}>
+                <span className={`text-[10px] sm:text-xs font-semibold text-center leading-tight ${isLight ? "text-[#5a3a10]" : "text-white/70"}`}>
                   Servicios
                 </span>
               </button>

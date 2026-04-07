@@ -75,25 +75,20 @@ function CardHalf({
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         style={{ objectPosition: imgPosition }}
       />
-      <div className={`absolute inset-0 ${isLight
-        ? "bg-gradient-to-b from-[#FAF7F2]/40 via-[#F5EFE4]/40 to-[#FAF7F2]/80"
-        : "bg-gradient-to-b from-black/30 via-black/40 to-black/80"
-      }`} />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
       <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
         <div className="flex items-center gap-1.5">
-          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-md flex-shrink-0 ${accent ? "bg-[#C5A55A]" : isLight ? "bg-[#C5A55A]/25" : "bg-white/20 backdrop-blur-sm"}`}>
-            <Icon className={`w-4 h-4 ${accent ? "text-black" : isLight ? "text-[#7a6030]" : "text-white"}`} />
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-md flex-shrink-0 ${accent ? "bg-[#C5A55A]" : "bg-white/20 backdrop-blur-sm"}`}>
+            <Icon className={`w-4 h-4 ${accent ? "text-black" : "text-white"}`} />
           </div>
-          <span className={`text-[10px] font-semibold tracking-wide uppercase drop-shadow ${isLight ? "text-[#2a1f0a]/80" : "text-white/70"}`}>{label}</span>
+          <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">{label}</span>
         </div>
         <div>
-          <h3 className={`text-base sm:text-lg font-bold leading-tight mb-2 drop-shadow-lg ${isLight ? "text-[#2a1f0a]" : "text-white"}`}>{title}</h3>
+          <h3 className="text-base sm:text-lg font-bold leading-tight mb-2 drop-shadow-lg text-white">{title}</h3>
           <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase shadow transition-all duration-200 group-hover:scale-105 ${
             accent
               ? "bg-[#C5A55A] text-black"
-              : isLight
-                ? "bg-[#C5A55A]/20 text-[#7a6030] border border-[#C5A55A]/40"
-                : "bg-white/20 backdrop-blur-sm text-white border border-white/30"
+              : "bg-white/20 backdrop-blur-sm text-white border border-white/40"
           }`}>
             {cta}
           </span>

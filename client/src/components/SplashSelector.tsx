@@ -282,19 +282,24 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
       >
         <div className="w-full max-w-[480px] sm:max-w-[580px] md:max-w-[700px] lg:max-w-[820px] xl:max-w-[900px]">
 
-          {/* ── Header ── */}
-          <div className="flex flex-col items-center mb-6 md:mb-8">
-            <div className="relative mb-3">
-              <div className="absolute inset-0 rounded-full bg-[#C5A55A]/20 blur-xl scale-150" />
-              <img src={LOGO_URL} alt="Nutriser" className="relative w-16 h-16 md:w-20 md:h-20 object-contain" />
+          {/* ── Header horizontal compacto ── */}
+          <div className="flex items-center gap-3 mb-4 md:mb-5">
+            {/* Logo */}
+            <div className="relative flex-shrink-0">
+              <div className="absolute inset-0 rounded-full bg-[#C5A55A]/20 blur-lg scale-150" />
+              <img src={LOGO_URL} alt="Nutriser" className="relative w-12 h-12 md:w-14 md:h-14 object-contain" />
             </div>
-            <p className="text-[#C5A55A] text-[10px] md:text-xs tracking-[0.3em] uppercase font-light mb-1">
-              Aesthetic &amp; Nutrition
-            </p>
-            <h1 className={`text-[#C5A55A] text-sm md:text-base font-semibold tracking-widest text-center uppercase`}>
-              Soy Nutriser y Vivo Mejor
-            </h1>
-            <div className="w-8 h-px bg-[#C5A55A]/60 mt-3" />
+            {/* Separador vertical */}
+            <div className="w-px h-10 bg-[#C5A55A]/30 flex-shrink-0" />
+            {/* Textos */}
+            <div className="flex flex-col justify-center min-w-0">
+              <p className="text-[#C5A55A] text-[9px] md:text-[10px] tracking-[0.25em] uppercase font-light leading-tight">
+                Aesthetic &amp; Nutrition
+              </p>
+              <h1 className="text-[#C5A55A] text-xs md:text-sm font-semibold tracking-wider uppercase leading-tight mt-0.5">
+                Soy Nutriser y Vivo Mejor
+              </h1>
+            </div>
           </div>
 
           {/* ── Grid de widgets ── */}

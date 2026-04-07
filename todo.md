@@ -1062,3 +1062,7 @@
 ## Toggle Discreto al Pie de Página
 
 - [x] Mover toggle de modo claro/oscuro del header al pie de página (esquina inferior discreta) en Splash 1 y Splash 2
+
+## Header Horizontal Splash 1
+
+- [x] Rediseñar header de Splash 1: logo al lado del texto en fila horizontal compacta para que todo quepa en una pantalla

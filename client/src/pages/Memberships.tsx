@@ -371,12 +371,16 @@ export default function Memberships() {
                   ? Math.round(program.price * (1 - discountInfo.discount / 100))
                   : null;
                 const consultValue = program.consultCount * PRICE_PER_CONSULT;
+                // Si el paquete tiene regularPrice definido, usarlo como referencia de ahorro
+                // (aplica cuando el paquete incluye servicios adicionales más allá de consultas)
+                const referencePrice = (program as any).regularPrice ?? consultValue;
+                const baseSavings = referencePrice - program.price;
                 const couponSavings = isGift
                   ? program.price
                   : discountedPrice !== null
                   ? program.price - discountedPrice
                   : 0;
-                const totalSavings = (consultValue - program.price) + couponSavings;
+                const totalSavings = baseSavings + couponSavings;
 
                 return (
                   <Card
@@ -410,8 +414,10 @@ export default function Memberships() {
                           </span>
                         )}
                         <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
-                          <span className="line-through">${consultValue.toLocaleString('es-MX')} MXN</span>
-                          <span className="text-gray-400">si pagaras consultas por separado</span>
+                          <span className="line-through">${((program as any).regularPrice ?? consultValue).toLocaleString('es-MX')} MXN</span>
+                          <span className="text-gray-400">
+                            {(program as any).regularPrice ? 'precio regular' : 'si pagaras consultas por separado'}
+                          </span>
                         </div>
                         {/* Etiqueta de ahorro total */}
                         {totalSavings > 0 && (

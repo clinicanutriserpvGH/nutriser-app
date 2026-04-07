@@ -1030,3 +1030,6 @@
 - [x] Cambiar "Nutriser Home" → "Nutriser Mall" (tienda/shop)
 - [x] Cambiar "Nutriser Web" → "Nutriser Home"
 - [x] Intercambiar posiciones: Nutriser Home a la izquierda, Nutriser Mall a la derecha
+
+## Fix Paquete Reductor
+- [x] Corregir precio de referencia y agregar badge verde de ahorro al Paquete Reductor

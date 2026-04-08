@@ -36,23 +36,23 @@ export default function BackToSplash() {
       style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
       className="fixed left-4 z-50 flex items-center gap-2"
     >
-      {/* Botón Inicio → splash principal */}
+      {/* Botón Inicio → splash principal — más grande y visible */}
       <button
         onClick={handleGoHome}
-        className="flex items-center gap-1.5 bg-black/70 backdrop-blur-sm border border-[#C5A55A]/40 text-[#C5A55A] px-3 py-2 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-[#C5A55A] hover:text-black transition-all duration-300 shadow-lg"
+        className="flex items-center gap-2 bg-[#C5A55A] border-2 border-[#C5A55A] text-black px-4 py-2.5 rounded-full text-sm font-extrabold tracking-widest uppercase hover:bg-[#B8944A] hover:border-[#B8944A] active:scale-95 transition-all duration-200 shadow-xl shadow-[#C5A55A]/40"
         aria-label="Volver al inicio"
       >
-        <Home className="w-3.5 h-3.5" />
-        Inicio
+        <Home className="w-4 h-4" />
+        INICIO
       </button>
 
       {/* Botón Regresar → /nutriser-home */}
       <button
         onClick={handleGoBack}
-        className="flex items-center gap-1.5 bg-black/70 backdrop-blur-sm border border-white/20 text-white/70 px-3 py-2 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-white/20 hover:text-white transition-all duration-300 shadow-lg"
+        className="flex items-center gap-1.5 bg-black/70 backdrop-blur-sm border border-white/20 text-white/80 px-3 py-2.5 rounded-full text-sm font-bold tracking-widest uppercase hover:bg-white/20 hover:text-white transition-all duration-300 shadow-lg"
         aria-label="Regresar a Nutriser Home"
       >
-        <ChevronLeft className="w-3.5 h-3.5" />
+        <ChevronLeft className="w-4 h-4" />
         Regresar
       </button>
     </div>

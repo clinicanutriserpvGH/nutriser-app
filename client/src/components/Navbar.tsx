@@ -153,19 +153,16 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
           </div>
 
           {/* Mobile: Botón Inicio + Toggle */}
-          <div className="lg:hidden flex items-center gap-1.5">
+          <div className="lg:hidden flex items-center gap-2">
             {onShowSplash && (
               <>
                 <button
                   onClick={onShowSplash}
                   aria-label="Volver al inicio"
-                  className={`flex items-center gap-1 text-[10px] tracking-[0.1em] uppercase font-bold px-2 py-1.5 rounded-full border transition-all duration-300 ${
-                    scrolled || lightBg
-                      ? "border-[#C5A55A]/30 text-[#C5A55A]/60 bg-transparent"
-                      : "border-white/20 text-white/50 bg-black/20"
-                  }`}
+                  className="flex items-center gap-1.5 text-xs tracking-widest uppercase font-extrabold px-3 py-2 rounded-full bg-[#C5A55A] text-black border-2 border-[#C5A55A] shadow-lg shadow-[#C5A55A]/30 active:scale-95 transition-all duration-200"
                 >
-                  <Home className="w-3 h-3" />
+                  <Home className="w-3.5 h-3.5" />
+                  INICIO
                 </button>
               </>
             )}

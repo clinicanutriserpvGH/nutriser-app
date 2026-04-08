@@ -1118,3 +1118,7 @@
 - [x] Agregar campo nombre en el modal de suscripción
 - [x] Guardar nombre y email en localStorage al suscribirse para autocompletar el foro
 - [x] Si ya está suscrito, el foro no pide nombre ni correo (campos ocultos y prellenados)
+
+## Botón Inicio Más Visible
+
+- [x] Agrandar botón "INICIO" en todas las páginas internas para que sea más visible y fácil de encontrar

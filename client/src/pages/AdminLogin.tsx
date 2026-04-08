@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Eye, EyeOff, User, Mail, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Lock, Eye, EyeOff, User, Mail, CheckCircle2, ArrowLeft, Home } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const ADMIN_EMAIL = "clinicanutriserpv@gmail.com";
@@ -78,9 +78,10 @@ export default function AdminLogin() {
             sessionStorage.removeItem("nutriser_splash_seen");
             window.location.href = "/";
           }}
-          className="flex items-center gap-1.5 text-gray-500 hover:text-[#C5A55A] text-sm font-medium bg-white/80 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm border border-gray-200 transition"
+          className="flex items-center gap-2 text-black text-sm font-extrabold tracking-widest uppercase bg-[#C5A55A] border-2 border-[#C5A55A] px-4 py-2.5 rounded-full shadow-lg shadow-[#C5A55A]/30 hover:bg-[#B8944A] active:scale-95 transition-all duration-200"
         >
-          Inicio
+          <Home className="w-4 h-4" />
+          INICIO
         </button>
       </div>
       <div className="max-w-md w-full">

@@ -1122,3 +1122,7 @@
 ## Botón Inicio Más Visible
 
 - [x] Agrandar botón "INICIO" en todas las páginas internas para que sea más visible y fácil de encontrar
+
+## Corrección Botón Correo - Eliminar Cuenta
+
+- [x] Corregir botón de correo en página "Eliminar cuenta" para que abra app de correo con mailto: y asunto prellenado

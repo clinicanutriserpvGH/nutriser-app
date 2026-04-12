@@ -278,10 +278,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
       }}
     >
       <div
-        className="min-h-full w-full flex flex-col items-center px-3 sm:px-4 md:px-6 box-border"
+        className="min-h-full w-full flex flex-col items-center px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 16px, 24px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 8px, 16px)' }}
       >
-        <div className="w-full max-w-[480px] sm:max-w-[580px] md:max-w-[700px] lg:max-w-[820px] xl:max-w-[900px]">
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px]">
 
           {/* ── Botón Regresar al Splash 0 ── */}
           {onBack && (
@@ -358,13 +358,13 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           {/* ── Grid de widgets ── */}
 
           {/* Fila 1: Nutriser Home | Nutriser Mall (2 columnas iguales) */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:gap-6 mb-3 md:mb-4 lg:mb-6">
             {/* Widget Nutriser Home (sitio web) — izquierda, prioridad */}
             <div className="col-span-1">
               <button
                 onClick={() => handleEnterSite()}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-                style={{ aspectRatio: "1 / 1" }}
+                style={{ aspectRatio: "1 / 1", minHeight: "200px" }}
               >
                 <img src={CLINIC_IMG2} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
@@ -390,7 +390,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               <button
                 onClick={() => handleNavigate('/nutriser-home')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-                style={{ aspectRatio: "1 / 1" }}
+                style={{ aspectRatio: "1 / 1", minHeight: "200px" }}
               >
                 <img src={CLINIC_IMG} alt="Nutriser Mall" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
@@ -413,13 +413,13 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
 
           {/* ── Mis Tratamientos + Agendar Cita ── */}
-          <div className="grid grid-cols-2 gap-3 mb-4 md:mb-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-4 md:mb-5 lg:mb-6">
 
             {/* Mis Tratamientos */}
             <button
               onClick={() => handleNavigate('/mis-tratamientos')}
               className={`relative rounded-2xl overflow-hidden border transition-all duration-200 group ${isLight ? "border-[#C5A55A]/30 hover:border-[#C5A55A]" : "border-[#C5A55A]/30 hover:border-[#C5A55A]"}`}
-              style={{ minHeight: "90px" }}
+              style={{ minHeight: "90px", height: "100%" }}
             >
               <div className="absolute inset-0">
                 <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className="w-full h-full object-cover transition-opacity opacity-50 group-hover:opacity-60" />
@@ -474,7 +474,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
 
           {/* ── Barra de acciones rápidas: solo Cuponera y Servicios ── */}
-          <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-5">
+          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-6 mb-4 md:mb-5 lg:mb-6">
             {/* Cuponera de Descuentos */}
             <button
               onClick={() => handleNavigate('/coupons')}

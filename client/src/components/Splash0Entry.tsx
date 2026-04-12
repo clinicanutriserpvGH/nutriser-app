@@ -50,13 +50,13 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
       }}
     >
       <div
-        className="min-h-full w-full flex flex-col items-center px-3 sm:px-4 md:px-6 box-border"
+        className="min-h-full w-full flex flex-col items-center px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border"
         style={{
           paddingTop: "max(env(safe-area-inset-top, 0px) + 16px, 24px)",
           paddingBottom: "max(env(safe-area-inset-bottom, 0px) + 8px, 16px)",
         }}
       >
-        <div className="w-full max-w-[480px] sm:max-w-[580px] md:max-w-[700px]">
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px]">
 
           {/* ── Header ── */}
           <div className={`flex items-center gap-3 mb-6 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
@@ -77,12 +77,14 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
             </div>
           </div>
 
-          {/* ── Tarjeta 1: Nutriser Home ── */}
-          <div className="mb-3">
+          {/* ── Tarjetas: Nutriser Home + Portal Salud ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6 mb-4">
+          {/* Tarjeta 1: Nutriser Home */}
+          <div>
             <button
               onClick={handleNutriserWeb}
               className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-              style={{ minHeight: "180px" }}
+              style={{ minHeight: "180px", aspectRatio: "16/9" }}
             >
               <img
                 src={CLINIC_IMG2}
@@ -112,8 +114,8 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
             </button>
           </div>
 
-          {/* ── Tarjeta 2: Portal de Salud (mismo diseño que en Splash 1) ── */}
-          <div className="mb-4">
+          {/* Tarjeta 2: Portal de Salud */}
+          <div>
             <button
               onClick={handlePortalSalud}
               className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
@@ -168,6 +170,8 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
               </div>
             </button>
           </div>
+
+          </div>{/* fin grid tarjetas */}
 
           {/* ── Íconos de redes sociales ── */}
           <div className="flex items-center justify-center gap-4 mb-4 mt-2">

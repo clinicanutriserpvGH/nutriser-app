@@ -94,8 +94,8 @@ export default function NutriserHomePage() {
       className="min-h-screen w-full overflow-x-hidden overflow-y-auto transition-all duration-500"
       style={{ background: bg }}
     >
-      <div className="w-full flex flex-col items-center px-3 sm:px-4 md:px-6 box-border" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 16px, 32px)', paddingBottom: '24px' }}>
-        <div className="w-full max-w-[480px] sm:max-w-[580px] md:max-w-[700px] lg:max-w-[820px] xl:max-w-[900px]">
+      <div className="w-full flex flex-col items-center px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 16px, 32px)', paddingBottom: '24px' }}>
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px]">
 
           {/* ── Header horizontal compacto ── */}
           <div className={`flex items-center gap-2 mb-4 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
@@ -129,8 +129,8 @@ export default function NutriserHomePage() {
             </div>
           </div>
 
-          {/* ── 1. Paquetes + Tienda Productos (2 columnas) ── */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
+          {/* ── 1. Paquetes + Tienda Productos + Academy + eBook (2 cols móvil, 4 cols desktop) ── */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-3 md:mb-4">
             <CardHalf
               img={IMG_NUTRICION}
               icon={CalendarCheck}
@@ -154,8 +154,8 @@ export default function NutriserHomePage() {
             />
           </div>
 
-          {/* ── 2. Nutriser Academy | Tienda eBook (2 columnas) ── */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
+          {/* ── 2. Nutriser Academy | Tienda eBook (oculto en desktop, ya está en la fila de arriba) ── */}
+          <div className="grid grid-cols-2 lg:hidden gap-3 md:gap-4 mb-6">
             <CardHalf
               img={IMG_ACADEMY}
               icon={GraduationCap}

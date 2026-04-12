@@ -1186,3 +1186,11 @@
 ## Splash 1: Nueva imagen Nutriser Mall (hub completo)
 
 - [x] Generar imagen que represente tratamientos + libros + cursos + productos para la tarjeta Nutriser Mall en SplashSelector
+
+## Responsividad Desktop/Tablet/Móvil
+
+- [x] Splash 0 (Splash0Entry): ampliar max-w en desktop, tarjetas en grid 2 columnas en pantallas grandes
+- [x] Splash 1 (SplashSelector): ampliar max-w en desktop, tarjetas en grid 2 columnas en pantallas grandes
+- [x] NutriserHomePage (Nutriser Mall): ampliar max-w y grid responsivo para desktop
+- [ ] PaquetesPage: ampliar max-w, cards de paquetes en grid 2-3 columnas en desktop
+- [ ] Revisar otras páginas internas (Servicios, Cursos, eBooks, etc.) para responsividad desktop

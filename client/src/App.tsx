@@ -147,6 +147,7 @@ function AppContent() {
         <SplashSelector
           onEnterSite={handleEnterSite}
           onNavigate={handleNavigateFromSplash}
+          onBack={() => setSplashState("splash0")}
         />
       )}
 

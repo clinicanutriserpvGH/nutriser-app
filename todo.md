@@ -1154,3 +1154,13 @@
 ## Splash 1: Quitar Portal de Salud
 
 - [x] Eliminar la tarjeta "Portal de Salud Nutriser" del Splash 1 (SplashSelector.tsx) ya que ahora está en el Splash 0
+
+## Splash 0: Modo día/noche automático
+
+- [ ] Agregar lógica de color automático día/noche en Splash0Entry.tsx igual que en SplashSelector (fondo claro de día, oscuro de noche)
+
+## Splash 1: Botón Regresar + Redes Sociales en Splash 0
+
+- [x] Agregar botón "← Regresar" en Splash 1 (SplashSelector) que lleve al Splash 0
+- [x] Copiar los íconos de redes sociales del Splash 1 al Splash 0 (Splash0Entry)
+- [x] Quitar los íconos de redes sociales del Splash 1 (ya estarán en Splash 0)

@@ -1173,3 +1173,8 @@
 
 - [x] Agregar botón "INICIO" en Navbar que lleve al Splash 0 (showSplash)
 - [x] Mantener botón "← Regresar" en Navbar que lleve al Splash 1 (showSplash1)
+
+## Splash 0: Imagen Nutriser Home y quitar Puerto Vallarta
+
+- [x] Quitar texto "Puerto Vallarta" del pie de página en Splash0Entry
+- [x] Reemplazar imagen de tarjeta Nutriser Home (iMac) por imagen de clínica/interior de Nutriser

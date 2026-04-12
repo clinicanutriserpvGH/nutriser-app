@@ -10,7 +10,7 @@ import { useSplashTheme } from "@/contexts/SplashThemeContext";
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 const CLINIC_IMG2 =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-imac-web-T2sERsyMxZB3iGgxpbi7eW.webp";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-reception-new_959bc342.png";
 const PORTAL_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-portal-salud-v2_e87113cf.png";
 const NUTRISER_ICON =
@@ -249,7 +249,7 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
 
           {/* ── Pie ── */}
           <p className={`text-center text-[9px] tracking-[0.2em] uppercase mt-2 ${isLight ? "text-[#9a8050]/40" : "text-white/20"}`}>
-            Nutriser Aesthetic &amp; Nutrition · Puerto Vallarta
+            Nutriser Aesthetic &amp; Nutrition
           </p>
 
         </div>

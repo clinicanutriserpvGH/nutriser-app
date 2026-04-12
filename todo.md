@@ -1143,3 +1143,10 @@
 ## Panel Admin: Safe Area iPhone
 
 - [x] Agregar padding-top con env(safe-area-inset-top) en AdminDashboard para que el botón Regresar no quede sobre el reloj del iPhone
+
+## Splash 0: Pantalla de entrada con dos opciones
+
+- [x] Crear componente Splash0Entry con dos tarjetas igual al diseño del Splash 1: "Nutriser Web" (→ Splash 1) y "Portal Salud" (→ portaldesaludnutriser.club, misma tarjeta que en Splash 1)
+- [x] Conectar Splash0Entry como primera pantalla en App.tsx
+- [x] Cambiar texto "Nutriser Home" por "Nutriser Web" en la tarjeta del Splash 1
+- [x] Al regresar desde Splash 1, volver al Splash 0

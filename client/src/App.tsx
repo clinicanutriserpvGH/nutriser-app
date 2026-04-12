@@ -24,6 +24,7 @@ import MyTreatments from "./pages/MyTreatments";
 import NutriserHomePage from "./pages/NutriserHomePage";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
+import Splash0Entry from "@/components/Splash0Entry";
 import { SplashContext } from "@/contexts/SplashContext";
 import { SplashThemeProvider } from "@/contexts/SplashThemeContext";
 import { useState } from "react";
@@ -65,41 +66,57 @@ function Router() {
   );
 }
 
+// Estado del splash:
+// "splash0" → mostrar Splash 0 (pantalla de entrada con 2 opciones)
+// "splash1" → mostrar Splash 1 (SplashSelector completo, tras elegir Nutriser Web)
+// "site"    → mostrar el sitio principal (Home)
+type SplashState = "splash0" | "splash1" | "site";
+
 function AppContent() {
   const [location] = useLocation();
 
-  // El splash se muestra SOLO en la ruta "/" cuando el usuario no lo ha visto aún
-  const [showSplash, setShowSplash] = useState(() => {
+  const [splashState, setSplashState] = useState<SplashState>(() => {
     // Nunca mostrar splash en rutas de admin/internas
-    if (isNoSplashRoute(location)) return false;
+    if (isNoSplashRoute(location)) return "site";
     // Solo mostrar en "/"
-    if (location !== "/") return false;
+    if (location !== "/") return "site";
+
     const seen = sessionStorage.getItem("nutriser_splash_seen");
-    return !seen;
+    if (!seen) return "splash0";
+    // Si ya eligió Nutriser Web anteriormente, ir directo al splash1
+    const choseSplash1 = sessionStorage.getItem("nutriser_chose_splash1");
+    if (choseSplash1) return "splash1";
+    return "splash0";
   });
 
-  // Entrar al sitio principal (Nutriser Home) — solo oculta el splash
-  const handleEnterSite = () => {
+  // Desde Splash 0: el usuario eligió "Nutriser Web" → mostrar Splash 1
+  const handleEnterSplash1 = () => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    setShowSplash(false);
+    sessionStorage.setItem("nutriser_chose_splash1", "1");
+    setSplashState("splash1");
   };
 
-  // Navegar a una ruta interna desde el splash.
-  // Usamos window.location.href para una navegación real: la URL cambia,
-  // React monta directamente la página destino sin pasar por Home.
+  // Desde Splash 1: el usuario entra al sitio principal
+  const handleEnterSite = () => {
+    sessionStorage.setItem("nutriser_splash_seen", "1");
+    sessionStorage.removeItem("nutriser_chose_splash1");
+    setSplashState("site");
+  };
+
+  // Navegar a una ruta interna desde el Splash 1
   const handleNavigateFromSplash = (path: string) => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
+    sessionStorage.removeItem("nutriser_chose_splash1");
     window.location.href = path;
   };
 
-  // Volver al splash: navegar a "/" y mostrar el splash
+  // Volver al Splash 0 (usado por botones "Regresar" en páginas internas)
   const handleShowSplash = () => {
     sessionStorage.removeItem("nutriser_splash_seen");
-    // Si ya estamos en "/", solo mostrar el splash
+    sessionStorage.removeItem("nutriser_chose_splash1");
     if (location === "/") {
-      setShowSplash(true);
+      setSplashState("splash0");
     } else {
-      // Navegar a "/" — el splash se mostrará porque borramos la clave
       window.location.href = "/";
     }
   };
@@ -108,15 +125,22 @@ function AppContent() {
     <SplashThemeProvider>
     <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
       <BackgroundMusic />
-      {/* El splash se superpone como overlay fixed cuando está activo */}
-      {showSplash && (
+
+      {/* Splash 0: pantalla de entrada con 2 opciones */}
+      {splashState === "splash0" && (
+        <Splash0Entry onEnterNutriserWeb={handleEnterSplash1} />
+      )}
+
+      {/* Splash 1: hub completo de Nutriser */}
+      {splashState === "splash1" && (
         <SplashSelector
           onEnterSite={handleEnterSite}
           onNavigate={handleNavigateFromSplash}
         />
       )}
-      {/* El Router solo renderiza cuando el splash NO está activo */}
-      {!showSplash && <Router />}
+
+      {/* Sitio principal */}
+      {splashState === "site" && <Router />}
     </SplashContext.Provider>
     </SplashThemeProvider>
   );

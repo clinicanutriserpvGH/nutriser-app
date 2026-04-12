@@ -1182,3 +1182,7 @@
 ## Splash 2: Imagen Nutriser Mall
 
 - [x] Reemplazar imagen de la tarjeta "Nutriser Mall" en NutriserHomePage por una imagen de tienda/productos de Nutriser
+
+## Splash 1: Nueva imagen Nutriser Mall (hub completo)
+
+- [x] Generar imagen que represente tratamientos + libros + cursos + productos para la tarjeta Nutriser Mall en SplashSelector

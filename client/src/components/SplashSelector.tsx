@@ -363,8 +363,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             <div className="col-span-1">
               <button
                 onClick={() => handleEnterSite()}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-                style={{ aspectRatio: "16 / 9", minHeight: "180px" }}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none aspect-[4/3] sm:aspect-[16/9]"
+                style={{ minHeight: "160px" }}
               >
                 <img src={CLINIC_IMG2} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
@@ -389,8 +389,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             <div className="col-span-1">
               <button
                 onClick={() => handleNavigate('/nutriser-home')}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-                style={{ aspectRatio: "16 / 9", minHeight: "180px" }}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none aspect-[4/3] sm:aspect-[16/9]"
+                style={{ minHeight: "160px" }}
               >
                 <img src={CLINIC_IMG} alt="Nutriser Mall" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />

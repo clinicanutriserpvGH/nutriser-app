@@ -128,21 +128,24 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/85" />
               <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 text-left">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xl flex-shrink-0" style={{ background: 'rgba(197,165,90,0.85)', border: '1.5px solid rgba(255,255,255,0.4)' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 sm:w-6 sm:h-6">
-                      <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                    </svg>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.45)', border: '1.5px solid rgba(197,165,90,0.6)', backdropFilter: 'blur(4px)' }}>
+                    <img
+                      src={NUTRISER_ICON}
+                      alt="Nutriser"
+                      className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
+                    />
                   </div>
-                  <span className="text-xs sm:text-sm font-bold tracking-wide uppercase drop-shadow-lg text-white" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+                  <span className="text-[11px] sm:text-xs font-bold tracking-widest uppercase text-[#C5A55A]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
                     App Pacientes
                   </span>
                 </div>
                 <div>
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight mb-1.5 drop-shadow-lg text-white">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight mb-2 drop-shadow-lg text-white">
                     Portal de Salud Nutriser
                   </h2>
-                  <div className="grid grid-cols-4 gap-x-2 gap-y-2 mb-3 w-full">
+                  {/* Íconos — solo visibles en pantallas más grandes */}
+                  <div className="hidden sm:grid grid-cols-4 gap-x-2 gap-y-1.5 mb-3 w-full">
                     {[
                       { icon: Utensils, label: "Mi Dieta" },
                       { icon: Camera, label: "Scan Food" },
@@ -153,15 +156,15 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
                       { icon: Ruler, label: "Mediciones" },
                       { icon: Repeat2, label: "Hábitos" },
                     ].map(({ icon: Ic, label }) => (
-                      <div key={label} className="flex flex-col items-center gap-1">
-                        <div className="w-9 h-9 rounded-full border flex items-center justify-center bg-black/40 backdrop-blur-sm border-white/30">
-                          <Ic className="w-4 h-4 text-[#C5A55A]" />
+                      <div key={label} className="flex flex-col items-center gap-0.5">
+                        <div className="w-8 h-8 rounded-full border flex items-center justify-center bg-black/40 backdrop-blur-sm border-white/30">
+                          <Ic className="w-3.5 h-3.5 text-[#C5A55A]" />
                         </div>
-                        <span className="text-[8px] font-medium leading-tight text-center w-full text-white/80">{label}</span>
+                        <span className="text-[7px] font-medium leading-tight text-center w-full text-white/80">{label}</span>
                       </div>
                     ))}
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 mt-1 bg-white/20 backdrop-blur-sm text-white border border-white/40">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
                     Acceder / Crear Cuenta
                   </span>
                 </div>

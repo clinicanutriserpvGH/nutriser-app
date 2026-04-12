@@ -126,17 +126,17 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
                 alt="Portal de Salud Nutriser"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/80" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/85" />
               <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 text-left">
                 <div className="flex items-center gap-1.5">
-                  <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden ${isLight ? "bg-[#C5A55A]/20" : "bg-black/30 backdrop-blur-sm"}`}>
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xl flex-shrink-0 overflow-hidden" style={{ background: 'rgba(197,165,90,0.9)', border: '1.5px solid rgba(255,255,255,0.5)' }}>
                     <img
-                      src={NUTRISER_ICON}
+                      src={LOGO_URL}
                       alt="Nutriser"
-                      className="w-full h-full object-contain p-0.5"
+                      className="w-full h-full object-contain p-1"
                     />
                   </div>
-                  <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">
+                  <span className="text-xs sm:text-sm font-bold tracking-wide uppercase drop-shadow-lg text-white" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
                     App Pacientes
                   </span>
                 </div>

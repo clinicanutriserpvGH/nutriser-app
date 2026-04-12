@@ -1126,3 +1126,11 @@
 ## Corrección Botón Correo - Eliminar Cuenta
 
 - [x] Corregir botón de correo en página "Eliminar cuenta" para que abra app de correo con mailto: y asunto prellenado
+
+## Bug: Botón de correo en Eliminar Cuenta no abre app de correo en iPhone
+
+- [x] Cambiar el enlace mailto: en DeleteAccount.tsx para que funcione en iPhone — quitar target="_blank" y usar window.location.href en onClick
+
+## Bug: Mapa de Google al fondo de la página principal abre URL de embed con error
+
+- [x] Corregir iframe de Google Maps en ContactSection.tsx: mostrar preview del mapa pero con overlay de tap-to-open — al tocar el mapa debe abrir Google Maps, no navegar a la URL de embed

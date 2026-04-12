@@ -230,23 +230,51 @@ export default function ContactSection() {
               </div>
             </div>
 
-            {/* Map */}
+            {/* Map — tap-to-open: muestra preview estático y al presionar abre Google Maps */}
             <div className="relative">
-              <div className="aspect-[4/3] lg:aspect-auto lg:h-full min-h-[400px] overflow-hidden border border-white/10">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3733.5!2d-105.2265714!3d20.6308619!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x84214f82065d24d5%3A0xeb2ab02e8b0e0702!2sNutriser!5e0!3m2!1ses!2smx!4v1774144000000"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, filter: "grayscale(0.3) contrast(1.1)" }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Ubicación de Nutriser"
-                />
-              </div>
+              <a
+                href="https://maps.google.com/?q=Nutriser+Aesthetic+%26+Nutrition,+Emiliano+Zapata+2,+Puerto+Vallarta,+Jalisco"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Ver en Google Maps"
+                className="block group"
+              >
+                <div className="aspect-[4/3] lg:aspect-auto lg:h-full min-h-[400px] overflow-hidden border border-white/10 relative">
+                  {/* Imagen estática del mapa como preview */}
+                  <img
+                    src="https://maps.googleapis.com/maps/api/staticmap?center=20.6308619,-105.2265714&zoom=16&size=600x400&maptype=roadmap&markers=color:red%7C20.6308619,-105.2265714&style=feature:all%7Celement:geometry%7Ccolor:0x1a1a1a&style=feature:road%7Celement:geometry%7Ccolor:0x2a2a2a&style=feature:water%7Celement:geometry%7Ccolor:0x0d0d0d&key=STATIC_MAP_PLACEHOLDER"
+                    alt="Mapa de ubicación de Nutriser"
+                    className="w-full h-full object-cover"
+                    style={{ filter: "grayscale(0.3) contrast(1.1)" }}
+                    onError={(e) => {
+                      // Si la imagen estática falla, mostrar fondo oscuro con pin
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                  {/* Fondo de respaldo si la imagen falla */}
+                  <div className="absolute inset-0 bg-[#111] flex flex-col items-center justify-center gap-3 -z-10">
+                    <MapPin className="w-10 h-10 text-[#C5A55A]" />
+                    <div className="text-center">
+                      <p className="text-white font-semibold text-sm">Nutriser Aesthetic &amp; Nutrition</p>
+                      <p className="text-white/50 text-xs mt-1">Emiliano Zapata #2, Puerto Vallarta</p>
+                    </div>
+                  </div>
+                  {/* Overlay oscuro con instrucción de tap */}
+                  <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-3 transition-all duration-300 group-hover:bg-black/20">
+                    <div className="bg-[#C5A55A] rounded-full p-3 shadow-lg shadow-[#C5A55A]/40 group-hover:scale-110 transition-transform duration-300">
+                      <MapPin className="w-6 h-6 text-black" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white font-bold text-sm tracking-wide">Nutriser Aesthetic &amp; Nutrition</p>
+                      <p className="text-white/70 text-xs mt-0.5">Emiliano Zapata #2, Puerto Vallarta</p>
+                      <p className="text-[#C5A55A] text-xs mt-2 font-semibold tracking-wider uppercase">Toca para abrir en Maps</p>
+                    </div>
+                  </div>
+                </div>
+              </a>
               {/* Gold corner accents */}
-              <div className="absolute -top-2 -left-2 w-12 h-12 border-t border-l border-[#C5A55A]" />
-              <div className="absolute -bottom-2 -right-2 w-12 h-12 border-b border-r border-[#C5A55A]" />
+              <div className="absolute -top-2 -left-2 w-12 h-12 border-t border-l border-[#C5A55A] pointer-events-none" />
+              <div className="absolute -bottom-2 -right-2 w-12 h-12 border-b border-r border-[#C5A55A] pointer-events-none" />
             </div>
           </div>
         </motion.div>

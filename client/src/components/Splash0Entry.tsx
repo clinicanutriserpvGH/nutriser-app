@@ -129,12 +129,10 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
               <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/85" />
               <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 text-left">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xl flex-shrink-0 overflow-hidden" style={{ background: 'rgba(197,165,90,0.9)', border: '1.5px solid rgba(255,255,255,0.5)' }}>
-                    <img
-                      src={LOGO_URL}
-                      alt="Nutriser"
-                      className="w-full h-full object-contain p-1"
-                    />
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xl flex-shrink-0" style={{ background: 'rgba(197,165,90,0.85)', border: '1.5px solid rgba(255,255,255,0.4)' }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 sm:w-6 sm:h-6">
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
                   </div>
                   <span className="text-xs sm:text-sm font-bold tracking-wide uppercase drop-shadow-lg text-white" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
                     App Pacientes

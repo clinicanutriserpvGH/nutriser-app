@@ -1178,3 +1178,7 @@
 
 - [x] Quitar texto "Puerto Vallarta" del pie de página en Splash0Entry
 - [x] Reemplazar imagen de tarjeta Nutriser Home (iMac) por imagen de clínica/interior de Nutriser
+
+## Splash 2: Imagen Nutriser Mall
+
+- [x] Reemplazar imagen de la tarjeta "Nutriser Mall" en NutriserHomePage por una imagen de tienda/productos de Nutriser

@@ -119,7 +119,7 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
             <button
               onClick={handlePortalSalud}
               className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-              style={{ minHeight: "180px" }}
+              style={{ minHeight: "180px", aspectRatio: "16/9" }}
             >
               <img
                 src={PORTAL_IMG}

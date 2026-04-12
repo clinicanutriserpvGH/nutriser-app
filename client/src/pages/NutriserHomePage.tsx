@@ -129,8 +129,8 @@ export default function NutriserHomePage() {
             </div>
           </div>
 
-          {/* ── 1. Paquetes + Tienda Productos + Academy + eBook (2 cols móvil, 4 cols desktop) ── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-3 md:mb-4">
+          {/* ── 4 tarjetas en grid: 2 columnas en móvil, 4 columnas en desktop ── */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-6">
             <CardHalf
               img={IMG_NUTRICION}
               icon={CalendarCheck}
@@ -152,10 +152,6 @@ export default function NutriserHomePage() {
               imgPosition="center 50%"
               isLight={isLight}
             />
-          </div>
-
-          {/* ── 2. Nutriser Academy | Tienda eBook (oculto en desktop, ya está en la fila de arriba) ── */}
-          <div className="grid grid-cols-2 lg:hidden gap-3 md:gap-4 mb-6">
             <CardHalf
               img={IMG_ACADEMY}
               icon={GraduationCap}

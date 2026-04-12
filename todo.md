@@ -1194,3 +1194,9 @@
 - [x] NutriserHomePage (Nutriser Mall): ampliar max-w y grid responsivo para desktop
 - [ ] PaquetesPage: ampliar max-w, cards de paquetes en grid 2-3 columnas en desktop
 - [ ] Revisar otras páginas internas (Servicios, Cursos, eBooks, etc.) para responsividad desktop
+
+## Corrección Responsividad Desktop (Round 2)
+
+- [ ] NutriserHomePage: quitar lg:hidden de la segunda fila para que las 4 tarjetas aparezcan en desktop en una sola fila de 4 columnas
+- [ ] Splash 1 (SplashSelector): corregir proporciones de tarjetas grandes en desktop (no deben ser cuadradas gigantes)
+- [ ] Splash 0 (Splash0Entry): igualar altura de las dos tarjetas en desktop

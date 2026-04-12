@@ -1139,3 +1139,7 @@
 
 - [x] Cambiar botón "← Regresar" en AdminDashboard para que lleve al Splash 1 (limpiar sessionStorage y redirigir a /)
 - [x] Quitar el botón/texto "Inicio" que aparece junto al botón Regresar
+
+## Panel Admin: Safe Area iPhone
+
+- [x] Agregar padding-top con env(safe-area-inset-top) en AdminDashboard para que el botón Regresar no quede sobre el reloj del iPhone

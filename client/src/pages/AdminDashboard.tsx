@@ -1098,7 +1098,10 @@ export default function AdminDashboard() {
   const pendingAppointments = appointments?.filter((a) => a.status === "pending") || [];
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] py-8 px-4">
+    <div
+      className="min-h-screen bg-[#FAF7F2] px-4"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 2rem)', paddingBottom: '2rem' }}
+    >
       <div className="max-w-6xl mx-auto">
         {/* Back Button — regresa al Splash 1 */}
         <div className="mb-6">

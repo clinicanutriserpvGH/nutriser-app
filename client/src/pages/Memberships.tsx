@@ -303,9 +303,9 @@ export default function Memberships() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAF7F2] to-[#F5F1E8] px-4 pb-12" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4rem)' }}>
+    <div className="min-h-screen bg-gradient-to-br from-[#FAF7F2] to-[#F5F1E8] px-4 md:px-8 lg:px-12 pb-12" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4rem)' }}>
       <BackToSplash />
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
 
@@ -321,7 +321,7 @@ export default function Memberships() {
         {step === "select" && (
           <>
             {/* Código de Promoción — visible antes de seleccionar paquete */}
-            <div className="max-w-xl mx-auto mb-8">
+            <div className="max-w-2xl mx-auto mb-8">
               <div className="border border-[#C5A55A]/30 rounded-xl p-5 bg-white shadow-sm">
                 <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-1.5">
                   <Tag className="w-4 h-4 text-[#C5A55A]" />
@@ -362,7 +362,7 @@ export default function Memberships() {
             </div>
 
             {/* Paquetes Nutricionales: Básico y Premium */}
-            <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 lg:gap-12 mb-8 max-w-5xl mx-auto">
               {PROGRAMS.filter(p => !p.exclusive).map((program) => {
                 const hasDiscount = discountInfo?.valid && !discountInfo.isTwoForOne;
                 const isGift = discountInfo?.valid && discountInfo.isGift;
@@ -456,9 +456,9 @@ export default function Memberships() {
 
         {/* Step: Form */}
         {step === "form" && selectedProgram && (
-          <Card className="max-w-2xl mx-auto border-2 border-[#C5A55A]/20">
-            <CardHeader>
-              <CardTitle>Completa tus datos</CardTitle>
+          <Card className="max-w-4xl mx-auto border-2 border-[#C5A55A]/20">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-2xl">Completa tus datos</CardTitle>
               <CardDescription>
                 Programa: {PROGRAMS.find(p => p.id === selectedProgram)?.name}
               </CardDescription>
@@ -555,7 +555,7 @@ export default function Memberships() {
 
         {/* Step: Upload Proof */}
         {step === "proof" && selectedProgram && (
-          <Card className="max-w-2xl mx-auto border-2 border-[#C5A55A]/20">
+          <Card className="max-w-4xl mx-auto border-2 border-[#C5A55A]/20">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>

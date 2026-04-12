@@ -132,9 +132,20 @@ function AppContent() {
     }
   };
 
+  // Volver al Splash 1 (hub de Nutriser) desde el sitio principal
+  const handleShowSplash1 = () => {
+    sessionStorage.setItem("nutriser_splash_seen", "1");
+    sessionStorage.setItem("nutriser_chose_splash1", "1");
+    if (location === "/") {
+      setSplashState("splash1");
+    } else {
+      window.location.href = "/";
+    }
+  };
+
   return (
     <SplashThemeProvider>
-    <SplashContext.Provider value={{ showSplash: handleShowSplash }}>
+    <SplashContext.Provider value={{ showSplash: handleShowSplash, showSplash1: handleShowSplash1 }}>
       <BackgroundMusic />
 
       {/* Splash 0: pantalla de entrada con 2 opciones */}

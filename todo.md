@@ -1164,3 +1164,7 @@
 - [x] Agregar botón "← Regresar" en Splash 1 (SplashSelector) que lleve al Splash 0
 - [x] Copiar los íconos de redes sociales del Splash 1 al Splash 0 (Splash0Entry)
 - [x] Quitar los íconos de redes sociales del Splash 1 (ya estarán en Splash 0)
+
+## Navbar: Botón Regresar al Splash 1
+
+- [x] Agregar botón "← Regresar" en la Navbar del sitio principal que lleve al Splash 1 (usando SplashContext)

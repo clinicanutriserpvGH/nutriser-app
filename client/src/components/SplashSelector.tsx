@@ -394,65 +394,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
           </div>
 
-          {/* Fila 2: Portal de Salud (ancho completo) */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
-            <div className="col-span-2">
-              <button
-                onClick={() => { window.location.href = "https://portaldesaludnutriser.club"; }}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-                style={{ minHeight: "180px" }}
-              >
-                <img
-                  src={PORTAL_IMG}
-                  alt="Portal de Salud Nutriser"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/80" />
-                <div className="relative flex flex-col justify-between p-3 sm:p-4 text-left" style={{ minHeight: "180px" }}>
-                  <div className="flex items-center gap-1.5">
-                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden ${isLight ? "bg-[#C5A55A]/20" : "bg-black/30 backdrop-blur-sm"}`}>
-                      <img
-                        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-silhouette-icon_f9345ac8.png"
-                        alt="Nutriser"
-                        className="w-full h-full object-contain p-0.5"
-                      />
-                    </div>
-                    <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">
-                      App Pacientes
-                    </span>
-                  </div>
-                  <div>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-1.5 drop-shadow-lg text-white">
-                      Portal de Salud Nutriser
-                    </h2>
-                    <div className="grid grid-cols-4 gap-x-2 gap-y-3 mb-3 w-full">
-                      {[
-                        { icon: Utensils, label: "Mi Dieta" },
-                        { icon: Camera, label: "Scan Food" },
-                        { icon: ClipboardList, label: "Detonantes" },
-                        { icon: PauseCircle, label: "Pausa" },
-                        { icon: ShoppingCart, label: "Lista Súper" },
-                        { icon: BookOpen, label: "Recetario" },
-                        { icon: Ruler, label: "Mediciones" },
-                        { icon: Repeat2, label: "Hábitos" },
-                      ].map(({ icon: Ic, label }) => (
-                        <div key={label} className="flex flex-col items-center gap-1">
-                          <div className="w-9 h-9 rounded-full border flex items-center justify-center bg-black/40 backdrop-blur-sm border-white/30">
-                            <Ic className="w-4 h-4 text-[#C5A55A]" />
-                          </div>
-                          <span className="text-[8px] font-medium leading-tight text-center w-full text-white/80">{label}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 mt-1 bg-white/20 backdrop-blur-sm text-white border border-white/40">
-                      Acceder / Crear Cuenta
-                    </span>
-                  </div>
-                </div>
-              </button>
-            </div>
-          </div>
-
           {/* ── Mis Tratamientos + Agendar Cita ── */}
           <div className="grid grid-cols-2 gap-3 mb-4 md:mb-5">
 

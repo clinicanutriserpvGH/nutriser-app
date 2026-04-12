@@ -1150,3 +1150,7 @@
 - [x] Conectar Splash0Entry como primera pantalla en App.tsx
 - [x] Cambiar texto "Nutriser Home" por "Nutriser Web" en la tarjeta del Splash 1
 - [x] Al regresar desde Splash 1, volver al Splash 0
+
+## Splash 1: Quitar Portal de Salud
+
+- [x] Eliminar la tarjeta "Portal de Salud Nutriser" del Splash 1 (SplashSelector.tsx) ya que ahora está en el Splash 0

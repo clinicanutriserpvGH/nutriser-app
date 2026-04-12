@@ -1134,3 +1134,8 @@
 ## Bug: Mapa de Google al fondo de la página principal abre URL de embed con error
 
 - [x] Corregir iframe de Google Maps en ContactSection.tsx: mostrar preview del mapa pero con overlay de tap-to-open — al tocar el mapa debe abrir Google Maps, no navegar a la URL de embed
+
+## Panel Admin: Botón Regresar → Splash 1
+
+- [x] Cambiar botón "← Regresar" en AdminDashboard para que lleve al Splash 1 (limpiar sessionStorage y redirigir a /)
+- [x] Quitar el botón/texto "Inicio" que aparece junto al botón Regresar

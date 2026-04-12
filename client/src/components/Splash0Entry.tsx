@@ -77,7 +77,7 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
             </div>
           </div>
 
-          {/* ── Tarjeta 1: Nutriser Web ── */}
+          {/* ── Tarjeta 1: Nutriser Home ── */}
           <div className="mb-3">
             <button
               onClick={handleNutriserWeb}
@@ -86,7 +86,7 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
             >
               <img
                 src={CLINIC_IMG2}
-                alt="Nutriser Web"
+                alt="Nutriser Home"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 style={{ objectPosition: "center center" }}
               />
@@ -102,7 +102,7 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
                 </div>
                 <div>
                   <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-3 drop-shadow-lg text-white">
-                    Nutriser Web
+                    Nutriser Home
                   </h2>
                   <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
                     Entrar

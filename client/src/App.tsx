@@ -72,6 +72,9 @@ function Router() {
 // "site"    → mostrar el sitio principal (Home)
 type SplashState = "splash0" | "splash1" | "site";
 
+// Versión del splash — incrementar cuando cambie el diseño para forzar que todos vean el nuevo splash
+const SPLASH_VERSION = "v2";
+
 function AppContent() {
   const [location] = useLocation();
 
@@ -80,6 +83,14 @@ function AppContent() {
     if (isNoSplashRoute(location)) return "site";
     // Solo mostrar en "/"
     if (location !== "/") return "site";
+
+    // Si la versión del splash cambió, limpiar el estado guardado
+    const savedVersion = sessionStorage.getItem("nutriser_splash_version");
+    if (savedVersion !== SPLASH_VERSION) {
+      sessionStorage.removeItem("nutriser_splash_seen");
+      sessionStorage.removeItem("nutriser_chose_splash1");
+      sessionStorage.setItem("nutriser_splash_version", SPLASH_VERSION);
+    }
 
     const seen = sessionStorage.getItem("nutriser_splash_seen");
     if (!seen) return "splash0";

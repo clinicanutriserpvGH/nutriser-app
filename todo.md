@@ -1168,3 +1168,8 @@
 ## Navbar: Botón Regresar al Splash 1
 
 - [x] Agregar botón "← Regresar" en la Navbar del sitio principal que lleve al Splash 1 (usando SplashContext)
+
+## Navbar: Dos botones — INICIO (Splash 0) y Regresar (Splash 1)
+
+- [x] Agregar botón "INICIO" en Navbar que lleve al Splash 0 (showSplash)
+- [x] Mantener botón "← Regresar" en Navbar que lleve al Splash 1 (showSplash1)

@@ -10,7 +10,7 @@ import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOp
 import { toast } from "sonner";
 
 const ADMIN_TABS = [
-  { value: 'memberships', label: 'Membresías', emoji: '👥' },
+  { value: 'memberships', label: 'Cupones Adquiridos', emoji: '🏷️' },
   { value: 'appointments', label: 'Citas', emoji: '📅' },
   { value: 'giftPurchases', label: 'Regalos', emoji: '🎁' },
   { value: 'promotions', label: 'Promociones', emoji: '🏷️' },
@@ -616,21 +616,21 @@ export default function AdminDashboard() {
   const utils = trpc.useUtils();
   const updateStatusMutation = trpc.memberships.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success("Membresía activada y correo enviado");
+      toast.success("Cupón activado y correo enviado");
       utils.memberships.list.invalidate();
     },
     onError: (error) => {
-      toast.error("Error al activar membresía: " + error.message);
+      toast.error("Error al activar cupón: " + error.message);
     },
   });
 
   const deleteMembershipMutation = trpc.memberships.cancel.useMutation({
     onSuccess: () => {
-      toast.success("Membresía eliminada");
+      toast.success("Cupón eliminado");
       utils.memberships.list.invalidate();
     },
     onError: (error) => {
-      toast.error("Error al eliminar membresía: " + error.message);
+      toast.error("Error al eliminar cupón: " + error.message);
     },
   });
 
@@ -680,10 +680,10 @@ export default function AdminDashboard() {
   const handleDeleteAll = () => {
     if (!memberships) return;
     if (memberships.length === 0) {
-      toast.error("No hay membresías para eliminar");
+      toast.error("No hay cupones para eliminar");
       return;
     }
-    if (confirm(`Estás seguro de que deseas eliminar TODAS las ${memberships.length} membresía(s)? Esta acción no se puede deshacer.`)) {
+    if (confirm(`Estás seguro de que deseas eliminar TODOS los ${memberships.length} cupón(es)? Esta acción no se puede deshacer.`)) {
       memberships.forEach((m) => {
         deleteMembershipMutation.mutate({ membershipId: m.id });
       });
@@ -1139,7 +1139,7 @@ export default function AdminDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#999] text-sm">Total Membresías</p>
+                  <p className="text-[#999] text-sm">Total Cupones</p>
                   <p className="text-3xl font-bold text-[#C5A55A]">{memberships?.length || 0}</p>
                 </div>
                 <Users className="w-8 h-8 text-[#C5A55A]/30" />
@@ -1223,8 +1223,8 @@ export default function AdminDashboard() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-[#C5A55A]">Solicitudes de Membresía</CardTitle>
-                    <CardDescription>Gestiona las solicitudes de membresía de los clientes</CardDescription>
+                    <CardTitle className="text-[#C5A55A]">Solicitudes de Cupones</CardTitle>
+                    <CardDescription>Gestiona las solicitudes de cupones de los clientes</CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button

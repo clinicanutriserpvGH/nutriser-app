@@ -30,7 +30,7 @@ export default function AdminMemberships() {
   const handleUpdateStatus = async (id: number, status: "verified" | "rejected") => {
     try {
       await updateStatusMutation.mutateAsync({ id, status });
-      toast.success(`Membresía ${status === "verified" ? "verificada" : "rechazada"}`);
+      toast.success(`Cupón ${status === "verified" ? "verificado" : "rechazado"}`);
       refetch();
     } catch (error) {
       toast.error("Error al actualizar el estado");
@@ -45,8 +45,8 @@ export default function AdminMemberships() {
     };
     const labels: Record<string, string> = {
       pending: "Pendiente",
-      verified: "Verificada",
-      rejected: "Rechazada",
+      verified: "Verificado",
+      rejected: "Rechazado",
     };
     return <Badge variant={variants[status]}>{labels[status]}</Badge>;
   };
@@ -55,7 +55,7 @@ export default function AdminMemberships() {
     <div className="min-h-screen bg-gradient-to-br from-[#FAF7F2] to-[#F5F1E8] py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-serif text-[#1A1A1A] mb-8">
-          Panel de Administración - Membresías
+          Panel de Administración - Cupones Adquiridos
         </h1>
 
         {isLoading ? (
@@ -66,7 +66,7 @@ export default function AdminMemberships() {
           <Card>
             <CardContent className="pt-6">
               <p className="text-center text-gray-600">
-                No hay membresías registradas aún.
+                No hay cupones registrados aún.
               </p>
             </CardContent>
           </Card>

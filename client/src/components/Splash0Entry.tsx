@@ -4,7 +4,7 @@
  * Mismo diseño de tarjetas que SplashSelector (Splash 1)
  */
 import { useState } from "react";
-import { Home, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2, Sparkles } from "lucide-react";
+import { Home, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2, Sparkles, CalendarCheck } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
 const LOGO_URL =
@@ -171,35 +171,55 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
 
           </div>{/* fin grid tarjetas */}
 
-          {/* ── Tarjeta Mis Tratamientos ── */}
-          <div className="mb-4">
+          {/* ── Mis Tratamientos + Agendar Cita ── */}
+          <div className="grid grid-cols-2 gap-3 lg:gap-6 mb-4">
+
+            {/* Mis Tratamientos */}
             <button
               onClick={() => { window.location.href = '/mis-tratamientos'; }}
               className="group relative w-full rounded-2xl overflow-hidden border transition-all duration-200 focus:outline-none"
-              style={{ minHeight: '80px', borderColor: 'rgba(197,165,90,0.35)' }}
+              style={{ minHeight: '110px', aspectRatio: '4/3', borderColor: 'rgba(197,165,90,0.35)' }}
             >
               <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-tratamientos_a1b2c3d4.jpg"
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-agendar-cita_49e2eca2.jpg"
                 alt="Mis Tratamientos"
-                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-55 transition-opacity duration-200"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-65 transition-opacity duration-200"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/20" />
-              <div className="relative flex items-center gap-4 px-5 py-4">
-                <div className="w-11 h-11 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
-                  <Sparkles className="w-6 h-6 text-black" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
+                <div className="w-10 h-10 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-black" />
                 </div>
-                <div className="flex-1 text-left">
-                  <p className="font-bold text-sm sm:text-base text-white drop-shadow">Mis Tratamientos</p>
-                  <p className="text-[10px] sm:text-xs text-white/70 mt-0.5">Seguimiento y descuentos personalizados</p>
-                </div>
-                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#C5A55A]" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                <div className="text-center">
+                  <p className="font-bold text-xs sm:text-sm text-white drop-shadow">Mis Tratamientos</p>
+                  <p className="text-[9px] sm:text-[10px] leading-tight mt-0.5 text-white/70">Seguimiento y descuentos</p>
                 </div>
               </div>
             </button>
+
+            {/* Agendar Cita */}
+            <button
+              onClick={() => { window.location.href = '/appointment-form'; }}
+              className="group relative w-full rounded-2xl overflow-hidden border transition-all duration-200 focus:outline-none"
+              style={{ minHeight: '110px', aspectRatio: '4/3', borderColor: 'rgba(197,165,90,0.35)' }}
+            >
+              <img
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-agendar-cita_49e2eca2.jpg"
+                alt="Agendar Cita"
+                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-65 transition-opacity duration-200"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
+                <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/80 flex items-center justify-center shadow-lg shadow-[#C5A55A]/30 flex-shrink-0">
+                  <CalendarCheck className="w-5 h-5 text-black" />
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-xs sm:text-sm text-white drop-shadow">Agendar Cita</p>
+                  <p className="text-[9px] sm:text-[10px] leading-tight mt-0.5 text-white/70">Reserva tu servicio</p>
+                </div>
+              </div>
+            </button>
+
           </div>
 
           {/* ── Íconos de redes sociales — más grandes en desktop ── */}

@@ -412,38 +412,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
           </div>
 
-          {/* ── Agendar Cita ── */}
-          <div className="grid grid-cols-1 gap-3 md:gap-4 lg:gap-6 mb-4 md:mb-5 lg:mb-6">
-
-            {/* Agendar Cita */}
-            <button
-              onClick={() => handleNavigate('/appointment-form')}
-              className={`relative rounded-2xl overflow-hidden border transition-all duration-200 group ${isLight ? "border-[#C5A55A]/30 hover:border-[#C5A55A]" : "border-[#C5A55A]/30 hover:border-[#C5A55A]"}`}
-              style={{ minHeight: "90px" }}
-            >
-              <div className="absolute inset-0">
-                <img
-                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-agendar-cita_49e2eca2.jpg"
-                  alt="Agendar Cita"
-                  className="w-full h-full object-cover transition-opacity opacity-50 group-hover:opacity-60"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-              </div>
-              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
-                <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/80 flex items-center justify-center shadow-lg shadow-[#C5A55A]/30 flex-shrink-0">
-                  <CalendarCheck className="w-5 h-5 text-black" />
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-xs sm:text-sm text-white drop-shadow">Agendar Cita</p>
-                  <p className="text-[9px] sm:text-[10px] leading-tight mt-0.5 text-white/70">
-                    Reserva tu servicio personalizado
-                  </p>
-                </div>
-              </div>
-            </button>
-
-          </div>
-
           {/* ── Barra de acciones rápidas: solo Cuponera y Servicios ── */}
           <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-6 mb-4 md:mb-5 lg:mb-6">
             {/* Cuponera de Descuentos */}

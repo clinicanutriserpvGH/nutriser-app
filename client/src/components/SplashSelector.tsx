@@ -415,23 +415,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
           </div>
 
-          {/* ── Agendar Cita ── */}
-          <div className="grid grid-cols-1 gap-2 md:gap-3 lg:gap-4 mb-4">
 
-            {/* Agendar Cita */}
-            <button
-              onClick={() => handleNavigate('/appointment-form')}
-              className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/85 border-[#C5A55A]/60 hover:border-[#C5A55A] hover:bg-[#2a1f0a]"
-            >
-              <div className="w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
-                <CalendarCheck className="w-5 h-5 text-black" />
-              </div>
-              <span className="text-[10px] sm:text-xs font-bold text-center leading-tight text-white">
-                Agendar Cita
-              </span>
-            </button>
-
-          </div>
 
           {/* ── Botón Administración ── */}
           <div className="flex justify-center gap-3 mb-5">

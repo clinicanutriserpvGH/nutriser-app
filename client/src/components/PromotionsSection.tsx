@@ -201,8 +201,8 @@ export default function PromotionsSection() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const createGiftPurchase = trpc.giftPurchases.create.useMutation({
-    onSuccess: (data) => {
-      setGeneratedCode(data.couponCode || "");
+    onSuccess: (_data) => {
+      setGeneratedCode(""); // el código se genera al aprobar, no aquí
       setStep("success");
       setIsSubmitting(false);
       if (timerRef.current) clearInterval(timerRef.current);
@@ -809,15 +809,16 @@ export default function PromotionsSection() {
 
             {step === "success" && (
               <div className="p-6 text-center space-y-4">
-                <div className="text-5xl mb-2">🎉</div>
-                <h3 className="font-bold text-xl text-[#1A1A1A]">¡Cupón Registrado!</h3>
-                <p className="text-gray-600 text-sm">Tu solicitud fue enviada. El administrador verificará tu pago y activará tu cupón.</p>
-                <div className="bg-[#FAF7F2] border-2 border-[#C5A55A] rounded-xl p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Tu código de cupón</p>
-                  <p className="font-mono font-black text-2xl text-[#C5A55A] tracking-widest">{generatedCode}</p>
+                <div className="text-5xl mb-2">⏳</div>
+                <h3 className="font-bold text-xl text-[#1A1A1A]">¡Solicitud Enviada!</h3>
+                <p className="text-gray-600 text-sm">Tu comprobante fue recibido correctamente. El administrador revisará tu pago y, una vez autorizado, recibirás tu código de cupón por correo electrónico.</p>
+                <div className="bg-[#FAF7F2] border-2 border-[#C5A55A]/40 rounded-xl p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">🔒 Estado de tu solicitud</p>
+                  <p className="font-semibold text-[#C5A55A] text-lg">Pendiente de autorización</p>
+                  <p className="text-xs text-gray-400 mt-1">Tu código aparecerá en tu correo una vez aprobado</p>
                 </div>
-                <p className="text-xs text-gray-400">Recibirás un correo de confirmación cuando sea aprobado.</p>
-                <button onClick={() => { setGiftModalOpen(false); resetForm(); }} className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition">Cerrar</button>
+                <p className="text-xs text-gray-400">Tiempo estimado de respuesta: 24-48 horas hábiles.</p>
+                <button onClick={() => { setGiftModalOpen(false); resetForm(); }} className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-xl font-bold transition">Entendido</button>
               </div>
             )}
           </div>

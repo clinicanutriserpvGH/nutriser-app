@@ -365,12 +365,7 @@ export const appRouter = router({
         recipientContact: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        // Generate unique coupon code: NUT-XXXX-XXXX
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        const part1 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-        const part2 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-        const couponCode = `NUT-${part1}-${part2}`;
-
+        // NO se genera el código aquí — se genera al aprobar (igual que paquetes/membersías)
         // Upload proof to S3
         const buffer = Buffer.from(input.proofData, 'base64');
         const fileName = `gift-proof-${Date.now()}.${input.proofMimeType.split('/')[1]}`;
@@ -378,7 +373,7 @@ export const appRouter = router({
 
         const purchase = await createGiftPurchase({
           promotionId: input.promotionId,
-          couponCode,
+          couponCode: '', // se asigna al aprobar
           buyerName: input.buyerName,
           buyerEmail: input.buyerEmail,
           buyerPhone: input.buyerPhone,
@@ -389,7 +384,7 @@ export const appRouter = router({
           status: 'pending',
         });
 
-        // Notify admin via Gmail
+        // Notify admin via Gmail (sin código aún)
         try {
           const { getAllPromotionsForAdmin } = await import('./db');
           const promos = await getAllPromotionsForAdmin();
@@ -400,7 +395,7 @@ export const appRouter = router({
             input.buyerName,
             input.buyerEmail,
             input.buyerPhone,
-            couponCode,
+            '(pendiente de autorización)',
             promotionTitle,
             input.isGift,
             input.recipientName
@@ -409,7 +404,8 @@ export const appRouter = router({
           console.error('Error sending coupon purchase notification:', e);
         }
 
-        return { success: true, id: purchase.id, couponCode };
+        // Solo devolvemos el id, NO el código — el usuario verá mensaje de espera
+        return { success: true, id: purchase.id };
       }),
 
     list: publicProcedure.query(async () => {
@@ -422,7 +418,13 @@ export const appRouter = router({
         const purchase = await getGiftPurchaseById(input.id);
         if (!purchase) throw new Error('Compra no encontrada');
 
-        await updateGiftPurchaseStatus(input.id, 'approved');
+        // Generar código único AHORA al aprobar (no al crear)
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const part1 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const part2 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const couponCode = `NUT-${part1}-${part2}`;
+
+        await updateGiftPurchaseStatus(input.id, 'approved', couponCode);
 
         // Get promotion title and expiresAt
         let promotionTitle = 'Promoción Nutriser';
@@ -437,11 +439,11 @@ export const appRouter = router({
           }
         } catch {}
 
-        // Send email to buyer
+        // Send email to buyer with the newly generated code
         await sendCouponApprovedEmail(
           purchase.buyerEmail,
           purchase.buyerName,
-          purchase.couponCode,
+          couponCode,
           promotionTitle,
           purchase.isGift ?? false,
           purchase.recipientName ?? undefined,

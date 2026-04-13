@@ -10,7 +10,7 @@ import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOp
 import { toast } from "sonner";
 
 const ADMIN_TABS = [
-  { value: 'memberships', label: 'Cupones Adquiridos', emoji: '🏷️' },
+  { value: 'memberships', label: 'Paquetes Comprados', emoji: '📦' },
   { value: 'appointments', label: 'Citas', emoji: '📅' },
   { value: 'giftPurchases', label: 'Cupones Comprados', emoji: '🏷️' },
   { value: 'promotions', label: 'Crear Cupón', emoji: '➕' },
@@ -1139,7 +1139,7 @@ export default function AdminDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#999] text-sm">Total Cupones</p>
+                  <p className="text-[#999] text-sm">Total Paquetes</p>
                   <p className="text-3xl font-bold text-[#C5A55A]">{memberships?.length || 0}</p>
                 </div>
                 <Users className="w-8 h-8 text-[#C5A55A]/30" />
@@ -1223,8 +1223,8 @@ export default function AdminDashboard() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-[#C5A55A]">Solicitudes de Cupones</CardTitle>
-                    <CardDescription>Gestiona las solicitudes de cupones de los clientes</CardDescription>
+                    <CardTitle className="text-[#C5A55A]">Solicitudes de Paquetes</CardTitle>
+                    <CardDescription>Gestiona las solicitudes de paquetes de los clientes</CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button

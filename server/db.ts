@@ -452,13 +452,14 @@ export async function getGiftPurchaseById(id: number) {
   return result[0] || null;
 }
 
-export async function updateGiftPurchaseStatus(id: number, status: "pending" | "approved" | "rejected" | "used") {
+export async function updateGiftPurchaseStatus(id: number, status: "pending" | "approved" | "rejected" | "used", couponCode?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
   await db.update(giftPurchases).set({ 
     status,
     approvedAt: status === "approved" ? new Date() : undefined,
+    ...(couponCode ? { couponCode } : {}),
   }).where(eq(giftPurchases.id, id));
   return { success: true };
 }

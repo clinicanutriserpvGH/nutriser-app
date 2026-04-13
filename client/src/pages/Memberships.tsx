@@ -591,7 +591,7 @@ export default function Memberships() {
                     <CopyButton text={BANK_INFO.account} />
                   </div>
                   <p className="text-xs text-[#1A1A1A]/50 mt-2">
-                    Concepto: <strong>{formData.clientName ? `${formData.clientName} – ` : "Tu nombre – "}{PROGRAMS.find(p => p.id === selectedProgram)?.name}</strong>
+                    Concepto: <strong>{formData.clientName || 'Tu nombre'}</strong>
                   </p>
                 </div>
 

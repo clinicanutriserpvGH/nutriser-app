@@ -774,7 +774,7 @@ export default function PromotionsSection() {
                   <p className="text-amber-700">Realiza tu transferencia a:</p>
                   <p className="font-mono font-bold text-amber-900 mt-1">CLABE: 002470701448743487</p>
                   <p className="text-amber-700 text-xs mt-1">Banco: Banamex</p>
-                  <p className="text-amber-700 text-xs mt-1">Concepto: <span className="font-semibold">{buyerName} – {selectedPromo?.title}</span></p>
+                  <p className="text-amber-700 text-xs mt-1">Concepto: <span className="font-semibold">{buyerName}</span></p>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500">Tiempo restante:</span>

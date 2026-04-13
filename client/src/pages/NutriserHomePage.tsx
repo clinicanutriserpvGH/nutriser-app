@@ -6,6 +6,7 @@ import {
   BookOpen, CalendarCheck, GraduationCap, ShoppingBag, ChevronLeft,
 } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
+import { useSplash } from "@/contexts/SplashContext";
 
 /* ─── Assets ────────────────────────────────────────────────────────────── */
 const LOGO_URL =
@@ -65,11 +66,16 @@ function CardHalf({
 /* ─── Componente principal ───────────────────────────────────────────────── */
 export default function NutriserHomePage() {
   const { isLight } = useSplashTheme();
+  const { showSplash1 } = useSplash();
 
   const goTo = (path: string) => { window.location.href = path; };
   const goBack = () => {
     sessionStorage.removeItem("nutriser_splash_seen");
     window.location.href = "/";
+  };
+  const goToSplash1 = () => {
+    // Regresar al Splash 1 (hub de Nutriser) sin recargar la página
+    showSplash1();
   };
 
   // Colores dinámicos
@@ -101,13 +107,21 @@ export default function NutriserHomePage() {
           <div className={`flex items-center gap-2 mb-4 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
             isLight ? "bg-[#2a1f0a]/90 shadow-lg shadow-[#C5A55A]/10" : "bg-transparent"
           }`} style={{ paddingTop: isLight ? undefined : 'env(safe-area-inset-top, 12px)' }}>
-            {/* Botón Inicio */}
+            {/* Botón Inicio → Splash 0 */}
             <button
               onClick={goBack}
               className={`flex items-center gap-1 transition-all text-xs font-medium px-2.5 py-1.5 rounded-full flex-shrink-0 ${backBtn}`}
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               Inicio
+            </button>
+            {/* Botón Regresar → Splash 1 */}
+            <button
+              onClick={goToSplash1}
+              className={`flex items-center gap-1 transition-all text-xs font-medium px-2.5 py-1.5 rounded-full flex-shrink-0 ${backBtn}`}
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              Regresar
             </button>
             {/* Separador */}
             <div className="w-px h-8 bg-[#C5A55A]/20 flex-shrink-0" />

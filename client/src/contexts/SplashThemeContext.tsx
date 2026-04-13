@@ -19,7 +19,9 @@ const SplashThemeContext = createContext<SplashThemeContextType | undefined>(und
  */
 function getAutoTheme(): SplashTheme {
   const hour = new Date().getHours();
-  return hour >= 6 && hour < 19 ? "light" : "dark";
+  // Modo claro: 06:00 – 21:59 (6am a 10pm)
+  // Modo oscuro: 22:00 – 05:59 (10pm a 6am)
+  return hour >= 6 && hour < 22 ? "light" : "dark";
 }
 
 const STORAGE_KEY = "nutriser_splash_theme";

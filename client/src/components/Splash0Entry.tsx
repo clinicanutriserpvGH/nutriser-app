@@ -63,13 +63,13 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
       }}
     >
       <div
-        className="min-h-screen w-full flex flex-col items-center justify-center px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border"
+        className="h-screen w-full flex flex-col items-center px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border overflow-hidden"
         style={{
-          paddingTop: "max(env(safe-area-inset-top, 0px) + 16px, 24px)",
-          paddingBottom: "max(env(safe-area-inset-bottom, 0px) + 8px, 24px)",
+          paddingTop: "max(env(safe-area-inset-top, 0px) + 12px, 20px)",
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px) + 8px, 16px)",
         }}
       >
-        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px]">
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px] flex flex-col h-full">
 
           {/* ── Header ── */}
           <div className={`flex items-center gap-3 mb-5 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
@@ -92,16 +92,16 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
 
           {/* ── Grid principal asimétrico ── */}
           {/* Móvil: columna única | Tablet (md+): 40% izquierda + 60% derecha */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4 lg:gap-5 mb-5">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4 lg:gap-5 mb-3 flex-1 min-h-0">
 
             {/* ── Columna izquierda (40%) — Nutriser Home + Mis Tratamientos ── */}
-            <div className="md:col-span-2 flex flex-col gap-3">
+            <div className="md:col-span-2 flex flex-col gap-3 h-full">
 
               {/* Tarjeta 1: Nutriser Home */}
               <button
                 onClick={handleNutriserWeb}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
-                style={{ minHeight: "130px", height: "130px" }}
+                style={{ minHeight: "120px" }}
               >
                 <img
                   src={CLINIC_IMG2}
@@ -131,7 +131,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
               <button
                 onClick={() => handleNavigate('/mis-tratamientos')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
-                style={{ minHeight: "120px", height: "120px" }}
+                style={{ minHeight: "100px" }}
               >
                 <img
                   src={TREATMENT_IMG}
@@ -161,11 +161,11 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
             </div>
 
             {/* ── Columna derecha (60%) — Portal de Salud (grande) ── */}
-            <div className="md:col-span-3">
+            <div className="md:col-span-3 h-full">
               <button
                 onClick={handlePortalSalud}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
-                style={{ minHeight: "260px", height: "260px" }}
+                style={{ minHeight: "240px" }}
               >
                 <img
                   src={PORTAL_IMG}

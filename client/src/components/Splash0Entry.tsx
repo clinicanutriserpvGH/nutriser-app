@@ -6,7 +6,7 @@
  * En móvil: apilado vertical
  */
 import { useState } from "react";
-import { Home, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2, Sparkles, CalendarCheck, Moon, Sun, Lock } from "lucide-react";
+import { Home, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2, Sparkles, CalendarCheck, Moon, Sun } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
 const LOGO_URL =
@@ -316,20 +316,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
 
           </div>
 
-          {/* ── Botón Administración ── */}
-          <div className="flex justify-center mb-3">
-            <button
-              onClick={() => { window.location.href = '/admin/login'; }}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-[11px] font-medium transition-all duration-200 ${
-                isLight
-                  ? "bg-[#EDE5D5]/60 hover:bg-[#E0D5C0]/80 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 text-[#9a8050] hover:text-[#7a6030]"
-                  : "bg-white/5 hover:bg-white/10 border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70"
-              }`}
-            >
-              <Lock className="w-3 h-3" />
-              Administración
-            </button>
-          </div>
+
 
           {/* ── Pie ── */}
           <div className="flex items-center justify-between mt-2">

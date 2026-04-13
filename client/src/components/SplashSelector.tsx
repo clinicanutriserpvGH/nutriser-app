@@ -446,7 +446,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                   <ClipboardList className="w-5 h-5 text-[#C5A55A]" />
                 </div>
                 <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
-                  Servicios
+                  Catálogo de Servicios
                 </span>
               </button>
             )}

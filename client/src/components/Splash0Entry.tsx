@@ -196,7 +196,7 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
                 <Sparkles className="w-5 h-5 text-[#C5A55A]" />
               </div>
               <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
-                Seguimiento a Mis Tratamientos
+                Mis Tratamientos
               </span>
             </button>
 

@@ -782,7 +782,7 @@ export default function MyTreatments() {
             <div className="flex lg:flex-col bg-white/5 rounded-2xl p-1 gap-1">
               {([
                 { id: "purchases", icon: ShieldCheck, label: "Mis Compras" },
-                { id: "tracking", icon: Sparkles, label: "Seguimiento" },
+                { id: "tracking", icon: Sparkles, label: "Mis Tratamientos" },
                 { id: "photos", icon: Camera, label: "Fotos" },
                 { id: "consent", icon: FileText, label: "Contrato" },
               ] as const).map(tab => (

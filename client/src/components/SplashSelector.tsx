@@ -387,13 +387,12 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
             {/* Widget Nutriser Mall (tienda/shop) — derecha */}
             <div className="col-span-1">
-              <button
-                onClick={() => handleNavigate('/nutriser-home')}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
+              <div
+                className="group relative w-full rounded-3xl overflow-hidden"
                 style={{ minHeight: "220px", aspectRatio: "16/9" }}
               >
                 <img src={CLINIC_IMG} alt="Nutriser Mall" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
@@ -403,54 +402,34 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                   </div>
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Mall</h2>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
-                      Visitar
-                    </span>
+                    {/* Accesos directos dentro de Nutriser Mall */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleNavigate('/nutriser-home')}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40"
+                      >
+                        <ShoppingBag className="w-3 h-3" />
+                        Visitar
+                      </button>
+                      <button
+                        onClick={() => handleNavigate('/services')}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 hover:scale-105 bg-[#C5A55A]/80 backdrop-blur-sm text-black border border-[#C5A55A]"
+                      >
+                        <ClipboardList className="w-3 h-3" />
+                        Servicios
+                      </button>
+                      <button
+                        onClick={() => handleNavigate('/coupons')}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 hover:scale-105 bg-[#C5A55A] backdrop-blur-sm text-black border border-[#C5A55A]"
+                      >
+                        <Tag className="w-3 h-3" />
+                        Cupones
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </button>
-            </div>
-          </div>
-
-          {/* ── Barra de acciones rápidas: 4 botones en 2x2 ── */}
-          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-4 mb-4">
-
-            {/* Catálogo de Servicios — debajo de Nutriser Web (izquierda) */}
-            <button
-              onClick={() => handleNavigate('/services')}
-              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group ${
-                isLight
-                  ? "bg-[#2a1f0a]/75 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]/90"
-                  : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10"
-              }`}
-            >
-              <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/30 group-hover:bg-[#C5A55A]/50 flex items-center justify-center transition-colors">
-                <ClipboardList className="w-5 h-5 text-[#C5A55A]" />
               </div>
-              <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
-                Catálogo de Servicios
-              </span>
-            </button>
-
-            {/* Cuponera de Descuentos — debajo de Nutriser Mall (derecha) */}
-            {!showEmailForm && (
-              <button
-                onClick={() => handleNavigate('/coupons')}
-                className={`relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group overflow-hidden ${
-                  isLight
-                    ? "bg-[#2a1f0a]/85 border-[#C5A55A]/60 hover:border-[#C5A55A] hover:bg-[#2a1f0a]"
-                    : "bg-white/5 border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10"
-                }`}
-              >
-                <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-pulse" style={{ animationDuration: "2s" }} />
-                <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
-                  <Tag className="w-5 h-5 text-black" />
-                </div>
-                <span className="relative text-[10px] sm:text-xs font-bold text-center leading-tight text-white">
-                  Cuponera de Descuentos
-                </span>
-              </button>
-            )}
+            </div>
           </div>
 
           {/* ── Agendar Cita + Mis Tratamientos ── */}

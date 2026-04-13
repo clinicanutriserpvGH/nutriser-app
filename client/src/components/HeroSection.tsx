@@ -4,7 +4,7 @@
  * Portal de Salud as the primary featured element
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Gift, CalendarCheck, ShoppingBag, MapPin } from "lucide-react";
+import { ChevronDown, Gift, CalendarCheck, ShoppingBag, MapPin, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const HERO_IMAGES = [
@@ -145,7 +145,7 @@ export default function HeroSection() {
                 const el = document.querySelector("#promociones");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}
-              className="relative col-span-2 inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-10 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
+              className="relative col-span-1 inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
               animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
               transition={{ duration: 1.2, repeat: Infinity }}
             >
@@ -156,8 +156,17 @@ export default function HeroSection() {
                 transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
               />
               <Gift className="relative w-5 h-5 flex-shrink-0" />
-              <span className="relative">Cuponera de Descuentos</span>
+              <span className="relative">Cuponera</span>
             </motion.button>
+            {/* Paquetes Nutriser */}
+            <a
+              href="/memberships"
+              onClick={(e) => { e.preventDefault(); window.location.href = '/memberships'; }}
+              className="col-span-1 inline-flex items-center justify-center gap-2 bg-[#C5A55A] text-[#1A1A1A] px-5 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#d4b46a] hover:shadow-lg hover:shadow-[#C5A55A]/40 rounded-lg"
+            >
+              <Package className="w-5 h-5 flex-shrink-0" />
+              <span>Paquetes</span>
+            </a>
           </motion.div>
         </div>
       </div>

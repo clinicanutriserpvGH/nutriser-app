@@ -451,6 +451,9 @@ export default function MyTreatments() {
           <div className="flex flex-col items-center mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="h-16 mb-3" />
             <h1 className="text-2xl font-bold text-white">Mis Tratamientos</h1>
+            <p className="text-white/50 text-sm text-center mt-2 max-w-xs leading-relaxed">
+              Consulta tus compras, paquetes y cupones, y da seguimiento a tus tratamientos estéticos.
+            </p>
           </div>
 
           <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm">

@@ -171,7 +171,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                   src={PORTAL_IMG}
                   alt="Portal de Salud Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  style={{ objectPosition: "center 15%" }}
+                  style={{ objectPosition: "center 65%" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/85" />
                 <div className="absolute inset-0 flex flex-col justify-between p-5 text-left">

@@ -101,6 +101,7 @@ export const appRouter = router({
         clientEmail: z.string().email(),
         clientPhone: z.string().optional(),
         programType: z.enum(["basic", "premium", "treatment"]),
+        programName: z.string().optional(), // Nombre real del paquete (ej: "Paquete Reductor Nutriser")
         discountCode: z.string().optional(),
         discountPercent: z.number().optional(),
       }))
@@ -110,13 +111,15 @@ export const appRouter = router({
           ? Math.round(basePrice * (1 - input.discountPercent / 100))
           : basePrice;
         const programLabel = input.programType === "basic" ? "Básico" : input.programType === "premium" ? "Premium" : "Tratamiento";
+        const realProgramName = input.programName || (input.programType === "basic" ? "Paquete Nutrición" : input.programType === "premium" ? "Paquete Reductor Nutriser" : "Tratamiento");
         const membership = await createMembership({
           clientName: input.clientName,
           clientEmail: input.clientEmail,
           clientPhone: input.clientPhone,
           programType: input.programType,
+          programName: realProgramName,
           price: String(finalPrice),
-          depositConcept: `${input.clientName} - Programa ${programLabel}`,
+          depositConcept: `${input.clientName} - ${realProgramName}`,
           discountCode: input.discountCode,
           discountPercent: input.discountPercent,
           originalPrice: input.discountPercent ? String(basePrice) : undefined,
@@ -158,7 +161,8 @@ export const appRouter = router({
           membership.clientPhone || undefined,
           membership.programType,
           membership.discountCode || undefined,
-          membership.discountPercent || undefined
+          membership.discountPercent || undefined,
+          membership.programName || undefined
         );
         
         await notifyOwner({
@@ -196,7 +200,8 @@ export const appRouter = router({
             membership.clientEmail,
             membership.clientName,
             membership.programType,
-            membership.accessCode || undefined
+            membership.accessCode || undefined,
+            membership.programName || undefined
           );
         }
         
@@ -1108,11 +1113,6 @@ export const appRouter = router({
         originalPrice: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        // Generate unique service code: NUT-SRV-XXXX
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        const part = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-        const serviceCode = `NUT-SRV-${part}`;
-
         // Upload proof to S3
         const buffer = Buffer.from(input.proofData, 'base64');
         const ext = input.proofMimeType.split('/')[1] || 'jpg';
@@ -1124,20 +1124,21 @@ export const appRouter = router({
           try { await incrementDiscountCodeUsage(input.discountCode); } catch {}
         }
 
+        // NOTE: serviceCode is NOT generated here — it is generated when admin approves
         const purchase = await createServicePurchase({
           serviceName: input.serviceName,
           buyerName: input.buyerName,
           buyerEmail: input.buyerEmail,
           buyerPhone: input.buyerPhone,
           proofUrl: url,
-          serviceCode,
+          serviceCode: '', // placeholder, assigned on approval
           status: 'pending',
           discountCode: input.discountCode,
           discountPercent: input.discountPercent,
           originalPrice: input.originalPrice,
         });
 
-        // Notify admin via email
+        // Notify admin via email (no code yet)
         try {
           await sendServicePurchaseNotificationToAdmin(
             ENV.gmailUser,
@@ -1145,13 +1146,14 @@ export const appRouter = router({
             input.buyerEmail,
             input.buyerPhone,
             input.serviceName,
-            serviceCode
+            'PENDIENTE DE AUTORIZACIÓN'
           );
         } catch (e) {
           console.error('Error sending service purchase notification:', e);
         }
 
-        return { success: true, serviceCode };
+        // Return success WITHOUT the code — user must wait for admin approval
+        return { success: true };
       }),
 
     list: publicProcedure.query(async () => {
@@ -1165,15 +1167,20 @@ export const appRouter = router({
         const purchase = purchases.find(p => p.id === input.id);
         if (!purchase) throw new Error('Compra no encontrada');
 
-        await updateServicePurchaseStatus(input.id, 'approved');
+        // Generate unique service code NOW (on approval, not on creation)
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const part = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const serviceCode = `NUT-SRV-${part}`;
 
-        // Send approval email to buyer
+        await updateServicePurchaseStatus(input.id, 'approved', serviceCode);
+
+        // Send approval email to buyer WITH the code
         try {
           await sendServicePurchaseApprovedEmail(
             purchase.buyerEmail,
             purchase.buyerName,
             purchase.serviceName,
-            purchase.serviceCode
+            serviceCode
           );
         } catch (e) {
           console.error('Error sending service approval email:', e);
@@ -1193,6 +1200,23 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return await deleteServicePurchase(input.id);
+      }),
+    // Verificar servicio por email+código (paciente logueado)
+    lookupByEmailAndCode: publicProcedure
+      .input(z.object({ email: z.string().email(), code: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const { lookupServiceByEmailAndCode } = await import('./db');
+        const result = await lookupServiceByEmailAndCode(input.email, input.code);
+        if (!result) return { found: false };
+        return {
+          found: true,
+          serviceCode: result.serviceCode,
+          buyerName: result.buyerName,
+          serviceName: result.serviceName,
+          status: result.status,
+          approvedAt: result.approvedAt,
+          originalPrice: result.originalPrice,
+        };
       }),
   }),
 
@@ -2232,6 +2256,20 @@ export const appRouter = router({
           ...p,
           promotionTitle: promos.find((pr: any) => pr.id === p.promotionId)?.title ?? 'Promoción',
         }));
+      }),
+    // Obtener servicios comprados vinculados al email del paciente (admin)
+    getServicesByEmail: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => {
+        const { getServicePurchasesByEmail } = await import('./db');
+        return await getServicePurchasesByEmail(input.email);
+      }),
+    // Verificar servicio por email+código (paciente logueado)
+    lookupServiceByCode: publicProcedure
+      .input(z.object({ email: z.string().email(), code: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const { lookupServiceByEmailAndCode } = await import('./db');
+        return await lookupServiceByEmailAndCode(input.email, input.code);
       }),
   }),
 });

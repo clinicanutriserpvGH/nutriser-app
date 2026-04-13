@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { toast } from "sonner";
 import {
   Bell, Calendar, Camera, ChevronDown, ChevronRight, FileText,
-  Loader2, Mail, Package, Phone, Plus, Scissors, Send, Tag, Trash2, User, X,
+  Loader2, Mail, Package, Phone, Plus, Activity, Send, Sparkles, Tag, Trash2, User, X,
 } from "lucide-react";
 
 type Patient = {
@@ -37,7 +37,7 @@ type Photo = {
 
 export default function AdminPatientsTab() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [patientTab, setPatientTab] = useState<"treatments" | "appointments" | "photos" | "info" | "packages" | "coupons">("treatments");
+  const [patientTab, setPatientTab] = useState<"treatments" | "appointments" | "photos" | "info" | "packages" | "coupons" | "services">("treatments");
   const [showAddTreatment, setShowAddTreatment] = useState(false);
   const [showAddAppointment, setShowAddAppointment] = useState(false);
   const [showNotifyModal, setShowNotifyModal] = useState(false);
@@ -89,6 +89,11 @@ export default function AdminPatientsTab() {
     trpc.patients.getCouponsByEmail.useQuery(
       { email: selectedPatient?.email ?? "" },
       { enabled: !!selectedPatient && patientTab === "coupons" }
+    );
+  const { data: patientServices = [], isLoading: loadingServices } =
+    trpc.patients.getServicesByEmail.useQuery(
+      { email: selectedPatient?.email ?? "" },
+      { enabled: !!selectedPatient && patientTab === "services" }
     );
 
   // ── Mutations ─────────────────────────────────────────────────────────────────
@@ -347,11 +352,12 @@ export default function AdminPatientsTab() {
             {/* Sub-tabs */}
             <div className="flex bg-gray-100 rounded-xl p-1 gap-1 flex-wrap">
               {([
-                { id: "treatments", icon: Scissors, label: "Tratamientos" },
+                { id: "treatments", icon: Activity, label: "Tratamientos" },
                 { id: "appointments", icon: Calendar, label: "Citas" },
                 { id: "photos", icon: Camera, label: "Fotos" },
                 { id: "packages", icon: Package, label: "Paquetes" },
                 { id: "coupons", icon: Tag, label: "Cupones" },
+                { id: "services", icon: Sparkles, label: "Servicios" },
                 { id: "info", icon: FileText, label: "Contrato" },
               ] as const).map(tab => (
                 <button key={tab.id} onClick={() => setPatientTab(tab.id)}
@@ -685,6 +691,42 @@ export default function AdminPatientsTab() {
               </div>
             )}
 
+            {/* Servicios Comprados */}
+            {patientTab === "services" && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm text-gray-700">Servicios comprados</h4>
+                {loadingServices ? (
+                  <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-[#C5A55A]" /></div>
+                ) : (patientServices as any[]).length === 0 ? (
+                  <div className="text-center py-8 text-gray-400 text-sm">Este paciente no tiene servicios comprados.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {(patientServices as any[]).map((s: any) => (
+                      <div key={s.id} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-sm text-[#1A1A1A]">{s.serviceName}</span>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                            s.status === "approved" ? "bg-green-100 text-green-700" :
+                            s.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                            "bg-red-100 text-red-700"
+                          }`}>
+                            {s.status === "approved" ? "✅ Aprobado" : s.status === "pending" ? "⏳ Pendiente" : "❌ Rechazado"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 space-y-0.5">
+                          {s.serviceCode && s.status === "approved" && (
+                            <p>Código: <span className="font-mono font-bold text-[#C5A55A]">{s.serviceCode}</span></p>
+                          )}
+                          <p>Comprador: <span className="font-medium text-gray-700">{s.buyerName}</span></p>
+                          {s.originalPrice && <p>Precio: <span className="font-medium text-gray-700">${s.originalPrice}</span></p>}
+                          <p>Fecha: {new Date(s.createdAt).toLocaleDateString("es-MX")}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             {/* ── Contrato / Info ── */}
             {patientTab === "info" && (
               <div className="space-y-3">

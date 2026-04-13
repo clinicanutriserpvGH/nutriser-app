@@ -125,8 +125,8 @@ export default function ServicesSection() {
   };
 
   const purchaseMutation = trpc.servicePurchases.create.useMutation({
-    onSuccess: (data) => {
-      setSuccessCode(data.serviceCode);
+    onSuccess: () => {
+      setSuccessCode("PENDIENTE");
       setIsSubmitting(false);
     },
     onError: (err) => {
@@ -369,15 +369,14 @@ export default function ServicesSection() {
 
             {successCode ? (
               <div className="p-6 text-center space-y-4">
-                <div className="text-5xl mb-2">🎉</div>
+                <div className="text-5xl mb-2">📋</div>
                 <h3 className="font-bold text-xl text-[#1A1A1A]">¡Solicitud Enviada!</h3>
                 <p className="text-gray-600 text-sm">
-                  Tu comprobante fue recibido. El equipo de Nutriser verificará tu pago y te confirmará por correo.
+                  Tu comprobante fue recibido. El equipo de Nutriser verificará tu pago.
                 </p>
-                <div className="bg-[#FAF7F2] border-2 border-[#C5A55A] rounded-xl p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Tu código de servicio</p>
-                  <p className="font-mono font-black text-xl text-[#C5A55A] tracking-widest">{successCode}</p>
-                  <p className="text-xs text-gray-400 mt-2">Guarda este código como referencia</p>
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <p className="text-xs text-amber-700 font-semibold uppercase tracking-wider mb-1">⏳ Pendiente de autorización</p>
+                  <p className="text-sm text-amber-800 mt-1">Recibirás tu código de servicio en tu correo electrónico una vez que el administrador autorice tu compra.</p>
                 </div>
                 <button
                    type="button"

@@ -206,11 +206,13 @@ export default function Memberships() {
     }
 
     try {
+      const selectedProgramData = PROGRAMS.find(p => p.id === selectedProgram);
       const result = await createMutation.mutateAsync({
         clientName: name,
         clientEmail: email,
         clientPhone: phone,
         programType: selectedProgram,
+        programName: selectedProgramData?.name, // Nombre real del paquete (ej: "Paquete Reductor Nutriser")
         discountCode: (discountInfo?.valid && formData.discountCode.trim()) ? formData.discountCode.trim() : undefined,
         discountPercent: (discountInfo?.valid && discountInfo.discount) ? discountInfo.discount : undefined,
       });

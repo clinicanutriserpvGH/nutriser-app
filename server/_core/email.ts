@@ -20,11 +20,13 @@ export async function sendConfirmationEmail(
   clientEmail: string,
   clientName: string,
   programType: "basic" | "premium" | "treatment",
-  accessCode?: string
+  accessCode?: string,
+  customProgramName?: string
 ) {
   const transporter = getEmailTransporter();
 
-  const programName = programType === "basic" ? "Básico" : programType === "premium" ? "Premium" : "Tratamiento";
+  // Usar el nombre real del paquete si está disponible, sino usar el nombre actualizado
+  const programName = customProgramName || (programType === "basic" ? "Paquete Nutrición" : programType === "premium" ? "Paquete Reductor Nutriser" : "Tratamiento");
   const price = programType === "basic" ? "$2,500 MXN" : programType === "premium" ? "$4,500 MXN" : "$5,499 MXN";
 
   const htmlContent = `
@@ -44,26 +46,25 @@ export async function sendConfirmationEmail(
             ${programType === "basic" ? `
               <p><strong>Incluye:</strong></p>
               <ul>
-                <li>4 Asesorías Nutricionales Personalizadas</li>
-                <li>4 Escaneos Corporales</li>
-                <li>5% de descuento en tratamientos corporales</li>
+                <li>4 asesorías nutricionales personalizadas</li>
+                <li>4 escaneos corporales</li>
+                <li>10% de descuento en tratamientos corporales</li>
+                <li>Acceso a seguimiento online</li>
               </ul>
             ` : programType === "premium" ? `
               <p><strong>Incluye:</strong></p>
               <ul>
-                <li>8 Asesorías Nutricionales Personalizadas</li>
-                <li>8 Escaneos Corporales</li>
-                <li>10% de descuento en todos los tratamientos</li>
-                <li>Acceso a seguimiento online</li>
+                <li>4 asesorías nutricionales personalizadas</li>
+                <li>4 sesiones de Cavitación corporal</li>
+                <li>4 sesiones de Radiofrecuencia corporal</li>
+                <li>4 sesiones de Mesoterapia reductora</li>
+                <li>10% de descuento en tratamientos faciales</li>
+                <li>10% de descuento en compra de productos</li>
               </ul>
             ` : `
               <p><strong>Incluye:</strong></p>
               <ul>
-                <li>4 sesiones de Cavitación corporal</li>
-                <li>4 sesiones de Radiofrecuencia corporal</li>
-                <li>4 sesiones de Mesoterapia reductora</li>
-                <li>Seguimiento personalizado de tu progreso</li>
-                <li>Válido en Nutriser Puerto Vallarta</li>
+                <li>Consulta con el equipo Nutriser para detalles</li>
               </ul>
             `}
           </div>
@@ -96,7 +97,7 @@ export async function sendConfirmationEmail(
     await transporter.sendMail({
       from: `"Nutriser" <${ENV.gmailUser}>`,
       to: clientEmail,
-      subject: `✅ Pago Confirmado - Programa ${programName} Nutriser`,
+      subject: `✅ Pago Confirmado - ${programName} - Nutriser`,
       html: htmlContent,
     });
     return true;
@@ -113,10 +114,11 @@ export async function sendMembershipNotificationToAdmin(
   clientPhone: string | undefined,
   programType: "basic" | "premium" | "treatment",
   discountCode?: string,
-  discountPercent?: number
+  discountPercent?: number,
+  customProgramName?: string
 ) {
   const transporter = getEmailTransporter();
-  const programName = programType === "basic" ? "Básico" : programType === "premium" ? "Premium" : "Tratamiento";
+  const programName = customProgramName || (programType === "basic" ? "Paquete Nutrición" : programType === "premium" ? "Paquete Reductor Nutriser" : "Tratamiento");
   const basePrice = programType === "basic" ? 2500 : programType === "premium" ? 4500 : 5499;
   const finalPrice = discountPercent ? Math.round(basePrice * (1 - discountPercent / 100)) : basePrice;
   const priceDisplay = `$${finalPrice.toLocaleString('es-MX')} MXN`;

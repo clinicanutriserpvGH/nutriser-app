@@ -599,12 +599,13 @@ export async function getAllServicePurchases() {
   return await db.select().from(servicePurchases).orderBy(desc(servicePurchases.createdAt));
 }
 
-export async function updateServicePurchaseStatus(id: number, status: "pending" | "approved" | "rejected") {
+export async function updateServicePurchaseStatus(id: number, status: "pending" | "approved" | "rejected", serviceCode?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(servicePurchases).set({
     status,
     approvedAt: status === "approved" ? new Date() : undefined,
+    ...(serviceCode ? { serviceCode } : {}),
   }).where(eq(servicePurchases.id, id));
   return { success: true };
 }
@@ -1254,4 +1255,22 @@ export async function getGiftPurchasesByEmail(email: string) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(giftPurchases).where(eq(giftPurchases.buyerEmail, email.toLowerCase().trim())).orderBy(desc(giftPurchases.createdAt));
+}
+
+export async function getServicePurchasesByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(servicePurchases).where(eq(servicePurchases.buyerEmail, email.toLowerCase().trim())).orderBy(desc(servicePurchases.createdAt));
+}
+
+export async function lookupServiceByEmailAndCode(email: string, code: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const results = await db.select().from(servicePurchases).where(
+    and(
+      eq(servicePurchases.buyerEmail, email.toLowerCase().trim()),
+      eq(servicePurchases.serviceCode, code.toUpperCase().trim())
+    )
+  ).limit(1);
+  return results[0] ?? null;
 }

@@ -191,18 +191,19 @@ Establecimiento: Nutriser Aesthetic & Nutrition, Puerto Vallarta, Jalisco, Méxi
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function MyTreatments() {
   const [view, setView] = useState<"auth" | "consent" | "portal">("auth");
-  const [authMode, setAuthMode] = useState<"login" | "register" | "forgot">("login");
+  const [authMode, setAuthMode] = useState<"login" | "register" | "register-form" | "forgot">("login");
   const [patient, setPatient] = useState<PatientSafe | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<"treatments" | "photos" | "consent" | "coupons" | "packages">("treatments");
-  // Estado para formulario de verificación de cupón
-  const [couponEmail, setCouponEmail] = useState("");
+  const [activeTab, setActiveTab] = useState<"services" | "photos" | "consent" | "coupons" | "packages">("services");
+  // Estado para formulario de verificación de cupón (solo código, email viene de sesión)
   const [couponCode, setCouponCode] = useState("");
   const [couponQuery, setCouponQuery] = useState<{email: string; code: string} | null>(null);
-  // Estado para formulario de verificación de paquete
-  const [packageEmail, setPackageEmail] = useState("");
+  // Estado para formulario de verificación de paquete (solo código, email viene de sesión)
   const [packageCode, setPackageCode] = useState("");
   const [packageQuery, setPackageQuery] = useState<{email: string; code: string} | null>(null);
+  // Estado para formulario de verificación de servicio
+  const [serviceCode, setServiceCode] = useState("");
+  const [serviceQuery, setServiceQuery] = useState<{email: string; code: string} | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [signingConsent, setSigningConsent] = useState(false);
   const [signatureEmpty, setSignatureEmpty] = useState(true);
@@ -275,6 +276,10 @@ export default function MyTreatments() {
   const packageLookup = trpc.memberships.lookupByEmailAndCode.useQuery(
     packageQuery ?? { email: 'x@x.com', code: 'NONE' },
     { enabled: !!packageQuery, retry: false }
+  );
+  const serviceLookup = trpc.servicePurchases.lookupByEmailAndCode.useQuery(
+    serviceQuery ?? { email: 'x@x.com', code: 'NONE' },
+    { enabled: !!serviceQuery, retry: false }
   );
 
   // ─── Mutations ──────────────────────────────────────────────────────────────
@@ -463,30 +468,15 @@ export default function MyTreatments() {
           <div className="flex flex-col items-center mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="h-16 mb-3" />
             <h1 className="text-2xl font-bold text-white">Mis Tratamientos</h1>
-            <p className="text-white/50 text-sm mt-1 text-center mb-4">Tu portal personal de salud y estética Nutriser</p>
-            <div className="grid grid-cols-1 gap-1.5 w-full max-w-xs text-left">
-              {[
-                { icon: "🗓️", text: "Seguimiento de tus tratamientos" },
-                { icon: "🏷️", text: "Verifica el estado de tus cupones" },
-                { icon: "📦", text: "Consulta el estado de tus paquetes" },
-                { icon: "📸", text: "Fotos antes y después de tu progreso" },
-                { icon: "📋", text: "Realiza tu contrato de consentimiento" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
-                  <span className="text-base">{item.icon}</span>
-                  <span className="text-white/70 text-xs">{item.text}</span>
-                </div>
-              ))}
-            </div>
           </div>
 
           <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm">
             {/* Tabs */}
-            {authMode !== "forgot" && (
+            {authMode !== "forgot" && authMode !== "register-form" && (
               <div className="flex bg-white/5 rounded-2xl p-1 mb-6">
-                {(["login", "register"] as const).map(m => (
+                {(["login", "register"] as Array<"login" | "register" | "register-form">).map(m => (
                   <button key={m} onClick={() => setAuthMode(m)}
-                    className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${authMode === m ? "bg-[#C5A55A] text-black" : "text-white/50 hover:text-white"}`}>
+                    className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${(authMode === m || (m === "register" && (authMode as string) === "register-form")) ? "bg-[#C5A55A] text-black" : "text-white/50 hover:text-white"}`}>
                     {m === "login" ? "Iniciar sesión" : "Crear cuenta"}
                   </button>
                 ))}
@@ -516,9 +506,56 @@ export default function MyTreatments() {
               </form>
             )}
 
-            {/* Register */}
+            {/* Register - Aviso de contrato de consentimiento */}
             {authMode === "register" && (
+              <div className="space-y-5">
+                <div className="flex flex-col items-center gap-3 py-2">
+                  <div className="w-14 h-14 rounded-full bg-[#C5A55A]/15 flex items-center justify-center">
+                    <ShieldCheck className="w-7 h-7 text-[#C5A55A]" />
+                  </div>
+                  <h3 className="text-white font-bold text-lg text-center">Contrato de Consentimiento</h3>
+                  <p className="text-white/60 text-sm text-center leading-relaxed">
+                    Para crear tu cuenta en Nutriser es necesario que leas y firmes el{" "}
+                    <strong className="text-white/80">Contrato de Consentimiento Informado</strong>.
+                  </p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+                  <p className="text-[#C5A55A] text-xs font-semibold uppercase tracking-wider">¿Cómo firmar?</p>
+                  <div className="flex items-start gap-3">
+                    <span className="text-xl mt-0.5">📱</span>
+                    <p className="text-white/60 text-sm">
+                      <strong className="text-white/80">Celular o Tablet:</strong> Usa tu dedo para trazar tu firma directamente en la pantalla.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-xl mt-0.5">💻</span>
+                    <p className="text-white/60 text-sm">
+                      <strong className="text-white/80">Computadora:</strong> Usa el mouse para dibujar tu firma en el área indicada.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => setAuthMode("register-form")}
+                  className="w-full bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold py-3"
+                >
+                  Continuar y leer contrato
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setAuthMode("login")}
+                  className="w-full text-center text-white/40 text-xs hover:text-white/60 transition-colors"
+                >
+                  Ya tengo cuenta — Iniciar sesión
+                </button>
+              </div>
+            )}
+            {/* Register Form - Formulario real de registro */}
+            {authMode === "register-form" && (
               <form onSubmit={handleRegister} className="space-y-4">
+                <button type="button" onClick={() => setAuthMode("register")} className="flex items-center gap-1 text-white/50 text-sm hover:text-white/80 mb-2">
+                  <ChevronLeft className="w-4 h-4" /> Volver
+                </button>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                   <Input name="name" placeholder="Nombre completo" required minLength={2} className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
@@ -666,7 +703,7 @@ export default function MyTreatments() {
         className="sticky top-0 z-40 bg-[#0D0D0D]/95 backdrop-blur-sm border-b border-white/10 px-4 py-3"
         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}
       >
-        <div className="max-w-lg mx-auto flex items-center justify-between">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={LOGO_URL} alt="Nutriser" className="h-8" />
             <div>
@@ -713,117 +750,183 @@ export default function MyTreatments() {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-5 space-y-5">
-        {/* Resumen rápido */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
-            <p className="text-2xl font-bold text-[#C5A55A]">{activeTreatments.length}</p>
-            <p className="text-white/50 text-xs mt-0.5">Activos</p>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
-            <p className="text-2xl font-bold text-green-400">{completedTreatments.length}</p>
-            <p className="text-white/50 text-xs mt-0.5">Finalizados</p>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
-            <p className="text-2xl font-bold text-blue-400">{upcomingAppointments.length}</p>
-            <p className="text-white/50 text-xs mt-0.5">Próximas citas</p>
-          </div>
-        </div>
+      {/* Layout: mobile=1col, desktop=2col */}
+      <div className="max-w-5xl mx-auto px-4 py-5">
+        <div className="flex flex-col lg:flex-row gap-5">
 
-        {/* Próximas citas */}
-        {upcomingAppointments.length > 0 && (
-          <div className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
-            <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#C5A55A]" /> Próximas citas
-            </h3>
-            <div className="space-y-2">
-              {upcomingAppointments.map(a => {
-                const treatment = treatments.find(t => t.id === a.treatmentId);
-                return (
-                  <div key={a.id} className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
-                    <div>
-                      <p className="text-white text-xs font-semibold">{treatment?.serviceName ?? "Tratamiento"}</p>
-                      <p className="text-white/50 text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
-                    </div>
-                    <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-[10px]">Programada</Badge>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Tabs */}
-        <div className="flex bg-white/5 rounded-2xl p-1 gap-1">
-          {([
-            { id: "treatments", icon: Heart, label: "Mis Tratamientos" },
-            { id: "photos", icon: Camera, label: "Fotos" },
-            { id: "coupons", icon: Tag, label: "Cupones" },
-            { id: "packages", icon: ShieldCheck, label: "Paquetes" },
-            { id: "consent", icon: FileText, label: "Contrato" },
-          ] as const).map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl text-[10px] font-semibold transition-all ${activeTab === tab.id ? "bg-[#C5A55A] text-black" : "text-white/40 hover:text-white/70"}`}>
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* ── Tab: Tratamientos ── */}
-        {activeTab === "treatments" && (
-          <div className="space-y-4">
-            {treatments.length === 0 ? (
-              <div className="text-center py-12">
-                <Sparkles className="w-12 h-12 text-white/20 mx-auto mb-3" />
-                <p className="text-white/40 text-sm">Aún no tienes tratamientos asignados.</p>
-                <p className="text-white/30 text-xs mt-1">El equipo de Nutriser los agregará pronto.</p>
+          {/* ── Columna izquierda (sidebar en desktop) ── */}
+          <div className="lg:w-64 xl:w-72 flex-shrink-0 space-y-4">
+            {/* Resumen rápido */}
+            <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center lg:text-left lg:flex lg:items-center lg:gap-3">
+                <p className="text-2xl font-bold text-[#C5A55A] lg:text-xl">{activeTreatments.length}</p>
+                <p className="text-white/50 text-xs mt-0.5 lg:mt-0">Activos</p>
               </div>
-            ) : (
-              treatments.map(t => {
-                const appts = appointmentsForTreatment(t.id);
-                const progress = t.totalSessions > 0 ? (t.completedSessions / t.totalSessions) * 100 : 0;
-                return (
-                  <div key={t.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h3 className="text-white font-bold text-sm">{t.serviceName}</h3>
-                        {t.notes && <p className="text-white/40 text-xs mt-0.5">{t.notes}</p>}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center lg:text-left lg:flex lg:items-center lg:gap-3">
+                <p className="text-2xl font-bold text-green-400 lg:text-xl">{completedTreatments.length}</p>
+                <p className="text-white/50 text-xs mt-0.5 lg:mt-0">Finalizados</p>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center lg:text-left lg:flex lg:items-center lg:gap-3">
+                <p className="text-2xl font-bold text-blue-400 lg:text-xl">{upcomingAppointments.length}</p>
+                <p className="text-white/50 text-xs mt-0.5 lg:mt-0">Próximas citas</p>
+              </div>
+            </div>
+
+            {/* Próximas citas (solo desktop) */}
+            {upcomingAppointments.length > 0 && (
+              <div className="hidden lg:block bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
+                <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#C5A55A]" /> Próximas citas
+                </h3>
+                <div className="space-y-2">
+                  {upcomingAppointments.map(a => {
+                    const treatment = treatments.find(t => t.id === a.treatmentId);
+                    return (
+                      <div key={a.id} className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
+                        <div>
+                          <p className="text-white text-xs font-semibold">{treatment?.serviceName ?? "Tratamiento"}</p>
+                          <p className="text-white/50 text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
+                        </div>
+                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-[10px]">Programada</Badge>
                       </div>
-                      <span className={`text-[10px] font-semibold px-2 py-1 rounded-full border ${statusColor(t.status)}`}>
-                        {statusLabel(t.status)}
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Tabs — horizontal en móvil, vertical en desktop */}
+            <div className="flex lg:flex-col bg-white/5 rounded-2xl p-1 gap-1">
+              {([
+                { id: "services", icon: Sparkles, label: "Mis Servicios" },
+                { id: "photos", icon: Camera, label: "Fotos" },
+                { id: "coupons", icon: Tag, label: "Cupones" },
+                { id: "packages", icon: ShieldCheck, label: "Paquetes" },
+                { id: "consent", icon: FileText, label: "Contrato" },
+              ] as const).map(tab => (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:items-center gap-0.5 lg:gap-2 py-2 lg:py-2.5 lg:px-3 rounded-xl text-[10px] lg:text-xs font-semibold transition-all ${activeTab === tab.id ? "bg-[#C5A55A] text-black" : "text-white/40 hover:text-white/70"}`}>
+                  <tab.icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Próximas citas (solo móvil) */}
+            {upcomingAppointments.length > 0 && (
+              <div className="lg:hidden bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
+                <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#C5A55A]" /> Próximas citas
+                </h3>
+                <div className="space-y-2">
+                  {upcomingAppointments.map(a => {
+                    const treatment = treatments.find(t => t.id === a.treatmentId);
+                    return (
+                      <div key={a.id} className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
+                        <div>
+                          <p className="text-white text-xs font-semibold">{treatment?.serviceName ?? "Tratamiento"}</p>
+                          <p className="text-white/50 text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
+                        </div>
+                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-[10px]">Programada</Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Columna derecha (contenido del tab) ── */}
+          <div className="flex-1 min-w-0 space-y-5">
+
+        {/* ── Tab: Mis Servicios — Formulario de verificación ── */}
+        {activeTab === "services" && (
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-5 h-5 text-[#C5A55A]" />
+                <h3 className="text-white font-bold text-sm">Verificar mi Servicio</h3>
+              </div>
+              <p className="text-white/50 text-xs">Ingresa el código de servicio que recibiste por correo para consultar el estado de tu compra.</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+              <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/20 rounded-xl px-3 py-2 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#C5A55A] flex-shrink-0" />
+                <span className="text-white/70 text-xs">Sesión: <strong className="text-white">{patient?.email}</strong></span>
+              </div>
+              <div>
+                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Código de servicio</label>
+                <Input
+                  type="text"
+                  placeholder="NUT-SRV-XXXXXX"
+                  value={serviceCode}
+                  onChange={e => { setServiceCode(e.target.value.toUpperCase()); setServiceQuery(null); }}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm font-mono tracking-widest"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  if (!serviceCode.trim()) { toast.error("Por favor ingresa el código de servicio"); return; }
+                  if (!patient?.email) { toast.error("No hay sesión activa"); return; }
+                  setServiceQuery({ email: patient.email, code: serviceCode.trim() });
+                }}
+                disabled={serviceLookup.isFetching}
+                className="w-full py-2.5 rounded-xl bg-[#C5A55A] text-black font-black text-sm uppercase tracking-widest hover:bg-[#B8963E] transition-all disabled:opacity-60"
+              >
+                {serviceLookup.isFetching ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Consultar Servicio'}
+              </button>
+            </div>
+            {/* Resultado de la búsqueda */}
+            {serviceQuery && !serviceLookup.isFetching && serviceLookup.data && (
+              <div className={`rounded-2xl p-4 border ${
+                !serviceLookup.data.found ? 'bg-red-500/10 border-red-500/20' :
+                serviceLookup.data.status === 'approved' ? 'bg-green-500/10 border-green-500/20' :
+                serviceLookup.data.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
+                'bg-yellow-500/10 border-yellow-500/20'
+              }`}>
+                {!serviceLookup.data.found ? (
+                  <div className="text-center py-2">
+                    <X className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                    <p className="text-red-400 font-bold text-sm">Servicio no encontrado</p>
+                    <p className="text-white/40 text-xs mt-1">Verifica que el código sea correcto o que el servicio esté asociado a tu correo.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      {serviceLookup.data.status === 'approved' && <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />}
+                      {serviceLookup.data.status === 'pending' && <Clock className="w-5 h-5 text-yellow-400 flex-shrink-0" />}
+                      {serviceLookup.data.status === 'rejected' && <X className="w-5 h-5 text-red-400 flex-shrink-0" />}
+                      <div>
+                        <p className="text-white font-bold text-sm">{(serviceLookup.data as any).serviceName}</p>
+                        <p className="text-white/50 text-xs">Cliente: {(serviceLookup.data as any).buyerName}</p>
+                      </div>
+                    </div>
+                    <div className="bg-black/20 rounded-xl px-3 py-2 flex items-center justify-between">
+                      <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">
+                        {serviceLookup.data.status === 'approved' ? (serviceLookup.data as any).serviceCode : '—'}
+                      </span>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                        serviceLookup.data.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                        serviceLookup.data.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                      }`}>
+                        {serviceLookup.data.status === 'approved' ? '✅ Activo' :
+                         serviceLookup.data.status === 'pending' ? '⏳ Pendiente de autorización' :
+                         '❌ Rechazado'}
                       </span>
                     </div>
-                    {/* Progreso */}
-                    <div>
-                      <div className="flex justify-between text-xs text-white/50 mb-1">
-                        <span>Sesiones</span>
-                        <span>{t.completedSessions} / {t.totalSessions}</span>
-                      </div>
-                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#C5A55A] rounded-full transition-all" style={{ width: `${progress}%` }} />
-                      </div>
-                    </div>
-                    {/* Citas de este tratamiento */}
-                    {appts.length > 0 && (
-                      <div className="space-y-1.5">
-                        <p className="text-white/50 text-xs font-semibold">Citas:</p>
-                        {appts.map(a => (
-                          <div key={a.id} className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-3.5 h-3.5 text-[#C5A55A]" />
-                              <span className="text-white/70 text-xs">{a.appointmentDate} · {a.appointmentTime}</span>
-                            </div>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${apptStatusColor(a.status)}`}>
-                              {apptStatusLabel(a.status)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                    {serviceLookup.data.status === 'pending' && (
+                      <p className="text-yellow-300/70 text-xs text-center">Tu compra está siendo revisada por el equipo Nutriser. Recibirás tu código de servicio por correo una vez autorizada.</p>
+                    )}
+                    {(serviceLookup.data as any).approvedAt && serviceLookup.data.status === 'approved' && (
+                      <p className="text-white/40 text-xs text-center">Autorizado el: {new Date((serviceLookup.data as any).approvedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    )}
+                    {(serviceLookup.data as any).originalPrice && (
+                      <p className="text-white/40 text-xs text-center">Precio: ${(serviceLookup.data as any).originalPrice} MXN</p>
                     )}
                   </div>
-                );
-              })
+                )}
+              </div>
             )}
           </div>
         )}
@@ -879,18 +982,12 @@ export default function MyTreatments() {
                 <Tag className="w-5 h-5 text-[#C5A55A]" />
                 <h3 className="text-white font-bold text-sm">Verificar mi Cupón</h3>
               </div>
-              <p className="text-white/50 text-xs">Ingresa el correo con el que compraste y el código que recibiste para consultar tu cupón.</p>
+              <p className="text-white/50 text-xs">Ingresa el código de cupón que recibiste por correo para consultar el estado de tu compra.</p>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
-              <div>
-                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Correo electrónico</label>
-                <Input
-                  type="email"
-                  placeholder="tucorreo@ejemplo.com"
-                  value={couponEmail}
-                  onChange={e => { setCouponEmail(e.target.value); setCouponQuery(null); }}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm"
-                />
+              <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/20 rounded-xl px-3 py-2 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#C5A55A] flex-shrink-0" />
+                <span className="text-white/70 text-xs">Sesión: <strong className="text-white">{patient?.email}</strong></span>
               </div>
               <div>
                 <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Código de cupón</label>
@@ -904,8 +1001,9 @@ export default function MyTreatments() {
               </div>
               <button
                 onClick={() => {
-                  if (!couponEmail.trim() || !couponCode.trim()) { toast.error("Por favor ingresa correo y código"); return; }
-                  setCouponQuery({ email: couponEmail.trim(), code: couponCode.trim() });
+                  if (!couponCode.trim()) { toast.error("Por favor ingresa el código de cupón"); return; }
+                  if (!patient?.email) { toast.error("No hay sesión activa"); return; }
+                  setCouponQuery({ email: patient.email, code: couponCode.trim() });
                 }}
                 disabled={couponLookup.isFetching}
                 className="w-full py-2.5 rounded-xl bg-[#C5A55A] text-black font-black text-sm uppercase tracking-widest hover:bg-[#B8963E] transition-all disabled:opacity-60"
@@ -979,18 +1077,12 @@ export default function MyTreatments() {
                 <ShieldCheck className="w-5 h-5 text-[#C5A55A]" />
                 <h3 className="text-white font-bold text-sm">Verificar mi Paquete</h3>
               </div>
-              <p className="text-white/50 text-xs">Ingresa el correo con el que te registraste y el código de acceso que recibiste para consultar tu paquete.</p>
+              <p className="text-white/50 text-xs">Ingresa el código de acceso que recibiste por correo para consultar el estado de tu paquete.</p>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
-              <div>
-                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Correo electrónico</label>
-                <Input
-                  type="email"
-                  placeholder="tucorreo@ejemplo.com"
-                  value={packageEmail}
-                  onChange={e => { setPackageEmail(e.target.value); setPackageQuery(null); }}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm"
-                />
+              <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/20 rounded-xl px-3 py-2 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#C5A55A] flex-shrink-0" />
+                <span className="text-white/70 text-xs">Sesión: <strong className="text-white">{patient?.email}</strong></span>
               </div>
               <div>
                 <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Código de acceso</label>
@@ -1004,8 +1096,9 @@ export default function MyTreatments() {
               </div>
               <button
                 onClick={() => {
-                  if (!packageEmail.trim() || !packageCode.trim()) { toast.error("Por favor ingresa correo y código"); return; }
-                  setPackageQuery({ email: packageEmail.trim(), code: packageCode.trim() });
+                  if (!packageCode.trim()) { toast.error("Por favor ingresa el código de acceso"); return; }
+                  if (!patient?.email) { toast.error("No hay sesión activa"); return; }
+                  setPackageQuery({ email: patient.email, code: packageCode.trim() });
                 }}
                 disabled={packageLookup.isFetching}
                 className="w-full py-2.5 rounded-xl bg-[#C5A55A] text-black font-black text-sm uppercase tracking-widest hover:bg-[#B8963E] transition-all disabled:opacity-60"
@@ -1108,7 +1201,12 @@ export default function MyTreatments() {
 
           </div>
         )}
+          </div>
+          {/* fin columna derecha */}
+        </div>
+        {/* fin flex row */}
       </div>
+      {/* fin max-w-5xl */}
 
       {/* Modal foto ampliada */}
       {selectedPhoto && (

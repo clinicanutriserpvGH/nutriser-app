@@ -15,6 +15,7 @@ import {
   Clock,
   Mail,
   Gift,
+  CalendarCheck,
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -169,16 +170,10 @@ export default function ContactSection() {
                 </a>
                 <button
                   onClick={() => navigate("/appointment-form")}
-                  className="flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E]"
+                  className="col-span-2 flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-2.5 text-xs tracking-[0.15em] uppercase font-semibold transition-all duration-300 hover:bg-[#B8963E]"
                 >
+                  <CalendarCheck className="w-3.5 h-3.5" />
                   Agendar Cita
-                </button>
-                <button
-                  onClick={() => navigate("/memberships")}
-                  className="flex items-center justify-center gap-2 bg-[#1A1A1A] border border-[#C5A55A] text-[#C5A55A] px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A]"
-                >
-                  <Gift className="w-4 h-4" />
-                  Paquetes Nutriser
                 </button>
                 <button
                   onClick={() => {

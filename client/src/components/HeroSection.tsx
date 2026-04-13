@@ -130,22 +130,14 @@ export default function HeroSection() {
               <MapPin className="w-4 h-4" />
               Ubicación
             </a>
-            {/* 3. Agenda tu Cita */}
-            <a
-              href="/appointment-form"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
-              className="col-span-2 inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
-            >
-              <CalendarCheck className="w-4 h-4" />
-              Agenda tu Cita
-            </a>
+            {/* 3. Cuponera — ancho completo, parpadeante */}
             <motion.button
               onClick={(e) => {
                 e.preventDefault();
                 const el = document.querySelector("#promociones");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}
-              className="relative col-span-1 inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
+              className="relative col-span-2 inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
               animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
               transition={{ duration: 1.2, repeat: Infinity }}
             >
@@ -156,16 +148,16 @@ export default function HeroSection() {
                 transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
               />
               <Gift className="relative w-5 h-5 flex-shrink-0" />
-              <span className="relative">Cuponera</span>
+              <span className="relative">Cuponera de Descuentos</span>
             </motion.button>
-            {/* Paquetes Nutriser */}
+            {/* 4. Agenda tu Cita — más compacto, ancho completo */}
             <a
-              href="/memberships"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/memberships'; }}
-              className="col-span-1 inline-flex items-center justify-center gap-2 bg-[#C5A55A] text-[#1A1A1A] px-5 py-4 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#d4b46a] hover:shadow-lg hover:shadow-[#C5A55A]/40 rounded-lg"
+              href="/appointment-form"
+              onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
+              className="col-span-2 inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-2.5 text-xs tracking-[0.12em] uppercase font-semibold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
             >
-              <Package className="w-5 h-5 flex-shrink-0" />
-              <span>Paquetes</span>
+              <CalendarCheck className="w-3.5 h-3.5" />
+              Agenda tu Cita
             </a>
           </motion.div>
         </div>

@@ -3,7 +3,7 @@
  * Soporta modo claro (crema) y oscuro (negro) con toggle palanca persistente
  */
 import {
-  BookOpen, CalendarCheck, GraduationCap, ShoppingBag, ChevronLeft,
+  BookOpen, CalendarCheck, GraduationCap, ShoppingBag, ChevronLeft, Tag,
 } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { useSplash } from "@/contexts/SplashContext";
@@ -188,19 +188,33 @@ export default function NutriserHomePage() {
             />
           </div>
 
-          {/* ── Botón Administración ── */}
+          {/* ── Botón Cuponera parpadeante ── */}
           <div className="flex justify-center mb-5">
             <button
-              onClick={() => { window.location.href = '/admin/login?from=splash2'; }}
-              className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${footerBtn}`}
+              onClick={() => {
+                sessionStorage.setItem("nutriser_splash_seen", "1");
+                sessionStorage.setItem("nutriser_scroll_to", "promociones");
+                window.location.href = '/';
+              }}
+              className="relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 border border-[#C5A55A] text-black bg-[#C5A55A] hover:bg-[#d4b46a] shadow-lg shadow-[#C5A55A]/40 active:scale-95"
+              style={{ animation: 'cuponera-pulse 2s ease-in-out infinite' }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              Administración
+              <Tag className="w-4 h-4" />
+              🏷️ Cuponera de Descuentos
+              {/* Punto de notificación */}
+              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-white" style={{ animation: 'cuponera-dot 1s ease-in-out infinite' }} />
             </button>
           </div>
+          <style>{`
+            @keyframes cuponera-pulse {
+              0%, 100% { box-shadow: 0 0 8px 2px rgba(197,165,90,0.5), 0 4px 12px rgba(197,165,90,0.3); transform: scale(1); }
+              50% { box-shadow: 0 0 20px 6px rgba(197,165,90,0.8), 0 6px 20px rgba(197,165,90,0.5); transform: scale(1.03); }
+            }
+            @keyframes cuponera-dot {
+              0%, 100% { opacity: 1; transform: scale(1); }
+              50% { opacity: 0.4; transform: scale(1.3); }
+            }
+          `}</style>
 
           {/* ── Footer ── */}
           <p className={`text-[10px] text-center pb-4 pt-2 ${isLight ? "text-[#9a8050]/40" : "text-white/20"}`}>

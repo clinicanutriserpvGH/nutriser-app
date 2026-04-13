@@ -4,7 +4,7 @@
  * Mismo diseño de tarjetas que SplashSelector (Splash 1)
  */
 import { useState } from "react";
-import { Globe, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2 } from "lucide-react";
+import { Home, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2 } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
 const LOGO_URL =
@@ -97,7 +97,7 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
               <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 text-left">
                 <div className="flex items-center gap-1.5">
                   <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
-                    <Globe className="w-4 h-4 text-black" />
+                    <Home className="w-4 h-4 text-black" />
                   </div>
 
                 </div>

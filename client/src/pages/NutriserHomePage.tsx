@@ -3,7 +3,7 @@
  * Soporta modo claro (crema) y oscuro (negro) con toggle palanca persistente
  */
 import {
-  BookOpen, CalendarCheck, GraduationCap, ShoppingBag, ChevronLeft, Tag,
+  BookOpen, CalendarCheck, GraduationCap, ShoppingBag, ChevronLeft,
 } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { useSplash } from "@/contexts/SplashContext";
@@ -70,12 +70,16 @@ export default function NutriserHomePage() {
 
   const goTo = (path: string) => { window.location.href = path; };
   const goBack = () => {
+    // Inicio → Splash 0 (pantalla principal)
     sessionStorage.removeItem("nutriser_splash_seen");
+    sessionStorage.removeItem("nutriser_chose_splash1");
     window.location.href = "/";
   };
   const goToSplash1 = () => {
-    // Regresar al Splash 1 (hub de Nutriser) sin recargar la página
-    showSplash1();
+    // Regresar → Splash 1 (hub con Sitio Web y Nutriser Mall)
+    sessionStorage.setItem("nutriser_splash_seen", "1");
+    sessionStorage.setItem("nutriser_chose_splash1", "1");
+    window.location.href = "/";
   };
 
   // Colores dinámicos
@@ -192,14 +196,15 @@ export default function NutriserHomePage() {
           <div className="flex justify-center mb-5">
             <button
               onClick={() => {
+                // Navegar directamente a la sección de cupones del sitio principal
                 sessionStorage.setItem("nutriser_splash_seen", "1");
+                sessionStorage.removeItem("nutriser_chose_splash1");
                 sessionStorage.setItem("nutriser_scroll_to", "promociones");
                 window.location.href = '/';
               }}
               className="relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 border border-[#C5A55A] text-black bg-[#C5A55A] hover:bg-[#d4b46a] shadow-lg shadow-[#C5A55A]/40 active:scale-95"
               style={{ animation: 'cuponera-pulse 2s ease-in-out infinite' }}
             >
-              <Tag className="w-4 h-4" />
               🏷️ Cuponera de Descuentos
               {/* Punto de notificación */}
               <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-white" style={{ animation: 'cuponera-dot 1s ease-in-out infinite' }} />

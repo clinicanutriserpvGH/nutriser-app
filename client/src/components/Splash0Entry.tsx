@@ -99,9 +99,7 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
                   <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
                     <Globe className="w-4 h-4 text-black" />
                   </div>
-                  <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">
-                    Sitio Web
-                  </span>
+
                 </div>
                 {/* Título y botón siempre abajo */}
                 <div>

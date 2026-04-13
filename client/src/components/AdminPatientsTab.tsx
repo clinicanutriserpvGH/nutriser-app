@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { toast } from "sonner";
 import {
   Bell, Calendar, Camera, ChevronDown, ChevronRight, FileText,
-  Loader2, Mail, Phone, Plus, Scissors, Send, Trash2, User, X,
+  Loader2, Mail, Package, Phone, Plus, Scissors, Send, Tag, Trash2, User, X,
 } from "lucide-react";
 
 type Patient = {
@@ -37,7 +37,7 @@ type Photo = {
 
 export default function AdminPatientsTab() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [patientTab, setPatientTab] = useState<"treatments" | "appointments" | "photos" | "info">("treatments");
+  const [patientTab, setPatientTab] = useState<"treatments" | "appointments" | "photos" | "info" | "packages" | "coupons">("treatments");
   const [showAddTreatment, setShowAddTreatment] = useState(false);
   const [showAddAppointment, setShowAddAppointment] = useState(false);
   const [showNotifyModal, setShowNotifyModal] = useState(false);
@@ -77,6 +77,18 @@ export default function AdminPatientsTab() {
     trpc.patients.getPhotos.useQuery(
       { patientId: selectedPatient?.id ?? 0 },
       { enabled: !!selectedPatient && patientTab === "photos" }
+    );
+
+  const { data: patientPackages = [], isLoading: loadingPackages } =
+    trpc.patients.getPackagesByEmail.useQuery(
+      { email: selectedPatient?.email ?? "" },
+      { enabled: !!selectedPatient && patientTab === "packages" }
+    );
+
+  const { data: patientCoupons = [], isLoading: loadingCoupons } =
+    trpc.patients.getCouponsByEmail.useQuery(
+      { email: selectedPatient?.email ?? "" },
+      { enabled: !!selectedPatient && patientTab === "coupons" }
     );
 
   // ── Mutations ─────────────────────────────────────────────────────────────────
@@ -338,6 +350,8 @@ export default function AdminPatientsTab() {
                 { id: "treatments", icon: Scissors, label: "Tratamientos" },
                 { id: "appointments", icon: Calendar, label: "Citas" },
                 { id: "photos", icon: Camera, label: "Fotos" },
+                { id: "packages", icon: Package, label: "Paquetes" },
+                { id: "coupons", icon: Tag, label: "Cupones" },
                 { id: "info", icon: FileText, label: "Contrato" },
               ] as const).map(tab => (
                 <button key={tab.id} onClick={() => setPatientTab(tab.id)}
@@ -591,6 +605,79 @@ export default function AdminPatientsTab() {
                           className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           <X className="w-3 h-3 text-white" />
                         </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Paquetes ── */}
+            {patientTab === "packages" && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm text-gray-700">Paquetes adquiridos</h4>
+                {loadingPackages ? (
+                  <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-[#C5A55A]" /></div>
+                ) : (patientPackages as any[]).length === 0 ? (
+                  <div className="text-center py-8 text-gray-400 text-sm">Este paciente no tiene paquetes registrados.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {(patientPackages as any[]).map((pkg: any) => (
+                      <div key={pkg.id} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-sm text-[#1A1A1A]">
+                            {pkg.programType === "basic" ? "Paquete Básico" : pkg.programType === "premium" ? "Paquete Premium" : pkg.programType}
+                          </span>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                            pkg.status === "verified" ? "bg-green-100 text-green-700" :
+                            pkg.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                            "bg-red-100 text-red-700"
+                          }`}>
+                            {pkg.status === "verified" ? "✅ Verificado" : pkg.status === "pending" ? "⏳ Pendiente" : "❌ Rechazado"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 space-y-0.5">
+                          <p>Precio: <span className="font-medium text-gray-700">${pkg.price}</span></p>
+                          {pkg.accessCode && <p>Código: <span className="font-mono font-bold text-[#C5A55A]">{pkg.accessCode}</span></p>}
+                          <p>Fecha: {new Date(pkg.createdAt).toLocaleDateString("es-MX")}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Cupones Comprados ── */}
+            {patientTab === "coupons" && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm text-gray-700">Cupones comprados</h4>
+                {loadingCoupons ? (
+                  <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-[#C5A55A]" /></div>
+                ) : (patientCoupons as any[]).length === 0 ? (
+                  <div className="text-center py-8 text-gray-400 text-sm">Este paciente no tiene cupones comprados.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {(patientCoupons as any[]).map((c: any) => (
+                      <div key={c.id} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-sm text-[#1A1A1A]">{c.promotionTitle}</span>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                            c.status === "approved" ? "bg-green-100 text-green-700" :
+                            c.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                            c.status === "used" ? "bg-blue-100 text-blue-700" :
+                            "bg-red-100 text-red-700"
+                          }`}>
+                            {c.status === "approved" ? "✅ Aprobado" : c.status === "pending" ? "⏳ Pendiente" : c.status === "used" ? "🎫 Usado" : "❌ Rechazado"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 space-y-0.5">
+                          {c.couponCode && c.status === "approved" && (
+                            <p>Código: <span className="font-mono font-bold text-[#C5A55A]">{c.couponCode}</span></p>
+                          )}
+                          <p>Comprador: <span className="font-medium text-gray-700">{c.buyerName}</span></p>
+                          <p>Fecha: {new Date(c.createdAt).toLocaleDateString("es-MX")}</p>
+                        </div>
                       </div>
                     ))}
                   </div>

@@ -1241,3 +1241,17 @@ export async function deletePatientAccount(id: number) {
   await db.delete(patientAccounts).where(eq(patientAccounts.id, id));
   return { success: true };
 }
+
+// Get memberships (paquetes) by patient email — for admin patient detail view
+export async function getMembershipsByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(memberships).where(eq(memberships.clientEmail, email.toLowerCase().trim())).orderBy(desc(memberships.createdAt));
+}
+
+// Get gift purchases (cupones comprados) by buyer email — for admin patient detail view
+export async function getGiftPurchasesByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(giftPurchases).where(eq(giftPurchases.buyerEmail, email.toLowerCase().trim())).orderBy(desc(giftPurchases.createdAt));
+}

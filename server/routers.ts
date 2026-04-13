@@ -2212,6 +2212,27 @@ export const appRouter = router({
         );
         return { success: true };
       }),
+    // Obtener paquetes (memberships) vinculados al email del paciente (admin)
+    getPackagesByEmail: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => {
+        const { getMembershipsByEmail } = await import('./db');
+        return await getMembershipsByEmail(input.email);
+      }),
+    // Obtener cupones comprados vinculados al email del paciente (admin)
+    getCouponsByEmail: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => {
+        const { getGiftPurchasesByEmail } = await import('./db');
+        const purchases = await getGiftPurchasesByEmail(input.email);
+        // Enriquecer con el título de la promoción
+        const { getAllPromotionsForAdmin } = await import('./db');
+        const promos = await getAllPromotionsForAdmin();
+        return purchases.map(p => ({
+          ...p,
+          promotionTitle: promos.find((pr: any) => pr.id === p.promotionId)?.title ?? 'Promoción',
+        }));
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;

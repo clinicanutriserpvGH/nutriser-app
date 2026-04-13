@@ -463,7 +463,21 @@ export default function MyTreatments() {
           <div className="flex flex-col items-center mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="h-16 mb-3" />
             <h1 className="text-2xl font-bold text-white">Mis Tratamientos</h1>
-            <p className="text-white/50 text-sm mt-1 text-center">Accede al seguimiento de tus tratamientos y descuentos exclusivos en tratamientos faciales y corporales</p>
+            <p className="text-white/50 text-sm mt-1 text-center mb-4">Tu portal personal de salud y estética Nutriser</p>
+            <div className="grid grid-cols-1 gap-1.5 w-full max-w-xs text-left">
+              {[
+                { icon: "🗓️", text: "Seguimiento de tus tratamientos" },
+                { icon: "🏷️", text: "Verifica el estado de tus cupones" },
+                { icon: "📦", text: "Consulta el estado de tus paquetes" },
+                { icon: "📸", text: "Fotos antes y después de tu progreso" },
+                { icon: "📋", text: "Realiza tu contrato de consentimiento" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
+                  <span className="text-base">{item.icon}</span>
+                  <span className="text-white/70 text-xs">{item.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm">

@@ -77,8 +77,7 @@ export default function NutriserHomePage() {
   };
   const goToSplash1 = () => {
     // Regresar → Splash 1 (hub con Sitio Web y Nutriser Mall)
-    sessionStorage.setItem("nutriser_splash_seen", "1");
-    sessionStorage.setItem("nutriser_chose_splash1", "1");
+    sessionStorage.setItem("nutriser_go_to_splash1", "1");
     window.location.href = "/";
   };
 

@@ -99,6 +99,13 @@ function AppContent() {
       return "site";
     }
 
+    // Si hay bandera de ir directo al Splash 1 (ej: desde botón Regresar en Nutriser Mall)
+    const goToSplash1 = sessionStorage.getItem("nutriser_go_to_splash1");
+    if (goToSplash1) {
+      sessionStorage.removeItem("nutriser_go_to_splash1");
+      return "splash1";
+    }
+
     // Siempre mostrar Splash 0 al entrar a la página principal
     return "splash0";
   });

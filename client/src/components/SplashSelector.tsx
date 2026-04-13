@@ -412,37 +412,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
           </div>
 
-          {/* ── Mis Tratamientos + Agendar Cita ── */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:gap-6 mb-4 md:mb-5 lg:mb-6">
-
-            {/* Mis Tratamientos */}
-            <button
-              onClick={() => handleNavigate('/mis-tratamientos')}
-              className={`relative rounded-2xl overflow-hidden border transition-all duration-200 group ${isLight ? "border-[#C5A55A]/30 hover:border-[#C5A55A]" : "border-[#C5A55A]/30 hover:border-[#C5A55A]"}`}
-              style={{ minHeight: "90px", height: "100%" }}
-            >
-              <div className="absolute inset-0">
-                <img src={IMG_TREATMENTS} alt="Mis Tratamientos" className="w-full h-full object-cover transition-opacity opacity-50 group-hover:opacity-60" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-              </div>
-              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
-                <div className="w-10 h-10 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-black" />
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-xs sm:text-sm text-white drop-shadow">Mis Tratamientos</p>
-                  {activePatient ? (
-                    <p className="text-[#C5A55A] text-[9px] sm:text-[10px] leading-tight mt-0.5 font-semibold">
-                      ✓ {activePatient.name.split(' ')[0]}
-                    </p>
-                  ) : (
-                    <p className="text-[9px] sm:text-[10px] leading-tight mt-0.5 text-white/70">
-                      Seguimiento y descuentos
-                    </p>
-                  )}
-                </div>
-              </div>
-            </button>
+          {/* ── Agendar Cita ── */}
+          <div className="grid grid-cols-1 gap-3 md:gap-4 lg:gap-6 mb-4 md:mb-5 lg:mb-6">
 
             {/* Agendar Cita */}
             <button

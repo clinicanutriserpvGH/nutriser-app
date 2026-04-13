@@ -4,7 +4,7 @@
  * Mismo diseño de tarjetas que SplashSelector (Splash 1)
  */
 import { useState } from "react";
-import { Home, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2, Sparkles, CalendarCheck } from "lucide-react";
+import { Home, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2, Sparkles, CalendarCheck, Moon, Sun } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
 const LOGO_URL =
@@ -22,7 +22,7 @@ interface Splash0EntryProps {
 
 export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) {
   const [leaving, setLeaving] = useState(false);
-  const { isLight } = useSplashTheme();
+  const { isLight, isAuto, toggleSplashTheme, resetToAuto } = useSplashTheme();
 
   const bg = isLight
     ? "linear-gradient(160deg, #FAF7F2 0%, #F5EFE4 50%, #FAF7F2 100%)"
@@ -281,9 +281,43 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
           </div>
 
           {/* ── Pie ── */}
-          <p className={`text-center text-[9px] tracking-[0.2em] uppercase mt-2 ${isLight ? "text-[#9a8050]/40" : "text-white/20"}`}>
-            Nutriser Aesthetic &amp; Nutrition
-          </p>
+          <div className="flex items-center justify-between mt-2">
+            <p className={`text-[9px] tracking-[0.2em] uppercase ${isLight ? "text-[#9a8050]/40" : "text-white/20"}`}>
+              Nutriser Aesthetic &amp; Nutrition
+            </p>
+            {/* Toggle discreto modo claro/oscuro */}
+            <div className="flex flex-col items-end gap-0.5">
+              <button
+                onClick={toggleSplashTheme}
+                aria-label={isLight ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] transition-all duration-300 ${
+                  isLight ? "text-[#9a8050]/50 hover:text-[#7a6030]" : "text-white/20 hover:text-white/50"
+                }`}
+              >
+                {isLight ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
+                <span className="tracking-wide">{isLight ? "Claro" : "Oscuro"}</span>
+                <span className={`relative inline-block w-6 h-3 rounded-full transition-colors duration-300 flex-shrink-0 ${
+                  isLight ? "bg-[#C5A55A]/50" : "bg-white/15"
+                }`}>
+                  <span className={`absolute top-0.5 w-2 h-2 rounded-full bg-white/70 shadow transition-transform duration-300 ${
+                    isLight ? "translate-x-3" : "translate-x-0.5"
+                  }`} />
+                </span>
+              </button>
+              {isAuto ? (
+                <span className={`text-[8px] pr-1 ${isLight ? "text-[#9a8050]/30" : "text-white/15"}`}>auto</span>
+              ) : (
+                <button
+                  onClick={resetToAuto}
+                  className={`text-[8px] pr-1 underline underline-offset-1 transition-colors ${
+                    isLight ? "text-[#9a8050]/40 hover:text-[#7a6030]" : "text-white/20 hover:text-white/50"
+                  }`}
+                >
+                  auto
+                </button>
+              )}
+            </div>
+          </div>
 
         </div>
       </div>

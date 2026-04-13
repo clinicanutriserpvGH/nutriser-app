@@ -483,12 +483,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
 
           {/* ── Footer ── */}
-          <div className="flex items-center justify-between pb-4 pt-2">
+          <div className="flex items-center justify-center pb-4 pt-2">
             <p className={`text-[10px] ${isLight ? "text-[#9a8050]/50" : "text-white/20"}`}>
               © 2025 Nutriser Aesthetic &amp; Nutrition · nutriserpv.com
             </p>
-            {/* Toggle discreto en esquina inferior derecha */}
-            <ThemeToggle isLight={isLight} isAuto={isAuto} onToggle={toggleSplashTheme} onResetAuto={resetToAuto} />
           </div>
 
         </div>

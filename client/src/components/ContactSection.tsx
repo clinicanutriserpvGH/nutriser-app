@@ -111,7 +111,12 @@ export default function ContactSection() {
               </a>
 
               {/* Address */}
-              <div className="flex items-start gap-5 p-6 bg-white/5 border border-white/10">
+              <a
+                href="https://maps.google.com/?q=Nutriser+Aesthetic+%26+Nutrition,+Emiliano+Zapata+2,+Puerto+Vallarta,+Jalisco"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-5 p-6 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#C5A55A]/40 transition-all duration-200 cursor-pointer"
+              >
                 <div className="w-14 h-14 flex items-center justify-center border border-[#C5A55A]/40 flex-shrink-0">
                   <MapPin className="w-6 h-6 text-[#C5A55A]" />
                 </div>
@@ -126,7 +131,7 @@ export default function ContactSection() {
                     Col. Valentín Gómez Farías, Puerto Vallarta, Jalisco
                   </p>
                 </div>
-              </div>
+              </a>
 
               {/* Hours */}
               <div className="flex items-start gap-5 p-6 bg-white/5 border border-white/10">
@@ -140,7 +145,7 @@ export default function ContactSection() {
                   <p className="text-white text-lg font-medium">
                     Lunes a Sábado
                   </p>
-                  <p className="text-white/50">Agenda tu cita por WhatsApp</p>
+
                 </div>
               </div>
 

@@ -1200,3 +1200,11 @@
 - [ ] NutriserHomePage: quitar lg:hidden de la segunda fila para que las 4 tarjetas aparezcan en desktop en una sola fila de 4 columnas
 - [ ] Splash 1 (SplashSelector): corregir proporciones de tarjetas grandes en desktop (no deben ser cuadradas gigantes)
 - [ ] Splash 0 (Splash0Entry): igualar altura de las dos tarjetas en desktop
+
+## Rediseño Portal Paciente - Sesión Actual
+
+- [ ] Backend: endpoint getMyPurchases(email) que retorna servicios+cupones+paquetes del paciente automáticamente
+- [ ] Portal paciente: reemplazar tabs Mis Servicios/Cupones/Paquetes con un solo tab "Mis Compras" automático
+- [ ] Portal paciente: tab "Seguimiento" con sesiones (dadas, perdidas, vencidas) actualizado por admin
+- [ ] Admin: en panel de pacientes, poder marcar sesiones de tratamiento como dada/perdida/vencida
+- [ ] Quitar formularios de código de verificación del portal del paciente

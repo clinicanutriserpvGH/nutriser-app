@@ -2271,6 +2271,26 @@ export const appRouter = router({
         const { lookupServiceByEmailAndCode } = await import('./db');
         return await lookupServiceByEmailAndCode(input.email, input.code);
       }),
+    // Obtener TODAS las compras del paciente por email (servicios + cupones + paquetes) - sin código
+    getMyPurchases: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => {
+        const { getMembershipsByEmail, getGiftPurchasesByEmail, getServicePurchasesByEmail, getAllPromotionsForAdmin } = await import('./db');
+        const [memberships, giftPurchases, servicePurchases, promos] = await Promise.all([
+          getMembershipsByEmail(input.email),
+          getGiftPurchasesByEmail(input.email),
+          getServicePurchasesByEmail(input.email),
+          getAllPromotionsForAdmin(),
+        ]);
+        return {
+          packages: memberships,
+          coupons: giftPurchases.map((p: any) => ({
+            ...p,
+            promotionTitle: (promos as any[]).find((pr: any) => pr.id === p.promotionId)?.title ?? 'Promoción',
+          })),
+          services: servicePurchases,
+        };
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;

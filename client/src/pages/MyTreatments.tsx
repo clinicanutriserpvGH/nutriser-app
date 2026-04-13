@@ -194,16 +194,8 @@ export default function MyTreatments() {
   const [authMode, setAuthMode] = useState<"login" | "register" | "register-form" | "forgot">("login");
   const [patient, setPatient] = useState<PatientSafe | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<"services" | "photos" | "consent" | "coupons" | "packages">("services");
-  // Estado para formulario de verificación de cupón (solo código, email viene de sesión)
-  const [couponCode, setCouponCode] = useState("");
-  const [couponQuery, setCouponQuery] = useState<{email: string; code: string} | null>(null);
-  // Estado para formulario de verificación de paquete (solo código, email viene de sesión)
-  const [packageCode, setPackageCode] = useState("");
-  const [packageQuery, setPackageQuery] = useState<{email: string; code: string} | null>(null);
-  // Estado para formulario de verificación de servicio
-  const [serviceCode, setServiceCode] = useState("");
-  const [serviceQuery, setServiceQuery] = useState<{email: string; code: string} | null>(null);
+  const [activeTab, setActiveTab] = useState<"purchases" | "tracking" | "photos" | "consent">("purchases");
+
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [signingConsent, setSigningConsent] = useState(false);
   const [signatureEmpty, setSignatureEmpty] = useState(true);
@@ -267,19 +259,10 @@ export default function MyTreatments() {
     { patientId: patient?.id ?? 0 },
     { enabled: !!patient && view === "portal" && activeTab === "photos" }
   );
-  const { data: promotions = [] } = trpc.promotions.list.useQuery(undefined, { enabled: !!patient && activeTab === "coupons" });
-  // Queries para verificación de cupón y paquete
-  const couponLookup = trpc.giftPurchases.lookupByEmailAndCode.useQuery(
-    couponQuery ?? { email: 'x@x.com', code: 'NONE' },
-    { enabled: !!couponQuery, retry: false }
-  );
-  const packageLookup = trpc.memberships.lookupByEmailAndCode.useQuery(
-    packageQuery ?? { email: 'x@x.com', code: 'NONE' },
-    { enabled: !!packageQuery, retry: false }
-  );
-  const serviceLookup = trpc.servicePurchases.lookupByEmailAndCode.useQuery(
-    serviceQuery ?? { email: 'x@x.com', code: 'NONE' },
-    { enabled: !!serviceQuery, retry: false }
+  // Query automática: todas las compras del paciente por correo (sin código)
+  const { data: myPurchases, isLoading: purchasesLoading } = trpc.patients.getMyPurchases.useQuery(
+    { email: patient?.email ?? 'x@x.com' },
+    { enabled: !!patient && view === 'portal' && activeTab === 'purchases' }
   );
 
   // ─── Mutations ──────────────────────────────────────────────────────────────
@@ -798,10 +781,9 @@ export default function MyTreatments() {
             {/* Tabs — horizontal en móvil, vertical en desktop */}
             <div className="flex lg:flex-col bg-white/5 rounded-2xl p-1 gap-1">
               {([
-                { id: "services", icon: Sparkles, label: "Mis Servicios" },
+                { id: "purchases", icon: ShieldCheck, label: "Mis Compras" },
+                { id: "tracking", icon: Sparkles, label: "Seguimiento" },
                 { id: "photos", icon: Camera, label: "Fotos" },
-                { id: "coupons", icon: Tag, label: "Cupones" },
-                { id: "packages", icon: ShieldCheck, label: "Paquetes" },
                 { id: "consent", icon: FileText, label: "Contrato" },
               ] as const).map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
@@ -839,321 +821,250 @@ export default function MyTreatments() {
           {/* ── Columna derecha (contenido del tab) ── */}
           <div className="flex-1 min-w-0 space-y-5">
 
-        {/* ── Tab: Mis Servicios — Formulario de verificación ── */}
-        {activeTab === "services" && (
-          <div className="space-y-4">
+        {/* ── Tab: Mis Compras — Automático por correo ── */}
+        {activeTab === "purchases" && (
+          <div className="space-y-5">
+            {/* Header */}
             <div className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-5 h-5 text-[#C5A55A]" />
-                <h3 className="text-white font-bold text-sm">Verificar mi Servicio</h3>
+              <div className="flex items-center gap-2 mb-1">
+                <ShieldCheck className="w-5 h-5 text-[#C5A55A]" />
+                <h3 className="text-white font-bold text-sm">Mis Compras</h3>
               </div>
-              <p className="text-white/50 text-xs">Ingresa el código de servicio que recibiste por correo para consultar el estado de tu compra.</p>
+              <p className="text-white/50 text-xs">Todo lo que has adquirido en Nutriser, vinculado a tu cuenta.</p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
-              <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/20 rounded-xl px-3 py-2 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#C5A55A] flex-shrink-0" />
-                <span className="text-white/70 text-xs">Sesión: <strong className="text-white">{patient?.email}</strong></span>
-              </div>
-              <div>
-                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Código de servicio</label>
-                <Input
-                  type="text"
-                  placeholder="NUT-SRV-XXXXXX"
-                  value={serviceCode}
-                  onChange={e => { setServiceCode(e.target.value.toUpperCase()); setServiceQuery(null); }}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm font-mono tracking-widest"
-                />
-              </div>
-              <button
-                onClick={() => {
-                  if (!serviceCode.trim()) { toast.error("Por favor ingresa el código de servicio"); return; }
-                  if (!patient?.email) { toast.error("No hay sesión activa"); return; }
-                  setServiceQuery({ email: patient.email, code: serviceCode.trim() });
-                }}
-                disabled={serviceLookup.isFetching}
-                className="w-full py-2.5 rounded-xl bg-[#C5A55A] text-black font-black text-sm uppercase tracking-widest hover:bg-[#B8963E] transition-all disabled:opacity-60"
-              >
-                {serviceLookup.isFetching ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Consultar Servicio'}
-              </button>
-            </div>
-            {/* Resultado de la búsqueda */}
-            {serviceQuery && !serviceLookup.isFetching && serviceLookup.data && (
-              <div className={`rounded-2xl p-4 border ${
-                !serviceLookup.data.found ? 'bg-red-500/10 border-red-500/20' :
-                serviceLookup.data.status === 'approved' ? 'bg-green-500/10 border-green-500/20' :
-                serviceLookup.data.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
-                'bg-yellow-500/10 border-yellow-500/20'
-              }`}>
-                {!serviceLookup.data.found ? (
-                  <div className="text-center py-2">
-                    <X className="w-8 h-8 text-red-400 mx-auto mb-2" />
-                    <p className="text-red-400 font-bold text-sm">Servicio no encontrado</p>
-                    <p className="text-white/40 text-xs mt-1">Verifica que el código sea correcto o que el servicio esté asociado a tu correo.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      {serviceLookup.data.status === 'approved' && <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />}
-                      {serviceLookup.data.status === 'pending' && <Clock className="w-5 h-5 text-yellow-400 flex-shrink-0" />}
-                      {serviceLookup.data.status === 'rejected' && <X className="w-5 h-5 text-red-400 flex-shrink-0" />}
-                      <div>
-                        <p className="text-white font-bold text-sm">{(serviceLookup.data as any).serviceName}</p>
-                        <p className="text-white/50 text-xs">Cliente: {(serviceLookup.data as any).buyerName}</p>
-                      </div>
-                    </div>
-                    <div className="bg-black/20 rounded-xl px-3 py-2 flex items-center justify-between">
-                      <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">
-                        {serviceLookup.data.status === 'approved' ? (serviceLookup.data as any).serviceCode : '—'}
-                      </span>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                        serviceLookup.data.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                        serviceLookup.data.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
-                      }`}>
-                        {serviceLookup.data.status === 'approved' ? '✅ Activo' :
-                         serviceLookup.data.status === 'pending' ? '⏳ Pendiente de autorización' :
-                         '❌ Rechazado'}
-                      </span>
-                    </div>
-                    {serviceLookup.data.status === 'pending' && (
-                      <p className="text-yellow-300/70 text-xs text-center">Tu compra está siendo revisada por el equipo Nutriser. Recibirás tu código de servicio por correo una vez autorizada.</p>
-                    )}
-                    {(serviceLookup.data as any).approvedAt && serviceLookup.data.status === 'approved' && (
-                      <p className="text-white/40 text-xs text-center">Autorizado el: {new Date((serviceLookup.data as any).approvedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    )}
-                    {(serviceLookup.data as any).originalPrice && (
-                      <p className="text-white/40 text-xs text-center">Precio: ${(serviceLookup.data as any).originalPrice} MXN</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* ── Tab: Fotos ── */}
-        {activeTab === "photos" && (
-          <div className="space-y-4">
-            {photos.length === 0 ? (
-              <div className="text-center py-12">
-                <Camera className="w-12 h-12 text-white/20 mx-auto mb-3" />
-                <p className="text-white/40 text-sm">Aún no hay fotos registradas.</p>
-                <p className="text-white/30 text-xs mt-1">El equipo de Nutriser agregará fotos de tu progreso.</p>
+            {purchasesLoading ? (
+              <div className="text-center py-10">
+                <Loader2 className="w-8 h-8 text-[#C5A55A] animate-spin mx-auto mb-2" />
+                <p className="text-white/40 text-xs">Cargando tus compras...</p>
               </div>
             ) : (
               <>
-                {/* Agrupar por tratamiento */}
-                {Array.from(new Set(photos.map(p => p.treatmentId ?? 0))).map(tid => {
-                  const groupPhotos = photos.filter(p => (p.treatmentId ?? 0) === tid);
-                  const treatment = treatments.find(t => t.id === tid);
-                  return (
-                    <div key={tid}>
-                      <p className="text-white/50 text-xs font-semibold mb-2">
-                        {treatment ? treatment.serviceName : "General"}
-                      </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {groupPhotos.map(photo => (
-                          <button key={photo.id} onClick={() => setSelectedPhoto(photo)}
-                            className="relative rounded-2xl overflow-hidden aspect-square group">
-                            <img src={photo.photoUrl} alt={photoTypeLabel(photo.type)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${photoTypeColor(photo.type)}`}>
-                                {photoTypeLabel(photo.type)}
-                              </span>
-                              <span className="text-white/60 text-[10px]">{photo.photoDate}</span>
+                {/* ── Paquetes ── */}
+                {(myPurchases?.packages?.length ?? 0) > 0 && (
+                  <div>
+                    <h4 className="text-white/60 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5" /> Paquetes
+                    </h4>
+                    <div className="space-y-3">
+                      {myPurchases!.packages.map((pkg: any) => (
+                        <div key={pkg.id} className={`rounded-2xl p-4 border ${
+                          pkg.status === 'verified' ? 'bg-green-500/10 border-green-500/20' :
+                          pkg.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
+                          'bg-yellow-500/10 border-yellow-500/20'
+                        }`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-white font-bold text-sm">{pkg.programName || pkg.programType}</p>
+                              <p className="text-white/50 text-xs mt-0.5">Precio: ${pkg.price} MXN</p>
+                              {pkg.verifiedAt && <p className="text-white/40 text-xs mt-0.5">Verificado: {new Date(pkg.verifiedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
                             </div>
-                          </button>
-                        ))}
-                      </div>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                              pkg.status === 'verified' ? 'bg-green-500/20 text-green-400' :
+                              pkg.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                              'bg-red-500/20 text-red-400'
+                            }`}>
+                              {pkg.status === 'verified' ? '✅ Activo' :
+                               pkg.status === 'pending' ? '⏳ Pendiente' : '❌ Rechazado'}
+                            </span>
+                          </div>
+                          {pkg.status === 'verified' && pkg.accessCode && (
+                            <div className="mt-2 bg-black/20 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                              <span className="text-white/40 text-xs">Código:</span>
+                              <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{pkg.accessCode}</span>
+                            </div>
+                          )}
+                          {pkg.status === 'pending' && (
+                            <p className="text-yellow-300/70 text-xs mt-2">Tu paquete está siendo revisado. Recibirás confirmación por correo.</p>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  );
-                })}
+                  </div>
+                )}
+
+                {/* ── Servicios ── */}
+                {(myPurchases?.services?.length ?? 0) > 0 && (
+                  <div>
+                    <h4 className="text-white/60 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" /> Servicios
+                    </h4>
+                    <div className="space-y-3">
+                      {myPurchases!.services.map((svc: any) => (
+                        <div key={svc.id} className={`rounded-2xl p-4 border ${
+                          svc.status === 'approved' ? 'bg-green-500/10 border-green-500/20' :
+                          svc.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
+                          'bg-yellow-500/10 border-yellow-500/20'
+                        }`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-white font-bold text-sm">{svc.serviceName}</p>
+                              {svc.originalPrice && <p className="text-white/50 text-xs mt-0.5">Precio: ${svc.originalPrice} MXN</p>}
+                              {svc.approvedAt && <p className="text-white/40 text-xs mt-0.5">Autorizado: {new Date(svc.approvedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                            </div>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                              svc.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                              svc.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                              'bg-red-500/20 text-red-400'
+                            }`}>
+                              {svc.status === 'approved' ? '✅ Activo' :
+                               svc.status === 'pending' ? '⏳ Pendiente' : '❌ Rechazado'}
+                            </span>
+                          </div>
+                          {svc.status === 'approved' && svc.serviceCode && (
+                            <div className="mt-2 bg-black/20 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                              <span className="text-white/40 text-xs">Código:</span>
+                              <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{svc.serviceCode}</span>
+                            </div>
+                          )}
+                          {svc.status === 'pending' && (
+                            <p className="text-yellow-300/70 text-xs mt-2">Tu servicio está siendo revisado. Recibirás confirmación por correo.</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Cupones ── */}
+                {(myPurchases?.coupons?.length ?? 0) > 0 && (
+                  <div>
+                    <h4 className="text-white/60 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5" /> Cupones
+                    </h4>
+                    <div className="space-y-3">
+                      {myPurchases!.coupons.map((c: any) => (
+                        <div key={c.id} className={`rounded-2xl p-4 border ${
+                          c.status === 'approved' ? 'bg-green-500/10 border-green-500/20' :
+                          c.status === 'used' ? 'bg-gray-500/10 border-gray-500/20' :
+                          c.status === 'expired' ? 'bg-orange-500/10 border-orange-500/20' :
+                          c.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
+                          'bg-yellow-500/10 border-yellow-500/20'
+                        }`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-white font-bold text-sm">{c.promotionTitle}</p>
+                              {c.expiresAt && c.status === 'approved' && (
+                                <p className="text-white/50 text-xs mt-0.5">Válido hasta: {new Date(c.expiresAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                              )}
+                            </div>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                              c.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                              c.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                              c.status === 'used' ? 'bg-gray-500/20 text-gray-400' :
+                              c.status === 'expired' ? 'bg-orange-500/20 text-orange-400' :
+                              'bg-red-500/20 text-red-400'
+                            }`}>
+                              {c.status === 'approved' ? '✅ Activo' :
+                               c.status === 'pending' ? '⏳ Pendiente' :
+                               c.status === 'used' ? '❌ Usado' :
+                               c.status === 'expired' ? '⚠️ Vencido' : '❌ Rechazado'}
+                            </span>
+                          </div>
+                          {c.couponCode && c.status === 'approved' && (
+                            <div className="mt-2 bg-black/20 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                              <span className="text-white/40 text-xs">Código:</span>
+                              <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{c.couponCode}</span>
+                            </div>
+                          )}
+                          {c.status === 'pending' && (
+                            <p className="text-yellow-300/70 text-xs mt-2">Tu cupón está siendo revisado. Recibirás confirmación por correo.</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Estado vacío */}
+                {(myPurchases?.packages?.length ?? 0) === 0 &&
+                 (myPurchases?.services?.length ?? 0) === 0 &&
+                 (myPurchases?.coupons?.length ?? 0) === 0 && (
+                  <div className="text-center py-12">
+                    <ShieldCheck className="w-12 h-12 text-white/20 mx-auto mb-3" />
+                    <p className="text-white/40 text-sm">Aún no tienes compras registradas.</p>
+                    <p className="text-white/30 text-xs mt-1">Tus paquetes, servicios y cupones aparecerán aquí automáticamente.</p>
+                  </div>
+                )}
               </>
             )}
           </div>
         )}
 
-        {/* ── Tab: Cupones — Formulario de verificación ── */}
-        {activeTab === "coupons" && (
+        {/* ── Tab: Seguimiento ── */}
+        {activeTab === "tracking" && (
           <div className="space-y-4">
-            <div className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Tag className="w-5 h-5 text-[#C5A55A]" />
-                <h3 className="text-white font-bold text-sm">Verificar mi Cupón</h3>
+            {treatments.length === 0 ? (
+              <div className="text-center py-12">
+                <Sparkles className="w-12 h-12 text-white/20 mx-auto mb-3" />
+                <p className="text-white/40 text-sm">Aún no tienes tratamientos asignados.</p>
+                <p className="text-white/30 text-xs mt-1">El equipo de Nutriser los agregará pronto.</p>
               </div>
-              <p className="text-white/50 text-xs">Ingresa el código de cupón que recibiste por correo para consultar el estado de tu compra.</p>
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
-              <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/20 rounded-xl px-3 py-2 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#C5A55A] flex-shrink-0" />
-                <span className="text-white/70 text-xs">Sesión: <strong className="text-white">{patient?.email}</strong></span>
-              </div>
-              <div>
-                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Código de cupón</label>
-                <Input
-                  type="text"
-                  placeholder="NUT-XXXX-XXXX"
-                  value={couponCode}
-                  onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponQuery(null); }}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm font-mono tracking-widest"
-                />
-              </div>
-              <button
-                onClick={() => {
-                  if (!couponCode.trim()) { toast.error("Por favor ingresa el código de cupón"); return; }
-                  if (!patient?.email) { toast.error("No hay sesión activa"); return; }
-                  setCouponQuery({ email: patient.email, code: couponCode.trim() });
-                }}
-                disabled={couponLookup.isFetching}
-                className="w-full py-2.5 rounded-xl bg-[#C5A55A] text-black font-black text-sm uppercase tracking-widest hover:bg-[#B8963E] transition-all disabled:opacity-60"
-              >
-                {couponLookup.isFetching ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Consultar Cupón'}
-              </button>
-            </div>
-            {/* Resultado de la búsqueda */}
-            {couponQuery && !couponLookup.isFetching && couponLookup.data && (
-              <div className={`rounded-2xl p-4 border ${
-                !couponLookup.data.found ? 'bg-red-500/10 border-red-500/20' :
-                couponLookup.data.status === 'approved' ? 'bg-green-500/10 border-green-500/20' :
-                couponLookup.data.status === 'used' ? 'bg-gray-500/10 border-gray-500/20' :
-                couponLookup.data.status === 'expired' ? 'bg-orange-500/10 border-orange-500/20' :
-                couponLookup.data.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
-                'bg-yellow-500/10 border-yellow-500/20'
-              }`}>
-                {!couponLookup.data.found ? (
-                  <div className="text-center py-2">
-                    <X className="w-8 h-8 text-red-400 mx-auto mb-2" />
-                    <p className="text-red-400 font-bold text-sm">Cupón no encontrado</p>
-                    <p className="text-white/40 text-xs mt-1">Verifica que el correo y código sean correctos.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      {couponLookup.data.status === 'approved' && <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />}
-                      {couponLookup.data.status === 'pending' && <Clock className="w-5 h-5 text-yellow-400 flex-shrink-0" />}
-                      {couponLookup.data.status === 'used' && <ShieldCheck className="w-5 h-5 text-gray-400 flex-shrink-0" />}
-                      {couponLookup.data.status === 'expired' && <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0" />}
-                      {couponLookup.data.status === 'rejected' && <X className="w-5 h-5 text-red-400 flex-shrink-0" />}
-                      <div>
-                        <p className="text-white font-bold text-sm">{(couponLookup.data as any).promotionTitle}</p>
-                        <p className="text-white/50 text-xs">Comprado por: {(couponLookup.data as any).buyerName}</p>
+            ) : (
+              <div className="space-y-4">
+                {treatments.map(t => {
+                  const progress = t.totalSessions > 0 ? Math.round((t.completedSessions / t.totalSessions) * 100) : 0;
+                  const tAppointments = appointments.filter(a => a.treatmentId === t.id);
+                  return (
+                    <div key={t.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+                      {/* Nombre y estado */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-white font-bold text-sm">{t.serviceName}</p>
+                          {t.notes && <p className="text-white/40 text-xs mt-0.5">{t.notes}</p>}
+                        </div>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                          t.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                          t.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
+                          'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {t.status === 'completed' ? '✅ Completado' :
+                           t.status === 'in_progress' ? '🔵 En progreso' : '⏳ Pendiente'}
+                        </span>
                       </div>
+                      {/* Barra de progreso */}
+                      {t.totalSessions > 0 && (
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-white/50 text-xs">Sesiones completadas</span>
+                            <span className="text-[#C5A55A] text-xs font-bold">{t.completedSessions} / {t.totalSessions}</span>
+                          </div>
+                          <div className="w-full bg-white/10 rounded-full h-2">
+                            <div
+                              className="bg-[#C5A55A] h-2 rounded-full transition-all duration-500"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                          <p className="text-white/30 text-xs mt-1 text-right">{progress}% completado</p>
+                        </div>
+                      )}
+                      {/* Citas del tratamiento */}
+                      {tAppointments.length > 0 && (
+                        <div>
+                          <p className="text-white/50 text-xs font-semibold mb-2">Historial de citas</p>
+                          <div className="space-y-1.5">
+                            {tAppointments.map(a => (
+                              <div key={a.id} className="flex items-center justify-between bg-black/20 rounded-xl px-3 py-2">
+                                <div>
+                                  <p className="text-white text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
+                                  {a.notes && <p className="text-white/40 text-[10px]">{a.notes}</p>}
+                                </div>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                  a.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                                  a.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                                  'bg-blue-500/20 text-blue-400'
+                                }`}>
+                                  {a.status === 'completed' ? '✅ Dada' :
+                                   a.status === 'cancelled' ? '❌ Perdida' : '📅 Programada'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="bg-black/20 rounded-xl px-3 py-2 flex items-center justify-between">
-                      <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{(couponLookup.data as any).couponCode}</span>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                        couponLookup.data.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                        couponLookup.data.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                        couponLookup.data.status === 'used' ? 'bg-gray-500/20 text-gray-400' :
-                        couponLookup.data.status === 'expired' ? 'bg-orange-500/20 text-orange-400' :
-                        'bg-red-500/20 text-red-400'
-                      }`}>
-                        {couponLookup.data.status === 'approved' ? '✅ Activo' :
-                         couponLookup.data.status === 'pending' ? '⏳ Pendiente de autorización' :
-                         couponLookup.data.status === 'used' ? '❌ Ya utilizado' :
-                         couponLookup.data.status === 'expired' ? '⚠️ Vencido' :
-                         '❌ Rechazado'}
-                      </span>
-                    </div>
-                    {couponLookup.data.status === 'pending' && (
-                      <p className="text-yellow-300/70 text-xs text-center">Tu compra está siendo revisada por el equipo Nutriser. Recibirás tu código por correo una vez autorizada.</p>
-                    )}
-                    {(couponLookup.data as any).expiresAt && couponLookup.data.status === 'approved' && (
-                      <p className="text-white/40 text-xs text-center">Válido hasta: {new Date((couponLookup.data as any).expiresAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── Tab: Mis Paquetes — Formulario de verificación ── */}
-        {activeTab === "packages" && (
-          <div className="space-y-4">
-            <div className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck className="w-5 h-5 text-[#C5A55A]" />
-                <h3 className="text-white font-bold text-sm">Verificar mi Paquete</h3>
-              </div>
-              <p className="text-white/50 text-xs">Ingresa el código de acceso que recibiste por correo para consultar el estado de tu paquete.</p>
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
-              <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/20 rounded-xl px-3 py-2 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#C5A55A] flex-shrink-0" />
-                <span className="text-white/70 text-xs">Sesión: <strong className="text-white">{patient?.email}</strong></span>
-              </div>
-              <div>
-                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Código de acceso</label>
-                <Input
-                  type="text"
-                  placeholder="XXXXXXXX"
-                  value={packageCode}
-                  onChange={e => { setPackageCode(e.target.value.toUpperCase()); setPackageQuery(null); }}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm font-mono tracking-widest"
-                />
-              </div>
-              <button
-                onClick={() => {
-                  if (!packageCode.trim()) { toast.error("Por favor ingresa el código de acceso"); return; }
-                  if (!patient?.email) { toast.error("No hay sesión activa"); return; }
-                  setPackageQuery({ email: patient.email, code: packageCode.trim() });
-                }}
-                disabled={packageLookup.isFetching}
-                className="w-full py-2.5 rounded-xl bg-[#C5A55A] text-black font-black text-sm uppercase tracking-widest hover:bg-[#B8963E] transition-all disabled:opacity-60"
-              >
-                {packageLookup.isFetching ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Consultar Paquete'}
-              </button>
-            </div>
-            {/* Resultado de la búsqueda */}
-            {packageQuery && !packageLookup.isFetching && packageLookup.data && (
-              <div className={`rounded-2xl p-4 border ${
-                !packageLookup.data.found ? 'bg-red-500/10 border-red-500/20' :
-                packageLookup.data.status === 'verified' ? 'bg-green-500/10 border-green-500/20' :
-                packageLookup.data.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
-                'bg-yellow-500/10 border-yellow-500/20'
-              }`}>
-                {!packageLookup.data.found ? (
-                  <div className="text-center py-2">
-                    <X className="w-8 h-8 text-red-400 mx-auto mb-2" />
-                    <p className="text-red-400 font-bold text-sm">Paquete no encontrado</p>
-                    <p className="text-white/40 text-xs mt-1">Verifica que el correo y código sean correctos.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      {packageLookup.data.status === 'verified' && <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />}
-                      {packageLookup.data.status === 'pending' && <Clock className="w-5 h-5 text-yellow-400 flex-shrink-0" />}
-                      {packageLookup.data.status === 'rejected' && <X className="w-5 h-5 text-red-400 flex-shrink-0" />}
-                      <div>
-                        <p className="text-white font-bold text-sm">{(packageLookup.data as any).programLabel}</p>
-                        <p className="text-white/50 text-xs">Cliente: {(packageLookup.data as any).clientName}</p>
-                      </div>
-                    </div>
-                    <div className="bg-black/20 rounded-xl px-3 py-2 flex items-center justify-between">
-                      <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{(packageLookup.data as any).accessCode ?? '—'}</span>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                        packageLookup.data.status === 'verified' ? 'bg-green-500/20 text-green-400' :
-                        packageLookup.data.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
-                      }`}>
-                        {packageLookup.data.status === 'verified' ? '✅ Activo' :
-                         packageLookup.data.status === 'pending' ? '⏳ Pendiente de verificación' :
-                         '❌ Rechazado'}
-                      </span>
-                    </div>
-                    {packageLookup.data.status === 'pending' && (
-                      <p className="text-yellow-300/70 text-xs text-center">Tu paquete está siendo revisado por el equipo Nutriser. Recibirás tu código de acceso por correo una vez verificado.</p>
-                    )}
-                    {(packageLookup.data as any).verifiedAt && (
-                      <p className="text-white/40 text-xs text-center">Verificado el: {new Date((packageLookup.data as any).verifiedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    )}
-                    {(packageLookup.data as any).price && (
-                      <p className="text-white/40 text-xs text-center">Precio pagado: ${(packageLookup.data as any).price} MXN</p>
-                    )}
-                  </div>
-                )}
+                  );
+                })}
               </div>
             )}
           </div>

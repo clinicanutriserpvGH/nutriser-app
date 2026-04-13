@@ -14,7 +14,7 @@ const LOGO_URL =
 const CLINIC_IMG2 =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-reception-new_959bc342.png";
 const PORTAL_IMG =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-portal-salud-v2_e87113cf.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/portal-salud-bg_efb07b95.jpg";
 const NUTRISER_ICON =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-silhouette-icon_f9345ac8.png";
 const TREATMENT_IMG =
@@ -171,9 +171,13 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                   src={PORTAL_IMG}
                   alt="Portal de Salud Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  style={{ objectPosition: "center 65%" }}
+                  style={{ objectPosition: "center 30%" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/85" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/85" />
+                {/* Logo Nutriser overlay en la parte superior derecha */}
+                <div className="absolute top-4 right-4 flex flex-col items-center gap-1">
+                  <img src={LOGO_URL} alt="Nutriser" className="w-20 h-auto object-contain drop-shadow-lg" style={{ filter: 'brightness(0) invert(1)' }} />
+                </div>
                 <div className="absolute inset-0 flex flex-col justify-between p-5 text-left">
                   <div className="flex items-center gap-2">
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.45)', border: '1.5px solid rgba(197,165,90,0.6)', backdropFilter: 'blur(4px)' }}>

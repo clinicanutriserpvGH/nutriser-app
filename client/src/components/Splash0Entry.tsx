@@ -331,7 +331,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
 
           {/* ── Pie ── */}
           <div className="flex items-center justify-between mt-2">
-            <p className={`text-[9px] tracking-[0.2em] uppercase ${isLight ? "text-[#9a8050]/40" : "text-white/20"}`}>
+            <p className={`text-[9px] tracking-[0.2em] uppercase text-center flex-1 ${isLight ? "text-[#9a8050]/40" : "text-white/20"}`}>
               Nutriser Aesthetic &amp; Nutrition
             </p>
             {/* Toggle discreto modo claro/oscuro */}

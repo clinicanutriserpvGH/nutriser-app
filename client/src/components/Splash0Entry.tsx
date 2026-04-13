@@ -171,53 +171,33 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
 
           </div>{/* fin grid tarjetas */}
 
-          {/* ── Mis Tratamientos + Agendar Cita ── */}
-          <div className="grid grid-cols-2 gap-3 lg:gap-6 mb-4">
+          {/* ── Mis Tratamientos + Agendar Cita (botones compactos sin imagen) ── */}
+          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-4 mb-4">
 
             {/* Mis Tratamientos */}
             <button
               onClick={() => { window.location.href = '/mis-tratamientos'; }}
-              className="group relative w-full rounded-2xl overflow-hidden border transition-all duration-200 focus:outline-none"
-              style={{ minHeight: '110px', aspectRatio: '4/3', borderColor: 'rgba(197,165,90,0.35)' }}
+              className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/85 border-[#C5A55A]/60 hover:border-[#C5A55A] hover:bg-[#2a1f0a]"
             >
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-agendar-cita_49e2eca2.jpg"
-                alt="Mis Tratamientos"
-                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-65 transition-opacity duration-200"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
-              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
-                <div className="w-10 h-10 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50 flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-black" />
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-xs sm:text-sm text-white drop-shadow">Mis Tratamientos</p>
-                  <p className="text-[9px] sm:text-[10px] leading-tight mt-0.5 text-white/70">Seguimiento y descuentos</p>
-                </div>
+              <div className="w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
+                <Sparkles className="w-5 h-5 text-black" />
               </div>
+              <span className="text-[10px] sm:text-xs font-bold text-center leading-tight text-white">
+                Mis Tratamientos
+              </span>
             </button>
 
             {/* Agendar Cita */}
             <button
               onClick={() => { window.location.href = '/appointment-form'; }}
-              className="group relative w-full rounded-2xl overflow-hidden border transition-all duration-200 focus:outline-none"
-              style={{ minHeight: '110px', aspectRatio: '4/3', borderColor: 'rgba(197,165,90,0.35)' }}
+              className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/75 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]/90"
             >
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-agendar-cita_49e2eca2.jpg"
-                alt="Agendar Cita"
-                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-65 transition-opacity duration-200"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
-              <div className="relative flex flex-col items-center justify-center gap-2 p-3 h-full">
-                <div className="w-10 h-10 rounded-xl bg-[#C5A55A]/80 flex items-center justify-center shadow-lg shadow-[#C5A55A]/30 flex-shrink-0">
-                  <CalendarCheck className="w-5 h-5 text-black" />
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-xs sm:text-sm text-white drop-shadow">Agendar Cita</p>
-                  <p className="text-[9px] sm:text-[10px] leading-tight mt-0.5 text-white/70">Reserva tu servicio</p>
-                </div>
+              <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/30 group-hover:bg-[#C5A55A]/50 flex items-center justify-center transition-colors">
+                <CalendarCheck className="w-5 h-5 text-[#C5A55A]" />
               </div>
+              <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
+                Agendar Cita
+              </span>
             </button>
 
           </div>

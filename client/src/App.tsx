@@ -92,11 +92,7 @@ function AppContent() {
       sessionStorage.setItem("nutriser_splash_version", SPLASH_VERSION);
     }
 
-    const seen = sessionStorage.getItem("nutriser_splash_seen");
-    if (!seen) return "splash0";
-    // Si ya eligió Nutriser Web anteriormente, ir directo al splash1
-    const choseSplash1 = sessionStorage.getItem("nutriser_chose_splash1");
-    if (choseSplash1) return "splash1";
+    // Siempre mostrar Splash 0 al entrar a la página principal
     return "splash0";
   });
 

@@ -283,7 +283,7 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
           {/* ── Botón Administración ── */}
           <div className="flex justify-center mb-3">
             <button
-              onClick={() => { window.location.href = '/admin'; }}
+              onClick={() => { window.location.href = '/admin/login'; }}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-[11px] font-medium transition-all duration-200 ${
                 isLight
                   ? "bg-[#EDE5D5]/60 hover:bg-[#E0D5C0]/80 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 text-[#9a8050] hover:text-[#7a6030]"

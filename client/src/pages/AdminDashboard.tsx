@@ -10,10 +10,11 @@ import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOp
 import { toast } from "sonner";
 
 const ADMIN_TABS = [
-  { value: 'memberships', label: 'Paquetes Comprados', emoji: '📦' },
-  { value: 'appointments', label: 'Citas', emoji: '📅' },
+  { value: 'patients', label: 'Gestión de Pacientes', emoji: '🏥' },
+  { value: 'appointments', label: 'Gestión de Citas', emoji: '📅' },
   { value: 'giftPurchases', label: 'Cupones Comprados', emoji: '🏷️' },
   { value: 'promotions', label: 'Crear Cupón', emoji: '➕' },
+  { value: 'memberships', label: 'Paquetes Comprados', emoji: '📦' },
   { value: 'ebook', label: 'eBook', emoji: '📖' },
   { value: 'subscribers', label: 'Suscriptores', emoji: '🔔' },
   { value: 'servicePurchases', label: 'Compras Serv.', emoji: '🛍️' },
@@ -24,7 +25,6 @@ const ADMIN_TABS = [
   { value: 'courses', label: 'Cursos', emoji: '🎓' },
   { value: 'suggestions', label: 'Foro Expertos', emoji: '💡' },
   { value: 'beforeAfter', label: 'Antes/Después', emoji: '📸' },
-  { value: 'patients', label: 'Pacientes', emoji: '🏥' },
 ] as const;
 
 type AdminTabValue = typeof ADMIN_TABS[number]['value'];

@@ -18,9 +18,10 @@ const NUTRISER_ICON =
 
 interface Splash0EntryProps {
   onEnterNutriserWeb: () => void; // → muestra Splash 1
+  onNavigate?: (path: string) => void; // → navegar a ruta interna
 }
 
-export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) {
+export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0EntryProps) {
   const [leaving, setLeaving] = useState(false);
   const { isLight, isAuto, toggleSplashTheme, resetToAuto } = useSplashTheme();
 
@@ -249,8 +250,22 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
 
           </div>
 
-          {/* ── Botón Administración ── */}
-          <div className="flex justify-center mb-3">
+          {/* ── Botón Mis Tratamientos + Administración ── */}
+          <div className="flex justify-center gap-3 mb-3">
+            <button
+              onClick={() => {
+                if (onNavigate) onNavigate('/mis-tratamientos');
+                else window.location.href = '/mis-tratamientos';
+              }}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-[11px] font-medium transition-all duration-200 ${
+                isLight
+                  ? "bg-[#EDE5D5]/60 hover:bg-[#E0D5C0]/80 border-[#C5A55A]/20 hover:border-[#C5A55A]/50 text-[#9a8050] hover:text-[#7a6030]"
+                  : "bg-white/5 hover:bg-white/10 border-white/10 hover:border-[#C5A55A]/30 text-white/40 hover:text-white/70"
+              }`}
+            >
+              <Sparkles className="w-3 h-3" />
+              Mis Tratamientos
+            </button>
             <button
               onClick={() => { window.location.href = '/admin/login'; }}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-[11px] font-medium transition-all duration-200 ${

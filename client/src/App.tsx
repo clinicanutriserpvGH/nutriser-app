@@ -146,7 +146,7 @@ function AppContent() {
 
       {/* Splash 0: pantalla de entrada con 2 opciones */}
       {splashState === "splash0" && (
-        <Splash0Entry onEnterNutriserWeb={handleEnterSplash1} />
+        <Splash0Entry onEnterNutriserWeb={handleEnterSplash1} onNavigate={handleNavigateFromSplash} />
       )}
 
       {/* Splash 1: hub completo de Nutriser */}

@@ -402,38 +402,21 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                   </div>
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Mall</h2>
-                    {/* Accesos directos dentro de Nutriser Mall */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleNavigate('/nutriser-home')}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40"
-                      >
-                        <ShoppingBag className="w-3 h-3" />
-                        Visitar
-                      </button>
-                      <button
-                        onClick={() => handleNavigate('/services')}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 hover:scale-105 bg-[#C5A55A]/80 backdrop-blur-sm text-black border border-[#C5A55A]"
-                      >
-                        <ClipboardList className="w-3 h-3" />
-                        Servicios
-                      </button>
-                      <button
-                        onClick={() => handleNavigate('/coupons')}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 hover:scale-105 bg-[#C5A55A] backdrop-blur-sm text-black border border-[#C5A55A]"
-                      >
-                        <Tag className="w-3 h-3" />
-                        Cupones
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleNavigate('/nutriser-home')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40"
+                    >
+                      <ShoppingBag className="w-3 h-3" />
+                      Visitar
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ── Agendar Cita + Mis Tratamientos ── */}
-          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-4 mb-4">
+          {/* ── Agendar Cita ── */}
+          <div className="grid grid-cols-1 gap-2 md:gap-3 lg:gap-4 mb-4">
 
             {/* Agendar Cita */}
             <button
@@ -448,39 +431,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </span>
             </button>
 
-            {/* Mis Tratamientos */}
-            <button
-              onClick={() => handleNavigate('/mis-tratamientos')}
-              className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/75 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]/90"
-            >
-              <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/30 group-hover:bg-[#C5A55A]/50 flex items-center justify-center transition-colors">
-                <Sparkles className="w-5 h-5 text-[#C5A55A]" />
-              </div>
-              <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
-                Mis Tratamientos
-              </span>
-            </button>
-
           </div>
 
-          {/* ── Botones Compartir + Administración ── */}
+          {/* ── Botón Administración ── */}
           <div className="flex justify-center gap-3 mb-5">
-            <button
-              onClick={() => {
-                const url = "https://nutriserpv.com";
-                if (navigator.share) {
-                  navigator.share({ title: "Nutriser Aesthetic & Nutrition", url });
-                } else {
-                  navigator.clipboard.writeText(url)
-                    .then(() => toast.success("¡Enlace copiado! Pégalo donde quieras compartirlo."))
-                    .catch(() => toast.error("No se pudo copiar el enlace."));
-                }
-              }}
-              className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${footerBtn}`}
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              Compartir
-            </button>
             <button
               onClick={() => { window.location.href = '/admin/login'; }}
               className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${footerBtn}`}

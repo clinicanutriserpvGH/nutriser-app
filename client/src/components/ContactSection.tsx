@@ -178,7 +178,7 @@ export default function ContactSection() {
                   className="flex items-center justify-center gap-2 bg-[#1A1A1A] border border-[#C5A55A] text-[#C5A55A] px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A]"
                 >
                   <Gift className="w-4 h-4" />
-                  Programas
+                  Paquetes Nutriser
                 </button>
                 <button
                   onClick={() => {

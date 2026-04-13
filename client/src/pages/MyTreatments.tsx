@@ -194,7 +194,15 @@ export default function MyTreatments() {
   const [authMode, setAuthMode] = useState<"login" | "register" | "forgot">("login");
   const [patient, setPatient] = useState<PatientSafe | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<"treatments" | "photos" | "consent" | "coupons">("treatments");
+  const [activeTab, setActiveTab] = useState<"treatments" | "photos" | "consent" | "coupons" | "packages">("treatments");
+  // Estado para formulario de verificación de cupón
+  const [couponEmail, setCouponEmail] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponQuery, setCouponQuery] = useState<{email: string; code: string} | null>(null);
+  // Estado para formulario de verificación de paquete
+  const [packageEmail, setPackageEmail] = useState("");
+  const [packageCode, setPackageCode] = useState("");
+  const [packageQuery, setPackageQuery] = useState<{email: string; code: string} | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [signingConsent, setSigningConsent] = useState(false);
   const [signatureEmpty, setSignatureEmpty] = useState(true);
@@ -259,6 +267,15 @@ export default function MyTreatments() {
     { enabled: !!patient && view === "portal" && activeTab === "photos" }
   );
   const { data: promotions = [] } = trpc.promotions.list.useQuery(undefined, { enabled: !!patient && activeTab === "coupons" });
+  // Queries para verificación de cupón y paquete
+  const couponLookup = trpc.giftPurchases.lookupByEmailAndCode.useQuery(
+    couponQuery ?? { email: 'x@x.com', code: 'NONE' },
+    { enabled: !!couponQuery, retry: false }
+  );
+  const packageLookup = trpc.memberships.lookupByEmailAndCode.useQuery(
+    packageQuery ?? { email: 'x@x.com', code: 'NONE' },
+    { enabled: !!packageQuery, retry: false }
+  );
 
   // ─── Mutations ──────────────────────────────────────────────────────────────
   const registerMutation = trpc.patients.register.useMutation({
@@ -725,9 +742,10 @@ export default function MyTreatments() {
         {/* Tabs */}
         <div className="flex bg-white/5 rounded-2xl p-1 gap-1">
           {([
-            { id: "treatments", icon: Scissors, label: "Tratamientos" },
+            { id: "treatments", icon: Heart, label: "Mis Tratamientos" },
             { id: "photos", icon: Camera, label: "Fotos" },
             { id: "coupons", icon: Tag, label: "Cupones" },
+            { id: "packages", icon: ShieldCheck, label: "Paquetes" },
             { id: "consent", icon: FileText, label: "Contrato" },
           ] as const).map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
@@ -839,164 +857,201 @@ export default function MyTreatments() {
           </div>
         )}
 
-        {/* ── Tab: Cupones ── */}
+        {/* ── Tab: Cupones — Formulario de verificación ── */}
         {activeTab === "coupons" && (
           <div className="space-y-4">
             <div className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Star className="w-5 h-5 text-[#C5A55A]" />
-                <h3 className="text-white font-bold text-sm">Promociones Exclusivas</h3>
+                <Tag className="w-5 h-5 text-[#C5A55A]" />
+                <h3 className="text-white font-bold text-sm">Verificar mi Cupón</h3>
               </div>
-              <p className="text-white/50 text-xs">Como paciente de Nutriser tienes acceso a estas promociones especiales.</p>
+              <p className="text-white/50 text-xs">Ingresa el correo con el que compraste y el código que recibiste para consultar tu cupón.</p>
             </div>
-            {(promotions as any[]).length === 0 ? (
-              <div className="text-center py-8">
-                <Tag className="w-10 h-10 text-white/20 mx-auto mb-2" />
-                <p className="text-white/40 text-sm">Próximamente habrá cupones disponibles para ti.</p>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+              <div>
+                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Correo electrónico</label>
+                <Input
+                  type="email"
+                  placeholder="tucorreo@ejemplo.com"
+                  value={couponEmail}
+                  onChange={e => { setCouponEmail(e.target.value); setCouponQuery(null); }}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm"
+                />
               </div>
-            ) : (
-              (promotions as any[]).map((promo: any) => {
-                const maxC = promo.maxCoupons ?? null;
-                const remaining = promo.couponsRemaining ?? null;
-                const pct = maxC && remaining != null ? Math.round(((maxC - remaining) / maxC) * 100) : null;
-                const isSoldOut = remaining === 0;
-                const isCritical = pct != null && pct >= 80 && !isSoldOut;
-                const isLow = pct != null && pct >= 50 && pct < 80 && !isSoldOut;
-                return (
-                  <div key={promo.id} className={`relative rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-0.5 ${isSoldOut ? 'opacity-70 grayscale' : ''}`}>
-                    {/* Urgency ribbon */}
-                    {isCritical && !isSoldOut && (
-                      <div className="absolute top-0 left-0 right-0 z-20 bg-red-600 text-white text-center py-1.5 text-xs font-black tracking-widest uppercase flex items-center justify-center gap-1 animate-pulse">
-                        <Flame className="w-3.5 h-3.5" /> ¡ÚTIMOS CUPONES! <Flame className="w-3.5 h-3.5" />
-                      </div>
-                    )}
-                    {isLow && !isSoldOut && (
-                      <div className="absolute top-0 left-0 right-0 z-20 bg-orange-500 text-white text-center py-1.5 text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1">
-                        <AlertTriangle className="w-3.5 h-3.5" /> Pocos cupones disponibles
-                      </div>
-                    )}
-
-                    {/* Imagen o header */}
-                    {promo.imageUrl ? (
-                      <div className={`relative overflow-hidden ${isCritical || isLow ? 'mt-7' : ''}`} style={{ height: '180px' }}>
-                        <img src={promo.imageUrl} alt={promo.title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        {promo.regularPrice && promo.price && (
-                          <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black shadow-lg">
-                            🔥 OFERTA
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <h3 className="font-serif text-lg text-white leading-tight drop-shadow-lg">{promo.title}</h3>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className={`bg-gradient-to-br from-[#1A1A1A] to-[#2a2a2a] p-4 ${isCritical || isLow ? 'mt-7' : ''}`}>
-                        {promo.regularPrice && promo.price && (
-                          <div className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black mb-2">🔥 OFERTA</div>
-                        )}
-                        <h3 className="font-serif text-lg text-white leading-tight">{promo.title}</h3>
-                      </div>
-                    )}
-
-                    {/* Cuerpo dorado */}
-                    <div className="bg-gradient-to-br from-[#C5A55A] via-[#B8963E] to-[#9E7D2A] p-4">
-                      {promo.description && (
-                        <p className="text-white/90 text-sm leading-relaxed mb-3">{promo.description}</p>
-                      )}
-
-                      {/* Precio comparativo */}
-                      {(promo.regularPrice || promo.price) && (
-                        <div className="bg-black/20 rounded-xl p-3 mb-3 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {promo.regularPrice && (
-                              <div className="text-center">
-                                <div className="text-white/50 text-[10px] uppercase tracking-wider">Antes</div>
-                                <div className="text-white/60 text-base line-through font-semibold">{promo.regularPrice}</div>
-                              </div>
-                            )}
-                            {promo.regularPrice && promo.price && (
-                              <ArrowRight className="w-4 h-4 text-white/60 flex-shrink-0" />
-                            )}
-                            {promo.price && (
-                              <div className="text-center">
-                                <div className="text-yellow-200 text-[10px] uppercase tracking-wider font-bold">Ahora</div>
-                                <div className="text-white text-xl font-black">{promo.price}</div>
-                              </div>
-                            )}
-                          </div>
-                          {promo.regularPrice && promo.price && (
-                            <div className="bg-green-500 text-white text-xs font-black px-2 py-1 rounded-lg text-center">
-                              ¡AHORRA!
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Contador regresivo */}
-                      {promo.expiresAt && (
-                        <PromoCountdown expiresAt={promo.expiresAt} />
-                      )}
-
-                      {/* Barra de vendidos */}
-                      {maxC != null && remaining != null && (
-                        <div className="mb-3">
-                          <div className="flex justify-between items-center mb-1.5">
-                            <span className={`text-xs font-bold flex items-center gap-1 ${
-                              isCritical ? 'text-red-200' : isLow ? 'text-orange-200' : 'text-white/80'
-                            }`}>
-                              {isCritical && <Flame className="w-3.5 h-3.5" />}
-                              {isSoldOut ? '❌ AGOTADO' : '⚡ Cupones limitados'}
-                            </span>
-                            <span className="text-white/70 text-xs font-bold">🔥 {pct}% vendido</span>
-                          </div>
-                          <div className="w-full bg-black/30 rounded-full h-2.5 overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-700 ${
-                                isCritical ? 'bg-red-500 animate-pulse' : isLow ? 'bg-orange-400' : 'bg-green-400'
-                              }`}
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Código de descuento si tiene */}
-                      {promo.code && (
-                        <div className="mb-3 bg-black/20 rounded-xl px-3 py-2 flex items-center justify-between">
-                          <span className="text-yellow-200 font-mono font-black text-sm tracking-widest">{promo.code}</span>
-                          <button
-                            onClick={() => { navigator.clipboard.writeText(promo.code); toast.success("Código copiado"); }}
-                            className="text-white/60 hover:text-white text-xs transition-colors font-bold"
-                          >
-                            Copiar
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Botón Lo Quiero */}
-                      <button
-                        onClick={() => {
-                          if (isSoldOut) { toast.error("Esta promoción ya no tiene cupones disponibles"); return; }
-                          const waUrl = `https://wa.me/526441234567?text=${encodeURIComponent(`Hola, me interesa la promoción: ${promo.title}`)}`;
-                          window.open(waUrl, '_blank');
-                        }}
-                        disabled={isSoldOut}
-                        className={`block w-full py-3 px-4 rounded-xl font-black text-sm text-center uppercase tracking-widest transition-all duration-200 shadow-lg ${
-                          isSoldOut
-                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                            : 'bg-white text-[#8B6914] hover:bg-[#FAF7F2] hover:scale-[1.02] active:scale-[0.98]'
-                        }`}
-                      >
-                        {isSoldOut ? '❌ Agotado' : '🎁 ¡Lo Quiero!'}
-                      </button>
-                    </div>
+              <div>
+                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Código de cupón</label>
+                <Input
+                  type="text"
+                  placeholder="NUT-XXXX-XXXX"
+                  value={couponCode}
+                  onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponQuery(null); }}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm font-mono tracking-widest"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  if (!couponEmail.trim() || !couponCode.trim()) { toast.error("Por favor ingresa correo y código"); return; }
+                  setCouponQuery({ email: couponEmail.trim(), code: couponCode.trim() });
+                }}
+                disabled={couponLookup.isFetching}
+                className="w-full py-2.5 rounded-xl bg-[#C5A55A] text-black font-black text-sm uppercase tracking-widest hover:bg-[#B8963E] transition-all disabled:opacity-60"
+              >
+                {couponLookup.isFetching ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Consultar Cupón'}
+              </button>
+            </div>
+            {/* Resultado de la búsqueda */}
+            {couponQuery && !couponLookup.isFetching && couponLookup.data && (
+              <div className={`rounded-2xl p-4 border ${
+                !couponLookup.data.found ? 'bg-red-500/10 border-red-500/20' :
+                couponLookup.data.status === 'approved' ? 'bg-green-500/10 border-green-500/20' :
+                couponLookup.data.status === 'used' ? 'bg-gray-500/10 border-gray-500/20' :
+                couponLookup.data.status === 'expired' ? 'bg-orange-500/10 border-orange-500/20' :
+                couponLookup.data.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
+                'bg-yellow-500/10 border-yellow-500/20'
+              }`}>
+                {!couponLookup.data.found ? (
+                  <div className="text-center py-2">
+                    <X className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                    <p className="text-red-400 font-bold text-sm">Cupón no encontrado</p>
+                    <p className="text-white/40 text-xs mt-1">Verifica que el correo y código sean correctos.</p>
                   </div>
-                );
-              })
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      {couponLookup.data.status === 'approved' && <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />}
+                      {couponLookup.data.status === 'pending' && <Clock className="w-5 h-5 text-yellow-400 flex-shrink-0" />}
+                      {couponLookup.data.status === 'used' && <ShieldCheck className="w-5 h-5 text-gray-400 flex-shrink-0" />}
+                      {couponLookup.data.status === 'expired' && <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0" />}
+                      {couponLookup.data.status === 'rejected' && <X className="w-5 h-5 text-red-400 flex-shrink-0" />}
+                      <div>
+                        <p className="text-white font-bold text-sm">{(couponLookup.data as any).promotionTitle}</p>
+                        <p className="text-white/50 text-xs">Comprado por: {(couponLookup.data as any).buyerName}</p>
+                      </div>
+                    </div>
+                    <div className="bg-black/20 rounded-xl px-3 py-2 flex items-center justify-between">
+                      <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{(couponLookup.data as any).couponCode}</span>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                        couponLookup.data.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                        couponLookup.data.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                        couponLookup.data.status === 'used' ? 'bg-gray-500/20 text-gray-400' :
+                        couponLookup.data.status === 'expired' ? 'bg-orange-500/20 text-orange-400' :
+                        'bg-red-500/20 text-red-400'
+                      }`}>
+                        {couponLookup.data.status === 'approved' ? '✅ Activo' :
+                         couponLookup.data.status === 'pending' ? '⏳ Pendiente de autorización' :
+                         couponLookup.data.status === 'used' ? '❌ Ya utilizado' :
+                         couponLookup.data.status === 'expired' ? '⚠️ Vencido' :
+                         '❌ Rechazado'}
+                      </span>
+                    </div>
+                    {couponLookup.data.status === 'pending' && (
+                      <p className="text-yellow-300/70 text-xs text-center">Tu compra está siendo revisada por el equipo Nutriser. Recibirás tu código por correo una vez autorizada.</p>
+                    )}
+                    {(couponLookup.data as any).expiresAt && couponLookup.data.status === 'approved' && (
+                      <p className="text-white/40 text-xs text-center">Válido hasta: {new Date((couponLookup.data as any).expiresAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}
+
+        {/* ── Tab: Mis Paquetes — Formulario de verificación ── */}
+        {activeTab === "packages" && (
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <ShieldCheck className="w-5 h-5 text-[#C5A55A]" />
+                <h3 className="text-white font-bold text-sm">Verificar mi Paquete</h3>
+              </div>
+              <p className="text-white/50 text-xs">Ingresa el correo con el que te registraste y el código de acceso que recibiste para consultar tu paquete.</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+              <div>
+                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Correo electrónico</label>
+                <Input
+                  type="email"
+                  placeholder="tucorreo@ejemplo.com"
+                  value={packageEmail}
+                  onChange={e => { setPackageEmail(e.target.value); setPackageQuery(null); }}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-white/60 text-xs font-semibold uppercase tracking-wider block mb-1">Código de acceso</label>
+                <Input
+                  type="text"
+                  placeholder="XXXXXXXX"
+                  value={packageCode}
+                  onChange={e => { setPackageCode(e.target.value.toUpperCase()); setPackageQuery(null); }}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm font-mono tracking-widest"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  if (!packageEmail.trim() || !packageCode.trim()) { toast.error("Por favor ingresa correo y código"); return; }
+                  setPackageQuery({ email: packageEmail.trim(), code: packageCode.trim() });
+                }}
+                disabled={packageLookup.isFetching}
+                className="w-full py-2.5 rounded-xl bg-[#C5A55A] text-black font-black text-sm uppercase tracking-widest hover:bg-[#B8963E] transition-all disabled:opacity-60"
+              >
+                {packageLookup.isFetching ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Consultar Paquete'}
+              </button>
+            </div>
+            {/* Resultado de la búsqueda */}
+            {packageQuery && !packageLookup.isFetching && packageLookup.data && (
+              <div className={`rounded-2xl p-4 border ${
+                !packageLookup.data.found ? 'bg-red-500/10 border-red-500/20' :
+                packageLookup.data.status === 'verified' ? 'bg-green-500/10 border-green-500/20' :
+                packageLookup.data.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
+                'bg-yellow-500/10 border-yellow-500/20'
+              }`}>
+                {!packageLookup.data.found ? (
+                  <div className="text-center py-2">
+                    <X className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                    <p className="text-red-400 font-bold text-sm">Paquete no encontrado</p>
+                    <p className="text-white/40 text-xs mt-1">Verifica que el correo y código sean correctos.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      {packageLookup.data.status === 'verified' && <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />}
+                      {packageLookup.data.status === 'pending' && <Clock className="w-5 h-5 text-yellow-400 flex-shrink-0" />}
+                      {packageLookup.data.status === 'rejected' && <X className="w-5 h-5 text-red-400 flex-shrink-0" />}
+                      <div>
+                        <p className="text-white font-bold text-sm">{(packageLookup.data as any).programLabel}</p>
+                        <p className="text-white/50 text-xs">Cliente: {(packageLookup.data as any).clientName}</p>
+                      </div>
+                    </div>
+                    <div className="bg-black/20 rounded-xl px-3 py-2 flex items-center justify-between">
+                      <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{(packageLookup.data as any).accessCode ?? '—'}</span>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                        packageLookup.data.status === 'verified' ? 'bg-green-500/20 text-green-400' :
+                        packageLookup.data.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                      }`}>
+                        {packageLookup.data.status === 'verified' ? '✅ Activo' :
+                         packageLookup.data.status === 'pending' ? '⏳ Pendiente de verificación' :
+                         '❌ Rechazado'}
+                      </span>
+                    </div>
+                    {packageLookup.data.status === 'pending' && (
+                      <p className="text-yellow-300/70 text-xs text-center">Tu paquete está siendo revisado por el equipo Nutriser. Recibirás tu código de acceso por correo una vez verificado.</p>
+                    )}
+                    {(packageLookup.data as any).verifiedAt && (
+                      <p className="text-white/40 text-xs text-center">Verificado el: {new Date((packageLookup.data as any).verifiedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    )}
+                    {(packageLookup.data as any).price && (
+                      <p className="text-white/40 text-xs text-center">Precio pagado: ${(packageLookup.data as any).price} MXN</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
 
         {/* ── Tab: Contrato ── */}
         {activeTab === "consent" && (

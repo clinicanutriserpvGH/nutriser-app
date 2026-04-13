@@ -226,6 +226,37 @@ export const appRouter = router({
         
         return { success: true };
       }),
+
+    // Verificar paquete por correo + código (para el panel del paciente)
+    lookupByEmailAndCode: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        code: z.string().min(1),
+      }))
+      .query(async ({ input }) => {
+        const all = await getAllMemberships();
+        const match = all.find(
+          m => m.clientEmail.toLowerCase() === input.email.toLowerCase().trim()
+            && (m.accessCode ?? '').toUpperCase() === input.code.toUpperCase().trim()
+        );
+        if (!match) return { found: false };
+        const programLabels: Record<string, string> = {
+          basic: 'Paquete Básico',
+          premium: 'Paquete Premium',
+          treatment: 'Paquete Tratamiento',
+        };
+        const programLabel = programLabels[match.programType] ?? match.programType;
+        return {
+          found: true,
+          accessCode: match.accessCode,
+          clientName: match.clientName,
+          programLabel,
+          programType: match.programType,
+          status: match.status,
+          verifiedAt: match.verifiedAt,
+          price: match.price,
+        };
+      }),
   }),
 
   appointments: router({
@@ -497,6 +528,47 @@ export const appRouter = router({
         }
         await deleteGiftPurchase(input.id);
         return { success: true };
+      }),
+
+    // Verificar cupón por correo + código (para el panel del paciente)
+    lookupByEmailAndCode: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        code: z.string().min(1),
+      }))
+      .query(async ({ input }) => {
+        const all = await getAllGiftPurchases();
+        const match = all.find(
+          p => p.buyerEmail.toLowerCase() === input.email.toLowerCase().trim()
+            && p.couponCode.toUpperCase() === input.code.toUpperCase().trim()
+        );
+        if (!match) return { found: false };
+        // Obtener el título de la promoción
+        let promotionTitle = 'Cupón Nutriser';
+        let promotionExpiresAt: Date | null = null;
+        try {
+          const { getAllPromotionsForAdmin } = await import('./db');
+          const promos = await getAllPromotionsForAdmin();
+          const promo = promos.find(p => p.id === match.promotionId);
+          if (promo) {
+            promotionTitle = promo.title;
+            promotionExpiresAt = promo.expiresAt ?? null;
+          }
+        } catch {}
+        // Determinar si está vencido
+        const isExpired = promotionExpiresAt ? new Date() > new Date(promotionExpiresAt) : false;
+        const displayStatus = isExpired && match.status === 'approved' ? 'expired' : match.status;
+        return {
+          found: true,
+          couponCode: match.couponCode,
+          buyerName: match.buyerName,
+          promotionTitle,
+          status: displayStatus,
+          approvedAt: match.approvedAt,
+          expiresAt: promotionExpiresAt,
+          isGift: match.isGift,
+          recipientName: match.recipientName,
+        };
       }),
   }),
 

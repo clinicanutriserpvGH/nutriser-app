@@ -171,32 +171,32 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
 
           </div>{/* fin grid tarjetas */}
 
-          {/* ── Mis Tratamientos + Agendar Cita (botones compactos sin imagen) ── */}
+          {/* ── Agendar Cita + Seguimiento de Mis Tratamientos (botones compactos sin imagen) ── */}
           <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-4 mb-4">
 
-            {/* Mis Tratamientos */}
+            {/* Agendar Cita — debajo de Nutriser Home (izquierda) */}
             <button
-              onClick={() => { window.location.href = '/mis-tratamientos'; }}
+              onClick={() => { window.location.href = '/appointment-form'; }}
               className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/85 border-[#C5A55A]/60 hover:border-[#C5A55A] hover:bg-[#2a1f0a]"
             >
               <div className="w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
-                <Sparkles className="w-5 h-5 text-black" />
+                <CalendarCheck className="w-5 h-5 text-black" />
               </div>
               <span className="text-[10px] sm:text-xs font-bold text-center leading-tight text-white">
-                Mis Tratamientos
+                Agendar Cita
               </span>
             </button>
 
-            {/* Agendar Cita */}
+            {/* Seguimiento de Mis Tratamientos — debajo del Portal de Salud (derecha) */}
             <button
-              onClick={() => { window.location.href = '/appointment-form'; }}
+              onClick={() => { window.location.href = '/mis-tratamientos'; }}
               className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/75 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]/90"
             >
               <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/30 group-hover:bg-[#C5A55A]/50 flex items-center justify-center transition-colors">
-                <CalendarCheck className="w-5 h-5 text-[#C5A55A]" />
+                <Sparkles className="w-5 h-5 text-[#C5A55A]" />
               </div>
               <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
-                Agendar Cita
+                Seguimiento de Mis Tratamientos
               </span>
             </button>
 

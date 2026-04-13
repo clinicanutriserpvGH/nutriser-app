@@ -1208,3 +1208,9 @@
 - [ ] Portal paciente: tab "Seguimiento" con sesiones (dadas, perdidas, vencidas) actualizado por admin
 - [ ] Admin: en panel de pacientes, poder marcar sesiones de tratamiento como dada/perdida/vencida
 - [ ] Quitar formularios de código de verificación del portal del paciente
+
+## Correcciones Sesión Actual - Contraste y Correos
+
+- [x] Mejorar contraste de botones "Para mí" / "Para regalar" en modal de cupones (texto muy claro sobre fondo blanco)
+- [x] Corregir plantillas de correo de cupones para que se vean nombres y detalles correctamente
+- [x] Corregir plantillas de correo de paquetes para que se vea todo el texto correctamente

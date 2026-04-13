@@ -144,15 +144,17 @@ export async function sendServicePurchaseApprovedEmail(
           </div>
           <p>Hola <strong>${buyerName}</strong>,</p>
           <p>Tu pago ha sido <strong style="color: #2e7d32;">confirmado</strong>. Tu servicio esta listo.</p>
-          <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2416 50%, #1a1a1a 100%); border-radius: 16px; padding: 28px; margin: 24px 0; text-align: center; border: 2px solid #C5A55A;">
-            <p style="color: #C5A55A; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 8px;">Servicio Confirmado</p>
-            <h2 style="color: #fff; font-size: 20px; margin: 0 0 16px;">${serviceName}</h2>
-            <div style="border-top: 1px dashed rgba(197,165,90,0.4); border-bottom: 1px dashed rgba(197,165,90,0.4); padding: 16px 0; margin: 16px 0;">
-              <p style="color: #aaa; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px;">CODIGO UNICO</p>
-              <p style="color: #C5A55A; font-size: 26px; font-family: monospace; font-weight: bold; letter-spacing: 4px; margin: 0;">${serviceCode}</p>
-            </div>
-            <p style="color: #666; font-size: 11px; margin: 8px 0 0;">Presenta este codigo en Nutriser al momento de tu cita.</p>
-          </div>
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a1a1a; border-radius: 16px; border: 2px solid #C5A55A; margin: 24px 0;">
+            <tr><td style="padding: 28px; text-align: center;">
+              <p style="color: #C5A55A; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 8px;">Servicio Confirmado</p>
+              <h2 style="color: #ffffff; font-size: 20px; margin: 0 0 16px;">${serviceName}</h2>
+              <hr style="border: none; border-top: 1px dashed #C5A55A; margin: 12px 0;">
+              <p style="color: #aaaaaa; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px;">C&#211;DIGO &#218;NICO</p>
+              <p style="color: #C5A55A; font-size: 26px; font-family: 'Courier New', monospace; font-weight: bold; letter-spacing: 4px; margin: 0;">${serviceCode}</p>
+              <hr style="border: none; border-top: 1px dashed #C5A55A; margin: 12px 0;">
+              <p style="color: #aaaaaa; font-size: 11px; margin: 8px 0 0;">Presenta este c&#243;digo en Nutriser al momento de tu cita.</p>
+            </td></tr>
+          </table>
           <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px 16px; border-radius: 4px; margin: 16px 0;">
             <p style="margin: 0; font-size: 13px; color: #2e7d32;">
               Agenda tu cita: Llama al <strong>322 450 3257</strong> o escríbenos por WhatsApp: <strong>+52 322 100 7799</strong>

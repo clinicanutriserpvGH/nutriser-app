@@ -31,15 +31,18 @@ export async function sendConfirmationEmail(
 
   const htmlContent = `
     <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; background-color: #f9f6f0;">
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #C5A55A;">Nutriser - Aesthetic & Nutrition</h1>
+          <div style="text-align: center; padding: 24px 0 12px; background-color: #1a1a1a; border-radius: 12px; margin-bottom: 20px;">
+            <h1 style="color: #C5A55A; font-size: 26px; margin: 0 0 4px;">Nutriser</h1>
+            <p style="color: #cccccc; font-size: 13px; margin: 0;">Aesthetic &amp; Nutrition</p>
+          </div>
           
-          <p>Hola <strong>${clientName}</strong>,</p>
+          <p style="color: #333333;">Hola <strong style="color: #1a1a1a;">${clientName}</strong>,</p>
           
-          <p>¡Gracias por adquirir el programa <strong>${programName}</strong> de Nutriser!</p>
+          <p style="color: #333333;">¡Gracias por adquirir el programa <strong style="color: #1a1a1a;">${programName}</strong> de Nutriser!</p>
           
-          <div style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #C5A55A; margin: 20px 0;">
+          <div style="background-color: #ffffff; padding: 15px; border-left: 4px solid #C5A55A; margin: 20px 0; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
             <h3 style="margin-top: 0; color: #C5A55A;">Detalles de tu Membresía</h3>
             <p><strong>Programa:</strong> ${programName}</p>
             <p><strong>Precio:</strong> ${price} (Pago único)</p>
@@ -69,24 +72,26 @@ export async function sendConfirmationEmail(
             `}
           </div>
           
-          <p>¡Tu pago ha sido <strong>confirmado y aprobado</strong> por nuestro equipo! 🎉</p>
+          <p style="color: #333333;">¡Tu pago ha sido <strong style="color: #1a7a32;">confirmado y aprobado</strong> por nuestro equipo!</p>
           
           ${accessCode ? `
-          <div style="background-color: #C5A55A; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
-            <p style="margin: 0 0 8px 0; font-size: 14px;">Tu código de acceso exclusivo es:</p>
-            <p style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 6px; font-family: monospace;">${accessCode}</p>
-            <p style="margin: 8px 0 0 0; font-size: 12px; opacity: 0.9;">Guarda este código — lo necesitarás para acceder a tu programa</p>
-          </div>
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #C5A55A; border-radius: 8px; margin: 20px 0;">
+            <tr><td style="padding: 20px; text-align: center;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #ffffff;">Tu c&#243;digo de acceso exclusivo es:</p>
+              <p style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 6px; font-family: 'Courier New', monospace; color: #ffffff;">${accessCode}</p>
+              <p style="margin: 8px 0 0 0; font-size: 12px; color: #ffffff;">Guarda este c&#243;digo &#8212; lo necesitar&#225;s para acceder a tu programa</p>
+            </td></tr>
+          </table>
           ` : ''}
           
-          <p>En breve nos pondremos en contacto contigo para coordinar tus primeras asesorías.</p>
+          <p style="color: #333333;">En breve nos pondremos en contacto contigo para coordinar tus primeras asesor&#237;as.</p>
           
-          <p>Si tienes alguna pregunta, no dudes en contactarnos por WhatsApp: <strong>+52 322 100 7799</strong> o por correo a <strong>clinicanutriserpv@gmail.com</strong>.</p>
+          <p style="color: #333333;">Si tienes alguna pregunta, no dudes en contactarnos por WhatsApp: <strong>+52 322 100 7799</strong> o por correo a <strong>clinicanutriserpv@gmail.com</strong>.</p>
           
-          <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+          <hr style="border: none; border-top: 1px solid #dddddd; margin: 20px 0;">
           
-          <p style="font-size: 12px; color: #999;">
-            Nutriser - Aesthetic & Nutrition
+          <p style="font-size: 12px; color: #999999; text-align: center;">
+            Nutriser - Aesthetic &amp; Nutrition &middot; nutriserpv.com
           </p>
         </div>
       </body>
@@ -130,25 +135,28 @@ export async function sendMembershipNotificationToAdmin(
 
   const htmlContent = `
     <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; background-color: #f9f6f0;">
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #C5A55A;">Nueva Inscripción a Membresía</h1>
+          <div style="text-align: center; padding: 20px 0 10px; background-color: #1a1a1a; border-radius: 12px; margin-bottom: 20px;">
+            <h1 style="color: #C5A55A; font-size: 22px; margin: 0 0 4px;">Nutriser Admin</h1>
+            <p style="color: #cccccc; font-size: 12px; margin: 0;">Nueva Inscripci&#243;n a Membres&#237;a</p>
+          </div>
           
-          <div style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #C5A55A; margin: 20px 0;">
+          <div style="background-color: #ffffff; padding: 15px; border-left: 4px solid #C5A55A; margin: 20px 0; border-radius: 4px;">
             <h3 style="margin-top: 0; color: #C5A55A;">Detalles del Cliente</h3>
-            <p><strong>Nombre:</strong> ${clientName}</p>
-            <p><strong>Email:</strong> ${clientEmail}</p>
-            <p><strong>Teléfono:</strong> ${clientPhone || "No proporcionado"}</p>
-            <p><strong>Programa:</strong> ${programName}</p>
+            <p style="color: #333333; margin: 4px 0;"><strong>Nombre:</strong> ${clientName}</p>
+            <p style="color: #333333; margin: 4px 0;"><strong>Email:</strong> ${clientEmail}</p>
+            <p style="color: #333333; margin: 4px 0;"><strong>Tel&#233;fono:</strong> ${clientPhone || 'No proporcionado'}</p>
+            <p style="color: #333333; margin: 4px 0;"><strong>Programa:</strong> ${programName}</p>
             ${discountLine}
           </div>
           
-          <p>El cliente ha completado su inscripción y está esperando confirmar el pago. Revisa el panel de administración para ver el comprobante cuando lo suba.</p>
+          <p style="color: #333333;">El cliente ha completado su inscripci&#243;n y est&#225; esperando confirmar el pago. Revisa el panel de administraci&#243;n para ver el comprobante cuando lo suba.</p>
           
-          <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+          <hr style="border: none; border-top: 1px solid #dddddd; margin: 20px 0;">
           
-          <p style="font-size: 12px; color: #999;">
-            Este es un correo automático de Nutriser.
+          <p style="font-size: 12px; color: #999999; text-align: center;">
+            Nutriser - Aesthetic &amp; Nutrition &middot; nutriserpv.com
           </p>
         </div>
       </body>
@@ -358,41 +366,43 @@ export async function sendCouponApprovedEmail(
     : '';
 
   const expiresBlock = expiresAt
-    ? `<div style="background: #C5A55A22; border: 1px solid #C5A55A44; border-radius: 8px; padding: 10px 16px; margin: 12px 0; text-align: center;">
-        <p style="color: #C5A55A; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 4px;">Válido hasta</p>
-        <p style="color: #F0D080; font-size: 15px; font-weight: bold; margin: 0;">${new Date(expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+    ? `<div style="background-color: rgba(197,165,90,0.15); border: 1px solid #C5A55A; border-radius: 8px; padding: 10px 16px; margin: 12px 0; text-align: center;">
+        <p style="color: #C5A55A; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 4px;">V&#225;lido hasta</p>
+        <p style="color: #ffffff; font-size: 15px; font-weight: bold; margin: 0;">${new Date(expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
       </div>`
     : '';
 
   const htmlContent = `
     <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f6f0;">
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; background-color: #f9f6f0;">
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
 
           <!-- Header -->
-          <div style="text-align: center; padding: 30px 0 10px;">
-            <h1 style="color: #C5A55A; font-size: 28px; margin: 0;">Nutriser</h1>
-            <p style="color: #888; font-size: 13px; margin: 4px 0 0;">Aesthetic & Nutrition</p>
+          <div style="text-align: center; padding: 30px 0 10px; background-color: #1a1a1a; border-radius: 12px; margin-bottom: 20px;">
+            <h1 style="color: #C5A55A; font-size: 28px; margin: 0 0 4px;">Nutriser</h1>
+            <p style="color: #cccccc; font-size: 13px; margin: 0;">Aesthetic &amp; Nutrition</p>
           </div>
 
-          <p>Hola <strong>${buyerName}</strong>,</p>
-          <p>¡Tu cupón ha sido <strong style="color: #2e7d32;">autorizado</strong>! Ya puedes usarlo en cualquiera de nuestros servicios.</p>
+          <p style="color: #333333;">Hola <strong style="color: #1a1a1a;">${buyerName}</strong>,</p>
+          <p style="color: #333333;">¡Tu cup&#243;n ha sido <strong style="color: #1a7a32;">autorizado</strong>! Ya puedes usarlo en cualquiera de nuestros servicios.</p>
 
           ${giftNote}
 
-          <!-- Cupón visual -->
-          <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2416 50%, #1a1a1a 100%); border-radius: 16px; padding: 30px; margin: 24px 0; text-align: center; border: 2px solid #C5A55A;">
-            <p style="color: #C5A55A; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 8px;">Cupón Válido</p>
-            <h2 style="color: #fff; font-size: 20px; margin: 0 0 16px;">${promotionTitle}</h2>
-            <div style="border-top: 1px dashed rgba(197,165,90,0.4); border-bottom: 1px dashed rgba(197,165,90,0.4); padding: 16px 0; margin: 16px 0;">
+          <!-- Cupón visual con fondo sólido para compatibilidad -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a1a1a; border-radius: 16px; border: 2px solid #C5A55A; margin: 24px 0;">
+            <tr><td style="padding: 30px; text-align: center;">
+              <p style="color: #C5A55A; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 8px;">Cup&#243;n V&#225;lido</p>
+              <h2 style="color: #ffffff; font-size: 20px; margin: 0 0 16px;">${promotionTitle}</h2>
+              <hr style="border: none; border-top: 1px dashed #C5A55A; margin: 12px 0;">
               <p style="color: #C5A55A; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px;">A NOMBRE DE</p>
-              <p style="color: #fff; font-size: 18px; font-weight: bold; margin: 0;">${holderName}</p>
-            </div>
-            <p style="color: #aaa; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px;">CÓDIGO ÚNICO</p>
-            <p style="color: #C5A55A; font-size: 28px; font-family: monospace; font-weight: bold; letter-spacing: 4px; margin: 0;">${couponCode}</p>
-            ${expiresBlock}
-            <p style="color: #666; font-size: 10px; margin: 16px 0 0;">Presenta este código en Nutriser para redimir tu cupón.</p>
-          </div>
+              <p style="color: #ffffff; font-size: 18px; font-weight: bold; margin: 0 0 16px;">${holderName}</p>
+              <hr style="border: none; border-top: 1px dashed #C5A55A; margin: 12px 0;">
+              <p style="color: #aaaaaa; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px;">C&#211;DIGO &#218;NICO</p>
+              <p style="color: #C5A55A; font-size: 28px; font-family: 'Courier New', monospace; font-weight: bold; letter-spacing: 4px; margin: 0;">${couponCode}</p>
+              ${expiresBlock}
+              <p style="color: #aaaaaa; font-size: 10px; margin: 16px 0 0;">Presenta este c&#243;digo en Nutriser para redimir tu cup&#243;n.</p>
+            </td></tr>
+          </table>
 
           <!-- Aviso de cita previa -->
           <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px 16px; border-radius: 4px; margin: 16px 0;">

@@ -744,13 +744,13 @@ export default function PromotionsSection() {
               <form onSubmit={handleStep2} className="p-5 space-y-4">
                 <p className="text-sm font-medium text-gray-700">¿Este cupón es para ti o para regalar?</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <button type="button" onClick={() => setIsGift(false)} className={`p-4 rounded-xl border-2 text-center transition ${isGift === false ? 'border-[#C5A55A] bg-[#C5A55A]/10' : 'border-gray-200 hover:border-[#C5A55A]/50'}`}>
+                  <button type="button" onClick={() => setIsGift(false)} className={`p-4 rounded-xl border-2 text-center transition ${isGift === false ? 'border-[#C5A55A] bg-[#C5A55A] text-white shadow-md' : 'border-gray-300 bg-gray-50 hover:border-[#C5A55A]/70 hover:bg-[#C5A55A]/5 text-gray-800'}`}>
                     <div className="text-2xl mb-1">🙋</div>
-                    <div className="text-sm font-semibold">Para mí</div>
+                    <div className="text-sm font-bold">Para mí</div>
                   </button>
-                  <button type="button" onClick={() => setIsGift(true)} className={`p-4 rounded-xl border-2 text-center transition ${isGift === true ? 'border-[#C5A55A] bg-[#C5A55A]/10' : 'border-gray-200 hover:border-[#C5A55A]/50'}`}>
+                  <button type="button" onClick={() => setIsGift(true)} className={`p-4 rounded-xl border-2 text-center transition ${isGift === true ? 'border-[#C5A55A] bg-[#C5A55A] text-white shadow-md' : 'border-gray-300 bg-gray-50 hover:border-[#C5A55A]/70 hover:bg-[#C5A55A]/5 text-gray-800'}`}>
                     <div className="text-2xl mb-1">🎁</div>
-                    <div className="text-sm font-semibold">Para regalar</div>
+                    <div className="text-sm font-bold">Para regalar</div>
                   </button>
                 </div>
                 {isGift && (

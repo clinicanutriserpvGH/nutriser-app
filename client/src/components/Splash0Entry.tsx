@@ -101,7 +101,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
               <button
                 onClick={handleNutriserWeb}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
-                style={{ minHeight: "180px" }}
+                style={{ minHeight: "130px", height: "130px" }}
               >
                 <img
                   src={CLINIC_IMG2}
@@ -131,7 +131,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
               <button
                 onClick={() => handleNavigate('/mis-tratamientos')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
-                style={{ minHeight: "160px" }}
+                style={{ minHeight: "120px", height: "120px" }}
               >
                 <img
                   src={TREATMENT_IMG}
@@ -165,7 +165,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
               <button
                 onClick={handlePortalSalud}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
-                style={{ minHeight: "360px" }}
+                style={{ minHeight: "260px", height: "260px" }}
               >
                 <img
                   src={PORTAL_IMG}
@@ -187,7 +187,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                     </span>
                   </div>
                   <div>
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight mb-3 drop-shadow-lg text-white">
+                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold leading-tight mb-2 drop-shadow-lg text-white">
                       Portal de Salud Nutriser
                     </h2>
                     {/* Íconos — solo visibles en pantallas más grandes */}

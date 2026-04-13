@@ -196,9 +196,8 @@ export default function NutriserHomePage() {
           <div className="flex justify-center mb-5">
             <button
               onClick={() => {
-                // Navegar directamente a la sección de cupones del sitio principal
-                sessionStorage.setItem("nutriser_splash_seen", "1");
-                sessionStorage.removeItem("nutriser_chose_splash1");
+                // Navegar directo al sitio principal (sección cupones) sin pasar por splash
+                sessionStorage.setItem("nutriser_go_to_site", "1");
                 sessionStorage.setItem("nutriser_scroll_to", "promociones");
                 window.location.href = '/';
               }}

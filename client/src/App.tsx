@@ -92,6 +92,13 @@ function AppContent() {
       sessionStorage.setItem("nutriser_splash_version", SPLASH_VERSION);
     }
 
+    // Si hay bandera de ir directo al sitio (ej: desde botón Cuponera), saltarse el splash
+    const goToSite = sessionStorage.getItem("nutriser_go_to_site");
+    if (goToSite) {
+      sessionStorage.removeItem("nutriser_go_to_site");
+      return "site";
+    }
+
     // Siempre mostrar Splash 0 al entrar a la página principal
     return "splash0";
   });

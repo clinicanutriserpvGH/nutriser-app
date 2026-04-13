@@ -357,14 +357,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           {/* ── Grid de widgets ── */}
 
-          {/* Fila 1: Nutriser Home | Nutriser Mall (2 columnas iguales) */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:gap-6 mb-3 md:mb-4 lg:mb-6">
-            {/* Widget Nutriser Home (sitio web) — izquierda, prioridad */}
+          {/* Fila 1: Nutriser Web | Nutriser Mall (1 col en móvil, 2 en desktop) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6 mb-5">
+            {/* Widget Nutriser Web (sitio web) — izquierda, prioridad */}
             <div className="col-span-1">
               <button
                 onClick={() => handleEnterSite()}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none aspect-[4/3] sm:aspect-[16/9]"
-                style={{ minHeight: "160px" }}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
+                style={{ minHeight: "220px", aspectRatio: "16/9" }}
               >
                 <img src={CLINIC_IMG2} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
@@ -389,8 +389,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             <div className="col-span-1">
               <button
                 onClick={() => handleNavigate('/nutriser-home')}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none aspect-[4/3] sm:aspect-[16/9]"
-                style={{ minHeight: "160px" }}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
+                style={{ minHeight: "220px", aspectRatio: "16/9" }}
               >
                 <img src={CLINIC_IMG} alt="Nutriser Mall" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
@@ -412,8 +412,8 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
           </div>
 
-          {/* ── Barra de acciones rápidas: Catálogo de Servicios (izq) + Cuponera (der) ── */}
-          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-6 mb-4 md:mb-5 lg:mb-6">
+          {/* ── Barra de acciones rápidas: 4 botones en 2x2 ── */}
+          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-4 mb-4">
 
             {/* Catálogo de Servicios — debajo de Nutriser Web (izquierda) */}
             <button
@@ -451,6 +451,37 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 </span>
               </button>
             )}
+          </div>
+
+          {/* ── Agendar Cita + Mis Tratamientos ── */}
+          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-4 mb-4">
+
+            {/* Agendar Cita */}
+            <button
+              onClick={() => handleNavigate('/appointment-form')}
+              className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/85 border-[#C5A55A]/60 hover:border-[#C5A55A] hover:bg-[#2a1f0a]"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
+                <CalendarCheck className="w-5 h-5 text-black" />
+              </div>
+              <span className="text-[10px] sm:text-xs font-bold text-center leading-tight text-white">
+                Agendar Cita
+              </span>
+            </button>
+
+            {/* Mis Tratamientos */}
+            <button
+              onClick={() => handleNavigate('/mis-tratamientos')}
+              className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/75 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]/90"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/30 group-hover:bg-[#C5A55A]/50 flex items-center justify-center transition-colors">
+                <Sparkles className="w-5 h-5 text-[#C5A55A]" />
+              </div>
+              <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
+                Mis Tratamientos
+              </span>
+            </button>
+
           </div>
 
           {/* ── Botones Compartir + Administración ── */}

@@ -171,37 +171,6 @@ export default function Splash0Entry({ onEnterNutriserWeb }: Splash0EntryProps) 
 
           </div>{/* fin grid tarjetas */}
 
-          {/* ── Agendar Cita + Seguimiento de Mis Tratamientos (botones compactos sin imagen) ── */}
-          <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-4 mb-4">
-
-            {/* Agendar Cita — debajo de Nutriser Home (izquierda) */}
-            <button
-              onClick={() => { window.location.href = '/appointment-form'; }}
-              className="relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/85 border-[#C5A55A]/60 hover:border-[#C5A55A] hover:bg-[#2a1f0a]"
-            >
-              <div className="w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
-                <CalendarCheck className="w-5 h-5 text-black" />
-              </div>
-              <span className="text-[10px] sm:text-xs font-bold text-center leading-tight text-white">
-                Agendar Cita
-              </span>
-            </button>
-
-            {/* Seguimiento de Mis Tratamientos — debajo del Portal de Salud (derecha) */}
-            <button
-              onClick={() => { window.location.href = '/mis-tratamientos'; }}
-              className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group bg-[#2a1f0a]/75 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]/90"
-            >
-              <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/30 group-hover:bg-[#C5A55A]/50 flex items-center justify-center transition-colors">
-                <Sparkles className="w-5 h-5 text-[#C5A55A]" />
-              </div>
-              <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
-                Mis Tratamientos
-              </span>
-            </button>
-
-          </div>
-
           {/* ── Íconos de redes sociales — más grandes en desktop ── */}
           <div className="flex items-center justify-center gap-5 sm:gap-6 lg:gap-8 mb-4 mt-1">
 

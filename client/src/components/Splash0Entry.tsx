@@ -107,7 +107,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                   src={CLINIC_IMG2}
                   alt="Nutriser Home"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  style={{ objectPosition: "center center" }}
+                  style={{ objectPosition: "center 40%", objectFit: "cover" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/15 to-black/80" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 text-left">
@@ -137,7 +137,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                   src={TREATMENT_IMG}
                   alt="Mis Tratamientos y Compras"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  style={{ objectPosition: "center 30%" }}
+                  style={{ objectPosition: "center 20%", objectFit: "cover" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/85" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 text-left">
@@ -171,6 +171,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                   src={PORTAL_IMG}
                   alt="Portal de Salud Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  style={{ objectPosition: "center 15%" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/85" />
                 <div className="absolute inset-0 flex flex-col justify-between p-5 text-left">

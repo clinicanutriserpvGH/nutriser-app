@@ -412,41 +412,42 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
           </div>
 
-          {/* ── Barra de acciones rápidas: solo Cuponera y Servicios ── */}
+          {/* ── Barra de acciones rápidas: Catálogo de Servicios (izq) + Cuponera (der) ── */}
           <div className="grid grid-cols-2 gap-2 md:gap-3 lg:gap-6 mb-4 md:mb-5 lg:mb-6">
-            {/* Cuponera de Descuentos */}
+
+            {/* Catálogo de Servicios — debajo de Nutriser Web (izquierda) */}
             <button
-              onClick={() => handleNavigate('/coupons')}
-              className={`relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group overflow-hidden ${
+              onClick={() => handleNavigate('/services')}
+              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group ${
                 isLight
-                  ? "bg-[#2a1f0a]/85 border-[#C5A55A]/60 hover:border-[#C5A55A] hover:bg-[#2a1f0a]"
-                  : "bg-white/5 border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10"
+                  ? "bg-[#2a1f0a]/75 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]/90"
+                  : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10"
               }`}
             >
-              <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-pulse" style={{ animationDuration: "2s" }} />
-              <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
-                <Tag className="w-5 h-5 text-black" />
+              <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/30 group-hover:bg-[#C5A55A]/50 flex items-center justify-center transition-colors">
+                <ClipboardList className="w-5 h-5 text-[#C5A55A]" />
               </div>
-              <span className="relative text-[10px] sm:text-xs font-bold text-center leading-tight text-white">
-                Cuponera de Descuentos
+              <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
+                Catálogo de Servicios
               </span>
             </button>
 
-            {/* Catálogo de Servicios */}
+            {/* Cuponera de Descuentos — debajo de Nutriser Mall (derecha) */}
             {!showEmailForm && (
               <button
-                onClick={() => handleNavigate('/services')}
-                className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group ${
+                onClick={() => handleNavigate('/coupons')}
+                className={`relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-2xl border transition-all duration-200 group overflow-hidden ${
                   isLight
-                    ? "bg-[#2a1f0a]/75 border-[#C5A55A]/40 hover:border-[#C5A55A]/80 hover:bg-[#2a1f0a]/90"
-                    : "bg-white/5 border-white/10 hover:border-[#C5A55A]/50 hover:bg-white/10"
+                    ? "bg-[#2a1f0a]/85 border-[#C5A55A]/60 hover:border-[#C5A55A] hover:bg-[#2a1f0a]"
+                    : "bg-white/5 border-[#C5A55A]/40 hover:border-[#C5A55A] hover:bg-white/10"
                 }`}
               >
-                <div className="w-9 h-9 rounded-xl bg-[#C5A55A]/30 group-hover:bg-[#C5A55A]/50 flex items-center justify-center transition-colors">
-                  <ClipboardList className="w-5 h-5 text-[#C5A55A]" />
+                <span className="absolute inset-0 rounded-2xl bg-[#C5A55A]/10 animate-pulse" style={{ animationDuration: "2s" }} />
+                <div className="relative w-9 h-9 rounded-xl bg-[#C5A55A] flex items-center justify-center shadow-lg shadow-[#C5A55A]/50">
+                  <Tag className="w-5 h-5 text-black" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-semibold text-center leading-tight text-white/90">
-                  Catálogo de Servicios
+                <span className="relative text-[10px] sm:text-xs font-bold text-center leading-tight text-white">
+                  Cuponera de Descuentos
                 </span>
               </button>
             )}

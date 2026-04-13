@@ -12,8 +12,8 @@ import { toast } from "sonner";
 const ADMIN_TABS = [
   { value: 'memberships', label: 'Cupones Adquiridos', emoji: '🏷️' },
   { value: 'appointments', label: 'Citas', emoji: '📅' },
-  { value: 'giftPurchases', label: 'Regalos', emoji: '🎁' },
-  { value: 'promotions', label: 'Promociones', emoji: '🏷️' },
+  { value: 'giftPurchases', label: 'Cupones Comprados', emoji: '🏷️' },
+  { value: 'promotions', label: 'Crear Cupón', emoji: '➕' },
   { value: 'ebook', label: 'eBook', emoji: '📖' },
   { value: 'subscribers', label: 'Suscriptores', emoji: '🔔' },
   { value: 'servicePurchases', label: 'Compras Serv.', emoji: '🛍️' },
@@ -1440,12 +1440,12 @@ export default function AdminDashboard() {
           <TabsContent value="giftPurchases" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
-                <CardTitle className="text-[#C5A55A]">Compras de Cupones de Regalo</CardTitle>
-                <CardDescription>Autoriza o rechaza las compras de cupones de regalo</CardDescription>
+                <CardTitle className="text-[#C5A55A]">Administración de Cupones Comprados</CardTitle>
+                <CardDescription>Autoriza o rechaza las compras de cupones de los clientes</CardDescription>
               </CardHeader>
               <CardContent>
                 {!giftPurchases || giftPurchases.length === 0 ? (
-                  <p className="text-[#999] text-center py-8">No hay compras de regalos pendientes</p>
+                  <p className="text-[#999] text-center py-8">No hay cupones comprados pendientes</p>
                 ) : (
                   <div className="space-y-4">
                     {giftPurchases.map((purchase: any) => (

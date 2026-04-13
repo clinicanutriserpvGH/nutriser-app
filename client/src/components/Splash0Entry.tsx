@@ -91,11 +91,11 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
           </div>
 
           {/* ── Grid principal asimétrico ── */}
-          {/* Móvil: columna única | Desktop: 40% izquierda + 60% derecha */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 lg:gap-5 mb-5">
+          {/* Móvil: columna única | Tablet (md+): 40% izquierda + 60% derecha */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4 lg:gap-5 mb-5">
 
             {/* ── Columna izquierda (40%) — Nutriser Home + Mis Tratamientos ── */}
-            <div className="lg:col-span-2 flex flex-col gap-3">
+            <div className="md:col-span-2 flex flex-col gap-3">
 
               {/* Tarjeta 1: Nutriser Home */}
               <button
@@ -161,7 +161,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
             </div>
 
             {/* ── Columna derecha (60%) — Portal de Salud (grande) ── */}
-            <div className="lg:col-span-3">
+            <div className="md:col-span-3">
               <button
                 onClick={handlePortalSalud}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"

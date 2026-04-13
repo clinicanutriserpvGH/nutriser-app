@@ -15,16 +15,16 @@ const ADMIN_TABS = [
   { value: 'giftPurchases', label: 'Cupones Comprados', emoji: '🏷️' },
   { value: 'promotions', label: 'Crear Cupón', emoji: '➕' },
   { value: 'memberships', label: 'Paquetes Comprados', emoji: '📦' },
+  { value: 'servicePurchases', label: 'Servicios Comprados', emoji: '💉' },
+  { value: 'services', label: 'Gestión de Servicios', emoji: '📋' },
+  { value: 'productPurchases', label: 'Productos Comprados', emoji: '🛒' },
+  { value: 'products', label: 'Gestión de Productos', emoji: '🧴' },
+  { value: 'discountCodes', label: 'Códigos de Descuento', emoji: '🏷️%' },
   { value: 'ebook', label: 'eBook', emoji: '📖' },
   { value: 'subscribers', label: 'Suscriptores', emoji: '🔔' },
-  { value: 'servicePurchases', label: 'Compras Serv.', emoji: '🛍️' },
-  { value: 'services', label: 'Servicios', emoji: '⚙️' },
-  { value: 'products', label: 'Productos', emoji: '📦' },
-  { value: 'productPurchases', label: 'Compras Prod.', emoji: '🛒' },
-  { value: 'discountCodes', label: 'Descuentos', emoji: '💰' },
   { value: 'courses', label: 'Cursos', emoji: '🎓' },
   { value: 'suggestions', label: 'Foro Expertos', emoji: '💡' },
-  { value: 'beforeAfter', label: 'Antes/Después', emoji: '📸' },
+  { value: 'beforeAfter', label: 'Transformaciones Pacientes', emoji: '✨' },
 ] as const;
 
 type AdminTabValue = typeof ADMIN_TABS[number]['value'];

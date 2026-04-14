@@ -94,23 +94,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
             />
           </a>
 
-          {/* ═══ DESKTOP: Botón Nutriser Shop (sin botones de splash) ═══ */}
-          {isDesktop && (
-            <div className="hidden lg:flex items-center gap-2">
-              <button
-                onClick={handleGoToShop}
-                title="Ir a Nutriser Shop"
-                className={`flex items-center gap-2 text-xs tracking-[0.12em] uppercase font-bold px-4 py-2 rounded-full border transition-all duration-300 ${
-                  scrolled || lightBg
-                    ? "border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-white"
-                    : "border-white/40 text-white hover:bg-white/10"
-                }`}
-              >
-                <ShoppingBag className="w-4 h-4" />
-                Nutriser Shop
-              </button>
-            </div>
-          )}
+          {/* DESKTOP: Sin botones de splash ni Shop en navbar (Shop va en el hero) */}
 
           {/* ═══ MÓVIL/TABLETA: En Home solo Inicio, en páginas internas Inicio + Regresar ═══ */}
           {!isDesktop && (
@@ -232,17 +216,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
               </>
             )}
 
-            {/* DESKTOP: Botón Nutriser Shop (en caso de que la ventana sea pequeña) */}
-            {isDesktop && (
-              <button
-                onClick={handleGoToShop}
-                aria-label="Ir a Nutriser Shop"
-                className="flex items-center gap-1 text-[10px] tracking-widest uppercase font-extrabold px-2.5 py-2 rounded-full bg-[#C5A55A] text-black border-2 border-[#C5A55A] shadow-lg shadow-[#C5A55A]/30 active:scale-95 transition-all duration-200"
-              >
-                <ShoppingBag className="w-3 h-3" />
-                Shop
-              </button>
-            )}
+            {/* DESKTOP: Sin botón Shop en navbar (va en el hero del Home) */}
 
             <button
               onClick={() => setMobileOpen(!mobileOpen)}

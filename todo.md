@@ -1301,3 +1301,22 @@
 ### Corrección Navbar móvil - Solo botón Inicio en Home
 - [x] En móvil, sitio web (Home): solo mostrar botón "Inicio" (→ Splash 0), sin "Regresar"
 - [x] El botón "Regresar" solo aparece en páginas internas (tienda, cursos, etc.)
+
+### Correcciones urgentes
+- [x] Bug: Botón "¡LO QUIERO!" del PromoSplash ahora navega a /cupon/:id para comprar
+- [x] Desktop Home: Quitar botón "Nutriser Shop" del navbar superior
+- [x] Desktop Home: Agregar botón "Nutriser Shop" en el hero donde está "Cuponera de Descuentos", con estilo brillante/dorado
+- [x] Tienda: Mejorar layout responsive para desktop (tarjetas, categorías, paquetes bien acomodados)
+- [x] Tienda: Mejorar layout responsive para tableta
+- [x] Tienda: Verificar layout en celular sigue bien
+
+### Ajustes navegación desktop + responsive tienda
+- [x] Desktop Home: Quitar botón "Nutriser Shop" del navbar superior
+- [x] Desktop Home: Agregar botón "Nutriser Shop" en el hero donde está "Cuponera de Descuentos", con estilo brillante/dorado
+- [x] Tienda: Mejorar layout responsive para desktop (tarjetas, categorías, paquetes bien acomodados)
+- [x] Tienda: Mejorar layout responsive para tableta
+- [x] Tienda: Verificar layout en celular sigue bien
+
+### Correcciones tienda - Abril 14
+- [x] Banner carrusel de ofertas clickeable y lleva a comprar la promoción/paquete
+- [x] PromoSplash: X respeta zona segura del iPhone (safe-area-inset-top)

@@ -30,7 +30,7 @@ function useCountdown(expiresAt: Date | string | null | undefined) {
 
 interface PromoSplashProps {
   onClose: () => void;
-  onGoToCoupon?: () => void; // Navegar a la cuponera
+  onGoToCoupon?: (promoId: number) => void; // Navegar al cupón específico
 }
 
 interface Promo {
@@ -172,10 +172,10 @@ export default function PromoSplash({ onClose, onGoToCoupon }: PromoSplashProps)
     onClose();
   }, [onClose]);
 
-  const handleAction = useCallback(() => {
+  const handleAction = useCallback((promoId: number) => {
     sessionStorage.setItem("nutriser_promo_splash_shown", "1");
     if (onGoToCoupon) {
-      onGoToCoupon();
+      onGoToCoupon(promoId);
     }
     handleClose();
   }, [onGoToCoupon, handleClose]);
@@ -186,11 +186,13 @@ export default function PromoSplash({ onClose, onGoToCoupon }: PromoSplashProps)
   if (!shouldShow) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      {/* Close button */}
+    <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+      style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}>
+      {/* Close button — respeta zona segura del iPhone */}
       <button
         onClick={handleClose}
-        className="absolute top-4 right-4 z-[110] w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
+        className="absolute right-4 z-[110] w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
+        style={{ top: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
       >
         <X className="w-5 h-5" />
       </button>
@@ -212,7 +214,7 @@ export default function PromoSplash({ onClose, onGoToCoupon }: PromoSplashProps)
         {activePromos[currentIndex] && (
           <PromoCard
             promo={activePromos[currentIndex]}
-            onAction={handleAction}
+            onAction={() => handleAction(activePromos[currentIndex].id)}
           />
         )}
 

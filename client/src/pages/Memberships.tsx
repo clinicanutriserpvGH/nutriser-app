@@ -158,7 +158,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 // ─── Banner Carousel ─────────────────────────────────────────────────────────
-function PromoBanner() {
+function PromoBanner({ onBannerClick }: { onBannerClick?: (pkgIndex: number) => void }) {
   const [idx, setIdx] = useState(0);
   const banners = [
     {
@@ -167,6 +167,7 @@ function PromoBanner() {
       badge: "-22%",
       bg: "from-amber-500 to-amber-700",
       img: PACKAGES[0].imageUrl,
+      pkgIndex: 0,
     },
     {
       title: "Paquete Reductor",
@@ -174,6 +175,7 @@ function PromoBanner() {
       badge: "-31%",
       bg: "from-emerald-500 to-emerald-700",
       img: PACKAGES[1].imageUrl,
+      pkgIndex: 1,
     },
   ];
 
@@ -184,24 +186,31 @@ function PromoBanner() {
 
   const b = banners[idx];
   return (
-    <div className="relative mx-4 mt-3 rounded-2xl overflow-hidden h-44 sm:h-52">
+    <button
+      onClick={() => onBannerClick?.(b.pkgIndex)}
+      className="relative mx-4 mt-3 rounded-2xl overflow-hidden h-44 sm:h-52 lg:h-56 w-[calc(100%-2rem)] text-left cursor-pointer group"
+    >
       <div className={`absolute inset-0 bg-gradient-to-r ${b.bg} transition-all duration-700`} />
-      <img src={b.img} alt={b.title} className="absolute right-0 top-0 h-full w-2/3 object-cover opacity-40 mix-blend-overlay" />
+      <img src={b.img} alt={b.title} className="absolute right-0 top-0 h-full w-2/3 object-cover opacity-40 mix-blend-overlay group-hover:opacity-50 transition-opacity" />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all" />
       <div className="relative z-10 h-full flex flex-col justify-center px-6">
         <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-black px-3 py-1 rounded-full w-fit mb-2">
           {b.badge} DESCUENTO
         </span>
         <h3 className="text-white text-xl sm:text-2xl font-black leading-tight">{b.title}</h3>
         <p className="text-white/80 text-sm font-medium mt-1">{b.subtitle}</p>
+        <span className="mt-2 inline-flex items-center gap-1 text-white/90 text-xs font-bold bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full w-fit group-hover:bg-white/30 transition-all">
+          <ShoppingCart className="w-3.5 h-3.5" /> Comprar ahora
+        </span>
       </div>
       {/* Dots */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
         {banners.map((_, i) => (
-          <button key={i} onClick={() => setIdx(i)}
-            className={`w-2 h-2 rounded-full transition-all ${i === idx ? "bg-white w-5" : "bg-white/40"}`} />
+          <span key={i} onClick={(e) => { e.stopPropagation(); setIdx(i); }}
+            className={`w-2 h-2 rounded-full transition-all cursor-pointer ${i === idx ? "bg-white w-5" : "bg-white/40"}`} />
         ))}
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -418,9 +427,9 @@ export default function Memberships() {
       {showPromoSplash && (
         <PromoSplash
           onClose={() => setShowPromoSplash(false)}
-          onGoToCoupon={() => {
+          onGoToCoupon={(promoId) => {
             setShowPromoSplash(false);
-            navigate("/coupons");
+            navigate(`/cupon/${promoId}`);
           }}
         />
       )}
@@ -446,13 +455,13 @@ export default function Memberships() {
           HEADER — Estilo tienda comercial
       ══════════════════════════════════════════════════════════════════════ */}
       <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 py-3 lg:py-4">
+          <div className="flex items-center gap-3 lg:gap-4">
             {/* Logo */}
-            <img src={LOGO_URL} alt="Nutriser" className="w-10 h-10 object-contain flex-shrink-0" />
+            <img src={LOGO_URL} alt="Nutriser" className="w-10 h-10 lg:w-12 lg:h-12 object-contain flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-[#C5A55A] text-[9px] tracking-[0.2em] uppercase font-semibold">Aesthetic & Nutrition</p>
-              <h1 className="text-gray-900 text-lg font-black leading-tight">Nutriser Shop</h1>
+              <p className="text-[#C5A55A] text-[9px] lg:text-[10px] tracking-[0.2em] uppercase font-semibold">Aesthetic & Nutrition</p>
+              <h1 className="text-gray-900 text-lg lg:text-xl font-black leading-tight">Nutriser Shop</h1>
             </div>
 
             {/* Session + Cart */}
@@ -489,14 +498,28 @@ export default function Memberships() {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input type="text" placeholder="¿Qué estás buscando?"
                 value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-100 border-0 rounded-full pl-10 pr-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/50 transition-all" />
+                className="w-full bg-gray-100 border-0 rounded-full pl-10 pr-4 py-2.5 lg:py-3 text-sm lg:text-base text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/50 transition-all" />
             </div>
           )}
         </div>
       </div>
 
-      {/* ── Banner Carrusel de Ofertas ── */}
-      <PromoBanner />
+      {/* ── Banner Carrusel de Ofertas (clickeable → comprar paquete) ── */}
+      <PromoBanner onBannerClick={(pkgIndex) => {
+        const pkg = PACKAGES[pkgIndex];
+        if (pkg) {
+          openCheckout({
+            id: pkg.id,
+            name: pkg.name,
+            price: pkg.price,
+            priceLabel: `$${pkg.price.toLocaleString("es-MX")} MXN`,
+            qty: 1,
+            imageUrl: pkg.imageUrl,
+            category: pkg.category,
+            itemType: "package",
+          });
+        }
+      }} />
 
       {/* ══════════════════════════════════════════════════════════════════════
           TABS — Estilo app comercial
@@ -536,10 +559,10 @@ export default function Memberships() {
           <div className="bg-white mt-2 py-4">
             <div className="max-w-7xl mx-auto px-4">
               <h3 className="text-gray-900 font-bold text-base mb-3">Categorías</h3>
-              <div className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+              <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-1 lg:justify-center" style={{ scrollbarWidth: "none" }}>
                 {/* Todos */}
-                <button onClick={() => setActiveCategory("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px]">
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                <button onClick={() => setActiveCategory("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
                     activeCategory === "all" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-gray-100"
                   }`}>
                     <Package className={`w-6 h-6 ${activeCategory === "all" ? "text-white" : "text-gray-500"}`} />
@@ -560,8 +583,8 @@ export default function Memberships() {
                   const Icon = meta.icon;
                   const isActive = activeCategory === cat;
                   return (
-                    <button key={cat} onClick={() => setActiveCategory(cat)} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px]">
-                      <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                    <button key={cat} onClick={() => setActiveCategory(cat)} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                      <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
                         isActive ? "shadow-lg" : ""
                       }`} style={{ backgroundColor: isActive ? meta.color : meta.bg }}>
                         <Icon className="w-6 h-6" style={{ color: isActive ? "#fff" : meta.color }} />
@@ -588,12 +611,12 @@ export default function Memberships() {
                   </span>
                 </div>
 
-                <HScrollRail>
+                <HScrollRail className="lg:!flex lg:!gap-6">
                   {PACKAGES.map(pkg => {
                     const savings = pkg.regularPrice - pkg.price;
                     const savingsPct = Math.round((savings / pkg.regularPrice) * 100);
                     return (
-                      <div key={pkg.id} className="flex-shrink-0 w-72 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                      <div key={pkg.id} className="flex-shrink-0 w-72 sm:w-80 lg:w-[calc(50%-0.75rem)] lg:flex-shrink bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all">
                         {/* Image */}
                         <div className="relative h-40 overflow-hidden">
                           <img src={pkg.imageUrl} alt={pkg.name} className="w-full h-full object-cover" />
@@ -681,8 +704,8 @@ export default function Memberships() {
                           {catServices.map(service => {
                             const priceNum = service.price ? parseInt(service.price.replace(/[^0-9]/g, "")) : null;
                             return (
-                              <div key={service.id} className="flex-shrink-0 w-52 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all">
-                                <div className="relative h-32 overflow-hidden">
+                              <div key={service.id} className="flex-shrink-0 w-52 sm:w-56 lg:w-60 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                                <div className="relative h-32 lg:h-40 overflow-hidden">
                                   {service.imageUrl ? (
                                     <img src={service.imageUrl} alt={service.name} className="w-full h-full object-cover" />
                                   ) : (
@@ -692,7 +715,7 @@ export default function Memberships() {
                                   )}
                                 </div>
                                 <div className="p-3">
-                                  <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{service.name}</h3>
+                                  <h3 className="font-bold text-gray-900 text-xs lg:text-sm leading-snug mb-1 line-clamp-2">{service.name}</h3>
                                   {service.price ? (
                                     <p className="text-[#C5A55A] font-black text-sm mb-2">{service.price}</p>
                                   ) : (
@@ -734,7 +757,7 @@ export default function Memberships() {
                         <p className="text-gray-400 font-medium">No se encontraron servicios</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
                         {filteredServices.map(service => {
                           const catMeta = CATEGORY_META[service.category ?? "general"] ?? CATEGORY_META.general;
                           const CatIcon = catMeta.icon;
@@ -817,8 +840,8 @@ export default function Memberships() {
                   {products.map(product => {
                     const priceNum = product.price ? parseInt(product.price.replace(/[^0-9]/g, "")) : null;
                     return (
-                      <div key={product.id} className="flex-shrink-0 w-48 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
-                        <div className="relative h-40 overflow-hidden">
+                      <div key={product.id} className="flex-shrink-0 w-48 sm:w-52 lg:w-56 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+                        <div className="relative h-40 lg:h-48 overflow-hidden">
                           {product.imageUrl ? (
                             <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                           ) : (

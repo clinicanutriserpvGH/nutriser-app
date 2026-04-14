@@ -4,8 +4,9 @@
  * Portal de Salud as the primary featured element
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Gift, CalendarCheck, ShoppingBag, MapPin, Package } from "lucide-react";
+import { ChevronDown, Gift, CalendarCheck, ShoppingBag, MapPin, Package, Store } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useDeviceType } from "@/hooks/useDeviceType";
 
 const HERO_IMAGES = [
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-recepcion-hero_de9ce8ee.png",
@@ -15,6 +16,7 @@ const HERO_IMAGES = [
 
 export default function HeroSection() {
   const [currentImg, setCurrentImg] = useState(0);
+  const { isDesktop } = useDeviceType();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -130,26 +132,45 @@ export default function HeroSection() {
               <MapPin className="w-4 h-4" />
               Ubicación
             </a>
-            {/* 3. Cuponera — ancho completo, parpadeante */}
-            <motion.button
-              onClick={(e) => {
-                e.preventDefault();
-                const el = document.querySelector("#promociones");
-                if (el) el.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="relative col-span-2 inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
-              animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
-              transition={{ duration: 1.2, repeat: Infinity }}
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <motion.span
-                className="relative w-3 h-3 rounded-full bg-[#C5A55A] flex-shrink-0"
-                animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <Gift className="relative w-5 h-5 flex-shrink-0" />
-              <span className="relative">Cuponera de Descuentos</span>
-            </motion.button>
+            {/* 3. Desktop: Nutriser Shop / Móvil: Cuponera — ancho completo, parpadeante */}
+            {isDesktop ? (
+              <motion.a
+                href="/memberships"
+                onClick={(e) => { e.preventDefault(); window.location.href = '/memberships'; }}
+                className="relative col-span-2 inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
+                animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <motion.span
+                  className="relative w-3 h-3 rounded-full bg-[#C5A55A] flex-shrink-0"
+                  animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <Store className="relative w-5 h-5 flex-shrink-0" />
+                <span className="relative">Nutriser Shop</span>
+              </motion.a>
+            ) : (
+              <motion.button
+                onClick={(e) => {
+                  e.preventDefault();
+                  const el = document.querySelector("#promociones");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="relative col-span-2 inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
+                animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <motion.span
+                  className="relative w-3 h-3 rounded-full bg-[#C5A55A] flex-shrink-0"
+                  animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <Gift className="relative w-5 h-5 flex-shrink-0" />
+                <span className="relative">Cuponera de Descuentos</span>
+              </motion.button>
+            )}
             {/* 4. Agenda tu Cita — más compacto, ancho completo */}
             <a
               href="/appointment-form"

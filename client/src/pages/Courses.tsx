@@ -327,7 +327,7 @@ export default function Courses() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
-      <BackToSplash />
+      <BackToSplash hideHome />
 
       {/* Modal de autenticación unificada */}
       <NutriserAuthModal

@@ -41,9 +41,9 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
     setTimeout(() => onEnterNutriserWeb(), 400);
   };
 
-  // Nutriser Web → abrir el sitio web real en nueva pestaña
+  // Nutriser Web → navegar directamente al sitio web real
   const handleNutriserWeb = () => {
-    window.open('https://www.nutriserpv.com', '_blank');
+    window.location.href = 'https://www.nutriserpv.com';
   };
 
   // Portal de Salud → app externa
@@ -137,11 +137,9 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
               </button>
 
               {/* Tarjeta 2: Nutriser Web → sitio web real */}
-              <a
-                href="https://www.nutriserpv.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1 block"
+              <button
+                onClick={handleNutriserWeb}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
                 style={{ minHeight: "100px" }}
               >
                 <img
@@ -167,7 +165,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                     </span>
                   </div>
                 </div>
-              </a>
+              </button>
 
             </div>
 

@@ -151,7 +151,7 @@ export default function NutriserHomePage() {
             <CardHalf
               img={IMG_NUTRICION}
               icon={CalendarCheck}
-              label="Shop"
+              label="Tienda"
               title="Paquetes Nutriser"
               cta="Ver Paquetes"
               onClick={() => goTo("/memberships")}
@@ -182,8 +182,8 @@ export default function NutriserHomePage() {
             <CardHalf
               img={IMG_EBOOK}
               icon={BookOpen}
-              label="eBooks"
-              title="Tienda eBook"
+              label="Tienda"
+              title="Nutriser Library"
               cta="Ver eBooks"
               onClick={() => goTo("/ebook")}
               imgPosition="center 30%"

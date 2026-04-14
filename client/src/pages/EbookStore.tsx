@@ -1,5 +1,5 @@
 /**
- * Nutriser - Tienda eBook
+ * Nutriser - Nutriser Library
  * Página pública para comprar el eBook de Nutriser
  * Flujo: Ver eBook → Datos del comprador → Transferencia bancaria + comprobante → Confirmación
  */
@@ -268,7 +268,7 @@ export default function EbookStore() {
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 bg-[#C5A55A]/10 text-[#C5A55A] px-4 py-2 rounded-full text-sm font-semibold mb-4">
                   <BookOpen className="w-4 h-4" />
-                  Tienda eBook
+                  Nutriser Library
                 </div>
                 <h1 className="font-serif text-4xl md:text-5xl text-[#1A1A1A] mb-4">{ebook.title}</h1>
               </div>

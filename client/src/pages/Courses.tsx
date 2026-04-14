@@ -237,6 +237,11 @@ export default function Courses() {
   };
 
   const handleSubscribe = async () => {
+    // Requerir login antes de suscribirse
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
+      return;
+    }
     if (!subscribeName.trim()) {
       toast.error("Por favor ingresa tu nombre.");
       return;

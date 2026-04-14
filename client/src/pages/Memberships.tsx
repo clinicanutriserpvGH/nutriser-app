@@ -12,7 +12,7 @@ import {
   ShoppingCart, X, Plus, Minus, Trash2, Tag, CheckCircle2,
   Loader2, Copy, CheckCheck, Apple, Sparkles, Scan, Syringe,
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
-  Search, ArrowLeft, Upload, BookOpen, FlaskConical,
+  Search, ArrowLeft, Upload, BookOpen, FlaskConical, User,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -232,8 +232,14 @@ export default function Memberships() {
     : discountInfo?.isGift ? 0 : checkoutTotal;
 
   const openCheckout = (item?: CartItem) => {
+    // Requerir login antes de abrir el checkout
+    if (!isLoggedIn) {
+      if (item) setPendingCartItem(item);
+      setShowAuthModal(true);
+      return;
+    }
     setBuyNowItem(item || null);
-    setBuyerName(""); setBuyerEmail(""); setBuyerPhone("");
+    setBuyerName(patient?.name || ""); setBuyerEmail(patient?.email || ""); setBuyerPhone((patient as any)?.phone || "");
     setProofFile(null); setSuccessCode(""); setDiscountCode(""); setDiscountInfo(null);
     setCheckoutOpen(true);
   };
@@ -305,7 +311,7 @@ export default function Memberships() {
   // ─── Render ─────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#F5F1E8]" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 3.5rem)" }}>
-      <BackToSplash />
+      <BackToSplash hideHome />
 
       {/* Modal de autenticación unificada */}
       <NutriserAuthModal
@@ -331,28 +337,31 @@ export default function Memberships() {
             <div>
               <p className="text-[#C5A55A] text-xs tracking-widest uppercase font-semibold">Aesthetic & Nutrition</p>
               <h1 className="text-2xl font-bold">Nutriser Shop</h1>
-              {/* Bienvenida con nombre del usuario */}
+            </div>
+            {/* Sesión + Carrito juntos a la derecha */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               {isLoggedIn && patient ? (
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-white/60">Hola,</span>
-                  <span className="text-xs text-[#C5A55A] font-semibold">{patient.name}</span>
-                  <button onClick={logout} className="text-[10px] text-white/30 hover:text-white/60 transition-colors ml-1">(Cerrar sesión)</button>
+                <div className="flex items-center gap-1.5 bg-white/10 rounded-full px-3 py-1.5">
+                  <User className="w-3.5 h-3.5 text-[#C5A55A] flex-shrink-0" />
+                  <span className="text-xs text-[#C5A55A] font-semibold max-w-[80px] truncate">{patient.name.split(' ')[0]}</span>
+                  <button onClick={logout} className="text-[9px] text-white/30 hover:text-white/60 transition-colors ml-0.5" title="Cerrar sesión">×</button>
                 </div>
               ) : (
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className="mt-1 text-xs text-[#C5A55A] hover:text-[#D4B46A] transition-colors flex items-center gap-1"
+                  className="flex items-center gap-1.5 bg-[#C5A55A]/20 border border-[#C5A55A]/40 rounded-full px-3 py-1.5 text-xs text-[#C5A55A] font-semibold hover:bg-[#C5A55A]/30 transition-all active:scale-95"
                 >
-                  <span>👤</span> Iniciar sesión
+                  <User className="w-3.5 h-3.5" />
+                  Iniciar sesión
                 </button>
               )}
+              <button onClick={() => setCartOpen(true)} className="relative p-2">
+                <ShoppingCart className="w-6 h-6 text-white" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-[#C5A55A] text-black text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">{cartCount}</span>
+                )}
+              </button>
             </div>
-            <button onClick={() => setCartOpen(true)} className="relative p-2">
-              <ShoppingCart className="w-6 h-6 text-white" />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-[#C5A55A] text-black text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">{cartCount}</span>
-              )}
-            </button>
           </div>
           {/* Buscador solo en tratamientos */}
           {activeTab === "tratamientos" && (

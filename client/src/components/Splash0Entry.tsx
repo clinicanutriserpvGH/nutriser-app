@@ -41,13 +41,9 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
     setTimeout(() => onEnterNutriserWeb(), 400);
   };
 
-  // Nutriser Web → ir al sitio web principal (Home.tsx)
+  // Nutriser Web → abrir el sitio web real en nueva pestaña
   const handleNutriserWeb = () => {
-    setLeaving(true);
-    setTimeout(() => {
-      if (onNavigate) onNavigate('/nutriser-home');
-      else window.location.href = '/nutriser-home';
-    }, 400);
+    window.open('https://www.nutriserpv.com', '_blank');
   };
 
   // Portal de Salud → app externa

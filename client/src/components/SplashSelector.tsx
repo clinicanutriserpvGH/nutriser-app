@@ -225,10 +225,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
       }}
     >
       <div
-        className="min-h-full w-full flex flex-col items-center justify-start px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border"
+        className="h-full min-h-screen w-full flex flex-col items-center justify-start px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 16px, 24px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 8px, 24px)' }}
       >
-        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px] flex flex-col flex-1">
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px] flex flex-col" style={{ minHeight: 'calc(100vh - max(env(safe-area-inset-top, 0px) + 16px, 24px) - max(env(safe-area-inset-bottom, 0px) + 8px, 24px))' }}>
 
           {/* ── Botón Regresar al Splash 0 ── */}
           {onBack && (
@@ -286,14 +286,16 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 </button>
               </div>
             ) : (
-              /* No logueado: botón "Iniciar sesión" */
+              /* No logueado: botón "Iniciar sesión / Crear cuenta" */
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 bg-[#C5A55A] text-black hover:bg-[#d4b46a] active:scale-95 flex-shrink-0"
+                className="flex flex-col items-center gap-0 px-3 py-1.5 rounded-xl transition-all duration-200 bg-[#C5A55A] text-black hover:bg-[#d4b46a] active:scale-95 flex-shrink-0"
               >
-                <LogIn className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Iniciar sesión</span>
-                <span className="sm:hidden">Entrar</span>
+                <div className="flex items-center gap-1">
+                  <User className="w-3 h-3" />
+                  <span className="text-[11px] font-bold leading-tight">Iniciar sesión</span>
+                </div>
+                <span className="text-[8px] font-medium opacity-70 leading-tight">Para comprar y obtener beneficios</span>
               </button>
             )}
 
@@ -321,10 +323,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
 
           {/* ── 3 Tarjetas: Shop + Academy + Mis Tratamientos ── */}
-          <div className="flex flex-col gap-3 mb-4 flex-1 min-h-0">
+          <div className="flex flex-col gap-2 mb-2 flex-1">
 
             {/* Tarjeta 1: Nutriser Shop */}
-            <div className="flex-1">
+            <div className="flex-1 min-h-[130px]">
               <button
                 onClick={() => handleNavigate('/memberships')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
@@ -355,7 +357,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
 
             {/* Tarjeta 2: Nutriser Academy */}
-            <div className="flex-1">
+            <div className="flex-1 min-h-[130px]">
               <button
                 onClick={() => handleNavigate('/cursos')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
@@ -386,7 +388,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
 
             {/* Tarjeta 3: Mis Tratamientos */}
-            <div className="flex-1">
+            <div className="flex-1 min-h-[130px]">
               <button
                 onClick={() => handleNavigate('/mis-tratamientos')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"

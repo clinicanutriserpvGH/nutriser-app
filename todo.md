@@ -1289,3 +1289,11 @@
 - [x] Productos (Farmacy) en scroll horizontal
 - [x] Diseño más dinámico y colorido tipo e-commerce
 - [x] Mantener funcionalidad completa (carrito, checkout, auth, PromoSplash)
+
+### Navegación diferenciada desktop vs móvil/tableta
+- [x] Desktop: Quitar botones "Regresar" e "Inicio" que llevan a splashes (splashes son exclusivos de la app móvil)
+- [x] Desktop: Agregar botón "Nutriser Shop" en el sitio web que lleve a la tienda
+- [x] Desktop: En la tienda, botón "Regresar" lleva de vuelta al sitio web (no a splashes)
+- [x] Móvil/tableta: Mantener botón "Regresar" que lleva al Splash 0
+- [x] Móvil/tableta: En la tienda, botón "Regresar" lleva al Splash 1
+- [x] Detectar tipo de dispositivo (desktop vs móvil/tableta) con hook compartido useDeviceType

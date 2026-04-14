@@ -29,23 +29,7 @@ import { SplashContext } from "@/contexts/SplashContext";
 import { SplashThemeProvider } from "@/contexts/SplashThemeContext";
 import { useState } from "react";
 import { useLocation } from "wouter";
-
-// ── Detección de dispositivo ────────────────────────────────────────────────
-// Retorna true si el usuario está en una computadora/laptop/Mac (NO móvil ni tablet)
-function isDesktopDevice(): boolean {
-  const ua = navigator.userAgent;
-  // Detectar móviles y tablets por User-Agent
-  const isMobileOrTablet = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet|touch/i.test(ua);
-  // También verificar por tamaño de pantalla como respaldo
-  // Pantallas >= 1024px de ancho sin touch se consideran desktop
-  const isLargeScreen = window.innerWidth >= 1024;
-  const hasTouchScreen = navigator.maxTouchPoints > 0;
-  // Es desktop si: NO es móvil/tablet por UA, Y (pantalla grande O sin touch)
-  if (isMobileOrTablet) return false;
-  // iPad en modo desktop puede tener UA de desktop, verificar touch
-  if (hasTouchScreen && !isLargeScreen) return false;
-  return true;
-}
+import { isDesktopDevice } from "@/hooks/useDeviceType";
 
 // Rutas que NUNCA muestran el splash
 const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/services", "/privacy-policy", "/delete-account", "/mis-tratamientos", "/nutriser-home"];

@@ -1,31 +1,78 @@
 /**
  * BackToSplash — botones flotantes de navegación
- * hideHome: si true, solo muestra "← Regresar" (sin botón Inicio)
- * Inicio: regresa al Splash 0 (pantalla de entrada principal)
- * Regresar: regresa al Splash 1 (hub con Nutriser Shop / Academy / Mis Tratamientos)
+ *
+ * LÓGICA DE DISPOSITIVOS:
+ * ─ Móvil/Tableta (PWA): Muestra botones Inicio (→ Splash 0) y Regresar (→ Splash 1)
+ * ─ Desktop (computadora): Muestra botón Regresar que lleva al sitio web (/) o a una ruta personalizada
+ *   Los splashes son exclusivos de la app móvil, desktop NO debe ir a splashes.
+ *
+ * Props:
+ * - hideHome: si true, solo muestra "← Regresar" (sin botón Inicio) en móvil
+ * - desktopBackTo: ruta a la que navega el botón Regresar en desktop (default: "/" = sitio web)
+ * - desktopBackLabel: texto del botón Regresar en desktop (default: "Regresar")
  */
-import { Home, ChevronLeft } from "lucide-react";
+import { Home, ChevronLeft, ShoppingBag } from "lucide-react";
 import { useSplash } from "@/contexts/SplashContext";
+import { useDeviceType } from "@/hooks/useDeviceType";
+import { useLocation } from "wouter";
 
 interface BackToSplashProps {
   hideHome?: boolean;
+  /** Ruta de destino del botón Regresar en desktop (default: "/" sitio web) */
+  desktopBackTo?: string;
+  /** Texto del botón Regresar en desktop */
+  desktopBackLabel?: string;
 }
 
-export default function BackToSplash({ hideHome = false }: BackToSplashProps) {
+export default function BackToSplash({
+  hideHome = false,
+  desktopBackTo = "/",
+  desktopBackLabel = "Regresar",
+}: BackToSplashProps) {
   const { showSplash, showSplash1 } = useSplash();
+  const { isDesktop } = useDeviceType();
+  const [, navigate] = useLocation();
 
+  // ── Handlers para MÓVIL/TABLETA ──
   const handleGoHome = () => {
-    // Limpiar sessionStorage para que el splash vuelva a mostrarse desde el inicio
     sessionStorage.removeItem("nutriser_splash_seen");
     sessionStorage.removeItem("nutriser_chose_splash1");
     showSplash();
   };
 
   const handleGoBack = () => {
-    // Volver al Splash 1 (hub de Nutriser Shop / Web / Academy)
     showSplash1();
   };
 
+  // ── Handlers para DESKTOP ──
+  const handleDesktopBack = () => {
+    navigate(desktopBackTo);
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DESKTOP: Solo un botón "Regresar" que lleva al sitio web (o ruta custom)
+  // ═══════════════════════════════════════════════════════════════════════════
+  if (isDesktop) {
+    return (
+      <div
+        style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
+        className="fixed left-4 z-50 flex items-center gap-2"
+      >
+        <button
+          onClick={handleDesktopBack}
+          className="flex items-center gap-1.5 bg-black/70 backdrop-blur-sm border border-white/20 text-white/80 px-3 py-2.5 rounded-full text-sm font-bold tracking-widest uppercase hover:bg-white/20 hover:text-white transition-all duration-300 shadow-lg"
+          aria-label={desktopBackLabel}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          {desktopBackLabel}
+        </button>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MÓVIL/TABLETA: Botones Inicio (→ Splash 0) y Regresar (→ Splash 1)
+  // ═══════════════════════════════════════════════════════════════════════════
   return (
     <div
       style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}

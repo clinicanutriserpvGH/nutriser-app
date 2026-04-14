@@ -63,8 +63,8 @@ export default function Courses() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
-  const [subscribeEmail, setSubscribeEmail] = useState("");
-  const [subscribeName, setSubscribeName] = useState("");
+  const [subscribeEmail, setSubscribeEmail] = useState(() => patient?.email || "");
+  const [subscribeName, setSubscribeName] = useState(() => patient?.name || "");
   const [subscribeEmailNotify, setSubscribeEmailNotify] = useState(true);
   const [subscribePushNotify, setSubscribePushNotify] = useState(false);
   const [pushSupported, setPushSupported] = useState(false);
@@ -85,12 +85,8 @@ export default function Courses() {
   // Foro de sugerencias
   const [suggestionTitle, setSuggestionTitle] = useState("");
   const [suggestionDesc, setSuggestionDesc] = useState("");
-  const [suggestionName, setSuggestionName] = useState(() => {
-    try { const s = localStorage.getItem('nutriser_academy_subscriber'); return s ? JSON.parse(s).name || '' : ''; } catch { return ''; }
-  });
-  const [suggestionEmail, setSuggestionEmail] = useState(() => {
-    try { const s = localStorage.getItem('nutriser_academy_subscriber'); return s ? JSON.parse(s).email || '' : ''; } catch { return ''; }
-  });
+  const [suggestionName, setSuggestionName] = useState(() => patient?.name || "");
+  const [suggestionEmail, setSuggestionEmail] = useState(() => patient?.email || "");
   const [suggestionSubmitted, setSuggestionSubmitted] = useState(false);
   const [submittedSuggestion, setSubmittedSuggestion] = useState<{title: string; description: string; authorName: string} | null>(null);
   const [showSuggestionForm, setShowSuggestionForm] = useState(false);
@@ -359,13 +355,6 @@ export default function Courses() {
                 <span className="text-[#C5A55A] font-semibold text-sm">{patient.name}</span>
                 <button onClick={logout} className="text-white/30 hover:text-white/60 text-xs ml-2 transition-colors">(Cerrar sesión)</button>
               </div>
-              <Button
-                onClick={() => setShowSubscribeModal(true)}
-                className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
-              >
-                <Bell className="w-5 h-5" />
-                Suscríbete para acceder a contenido exclusivo
-              </Button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3">
@@ -912,10 +901,10 @@ export default function Courses() {
                 Nueva sugerencia de tema
               </h3>
               <div className="space-y-3">
-                {savedSubscriber ? (
+                {isLoggedIn && patient ? (
                   <div className="flex items-center gap-2 bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-lg px-3 py-2">
                     <span className="text-[#C5A55A] text-sm">✓</span>
-                    <span className="text-[#C5A55A] text-sm font-medium">Participando como <strong>{savedSubscriber.name || savedSubscriber.email}</strong></span>
+                    <span className="text-[#C5A55A] text-sm font-medium">Participando como <strong>{patient.name}</strong></span>
                   </div>
                 ) : (
                   <>

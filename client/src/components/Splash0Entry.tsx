@@ -35,19 +35,19 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
     ? "linear-gradient(160deg, #FAF7F2 0%, #F5EFE4 50%, #FAF7F2 100%)"
     : "linear-gradient(160deg, #0f0f0f 0%, #1a1208 50%, #0f0f0f 100%)";
 
-  // Nutriser Home → ir al sitio web principal (Home.tsx)
+  // Nutriser Home → abrir Splash 1 (hub de servicios: Shop + Academy + Mis Tratamientos)
   const handleNutriserHome = () => {
+    setLeaving(true);
+    setTimeout(() => onEnterNutriserWeb(), 400);
+  };
+
+  // Nutriser Web → ir al sitio web principal (Home.tsx)
+  const handleNutriserWeb = () => {
     setLeaving(true);
     setTimeout(() => {
       if (onNavigate) onNavigate('/nutriser-home');
       else window.location.href = '/nutriser-home';
     }, 400);
-  };
-
-  // Nutriser Web → abrir Splash 1 (hub de servicios)
-  const handleNutriserWeb = () => {
-    setLeaving(true);
-    setTimeout(() => onEnterNutriserWeb(), 400);
   };
 
   // Portal de Salud → app externa
@@ -110,7 +110,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
             {/* ── Columna izquierda (40%) — Nutriser Home + Nutriser Web ── */}
             <div className="md:col-span-2 flex flex-col gap-3 h-full">
 
-              {/* Tarjeta 1: Nutriser Home */}
+              {/* Tarjeta 1: Nutriser Home → Splash 1 (Shop + Academy + Mis Tratamientos) */}
               <button
                 onClick={handleNutriserHome}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
@@ -130,9 +130,10 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-2 drop-shadow-lg text-white">
+                    <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-1 drop-shadow-lg text-white">
                       Nutriser Home
                     </h2>
+                    <p className="text-white/70 text-[11px] mb-2">Shop · Academy · Mis Tratamientos</p>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
                       Entrar
                     </span>
@@ -140,7 +141,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                 </div>
               </button>
 
-              {/* Tarjeta 2: Nutriser Web (→ Splash 1) */}
+              {/* Tarjeta 2: Nutriser Web → sitio web principal */}
               <button
                 onClick={handleNutriserWeb}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
@@ -163,9 +164,9 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-1 drop-shadow-lg text-white">
                       Nutriser Web
                     </h2>
-                    <p className="text-white/70 text-[11px] mb-2">Shop · Academy · Mis Tratamientos</p>
+                    <p className="text-white/70 text-[11px] mb-2">Sitio web oficial</p>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
-                      <Globe className="w-3 h-3" /> Explorar
+                      <Globe className="w-3 h-3" /> Ver sitio
                     </span>
                   </div>
                 </div>

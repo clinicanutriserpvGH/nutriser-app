@@ -103,7 +103,7 @@ export default function NutriserHomePage() {
       className="min-h-screen w-full overflow-x-hidden overflow-y-auto transition-all duration-500"
       style={{ background: bg }}
     >
-      <div className="w-full flex flex-col items-center px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 16px, 32px)', paddingBottom: '24px' }}>
+      <div className="w-full flex flex-col items-center px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 8px, 16px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 8px, 16px)' }}>
         <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px]">
 
           {/* ── Header horizontal compacto ── */}

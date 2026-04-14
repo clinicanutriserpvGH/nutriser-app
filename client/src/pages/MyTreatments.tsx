@@ -430,7 +430,7 @@ export default function MyTreatments() {
   // ─── Pantalla de autenticación ───────────────────────────────────────────────
   if (view === "auth") {
     return (
-      <div className="min-h-screen bg-[#0D0D0D] flex flex-col items-center justify-center px-4 py-10">
+      <div className="min-h-screen bg-[#0D0D0D] flex flex-col items-center justify-start px-4 py-10" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)' }}>
         <div className="w-full max-w-md">
 
           {/* Botón Inicio — arriba, visible */}
@@ -601,7 +601,7 @@ export default function MyTreatments() {
   // ─── Pantalla de consentimiento ───────────────────────────────────────────────
   if (view === "consent") {
     return (
-      <div className="min-h-screen bg-[#0D0D0D] flex flex-col items-center justify-center px-4 py-10">
+      <div className="min-h-screen bg-[#0D0D0D] flex flex-col items-center justify-start px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: '24px' }}>
         <div className="w-full max-w-lg">
           <div className="flex flex-col items-center mb-6">
             <ShieldCheck className="w-12 h-12 text-[#C5A55A] mb-2" />

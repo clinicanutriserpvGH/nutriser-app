@@ -13,15 +13,15 @@ interface SplashThemeContextType {
 
 const SplashThemeContext = createContext<SplashThemeContextType | undefined>(undefined);
 
-/** Devuelve el tema que corresponde según la hora local del dispositivo.
- *  Modo claro: 06:00 – 18:59  (6am a 7pm)
- *  Modo oscuro: 19:00 – 05:59 (7pm a 6am)
+/** Devuelve el tema del sistema operativo del dispositivo.
+ *  Si el sistema está en modo oscuro → "dark"
+ *  Si el sistema está en modo claro → "light"
  */
-function getAutoTheme(): SplashTheme {
-  const hour = new Date().getHours();
-  // Modo claro: 06:00 – 21:59 (6am a 10pm)
-  // Modo oscuro: 22:00 – 05:59 (10pm a 6am)
-  return hour >= 6 && hour < 22 ? "light" : "dark";
+function getSystemTheme(): SplashTheme {
+  if (typeof window !== "undefined" && window.matchMedia) {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  return "light";
 }
 
 const STORAGE_KEY = "nutriser_splash_theme";
@@ -34,8 +34,8 @@ export function SplashThemeProvider({ children }: { children: React.ReactNode })
       const stored = localStorage.getItem(STORAGE_KEY) as SplashTheme | null;
       if (stored === "light" || stored === "dark") return stored;
     }
-    // Sin preferencia manual → usar detección automática
-    return getAutoTheme();
+    // Sin preferencia manual → usar tema del sistema operativo
+    return getSystemTheme();
   });
 
   const [isAuto, setIsAuto] = useState<boolean>(() => {
@@ -43,26 +43,22 @@ export function SplashThemeProvider({ children }: { children: React.ReactNode })
     return source !== "manual";
   });
 
-  // Actualizar automáticamente cada minuto por si cambia la hora
+  // Escuchar cambios en el tema del sistema operativo en tiempo real
   useEffect(() => {
     if (!isAuto) return;
 
-    const tick = () => {
-      const auto = getAutoTheme();
-      setSplashTheme(auto);
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSplashTheme(e.matches ? "dark" : "light");
     };
 
-    // Calcular ms hasta el próximo minuto para sincronizar el intervalo
-    const now = new Date();
-    const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+    // Sincronizar inmediatamente con el estado actual del sistema
+    setSplashTheme(mediaQuery.matches ? "dark" : "light");
 
-    const timeout = setTimeout(() => {
-      tick();
-      const interval = setInterval(tick, 60_000);
-      return () => clearInterval(interval);
-    }, msToNextMinute);
-
-    return () => clearTimeout(timeout);
+    // Escuchar cambios futuros
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, [isAuto]);
 
   const toggleSplashTheme = useCallback(() => {
@@ -75,12 +71,12 @@ export function SplashThemeProvider({ children }: { children: React.ReactNode })
     setIsAuto(false);
   }, []);
 
-  /** Vuelve al modo automático por horario */
+  /** Vuelve al modo automático (tema del sistema) */
   const resetToAuto = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.setItem(SOURCE_KEY, "auto");
     setIsAuto(true);
-    setSplashTheme(getAutoTheme());
+    setSplashTheme(getSystemTheme());
   }, []);
 
   return (

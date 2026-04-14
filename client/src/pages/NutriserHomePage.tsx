@@ -32,8 +32,8 @@ function CardHalf({
   return (
     <button
       onClick={onClick}
-      className="group relative w-full rounded-2xl overflow-hidden focus:outline-none"
-      style={{ aspectRatio: "4 / 5" }}
+      className="group relative w-full rounded-2xl overflow-hidden focus:outline-none h-full"
+      style={{ minHeight: '180px' }}
     >
       <img
         src={img} alt={title}
@@ -100,11 +100,11 @@ export default function NutriserHomePage() {
 
   return (
     <div
-      className="min-h-screen w-full overflow-x-hidden overflow-y-auto transition-all duration-500"
+      className="fixed inset-0 w-full overflow-x-hidden overflow-y-auto transition-all duration-500"
       style={{ background: bg }}
     >
-      <div className="w-full flex flex-col items-center px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 8px, 16px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 8px, 16px)' }}>
-        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px]">
+      <div className="min-h-full w-full flex flex-col items-center px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 8px, 16px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 8px, 16px)' }}>
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px] flex flex-col flex-1">
 
           {/* ── Header horizontal compacto ── */}
           <div className={`flex items-center gap-2 mb-4 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
@@ -147,7 +147,7 @@ export default function NutriserHomePage() {
           </div>
 
           {/* ── 4 tarjetas en grid: 2 columnas en móvil, 4 columnas en desktop ── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-4 flex-1 min-h-0">
             <CardHalf
               img={IMG_NUTRICION}
               icon={CalendarCheck}
@@ -192,7 +192,7 @@ export default function NutriserHomePage() {
           </div>
 
           {/* ── Botón Cuponera parpadeante ── */}
-          <div className="flex justify-center mb-5">
+          <div className="flex justify-center mt-4 mb-3">
             <button
               onClick={() => {
                 // Navegar directo al sitio principal (sección cupones) sin pasar por splash

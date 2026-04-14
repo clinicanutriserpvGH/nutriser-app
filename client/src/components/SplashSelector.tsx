@@ -278,10 +278,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
       }}
     >
       <div
-        className="min-h-screen w-full flex flex-col items-center justify-start px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border"
+        className="min-h-full w-full flex flex-col items-center justify-start px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 box-border"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 16px, 24px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 8px, 24px)' }}
       >
-        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px]">
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[780px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px] flex flex-col flex-1">
 
           {/* ── Botón Regresar al Splash 0 ── */}
           {onBack && (
@@ -358,12 +358,12 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           {/* ── Grid de widgets ── */}
 
           {/* Fila 1: Nutriser Shop | Nutriser Web (1 col en móvil, 2 en desktop) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6 mb-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6 mb-4 flex-1 min-h-0">
             {/* Widget Nutriser Shop (tienda/shop) — izquierda, prioridad */}
-            <div className="col-span-1">
+            <div className="col-span-1 h-full">
               <div
-                className="group relative w-full rounded-3xl overflow-hidden"
-                style={{ minHeight: "220px", aspectRatio: "16/9" }}
+                className="group relative w-full rounded-3xl overflow-hidden h-full"
+                style={{ minHeight: "220px" }}
               >
                 <img src={CLINIC_IMG} alt="Nutriser Shop" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
@@ -389,11 +389,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             </div>
 
             {/* Widget Nutriser Web (sitio web) — derecha */}
-            <div className="col-span-1">
+            <div className="col-span-1 h-full">
               <button
                 onClick={() => handleEnterSite()}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none"
-                style={{ minHeight: "220px", aspectRatio: "16/9" }}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
+                style={{ minHeight: "220px" }}
               >
                 <img src={CLINIC_IMG2} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />

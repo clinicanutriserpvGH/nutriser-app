@@ -430,7 +430,8 @@ export default function MyTreatments() {
   // ─── Pantalla de autenticación ───────────────────────────────────────────────
   if (view === "auth") {
     return (
-      <div className="min-h-screen bg-[#0D0D0D] flex flex-col items-center justify-start px-4 py-10" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)' }}>
+      <div className="fixed inset-0 bg-[#0D0D0D] overflow-y-auto">
+      <div className="min-h-full flex flex-col items-center justify-center px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 24px, 40px)' }}>
         <div className="w-full max-w-md">
 
           {/* Botón Inicio — arriba, visible */}
@@ -594,6 +595,7 @@ export default function MyTreatments() {
 
 
         </div>
+      </div>
       </div>
     );
   }

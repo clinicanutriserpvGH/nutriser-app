@@ -1269,3 +1269,13 @@
 - [x] Investigar por qué la tienda publicada muestra un diseño diferente al código local
 - [x] Verificar que Memberships.tsx (no Store.tsx) es la tienda real en /memberships
 - [x] Integrar PromoSplash en Memberships.tsx correctamente
+
+### Rediseño Completo de Nutriser Shop
+- [x] Rediseñar header con estilo premium (gradiente, logo, sesión, carrito)
+- [x] Rediseñar tabs principales con estilo más elegante
+- [x] Rediseñar sección de Paquetes Especiales con tarjetas premium
+- [x] Rediseñar tarjetas de servicios individuales con imágenes y diseño atractivo
+- [x] Rediseñar sección de Farmacy con grid mejorado
+- [x] Rediseñar sección de Library
+- [x] Verificar diseño responsive en móvil
+- [x] Mantener funcionalidad de carrito, checkout y autenticación

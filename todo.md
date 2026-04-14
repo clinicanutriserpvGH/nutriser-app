@@ -1279,3 +1279,13 @@
 - [x] Rediseñar sección de Library
 - [x] Verificar diseño responsive en móvil
 - [x] Mantener funcionalidad de carrito, checkout y autenticación
+
+### Rediseño Nutriser Shop - Estilo Farmacia del Ahorro
+- [x] Cambiar fondo a blanco/claro tipo tienda comercial digital
+- [x] Banner carrusel de ofertas/promociones en la parte superior
+- [x] Categorías con scroll horizontal e iconos circulares
+- [x] Servicios en scroll horizontal (no grid vertical)
+- [x] Paquetes especiales en scroll horizontal tipo tarjetas de oferta
+- [x] Productos (Farmacy) en scroll horizontal
+- [x] Diseño más dinámico y colorido tipo e-commerce
+- [x] Mantener funcionalidad completa (carrito, checkout, auth, PromoSplash)

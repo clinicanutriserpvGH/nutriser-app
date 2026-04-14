@@ -327,17 +327,18 @@ export default function Courses() {
             <span className="text-[#C5A55A] font-semibold text-sm uppercase tracking-widest">Nutriser Academy</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
-            Expertos <span className="text-[#C5A55A] italic">en Salud</span>
+            Formación Digital <span className="text-[#C5A55A] italic">en Salud</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8">
-            Aprende con nuestros expertos en salud y estética a través de videos, cursos y material exclusivo. Suscríbete para no perderte ningún contenido nuevo.
+            Accede a cursos, videos y material de apoyo creado por profesionales en nutrición, salud y medicina estética.
+            Un espacio de aprendizaje digital con contenido práctico, actualizado y exclusivo.
           </p>
           <Button
             onClick={() => setShowSubscribeModal(true)}
             className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
           >
             <Bell className="w-5 h-5" />
-            Suscríbete para recibir contenido de expertos
+            Suscríbete para acceder a contenido exclusivo
           </Button>
         </div>
       </section>
@@ -637,7 +638,7 @@ export default function Courses() {
           <div>
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-serif font-bold text-[#1A1A1A]">Cursos de Expertos en Salud</h2>
+                <h2 className="text-2xl font-serif font-bold text-[#1A1A1A]">Cursos y Contenido Especializado</h2>
                 <p className="text-gray-500 text-sm mt-1">{courses.length} curso{courses.length !== 1 ? "s" : ""} disponible{courses.length !== 1 ? "s" : ""}</p>
               </div>
             </div>
@@ -667,8 +668,8 @@ export default function Courses() {
                     </div>
                   </div>
                   <h3 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-3">Contenido en preparación</h3>
-                  <p className="text-gray-500">Nuestros expertos en salud y estética están preparando contenido exclusivo para ti.</p>
-                  <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete para recibir notificaciones de nuevo contenido, pertenecer a la comunidad Nutriser Academy y poder participar en el foro de sugerencias.</p>
+                  <p className="text-gray-500">Estamos preparando cursos, clases en video y recursos exclusivos para ti.</p>
+                  <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete para recibir notificaciones sobre nuevos contenidos y próximos lanzamientos de Nutriser Academy.</p>
                   <Button
                     onClick={() => setShowSubscribeModal(true)}
                     className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3.5 rounded-full font-semibold shadow-lg shadow-[#C5A55A]/20"
@@ -681,21 +682,21 @@ export default function Courses() {
                       <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">
                         <Bell className="w-4 h-4 text-[#C5A55A]" />
                       </div>
-                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Notificaciones instantáneas</p>
+                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Avisos de nuevo contenido</p>
                       <p className="text-xs text-gray-400">Recibe un aviso en el momento que nuestros expertos publiquen nuevo contenido.</p>
                     </div>
                     <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
                       <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">
                         <FileText className="w-4 h-4 text-[#C5A55A]" />
                       </div>
-                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Material de apoyo</p>
+                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Recursos descargables</p>
                       <p className="text-xs text-gray-400">Cada curso incluye documentos, guías y recursos descargables de nuestros expertos.</p>
                     </div>
                     <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
                       <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">
                         <MessageSquare className="w-4 h-4 text-[#C5A55A]" />
                       </div>
-                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Foro de la comunidad</p>
+                      <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Comunidad Nutriser</p>
                       <p className="text-xs text-gray-400">Al suscribirte puedes proponer temas y votar en el foro. Solo miembros de la comunidad pueden participar.</p>
                     </div>
                   </div>

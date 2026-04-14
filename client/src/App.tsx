@@ -186,7 +186,7 @@ function AppContent() {
       {splashState === "splash0" && (
         <Splash0Entry
           onEnterNutriserWeb={handleEnterSplash1}
-          onGoToWebsite={() => { window.location.href = 'https://www.nutriserpv.com'; }}
+          onGoToWebsite={() => { setSplashState('site'); }}
           onNavigate={handleNavigateFromSplash}
         />
       )}

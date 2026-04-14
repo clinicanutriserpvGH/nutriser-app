@@ -42,41 +42,10 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
     setTimeout(() => onEnterNutriserWeb(), 400);
   };
 
-  // Nutriser Web → navegar directamente al sitio web real
-  const handleNutriserWeb = (e?: React.MouseEvent<HTMLButtonElement>) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    console.log('handleNutriserWeb clicked');
-    
-    // Estrategia 1: window.location.href (más confiable)
-    try {
-      window.location.href = 'https://www.nutriserpv.com';
-      return;
-    } catch (e1) {
-      console.error('window.location.href failed:', e1);
-    }
-    
-    // Estrategia 2: window.open con _self
-    try {
-      const newWindow = window.open('https://www.nutriserpv.com', '_self');
-      if (newWindow) return;
-    } catch (e2) {
-      console.error('window.open failed:', e2);
-    }
-    
-    // Estrategia 3: crear un <a> tag dinámico
-    try {
-      const link = document.createElement('a');
-      link.href = 'https://www.nutriserpv.com';
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (e3) {
-      console.error('Dynamic link failed:', e3);
+  // Nutriser Web → navegar al sitio web (la página Home con hero, servicios, contacto)
+  const handleNutriserWeb = () => {
+    if (onGoToWebsite) {
+      onGoToWebsite();
     }
   };
 

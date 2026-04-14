@@ -1232,3 +1232,5 @@
 - [x] Detección de dispositivo: PC/Mac/Laptop → sitio web directo, móvil/tablet → Splash 0
 - [x] Nutriser Academy: sesión unificada con "Hola, [Nombre]" y botón iniciar sesión
 - [x] Nutriser Academy: botón Regresar corregido para ir a Splash 1
+
+- [x] Corregir botón Nutriser Web: navegar internamente al sitio web (setSplashState site) en lugar de URL externa

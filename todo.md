@@ -1214,3 +1214,21 @@
 - [x] Mejorar contraste de botones "Para mí" / "Para regalar" en modal de cupones (texto muy claro sobre fondo blanco)
 - [x] Corregir plantillas de correo de cupones para que se vean nombres y detalles correctamente
 - [x] Corregir plantillas de correo de paquetes para que se vea todo el texto correctamente
+
+## Sistema de Cuenta Unificada - Sesión Actual
+- [x] Corregir botón "Regresar" en todas las páginas internas para que vaya al Splash 1 (no Splash 0)
+- [x] Habilitar compra del libro en pre-compra (quitar bloqueo "Próximamente disponible")
+- [x] Extender schema DB: tabla shopCartItems para carrito persistente
+- [x] Crear procedimientos tRPC: cart.getItems, cart.addItem, cart.updateItem, cart.removeItem, cart.clear
+- [x] Crear hook usePatientAuth: maneja sesión unificada (localStorage), expone patient/login/logout/register
+- [x] Nutriser Shop: mostrar modal de login/registro antes de agregar al carrito o comprar
+- [x] Nutriser Shop: mostrar "Bienvenido, [Nombre]" y botón cerrar sesión cuando está logueado
+- [ ] Nutriser Shop: carrito persistente en DB (sincronizar con cuenta del usuario) [pendiente - carrito local funcional]
+- [x] Mis Tratamientos: si ya tiene sesión activa (mismo correo), entrar directo al login sin re-registrar
+- [x] Mis Tratamientos: consentimiento obligatorio siempre (no se puede saltar)
+- [x] Mis Tratamientos: detectar cuenta existente de Shop y no pedir registro nuevo
+- [x] Splash 0: reestructurar con Nutriser Home + Portal Salud + Nutriser Web
+- [x] Splash 1: reestructurar con Shop + Academy + Mis Tratamientos + login/sesión arriba
+- [x] Detección de dispositivo: PC/Mac/Laptop → sitio web directo, móvil/tablet → Splash 0
+- [x] Nutriser Academy: sesión unificada con "Hola, [Nombre]" y botón iniciar sesión
+- [x] Nutriser Academy: botón Regresar corregido para ir a Splash 1

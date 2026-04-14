@@ -17,6 +17,7 @@ import {
   ShieldCheck, Sparkles, Star, Tag, User, X,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -190,6 +191,9 @@ Establecimiento: Nutriser Aesthetic & Nutrition`;
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function MyTreatments() {
+  // Sesión unificada: si el usuario ya inició sesión en Shop/Academy/Splash1, se detecta aquí
+  const { patient: unifiedPatient, login: unifiedLogin, logout: unifiedLogout } = usePatientAuth();
+
   const [view, setView] = useState<"auth" | "consent" | "portal">("auth");
   const [authMode, setAuthMode] = useState<"login" | "register" | "register-form" | "forgot">("login");
   const [patient, setPatient] = useState<PatientSafe | null>(null);
@@ -228,12 +232,14 @@ export default function MyTreatments() {
   }, [verifySession.isSuccess, verifySession.isError]);
 
   // Persistir sesión en localStorage (sobrevive al cerrar el navegador)
+  // También detecta sesión unificada de Shop/Academy (misma clave "nutriser_patient")
   useEffect(() => {
     const stored = localStorage.getItem("nutriser_patient");
     if (stored) {
       try {
         const p = JSON.parse(stored);
         setPatient(p);
+        // Siempre mostrar consentimiento si no lo ha firmado, aunque ya esté logueado
         setView(p.consentAcceptedAt ? "portal" : "consent");
       } catch {
         localStorage.removeItem("nutriser_patient");
@@ -244,6 +250,8 @@ export default function MyTreatments() {
   const persistPatient = (p: PatientSafe) => {
     localStorage.setItem("nutriser_patient", JSON.stringify(p));
     setPatient(p);
+    // Sincronizar con el hook unificado para que Shop/Academy también detecten la sesión
+    unifiedLogin(p as any);
   };
 
   // ─── Queries ────────────────────────────────────────────────────────────────
@@ -438,7 +446,9 @@ export default function MyTreatments() {
           <div className="flex justify-start mb-6">
             <button
               onClick={() => {
-                sessionStorage.removeItem('nutriser_splash_seen');
+                sessionStorage.setItem('nutriser_splash_seen', '1');
+                sessionStorage.setItem('nutriser_chose_splash1', '1');
+                sessionStorage.setItem('nutriser_go_to_splash1', '1');
                 window.location.href = '/';
               }}
               className="flex items-center gap-2 bg-[#C5A55A] border-2 border-[#C5A55A] text-black px-4 py-2.5 rounded-full text-sm font-extrabold tracking-widest uppercase shadow-lg shadow-[#C5A55A]/30 hover:bg-[#B8944A] active:scale-95 transition-all duration-200"
@@ -724,7 +734,9 @@ export default function MyTreatments() {
             </button>
             <button
               onClick={() => {
-                sessionStorage.removeItem('nutriser_splash_seen');
+                sessionStorage.setItem('nutriser_splash_seen', '1');
+                sessionStorage.setItem('nutriser_chose_splash1', '1');
+                sessionStorage.setItem('nutriser_go_to_splash1', '1');
                 window.location.href = '/';
               }}
               className="flex items-center gap-1 text-white/40 hover:text-[#C5A55A] text-xs transition-colors"

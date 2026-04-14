@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSplash } from "@/contexts/SplashContext";
 import { trpc } from "@/lib/trpc";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
+import NutriserAuthModal from "@/components/NutriserAuthModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +55,10 @@ type Comment = {
 
 export default function Courses() {
   const { showSplash } = useSplash();
+
+  // Sesión unificada: detecta si el usuario ya inició sesión en Shop/Mis Tratamientos/Splash1
+  const { patient, isLoggedIn, logout } = usePatientAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
@@ -318,6 +324,13 @@ export default function Courses() {
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
       <BackToSplash />
 
+      {/* Modal de autenticación unificada */}
+      <NutriserAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        contextMessage="Inicia sesión para suscribirte y acceder a contenido exclusivo de Nutriser Academy."
+      />
+
       {/* Hero de Cursos */}
       <section className="relative bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] py-16 px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4rem)' }}>
 
@@ -333,13 +346,39 @@ export default function Courses() {
             Accede a cursos, videos y material de apoyo creado por profesionales en nutrición, salud y medicina estética.
             Un espacio de aprendizaje digital con contenido práctico, actualizado y exclusivo.
           </p>
-          <Button
-            onClick={() => setShowSubscribeModal(true)}
-            className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
-          >
-            <Bell className="w-5 h-5" />
-            Suscríbete para acceder a contenido exclusivo
-          </Button>
+          {/* Bienvenida con nombre del usuario o botón de login */}
+          {isLoggedIn && patient ? (
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2 bg-white/10 rounded-full px-5 py-2">
+                <span className="text-white/70 text-sm">Hola,</span>
+                <span className="text-[#C5A55A] font-semibold text-sm">{patient.name}</span>
+                <button onClick={logout} className="text-white/30 hover:text-white/60 text-xs ml-2 transition-colors">(Cerrar sesión)</button>
+              </div>
+              <Button
+                onClick={() => setShowSubscribeModal(true)}
+                className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
+              >
+                <Bell className="w-5 h-5" />
+                Suscríbete para acceder a contenido exclusivo
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3">
+              <Button
+                onClick={() => setShowSubscribeModal(true)}
+                className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
+              >
+                <Bell className="w-5 h-5" />
+                Suscríbete para acceder a contenido exclusivo
+              </Button>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="text-white/50 hover:text-[#C5A55A] text-sm transition-colors"
+              >
+                👤 Ya tengo cuenta — Iniciar sesión
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

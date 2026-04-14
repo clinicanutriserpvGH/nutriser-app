@@ -603,3 +603,31 @@ export const patientPhotos = mysqlTable("patientPhotos", {
 });
 export type PatientPhoto = typeof patientPhotos.$inferSelect;
 export type InsertPatientPhoto = typeof patientPhotos.$inferInsert;
+
+// ============================================================
+// CARRITO PERSISTENTE — Nutriser Shop
+// ============================================================
+/**
+ * Items del carrito de compras persistente por paciente.
+ * Se sincroniza con la cuenta del usuario para que el carrito
+ * se mantenga entre sesiones y dispositivos.
+ */
+export const shopCartItems = mysqlTable("shopCartItems", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull(), // FK a patientAccounts.id
+  itemKey: varchar("itemKey", { length: 100 }).notNull(), // ej: "svc-5", "ebook-2", "pkg-nutricion"
+  itemType: mysqlEnum("itemType", ["service", "product", "ebook", "package"]).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  price: int("price").default(0).notNull(), // precio en MXN (entero)
+  priceLabel: varchar("priceLabel", { length: 100 }),
+  imageUrl: text("imageUrl"),
+  category: varchar("category", { length: 100 }),
+  qty: int("qty").default(1).notNull(),
+  serviceId: int("serviceId"),
+  productId: int("productId"),
+  ebookId: int("ebookId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ShopCartItem = typeof shopCartItems.$inferSelect;
+export type InsertShopCartItem = typeof shopCartItems.$inferInsert;

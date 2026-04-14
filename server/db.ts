@@ -1274,3 +1274,42 @@ export async function lookupServiceByEmailAndCode(email: string, code: string) {
   ).limit(1);
   return results[0] ?? null;
 }
+
+// ============================================================
+// CARRITO PERSISTENTE — Nutriser Shop
+// ============================================================
+import { shopCartItems, InsertShopCartItem, ShopCartItem } from '../drizzle/schema';
+
+export async function getCartItemsByPatient(patientId: number): Promise<ShopCartItem[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(shopCartItems).where(eq(shopCartItems.patientId, patientId)).orderBy(shopCartItems.createdAt);
+}
+
+export async function upsertCartItem(patientId: number, data: Omit<InsertShopCartItem, 'patientId' | 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Check if item already exists
+  const existing = await db.select().from(shopCartItems)
+    .where(and(eq(shopCartItems.patientId, patientId), eq(shopCartItems.itemKey, data.itemKey)))
+    .limit(1);
+  if (existing.length > 0) {
+    await db.update(shopCartItems)
+      .set({ qty: data.qty, updatedAt: new Date() })
+      .where(and(eq(shopCartItems.patientId, patientId), eq(shopCartItems.itemKey, data.itemKey)));
+  } else {
+    await db.insert(shopCartItems).values({ ...data, patientId });
+  }
+}
+
+export async function removeCartItem(patientId: number, itemKey: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(shopCartItems).where(and(eq(shopCartItems.patientId, patientId), eq(shopCartItems.itemKey, itemKey)));
+}
+
+export async function clearCart(patientId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(shopCartItems).where(eq(shopCartItems.patientId, patientId));
+}

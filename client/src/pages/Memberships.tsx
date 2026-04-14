@@ -14,9 +14,11 @@ import {
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
   Search, ArrowLeft, Upload, BookOpen, FlaskConical,
 } from "lucide-react";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
+import NutriserAuthModal from "@/components/NutriserAuthModal";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type StoreTab = "tratamientos" | "farmacy" | "library";
@@ -114,19 +116,53 @@ export default function Memberships() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<StoreTab>("tratamientos");
 
-  // ─── Carrito unificado ──────────────────────────────────────────────────────
+  // ─── Sesión unificada ────────────────────────────────────────────────
+  const { patient, isLoggedIn, logout } = usePatientAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingCartItem, setPendingCartItem] = useState<Omit<CartItem, "qty"> | null>(null);
+
+  // Pre-llenar datos del checkout con la sesión activa
+  useEffect(() => {
+    if (patient) {
+      setBuyerName(patient.name || "");
+      setBuyerEmail(patient.email || "");
+      setBuyerPhone(patient.phone || "");
+    }
+  }, [patient?.id]);
+
+  // ─── Carrito unificado ──────────────────────────────────────────────
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
 
   const addToCart = (item: Omit<CartItem, "qty">) => {
+    // Requerir login antes de agregar al carrito
+    if (!isLoggedIn) {
+      setPendingCartItem(item);
+      setShowAuthModal(true);
+      return;
+    }
     setCart(prev => {
       const existing = prev.find(c => c.id === item.id);
       if (existing) return prev.map(c => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
       return [...prev, { ...item, qty: 1 }];
     });
     toast.success(`"${item.name}" agregado al carrito`, { duration: 2000 });
+  };
+
+  // Cuando el usuario se loguea, agregar el item pendiente al carrito
+  const handleAuthSuccess = (_patient?: any) => {
+    if (pendingCartItem) {
+      setCart(prev => {
+        const existing = prev.find(c => c.id === pendingCartItem.id);
+        if (existing) return prev.map(c => c.id === pendingCartItem.id ? { ...c, qty: c.qty + 1 } : c);
+        return [...prev, { ...pendingCartItem, qty: 1 }];
+      });
+      toast.success(`"${pendingCartItem.name}" agregado al carrito`, { duration: 2000 });
+      setPendingCartItem(null);
+    }
+    setShowAuthModal(false);
   };
   const removeFromCart = (id: string) => setCart(prev => prev.filter(c => c.id !== id));
   const updateQty = (id: string, delta: number) => {
@@ -264,10 +300,18 @@ export default function Memberships() {
     reader.readAsDataURL(proofFile);
   };
 
-  // ─── Render ─────────────────────────────────────────────────────────────────
+  // ─── Render ─────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#F5F1E8]" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 3.5rem)" }}>
       <BackToSplash />
+
+      {/* Modal de autenticación unificada */}
+      <NutriserAuthModal
+        isOpen={showAuthModal}
+        onClose={() => { setShowAuthModal(false); setPendingCartItem(null); }}
+        onSuccess={handleAuthSuccess}
+        contextMessage="Necesitas una cuenta para agregar productos al carrito y realizar compras."
+      />
 
       {/* ── Carrito flotante ── */}
       {cartCount > 0 && (
@@ -285,6 +329,21 @@ export default function Memberships() {
             <div>
               <p className="text-[#C5A55A] text-xs tracking-widest uppercase font-semibold">Aesthetic & Nutrition</p>
               <h1 className="text-2xl font-bold">Nutriser Shop</h1>
+              {/* Bienvenida con nombre del usuario */}
+              {isLoggedIn && patient ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-white/60">Hola,</span>
+                  <span className="text-xs text-[#C5A55A] font-semibold">{patient.name}</span>
+                  <button onClick={logout} className="text-[10px] text-white/30 hover:text-white/60 transition-colors ml-1">(Cerrar sesión)</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="mt-1 text-xs text-[#C5A55A] hover:text-[#D4B46A] transition-colors flex items-center gap-1"
+                >
+                  <span>👤</span> Iniciar sesión
+                </button>
+              )}
             </div>
             <button onClick={() => setCartOpen(true)} className="relative p-2">
               <ShoppingCart className="w-6 h-6 text-white" />

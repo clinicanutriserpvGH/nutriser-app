@@ -1,12 +1,14 @@
 /*
- * Splash0Entry — Pantalla de entrada principal
+ * Splash0Entry — Pantalla de entrada principal (Splash 0)
+ * Solo para móvil/tablet (PC va directo al sitio web)
  * Grid asimétrico:
- *   - Columna izquierda (40%): Nutriser Home (arriba) + Mis Tratamientos & Compras (abajo)
+ *   - Columna izquierda (40%): Nutriser Home (arriba) + Nutriser Web (abajo)
  *   - Columna derecha (60%): Portal de Salud Nutriser (grande, prominente)
  * En móvil: apilado vertical
+ * Al tocar "Nutriser Web" → abre Splash 1 (Shop + Academy + Mis Tratamientos + login)
  */
 import { useState } from "react";
-import { Home, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2, Sparkles, CalendarCheck, Moon, Sun } from "lucide-react";
+import { Home, Globe, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2, CalendarCheck, Moon, Sun } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
 const LOGO_URL =
@@ -17,11 +19,11 @@ const PORTAL_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-portal-mockup-v4-aU4KfCJ6CG97EN8YaBoxMa.png";
 const NUTRISER_ICON =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-silhouette-icon_f9345ac8.png";
-const TREATMENT_IMG =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-treatment-session_cebb9c5f.jpg";
+const NUTRISER_WEB_IMG =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-imac-web-T2sERsyMxZB3iGgxpbi7eW.webp";
 
 interface Splash0EntryProps {
-  onEnterNutriserWeb: () => void; // → muestra Splash 1
+  onEnterNutriserWeb: () => void; // → muestra Splash 1 (Shop + Academy + Mis Tratamientos)
   onNavigate?: (path: string) => void; // → navegar a ruta interna
 }
 
@@ -33,11 +35,22 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
     ? "linear-gradient(160deg, #FAF7F2 0%, #F5EFE4 50%, #FAF7F2 100%)"
     : "linear-gradient(160deg, #0f0f0f 0%, #1a1208 50%, #0f0f0f 100%)";
 
+  // Nutriser Home → ir al sitio web principal (Home.tsx)
+  const handleNutriserHome = () => {
+    setLeaving(true);
+    setTimeout(() => {
+      if (onNavigate) onNavigate('/nutriser-home');
+      else window.location.href = '/nutriser-home';
+    }, 400);
+  };
+
+  // Nutriser Web → abrir Splash 1 (hub de servicios)
   const handleNutriserWeb = () => {
     setLeaving(true);
     setTimeout(() => onEnterNutriserWeb(), 400);
   };
 
+  // Portal de Salud → app externa
   const handlePortalSalud = () => {
     setLeaving(true);
     setTimeout(() => {
@@ -94,12 +107,12 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
           {/* Móvil: columna única | Tablet (md+): 40% izquierda + 60% derecha */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4 lg:gap-5 mb-3 flex-1 min-h-0">
 
-            {/* ── Columna izquierda (40%) — Nutriser Home + Mis Tratamientos ── */}
+            {/* ── Columna izquierda (40%) — Nutriser Home + Nutriser Web ── */}
             <div className="md:col-span-2 flex flex-col gap-3 h-full">
 
               {/* Tarjeta 1: Nutriser Home */}
               <button
-                onClick={handleNutriserWeb}
+                onClick={handleNutriserHome}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
                 style={{ minHeight: "120px" }}
               >
@@ -127,32 +140,32 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                 </div>
               </button>
 
-              {/* Tarjeta 2: Mis Tratamientos & Compras */}
+              {/* Tarjeta 2: Nutriser Web (→ Splash 1) */}
               <button
-                onClick={() => handleNavigate('/mis-tratamientos')}
+                onClick={handleNutriserWeb}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
                 style={{ minHeight: "100px" }}
               >
                 <img
-                  src={TREATMENT_IMG}
-                  alt="Mis Tratamientos y Compras"
+                  src={NUTRISER_WEB_IMG}
+                  alt="Nutriser Web"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  style={{ objectPosition: "center 20%", objectFit: "cover" }}
+                  style={{ objectPosition: "center center", objectFit: "cover" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/85" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 text-left">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]/80 backdrop-blur-sm">
-                      <Sparkles className="w-4 h-4 text-black" />
+                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
+                      <Globe className="w-4 h-4 text-white" />
                     </div>
                   </div>
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-1 drop-shadow-lg text-white">
-                      Mis Tratamientos
+                      Nutriser Web
                     </h2>
-                    <p className="text-white/70 text-[11px] mb-2">Seguimiento a mis paquetes, cupones y tratamientos adquiridos</p>
+                    <p className="text-white/70 text-[11px] mb-2">Shop · Academy · Mis Tratamientos</p>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
-                      Acceder
+                      <Globe className="w-3 h-3" /> Explorar
                     </span>
                   </div>
                 </div>
@@ -316,8 +329,6 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
             </a>
 
           </div>
-
-
 
           {/* ── Pie ── */}
           <div className="flex items-center justify-between mt-2">

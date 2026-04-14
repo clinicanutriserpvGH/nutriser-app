@@ -30,6 +30,23 @@ import { SplashThemeProvider } from "@/contexts/SplashThemeContext";
 import { useState } from "react";
 import { useLocation } from "wouter";
 
+// ── Detección de dispositivo ────────────────────────────────────────────────
+// Retorna true si el usuario está en una computadora/laptop/Mac (NO móvil ni tablet)
+function isDesktopDevice(): boolean {
+  const ua = navigator.userAgent;
+  // Detectar móviles y tablets por User-Agent
+  const isMobileOrTablet = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet|touch/i.test(ua);
+  // También verificar por tamaño de pantalla como respaldo
+  // Pantallas >= 1024px de ancho sin touch se consideran desktop
+  const isLargeScreen = window.innerWidth >= 1024;
+  const hasTouchScreen = navigator.maxTouchPoints > 0;
+  // Es desktop si: NO es móvil/tablet por UA, Y (pantalla grande O sin touch)
+  if (isMobileOrTablet) return false;
+  // iPad en modo desktop puede tener UA de desktop, verificar touch
+  if (hasTouchScreen && !isLargeScreen) return false;
+  return true;
+}
+
 // Rutas que NUNCA muestran el splash
 const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/services", "/privacy-policy", "/delete-account", "/mis-tratamientos", "/nutriser-home"];
 
@@ -67,13 +84,13 @@ function Router() {
 }
 
 // Estado del splash:
-// "splash0" → mostrar Splash 0 (pantalla de entrada con 2 opciones)
-// "splash1" → mostrar Splash 1 (SplashSelector completo, tras elegir Nutriser Web)
+// "splash0" → mostrar Splash 0 (pantalla de entrada: Nutriser Home + Portal Salud + Nutriser Web)
+// "splash1" → mostrar Splash 1 (hub: Shop + Academy + Mis Tratamientos + login)
 // "site"    → mostrar el sitio principal (Home)
 type SplashState = "splash0" | "splash1" | "site";
 
 // Versión del splash — incrementar cuando cambie el diseño para forzar que todos vean el nuevo splash
-const SPLASH_VERSION = "v2";
+const SPLASH_VERSION = "v3";
 
 function AppContent() {
   const [location] = useLocation();
@@ -83,6 +100,12 @@ function AppContent() {
     if (isNoSplashRoute(location)) return "site";
     // Solo mostrar en "/"
     if (location !== "/") return "site";
+
+    // ── DETECCIÓN DE DISPOSITIVO ──────────────────────────────────────────
+    // Si es computadora/laptop/Mac → ir directo al sitio web (más formal)
+    if (isDesktopDevice()) {
+      return "site";
+    }
 
     // Si la versión del splash cambió, limpiar el estado guardado
     const savedVersion = sessionStorage.getItem("nutriser_splash_version");
@@ -99,14 +122,14 @@ function AppContent() {
       return "site";
     }
 
-    // Si hay bandera de ir directo al Splash 1 (ej: desde botón Regresar en Nutriser Shop)
+    // Si hay bandera de ir directo al Splash 1 (ej: desde botón Regresar en Nutriser Shop/Academy/Tratamientos)
     const goToSplash1 = sessionStorage.getItem("nutriser_go_to_splash1");
     if (goToSplash1) {
       sessionStorage.removeItem("nutriser_go_to_splash1");
       return "splash1";
     }
 
-    // Siempre mostrar Splash 0 al entrar a la página principal
+    // Móvil/tablet → Splash 0
     return "splash0";
   });
 
@@ -131,7 +154,7 @@ function AppContent() {
     window.location.href = path;
   };
 
-  // Volver al Splash 0 (usado por botones "Regresar" en páginas internas)
+  // Volver al Splash 0 (usado por botones "Regresar" en páginas internas cuando vienen de Splash 0)
   const handleShowSplash = () => {
     sessionStorage.removeItem("nutriser_splash_seen");
     sessionStorage.removeItem("nutriser_chose_splash1");
@@ -142,10 +165,11 @@ function AppContent() {
     }
   };
 
-  // Volver al Splash 1 (hub de Nutriser) desde el sitio principal
+  // Volver al Splash 1 (hub de Nutriser) — usado por Nutriser Shop, Academy y Mis Tratamientos
   const handleShowSplash1 = () => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
     sessionStorage.setItem("nutriser_chose_splash1", "1");
+    sessionStorage.setItem("nutriser_go_to_splash1", "1");
     if (location === "/") {
       setSplashState("splash1");
     } else {
@@ -158,12 +182,12 @@ function AppContent() {
     <SplashContext.Provider value={{ showSplash: handleShowSplash, showSplash1: handleShowSplash1 }}>
       <BackgroundMusic />
 
-      {/* Splash 0: pantalla de entrada con 2 opciones */}
+      {/* Splash 0: pantalla de entrada — Nutriser Home + Portal Salud + Nutriser Web */}
       {splashState === "splash0" && (
         <Splash0Entry onEnterNutriserWeb={handleEnterSplash1} onNavigate={handleNavigateFromSplash} />
       )}
 
-      {/* Splash 1: hub completo de Nutriser */}
+      {/* Splash 1: hub de servicios — Shop + Academy + Mis Tratamientos + login */}
       {splashState === "splash1" && (
         <SplashSelector
           onEnterSite={handleEnterSite}

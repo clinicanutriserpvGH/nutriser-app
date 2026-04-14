@@ -2292,5 +2292,55 @@ export const appRouter = router({
         };
       }),
   }),
+  // ══════════════════════════════════════════════════════════════════════
+  // CARRITO PERSISTENTE — Nutriser Shop
+  // ══════════════════════════════════════════════════════════════════════
+  cart: router({
+    // Obtener items del carrito del paciente
+    getItems: publicProcedure
+      .input(z.object({ patientId: z.number() }))
+      .query(async ({ input }) => {
+        const { getCartItemsByPatient } = await import('./db');
+        return await getCartItemsByPatient(input.patientId);
+      }),
+    // Agregar o actualizar item en el carrito
+    upsertItem: publicProcedure
+      .input(z.object({
+        patientId: z.number(),
+        itemKey: z.string(),
+        itemType: z.enum(['service', 'product', 'ebook', 'package']),
+        name: z.string(),
+        price: z.number(),
+        priceLabel: z.string().optional(),
+        imageUrl: z.string().optional(),
+        category: z.string().optional(),
+        qty: z.number().min(1).default(1),
+        serviceId: z.number().optional(),
+        productId: z.number().optional(),
+        ebookId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { upsertCartItem } = await import('./db');
+        const { patientId, ...data } = input;
+        await upsertCartItem(patientId, data as any);
+        return { success: true };
+      }),
+    // Eliminar item del carrito
+    removeItem: publicProcedure
+      .input(z.object({ patientId: z.number(), itemKey: z.string() }))
+      .mutation(async ({ input }) => {
+        const { removeCartItem } = await import('./db');
+        await removeCartItem(input.patientId, input.itemKey);
+        return { success: true };
+      }),
+    // Vaciar carrito completo
+    clearCart: publicProcedure
+      .input(z.object({ patientId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { clearCart } = await import('./db');
+        await clearCart(input.patientId);
+        return { success: true };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

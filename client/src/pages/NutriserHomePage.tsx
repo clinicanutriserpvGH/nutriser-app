@@ -152,7 +152,7 @@ export default function NutriserHomePage() {
               img={IMG_NUTRICION}
               icon={CalendarCheck}
               label="Tienda"
-              title="Paquetes Nutriser"
+              title="Nutriser Tratamientos"
               cta="Ver Paquetes"
               onClick={() => goTo("/memberships")}
               accent

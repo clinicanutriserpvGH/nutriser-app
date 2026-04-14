@@ -150,7 +150,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-1 drop-shadow-lg text-white">
                       Mis Tratamientos
                     </h2>
-                    <p className="text-white/70 text-[11px] mb-2">Paquetes, cupones y seguimiento adquiridos</p>
+                    <p className="text-white/70 text-[11px] mb-2">Seguimiento a mis paquetes, cupones y tratamientos adquiridos</p>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
                       Acceder
                     </span>

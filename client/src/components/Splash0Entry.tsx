@@ -85,7 +85,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                 Aesthetic &amp; Nutrition
               </p>
               <h1 className="text-white text-xs font-semibold tracking-wider uppercase leading-tight mt-0.5">
-                Soy Nutriser y Vivo Mejor
+                Bienvenido a Nutriser
               </h1>
             </div>
           </div>

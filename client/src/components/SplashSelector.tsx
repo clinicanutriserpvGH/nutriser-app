@@ -13,7 +13,7 @@ import { useSplashTheme } from "@/contexts/SplashThemeContext";
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 const CLINIC_IMG =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-mall-hub-24WMGfbpx5UmTi5DXECtgS.webp";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-shop-entrance-v4-HUPan3L87bBgmsrQt8NsWo.webp";
 const CLINIC_IMG2 =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-imac-web-T2sERsyMxZB3iGgxpbi7eW.webp";
 const PORTAL_IMG =

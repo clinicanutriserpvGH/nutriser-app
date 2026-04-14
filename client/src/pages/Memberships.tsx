@@ -121,14 +121,7 @@ export default function Memberships() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingCartItem, setPendingCartItem] = useState<Omit<CartItem, "qty"> | null>(null);
 
-  // Pre-llenar datos del checkout con la sesión activa
-  useEffect(() => {
-    if (patient) {
-      setBuyerName(patient.name || "");
-      setBuyerEmail(patient.email || "");
-      setBuyerPhone(patient.phone || "");
-    }
-  }, [patient?.id]);
+
 
   // ─── Carrito unificado ──────────────────────────────────────────────
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -200,6 +193,15 @@ export default function Memberships() {
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
+  // Pre-llenar datos del checkout con la sesión activa
+  useEffect(() => {
+    if (patient) {
+      setBuyerName(patient.name || "");
+      setBuyerEmail(patient.email || "");
+      setBuyerPhone((patient as any).phone || "");
+    }
+  }, [patient?.id]);
+
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successCode, setSuccessCode] = useState("");
@@ -671,8 +673,8 @@ export default function Memberships() {
                     <div className="flex flex-col gap-2">
                       <button onClick={() => addToCart({
                         id: `ebook-${ebook.id}`, name: ebook.title,
-                        price: parseInt(String(ebook.price).replace(/[^0-9]/g, "")) || 0,
-                        priceLabel: `${ebook.price} MXN`, imageUrl: ebook.coverUrl,
+                        price: (ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : (parseFloat(String(ebook.price)) || 0),
+                        priceLabel: `$${((ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : parseFloat(String(ebook.price))).toLocaleString("es-MX", { minimumFractionDigits: 0 })} MXN`, imageUrl: ebook.coverUrl,
                         category: "ebook", itemType: "ebook", ebookId: ebook.id,
                       })}
                         className="w-full flex items-center justify-center gap-2 border-2 border-[#C5A55A] text-[#C5A55A] font-bold py-3 rounded-xl hover:bg-[#C5A55A]/10 transition-all active:scale-95">
@@ -680,8 +682,8 @@ export default function Memberships() {
                       </button>
                       <button onClick={() => openCheckout({
                         id: `ebook-${ebook.id}`, name: ebook.title,
-                        price: parseInt(String(ebook.price).replace(/[^0-9]/g, "")) || 0,
-                        priceLabel: `${ebook.price} MXN`, qty: 1, imageUrl: ebook.coverUrl,
+                        price: (ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : (parseFloat(String(ebook.price)) || 0),
+                        priceLabel: `$${((ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : parseFloat(String(ebook.price))).toLocaleString("es-MX", { minimumFractionDigits: 0 })} MXN`, qty: 1, imageUrl: ebook.coverUrl,
                         category: "ebook", itemType: "ebook", ebookId: ebook.id,
                       })}
                         className="w-full flex items-center justify-center gap-2 bg-[#C5A55A] text-black font-bold py-3 rounded-xl hover:bg-[#B8963E] transition-all active:scale-95 shadow-md shadow-[#C5A55A]/30">
@@ -818,21 +820,35 @@ export default function Memberships() {
                   )}
                 </div>
                 {/* Datos del comprador */}
-                <div className="space-y-3">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tus datos</p>
-                  <div>
-                    <Label htmlFor="co-name" className="text-sm">Nombre completo *</Label>
-                    <Input id="co-name" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="Tu nombre completo" required className="mt-1" />
+                {isLoggedIn && patient ? (
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tus datos</p>
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-green-800">{patient.name}</p>
+                        <p className="text-xs text-green-700">{patient.email}</p>
+                        {(patient as any).phone && <p className="text-xs text-green-600">{(patient as any).phone}</p>}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="co-email" className="text-sm">Correo electrónico *</Label>
-                    <Input id="co-email" type="email" value={buyerEmail} onChange={e => setBuyerEmail(e.target.value)} placeholder="tu@email.com" required className="mt-1" />
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tus datos</p>
+                    <div>
+                      <Label htmlFor="co-name" className="text-sm">Nombre completo *</Label>
+                      <Input id="co-name" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="Tu nombre completo" required className="mt-1" />
+                    </div>
+                    <div>
+                      <Label htmlFor="co-email" className="text-sm">Correo electrónico *</Label>
+                      <Input id="co-email" type="email" value={buyerEmail} onChange={e => setBuyerEmail(e.target.value)} placeholder="tu@email.com" required className="mt-1" />
+                    </div>
+                    <div>
+                      <Label htmlFor="co-phone" className="text-sm">Teléfono *</Label>
+                      <Input id="co-phone" value={buyerPhone} onChange={e => setBuyerPhone(e.target.value)} placeholder="+52 322..." required className="mt-1" />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="co-phone" className="text-sm">Teléfono *</Label>
-                    <Input id="co-phone" value={buyerPhone} onChange={e => setBuyerPhone(e.target.value)} placeholder="+52 322..." required className="mt-1" />
-                  </div>
-                </div>
+                )}
                 {/* Datos bancarios */}
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
                   <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Datos para transferencia</p>

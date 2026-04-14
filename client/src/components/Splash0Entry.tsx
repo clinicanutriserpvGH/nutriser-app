@@ -285,8 +285,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
 
             {/* Correo */}
             <a
-              href="#"
-              onClick={e => { e.preventDefault(); window.location.href = 'mailto:clinicanutriserpv@gmail.com?subject=Consulta%20Nutriser'; }}
+              href="mailto:clinicanutriserpv@gmail.com?subject=Consulta%20Nutriser"
               className="flex flex-col items-center gap-1 group flex-shrink-0" aria-label="Enviar correo a Nutriser">
               <div className="w-11 h-11 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200"
                 style={isLight

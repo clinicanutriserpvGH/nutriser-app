@@ -24,10 +24,11 @@ const NUTRISER_WEB_IMG =
 
 interface Splash0EntryProps {
   onEnterNutriserWeb: () => void; // → muestra Splash 1 (Shop + Academy + Mis Tratamientos)
+  onGoToWebsite?: () => void; // → navega al sitio web externo nutriserpv.com
   onNavigate?: (path: string) => void; // → navegar a ruta interna
 }
 
-export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0EntryProps) {
+export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavigate }: Splash0EntryProps) {
   const [leaving, setLeaving] = useState(false);
   const { isLight, isAuto, toggleSplashTheme, resetToAuto } = useSplashTheme();
 
@@ -43,7 +44,11 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
 
   // Nutriser Web → navegar directamente al sitio web real
   const handleNutriserWeb = () => {
-    window.location.href = 'https://www.nutriserpv.com';
+    if (onGoToWebsite) {
+      onGoToWebsite();
+    } else {
+      window.location.href = 'https://www.nutriserpv.com';
+    }
   };
 
   // Portal de Salud → app externa

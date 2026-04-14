@@ -184,7 +184,11 @@ function AppContent() {
 
       {/* Splash 0: pantalla de entrada — Nutriser Home + Portal Salud + Nutriser Web */}
       {splashState === "splash0" && (
-        <Splash0Entry onEnterNutriserWeb={handleEnterSplash1} onNavigate={handleNavigateFromSplash} />
+        <Splash0Entry
+          onEnterNutriserWeb={handleEnterSplash1}
+          onGoToWebsite={() => { window.location.href = 'https://www.nutriserpv.com'; }}
+          onNavigate={handleNavigateFromSplash}
+        />
       )}
 
       {/* Splash 1: hub de servicios — Shop + Academy + Mis Tratamientos + login */}

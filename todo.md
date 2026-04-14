@@ -1297,3 +1297,7 @@
 - [x] Móvil/tableta: Mantener botón "Regresar" que lleva al Splash 0
 - [x] Móvil/tableta: En la tienda, botón "Regresar" lleva al Splash 1
 - [x] Detectar tipo de dispositivo (desktop vs móvil/tableta) con hook compartido useDeviceType
+
+### Corrección Navbar móvil - Solo botón Inicio en Home
+- [x] En móvil, sitio web (Home): solo mostrar botón "Inicio" (→ Splash 0), sin "Regresar"
+- [x] El botón "Regresar" solo aparece en páginas internas (tienda, cursos, etc.)

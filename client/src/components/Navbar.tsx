@@ -28,9 +28,11 @@ const navLinks = [
 interface NavbarProps {
   lightBg?: boolean;
   onShowSplash?: () => void;
+  /** Cuando es true (Home/sitio principal), en móvil solo muestra Inicio, sin Regresar */
+  isHome?: boolean;
 }
 
-export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
+export default function Navbar({ lightBg = false, onShowSplash, isHome = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [, navigate] = useLocation();
@@ -110,7 +112,7 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
             </div>
           )}
 
-          {/* ═══ MÓVIL/TABLETA: Botones Inicio + Regresar (a splashes) ═══ */}
+          {/* ═══ MÓVIL/TABLETA: En Home solo Inicio, en páginas internas Inicio + Regresar ═══ */}
           {!isDesktop && (
             <div className="hidden lg:flex items-center gap-2">
               <button
@@ -127,20 +129,22 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
                 </svg>
                 Inicio
               </button>
-              <button
-                onClick={handleRegresar}
-                title="Regresar al menú de Nutriser"
-                className={`flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase font-bold px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                  scrolled || lightBg
-                    ? "border-[#C5A55A]/30 text-[#C5A55A]/70 hover:bg-[#C5A55A]/10"
-                    : "border-white/20 text-white/60 hover:bg-white/10"
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 12H5M12 5l-7 7 7 7"/>
-                </svg>
-                Regresar
-              </button>
+              {!isHome && (
+                <button
+                  onClick={handleRegresar}
+                  title="Regresar al menú de Nutriser"
+                  className={`flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase font-bold px-3 py-1.5 rounded-full border transition-all duration-300 ${
+                    scrolled || lightBg
+                      ? "border-[#C5A55A]/30 text-[#C5A55A]/70 hover:bg-[#C5A55A]/10"
+                      : "border-white/20 text-white/60 hover:bg-white/10"
+                  }`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 12H5M12 5l-7 7 7 7"/>
+                  </svg>
+                  Regresar
+                </button>
+              )}
             </div>
           )}
 
@@ -199,7 +203,7 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
 
           {/* ═══ Mobile: Botones según dispositivo + Toggle ═══ */}
           <div className="lg:hidden flex items-center gap-1.5">
-            {/* MÓVIL/TABLETA: Inicio + Regresar a splashes */}
+            {/* MÓVIL/TABLETA: En Home solo Inicio, en páginas internas Inicio + Regresar */}
             {!isDesktop && (
               <>
                 <button
@@ -213,16 +217,18 @@ export default function Navbar({ lightBg = false, onShowSplash }: NavbarProps) {
                   </svg>
                   Inicio
                 </button>
-                <button
-                  onClick={handleRegresar}
-                  aria-label="Regresar al menú de Nutriser"
-                  className="flex items-center gap-1 text-[10px] tracking-widest uppercase font-extrabold px-2.5 py-2 rounded-full bg-[#C5A55A] text-black border-2 border-[#C5A55A] shadow-lg shadow-[#C5A55A]/30 active:scale-95 transition-all duration-200"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 12H5M12 5l-7 7 7 7"/>
-                  </svg>
-                  Regresar
-                </button>
+                {!isHome && (
+                  <button
+                    onClick={handleRegresar}
+                    aria-label="Regresar al menú de Nutriser"
+                    className="flex items-center gap-1 text-[10px] tracking-widest uppercase font-extrabold px-2.5 py-2 rounded-full bg-[#C5A55A] text-black border-2 border-[#C5A55A] shadow-lg shadow-[#C5A55A]/30 active:scale-95 transition-all duration-200"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5M12 5l-7 7 7 7"/>
+                    </svg>
+                    Regresar
+                  </button>
+                )}
               </>
             )}
 

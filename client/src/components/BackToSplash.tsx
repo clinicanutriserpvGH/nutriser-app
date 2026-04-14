@@ -22,12 +22,15 @@ interface BackToSplashProps {
   desktopBackTo?: string;
   /** Texto del botón Regresar en desktop */
   desktopBackLabel?: string;
+  /** Ruta de destino del botón Regresar en móvil (si se define, navega ahí en vez de Splash 1) */
+  mobileBackTo?: string;
 }
 
 export default function BackToSplash({
   hideHome = false,
   desktopBackTo = "/",
   desktopBackLabel = "Regresar",
+  mobileBackTo,
 }: BackToSplashProps) {
   const { showSplash, showSplash1 } = useSplash();
   const { isDesktop } = useDeviceType();
@@ -41,7 +44,11 @@ export default function BackToSplash({
   };
 
   const handleGoBack = () => {
-    showSplash1();
+    if (mobileBackTo) {
+      navigate(mobileBackTo);
+    } else {
+      showSplash1();
+    }
   };
 
   // ── Handlers para DESKTOP ──

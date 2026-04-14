@@ -1320,3 +1320,7 @@
 ### Correcciones tienda - Abril 14
 - [x] Banner carrusel de ofertas clickeable y lleva a comprar la promoción/paquete
 - [x] PromoSplash: X respeta zona segura del iPhone (safe-area-inset-top)
+
+### Bug navegación cupón desde tienda
+- [x] Botón Regresar en página del cupón regresa a la tienda cuando viene de ahí (usa sessionStorage flag + BackToSplash mobileBackTo)
+- [x] Banner carrusel clickeable navega al paquete correspondiente

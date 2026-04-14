@@ -4,10 +4,11 @@
  * URL: /cupon/:id
  */
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ArrowLeft, ArrowRight, Clock, Flame, AlertTriangle, Upload, CheckCircle, X, Tag } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { toast } from "sonner";
@@ -56,9 +57,31 @@ export default function CouponPage() {
     return "ok";
   };
 
+  // Detectar si el usuario viene de la tienda (/memberships)
+  const [cameFromStore] = useState(() => {
+    try {
+      const ref = document.referrer;
+      if (ref && ref.includes('/memberships')) return true;
+      // También revisar si hay un flag en sessionStorage
+      const fromStore = sessionStorage.getItem('nutriser_coupon_from_store');
+      if (fromStore) {
+        sessionStorage.removeItem('nutriser_coupon_from_store');
+        return true;
+      }
+    } catch {}
+    return false;
+  });
+  const [, navigate] = useLocation();
+
   const handleBack = () => {
-    sessionStorage.setItem("nutriser_scroll_to", "promociones");
-    window.location.replace("/");
+    if (cameFromStore) {
+      // Volver a la tienda
+      navigate('/memberships');
+    } else {
+      // Volver al home con scroll a promociones
+      sessionStorage.setItem("nutriser_scroll_to", "promociones");
+      window.location.replace("/");
+    }
   };
 
   // Enviar comprobante de pago
@@ -107,6 +130,13 @@ export default function CouponPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
+      {/* Navegación: si viene de la tienda, BackToSplash regresa a /memberships; si no, al home */}
+      <BackToSplash
+        hideHome={cameFromStore}
+        desktopBackTo={cameFromStore ? "/memberships" : "/"}
+        desktopBackLabel="Regresar"
+        mobileBackTo={cameFromStore ? "/memberships" : undefined}
+      />
       <Navbar />
 
       <main className="flex-1 py-12">
@@ -117,7 +147,7 @@ export default function CouponPage() {
             className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E] font-semibold mb-8 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            Ver todas las promociones
+            {cameFromStore ? "Volver a la tienda" : "Ver todas las promociones"}
           </button>
 
           {isLoading ? (

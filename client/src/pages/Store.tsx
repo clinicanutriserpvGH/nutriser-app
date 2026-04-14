@@ -1,5 +1,5 @@
 /*
- * Nutriser - Tienda de Productos
+ * Nutriser - Nutriser Farmacy
  * Design: "Lujo Orgánico" — catálogo de productos con modal de compra
  */
 import { useState, useEffect } from "react";
@@ -137,7 +137,7 @@ export default function Store() {
         <div className="max-w-6xl mx-auto">
 
           <h1 className="font-serif text-4xl lg:text-5xl text-white mb-3">
-            Tienda de <span className="text-[#C5A55A] italic">Productos</span>
+            Nutriser <span className="text-[#C5A55A] italic">Farmacy</span>
           </h1>
           <p className="text-white/60 text-lg max-w-xl">
             Complementa tus tratamientos con productos nutricionales y cosméticos de alta calidad.

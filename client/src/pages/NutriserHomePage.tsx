@@ -163,7 +163,7 @@ export default function NutriserHomePage() {
               img={IMG_TIENDA}
               icon={ShoppingBag}
               label="Tienda"
-              title="Tienda Productos"
+              title="Nutriser Farmacy"
               cta="Ver Tienda"
               onClick={() => goTo("/tienda")}
               imgPosition="center 50%"

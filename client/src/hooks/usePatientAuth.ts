@@ -50,8 +50,13 @@ function clearSession() {
 export function usePatientAuth() {
   const [patient, setPatient] = useState<PatientSession | null>(() => loadSession());
 
-  // Sincronizar cambios de localStorage entre pestañas
+  // Sincronizar cambios de localStorage entre pestañas y al montar
   useEffect(() => {
+    // Al montar, siempre leer del localStorage (por si cambió en otra pestaña o navegación)
+    const current = loadSession();
+    setPatient(current);
+
+    // Escuchar cambios de localStorage desde otras pestañas
     const handler = (e: StorageEvent) => {
       if (e.key === SESSION_KEY) {
         setPatient(e.newValue ? JSON.parse(e.newValue) : null);

@@ -44,10 +44,17 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
 
   // Nutriser Web → navegar directamente al sitio web real
   const handleNutriserWeb = () => {
-    if (onGoToWebsite) {
-      onGoToWebsite();
-    } else {
-      window.location.href = 'https://www.nutriserpv.com';
+    console.log('handleNutriserWeb called', { onGoToWebsite: !!onGoToWebsite });
+    try {
+      if (onGoToWebsite) {
+        onGoToWebsite();
+      } else {
+        window.location.href = 'https://www.nutriserpv.com';
+      }
+    } catch (e) {
+      console.error('Error navigating to website:', e);
+      // Fallback: intentar con window.open
+      window.open('https://www.nutriserpv.com', '_self');
     }
   };
 

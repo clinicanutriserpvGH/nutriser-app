@@ -18,8 +18,8 @@ const CLINIC_IMG2 =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-imac-web-T2sERsyMxZB3iGgxpbi7eW.webp";
 const PORTAL_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-portal-salud-v2_e87113cf.png";
-const IMG_TREATMENTS =
-  "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80";
+const IMG_ACADEMY =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy-hub-v2-B6bpVdHqtSSKFqZdAvvqyS.webp";
 
 /* ─── Props ─────────────────────────────────────────────────────────────── */
 interface SplashSelectorProps {
@@ -357,13 +357,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
           {/* ── Grid de widgets ── */}
 
-          {/* Fila 1: Nutriser Shop | Nutriser Web (1 col en móvil, 2 en desktop) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6 mb-4 flex-1 min-h-0">
-            {/* Widget Nutriser Shop (tienda/shop) — izquierda, prioridad */}
-            <div className="col-span-1 h-full">
-              <div
-                className="group relative w-full rounded-3xl overflow-hidden h-full"
-                style={{ minHeight: "220px" }}
+          {/* Fila 1: Nutriser Shop | Nutriser Web | Nutriser Academy (3 tarjetas) */}
+          <div className="flex flex-col gap-3 mb-4 flex-1 min-h-0">
+            {/* Widget Nutriser Shop (tienda unificada) */}
+            <div className="flex-1">
+              <button
+                onClick={() => handleNavigate('/memberships')}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
+                style={{ minHeight: "140px" }}
               >
                 <img src={CLINIC_IMG} alt="Nutriser Shop" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
@@ -376,26 +377,22 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                   </div>
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Shop</h2>
-                    <button
-                      onClick={() => handleNavigate('/nutriser-home')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 hover:scale-105 bg-[#C5A55A] text-black"
-                    >
-                      <ShoppingBag className="w-3 h-3" />
-                      Visitar
-                    </button>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
+                      <ShoppingBag className="w-3 h-3" /> Visitar
+                    </span>
                   </div>
                 </div>
-              </div>
+              </button>
             </div>
 
-            {/* Widget Nutriser Web (sitio web) — derecha */}
-            <div className="col-span-1 h-full">
+            {/* Widget Nutriser Web (sitio web) */}
+            <div className="flex-1">
               <button
                 onClick={() => handleEnterSite()}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
-                style={{ minHeight: "220px" }}
+                style={{ minHeight: "140px" }}
               >
-                <img src={CLINIC_IMG2} alt="Nutriser Home" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
+                <img src={CLINIC_IMG2} alt="Nutriser Web" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/75" />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
@@ -408,6 +405,32 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Web</h2>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
                       Entrar
+                    </span>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            {/* Widget Nutriser Academy */}
+            <div className="flex-1">
+              <button
+                onClick={() => handleNavigate('/courses')}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
+                style={{ minHeight: "140px" }}
+              >
+                <img src={IMG_ACADEMY} alt="Nutriser Academy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/80" />
+                <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
+                      <GraduationCap className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">Educación</span>
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Academy</h2>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
+                      <GraduationCap className="w-3 h-3" /> Ver cursos
                     </span>
                   </div>
                 </div>

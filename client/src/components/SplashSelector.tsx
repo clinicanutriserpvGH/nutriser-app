@@ -295,7 +295,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                   <User className="w-3 h-3" />
                   <span className="text-[11px] font-bold leading-tight">Iniciar sesión</span>
                 </div>
-                <span className="text-[8px] font-medium opacity-70 leading-tight">Para comprar y obtener beneficios</span>
+                <span className="text-[8px] font-medium opacity-70 leading-tight">Accede a tu cuenta Nutriser</span>
               </button>
             )}
 

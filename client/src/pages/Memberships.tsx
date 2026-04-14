@@ -429,7 +429,7 @@ export default function Memberships() {
           onClose={() => setShowPromoSplash(false)}
           onGoToCoupon={(promoId) => {
             setShowPromoSplash(false);
-            navigate(`/cupon/${promoId}`);
+            navigate(`/cupon/${promoId}?from=store`);
           }}
         />
       )}

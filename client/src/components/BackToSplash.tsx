@@ -63,7 +63,7 @@ export default function BackToSplash({
     return (
       <div
         style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
-        className="fixed left-4 z-50 flex items-center gap-2"
+        className="fixed left-4 z-[60] flex items-center gap-2"
       >
         <button
           onClick={handleDesktopBack}
@@ -83,7 +83,7 @@ export default function BackToSplash({
   return (
     <div
       style={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
-      className="fixed left-4 z-50 flex items-center gap-2"
+      className="fixed left-4 z-[60] flex items-center gap-2"
     >
       {/* Botón Inicio → Splash 0 (oculto si hideHome=true) */}
       {!hideHome && (

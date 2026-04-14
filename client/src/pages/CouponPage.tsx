@@ -57,17 +57,11 @@ export default function CouponPage() {
     return "ok";
   };
 
-  // Detectar si el usuario viene de la tienda (/memberships)
+  // Detectar si el usuario viene de la tienda (/memberships) via query param ?from=store
   const [cameFromStore] = useState(() => {
     try {
-      const ref = document.referrer;
-      if (ref && ref.includes('/memberships')) return true;
-      // También revisar si hay un flag en sessionStorage
-      const fromStore = sessionStorage.getItem('nutriser_coupon_from_store');
-      if (fromStore) {
-        sessionStorage.removeItem('nutriser_coupon_from_store');
-        return true;
-      }
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('from') === 'store';
     } catch {}
     return false;
   });

@@ -174,12 +174,11 @@ export default function PromoSplash({ onClose, onGoToCoupon }: PromoSplashProps)
 
   const handleAction = useCallback((promoId: number) => {
     sessionStorage.setItem("nutriser_promo_splash_shown", "1");
-    // Marcar que el usuario viene de la tienda para que CouponPage sepa regresar aquí
-    sessionStorage.setItem("nutriser_coupon_from_store", "1");
     if (onGoToCoupon) {
       onGoToCoupon(promoId);
+    } else {
+      handleClose();
     }
-    handleClose();
   }, [onGoToCoupon, handleClose]);
 
   const goNext = () => setCurrentIndex((i) => (i + 1) % activePromos.length);

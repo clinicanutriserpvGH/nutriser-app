@@ -1322,5 +1322,5 @@
 - [x] PromoSplash: X respeta zona segura del iPhone (safe-area-inset-top)
 
 ### Bug navegación cupón desde tienda
-- [x] Botón Regresar en página del cupón regresa a la tienda cuando viene de ahí (usa sessionStorage flag + BackToSplash mobileBackTo)
+- [x] Botón Regresar en página del cupón SIGUE yendo al Splash 1 — CORREGIDO: query param ?from=store + z-index z-[60] en BackToSplash
 - [x] Banner carrusel clickeable navega al paquete correspondiente

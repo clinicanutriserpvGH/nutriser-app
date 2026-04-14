@@ -1239,3 +1239,28 @@
 - [ ] Rediseñar Nutriser Shop: layout limpio con categorías en iconos circulares, secciones separadas
 - [ ] Agregar botón flotante de WhatsApp en la tienda
 - [ ] Corregir sesión unificada: iniciar sesión una vez y que funcione en Shop, Academy y Mis Tratamientos
+
+## Sistema de Banners Promocionales (Pop-ups de Ofertas)
+
+### Base de Datos
+- [ ] Crear tabla shop_promotions en drizzle/schema.ts (título, descripción, descuento, cupón, imagen, plantilla, activo, fechas)
+- [ ] Ejecutar migraciones con pnpm db:push
+
+### Backend (tRPC)
+- [ ] Crear procedimientos para CRUD de promociones (admin)
+- [ ] Crear procedimiento público para obtener promociones activas
+
+### Panel Admin
+- [ ] Crear sección de gestión de banners promocionales en admin
+- [ ] Formulario para crear/editar promoción con selector de plantilla
+- [ ] Vista previa de la plantilla seleccionada
+- [ ] Activar/desactivar promociones
+
+### Frontend - Pop-up en Tienda
+- [x] Crear componente PromoSplash con diseño tipo aparador publicitario
+- [x] Mostrar pop-up al entrar a Nutriser Shop si hay promociones activas
+- [x] Botón cerrar (X) y botón "Después" para cerrar
+- [x] No mostrar el mismo pop-up dos veces en la misma sesión (sessionStorage)
+- [x] Carrusel con flechas de navegación y dots indicadores
+- [x] Mostrar imagen, título, descripción, precios, timer de expiración y barra de progreso
+- [x] Test unitario para promotions.list endpoint

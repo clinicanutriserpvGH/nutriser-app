@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import BackToSplash from "@/components/BackToSplash";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
+import PromoSplash from "@/components/PromoSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -35,6 +36,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 export default function Store() {
   const { patient, isLoggedIn, logout } = usePatientAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showPromoSplash, setShowPromoSplash] = useState(true);
 
   const { data: products = [], isLoading } = trpc.products.list.useQuery();
 
@@ -180,6 +182,16 @@ export default function Store() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
+      {/* ─── Promo Splash (aparador de publicidad) ──────────────────── */}
+      {showPromoSplash && (
+        <PromoSplash
+          onClose={() => setShowPromoSplash(false)}
+          onGoToCoupon={() => {
+            setShowPromoSplash(false);
+            // Scroll to top and let user navigate
+          }}
+        />
+      )}
       {/* ─── Top Bar ─────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white shadow-sm">
         {/* Back + Brand + User */}

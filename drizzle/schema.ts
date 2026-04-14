@@ -631,3 +631,37 @@ export const shopCartItems = mysqlTable("shopCartItems", {
 });
 export type ShopCartItem = typeof shopCartItems.$inferSelect;
 export type InsertShopCartItem = typeof shopCartItems.$inferInsert;
+
+/**
+ * Banners promocionales para Nutriser Shop
+ * El administrador crea promociones con plantillas prediseñadas
+ * que aparecen como pop-up al entrar a la tienda
+ */
+export const shopPromotions = mysqlTable("shopPromotions", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  subtitle: varchar("subtitle", { length: 255 }),
+  description: text("description"),
+  discountText: varchar("discountText", { length: 100 }), // ej: "65%", "2x1", "$500 OFF"
+  couponCode: varchar("couponCode", { length: 50 }),
+  imageUrl: text("imageUrl"), // imagen principal del banner
+  ctaText: varchar("ctaText", { length: 100 }).default("Ver oferta"), // texto del botón CTA
+  ctaLink: varchar("ctaLink", { length: 500 }), // enlace del CTA (opcional)
+  template: mysqlEnum("template", [
+    "gold_elegant",     // Dorado elegante — estilo Nutriser
+    "vibrant_orange",   // Naranja vibrante — estilo Farmacias
+    "fresh_green",      // Verde fresco — salud/nutrición
+    "royal_purple",     // Púrpura real — premium/lujo
+    "clean_white",      // Blanco limpio — minimalista
+    "dark_luxury",      // Negro/dorado — lujo oscuro
+  ]).default("gold_elegant").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  isFullscreen: boolean("isFullscreen").default(false).notNull(), // true = pantalla completa, false = modal
+  priority: int("priority").default(0).notNull(), // mayor = más prioridad
+  startDate: timestamp("startDate"),
+  endDate: timestamp("endDate"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ShopPromotion = typeof shopPromotions.$inferSelect;
+export type InsertShopPromotion = typeof shopPromotions.$inferInsert;

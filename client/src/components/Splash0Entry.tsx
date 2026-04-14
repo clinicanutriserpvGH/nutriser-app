@@ -44,8 +44,11 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
 
   // Nutriser Web → navegar al sitio web (la página Home con hero, servicios, contacto)
   const handleNutriserWeb = () => {
+    console.log('[Nutriser Web] Botón presionado, onGoToWebsite:', !!onGoToWebsite);
     if (onGoToWebsite) {
       onGoToWebsite();
+    } else {
+      console.warn('[Nutriser Web] onGoToWebsite no está definido!');
     }
   };
 
@@ -110,18 +113,19 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
 
               {/* Tarjeta 1: Nutriser Home → Splash 1 (Shop + Academy + Mis Tratamientos) */}
               <button
-                onClick={handleNutriserHome}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
-                style={{ minHeight: "120px" }}
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNutriserHome(); }}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1 cursor-pointer"
+                style={{ minHeight: "120px", WebkitTapHighlightColor: "transparent" }}
               >
                 <img
                   src={CLINIC_IMG2}
                   alt="Nutriser Home"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   style={{ objectPosition: "35% 50%", objectFit: "cover" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-black/90" />
-                <div className="absolute inset-0 flex flex-col justify-between p-4 text-left">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-black/90 pointer-events-none" />
+                <div className="absolute inset-0 flex flex-col justify-between p-4 text-left pointer-events-none">
                   <div className="flex items-center gap-1.5">
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
                       <Home className="w-4 h-4 text-black" />
@@ -142,18 +146,18 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
               {/* Tarjeta 2: Nutriser Web → sitio web real */}
               <button
                 type="button"
-                onClick={handleNutriserWeb}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNutriserWeb(); }}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1 cursor-pointer"
-                style={{ minHeight: "100px", background: "none", border: "none", padding: 0 }}
+                style={{ minHeight: "100px", background: "none", border: "none", padding: 0, WebkitTapHighlightColor: "transparent" }}
               >
                 <img
                   src={NUTRISER_WEB_IMG}
                   alt="Nutriser Web"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   style={{ objectPosition: "center center", objectFit: "cover" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/85" />
-                <div className="absolute inset-0 flex flex-col justify-between p-4 text-left">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/85 pointer-events-none" />
+                <div className="absolute inset-0 flex flex-col justify-between p-4 text-left pointer-events-none">
                   <div className="flex items-center gap-1.5">
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
                       <Globe className="w-4 h-4 text-white" />
@@ -176,19 +180,20 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             {/* ── Columna derecha (60%) — Portal de Salud (grande) ── */}
             <div className="md:col-span-3 h-full">
               <button
-                onClick={handlePortalSalud}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
-                style={{ minHeight: "240px" }}
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePortalSalud(); }}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full cursor-pointer"
+                style={{ minHeight: "240px", WebkitTapHighlightColor: "transparent" }}
               >
                 <img
                   src={PORTAL_IMG}
                   alt="Portal de Salud Nutriser"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   style={{ objectPosition: "38% 40%" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/80" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/80 pointer-events-none" />
 
-                <div className="absolute inset-0 flex flex-col justify-between p-5 text-left">
+                <div className="absolute inset-0 flex flex-col justify-between p-5 text-left pointer-events-none">
                   <div className="flex items-center gap-2">
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.45)', border: '1.5px solid rgba(197,165,90,0.6)', backdropFilter: 'blur(4px)' }}>
                       <img

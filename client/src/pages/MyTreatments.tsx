@@ -192,11 +192,12 @@ Establecimiento: Nutriser Aesthetic & Nutrition`;
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function MyTreatments() {
   // Sesión unificada: si el usuario ya inició sesión en Shop/Academy/Splash1, se detecta aquí
-  const { patient: unifiedPatient, login: unifiedLogin, logout: unifiedLogout } = usePatientAuth();
+  const { patient: unifiedPatient, login: unifiedLogin, logout: unifiedLogout, updateSession } = usePatientAuth();
+  // Usar el patient del hook unificado como fuente única de verdad
+  const patient = unifiedPatient as PatientSafe | null;
 
   const [view, setView] = useState<"auth" | "consent" | "portal">("auth");
   const [authMode, setAuthMode] = useState<"login" | "register" | "register-form" | "forgot">("login");
-  const [patient, setPatient] = useState<PatientSafe | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState<"purchases" | "tracking" | "photos" | "consent">("purchases");
 
@@ -223,34 +224,29 @@ export default function MyTreatments() {
       setSessionChecked(true);
     } else if (verifySession.isError) {
       // El paciente ya no existe en la BD (fue eliminado por el admin)
-      localStorage.removeItem("nutriser_patient");
-      setPatient(null);
+      unifiedLogout();
       setView("auth");
       setSessionChecked(true);
       toast.error("Tu cuenta ya no está activa. Por favor crea una nueva cuenta.");
     }
   }, [verifySession.isSuccess, verifySession.isError]);
 
-  // Persistir sesión en localStorage (sobrevive al cerrar el navegador)
-  // También detecta sesión unificada de Shop/Academy (misma clave "nutriser_patient")
+  // Detectar sesión unificada al montar — si ya hay sesión, ir directo al portal o consentimiento
   useEffect(() => {
-    const stored = localStorage.getItem("nutriser_patient");
-    if (stored) {
-      try {
-        const p = JSON.parse(stored);
-        setPatient(p);
-        // Siempre mostrar consentimiento si no lo ha firmado, aunque ya esté logueado
-        setView(p.consentAcceptedAt ? "portal" : "consent");
-      } catch {
-        localStorage.removeItem("nutriser_patient");
-      }
+    if (patient) {
+      setView(patient.consentAcceptedAt ? "portal" : "consent");
     }
   }, []);
 
+  // Cuando el patient cambia (ej: login desde otro módulo), actualizar la vista
+  useEffect(() => {
+    if (patient && view === "auth") {
+      setView(patient.consentAcceptedAt ? "portal" : "consent");
+    }
+  }, [patient]);
+
   const persistPatient = (p: PatientSafe) => {
-    localStorage.setItem("nutriser_patient", JSON.stringify(p));
-    setPatient(p);
-    // Sincronizar con el hook unificado para que Shop/Academy también detecten la sesión
+    // Usar exclusivamente el hook unificado
     unifiedLogin(p as any);
   };
 
@@ -408,8 +404,7 @@ export default function MyTreatments() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("nutriser_patient");
-    setPatient(null);
+    unifiedLogout(); // Limpia localStorage y estado del hook unificado
     setView("auth");
     setAuthMode("login");
   };

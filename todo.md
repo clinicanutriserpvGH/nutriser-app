@@ -1234,3 +1234,8 @@
 - [x] Nutriser Academy: botón Regresar corregido para ir a Splash 1
 
 - [x] Corregir botón Nutriser Web: navegar internamente al sitio web (setSplashState site) en lugar de URL externa
+
+## Rediseño Nutriser Shop + Sesión Unificada
+- [ ] Rediseñar Nutriser Shop: layout limpio con categorías en iconos circulares, secciones separadas
+- [ ] Agregar botón flotante de WhatsApp en la tienda
+- [ ] Corregir sesión unificada: iniciar sesión una vez y que funcione en Shop, Academy y Mis Tratamientos

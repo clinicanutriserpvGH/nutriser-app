@@ -18,7 +18,7 @@ const IMG_TIENDA =
 const IMG_EBOOK =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-ebook-tablet_dccb4840.png";
 const IMG_ACADEMY =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy-hub-RM95f9aSJepvEwzwrfhvvE.webp";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy-hub-v2-B6bpVdHqtSSKFqZdAvvqyS.webp";
 
 
 

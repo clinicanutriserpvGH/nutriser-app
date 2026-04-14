@@ -19,6 +19,7 @@ import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
+import PromoSplash from "@/components/PromoSplash";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type StoreTab = "tratamientos" | "farmacy" | "library";
@@ -119,6 +120,7 @@ export default function Memberships() {
   // ─── Sesión unificada ────────────────────────────────────────────────
   const { patient, isLoggedIn, logout } = usePatientAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showPromoSplash, setShowPromoSplash] = useState(true);
   const [pendingCartItem, setPendingCartItem] = useState<Omit<CartItem, "qty"> | null>(null);
 
 
@@ -312,6 +314,17 @@ export default function Memberships() {
   return (
     <div className="min-h-screen bg-[#F5F1E8]" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 3.5rem)" }}>
       <BackToSplash hideHome />
+
+      {/* ── Pop-up de cupones/promociones ── */}
+      {showPromoSplash && (
+        <PromoSplash
+          onClose={() => setShowPromoSplash(false)}
+          onGoToCoupon={() => {
+            setShowPromoSplash(false);
+            navigate("/coupons");
+          }}
+        />
+      )}
 
       {/* Modal de autenticación unificada */}
       <NutriserAuthModal

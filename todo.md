@@ -1264,3 +1264,8 @@
 - [x] Carrusel con flechas de navegación y dots indicadores
 - [x] Mostrar imagen, título, descripción, precios, timer de expiración y barra de progreso
 - [x] Test unitario para promotions.list endpoint
+
+### Investigación - Pop-up no aparece en versión publicada
+- [x] Investigar por qué la tienda publicada muestra un diseño diferente al código local
+- [x] Verificar que Memberships.tsx (no Store.tsx) es la tienda real en /memberships
+- [x] Integrar PromoSplash en Memberships.tsx correctamente

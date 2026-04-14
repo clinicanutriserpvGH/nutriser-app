@@ -843,7 +843,7 @@ export const appRouter = router({
                     </div>
                     <a href="${loginUrl}" style="display:inline-block;background:#C5A55A;color:#fff;padding:14px 28px;text-decoration:none;border-radius:4px;font-weight:bold;margin:16px 0">Acceder a mi Ebook</a>
                     <p style="color:#888;font-size:12px">Guarda estas credenciales. Son personales e intransferibles. El contenido solo puede visualizarse en línea.</p>
-                    <p style="color:#888;font-size:12px">Nutriser Aesthetic &amp; Nutrition · Puerto Vallarta, Jalisco</p>
+                    <p style="color:#888;font-size:12px">Nutriser Aesthetic &amp; Nutrition</p>
                   </div>
                 `,
               });
@@ -1845,7 +1845,7 @@ export const appRouter = router({
           doc.fontSize(11).font('Helvetica-Bold').text('I. IDENTIFICACIÓN DE LAS PARTES');
           doc.moveDown(0.3);
           doc.fontSize(10).font('Helvetica').text(
-            'PRESTADOR DEL SERVICIO: Nutriser Aesthetic & Nutrition, establecimiento de salud y bienestar estético ubicado en Puerto Vallarta, Jalisco, México. Tel: +52 (322) 100-7799. Correo: clinicanutriserpv@gmail.com.',
+            'PRESTADOR DEL SERVICIO: Nutriser Aesthetic & Nutrition, establecimiento de salud y bienestar estético. Tel: +52 (322) 100-7799. Correo: clinicanutriserpv@gmail.com.',
             { align: 'justify' }
           );
           doc.moveDown(0.5);

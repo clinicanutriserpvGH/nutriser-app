@@ -246,7 +246,7 @@ export default function EbookReader() {
       {/* Footer */}
       <div className="bg-[#111] border-t border-[#C5A55A]/20 px-4 py-2 flex items-center justify-center">
         <p className="text-[#555] text-xs">
-          © Nutriser Aesthetic & Nutrition · Puerto Vallarta · Contenido protegido · Solo lectura en línea
+          © Nutriser Aesthetic & Nutrition · Contenido protegido · Solo lectura en línea
         </p>
       </div>
     </div>

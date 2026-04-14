@@ -472,7 +472,7 @@ export async function sendPasswordResetEmail(adminEmail: string, resetLink: stri
           
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="color: #999; font-size: 12px; text-align: center;">
-            Nutriser Aesthetic &amp; Nutrition — Puerto Vallarta
+            Nutriser Aesthetic &amp; Nutrition
           </p>
         </div>
       </body>
@@ -514,7 +514,7 @@ export async function sendPatientNotificationEmail(
           </div>
           <div style="background-color: #1A1A1A; padding: 20px 32px; text-align: center;">
             <p style="color: #888; font-size: 12px; margin: 0;">
-              Nutriser Aesthetic &amp; Nutrition — Puerto Vallarta, Jalisco, México<br/>
+              Nutriser Aesthetic &amp; Nutrition<br/>
               <a href="mailto:clinicanutriserpv@gmail.com" style="color: #C5A55A;">clinicanutriserpv@gmail.com</a>
             </p>
           </div>

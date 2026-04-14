@@ -158,8 +158,8 @@ export async function generateCouponImage(data: CouponImageData): Promise<Buffer
       <line x1="730" y1="365" x2="870" y2="365" stroke="${GOLD}" stroke-width="1" opacity="0.3"/>
       <line x1="930" y1="365" x2="1070" y2="365" stroke="${GOLD}" stroke-width="1" opacity="0.3"/>
       <circle cx="900" cy="365" r="4" fill="${GOLD}" opacity="0.5"/>
-      <!-- Puerto Vallarta -->
-      <text x="900" y="400" font-family="Noto Sans" font-size="14" fill="${GOLD}" text-anchor="middle" opacity="0.4">Puerto Vallarta, Jalisco</text>
+      <!-- Ubicación -->
+      <text x="900" y="400" font-family="Noto Sans" font-size="14" fill="${GOLD}" text-anchor="middle" opacity="0.4"></text>
       <!-- Corner decorations -->
       <rect x="640" y="20" width="40" height="2" fill="${GOLD}" opacity="0.3"/>
       <rect x="640" y="20" width="2" height="40" fill="${GOLD}" opacity="0.3"/>
@@ -210,7 +210,7 @@ export async function generateCouponImage(data: CouponImageData): Promise<Buffer
 
   <!-- Bottom footer -->
   <rect x="0" y="590" width="620" height="40" fill="${GOLD}" opacity="0.08"/>
-  <text x="300" y="615" font-family="Noto Sans" font-size="16" fill="${GOLD}" text-anchor="middle" opacity="0.9">nutriserpv.com · Puerto Vallarta, Jalisco</text>
+  <text x="300" y="615" font-family="Noto Sans" font-size="16" fill="${GOLD}" text-anchor="middle" opacity="0.9">nutriserpv.com · </text>
 
   <!-- Right panel -->
   ${rightPanel}

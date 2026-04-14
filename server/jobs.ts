@@ -97,7 +97,7 @@ export async function sendAppointmentReminders() {
               
               <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
                 <p>© 2026 Nutriser Aesthetic & Nutrition</p>
-                <p>Puerto Vallarta, Jalisco, México</p>
+                
               </div>
             </div>
           `,
@@ -198,7 +198,7 @@ export async function sendBirthdayGreetings() {
               
               <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
                 <p>© 2026 Nutriser Aesthetic & Nutrition</p>
-                <p>Puerto Vallarta, Jalisco, México</p>
+                
               </div>
             </div>
           `,

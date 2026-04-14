@@ -23,7 +23,7 @@ export default function Footer() {
             &copy; {year} Nutriser Soluciones. Todos los derechos reservados.
           </p>
           <div className="flex flex-col items-center md:items-end gap-1">
-            <p className="text-sm">Puerto Vallarta, Jalisco, México</p>
+            
             <div className="flex gap-3">
               <a
                 href="/privacy-policy"

@@ -34,7 +34,7 @@ export default function HeroSection() {
           <motion.img
             key={currentImg}
             src={HERO_IMAGES[currentImg]}
-            alt="Clínica Nutriser - Puerto Vallarta"
+            alt="Clínica Nutriser"
             className="absolute inset-0 w-full h-full object-cover"
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}

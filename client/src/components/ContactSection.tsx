@@ -129,7 +129,7 @@ export default function ContactSection() {
                     Emiliano Zapata #2
                   </p>
                   <p className="text-white/50">
-                    Col. Valentín Gómez Farías, Puerto Vallarta, Jalisco
+                    Col. Valentín Gómez Farías
                   </p>
                 </div>
               </a>
@@ -256,7 +256,7 @@ export default function ContactSection() {
                     <MapPin className="w-10 h-10 text-[#C5A55A]" />
                     <div className="text-center">
                       <p className="text-white font-semibold text-sm">Nutriser Aesthetic &amp; Nutrition</p>
-                      <p className="text-white/50 text-xs mt-1">Emiliano Zapata #2, Puerto Vallarta</p>
+                      <p className="text-white/50 text-xs mt-1">Emiliano Zapata #2</p>
                     </div>
                   </div>
                   {/* Overlay oscuro con instrucción de tap */}
@@ -266,7 +266,7 @@ export default function ContactSection() {
                     </div>
                     <div className="text-center">
                       <p className="text-white font-bold text-sm tracking-wide">Nutriser Aesthetic &amp; Nutrition</p>
-                      <p className="text-white/70 text-xs mt-0.5">Emiliano Zapata #2, Puerto Vallarta</p>
+                      <p className="text-white/70 text-xs mt-0.5">Emiliano Zapata #2</p>
                       <p className="text-[#C5A55A] text-xs mt-2 font-semibold tracking-wider uppercase">Toca para abrir en Maps</p>
                     </div>
                   </div>

@@ -268,7 +268,7 @@ export default function CouponPage() {
                     </button>
 
                     <p className="text-white/60 text-xs text-center mt-3">
-                      * Previa cita requerida · Válido en Nutriser Puerto Vallarta
+                      * Previa cita requerida · Válido en Nutriser Aesthetic &amp; Nutrition
                     </p>
                   </div>
                 </div>

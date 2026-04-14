@@ -67,7 +67,7 @@ type Photo = { id: number; patientId: number; treatmentId?: number | null; type:
 const CONSENT_TEXT = `CARTA DE CONSENTIMIENTO INFORMADO PARA TRATAMIENTOS ESTÉTICOS Y NUTRICIONALES
 
 ESTABLECIMIENTO: Nutriser Aesthetic & Nutrition
-DOMICILIO: Puerto Vallarta, Jalisco, México
+DOMICILIO: Nutriser Aesthetic & Nutrition
 TELÉFONO: +52 (322) 100-7799
 CORREO: clinicanutriserpv@gmail.com
 FECHA DE EMISIÓN: 31 de marzo de 2026
@@ -78,7 +78,7 @@ Documento elaborado en cumplimiento de la NOM-004-SSA3-2012 del Expediente Clín
 
 I. IDENTIFICACIÓN DE LAS PARTES
 
-PRESTADOR DEL SERVICIO: Nutriser Aesthetic & Nutrition, establecimiento de salud y bienestar estético ubicado en Puerto Vallarta, Jalisco, México, con atención por profesionales certificados en nutrición clínica y procedimientos estéticos no invasivos.
+PRESTADOR DEL SERVICIO: Nutriser Aesthetic & Nutrition, establecimiento de salud y bienestar estético, con atención por profesionales certificados en nutrición clínica y procedimientos estéticos no invasivos.
 
 PACIENTE: El/la suscrito/a, cuyos datos personales constan en el expediente clínico del establecimiento, y cuya firma al calce del presente documento acredita su identidad y conformidad.
 
@@ -186,7 +186,7 @@ Este documento tiene plena validez legal conforme a los artículos 1803 y 1834 d
 Firma del paciente: [FIRMA DIGITAL AL CALCE]
 Fecha de firma: [FECHA DE FIRMA]
 Nombre del profesional tratante: Equipo Nutriser Aesthetic & Nutrition
-Establecimiento: Nutriser Aesthetic & Nutrition, Puerto Vallarta, Jalisco, México`;
+Establecimiento: Nutriser Aesthetic & Nutrition`;
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function MyTreatments() {

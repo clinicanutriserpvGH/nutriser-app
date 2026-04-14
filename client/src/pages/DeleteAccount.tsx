@@ -74,7 +74,7 @@ export default function DeleteAccount() {
       </div>
 
       <p className="text-[#FAF7F2]/30 text-xs mt-8 text-center">
-        Nutriser Aesthetic &amp; Nutrition · Puerto Vallarta, Jalisco, México<br />
+        Nutriser Aesthetic &amp; Nutrition<br />
         clinicanutriserpv@gmail.com
       </p>
     </div>

@@ -43,18 +43,40 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
   };
 
   // Nutriser Web → navegar directamente al sitio web real
-  const handleNutriserWeb = () => {
-    console.log('handleNutriserWeb called', { onGoToWebsite: !!onGoToWebsite });
+  const handleNutriserWeb = (e?: React.MouseEvent<HTMLButtonElement>) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    console.log('handleNutriserWeb clicked');
+    
+    // Estrategia 1: window.location.href (más confiable)
     try {
-      if (onGoToWebsite) {
-        onGoToWebsite();
-      } else {
-        window.location.href = 'https://www.nutriserpv.com';
-      }
-    } catch (e) {
-      console.error('Error navigating to website:', e);
-      // Fallback: intentar con window.open
-      window.open('https://www.nutriserpv.com', '_self');
+      window.location.href = 'https://www.nutriserpv.com';
+      return;
+    } catch (e1) {
+      console.error('window.location.href failed:', e1);
+    }
+    
+    // Estrategia 2: window.open con _self
+    try {
+      const newWindow = window.open('https://www.nutriserpv.com', '_self');
+      if (newWindow) return;
+    } catch (e2) {
+      console.error('window.open failed:', e2);
+    }
+    
+    // Estrategia 3: crear un <a> tag dinámico
+    try {
+      const link = document.createElement('a');
+      link.href = 'https://www.nutriserpv.com';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e3) {
+      console.error('Dynamic link failed:', e3);
     }
   };
 
@@ -149,12 +171,11 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
               </button>
 
               {/* Tarjeta 2: Nutriser Web → sitio web real */}
-              <a
-                href="https://www.nutriserpv.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1 block"
-                style={{ minHeight: "100px" }}
+              <button
+                type="button"
+                onClick={handleNutriserWeb}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1 cursor-pointer"
+                style={{ minHeight: "100px", background: "none", border: "none", padding: 0 }}
               >
                 <img
                   src={NUTRISER_WEB_IMG}
@@ -179,7 +200,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                     </span>
                   </div>
                 </div>
-              </a>
+              </button>
 
             </div>
 

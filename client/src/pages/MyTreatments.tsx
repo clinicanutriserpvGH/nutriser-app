@@ -442,7 +442,7 @@ export default function MyTreatments() {
       <div className="min-h-full flex flex-col items-center justify-center px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 24px, 40px)' }}>
         <div className="w-full max-w-md">
 
-          {/* Botón Inicio — arriba, visible */}
+          {/* Botón Regresar — arriba, visible */}
           <div className="flex justify-start mb-6">
             <button
               onClick={() => {
@@ -453,8 +453,8 @@ export default function MyTreatments() {
               }}
               className="flex items-center gap-2 bg-[#C5A55A] border-2 border-[#C5A55A] text-black px-4 py-2.5 rounded-full text-sm font-extrabold tracking-widest uppercase shadow-lg shadow-[#C5A55A]/30 hover:bg-[#B8944A] active:scale-95 transition-all duration-200"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              INICIO
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+              REGRESAR
             </button>
           </div>
 
@@ -741,7 +741,7 @@ export default function MyTreatments() {
               }}
               className="flex items-center gap-1 text-white/40 hover:text-[#C5A55A] text-xs transition-colors"
             >
-              <ChevronLeft className="w-4 h-4" /> Inicio
+              <ChevronLeft className="w-4 h-4" /> Regresar
             </button>
             <button onClick={handleLogout} className="flex items-center gap-1.5 text-white/40 hover:text-white/70 text-xs transition-colors">
               <LogOut className="w-4 h-4" /> Salir

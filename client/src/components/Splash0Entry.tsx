@@ -89,8 +89,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
             isLight ? "bg-[#2a1f0a]/90 shadow-lg shadow-[#C5A55A]/10" : "bg-transparent"
           }`}>
             <div className="relative flex-shrink-0">
-              <div className="absolute inset-0 rounded-full bg-[#C5A55A]/30 blur-lg scale-150" />
-              <img src={LOGO_URL} alt="Nutriser" className="relative w-12 h-12 object-contain" />
+              <img src={LOGO_URL} alt="Nutriser" className="relative w-11 h-11 object-contain" />
             </div>
             <div className="w-px h-10 bg-[#C5A55A]/50 flex-shrink-0" />
             <div className="flex flex-col justify-center min-w-0 flex-1">
@@ -122,7 +121,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   style={{ objectPosition: "35% 50%", objectFit: "cover" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/15 to-black/80" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-black/90" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 text-left">
                   <div className="flex items-center gap-1.5">
                     <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
@@ -130,10 +129,10 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-1 drop-shadow-lg text-white">
+                    <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-1 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
                       Nutriser Home
                     </h2>
-                    <p className="text-white/70 text-[11px] mb-2">Shop · Academy · Mis Tratamientos</p>
+                    <p className="text-white/90 text-[11px] mb-2" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>Shop · Academy · Mis Tratamientos</p>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
                       Entrar
                     </span>

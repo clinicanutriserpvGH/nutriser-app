@@ -260,7 +260,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 Aesthetic &amp; Nutrition
               </p>
               <h1 className="text-white text-xs md:text-sm font-semibold tracking-wider uppercase leading-tight mt-0.5">
-                Nutriser Web
+                Bienvenido a Nutriser
               </h1>
             </div>
 

@@ -414,7 +414,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Widget Nutriser Academy */}
             <div className="flex-1">
               <button
-                onClick={() => handleNavigate('/courses')}
+                onClick={() => handleNavigate('/cursos')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
                 style={{ minHeight: "140px" }}
               >

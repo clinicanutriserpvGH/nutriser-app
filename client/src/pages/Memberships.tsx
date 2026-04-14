@@ -576,20 +576,32 @@ export default function Memberships() {
             <div className="max-w-sm mx-auto">
               <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-[#C5A55A]/20">
                 {ebook.coverUrl && (
-                  <div className="h-64 overflow-hidden">
-                    <img src={ebook.coverUrl} alt={ebook.title} className="w-full h-full object-cover" />
+                  <div className="bg-[#F5F1E8] flex items-center justify-center p-6">
+                    <img src={ebook.coverUrl} alt={ebook.title} className="max-h-72 w-auto object-contain rounded-lg shadow-lg" />
                   </div>
                 )}
                 <div className="p-5">
                   <p className="text-[10px] text-[#C5A55A] font-semibold uppercase tracking-wider mb-1">eBook Digital</p>
                   <h3 className="font-bold text-[#1A1A1A] text-xl leading-snug mb-2">{ebook.title}</h3>
                   {ebook.description && <p className="text-gray-500 text-sm leading-relaxed mb-4">{ebook.description}</p>}
-                  <div className="flex items-end gap-2 mb-1">
-                    <span className="text-3xl font-black text-[#C5A55A]">{ebook.price}</span>
-                    <span className="text-sm text-gray-400 mb-1">MXN</span>
-                  </div>
-                  {(ebook as any).presalePrice && (
-                    <p className="text-xs text-gray-400 line-through mb-3">{(ebook as any).presalePrice} MXN precio regular</p>
+                  {/* presalePrice = precio de pre-compra (promoción) | price = precio original */}
+                  {(ebook as any).presalePrice ? (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">Pre-compra</span>
+                        <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full">Precio especial</span>
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <span className="text-3xl font-black text-[#C5A55A]">${parseFloat(String((ebook as any).presalePrice)).toLocaleString("es-MX", { minimumFractionDigits: 0 })}</span>
+                        <span className="text-sm text-gray-400 mb-1">MXN</span>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-0.5">Precio regular: <span className="line-through">${parseFloat(String(ebook.price)).toLocaleString("es-MX", { minimumFractionDigits: 0 })} MXN</span></p>
+                    </div>
+                  ) : (
+                    <div className="flex items-end gap-2 mb-3">
+                      <span className="text-3xl font-black text-[#C5A55A]">${parseFloat(String(ebook.price)).toLocaleString("es-MX", { minimumFractionDigits: 0 })}</span>
+                      <span className="text-sm text-gray-400 mb-1">MXN</span>
+                    </div>
                   )}
                   {ebook.comingSoon ? (
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">

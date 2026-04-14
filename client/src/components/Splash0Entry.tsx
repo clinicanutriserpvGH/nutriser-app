@@ -136,10 +136,12 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                 </div>
               </button>
 
-              {/* Tarjeta 2: Nutriser Web → sitio web principal */}
-              <button
-                onClick={handleNutriserWeb}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1"
+              {/* Tarjeta 2: Nutriser Web → sitio web real */}
+              <a
+                href="https://www.nutriserpv.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1 block"
                 style={{ minHeight: "100px" }}
               >
                 <img
@@ -165,7 +167,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onNavigate }: Splash0
                     </span>
                   </div>
                 </div>
-              </button>
+              </a>
 
             </div>
 

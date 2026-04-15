@@ -1494,3 +1494,4 @@
 - [x] Reducir tamaño de los botones de navegación (INICIO/Regresar) para que no sean tan grandes
 - [x] Botón Regresar dentro de la tienda (al ver servicio/categoría) debe regresar a la tienda, no al Splash
 - [x] Tabletas (iPad) deben detectarse como móviles y mostrar Splashes, no el sitio web de escritorio
+- [ ] Optimizar layout del Splash 1 (hub) para que se vea bien en tabletas (iPad)

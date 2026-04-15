@@ -1227,7 +1227,7 @@ export default function Memberships() {
       {/* ══════════════════════════════════════════════════════════════════════
           BOTÓN FLOTANTE MONEDERO (estilo Farmacia del Ahorro)
       ══════════════════════════════════════════════════════════════════════ */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-1">
+      {!walletSheetOpen && <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-1">
         {/* Pulse ring */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80px] h-[80px] rounded-full bg-[#C5A55A]/30 animate-ping" style={{ animationDuration: '2s' }} />
         <button
@@ -1243,7 +1243,7 @@ export default function Memberships() {
           </div>
         </button>
         <span className="text-[10px] font-bold text-[#C5A55A] bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm border border-[#C5A55A]/20">Monedero</span>
-      </div>
+      </div>}
 
       {/* ══════════════════════════════════════════════════════════════════════
           BOTTOM SHEET — TARJETA MONEDERO

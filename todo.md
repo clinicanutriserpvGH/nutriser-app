@@ -1430,3 +1430,4 @@
 - [x] Botón flotante del monedero mejorado en Nutriser Shop (Memberships.tsx): 76px, pulso dorado, etiqueta, z-60
 - [x] Texto del modal de login actualizado: menciona monedero, cupones y beneficios
 - [x] Carrito flotante reposicionado para no solapar con botón del monedero
+- [x] Ocultar botón flotante del monedero cuando el bottom sheet está abierto (tapa el contenido)

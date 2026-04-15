@@ -1357,3 +1357,9 @@
 - [x] Causa raíz: múltiples instancias del hook useState no se sincronizaban entre modal y página
 - [x] Solución: PatientAuthStore singleton + useSyncExternalStore + listeners globales
 - [x] Verificado: sesión persiste después de recarga de página (localStorage funciona correctamente)
+
+## Correcciones Página del Cupón (reportado por usuario)
+- [x] Eliminar botones duplicados de REGRESAR en página del cupón — removido Navbar y botón inline, dejando solo BackToSplash
+- [x] Respetar safe area del iPhone — espaciador con env(safe-area-inset-top) + modal con paddingTop
+- [x] Auto-rellenar nombre, correo y teléfono en formulario "Adquirir cupón" si el usuario ya inició sesión (usePatientAuth)
+- [x] Cambiar placeholder "Tony Robles" por "Tu nombre completo"

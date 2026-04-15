@@ -6,23 +6,24 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ArrowLeft, ArrowRight, Clock, Flame, AlertTriangle, Upload, CheckCircle, X, Tag } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import { Loader2, ArrowRight, Clock, Flame, AlertTriangle, Upload, CheckCircle, Tag } from "lucide-react";
 import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 export default function CouponPage() {
   const params = useParams<{ id: string }>();
   const couponId = parseInt(params.id || "0", 10);
+  const { patient, isLoggedIn } = usePatientAuth();
 
   // Estados principales
   const [showPaymentFlow, setShowPaymentFlow] = useState(false);
 
-  // Estados del flujo de pago
+  // Estados del flujo de pago — se auto-rellenan si hay sesión activa
   const [payName, setPayName] = useState('');
   const [payPhone, setPayPhone] = useState('');
   const [payEmail, setPayEmail] = useState('');
@@ -32,6 +33,15 @@ export default function CouponPage() {
 
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
   const promo = promotions?.find((p) => p.id === couponId);
+
+  // Auto-rellenar datos del paciente logueado
+  useEffect(() => {
+    if (isLoggedIn && patient) {
+      if (!payName && patient.name) setPayName(patient.name);
+      if (!payEmail && patient.email) setPayEmail(patient.email);
+      if (!payPhone && patient.phone) setPayPhone(patient.phone);
+    }
+  }, [isLoggedIn, patient]);
 
   // Mutaciones
   const createServicePurchaseMutation = trpc.servicePurchases.create.useMutation({
@@ -69,10 +79,8 @@ export default function CouponPage() {
 
   const handleBack = () => {
     if (cameFromStore) {
-      // Volver a la tienda
       navigate('/memberships');
     } else {
-      // Volver al home con scroll a promociones
       sessionStorage.setItem("nutriser_scroll_to", "promociones");
       window.location.replace("/");
     }
@@ -124,25 +132,25 @@ export default function CouponPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
-      {/* Navegación: si viene de la tienda, BackToSplash regresa a /memberships; si no, al home */}
+      {/* Navegación única: BackToSplash (sin Navbar para evitar duplicados) */}
       <BackToSplash
         hideHome={cameFromStore}
         desktopBackTo={cameFromStore ? "/memberships" : "/"}
-        desktopBackLabel="Regresar"
+        desktopBackLabel={cameFromStore ? "Volver a la tienda" : "Regresar"}
         mobileBackTo={cameFromStore ? "/memberships" : undefined}
       />
-      <Navbar />
 
-      <main className="flex-1 py-12">
+      {/* Espaciador para safe area + BackToSplash */}
+      <div className="pt-20" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 5rem)' }} />
+
+      <main className="flex-1 pb-12">
         <div className="container max-w-2xl mx-auto px-4">
-          {/* Back button */}
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E] font-semibold mb-8 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            {cameFromStore ? "Volver a la tienda" : "Ver todas las promociones"}
-          </button>
+          {/* Header decorativo */}
+          <div className="text-center mb-2">
+            <div className="inline-block bg-[#C5A55A]/20 text-[#8B6914] text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest">
+              🎁 Oferta Exclusiva Nutriser
+            </div>
+          </div>
 
           {isLoading ? (
             <div className="flex justify-center py-24">
@@ -167,22 +175,17 @@ export default function CouponPage() {
 
             return (
               <div>
-                {/* Header */}
-                <div className="text-center mb-8">
-                  <div className="inline-block bg-[#C5A55A]/20 text-[#8B6914] text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest mb-4">
-                    🎁 Oferta Exclusiva Nutriser
-                  </div>
-                  <h1 className="font-serif text-3xl lg:text-4xl text-[#1A1A1A] leading-tight">
-                    {promo.title}
-                  </h1>
-                </div>
+                {/* Title */}
+                <h1 className="font-serif text-3xl lg:text-4xl text-[#1A1A1A] leading-tight text-center mb-6">
+                  {promo.title}
+                </h1>
 
                 {/* Coupon card */}
                 <div className="rounded-2xl overflow-hidden shadow-2xl border-2 border-[#C5A55A]/30">
                   {/* Urgency ribbon */}
                   {isCritical && !isSoldOut && (
                     <div className="bg-red-600 text-white text-center py-2 text-sm font-black tracking-widest uppercase flex items-center justify-center gap-2 animate-pulse">
-                      <Flame className="w-4 h-4" /> ¡ÚTIMOS CUPONES DISPONIBLES! <Flame className="w-4 h-4" />
+                      <Flame className="w-4 h-4" /> ¡ÚLTIMOS CUPONES DISPONIBLES! <Flame className="w-4 h-4" />
                     </div>
                   )}
                   {isLow && !isSoldOut && (
@@ -247,7 +250,6 @@ export default function CouponPage() {
                             </div>
                           )}
                         </div>
-
                       </div>
                     )}
 
@@ -308,13 +310,12 @@ export default function CouponPage() {
                   </button>
                 </div>
 
-
-
                 {/* ═══════════════════════════════════════════════════════
                      MODAL: PAGO CON COMPROBANTE + CÓDIGO EXTRA
                     ═══════════════════════════════════════════════════════ */}
                 {showPaymentFlow && (
-                  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto">
+                  <div className="fixed inset-0 bg-black/60 flex items-start justify-center z-[70] p-4 overflow-y-auto"
+                       style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>
                     <div className="bg-white rounded-2xl max-w-md w-full p-6 my-4 shadow-2xl">
                       <div className="flex justify-between items-center mb-4">
                         <h2 className="font-serif text-xl font-bold text-[#1A1A1A]">💳 Adquirir cupón</h2>
@@ -342,11 +343,11 @@ export default function CouponPage() {
                             </div>
                           </div>
 
-                          {/* Datos del cliente */}
+                          {/* Datos del cliente — auto-rellenados si hay sesión */}
                           <div className="space-y-3 mb-4">
                             <div>
                               <label className="text-xs font-semibold text-[#1A1A1A] mb-1 block">Nombre completo *</label>
-                              <Input placeholder="Tony Robles" value={payName} onChange={e => setPayName(e.target.value)} className="text-[#1A1A1A] placeholder:text-gray-400" />
+                              <Input placeholder="Tu nombre completo" value={payName} onChange={e => setPayName(e.target.value)} className="text-[#1A1A1A] placeholder:text-gray-400" />
                             </div>
                             <div>
                               <label className="text-xs font-semibold text-[#1A1A1A] mb-1 block">Correo electrónico *</label>

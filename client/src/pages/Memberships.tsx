@@ -446,6 +446,14 @@ export default function Memberships() {
             setShowPromoSplash(false);
             navigate(`/cupon/${promoId}?from=store`);
           }}
+          onOpenWallet={() => {
+            setShowPromoSplash(false);
+            if (isLoggedIn) {
+              setWalletSheetOpen(true);
+            } else {
+              setShowAuthModal(true);
+            }
+          }}
         />
       )}
 
@@ -1303,102 +1311,110 @@ export default function Memberships() {
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-gray-300" />
             </div>
-            {/* Título */}
-            <h2 className="text-center text-xl font-bold text-gray-900 pb-3">Tu Monedero Nutriser</h2>
+            {/* Logo grande + título */}
+            <div className="text-center pb-3">
+              <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-icon-1024_dccbcd3f.png" alt="Nutriser" className="w-28 h-auto object-contain mx-auto mb-1" />
+              <h2 className="text-lg font-bold text-gray-900">Tu Monedero Nutriser</h2>
+            </div>
             <div className="border-t border-gray-100" />
 
-            {/* ── Tarjeta estilo Farmacias del Ahorro ── */}
+            {/* ── Tarjeta rediseñada estilo premium ── */}
             <div className="px-5 pt-5 pb-3">
-              <div className="relative bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)] border border-gray-100 overflow-hidden">
-                {/* Decorative corner arc */}
-                <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full bg-gradient-to-tr from-[#C5A55A]/15 to-[#C5A55A]/5" />
-                <div className="absolute -bottom-3 -left-3 w-24 h-24 rounded-full bg-gradient-to-tr from-[#C5A55A]/10 to-transparent" />
+              <div className="relative bg-gradient-to-br from-[#1A1A1A] via-[#222222] to-[#1A1A1A] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden border border-[#C5A55A]/25">
+                {/* Gold line at top */}
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#C5A55A] to-transparent" />
+                {/* Decorative gold accents */}
+                <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-[#C5A55A]/8 to-transparent rounded-bl-full" />
+                <div className="absolute bottom-0 left-0 w-28 h-28 bg-gradient-to-tr from-[#C5A55A]/6 to-transparent rounded-tr-full" />
 
-                {/* Card header */}
-                <div className="px-5 pt-4 pb-2 flex items-center justify-between relative z-10">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#C5A55A] font-black text-sm tracking-wider uppercase">Monedero Nutriser</span>
-                    <img src={LOGO_URL} alt="" className="w-7 h-7 object-contain" />
-                  </div>
-                  <div className="bg-emerald-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full tracking-wider uppercase">
-                    Activa
-                  </div>
-                </div>
-
-                {/* QR Code section */}
-                <div className="px-5 py-4 flex flex-col items-center relative z-10">
-                  {walletData ? (
-                    <>
-                      <div className="bg-white rounded-xl p-3 shadow-sm mb-3">
-                        <QRCodeSVG
-                          value={`nutriser://wallet/${walletData.walletNumber || '0000000000'}`}
-                          size={140}
-                          level="H"
-                          includeMargin={false}
-                          bgColor="#FFFFFF"
-                          fgColor="#1A1A1A"
-                          imageSettings={{
-                            src: LOGO_URL,
-                            x: undefined,
-                            y: undefined,
-                            height: 28,
-                            width: 28,
-                            excavate: true,
-                          }}
-                        />
-                      </div>
-                      <p className="text-[10px] text-gray-400 mb-2">Presenta este código en caja</p>
-                      <p className="font-bold text-gray-800 text-lg tracking-wide uppercase">
-                        {patient?.name}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-gray-500 text-sm font-mono tracking-widest">
-                          {walletData.walletNumber}
-                        </p>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(walletData.walletNumber || "");
-                            toast.success("Número copiado");
-                          }}
-                          className="p-1 rounded hover:bg-gray-100 transition-colors"
-                        >
-                          <Copy className="w-3.5 h-3.5 text-[#C5A55A]" />
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="py-6 text-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-[#C5A55A] mx-auto mb-2" />
-                      <p className="text-gray-400 text-sm">Cargando tu monedero...</p>
+                <div className="relative z-10 p-5">
+                  {/* Card header */}
+                  <div className="flex items-start justify-between mb-1">
+                    <div>
+                      <h3 className="text-[#C5A55A] font-black text-sm tracking-widest uppercase">Monedero Nutriser</h3>
+                      <p className="text-gray-500 text-[10px] tracking-wide">aesthetic & nutrition</p>
                     </div>
-                  )}
-                </div>
+                    <div className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase border border-emerald-500/30">
+                      Activa
+                    </div>
+                  </div>
 
-                {/* Card footer */}
-                <div className="px-5 pb-4 flex items-center justify-between relative z-10">
-                  <img src={LOGO_URL} alt="Nutriser" className="h-9 object-contain opacity-50" />
-                  <div className="text-right">
-                    <p className="text-[10px] text-gray-400 font-semibold tracking-wider uppercase">Aesthetic & Nutrition</p>
+                  {/* Gold separator */}
+                  <div className="h-px bg-gradient-to-r from-[#C5A55A]/40 via-[#C5A55A]/20 to-transparent my-3" />
+
+                  {/* Wallet number */}
+                  <div className="mb-3">
+                    <p className="text-gray-500 text-[10px] uppercase tracking-widest font-semibold mb-0.5">Número de tarjeta</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-white text-lg font-mono font-bold tracking-[0.2em]">
+                        {walletData?.walletNumber || '---'}
+                      </p>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(walletData?.walletNumber || "");
+                          toast.success("Número copiado");
+                        }}
+                        className="p-1 rounded hover:bg-white/10 transition-colors"
+                      >
+                        <Copy className="w-3.5 h-3.5 text-[#C5A55A]" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Titular + Saldo */}
+                  <div className="flex items-end justify-between mb-4">
+                    <div>
+                      <p className="text-gray-500 text-[10px] uppercase tracking-widest font-semibold">Titular</p>
+                      <p className="text-white font-bold text-sm">{patient?.name || '---'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-gray-500 text-[10px] uppercase tracking-widest font-semibold">Saldo disponible</p>
+                      <p className="text-[#C5A55A] font-black text-2xl">${(walletBalance / 100).toFixed(2)}</p>
+                    </div>
+                  </div>
+
+                  {/* QR Code section */}
+                  <div className="flex flex-col items-center">
+                    {walletData ? (
+                      <>
+                        <div className="bg-white rounded-2xl p-3.5 shadow-lg">
+                          <QRCodeSVG
+                            value={`nutriser://wallet/${walletData.walletNumber || '0000000000'}`}
+                            size={130}
+                            level="H"
+                            includeMargin={false}
+                            bgColor="#FFFFFF"
+                            fgColor="#1A1A1A"
+                            imageSettings={{
+                              src: LOGO_URL,
+                              x: undefined,
+                              y: undefined,
+                              height: 26,
+                              width: 26,
+                              excavate: true,
+                            }}
+                          />
+                        </div>
+                        <p className="text-gray-500 text-[10px] mt-2">Escanea para acceder a tu monedero</p>
+                      </>
+                    ) : (
+                      <div className="py-6 text-center">
+                        <Loader2 className="w-8 h-8 animate-spin text-[#C5A55A] mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">Cargando tu monedero...</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Logo watermark */}
+                  <div className="flex justify-end mt-2">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-icon-1024_dccbcd3f.png" alt="" className="w-16 h-auto object-contain opacity-30" />
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Saldo section */}
-            <div className="flex items-center justify-center gap-6 px-5 pb-3">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-[#C5A55A] flex items-center justify-center shadow-sm">
-                  <span className="text-white text-[10px] font-black">e$</span>
-                </div>
-                <span className="font-black text-[#C5A55A] text-xl">{(walletBalance / 100).toFixed(0)}</span>
               </div>
             </div>
 
             {/* Botón Ir a mi monedero */}
-            <div className="px-5 pb-8">
+            <div className="px-5 pb-8 pt-2">
               <button
                 onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }}
                 className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-2xl text-base hover:bg-[#2D2D2D] active:scale-[0.98] transition-all shadow-lg"

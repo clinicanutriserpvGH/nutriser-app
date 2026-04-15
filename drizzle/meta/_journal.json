@@ -274,6 +274,13 @@
       "when": 1776218843215,
       "tag": "0038_light_gunslinger",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "5",
+      "when": 1776237185404,
+      "tag": "0039_cheerful_dragon_man",
+      "breakpoints": true
     }
   ]
 }

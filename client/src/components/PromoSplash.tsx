@@ -1,12 +1,16 @@
 /*
  * PromoSplash — Pop-up de publicidad al entrar a Nutriser Shop
- * Muestra automáticamente los cupones/promociones activos de la cuponera.
+ * Muestra automáticamente los cupones/promociones activos de la cuponera
+ * + una tarjeta promocional del Monedero Nutriser invitando a crear cuenta.
  * Diseño tipo aparador de publicidad con carrusel de ofertas.
  * El usuario puede cerrar con X o "Después" y seguir navegando.
  */
 import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
-import { X, Gift, Clock, ChevronLeft, ChevronRight, Flame } from "lucide-react";
+import { X, Gift, Clock, ChevronLeft, ChevronRight, Flame, Wallet, Star, Percent, Sparkles } from "lucide-react";
+
+const MONEDERO_BANNER_URL =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-monedero-promo-banner-v3_ebc4e9af.png";
 
 function useCountdown(expiresAt: Date | string | null | undefined) {
   const [timeLeft, setTimeLeft] = useState("");
@@ -30,7 +34,8 @@ function useCountdown(expiresAt: Date | string | null | undefined) {
 
 interface PromoSplashProps {
   onClose: () => void;
-  onGoToCoupon?: (promoId: number) => void; // Navegar al cupón específico
+  onGoToCoupon?: (promoId: number) => void;
+  onOpenWallet?: () => void; // Para abrir el monedero o mostrar auth
 }
 
 interface Promo {
@@ -149,14 +154,78 @@ function PromoCard({
   );
 }
 
-export default function PromoSplash({ onClose, onGoToCoupon }: PromoSplashProps) {
+/* ── Tarjeta promocional del Monedero Nutriser ── */
+function MonederoPromoCard({ onAction }: { onAction: () => void }) {
+  return (
+    <div className="relative w-full flex-shrink-0">
+      <div className="relative h-[55vh] min-h-[380px] max-h-[520px] w-full overflow-hidden rounded-2xl bg-gradient-to-b from-[#1A1A1A] via-[#222222] to-[#1A1A1A]">
+        {/* Decorative gold accents */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-[#C5A55A]/10 to-transparent rounded-bl-full" />
+        <div className="absolute bottom-0 left-0 w-36 h-36 bg-gradient-to-tr from-[#C5A55A]/8 to-transparent rounded-tr-full" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#C5A55A]/60 to-transparent" />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 py-8">
+          {/* Card image */}
+          <div className="w-full max-w-[260px] mb-5">
+            <img
+              src={MONEDERO_BANNER_URL}
+              alt="Monedero Nutriser"
+              className="w-full h-auto rounded-xl shadow-[0_8px_30px_rgba(197,165,90,0.2)]"
+            />
+          </div>
+
+          {/* Title */}
+          <h3 className="text-[#C5A55A] font-black text-xl text-center leading-tight mb-2">
+            Crea tu Monedero Nutriser
+          </h3>
+          <p className="text-gray-400 text-sm text-center leading-relaxed mb-5 max-w-[280px]">
+            Regístrate y obtén tu tarjeta digital con beneficios exclusivos
+          </p>
+
+          {/* Benefits mini-list */}
+          <div className="space-y-2 mb-6 w-full max-w-[280px]">
+            {[
+              { icon: Percent, text: "1% de cashback en cada compra" },
+              { icon: Star, text: "Planes de lealtad y recompensas" },
+              { icon: Sparkles, text: "3 consultas y la 4ta es GRATIS" },
+              { icon: Wallet, text: "Saldo electrónico para usar en tienda" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-full bg-[#C5A55A]/15 flex items-center justify-center flex-shrink-0">
+                  <item.icon className="w-3 h-3 text-[#C5A55A]" />
+                </div>
+                <span className="text-white/80 text-xs">{item.text}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA Button */}
+          <button
+            onClick={onAction}
+            className="w-full max-w-[280px] bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#C5A55A]/30 transition-all active:scale-[0.98]"
+          >
+            <Wallet className="w-5 h-5" />
+            ¡Crear mi Monedero!
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: PromoSplashProps) {
   const { data: promotions = [] } = trpc.promotions.list.useQuery();
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
 
-  // Don't show if no active promotions or already dismissed
-  const shouldShow = activePromos.length > 0 && !dismissed;
+  // Total slides = active promos + 1 monedero promo card (always at the end)
+  const totalSlides = activePromos.length + 1;
+  const isMonederoSlide = currentIndex >= activePromos.length;
+
+  // Show if there are promos OR we always show the monedero card
+  const shouldShow = totalSlides > 0 && !dismissed;
 
   // Check if already shown in this session
   useEffect(() => {
@@ -181,8 +250,16 @@ export default function PromoSplash({ onClose, onGoToCoupon }: PromoSplashProps)
     }
   }, [onGoToCoupon, handleClose]);
 
-  const goNext = () => setCurrentIndex((i) => (i + 1) % activePromos.length);
-  const goPrev = () => setCurrentIndex((i) => (i - 1 + activePromos.length) % activePromos.length);
+  const handleMonederoAction = useCallback(() => {
+    sessionStorage.setItem("nutriser_promo_splash_shown", "1");
+    if (onOpenWallet) {
+      onOpenWallet();
+    }
+    handleClose();
+  }, [onOpenWallet, handleClose]);
+
+  const goNext = () => setCurrentIndex((i) => (i + 1) % totalSlides);
+  const goPrev = () => setCurrentIndex((i) => (i - 1 + totalSlides) % totalSlides);
 
   if (!shouldShow) return null;
 
@@ -204,23 +281,29 @@ export default function PromoSplash({ onClose, onGoToCoupon }: PromoSplashProps)
         <div className="text-center mb-4">
           <div className="inline-flex items-center gap-2 bg-[#C5A55A]/20 backdrop-blur-sm rounded-full px-4 py-2 mb-2">
             <Gift className="w-4 h-4 text-[#C5A55A]" />
-            <span className="text-[#C5A55A] text-sm font-bold tracking-wide">OFERTAS EXCLUSIVAS</span>
+            <span className="text-[#C5A55A] text-sm font-bold tracking-wide">
+              {isMonederoSlide ? "BENEFICIOS EXCLUSIVOS" : "OFERTAS EXCLUSIVAS"}
+            </span>
           </div>
-          {activePromos.length > 1 && (
-            <p className="text-white/60 text-xs">{currentIndex + 1} de {activePromos.length} ofertas</p>
+          {totalSlides > 1 && (
+            <p className="text-white/60 text-xs">{currentIndex + 1} de {totalSlides} {activePromos.length > 0 ? "ofertas" : ""}</p>
           )}
         </div>
 
-        {/* Promo Card */}
-        {activePromos[currentIndex] && (
-          <PromoCard
-            promo={activePromos[currentIndex]}
-            onAction={() => handleAction(activePromos[currentIndex].id)}
-          />
+        {/* Card — either promo or monedero */}
+        {isMonederoSlide ? (
+          <MonederoPromoCard onAction={handleMonederoAction} />
+        ) : (
+          activePromos[currentIndex] && (
+            <PromoCard
+              promo={activePromos[currentIndex]}
+              onAction={() => handleAction(activePromos[currentIndex].id)}
+            />
+          )
         )}
 
         {/* Navigation arrows */}
-        {activePromos.length > 1 && (
+        {totalSlides > 1 && (
           <>
             <button
               onClick={goPrev}
@@ -238,9 +321,9 @@ export default function PromoSplash({ onClose, onGoToCoupon }: PromoSplashProps)
         )}
 
         {/* Dots indicator */}
-        {activePromos.length > 1 && (
+        {totalSlides > 1 && (
           <div className="flex items-center justify-center gap-2 mt-4">
-            {activePromos.map((_: Promo, i: number) => (
+            {Array.from({ length: totalSlides }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentIndex(i)}

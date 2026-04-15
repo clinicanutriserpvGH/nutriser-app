@@ -1444,3 +1444,23 @@
 - [x] Reemplazar código de barras por QR en el bottom sheet del monedero (con logo Nutriser al centro)
 - [ ] Crear sistema de cobro presencial en panel admin con escáner QR
 - [x] Mejorar carrito: respetar zona segura, ocultar barra inferior cuando está abierto, mejorar diseño
+- [ ] Crear página Cuenta estilo Farmacias del Ahorro: perfil, monedero, pedidos, favoritos, notificaciones
+- [ ] Agregar sistema de favoritos: tabla DB, procedimientos backend, botón corazón en productos
+- [ ] Tab Cuenta en barra inferior abre página de cuenta (no el monedero)
+- [ ] Notificaciones: integrar suscripción por email (sistema existente)
+- [x] Unificar diseño de tarjeta del bottom sheet del monedero con la página completa (fondo oscuro, número, titular, saldo, QR)
+- [x] Mover botón de sonido al lado derecho (opuesto al botón Regresar) para que no tape
+- [x] Agregar barra de navegación inferior en WalletPage (/monedero) con Inicio (regresa a tienda), Monedero (activo), etc.
+
+## Rediseño Tarjeta Monedero - Sesión Actual
+
+- [x] Rediseñar tarjeta del monedero estilo Farmacias del Ahorro con logo Nutriser más grande
+- [x] Mejorar presentación visual de la tarjeta (fondo, gradientes, tipografía)
+- [x] Logo Nutriser prominente en la tarjeta
+- [x] Unificar diseño en bottom sheet y página /monedero
+- [ ] Agregar barra de navegación inferior en /monedero con opción Inicio
+- [ ] Implementar backend de favoritos (db helpers + tRPC procedures)
+- [ ] Crear página de Cuenta completa
+- [ ] Agregar botones de corazón en tarjetas de productos
+- [x] Crear banner promocional del Monedero Nutriser en el carrusel de cupones/promociones de la tienda
+- [x] Banner debe incitar a crear cuenta y obtener monedero con beneficios (cashback, puntos, recompensas)

@@ -765,3 +765,26 @@ export const loyaltyProgress = mysqlTable("loyaltyProgress", {
 });
 export type LoyaltyProgress = typeof loyaltyProgress.$inferSelect;
 export type InsertLoyaltyProgress = typeof loyaltyProgress.$inferInsert;
+
+// ============================================================
+// FAVORITOS — Lista de deseos del usuario
+// ============================================================
+
+/**
+ * Favoritos del usuario en la tienda
+ * Permite guardar productos/servicios/paquetes para comprar después
+ */
+export const favorites = mysqlTable("favorites", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull(), // FK a patientAccounts.id
+  itemKey: varchar("itemKey", { length: 100 }).notNull(), // ej: "svc-5", "product-2", "pkg-nutricion"
+  itemType: mysqlEnum("itemType", ["service", "product", "ebook", "package"]).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  price: int("price").default(0).notNull(), // precio en MXN (entero)
+  priceLabel: varchar("priceLabel", { length: 100 }),
+  imageUrl: text("imageUrl"),
+  category: varchar("category", { length: 100 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertFavorite = typeof favorites.$inferInsert;

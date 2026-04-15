@@ -48,9 +48,9 @@ export default function BackgroundMusic() {
       title={playing ? "Pausar música de fondo" : "Reproducir música de fondo"}
       style={{
         position: "fixed",
-        // Posición: esquina superior izquierda para no chocar con barra de navegación inferior
+        // Posición: esquina superior derecha para no chocar con botón Regresar
         top: "max(env(safe-area-inset-top, 0px) + 12px, 20px)",
-        left: "16px",
+        right: "16px",
         zIndex: 9999,
         width: "36px",
         height: "36px",

@@ -1488,3 +1488,4 @@
 - [x] Agregar pestaña 'Lista de Deseos' con icono de corazón en la barra inferior de la tienda
 - [x] Panel de lista de deseos donde se puedan ver todos los artículos guardados y agregar al carrito
 - [x] Corregir error de parse en SplashSelector.tsx (HTML entities &amp; en JSX)
+- [x] Lista de Deseos: botón Regresar debe mostrar también opción de ir al inicio (igual que Monedero)

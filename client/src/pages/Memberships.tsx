@@ -456,7 +456,7 @@ export default function Memberships() {
   // ─── Render ─────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#f5f5f5]" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 3.5rem)" }}>
-      <BackToSplash hideHome desktopBackTo="/" desktopBackLabel="Regresar" />
+      <BackToSplash desktopBackTo="/" desktopBackLabel="Regresar" />
 
       {/* ── Pop-up de cupones/promociones ── */}
       {showPromoSplash && (

@@ -1421,3 +1421,12 @@
 
 ### Mejora Botón Flotante Monedero
 - [x] Hacer botón flotante más grande y visible (más contraste, sombra, logo claro)
+
+### Correcciones Botón Flotante Monedero
+- [x] Agregar botón flotante del monedero en Memberships.tsx (tienda real con productos)
+- [x] Cambiar descripción del modal de login: incluir monedero y beneficios, no solo carrito/compras
+- [x] Botón flotante navega directo a /monedero (requiere login primero, muestra bottom sheet con tarjeta)
+- [x] Quitar botón INICIO de la página del Monedero, dejar solo REGRESAR
+- [x] Botón flotante del monedero mejorado en Nutriser Shop (Memberships.tsx): 76px, pulso dorado, etiqueta, z-60
+- [x] Texto del modal de login actualizado: menciona monedero, cupones y beneficios
+- [x] Carrito flotante reposicionado para no solapar con botón del monedero

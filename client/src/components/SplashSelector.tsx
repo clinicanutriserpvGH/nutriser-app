@@ -468,7 +468,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
       <NutriserAuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        contextMessage="Una cuenta para Nutriser Shop, Academy y Mis Tratamientos"
+        contextMessage="Inicia sesión para acceder a tu monedero, cupones, beneficios de lealtad, Nutriser Shop y Academy."
         onSuccess={() => setShowAuthModal(false)}
       />
 

@@ -292,7 +292,7 @@ export default function WalletPage() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-[#1A1A1A] flex flex-col">
-        <BackToSplash mobileBackTo="/memberships" />
+        <BackToSplash hideHome mobileBackTo="/memberships" />
         <div
           className="flex-1 flex flex-col items-center justify-center px-6"
           style={{ paddingTop: "env(safe-area-inset-top, 20px)" }}
@@ -353,7 +353,7 @@ export default function WalletPage() {
       className="min-h-screen bg-[#FAF7F2]"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
-      <BackToSplash mobileBackTo="/memberships" />
+      <BackToSplash hideHome mobileBackTo="/memberships" />
 
       {/* Header */}
       <div className="bg-[#1A1A1A] pt-16 pb-6 px-4">

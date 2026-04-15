@@ -453,13 +453,13 @@ export default function Memberships() {
         isOpen={showAuthModal}
         onClose={() => { setShowAuthModal(false); setPendingCartItem(null); }}
         onSuccess={handleAuthSuccess}
-        contextMessage="Necesitas una cuenta para agregar productos al carrito y realizar compras."
+        contextMessage="Necesitas una cuenta para acceder a tu monedero, cupones, beneficios de lealtad y realizar compras."
       />
 
       {/* ── Carrito flotante ── */}
       {cartCount > 0 && (
         <button onClick={() => setCartOpen(true)}
-          className="fixed bottom-6 right-4 z-40 bg-[#C5A55A] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:bg-[#B8963E] transition-all active:scale-95">
+          className="fixed bottom-28 right-4 z-[55] bg-[#C5A55A] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:bg-[#B8963E] transition-all active:scale-95">
           <ShoppingCart className="w-6 h-6" />
           <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-black rounded-full w-5 h-5 flex items-center justify-center">{cartCount}</span>
         </button>
@@ -1227,16 +1227,23 @@ export default function Memberships() {
       {/* ══════════════════════════════════════════════════════════════════════
           BOTÓN FLOTANTE MONEDERO (estilo Farmacia del Ahorro)
       ══════════════════════════════════════════════════════════════════════ */}
-      <button
-        onClick={() => {
-          if (!isLoggedIn) { setShowAuthModal(true); return; }
-          setWalletSheetOpen(true);
-        }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[68px] h-[68px] rounded-full bg-gradient-to-br from-[#C5A55A] to-[#B8963E] shadow-[0_4px_24px_rgba(197,165,90,0.5)] flex items-center justify-center border-[3px] border-white hover:scale-110 active:scale-95 transition-all"
-        aria-label="Mi Monedero Nutriser"
-      >
-        <img src={LOGO_URL} alt="Monedero Nutriser" className="w-11 h-11 rounded-full object-contain" />
-      </button>
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-1">
+        {/* Pulse ring */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80px] h-[80px] rounded-full bg-[#C5A55A]/30 animate-ping" style={{ animationDuration: '2s' }} />
+        <button
+          onClick={() => {
+            if (!isLoggedIn) { setShowAuthModal(true); return; }
+            setWalletSheetOpen(true);
+          }}
+          className="relative w-[76px] h-[76px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B86A] to-[#B8963E] shadow-[0_6px_30px_rgba(197,165,90,0.6)] flex items-center justify-center border-[3px] border-white hover:scale-110 active:scale-95 transition-all"
+          aria-label="Mi Monedero Nutriser"
+        >
+          <div className="w-[58px] h-[58px] rounded-full bg-white flex items-center justify-center shadow-inner">
+            <img src={LOGO_URL} alt="Monedero Nutriser" className="w-11 h-11 rounded-full object-contain" />
+          </div>
+        </button>
+        <span className="text-[10px] font-bold text-[#C5A55A] bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm border border-[#C5A55A]/20">Monedero</span>
+      </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
           BOTTOM SHEET — TARJETA MONEDERO

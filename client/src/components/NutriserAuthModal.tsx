@@ -93,7 +93,7 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
             <h2 className="text-white font-black text-xl tracking-tight">
               {mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
             </h2>
-            <p className="text-white/40 text-xs mt-0.5">Nutriser — cuenta unificada</p>
+            <p className="text-white/40 text-xs mt-0.5">Accede a tu monedero, cupones y beneficios</p>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-full hover:bg-white/10 text-white/50 transition-colors">
             <X className="w-5 h-5" />

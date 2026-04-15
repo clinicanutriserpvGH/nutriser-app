@@ -424,7 +424,7 @@ export default function Store() {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onSuccess={() => setShowAuthModal(false)}
-        contextMessage="Inicia sesión para comprar productos y acceder a beneficios exclusivos."
+        contextMessage="Necesitas una cuenta para acceder a tu monedero, cupones, beneficios de lealtad y realizar compras."
       />
 
       {/* ─── Purchase Modal ──────────────────────────────────────────── */}

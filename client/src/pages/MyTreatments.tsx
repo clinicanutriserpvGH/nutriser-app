@@ -3,6 +3,8 @@
  * Registro / Login de pacientes presenciales.
  * Tras autenticarse ven sus tratamientos, citas, fotos antes/después,
  * consentimiento informado, cupones y catálogo de servicios.
+ * 
+ * DISEÑO: Tema claro integrado con la tienda (fondo #f5f5f5, tarjetas blancas, acentos dorados)
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import SignatureCanvas from "react-signature-canvas";
@@ -12,12 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  AlertTriangle, ArrowRight, Bell, BellOff, Calendar, Camera, CheckCircle2, ChevronLeft, Clock, Eye, EyeOff,
+  AlertTriangle, ArrowLeft, ArrowRight, Bell, BellOff, Calendar, Camera, CheckCircle2, ChevronLeft, Clock, Eye, EyeOff,
   FileText, Flame, Heart, Loader2, Lock, LogOut, Mail, Phone, Scissors,
   ShieldCheck, Sparkles, Star, Tag, User, X,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
+import { useLocation } from "wouter";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -46,10 +49,10 @@ function PromoCountdown({ expiresAt }: { expiresAt: Date | string }) {
   }, [expiresAt]);
   return (
     <div className={`flex items-center gap-2 mb-3 text-xs font-bold px-3 py-2 rounded-lg ${
-      isUrgent ? 'bg-red-900/40 text-red-200 animate-pulse' : 'bg-black/20 text-white/80'
+      isUrgent ? 'bg-red-50 text-red-600 animate-pulse' : 'bg-gray-50 text-gray-600'
     }`}>
       <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-      <span>{isUrgent ? '🔥 ' : '⏳ '}Oferta termina en: <strong className="text-white">{timeLeft}</strong></span>
+      <span>{isUrgent ? '🔥 ' : '⏳ '}Oferta termina en: <strong className="text-gray-900">{timeLeft}</strong></span>
     </div>
   );
 }
@@ -191,9 +194,9 @@ Establecimiento: Nutriser Aesthetic & Nutrition`;
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function MyTreatments() {
+  const [, navigate] = useLocation();
   // Sesión unificada: si el usuario ya inició sesión en Shop/Academy/Splash1, se detecta aquí
   const { patient: unifiedPatient, login: unifiedLogin, logout: unifiedLogout, updateSession } = usePatientAuth();
-  // Usar el patient del hook unificado como fuente única de verdad
   const patient = unifiedPatient as PatientSafe | null;
 
   const [view, setView] = useState<"auth" | "consent" | "portal">("auth");
@@ -208,7 +211,7 @@ export default function MyTreatments() {
   const [consentScrolled, setConsentScrolled] = useState(false);
   const sigCanvasRef = useRef<SignatureCanvas>(null);
 
-  // Validar sesión contra la BD al cargar (detecta si el admin eliminó al paciente)
+  // Validar sesión contra la BD al cargar
   const [sessionChecked, setSessionChecked] = useState(false);
   const verifySession = trpc.patients.getById.useQuery(
     { id: patient?.id ?? 0 },
@@ -223,7 +226,6 @@ export default function MyTreatments() {
     if (verifySession.isSuccess) {
       setSessionChecked(true);
     } else if (verifySession.isError) {
-      // El paciente ya no existe en la BD (fue eliminado por el admin)
       unifiedLogout();
       setView("auth");
       setSessionChecked(true);
@@ -231,14 +233,12 @@ export default function MyTreatments() {
     }
   }, [verifySession.isSuccess, verifySession.isError]);
 
-  // Detectar sesión unificada al montar — si ya hay sesión, ir directo al portal o consentimiento
   useEffect(() => {
     if (patient) {
       setView(patient.consentAcceptedAt ? "portal" : "consent");
     }
   }, []);
 
-  // Cuando el patient cambia (ej: login desde otro módulo), actualizar la vista
   useEffect(() => {
     if (patient && view === "auth") {
       setView(patient.consentAcceptedAt ? "portal" : "consent");
@@ -246,7 +246,6 @@ export default function MyTreatments() {
   }, [patient]);
 
   const persistPatient = (p: PatientSafe) => {
-    // Usar exclusivamente el hook unificado
     unifiedLogin(p as any);
   };
 
@@ -263,7 +262,6 @@ export default function MyTreatments() {
     { patientId: patient?.id ?? 0 },
     { enabled: !!patient && view === "portal" && activeTab === "photos" }
   );
-  // Query automática: todas las compras del paciente por correo (sin código)
   const { data: myPurchases, isLoading: purchasesLoading } = trpc.patients.getMyPurchases.useQuery(
     { email: patient?.email ?? 'x@x.com' },
     { enabled: !!patient && view === 'portal' && activeTab === 'purchases' }
@@ -316,11 +314,11 @@ export default function MyTreatments() {
       await savePushMutation.mutateAsync({ patientId: patient.id, pushSubscription: subJson });
       persistPatient({ ...patient, pushSubscription: subJson });
       setNotifStatus('granted');
-      toast.success('¡Notificaciones activadas! Te avisaremos cuando tengas nuevas citas o tratamientos.');
+      toast.success('¡Notificaciones activadas!');
     } catch (e) {
       console.error('[Push]', e);
       setNotifStatus('idle');
-      toast.error('No se pudieron activar las notificaciones. Intenta de nuevo.');
+      toast.error('No se pudieron activar las notificaciones.');
     }
   };
 
@@ -339,7 +337,6 @@ export default function MyTreatments() {
     }
   };
 
-  // Detectar si ya tiene notificaciones activas al cargar
   useEffect(() => {
     if (patient?.pushSubscription && Notification.permission === 'granted') {
       setNotifStatus('granted');
@@ -391,7 +388,6 @@ export default function MyTreatments() {
     if (!patient) return;
     setSigningConsent(true);
     try {
-      // Solo enviar la imagen de la firma — el servidor genera el PDF
       const signatureDataUrl = sigCanvasRef.current.toDataURL("image/png");
       await consentMutation.mutateAsync({
         patientId: patient.id,
@@ -404,28 +400,32 @@ export default function MyTreatments() {
   };
 
   const handleLogout = () => {
-    unifiedLogout(); // Limpia localStorage y estado del hook unificado
+    unifiedLogout();
     setView("auth");
     setAuthMode("login");
+  };
+
+  const goBackToStore = () => {
+    navigate("/memberships");
   };
 
   // ─── Helpers UI ─────────────────────────────────────────────────────────────
   const statusLabel = (s: Treatment["status"]) =>
     s === "pending" ? "Pendiente" : s === "in_progress" ? "En progreso" : "Finalizado";
   const statusColor = (s: Treatment["status"]) =>
-    s === "pending" ? "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" :
-    s === "in_progress" ? "bg-blue-500/20 text-blue-300 border-blue-500/30" :
-    "bg-green-500/20 text-green-300 border-green-500/30";
+    s === "pending" ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
+    s === "in_progress" ? "bg-blue-50 text-blue-700 border-blue-200" :
+    "bg-green-50 text-green-700 border-green-200";
   const apptStatusColor = (s: Appointment["status"]) =>
-    s === "scheduled" ? "bg-blue-500/20 text-blue-300" :
-    s === "completed" ? "bg-green-500/20 text-green-300" : "bg-red-500/20 text-red-300";
+    s === "scheduled" ? "bg-blue-50 text-blue-700" :
+    s === "completed" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700";
   const apptStatusLabel = (s: Appointment["status"]) =>
     s === "scheduled" ? "Programada" : s === "completed" ? "Realizada" : "Cancelada";
   const photoTypeLabel = (t: Photo["type"]) =>
     t === "before" ? "Antes" : t === "after" ? "Después" : "Progreso";
   const photoTypeColor = (t: Photo["type"]) =>
-    t === "before" ? "bg-orange-500/20 text-orange-300" :
-    t === "after" ? "bg-green-500/20 text-green-300" : "bg-blue-500/20 text-blue-300";
+    t === "before" ? "bg-orange-50 text-orange-700" :
+    t === "after" ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700";
 
   const appointmentsForTreatment = (treatmentId: number) =>
     appointments.filter(a => a.treatmentId === treatmentId);
@@ -433,42 +433,37 @@ export default function MyTreatments() {
   // ─── Pantalla de autenticación ───────────────────────────────────────────────
   if (view === "auth") {
     return (
-      <div className="fixed inset-0 bg-[#0D0D0D] overflow-y-auto">
+      <div className="fixed inset-0 bg-[#f5f5f5] overflow-y-auto">
       <div className="min-h-full flex flex-col items-center justify-center px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 24px, 40px)' }}>
         <div className="w-full max-w-md">
 
-          {/* Botón Regresar — arriba, visible */}
+          {/* Botón Regresar a la tienda */}
           <div className="flex justify-start mb-6">
             <button
-              onClick={() => {
-                sessionStorage.setItem('nutriser_splash_seen', '1');
-                sessionStorage.setItem('nutriser_chose_splash1', '1');
-                sessionStorage.setItem('nutriser_go_to_splash1', '1');
-                window.location.href = '/';
-              }}
-              className="flex items-center gap-2 bg-[#C5A55A] border-2 border-[#C5A55A] text-black px-4 py-2.5 rounded-full text-sm font-extrabold tracking-widest uppercase shadow-lg shadow-[#C5A55A]/30 hover:bg-[#B8944A] active:scale-95 transition-all duration-200"
+              onClick={goBackToStore}
+              className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-full text-sm font-bold shadow-sm hover:bg-gray-50 active:scale-95 transition-all duration-200"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-              REGRESAR
+              <ArrowLeft className="w-4 h-4" />
+              Regresar a la tienda
             </button>
           </div>
 
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="h-16 mb-3" />
-            <h1 className="text-2xl font-bold text-white">Mis Tratamientos</h1>
-            <p className="text-white/50 text-sm text-center mt-2 max-w-xs leading-relaxed">
+            <h1 className="text-2xl font-bold text-gray-900">Mis Tratamientos</h1>
+            <p className="text-gray-500 text-sm text-center mt-2 max-w-xs leading-relaxed">
               Consulta tus compras, paquetes y cupones, y da seguimiento a tus tratamientos estéticos.
             </p>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm">
+          <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
             {/* Tabs */}
             {authMode !== "forgot" && authMode !== "register-form" && (
-              <div className="flex bg-white/5 rounded-2xl p-1 mb-6">
+              <div className="flex bg-gray-100 rounded-2xl p-1 mb-6">
                 {(["login", "register"] as Array<"login" | "register" | "register-form">).map(m => (
                   <button key={m} onClick={() => setAuthMode(m)}
-                    className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${(authMode === m || (m === "register" && (authMode as string) === "register-form")) ? "bg-[#C5A55A] text-black" : "text-white/50 hover:text-white"}`}>
+                    className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${(authMode === m || (m === "register" && (authMode as string) === "register-form")) ? "bg-[#C5A55A] text-white shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
                     {m === "login" ? "Iniciar sesión" : "Crear cuenta"}
                   </button>
                 ))}
@@ -479,102 +474,102 @@ export default function MyTreatments() {
             {authMode === "login" && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <Input name="email" type="email" placeholder="Correo electrónico" required className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input name="email" type="email" placeholder="Correo electrónico" required className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Contraseña" required className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
-                  <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-[#C5A55A] transition-colors">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Contraseña" required className="pl-10 pr-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
+                  <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#C5A55A] transition-colors">
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                <Button type="submit" disabled={loginMutation.isPending} className="w-full bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold">
+                <Button type="submit" disabled={loginMutation.isPending} className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold">
                   {loginMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Entrar"}
                 </Button>
-                <button type="button" onClick={() => setAuthMode("forgot")} className="w-full text-center text-white/40 text-xs hover:text-white/60 transition-colors">
+                <button type="button" onClick={() => setAuthMode("forgot")} className="w-full text-center text-gray-400 text-xs hover:text-gray-600 transition-colors">
                   ¿Olvidaste tu contraseña?
                 </button>
               </form>
             )}
 
-            {/* Register - Aviso de contrato de consentimiento */}
+            {/* Register - Aviso de contrato */}
             {authMode === "register" && (
               <div className="space-y-5">
                 <div className="flex flex-col items-center gap-3 py-2">
-                  <div className="w-14 h-14 rounded-full bg-[#C5A55A]/15 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-[#C5A55A]/10 flex items-center justify-center">
                     <ShieldCheck className="w-7 h-7 text-[#C5A55A]" />
                   </div>
-                  <h3 className="text-white font-bold text-lg text-center">Contrato de Consentimiento</h3>
-                  <p className="text-white/60 text-sm text-center leading-relaxed">
+                  <h3 className="text-gray-900 font-bold text-lg text-center">Contrato de Consentimiento</h3>
+                  <p className="text-gray-500 text-sm text-center leading-relaxed">
                     Para crear tu cuenta en Nutriser es necesario que leas y firmes el{" "}
-                    <strong className="text-white/80">Contrato de Consentimiento Informado</strong>.
+                    <strong className="text-gray-700">Contrato de Consentimiento Informado</strong>.
                   </p>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
                   <p className="text-[#C5A55A] text-xs font-semibold uppercase tracking-wider">¿Cómo firmar?</p>
                   <div className="flex items-start gap-3">
                     <span className="text-xl mt-0.5">📱</span>
-                    <p className="text-white/60 text-sm">
-                      <strong className="text-white/80">Celular o Tablet:</strong> Usa tu dedo para trazar tu firma directamente en la pantalla.
+                    <p className="text-gray-500 text-sm">
+                      <strong className="text-gray-700">Celular o Tablet:</strong> Usa tu dedo para trazar tu firma directamente en la pantalla.
                     </p>
                   </div>
                   <div className="flex items-start gap-3">
                     <span className="text-xl mt-0.5">💻</span>
-                    <p className="text-white/60 text-sm">
-                      <strong className="text-white/80">Computadora:</strong> Usa el mouse para dibujar tu firma en el área indicada.
+                    <p className="text-gray-500 text-sm">
+                      <strong className="text-gray-700">Computadora:</strong> Usa el mouse para dibujar tu firma en el área indicada.
                     </p>
                   </div>
                 </div>
                 <Button
                   type="button"
                   onClick={() => setAuthMode("register-form")}
-                  className="w-full bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold py-3"
+                  className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-3"
                 >
                   Continuar y leer contrato
                 </Button>
                 <button
                   type="button"
                   onClick={() => setAuthMode("login")}
-                  className="w-full text-center text-white/40 text-xs hover:text-white/60 transition-colors"
+                  className="w-full text-center text-gray-400 text-xs hover:text-gray-600 transition-colors"
                 >
                   Ya tengo cuenta — Iniciar sesión
                 </button>
               </div>
             )}
-            {/* Register Form - Formulario real de registro */}
+            {/* Register Form */}
             {authMode === "register-form" && (
               <form onSubmit={handleRegister} className="space-y-4">
-                <button type="button" onClick={() => setAuthMode("register")} className="flex items-center gap-1 text-white/50 text-sm hover:text-white/80 mb-2">
+                <button type="button" onClick={() => setAuthMode("register")} className="flex items-center gap-1 text-gray-400 text-sm hover:text-gray-600 mb-2">
                   <ChevronLeft className="w-4 h-4" /> Volver
                 </button>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <Input name="name" placeholder="Nombre completo" required minLength={2} className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input name="name" placeholder="Nombre completo" required minLength={2} className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
                 </div>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <Input name="email" type="email" placeholder="Correo electrónico" required className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input name="email" type="email" placeholder="Correo electrónico" required className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
                 </div>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <Input name="phone" type="tel" placeholder="Teléfono / Celular" required minLength={8} className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input name="phone" type="tel" placeholder="Teléfono / Celular" required minLength={8} className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
                 </div>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <div className="pl-10 pr-3 py-2 bg-white/5 border border-white/10 rounded-md flex items-center">
-                    <label className="text-white/40 text-sm mr-2 whitespace-nowrap">Fecha de nacimiento:</label>
-                    <input name="birthday" type="date" className="bg-transparent text-white text-sm flex-1 outline-none [color-scheme:dark]" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <div className="pl-10 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center">
+                    <label className="text-gray-400 text-sm mr-2 whitespace-nowrap">Fecha de nacimiento:</label>
+                    <input name="birthday" type="date" className="bg-transparent text-gray-900 text-sm flex-1 outline-none" />
                   </div>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Contraseña (mín. 6 caracteres)" required minLength={6} className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
-                  <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-[#C5A55A] transition-colors">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input name="password" type={showPassword ? "text" : "password"} placeholder="Contraseña (mín. 6 caracteres)" required minLength={6} className="pl-10 pr-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
+                  <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#C5A55A] transition-colors">
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                <Button type="submit" disabled={registerMutation.isPending} className="w-full bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold">
+                <Button type="submit" disabled={registerMutation.isPending} className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold">
                   {registerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Crear mi cuenta"}
                 </Button>
               </form>
@@ -583,15 +578,15 @@ export default function MyTreatments() {
             {/* Forgot */}
             {authMode === "forgot" && (
               <form onSubmit={handleForgot} className="space-y-4">
-                <button type="button" onClick={() => setAuthMode("login")} className="flex items-center gap-1 text-white/50 text-sm hover:text-white/80 mb-2">
+                <button type="button" onClick={() => setAuthMode("login")} className="flex items-center gap-1 text-gray-400 text-sm hover:text-gray-600 mb-2">
                   <ChevronLeft className="w-4 h-4" /> Volver
                 </button>
-                <p className="text-white/70 text-sm">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+                <p className="text-gray-500 text-sm">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <Input name="email" type="email" placeholder="Correo electrónico" required className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input name="email" type="email" placeholder="Correo electrónico" required className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
                 </div>
-                <Button type="submit" disabled={forgotMutation.isPending} className="w-full bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold">
+                <Button type="submit" disabled={forgotMutation.isPending} className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold">
                   {forgotMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar enlace"}
                 </Button>
               </form>
@@ -608,15 +603,15 @@ export default function MyTreatments() {
   // ─── Pantalla de consentimiento ───────────────────────────────────────────────
   if (view === "consent") {
     return (
-      <div className="min-h-screen bg-[#0D0D0D] flex flex-col items-center justify-start px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: '24px' }}>
+      <div className="min-h-screen bg-[#f5f5f5] flex flex-col items-center justify-start px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: '24px' }}>
         <div className="w-full max-w-lg">
           <div className="flex flex-col items-center mb-6">
             <ShieldCheck className="w-12 h-12 text-[#C5A55A] mb-2" />
-            <h1 className="text-2xl font-bold text-white">Consentimiento Informado</h1>
-            <p className="text-white/50 text-sm mt-1 text-center">Lee el documento completo y fírmalo para continuar</p>
+            <h1 className="text-2xl font-bold text-gray-900">Consentimiento Informado</h1>
+            <p className="text-gray-500 text-sm mt-1 text-center">Lee el documento completo y fírmalo para continuar</p>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm">
+          <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
             {/* Documento */}
             <div
               ref={consentScrollRef}
@@ -624,7 +619,7 @@ export default function MyTreatments() {
                 const el = consentScrollRef.current;
                 if (el && el.scrollTop + el.clientHeight >= el.scrollHeight - 10) setConsentScrolled(true);
               }}
-              className="h-64 overflow-y-auto bg-black/30 rounded-2xl p-4 mb-4 text-white/70 text-xs leading-relaxed whitespace-pre-line border border-white/10"
+              className="h-64 overflow-y-auto bg-gray-50 rounded-2xl p-4 mb-4 text-gray-600 text-xs leading-relaxed whitespace-pre-line border border-gray-200"
             >
               {patient ? CONSENT_TEXT.replace(
                 "Yo, el/la paciente que firma el presente documento,",
@@ -632,15 +627,15 @@ export default function MyTreatments() {
               ) : CONSENT_TEXT}
             </div>
             {!consentScrolled && (
-              <p className="text-yellow-400/80 text-xs text-center mb-3 flex items-center justify-center gap-1">
+              <p className="text-[#C5A55A] text-xs text-center mb-3 flex items-center justify-center gap-1">
                 <span>↓</span> Desplázate hasta el final para poder firmar
               </p>
             )}
 
             {/* Firma digital */}
             <div className="space-y-3">
-              <label className="text-white/70 text-sm font-semibold">Firma digital (dibuja con tu dedo o mouse):</label>
-              <div className="bg-white rounded-2xl p-2">
+              <label className="text-gray-700 text-sm font-semibold">Firma digital (dibuja con tu dedo o mouse):</label>
+              <div className="bg-white rounded-2xl p-2 border border-gray-200">
                 <SignatureCanvas
                   ref={sigCanvasRef}
                   canvasProps={{
@@ -658,7 +653,7 @@ export default function MyTreatments() {
                     setSignatureEmpty(true);
                   }}
                   variant="outline"
-                  className="flex-1 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
+                  className="flex-1 bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
                   disabled={!consentScrolled}
                 >
                   <X className="w-4 h-4 mr-2" /> Borrar
@@ -666,7 +661,7 @@ export default function MyTreatments() {
                 <Button
                   onClick={handleSignConsent}
                   disabled={!consentScrolled || signatureEmpty || signingConsent || consentMutation.isPending}
-                  className="flex-1 bg-[#C5A55A] hover:bg-[#d4b46a] text-black font-bold"
+                  className="flex-1 bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold"
                 >
                   {signingConsent || consentMutation.isPending
                     ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Guardando PDF...</>
@@ -676,7 +671,7 @@ export default function MyTreatments() {
             </div>
           </div>
 
-          <button onClick={handleLogout} className="mt-4 w-full text-center text-white/30 text-xs hover:text-white/50 transition-colors">
+          <button onClick={handleLogout} className="mt-4 w-full text-center text-gray-400 text-xs hover:text-gray-600 transition-colors">
             Cerrar sesión
           </button>
         </div>
@@ -690,30 +685,43 @@ export default function MyTreatments() {
   const completedTreatments = treatments.filter(t => t.status === "completed");
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D]">
-      {/* Header */}
+    <div className="min-h-screen bg-[#f5f5f5]" style={{ paddingBottom: '24px' }}>
+      {/* Header — Estilo tienda */}
       <div
-        className="sticky top-0 z-40 bg-[#0D0D0D]/95 backdrop-blur-sm border-b border-white/10 px-4 py-3"
+        className="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-100"
         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}
       >
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <button onClick={goBackToStore} className="flex items-center gap-1.5 text-gray-500 hover:text-[#C5A55A] transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
             <img src={LOGO_URL} alt="Nutriser" className="h-8" />
             <div>
-              <p className="text-white text-sm font-bold leading-tight">{patient?.name}</p>
-              <p className="text-white/40 text-xs">Mis Tratamientos</p>
+              <p className="text-[#C5A55A] text-[9px] tracking-[0.15em] uppercase font-semibold">Aesthetic & Nutrition</p>
+              <p className="text-gray-900 text-sm font-bold leading-tight">Mis Tratamientos</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Botón notificaciones */}
+          <div className="flex items-center gap-2">
+            {/* Nombre del paciente */}
+            <div className="hidden sm:flex flex-col items-end mr-2">
+              <span className="text-[#C5A55A] text-[10px] font-bold leading-tight">
+                {patient?.name?.split(' ')[0]}
+              </span>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                <span className="text-green-600 text-[8px] font-semibold">Activa</span>
+              </div>
+            </div>
+            {/* Notificaciones */}
             <button
               onClick={notifStatus === 'granted' ? handleDisableNotifications : handleEnableNotifications}
               disabled={notifStatus === 'loading'}
               title={notifStatus === 'granted' ? 'Desactivar notificaciones' : 'Activar notificaciones'}
-              className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 ${
+              className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all ${
                 notifStatus === 'granted'
-                  ? 'bg-[#C5A55A]/20 text-[#C5A55A] hover:bg-[#C5A55A]/30'
-                  : 'text-white/40 hover:text-[#C5A55A]'
+                  ? 'bg-[#C5A55A]/10 text-[#C5A55A]'
+                  : 'text-gray-400 hover:text-[#C5A55A]'
               }`}
             >
               {notifStatus === 'loading' ? (
@@ -727,19 +735,9 @@ export default function MyTreatments() {
                 <BellOff className="w-4 h-4" />
               )}
             </button>
-            <button
-              onClick={() => {
-                sessionStorage.setItem('nutriser_splash_seen', '1');
-                sessionStorage.setItem('nutriser_chose_splash1', '1');
-                sessionStorage.setItem('nutriser_go_to_splash1', '1');
-                window.location.href = '/';
-              }}
-              className="flex items-center gap-1 text-white/40 hover:text-[#C5A55A] text-xs transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" /> Regresar
-            </button>
-            <button onClick={handleLogout} className="flex items-center gap-1.5 text-white/40 hover:text-white/70 text-xs transition-colors">
-              <LogOut className="w-4 h-4" /> Salir
+            {/* Cerrar sesión */}
+            <button onClick={handleLogout} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-xs transition-colors">
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -753,36 +751,36 @@ export default function MyTreatments() {
           <div className="lg:w-64 xl:w-72 flex-shrink-0 space-y-4">
             {/* Resumen rápido */}
             <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center lg:text-left lg:flex lg:items-center lg:gap-3">
+              <div className="bg-white border border-gray-100 rounded-2xl p-3 text-center lg:text-left lg:flex lg:items-center lg:gap-3 shadow-sm">
                 <p className="text-2xl font-bold text-[#C5A55A] lg:text-xl">{activeTreatments.length}</p>
-                <p className="text-white/50 text-xs mt-0.5 lg:mt-0">Activos</p>
+                <p className="text-gray-500 text-xs mt-0.5 lg:mt-0">Activos</p>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center lg:text-left lg:flex lg:items-center lg:gap-3">
-                <p className="text-2xl font-bold text-green-400 lg:text-xl">{completedTreatments.length}</p>
-                <p className="text-white/50 text-xs mt-0.5 lg:mt-0">Finalizados</p>
+              <div className="bg-white border border-gray-100 rounded-2xl p-3 text-center lg:text-left lg:flex lg:items-center lg:gap-3 shadow-sm">
+                <p className="text-2xl font-bold text-green-600 lg:text-xl">{completedTreatments.length}</p>
+                <p className="text-gray-500 text-xs mt-0.5 lg:mt-0">Finalizados</p>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center lg:text-left lg:flex lg:items-center lg:gap-3">
-                <p className="text-2xl font-bold text-blue-400 lg:text-xl">{upcomingAppointments.length}</p>
-                <p className="text-white/50 text-xs mt-0.5 lg:mt-0">Próximas citas</p>
+              <div className="bg-white border border-gray-100 rounded-2xl p-3 text-center lg:text-left lg:flex lg:items-center lg:gap-3 shadow-sm">
+                <p className="text-2xl font-bold text-blue-600 lg:text-xl">{upcomingAppointments.length}</p>
+                <p className="text-gray-500 text-xs mt-0.5 lg:mt-0">Próximas citas</p>
               </div>
             </div>
 
             {/* Próximas citas (solo desktop) */}
             {upcomingAppointments.length > 0 && (
-              <div className="hidden lg:block bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
-                <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
+              <div className="hidden lg:block bg-[#C5A55A]/5 border border-[#C5A55A]/20 rounded-2xl p-4">
+                <h3 className="text-gray-900 font-semibold text-sm mb-3 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-[#C5A55A]" /> Próximas citas
                 </h3>
                 <div className="space-y-2">
                   {upcomingAppointments.map(a => {
                     const treatment = treatments.find(t => t.id === a.treatmentId);
                     return (
-                      <div key={a.id} className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
+                      <div key={a.id} className="flex items-center justify-between bg-white rounded-xl px-3 py-2 border border-gray-100">
                         <div>
-                          <p className="text-white text-xs font-semibold">{treatment?.serviceName ?? "Tratamiento"}</p>
-                          <p className="text-white/50 text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
+                          <p className="text-gray-900 text-xs font-semibold">{treatment?.serviceName ?? "Tratamiento"}</p>
+                          <p className="text-gray-400 text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
                         </div>
-                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-[10px]">Programada</Badge>
+                        <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Programada</Badge>
                       </div>
                     );
                   })}
@@ -791,7 +789,7 @@ export default function MyTreatments() {
             )}
 
             {/* Tabs — horizontal en móvil, vertical en desktop */}
-            <div className="flex lg:flex-col bg-white/5 rounded-2xl p-1 gap-1">
+            <div className="flex lg:flex-col bg-white border border-gray-100 rounded-2xl p-1 gap-1 shadow-sm">
               {([
                 { id: "purchases", icon: ShieldCheck, label: "Mis Compras" },
                 { id: "tracking", icon: Sparkles, label: "Mis Tratamientos" },
@@ -799,7 +797,7 @@ export default function MyTreatments() {
                 { id: "consent", icon: FileText, label: "Contrato" },
               ] as const).map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:items-center gap-0.5 lg:gap-2 py-2 lg:py-2.5 lg:px-3 rounded-xl text-[10px] lg:text-xs font-semibold transition-all ${activeTab === tab.id ? "bg-[#C5A55A] text-black" : "text-white/40 hover:text-white/70"}`}>
+                  className={`flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:items-center gap-0.5 lg:gap-2 py-2 lg:py-2.5 lg:px-3 rounded-xl text-[10px] lg:text-xs font-semibold transition-all ${activeTab === tab.id ? "bg-[#C5A55A] text-white shadow-sm" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}>
                   <tab.icon className="w-4 h-4" />
                   {tab.label}
                 </button>
@@ -808,20 +806,20 @@ export default function MyTreatments() {
 
             {/* Próximas citas (solo móvil) */}
             {upcomingAppointments.length > 0 && (
-              <div className="lg:hidden bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
-                <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
+              <div className="lg:hidden bg-[#C5A55A]/5 border border-[#C5A55A]/20 rounded-2xl p-4">
+                <h3 className="text-gray-900 font-semibold text-sm mb-3 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-[#C5A55A]" /> Próximas citas
                 </h3>
                 <div className="space-y-2">
                   {upcomingAppointments.map(a => {
                     const treatment = treatments.find(t => t.id === a.treatmentId);
                     return (
-                      <div key={a.id} className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
+                      <div key={a.id} className="flex items-center justify-between bg-white rounded-xl px-3 py-2 border border-gray-100">
                         <div>
-                          <p className="text-white text-xs font-semibold">{treatment?.serviceName ?? "Tratamiento"}</p>
-                          <p className="text-white/50 text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
+                          <p className="text-gray-900 text-xs font-semibold">{treatment?.serviceName ?? "Tratamiento"}</p>
+                          <p className="text-gray-400 text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
                         </div>
-                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-[10px]">Programada</Badge>
+                        <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Programada</Badge>
                       </div>
                     );
                   })}
@@ -833,61 +831,60 @@ export default function MyTreatments() {
           {/* ── Columna derecha (contenido del tab) ── */}
           <div className="flex-1 min-w-0 space-y-5">
 
-        {/* ── Tab: Mis Compras — Automático por correo ── */}
+        {/* ── Tab: Mis Compras ── */}
         {activeTab === "purchases" && (
           <div className="space-y-5">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent border border-[#C5A55A]/20 rounded-2xl p-4">
+            <div className="bg-[#C5A55A]/5 border border-[#C5A55A]/20 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-1">
                 <ShieldCheck className="w-5 h-5 text-[#C5A55A]" />
-                <h3 className="text-white font-bold text-sm">Mis Compras</h3>
+                <h3 className="text-gray-900 font-bold text-sm">Mis Compras</h3>
               </div>
-              <p className="text-white/50 text-xs">Todo lo que has adquirido en Nutriser, vinculado a tu cuenta.</p>
+              <p className="text-gray-500 text-xs">Todo lo que has adquirido en Nutriser, vinculado a tu cuenta.</p>
             </div>
 
             {purchasesLoading ? (
               <div className="text-center py-10">
                 <Loader2 className="w-8 h-8 text-[#C5A55A] animate-spin mx-auto mb-2" />
-                <p className="text-white/40 text-xs">Cargando tus compras...</p>
+                <p className="text-gray-400 text-xs">Cargando tus compras...</p>
               </div>
             ) : (
               <>
-                {/* ── Paquetes ── */}
+                {/* Paquetes */}
                 {(myPurchases?.packages?.length ?? 0) > 0 && (
                   <div>
-                    <h4 className="text-white/60 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <h4 className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <ShieldCheck className="w-3.5 h-3.5" /> Paquetes
                     </h4>
                     <div className="space-y-3">
                       {myPurchases!.packages.map((pkg: any) => (
-                        <div key={pkg.id} className={`rounded-2xl p-4 border ${
-                          pkg.status === 'verified' ? 'bg-green-500/10 border-green-500/20' :
-                          pkg.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
-                          'bg-yellow-500/10 border-yellow-500/20'
+                        <div key={pkg.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
+                          pkg.status === 'verified' ? 'border-green-200' :
+                          pkg.status === 'rejected' ? 'border-red-200' :
+                          'border-yellow-200'
                         }`}>
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <p className="text-white font-bold text-sm">{pkg.programName || pkg.programType}</p>
-                              <p className="text-white/50 text-xs mt-0.5">Precio: ${pkg.price} MXN</p>
-                              {pkg.verifiedAt && <p className="text-white/40 text-xs mt-0.5">Verificado: {new Date(pkg.verifiedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                              <p className="text-gray-900 font-bold text-sm">{pkg.programName || pkg.programType}</p>
+                              <p className="text-gray-500 text-xs mt-0.5">Precio: ${pkg.price} MXN</p>
+                              {pkg.verifiedAt && <p className="text-gray-400 text-xs mt-0.5">Verificado: {new Date(pkg.verifiedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
                             </div>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                              pkg.status === 'verified' ? 'bg-green-500/20 text-green-400' :
-                              pkg.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                              'bg-red-500/20 text-red-400'
+                              pkg.status === 'verified' ? 'bg-green-50 text-green-700' :
+                              pkg.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
+                              'bg-red-50 text-red-700'
                             }`}>
-                              {pkg.status === 'verified' ? '✅ Activo' :
-                               pkg.status === 'pending' ? '⏳ Pendiente' : '❌ Rechazado'}
+                              {pkg.status === 'verified' ? 'Activo' :
+                               pkg.status === 'pending' ? 'Pendiente' : 'Rechazado'}
                             </span>
                           </div>
                           {pkg.status === 'verified' && pkg.accessCode && (
-                            <div className="mt-2 bg-black/20 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                              <span className="text-white/40 text-xs">Código:</span>
+                            <div className="mt-2 bg-gray-50 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                              <span className="text-gray-400 text-xs">Código:</span>
                               <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{pkg.accessCode}</span>
                             </div>
                           )}
                           {pkg.status === 'pending' && (
-                            <p className="text-yellow-300/70 text-xs mt-2">Tu paquete está siendo revisado. Recibirás confirmación por correo.</p>
+                            <p className="text-yellow-600 text-xs mt-2">Tu paquete está siendo revisado. Recibirás confirmación por correo.</p>
                           )}
                         </div>
                       ))}
@@ -895,42 +892,42 @@ export default function MyTreatments() {
                   </div>
                 )}
 
-                {/* ── Servicios ── */}
+                {/* Servicios */}
                 {(myPurchases?.services?.length ?? 0) > 0 && (
                   <div>
-                    <h4 className="text-white/60 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <h4 className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" /> Servicios
                     </h4>
                     <div className="space-y-3">
                       {myPurchases!.services.map((svc: any) => (
-                        <div key={svc.id} className={`rounded-2xl p-4 border ${
-                          svc.status === 'approved' ? 'bg-green-500/10 border-green-500/20' :
-                          svc.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
-                          'bg-yellow-500/10 border-yellow-500/20'
+                        <div key={svc.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
+                          svc.status === 'approved' ? 'border-green-200' :
+                          svc.status === 'rejected' ? 'border-red-200' :
+                          'border-yellow-200'
                         }`}>
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <p className="text-white font-bold text-sm">{svc.serviceName}</p>
-                              {svc.originalPrice && <p className="text-white/50 text-xs mt-0.5">Precio: ${svc.originalPrice} MXN</p>}
-                              {svc.approvedAt && <p className="text-white/40 text-xs mt-0.5">Autorizado: {new Date(svc.approvedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                              <p className="text-gray-900 font-bold text-sm">{svc.serviceName}</p>
+                              {svc.originalPrice && <p className="text-gray-500 text-xs mt-0.5">Precio: ${svc.originalPrice} MXN</p>}
+                              {svc.approvedAt && <p className="text-gray-400 text-xs mt-0.5">Autorizado: {new Date(svc.approvedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
                             </div>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                              svc.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                              svc.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                              'bg-red-500/20 text-red-400'
+                              svc.status === 'approved' ? 'bg-green-50 text-green-700' :
+                              svc.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
+                              'bg-red-50 text-red-700'
                             }`}>
-                              {svc.status === 'approved' ? '✅ Activo' :
-                               svc.status === 'pending' ? '⏳ Pendiente' : '❌ Rechazado'}
+                              {svc.status === 'approved' ? 'Activo' :
+                               svc.status === 'pending' ? 'Pendiente' : 'Rechazado'}
                             </span>
                           </div>
                           {svc.status === 'approved' && svc.serviceCode && (
-                            <div className="mt-2 bg-black/20 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                              <span className="text-white/40 text-xs">Código:</span>
+                            <div className="mt-2 bg-gray-50 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                              <span className="text-gray-400 text-xs">Código:</span>
                               <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{svc.serviceCode}</span>
                             </div>
                           )}
                           {svc.status === 'pending' && (
-                            <p className="text-yellow-300/70 text-xs mt-2">Tu servicio está siendo revisado. Recibirás confirmación por correo.</p>
+                            <p className="text-yellow-600 text-xs mt-2">Tu servicio está siendo revisado. Recibirás confirmación por correo.</p>
                           )}
                         </div>
                       ))}
@@ -938,49 +935,49 @@ export default function MyTreatments() {
                   </div>
                 )}
 
-                {/* ── Cupones ── */}
+                {/* Cupones */}
                 {(myPurchases?.coupons?.length ?? 0) > 0 && (
                   <div>
-                    <h4 className="text-white/60 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <h4 className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <Tag className="w-3.5 h-3.5" /> Cupones
                     </h4>
                     <div className="space-y-3">
                       {myPurchases!.coupons.map((c: any) => (
-                        <div key={c.id} className={`rounded-2xl p-4 border ${
-                          c.status === 'approved' ? 'bg-green-500/10 border-green-500/20' :
-                          c.status === 'used' ? 'bg-gray-500/10 border-gray-500/20' :
-                          c.status === 'expired' ? 'bg-orange-500/10 border-orange-500/20' :
-                          c.status === 'rejected' ? 'bg-red-500/10 border-red-500/20' :
-                          'bg-yellow-500/10 border-yellow-500/20'
+                        <div key={c.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
+                          c.status === 'approved' ? 'border-green-200' :
+                          c.status === 'used' ? 'border-gray-200' :
+                          c.status === 'expired' ? 'border-orange-200' :
+                          c.status === 'rejected' ? 'border-red-200' :
+                          'border-yellow-200'
                         }`}>
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <p className="text-white font-bold text-sm">{c.promotionTitle}</p>
+                              <p className="text-gray-900 font-bold text-sm">{c.promotionTitle}</p>
                               {c.expiresAt && c.status === 'approved' && (
-                                <p className="text-white/50 text-xs mt-0.5">Válido hasta: {new Date(c.expiresAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                                <p className="text-gray-500 text-xs mt-0.5">Válido hasta: {new Date(c.expiresAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                               )}
                             </div>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                              c.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                              c.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                              c.status === 'used' ? 'bg-gray-500/20 text-gray-400' :
-                              c.status === 'expired' ? 'bg-orange-500/20 text-orange-400' :
-                              'bg-red-500/20 text-red-400'
+                              c.status === 'approved' ? 'bg-green-50 text-green-700' :
+                              c.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
+                              c.status === 'used' ? 'bg-gray-100 text-gray-500' :
+                              c.status === 'expired' ? 'bg-orange-50 text-orange-700' :
+                              'bg-red-50 text-red-700'
                             }`}>
-                              {c.status === 'approved' ? '✅ Activo' :
-                               c.status === 'pending' ? '⏳ Pendiente' :
-                               c.status === 'used' ? '❌ Usado' :
-                               c.status === 'expired' ? '⚠️ Vencido' : '❌ Rechazado'}
+                              {c.status === 'approved' ? 'Activo' :
+                               c.status === 'pending' ? 'Pendiente' :
+                               c.status === 'used' ? 'Usado' :
+                               c.status === 'expired' ? 'Vencido' : 'Rechazado'}
                             </span>
                           </div>
                           {c.couponCode && c.status === 'approved' && (
-                            <div className="mt-2 bg-black/20 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                              <span className="text-white/40 text-xs">Código:</span>
+                            <div className="mt-2 bg-gray-50 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                              <span className="text-gray-400 text-xs">Código:</span>
                               <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{c.couponCode}</span>
                             </div>
                           )}
                           {c.status === 'pending' && (
-                            <p className="text-yellow-300/70 text-xs mt-2">Tu cupón está siendo revisado. Recibirás confirmación por correo.</p>
+                            <p className="text-yellow-600 text-xs mt-2">Tu cupón está siendo revisado. Recibirás confirmación por correo.</p>
                           )}
                         </div>
                       ))}
@@ -993,9 +990,9 @@ export default function MyTreatments() {
                  (myPurchases?.services?.length ?? 0) === 0 &&
                  (myPurchases?.coupons?.length ?? 0) === 0 && (
                   <div className="text-center py-12">
-                    <ShieldCheck className="w-12 h-12 text-white/20 mx-auto mb-3" />
-                    <p className="text-white/40 text-sm">Aún no tienes compras registradas.</p>
-                    <p className="text-white/30 text-xs mt-1">Tus paquetes, servicios y cupones aparecerán aquí automáticamente.</p>
+                    <ShieldCheck className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm">Aún no tienes compras registradas.</p>
+                    <p className="text-gray-400 text-xs mt-1">Tus paquetes, servicios y cupones aparecerán aquí automáticamente.</p>
                   </div>
                 )}
               </>
@@ -1008,9 +1005,9 @@ export default function MyTreatments() {
           <div className="space-y-4">
             {treatments.length === 0 ? (
               <div className="text-center py-12">
-                <Sparkles className="w-12 h-12 text-white/20 mx-auto mb-3" />
-                <p className="text-white/40 text-sm">Aún no tienes tratamientos asignados.</p>
-                <p className="text-white/30 text-xs mt-1">El equipo de Nutriser los agregará pronto.</p>
+                <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm">Aún no tienes tratamientos asignados.</p>
+                <p className="text-gray-400 text-xs mt-1">El equipo de Nutriser los agregará pronto.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -1018,56 +1015,53 @@ export default function MyTreatments() {
                   const progress = t.totalSessions > 0 ? Math.round((t.completedSessions / t.totalSessions) * 100) : 0;
                   const tAppointments = appointments.filter(a => a.treatmentId === t.id);
                   return (
-                    <div key={t.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
-                      {/* Nombre y estado */}
+                    <div key={t.id} className="bg-white border border-gray-100 rounded-2xl p-4 space-y-3 shadow-sm">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-white font-bold text-sm">{t.serviceName}</p>
-                          {t.notes && <p className="text-white/40 text-xs mt-0.5">{t.notes}</p>}
+                          <p className="text-gray-900 font-bold text-sm">{t.serviceName}</p>
+                          {t.notes && <p className="text-gray-400 text-xs mt-0.5">{t.notes}</p>}
                         </div>
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                          t.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                          t.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
-                          'bg-yellow-500/20 text-yellow-400'
+                          t.status === 'completed' ? 'bg-green-50 text-green-700' :
+                          t.status === 'in_progress' ? 'bg-blue-50 text-blue-700' :
+                          'bg-yellow-50 text-yellow-700'
                         }`}>
-                          {t.status === 'completed' ? '✅ Completado' :
-                           t.status === 'in_progress' ? '🔵 En progreso' : '⏳ Pendiente'}
+                          {t.status === 'completed' ? 'Completado' :
+                           t.status === 'in_progress' ? 'En progreso' : 'Pendiente'}
                         </span>
                       </div>
-                      {/* Barra de progreso */}
                       {t.totalSessions > 0 && (
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-white/50 text-xs">Sesiones completadas</span>
+                            <span className="text-gray-500 text-xs">Sesiones completadas</span>
                             <span className="text-[#C5A55A] text-xs font-bold">{t.completedSessions} / {t.totalSessions}</span>
                           </div>
-                          <div className="w-full bg-white/10 rounded-full h-2">
+                          <div className="w-full bg-gray-100 rounded-full h-2">
                             <div
                               className="bg-[#C5A55A] h-2 rounded-full transition-all duration-500"
                               style={{ width: `${progress}%` }}
                             />
                           </div>
-                          <p className="text-white/30 text-xs mt-1 text-right">{progress}% completado</p>
+                          <p className="text-gray-400 text-xs mt-1 text-right">{progress}% completado</p>
                         </div>
                       )}
-                      {/* Citas del tratamiento */}
                       {tAppointments.length > 0 && (
                         <div>
-                          <p className="text-white/50 text-xs font-semibold mb-2">Historial de citas</p>
+                          <p className="text-gray-500 text-xs font-semibold mb-2">Historial de citas</p>
                           <div className="space-y-1.5">
                             {tAppointments.map(a => (
-                              <div key={a.id} className="flex items-center justify-between bg-black/20 rounded-xl px-3 py-2">
+                              <div key={a.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
                                 <div>
-                                  <p className="text-white text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
-                                  {a.notes && <p className="text-white/40 text-[10px]">{a.notes}</p>}
+                                  <p className="text-gray-900 text-xs">{a.appointmentDate} · {a.appointmentTime}</p>
+                                  {a.notes && <p className="text-gray-400 text-[10px]">{a.notes}</p>}
                                 </div>
                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                  a.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                                  a.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
-                                  'bg-blue-500/20 text-blue-400'
+                                  a.status === 'completed' ? 'bg-green-50 text-green-700' :
+                                  a.status === 'cancelled' ? 'bg-red-50 text-red-700' :
+                                  'bg-blue-50 text-blue-700'
                                 }`}>
-                                  {a.status === 'completed' ? '✅ Dada' :
-                                   a.status === 'cancelled' ? '❌ Perdida' : '📅 Programada'}
+                                  {a.status === 'completed' ? 'Dada' :
+                                   a.status === 'cancelled' ? 'Perdida' : 'Programada'}
                                 </span>
                               </div>
                             ))}
@@ -1082,23 +1076,48 @@ export default function MyTreatments() {
           </div>
         )}
 
+        {/* ── Tab: Fotos ── */}
+        {activeTab === "photos" && (
+          <div className="space-y-4">
+            {photos.length === 0 ? (
+              <div className="text-center py-12">
+                <Camera className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm">Aún no tienes fotos de seguimiento.</p>
+                <p className="text-gray-400 text-xs mt-1">El equipo de Nutriser las subirá conforme avance tu tratamiento.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {photos.map(photo => (
+                  <button key={photo.id} onClick={() => setSelectedPhoto(photo)} className="relative group rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-white">
+                    <img src={photo.photoUrl} alt="Foto" className="w-full aspect-square object-cover" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${photoTypeColor(photo.type)}`}>
+                        {photoTypeLabel(photo.type)}
+                      </span>
+                      <p className="text-white text-[10px] mt-0.5">{photo.photoDate}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── Tab: Contrato ── */}
         {activeTab === "consent" && (
           <div className="space-y-4">
             {patient?.consentAcceptedAt ? (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4">
+              <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  <h3 className="text-white font-bold text-sm">Consentimiento firmado</h3>
+                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  <h3 className="text-gray-900 font-bold text-sm">Consentimiento firmado</h3>
                 </div>
-                <p className="text-white/50 text-xs">
+                <p className="text-gray-500 text-xs">
                   Firmado el {new Date(patient.consentAcceptedAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}
                 </p>
                 {patient.consentPdfUrl && (
                   <button
                     onClick={() => {
-                      // En iOS WKWebView, target="_blank" no funciona — usar location directa
                       const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
                       if (isIOS) {
                         window.location.href = patient.consentPdfUrl!;
@@ -1114,14 +1133,13 @@ export default function MyTreatments() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <ShieldCheck className="w-10 h-10 text-white/20 mx-auto mb-2" />
-                <p className="text-white/40 text-sm">No has firmado el consentimiento aún.</p>
-                <Button onClick={() => setView("consent")} className="mt-3 bg-[#C5A55A] hover:bg-[#d4b46a] text-black text-xs">
+                <ShieldCheck className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500 text-sm">No has firmado el consentimiento aún.</p>
+                <Button onClick={() => setView("consent")} className="mt-3 bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs">
                   Firmar ahora
                 </Button>
               </div>
             )}
-
           </div>
         )}
           </div>
@@ -1133,7 +1151,7 @@ export default function MyTreatments() {
 
       {/* Modal foto ampliada */}
       {selectedPhoto && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setSelectedPhoto(null)}>
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setSelectedPhoto(null)}>
           <div className="relative max-w-sm w-full" onClick={e => e.stopPropagation()}>
             <button onClick={() => setSelectedPhoto(null)} className="absolute -top-10 right-0 text-white/60 hover:text-white">
               <X className="w-6 h-6" />

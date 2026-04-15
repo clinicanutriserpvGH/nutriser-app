@@ -1480,3 +1480,5 @@
 - [x] Mover Nutriser Web de Splash 0 a Splash 1
 - [x] Splash 0 queda solo con: Nutriser Home + Portal de Salud
 - [x] Splash 1 queda con: Nutriser Shop + Nutriser Academy + Nutriser Web
+- [x] Mejorar diseño de Mis Tratamientos: fondo integrado a la tienda (crema, dorado, mismo estilo)
+- [x] Botón Regresar en Mis Tratamientos debe llevar de vuelta a la tienda (/memberships)

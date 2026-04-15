@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Gift, Copy, Check, X, ArrowRight, Flame, Clock, AlertTriangle, Bell, BellRing } from "lucide-react";
 import { toast } from "sonner";
+import { checkIOSPushReadiness, isPushSupported, subscribeToPush } from "@/lib/pushHelper";
 
 type Step = "form" | "type" | "payment" | "success";
 
@@ -110,67 +111,48 @@ export default function PromotionsSection() {
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
 
   const handleEnablePush = async () => {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
-    // WKWebView (app nativa Xcode) no tiene serviceWorker — en ese caso no mostrar instrucciones de Safari
-    const isWKWebView = isIOS && !('serviceWorker' in navigator);
-
-    if (isIOS && !isInStandaloneMode && !isWKWebView) {
-      toast(
-        <div className="text-sm">
-          <p className="font-bold mb-1">📱 Paso previo en iPhone:</p>
-          <ol className="list-decimal list-inside space-y-1 text-xs">
-            <li>Toca el ícono <strong>Compartir</strong> (cuadro con flecha ↑) en Safari</li>
-            <li>Selecciona <strong>"Agregar a pantalla de inicio"</strong></li>
-            <li>Abre la app desde tu pantalla de inicio</li>
-            <li>Regresa aquí y activa las notificaciones</li>
-          </ol>
-        </div>,
-        { duration: 8000 }
-      );
+    // Check iOS readiness first
+    const iosCheck = checkIOSPushReadiness();
+    if (!iosCheck.ready) {
+      if (iosCheck.reason === 'not_standalone') {
+        toast(
+          <div className="text-sm">
+            <p className="font-bold mb-1">📱 Paso previo en iPhone:</p>
+            <ol className="list-decimal list-inside space-y-1 text-xs">
+              <li>Toca el ícono <strong>Compartir</strong> (cuadro con flecha ↑) en Safari</li>
+              <li>Selecciona <strong>"Agregar a pantalla de inicio"</strong></li>
+              <li>Abre la app desde tu pantalla de inicio</li>
+              <li>Regresa aquí y toca la campanita para activar notificaciones</li>
+            </ol>
+          </div>,
+          { duration: 10000 }
+        );
+      } else if (iosCheck.message) {
+        toast.error(iosCheck.message);
+      }
       return;
     }
-    
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+
+    if (!isPushSupported()) {
       toast.error("Las notificaciones push no están disponibles en este navegador.");
       return;
     }
+
     setPushLoading(true);
     try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        toast.error("Permiso de notificaciones denegado.");
-        setPushLoading(false);
-        return;
-      }
-      const reg = await navigator.serviceWorker.ready;
       const publicKey = vapidData?.publicKey || import.meta.env.VITE_VAPID_PUBLIC_KEY;
       if (!publicKey) { toast.error("Error de configuración."); setPushLoading(false); return; }
-      // Convert base64 to Uint8Array
-      const padding = '='.repeat((4 - publicKey.length % 4) % 4);
-      const base64 = (publicKey + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-      for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
 
-      // Reusar suscripción existente si ya hay una activa (evita duplicados)
-      let subscription = await reg.pushManager.getSubscription();
-      if (!subscription) {
-        subscription = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: outputArray,
-        });
-      }
-      const p256dhArr = new Uint8Array(subscription.getKey('p256dh')!);
-      const authArr = new Uint8Array(subscription.getKey('auth')!);
-      const p256dh = btoa(Array.from(p256dhArr).map(b => String.fromCharCode(b)).join(''));
-      const auth = btoa(Array.from(authArr).map(b => String.fromCharCode(b)).join(''));
-      // Obtener email guardado en localStorage (del proceso de suscripción a cupones)
+      const { endpoint, p256dh, auth } = await subscribeToPush(publicKey);
       const savedEmail = localStorage.getItem('nutriser_subscriber_email') || subEmail || undefined;
-      await pushSubscribeMutation.mutateAsync({ endpoint: subscription.endpoint, p256dh, auth, email: savedEmail || undefined });
+      await pushSubscribeMutation.mutateAsync({ endpoint, p256dh, auth, email: savedEmail || undefined });
     } catch (e: any) {
-      console.error('Push subscription error:', e);
-      toast.error("Error al activar notificaciones: " + e.message);
+      if (e?.message === 'PERMISSION_DENIED') {
+        toast.error("Permiso de notificaciones denegado. Ve a Ajustes > Nutriser > Notificaciones para activarlas.");
+      } else {
+        console.error('Push subscription error:', e);
+        toast.error("Error al activar notificaciones: " + (e?.message || 'Error desconocido'));
+      }
     }
     setPushLoading(false);
   };

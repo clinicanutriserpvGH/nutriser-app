@@ -1324,3 +1324,13 @@
 ### Bug navegación cupón desde tienda
 - [x] Botón Regresar en página del cupón SIGUE yendo al Splash 1 — CORREGIDO: query param ?from=store + z-index z-[60] en BackToSplash
 - [x] Banner carrusel clickeable navega al paquete correspondiente
+
+## Notificaciones Push en iPhone/iOS
+- [x] Diagnosticar por qué las notificaciones push no funcionan en iPhone
+- [x] Verificar manifest.json tiene los campos requeridos por iOS (display: standalone)
+- [x] Corregir service worker v4 compatible con iOS/Safari (sin vibrate, requireInteraction, actions)
+- [x] Corregir SplashSelector: VAPID key como Uint8Array (no string) — requerido por Safari
+- [x] Crear pushHelper.ts centralizado con detección iOS, conversión VAPID, y suscripción
+- [x] Refactorizar PromotionsSection y SplashSelector para usar pushHelper
+- [x] Agregar update forzado del SW en index.html para dispositivos con cache viejo
+- [x] Tests unitarios para push notifications server-side

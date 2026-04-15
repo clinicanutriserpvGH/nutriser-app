@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { checkIOSPushReadiness, isPushSupported, subscribeToPush, isIOSDevice, isPWAStandalone, isWKWebView as checkIsWKWebView } from "@/lib/pushHelper";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
@@ -90,11 +91,10 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [emailDone, setEmailDone] = useState(() => localStorage.getItem("nutriser_email_subscribed") === "true");
 
-  // Detectar iOS/Safari y WKWebView
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  const isPWA = window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
-  const isWKWebView = isIOS && !("serviceWorker" in navigator);
+  // iOS detection via pushHelper
+  const isIOS = isIOSDevice();
+  const isPWA = isPWAStandalone();
+  const isWKWebViewFlag = checkIsWKWebView();
 
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
 
@@ -131,48 +131,47 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   };
 
   const handleEnablePush = async () => {
-    if (isIOS && !isPWA && !isWKWebView) {
-      toast(
-        <div className="text-sm">
-          <p className="font-bold mb-1">📱 Paso previo en iPhone:</p>
-          <ol className="list-decimal list-inside space-y-1 text-xs">
-            <li>Toca el ícono <strong>Compartir</strong> (cuadro con flecha ↑) en Safari</li>
-            <li>Selecciona <strong>"Agregar a pantalla de inicio"</strong></li>
-            <li>Abre la app desde tu pantalla de inicio</li>
-            <li>Regresa aquí y activa las notificaciones</li>
-          </ol>
-        </div>,
-        { duration: 8000 }
-      );
+    // Check iOS readiness first
+    const iosCheck = checkIOSPushReadiness();
+    if (!iosCheck.ready) {
+      if (iosCheck.reason === 'not_standalone') {
+        toast(
+          <div className="text-sm">
+            <p className="font-bold mb-1">📱 Paso previo en iPhone:</p>
+            <ol className="list-decimal list-inside space-y-1 text-xs">
+              <li>Toca el ícono <strong>Compartir</strong> (cuadro con flecha ↑) en Safari</li>
+              <li>Selecciona <strong>"Agregar a pantalla de inicio"</strong></li>
+              <li>Abre la app desde tu pantalla de inicio</li>
+              <li>Regresa aquí y toca la campanita para activar notificaciones</li>
+            </ol>
+          </div>,
+          { duration: 10000 }
+        );
+      } else if (iosCheck.message) {
+        toast.error(iosCheck.message);
+      }
       return;
     }
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+
+    if (!isPushSupported()) {
       toast.error("Las notificaciones push no están disponibles en este navegador.");
       return;
     }
+
     setPushLoading(true);
     try {
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        toast.error("Permiso de notificaciones denegado.");
-        setPushLoading(false);
-        return;
-      }
-      const reg = await navigator.serviceWorker.ready;
       const publicKey = vapidData?.publicKey;
       if (!publicKey) throw new Error("No VAPID key");
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: publicKey,
-      });
-      const subJson = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
-      await pushSubscribeMutation.mutateAsync({
-        endpoint: subJson.endpoint,
-        p256dh: subJson.keys.p256dh,
-        auth: subJson.keys.auth,
-      });
-    } catch {
-      toast.error("No se pudieron activar las notificaciones.");
+
+      const { endpoint, p256dh, auth } = await subscribeToPush(publicKey);
+      await pushSubscribeMutation.mutateAsync({ endpoint, p256dh, auth });
+    } catch (e: any) {
+      if (e?.message === 'PERMISSION_DENIED') {
+        toast.error("Permiso de notificaciones denegado. Ve a Ajustes > Nutriser > Notificaciones para activarlas.");
+      } else {
+        console.error('Push subscription error:', e);
+        toast.error("No se pudieron activar las notificaciones.");
+      }
     } finally {
       setPushLoading(false);
     }
@@ -494,7 +493,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 )}
               </div>
 
-              {!isWKWebView && (
+              {!isWKWebViewFlag && (
                 <>
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-px bg-white/10" />
@@ -508,7 +507,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                       <div className="flex-1">
                         <p className="text-white font-semibold text-sm">Activa las notificaciones y no te pierdas nada</p>
                         <p className="text-white/50 text-xs mt-0.5">Recibe promociones y cupones exclusivos al instante</p>
-                        {isIOS && !isPWA && !isWKWebView && (
+                        {isIOS && !isPWA && !isWKWebViewFlag && (
                           <div className="mt-2 bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl p-3">
                             <p className="text-[#C5A55A] text-xs font-bold mb-1">📱 Para activar en iPhone:</p>
                             <ol className="text-white/60 text-[11px] space-y-0.5 list-decimal list-inside">

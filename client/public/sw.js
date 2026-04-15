@@ -1,5 +1,5 @@
-// Nutriser PWA Service Worker v3
-const CACHE_NAME = 'nutriser-v3';
+// Nutriser PWA Service Worker v4 — iOS/Safari compatible
+const CACHE_NAME = 'nutriser-v4';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -15,6 +15,9 @@ const STATIC_ASSETS = [
   '/icons/icon-512x512.png',
   '/icons/icon-512x512-maskable.png',
 ];
+
+// Detect iOS/Safari
+const isIOS = /iphone|ipad|ipod/i.test(self.navigator?.userAgent || '');
 
 // Install: cache static assets
 self.addEventListener('install', (event) => {
@@ -102,11 +105,11 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// ─── Push Notifications ────────────────────────────────────────────────────────
+// ─── Push Notifications (iOS/Safari compatible) ───────────────────────────────
 
 const NOTIFICATION_SOUND_URL = 'https://res.cloudinary.com/dikinwkjq/video/upload/v1774457153/nutriser-audio/notification-bell.mp3';
 
-// Reproduce el sonido de notificación en todas las pestañas abiertas
+// Play notification sound in all open tabs/windows
 async function playNotificationSound() {
   try {
     const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
@@ -114,7 +117,7 @@ async function playNotificationSound() {
       client.postMessage({ type: 'PLAY_NOTIFICATION_SOUND', url: NOTIFICATION_SOUND_URL });
     }
   } catch (e) {
-    // Silenciar errores si no hay clientes abiertos
+    // Silently fail if no clients are open
   }
 }
 
@@ -127,28 +130,29 @@ self.addEventListener('push', (event) => {
   }
 
   const title = data.title || 'Nutriser - Nueva Oferta';
+
+  // Build notification options — iOS/Safari compatible
+  // Safari does NOT support: vibrate, actions, requireInteraction, renotify
   const options = {
     body: data.body || 'Hay una nueva oferta disponible para ti.',
     icon: data.icon || '/icons/icon-192x192.png',
     badge: '/icons/icon-72x72.png',
-    vibrate: [200, 100, 200],
     tag: data.tag || 'nutriser-promo',
-    renotify: false,
-    requireInteraction: true,
     data: {
       url: data.url || 'https://nutriserpv.com',
     },
-    actions: [
-      {
-        action: 'open',
-        title: 'Ver Oferta',
-      },
-      {
-        action: 'close',
-        title: 'Cerrar',
-      },
-    ],
   };
+
+  // Only add non-iOS features when NOT on iOS
+  if (!isIOS) {
+    options.vibrate = [200, 100, 200];
+    options.requireInteraction = true;
+    options.renotify = false;
+    options.actions = [
+      { action: 'open', title: 'Ver Oferta' },
+      { action: 'close', title: 'Cerrar' },
+    ];
+  }
 
   event.waitUntil(
     Promise.all([
@@ -167,13 +171,17 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Try to focus an existing window first
       for (const client of clientList) {
-        if (client.url.includes('nutriserpv.com') && 'focus' in client) {
+        if ('focus' in client) {
           client.focus();
-          client.navigate(url);
+          if ('navigate' in client) {
+            client.navigate(url);
+          }
           return;
         }
       }
+      // Otherwise open a new window
       if (clients.openWindow) {
         return clients.openWindow(url);
       }
@@ -187,13 +195,15 @@ self.addEventListener('pushsubscriptionchange', (event) => {
       userVisibleOnly: true,
       applicationServerKey: event.oldSubscription?.options?.applicationServerKey,
     }).then((subscription) => {
+      const p256dhArr = new Uint8Array(subscription.getKey('p256dh'));
+      const authArr = new Uint8Array(subscription.getKey('auth'));
       return fetch('/api/trpc/push.subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           endpoint: subscription.endpoint,
-          p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')))),
-          auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))),
+          p256dh: btoa(Array.from(p256dhArr).map(b => String.fromCharCode(b)).join('')),
+          auth: btoa(Array.from(authArr).map(b => String.fromCharCode(b)).join('')),
         }),
       });
     })

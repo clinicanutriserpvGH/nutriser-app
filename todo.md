@@ -1411,3 +1411,10 @@
 - [x] Acreditar/debitar saldo manualmente
 - [x] Gestionar planes de lealtad (crear, editar, desactivar)
 - [x] Registrar compras y consultas para acumular progreso
+
+### Monedero dentro de Nutriser Shop
+- [x] Pestaña "Monedero" en tabs de Nutriser Shop que navega a /monedero
+- [x] Botón flotante circular con logo Nutriser (estilo Farmacia del Ahorro)
+- [x] Bottom sheet al presionar botón flotante: tarjeta monedero (QR, nombre, número, saldo)
+- [x] Botón "Ir a mi monedero" en bottom sheet que navega a /monedero
+- [x] Asegurar que funcione en móvil y desktop

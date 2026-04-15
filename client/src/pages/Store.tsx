@@ -9,11 +9,16 @@ import { toast } from "sonner";
 import {
   ShoppingBag, X, Upload, Loader2, Package, Search,
   User, LogOut, ChevronRight, ShoppingCart, MessageCircle,
+  Wallet, Copy,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
 import PromoSplash from "@/components/PromoSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
+
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 const CATEGORY_LABELS: Record<string, string> = {
   general: "General",
@@ -37,6 +42,16 @@ export default function Store() {
   const { patient, isLoggedIn, logout } = usePatientAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPromoSplash, setShowPromoSplash] = useState(true);
+  const [walletSheetOpen, setWalletSheetOpen] = useState(false);
+  const [, navigate] = useLocation();
+
+  // Wallet data for floating button & bottom sheet
+  const walletQuery = trpc.wallet.getMyWallet.useQuery(
+    { patientId: patient?.id ?? 0 },
+    { enabled: isLoggedIn && !!patient?.id }
+  );
+  const walletData = walletQuery.data;
+  const walletBalance = walletData?.wallet?.balance ?? 0;
 
   const { data: products = [], isLoading } = trpc.products.list.useQuery();
 
@@ -557,6 +572,134 @@ export default function Store() {
           </div>
         </div>
       )}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          BOTÓN FLOTANTE MONEDERO (estilo Farmacia del Ahorro)
+      ══════════════════════════════════════════════════════════════════════ */}
+      <button
+        onClick={() => {
+          if (!isLoggedIn) { setShowAuthModal(true); return; }
+          setWalletSheetOpen(true);
+        }}
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[68px] h-[68px] rounded-full bg-gradient-to-br from-[#C5A55A] to-[#B8963E] shadow-[0_4px_24px_rgba(197,165,90,0.5)] flex items-center justify-center border-[3px] border-white hover:scale-110 active:scale-95 transition-all"
+        aria-label="Mi Monedero Nutriser"
+      >
+        <img src={LOGO_URL} alt="Monedero Nutriser" className="w-11 h-11 rounded-full object-contain" />
+      </button>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          BOTTOM SHEET — TARJETA MONEDERO
+      ══════════════════════════════════════════════════════════════════════ */}
+      {walletSheetOpen && (
+        <div className="fixed inset-0 z-50">
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setWalletSheetOpen(false)} />
+          {/* Sheet */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto animate-[slideUp_0.3s_ease-out]">
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-gray-300" />
+            </div>
+            {/* Título */}
+            <h2 className="text-center text-lg font-bold text-gray-900 pb-3">Tu Monedero Nutriser</h2>
+            <div className="border-t border-gray-100" />
+
+            {/* Tarjeta del monedero */}
+            <div className="p-5">
+              <div className="bg-gradient-to-br from-[#FAF7F2] to-[#F5EFE3] rounded-2xl shadow-lg border border-[#E8DCC8] overflow-hidden">
+                {/* Header tarjeta */}
+                <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2D2D2D] px-5 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#C5A55A] font-black text-xs tracking-widest uppercase">Monedero Nutriser</span>
+                    <img src={LOGO_URL} alt="" className="w-6 h-6 rounded-full" />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded-full bg-[#C5A55A] flex items-center justify-center">
+                      <span className="text-white text-[9px] font-black">e$</span>
+                    </div>
+                    <span className="text-white font-black text-sm">{(walletBalance / 100).toFixed(0)}</span>
+                  </div>
+                </div>
+
+                {/* QR / Código */}
+                <div className="px-5 py-4 flex flex-col items-center">
+                  {walletData ? (
+                    <>
+                      <QRCodeSVG
+                        value={`${window.location.origin}/monedero`}
+                        size={120}
+                        level="M"
+                        bgColor="transparent"
+                        fgColor="#1A1A1A"
+                        className="mb-3"
+                      />
+                      <p className="font-bold text-gray-900 text-base tracking-wide">
+                        {patient?.name}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-gray-500 text-sm font-mono tracking-wider">
+                          {walletData.wallet.walletNumber}
+                        </p>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(walletData.wallet.walletNumber || "");
+                            toast.success("Número copiado");
+                          }}
+                          className="p-1 rounded hover:bg-gray-100 transition-colors"
+                        >
+                          <Copy className="w-3.5 h-3.5 text-gray-400" />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="py-6 text-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#C5A55A] mx-auto mb-2" />
+                      <p className="text-gray-400 text-sm">Cargando tu monedero...</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer tarjeta */}
+                <div className="px-5 pb-4 flex items-center justify-between">
+                  <img src={LOGO_URL} alt="Nutriser" className="h-8 object-contain opacity-60" />
+                  <p className="text-[10px] text-gray-400 font-medium">AESTHETIC & NUTRITION</p>
+                </div>
+              </div>
+
+              {/* Saldo y acciones */}
+              <div className="flex items-center justify-center gap-6 mt-4">
+                <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </button>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-6 h-6 rounded-full bg-[#C5A55A] flex items-center justify-center">
+                    <span className="text-white text-[9px] font-black">e$</span>
+                  </div>
+                  <span className="font-black text-[#C5A55A] text-lg">{(walletBalance / 100).toFixed(0)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Botón Ir a mi monedero */}
+            <div className="px-5 pb-8">
+              <button
+                onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }}
+                className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-2xl text-base hover:bg-[#2D2D2D] active:scale-[0.98] transition-all shadow-lg"
+              >
+                Ir a mi monedero
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSS animation for bottom sheet */}
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

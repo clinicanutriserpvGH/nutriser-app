@@ -1482,3 +1482,4 @@
 - [x] Splash 1 queda con: Nutriser Shop + Nutriser Academy + Nutriser Web
 - [x] Mejorar diseño de Mis Tratamientos: fondo integrado a la tienda (crema, dorado, mismo estilo)
 - [x] Botón Regresar en Mis Tratamientos debe llevar de vuelta a la tienda (/memberships)
+- [x] Bug: Carrito se borra al navegar a /monedero y regresar — persistir carrito en localStorage

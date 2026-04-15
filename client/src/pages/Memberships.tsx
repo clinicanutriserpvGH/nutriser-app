@@ -229,8 +229,24 @@ export default function Memberships() {
   const [showPromoSplash, setShowPromoSplash] = useState(true);
   const [pendingCartItem, setPendingCartItem] = useState<Omit<CartItem, "qty"> | null>(null);
 
-  // ─── Carrito unificado ──────────────────────────────────────────────
-  const [cart, setCart] = useState<CartItem[]>([]);
+  // ─── Carrito unificado (persistido en localStorage) ─────────────────
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem("nutriser-cart");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  // Sincronizar carrito con localStorage
+  useEffect(() => {
+    try {
+      if (cart.length > 0) {
+        localStorage.setItem("nutriser-cart", JSON.stringify(cart));
+      } else {
+        localStorage.removeItem("nutriser-cart");
+      }
+    } catch { /* ignore */ }
+  }, [cart]);
   const [cartOpen, setCartOpen] = useState(false);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);

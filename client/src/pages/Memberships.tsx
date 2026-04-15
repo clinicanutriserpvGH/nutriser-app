@@ -1291,7 +1291,7 @@ export default function Memberships() {
                 className="flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] transition-colors text-gray-400"
               >
                 <ClipboardList className="w-5 h-5" />
-                <span className="text-[8px] font-semibold leading-tight">Mis<br/>Tratam.</span>
+                <span className="text-[8px] font-semibold leading-tight">Mis<br/>Tratamientos</span>
               </button>
 
               {/* Cuenta */}

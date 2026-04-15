@@ -1351,3 +1351,9 @@
 - [x] Actualizar pushHelper.ts con soporte nativo (requestNativePushPermission, checkNativePushStatus)
 - [x] Empaquetar proyecto como ZIP (NutriserApp-iOS-Push.zip)
 - [x] Tests unitarios para apnsService
+
+## Bug: Sesión de paciente no se mantiene en la tienda
+- [x] La sesión no persistía después de iniciar sesión — CORREGIDO: usePatientAuth reescrito con useSyncExternalStore
+- [x] Causa raíz: múltiples instancias del hook useState no se sincronizaban entre modal y página
+- [x] Solución: PatientAuthStore singleton + useSyncExternalStore + listeners globales
+- [x] Verificado: sesión persiste después de recarga de página (localStorage funciona correctamente)

@@ -5,13 +5,18 @@
  *   - Nutriser Shop (/memberships)
  *   - Mis Tratamientos (/mis-tratamientos)
  *   - Nutriser Academy (/cursos)
+ *   - Store (/store)
  *
  * La sesión se persiste en localStorage bajo la clave "nutriser_patient" (unificada con MyTreatments).
  * Al hacer login/registro, se guarda el objeto del paciente (sin passwordHash).
  * Al hacer logout, se limpia el localStorage.
+ *
+ * IMPORTANTE: Usa un EventTarget global para sincronizar TODAS las instancias del hook
+ * dentro de la misma pestaña. Esto resuelve el bug donde el login en un modal
+ * no se reflejaba en el componente padre.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 
 export type PatientSession = {
   id: number;
@@ -29,60 +34,98 @@ export type PatientSession = {
 
 const SESSION_KEY = "nutriser_patient"; // clave unificada — misma que MyTreatments
 
-function loadSession(): PatientSession | null {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as PatientSession;
-  } catch {
-    return null;
+// ─── Global Store ────────────────────────────────────────────────────────────
+// Singleton que mantiene el estado y notifica a TODOS los suscriptores (hooks)
+// cuando cambia. Esto resuelve el problema de sincronización entre instancias.
+
+type Listener = () => void;
+
+class PatientAuthStore {
+  private listeners = new Set<Listener>();
+  private snapshot: PatientSession | null;
+
+  constructor() {
+    this.snapshot = this.readFromStorage();
+
+    // Escuchar cambios de localStorage desde OTRAS pestañas
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", (e) => {
+        if (e.key === SESSION_KEY) {
+          this.snapshot = e.newValue ? JSON.parse(e.newValue) : null;
+          this.emit();
+        }
+      });
+    }
+  }
+
+  private readFromStorage(): PatientSession | null {
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw) as PatientSession;
+    } catch {
+      return null;
+    }
+  }
+
+  private emit() {
+    Array.from(this.listeners).forEach((listener) => listener());
+  }
+
+  subscribe(listener: Listener): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  getSnapshot(): PatientSession | null {
+    return this.snapshot;
+  }
+
+  login(patient: PatientSession) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(patient));
+    this.snapshot = patient;
+    this.emit();
+  }
+
+  logout() {
+    localStorage.removeItem(SESSION_KEY);
+    this.snapshot = null;
+    this.emit();
+  }
+
+  updateSession(updates: Partial<PatientSession>) {
+    if (!this.snapshot) return;
+    const updated = { ...this.snapshot, ...updates };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
+    this.snapshot = updated;
+    this.emit();
   }
 }
 
-function saveSession(patient: PatientSession) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(patient));
-}
+// Singleton global — una sola instancia para toda la app
+const store = new PatientAuthStore();
 
-function clearSession() {
-  localStorage.removeItem(SESSION_KEY);
-}
+// ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function usePatientAuth() {
-  const [patient, setPatient] = useState<PatientSession | null>(() => loadSession());
-
-  // Sincronizar cambios de localStorage entre pestañas y al montar
-  useEffect(() => {
-    // Al montar, siempre leer del localStorage (por si cambió en otra pestaña o navegación)
-    const current = loadSession();
-    setPatient(current);
-
-    // Escuchar cambios de localStorage desde otras pestañas
-    const handler = (e: StorageEvent) => {
-      if (e.key === SESSION_KEY) {
-        setPatient(e.newValue ? JSON.parse(e.newValue) : null);
-      }
-    };
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
+  // useSyncExternalStore garantiza que TODAS las instancias del hook
+  // se actualicen cuando el store cambia (login, logout, updateSession)
+  const patient = useSyncExternalStore(
+    (cb) => store.subscribe(cb),
+    () => store.getSnapshot(),
+    () => null // server snapshot
+  );
 
   const login = useCallback((patientData: PatientSession) => {
-    saveSession(patientData);
-    setPatient(patientData);
+    store.login(patientData);
   }, []);
 
   const logout = useCallback(() => {
-    clearSession();
-    setPatient(null);
+    store.logout();
   }, []);
 
   const updateSession = useCallback((updates: Partial<PatientSession>) => {
-    setPatient(prev => {
-      if (!prev) return prev;
-      const updated = { ...prev, ...updates };
-      saveSession(updated);
-      return updated;
-    });
+    store.updateSession(updates);
   }, []);
 
   const isLoggedIn = patient !== null;

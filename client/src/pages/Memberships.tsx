@@ -372,10 +372,16 @@ export default function Memberships() {
   });
 
   const checkoutItems = buyNowItem ? [buyNowItem] : cart;
-  const checkoutTotal = checkoutItems.reduce((s, i) => s + i.price * i.qty, 0);
+  const checkoutTotal = checkoutItems.reduce((s, i) => s + (isNaN(i.price) ? 0 : i.price) * i.qty, 0);
+  const hasValidPrice = checkoutItems.every(i => !isNaN(i.price) && i.price > 0);
   const discountedTotal = discountInfo?.valid && discountInfo.discount
     ? Math.round(checkoutTotal * (1 - discountInfo.discount / 100))
     : discountInfo?.isGift ? 0 : checkoutTotal;
+  // Cashback: 1% de la compra (en centavos)
+  const cashbackAmount = hasValidPrice ? Math.round(discountedTotal * 0.01) : 0;
+  // Monto final a transferir (considerando monedero)
+  const transferAmount = Math.max(0, (discountInfo?.isGift ? 0 : discountedTotal) - (useWallet ? walletAmount / 100 : 0));
+  const fullyCoveredByWallet = useWallet && transferAmount <= 0;
 
   const openCheckout = (item?: CartItem) => {
     if (!isLoggedIn) {
@@ -413,8 +419,42 @@ export default function Memberships() {
     if (!buyerName.trim()) { toast.error("Ingresa tu nombre"); return; }
     if (!buyerEmail.trim()) { toast.error("Ingresa tu correo"); return; }
     if (!buyerPhone.trim()) { toast.error("Ingresa tu teléfono"); return; }
-    if (!proofFile) { toast.error("Sube el comprobante de pago"); return; }
+    if (!fullyCoveredByWallet && !proofFile) { toast.error("Sube el comprobante de pago"); return; }
     setIsSubmitting(true);
+
+    // Si paga todo con monedero, hacer redeem y no necesita comprobante
+    if (fullyCoveredByWallet) {
+      try {
+        const itemNames = checkoutItems.map(i => `${i.qty}x ${i.name}`).join(", ");
+        await walletRedeemMutation.mutateAsync({
+          patientId: patient?.id || 0,
+          amount: walletAmount,
+          description: `Compra con monedero: ${itemNames}`,
+        });
+        setSuccessCode("MONEDERO");
+        walletQuery.refetch();
+      } catch (err: any) {
+        toast.error("Error al procesar pago con monedero: " + (err?.message || "Intenta de nuevo"));
+      }
+      setIsSubmitting(false);
+      return;
+    }
+    // Pago con transferencia (con o sin monedero parcial)
+    if (useWallet && walletAmount > 0) {
+      try {
+        const itemNames = checkoutItems.map(i => `${i.qty}x ${i.name}`).join(", ");
+        await walletRedeemMutation.mutateAsync({
+          patientId: patient?.id || 0,
+          amount: walletAmount,
+          description: `Pago parcial monedero: ${itemNames}`,
+        });
+        walletQuery.refetch();
+      } catch (err: any) {
+        toast.error("Error al descontar monedero: " + (err?.message || ""));
+        setIsSubmitting(false);
+        return;
+      }
+    }
     const reader = new FileReader();
     reader.onload = async (ev) => {
       const base64 = (ev.target?.result as string).split(",")[1];
@@ -429,7 +469,7 @@ export default function Memberships() {
           buyerPhone: buyerPhone || undefined,
           quantity: firstItem.qty,
           proofData: base64,
-          proofMimeType: proofFile.type,
+          proofMimeType: proofFile!.type,
         });
       } else if (firstItem?.itemType === "ebook" && firstItem.ebookId) {
         ebookPurchaseMutation.mutate({
@@ -443,14 +483,14 @@ export default function Memberships() {
           serviceName: itemNames,
           buyerName, buyerEmail, buyerPhone,
           proofData: base64,
-          proofMimeType: proofFile.type,
+          proofMimeType: proofFile!.type,
           discountCode: discountInfo?.valid ? discountCode.trim() : undefined,
           discountPercent: discountInfo?.valid ? (discountInfo.discount ?? 0) : undefined,
           originalPrice: `$${checkoutTotal.toLocaleString("es-MX")} MXN`,
         });
       }
     };
-    reader.readAsDataURL(proofFile);
+    reader.readAsDataURL(proofFile!);
   };
 
   // ─── Render ─────────────────────────────────────────────────────
@@ -1243,7 +1283,7 @@ export default function Memberships() {
                   ))}
                   <div className="border-t border-gray-200 pt-2 flex items-center justify-between font-bold">
                     <span className="text-gray-900">Total</span>
-                    <span className="text-[#C5A55A]">${checkoutTotal.toLocaleString("es-MX")} MXN</span>
+                    <span className="text-[#C5A55A]">{hasValidPrice ? `$${checkoutTotal.toLocaleString("es-MX")} MXN` : "Consultar precio"}</span>
                   </div>
                 </div>
                 {/* Código de descuento */}
@@ -1296,31 +1336,37 @@ export default function Memberships() {
                   </div>
                 )}
                 {/* Monedero Nutriser */}
-                {isLoggedIn && walletBalance > 0 && (
+                {isLoggedIn && hasValidPrice && (
                   <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Monedero Nutriser</p>
+                    {/* Saldo y opción de usar */}
                     <div className={`border rounded-xl p-3 transition-all ${useWallet ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
-                      <label className="flex items-center gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={useWallet}
-                          onChange={(e) => {
-                            setUseWallet(e.target.checked);
-                            if (e.target.checked) {
-                              const maxApply = Math.min(walletBalance, discountedTotal);
-                              setWalletAmount(maxApply);
-                            } else {
-                              setWalletAmount(0);
-                            }
-                          }}
-                          className="w-4 h-4 accent-[#C5A55A]"
-                        />
-                        <Wallet className="w-5 h-5 text-[#C5A55A]" />
+                      <div className="flex items-center gap-3">
+                        <Wallet className="w-5 h-5 text-[#C5A55A] flex-shrink-0" />
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
-                          <p className="text-xs text-gray-500">Saldo disponible: <span className="font-bold text-[#C5A55A]">${(walletBalance / 100).toFixed(2)} MXN</span></p>
+                          <p className="text-sm font-semibold text-gray-800">Tu saldo</p>
+                          <p className="text-xs text-gray-500">Disponible: <span className="font-bold text-[#C5A55A]">${(walletBalance / 100).toFixed(2)} MXN</span></p>
                         </div>
-                      </label>
+                      </div>
+                      {walletBalance > 0 && (
+                        <label className="flex items-center gap-3 cursor-pointer mt-2 pt-2 border-t border-gray-200">
+                          <input
+                            type="checkbox"
+                            checked={useWallet}
+                            onChange={(e) => {
+                              setUseWallet(e.target.checked);
+                              if (e.target.checked) {
+                                const maxApply = Math.min(walletBalance, discountedTotal * 100);
+                                setWalletAmount(maxApply);
+                              } else {
+                                setWalletAmount(0);
+                              }
+                            }}
+                            className="w-4 h-4 accent-[#C5A55A]"
+                          />
+                          <span className="text-sm text-gray-700">Usar saldo para pagar</span>
+                        </label>
+                      )}
                       {useWallet && (
                         <div className="mt-2 pt-2 border-t border-gray-200">
                           <div className="flex items-center justify-between text-sm">
@@ -1328,53 +1374,69 @@ export default function Memberships() {
                             <span className="font-bold text-green-600">-${(walletAmount / 100).toFixed(2)} MXN</span>
                           </div>
                           <div className="flex items-center justify-between text-sm mt-1">
-                            <span className="text-gray-600">Restante a transferir:</span>
-                            <span className="font-bold text-[#C5A55A]">${((discountedTotal * 100 - walletAmount) / 100).toFixed(2)} MXN</span>
+                            <span className="text-gray-600">{fullyCoveredByWallet ? "Cubierto con monedero" : "Restante a transferir:"}:</span>
+                            <span className={`font-bold ${fullyCoveredByWallet ? 'text-green-600' : 'text-[#C5A55A]'}`}>
+                              {fullyCoveredByWallet ? "$0.00 MXN" : `$${transferAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN`}
+                            </span>
                           </div>
                         </div>
                       )}
                     </div>
-                  </div>
-                )}
-                {/* Datos bancarios */}
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
-                  <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Datos para transferencia</p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-500">Banco: <span className="font-bold text-gray-700">{BANK_INFO.bank}</span></p>
-                      <p className="text-xs text-gray-500">CLABE: <span className="font-bold font-mono text-gray-700">{BANK_INFO.account}</span></p>
-                    </div>
-                    <CopyButton text={BANK_INFO.account} />
-                  </div>
-                  <p className="text-xs text-gray-500">Monto: <span className="font-black text-[#C5A55A]">${((discountInfo?.isGift ? 0 : discountedTotal) - (useWallet ? walletAmount / 100 : 0)).toLocaleString("es-MX")} MXN</span>{useWallet && walletAmount > 0 && <span className="text-green-600 text-[10px] ml-1">(monedero: -${(walletAmount / 100).toFixed(2)})</span>}</p>
-                </div>
-                {/* Comprobante */}
-                <div>
-                  <Label className="text-sm text-gray-600">Comprobante de pago *</Label>
-                  <label className="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-5 cursor-pointer hover:border-[#C5A55A] hover:bg-amber-50/50 transition-all">
-                    {proofFile ? (
-                      <div className="text-center">
-                        <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-1" />
-                        <p className="text-sm font-semibold text-green-700">{proofFile.name}</p>
-                        <p className="text-xs text-gray-400">Toca para cambiar</p>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <Upload className="w-8 h-8 text-gray-300 mx-auto mb-1" />
-                        <p className="text-sm font-semibold text-gray-600">Subir comprobante</p>
-                        <p className="text-xs text-gray-400">JPG, PNG o PDF — máx. 5MB</p>
+                    {/* Cashback informativo */}
+                    {cashbackAmount > 0 && (
+                      <div className="mt-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
+                        <Gift className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                        <p className="text-xs text-emerald-700">
+                          Con esta compra ganarás <span className="font-bold">${cashbackAmount.toLocaleString("es-MX")} MXN</span> de cashback en tu monedero
+                          <span className="text-emerald-500 block text-[10px] mt-0.5">(disponible para tu próxima compra)</span>
+                        </p>
                       </div>
                     )}
-                    <input type="file" accept="image/jpeg,image/png,application/pdf" className="hidden" onChange={e => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
-                      setProofFile(file);
-                    }} />
-                  </label>
-                </div>
+                  </div>
+                )}
+                {/* Datos bancarios — ocultar si el monedero cubre todo */}
+                {!fullyCoveredByWallet && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+                    <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Datos para transferencia</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-gray-500">Banco: <span className="font-bold text-gray-700">{BANK_INFO.bank}</span></p>
+                        <p className="text-xs text-gray-500">CLABE: <span className="font-bold font-mono text-gray-700">{BANK_INFO.account}</span></p>
+                      </div>
+                      <CopyButton text={BANK_INFO.account} />
+                    </div>
+                    <p className="text-xs text-gray-500">Monto: <span className="font-black text-[#C5A55A]">{hasValidPrice ? `$${transferAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN` : "Consultar precio"}</span>{useWallet && walletAmount > 0 && <span className="text-green-600 text-[10px] ml-1">(monedero: -${(walletAmount / 100).toFixed(2)})</span>}</p>
+                  </div>
+                )}
+                {/* Comprobante — solo si necesita transferir */}
+                {!fullyCoveredByWallet && (
+                  <div>
+                    <Label className="text-sm text-gray-600">Comprobante de pago *</Label>
+                    <label className="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-5 cursor-pointer hover:border-[#C5A55A] hover:bg-amber-50/50 transition-all">
+                      {proofFile ? (
+                        <div className="text-center">
+                          <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-1" />
+                          <p className="text-sm font-semibold text-green-700">{proofFile.name}</p>
+                          <p className="text-xs text-gray-400">Toca para cambiar</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 text-gray-300 mx-auto mb-1" />
+                          <p className="text-sm font-semibold text-gray-600">Subir comprobante</p>
+                          <p className="text-xs text-gray-400">JPG, PNG o PDF — máx. 5MB</p>
+                        </div>
+                      )}
+                      <input type="file" accept="image/jpeg,image/png,application/pdf" className="hidden" onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
+                        setProofFile(file);
+                      }} />
+                    </label>
+                  </div>
+                )}
                 <Button type="submit" disabled={isSubmitting} className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-black py-3.5 text-base rounded-xl shadow-md">
-                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Enviar comprobante y confirmar pedido"}
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (fullyCoveredByWallet ? "Confirmar compra con monedero" : "Enviar comprobante y confirmar pedido")}
                 </Button>
               </form>
             )}

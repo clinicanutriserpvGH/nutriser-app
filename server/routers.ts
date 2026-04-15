@@ -205,6 +205,35 @@ export const appRouter = router({
             membership.accessCode || undefined,
             membership.programName || undefined
           );
+
+          // ── Auto-acreditar cashback al monedero del paciente ──
+          try {
+            const patient = await getPatientByEmail(membership.clientEmail);
+            if (patient) {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet && wallet.isActive) {
+                const priceInCents = Math.round(parseFloat(String(membership.price)) * 100);
+                if (priceInCents > 0) {
+                  const CASHBACK_PERCENT = 1; // 1% cashback
+                  const cashbackAmount = Math.round(priceInCents * CASHBACK_PERCENT / 100);
+                  if (cashbackAmount > 0) {
+                    await addWalletTransaction({
+                      walletId: wallet.id,
+                      type: 'cashback',
+                      amount: cashbackAmount,
+                      description: `Cashback ${CASHBACK_PERCENT}% por compra: ${membership.programName || membership.programType}`,
+                      referenceType: 'membership',
+                      referenceId: membership.id,
+                      createdBy: 'system',
+                    });
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.error('[Cashback] Error al acreditar cashback automático:', e);
+            // No bloquear la verificación si falla el cashback
+          }
         }
         
         return membership;
@@ -2641,6 +2670,64 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const wallet = await createWallet(input.patientId);
         return wallet;
+      }),
+
+    // Registrar compra presencial (admin escanea QR)
+    adminRegisterPresentialPurchase: publicProcedure
+      .input(z.object({
+        walletNumber: z.string(),
+        itemType: z.enum(['service', 'package', 'product']),
+        itemName: z.string(),
+        itemPrice: z.number().min(0), // centavos
+        cashbackPercent: z.number().min(0).max(100).default(1),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        if (!wallet.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Monedero desactivado' });
+
+        const cashbackAmount = Math.round(input.itemPrice * (input.cashbackPercent / 100));
+        
+        // Acreditar cashback al monedero
+        if (cashbackAmount > 0) {
+          await addWalletTransaction({
+            walletId: wallet.id,
+            type: 'cashback',
+            amount: cashbackAmount,
+            description: `Cashback ${input.cashbackPercent}% por ${input.itemType}: ${input.itemName}${input.notes ? ` (${input.notes})` : ''}`,
+            referenceType: `presential_${input.itemType}`,
+            createdBy: 'admin',
+          });
+        }
+
+        const patient = await getPatientById(wallet.patientId);
+        return {
+          success: true,
+          patientName: patient?.name || 'Usuario',
+          cashbackAmount,
+          newBalance: wallet.balance + cashbackAmount,
+        };
+      }),
+
+    // Buscar monedero completo por número (admin — para QR scan)
+    adminLookupByNumber: publicProcedure
+      .input(z.object({ walletNumber: z.string() }))
+      .query(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        const patient = await getPatientById(wallet.patientId);
+        const transactions = await getWalletTransactions(wallet.id, 10);
+        return {
+          walletId: wallet.id,
+          walletNumber: wallet.walletNumber,
+          patientName: patient?.name || 'Usuario',
+          patientEmail: patient?.email || '',
+          patientPhone: patient?.phone || '',
+          balance: wallet.balance,
+          isActive: wallet.isActive,
+          recentTransactions: transactions,
+        };
       }),
   }),
 });

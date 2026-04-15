@@ -1494,4 +1494,31 @@
 - [x] Reducir tamaño de los botones de navegación (INICIO/Regresar) para que no sean tan grandes
 - [x] Botón Regresar dentro de la tienda (al ver servicio/categoría) debe regresar a la tienda, no al Splash
 - [x] Tabletas (iPad) deben detectarse como móviles y mostrar Splashes, no el sitio web de escritorio
-- [ ] Optimizar layout del Splash 1 (hub) para que se vea bien en tabletas (iPad)
+- [x] Optimizar layout del Splash 1 (hub) para que se vea bien en tabletas (iPad)
+
+## Monedero en Checkout y Sistema QR Presencial
+
+### Bug Fix
+- [x] Corregir bug "$NaN MXN" cuando servicio tiene precio "Consultar precio"
+
+### Checkout - Integración Monedero
+- [x] Mostrar saldo disponible del monedero en modal Finalizar Compra
+- [x] Opción checkbox/toggle para usar saldo del monedero para pagar
+- [x] Si saldo cubre todo → no necesita subir comprobante
+- [x] Si saldo no cubre todo → pagar diferencia por transferencia
+- [x] Mostrar cuánto cashback ganará con esta compra (informativo, no usable ahora)
+- [x] Cashback se acredita solo después de que admin verifica comprobante (online)
+
+### QR del Usuario
+- [x] Generar QR único por usuario (vinculado a su cuenta) (ya existía)
+- [x] Mostrar QR en la pestaña Monedero de la tienda (ya existía)
+- [x] QR debe contener ID del usuario para identificarlo (ya existía)
+
+### Panel Admin - Compras Presenciales
+- [x] Agregar opción "Escanear QR" en panel admin
+- [x] Al escanear QR → abrir monedero del usuario
+- [x] Mostrar opciones de servicios/paquetes/productos para seleccionar qué compró
+- [x] Al confirmar → acreditar cashback correspondiente al monedero del usuario
+
+### Acreditación Automática Online
+- [x] Al verificar comprobante de compra online → acreditar cashback automáticamente al monedero

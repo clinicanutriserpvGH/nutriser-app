@@ -12,10 +12,12 @@ import { toast } from "sonner";
 import {
   Search, Plus, Minus, CreditCard,
   Gift, Star, ChevronDown, ChevronUp, Loader2,
-  DollarSign, Users, Award, Trash2, Calendar,
+  DollarSign, Users, Award, Trash2, Calendar, QrCode,
 } from "lucide-react";
 
-type SubTab = "wallets" | "loyalty" | "plans";
+import AdminQRScanner from "./AdminQRScanner";
+
+type SubTab = "wallets" | "loyalty" | "plans" | "qrscan";
 
 export default function AdminWalletTab() {
   const [subTab, setSubTab] = useState<SubTab>("wallets");
@@ -112,6 +114,7 @@ export default function AdminWalletTab() {
       {/* Sub-tabs */}
       <div className="flex gap-2 border-b border-gray-200 pb-2">
         {([
+          { key: "qrscan" as SubTab, label: "Escanear QR", icon: QrCode },
           { key: "wallets" as SubTab, label: "Tarjetas", icon: CreditCard },
           { key: "loyalty" as SubTab, label: "Registrar Lealtad", icon: Star },
           { key: "plans" as SubTab, label: "Planes de Producto", icon: Gift },
@@ -130,6 +133,9 @@ export default function AdminWalletTab() {
           </button>
         ))}
       </div>
+
+      {/* ═══ SUB-TAB: Escanear QR ═══ */}
+      {subTab === "qrscan" && <AdminQRScanner />}
 
       {/* ═══ SUB-TAB: Tarjetas ═══ */}
       {subTab === "wallets" && (

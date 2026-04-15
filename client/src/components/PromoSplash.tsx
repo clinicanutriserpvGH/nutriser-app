@@ -220,9 +220,9 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: Pro
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
 
-  // Total slides = active promos + 1 monedero promo card (always at the end)
+  // Total slides = 1 monedero promo card (always FIRST) + active promos
   const totalSlides = activePromos.length + 1;
-  const isMonederoSlide = currentIndex >= activePromos.length;
+  const isMonederoSlide = currentIndex === 0;
 
   // Show if there are promos OR we always show the monedero card
   const shouldShow = totalSlides > 0 && !dismissed;
@@ -290,14 +290,14 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: Pro
           )}
         </div>
 
-        {/* Card — either promo or monedero */}
+        {/* Card — monedero first, then promos */}
         {isMonederoSlide ? (
           <MonederoPromoCard onAction={handleMonederoAction} />
         ) : (
-          activePromos[currentIndex] && (
+          activePromos[currentIndex - 1] && (
             <PromoCard
-              promo={activePromos[currentIndex]}
-              onAction={() => handleAction(activePromos[currentIndex].id)}
+              promo={activePromos[currentIndex - 1]}
+              onAction={() => handleAction(activePromos[currentIndex - 1].id)}
             />
           )
         )}

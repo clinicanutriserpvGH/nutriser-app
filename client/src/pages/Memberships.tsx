@@ -13,7 +13,7 @@ import {
   Loader2, Copy, CheckCheck, Apple, Sparkles, Scan, Syringe,
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
   Search, ArrowLeft, Upload, BookOpen, FlaskConical, User,
-  Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin,
+  Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
@@ -1274,12 +1274,24 @@ export default function Memberships() {
               {/* Library */}
               <button
                 onClick={() => setActiveTab("library")}
-                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[56px] transition-colors ${
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] transition-colors ${
                   activeTab === "library" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
                 <BookOpen className="w-5 h-5" />
                 <span className="text-[9px] font-semibold leading-tight">Library</span>
+              </button>
+
+              {/* Mis Tratamientos */}
+              <button
+                onClick={() => {
+                  if (!isLoggedIn) { setShowAuthModal(true); return; }
+                  navigate("/mis-tratamientos");
+                }}
+                className="flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] transition-colors text-gray-400"
+              >
+                <ClipboardList className="w-5 h-5" />
+                <span className="text-[8px] font-semibold leading-tight">Mis<br/>Tratam.</span>
               </button>
 
               {/* Cuenta */}
@@ -1288,7 +1300,7 @@ export default function Memberships() {
                   if (!isLoggedIn) { setShowAuthModal(true); return; }
                   navigate("/monedero");
                 }}
-                className="flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[56px] transition-colors text-gray-400"
+                className="flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] transition-colors text-gray-400"
               >
                 <User className="w-5 h-5" />
                 <span className="text-[9px] font-semibold leading-tight">Cuenta</span>

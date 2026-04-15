@@ -1474,3 +1474,9 @@
 - [x] Quitar el cuadro blanco separado del logo, integrar logo en la tarjeta misma
 - [x] Mover/ocultar botón de sonido para que no estorbe
 - [x] Quitar botón de sonido de la tienda (Memberships), dejarlo solo en el sitio web principal (Home)
+- [x] Agregar pestaña 'Mis Tratamientos' en la barra inferior de la tienda (al lado de Cuenta)
+- [x] Quitar 'Mis Tratamientos' del Splash 1 (hub Nutriser Web) para simplificar navegación
+- [x] Quitar descripción 'Shop · Academy · Mis Tratamientos' de la tarjeta Nutriser Home en Splash 0
+- [x] Mover Nutriser Web de Splash 0 a Splash 1
+- [x] Splash 0 queda solo con: Nutriser Home + Portal de Salud
+- [x] Splash 1 queda con: Nutriser Shop + Nutriser Academy + Nutriser Web

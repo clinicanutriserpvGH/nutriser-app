@@ -1,11 +1,10 @@
 /*
  * Splash0Entry — Pantalla de entrada principal (Splash 0)
  * Solo para móvil/tablet (PC va directo al sitio web)
- * Grid asimétrico:
- *   - Columna izquierda (40%): Nutriser Home (arriba) + Nutriser Web (abajo)
- *   - Columna derecha (60%): Portal de Salud Nutriser (grande, prominente)
+ * Grid de 2 tarjetas:
+ *   - Nutriser Home → abre Splash 1 (Shop + Academy + Web)
+ *   - Portal de Salud Nutriser → app externa
  * En móvil: apilado vertical
- * Al tocar "Nutriser Web" → abre Splash 1 (Shop + Academy + Mis Tratamientos + login)
  */
 import { useState } from "react";
 import { Home, Globe, Utensils, Camera, ClipboardList, PauseCircle, ShoppingCart, BookOpen, Ruler, Repeat2, CalendarCheck, Moon, Sun } from "lucide-react";
@@ -23,7 +22,7 @@ const NUTRISER_WEB_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-imac-web-T2sERsyMxZB3iGgxpbi7eW.webp";
 
 interface Splash0EntryProps {
-  onEnterNutriserWeb: () => void; // → muestra Splash 1 (Shop + Academy + Mis Tratamientos)
+  onEnterNutriserWeb: () => void; // → muestra Splash 1 (Shop + Academy + Web)
   onGoToWebsite?: () => void; // → navega al sitio web externo nutriserpv.com
   onNavigate?: (path: string) => void; // → navegar a ruta interna
 }
@@ -104,19 +103,16 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             </div>
           </div>
 
-          {/* ── Grid principal asimétrico ── */}
-          {/* Móvil: columna única | Tablet (md+): 40% izquierda + 60% derecha */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4 lg:gap-5 mb-3 flex-1 min-h-0">
+          {/* ── Grid principal — 2 tarjetas: Nutriser Home + Portal de Salud ── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-5 mb-3 flex-1 min-h-0">
 
-            {/* ── Columna izquierda (40%) — Nutriser Home + Nutriser Web ── */}
-            <div className="md:col-span-2 flex flex-col gap-3 h-full">
-
-              {/* Tarjeta 1: Nutriser Home → Splash 1 (Shop + Academy + Mis Tratamientos) */}
+            {/* Tarjeta 1: Nutriser Home → Splash 1 (Shop + Academy + Web) */}
+            <div className="h-full">
               <button
                 type="button"
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNutriserHome(); }}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1 cursor-pointer"
-                style={{ minHeight: "120px", WebkitTapHighlightColor: "transparent" }}
+                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full cursor-pointer"
+                style={{ minHeight: "200px", WebkitTapHighlightColor: "transparent" }}
               >
                 <img
                   src={CLINIC_IMG2}
@@ -125,60 +121,26 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   style={{ objectPosition: "35% 50%", objectFit: "cover" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-black/90 pointer-events-none" />
-                <div className="absolute inset-0 flex flex-col justify-between p-4 text-left pointer-events-none">
+                <div className="absolute inset-0 flex flex-col justify-between p-5 text-left pointer-events-none">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
-                      <Home className="w-4 h-4 text-black" />
+                    <div className="w-9 h-9 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
+                      <Home className="w-4.5 h-4.5 text-black" />
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-1 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
+                    <h2 className="text-2xl sm:text-3xl font-bold leading-tight mb-2 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
                       Nutriser Home
                     </h2>
-                    <p className="text-white/90 text-[11px] mb-2" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>Shop · Academy · Mis Tratamientos</p>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
+                    <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
                       Entrar
                     </span>
                   </div>
                 </div>
               </button>
-
-              {/* Tarjeta 2: Nutriser Web → sitio web real */}
-              <button
-                type="button"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleNutriserWeb(); }}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none flex-1 cursor-pointer"
-                style={{ minHeight: "100px", background: "none", border: "none", padding: 0, WebkitTapHighlightColor: "transparent" }}
-              >
-                <img
-                  src={NUTRISER_WEB_IMG}
-                  alt="Nutriser Web"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                  style={{ objectPosition: "center center", objectFit: "cover" }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/85 pointer-events-none" />
-                <div className="absolute inset-0 flex flex-col justify-between p-4 text-left pointer-events-none">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
-                      <Globe className="w-4 h-4 text-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-bold leading-tight mb-1 drop-shadow-lg text-white">
-                      Nutriser Web
-                    </h2>
-                    <p className="text-white/70 text-[11px] mb-2">Sitio web oficial</p>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
-                      <Globe className="w-3 h-3" /> Ver sitio
-                    </span>
-                  </div>
-                </div>
-              </button>
-
             </div>
 
-            {/* ── Columna derecha (60%) — Portal de Salud (grande) ── */}
-            <div className="md:col-span-3 h-full">
+            {/* Tarjeta 2: Portal de Salud Nutriser (grande) */}
+            <div className="h-full">
               <button
                 type="button"
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePortalSalud(); }}

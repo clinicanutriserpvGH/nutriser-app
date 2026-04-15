@@ -10,7 +10,7 @@
  */
 import { useState } from "react";
 import {
-  Bell, BellRing, Check, GraduationCap, Loader2,
+  Bell, BellRing, Check, Globe, GraduationCap, Loader2,
   LogIn, LogOut, Moon, ShoppingBag, Sparkles, Sun, User, X,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -353,7 +353,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             )}
           </div>
 
-          {/* ── 3 Tarjetas: Shop + Academy + Mis Tratamientos ── */}
+          {/* ── 3 Tarjetas: Shop + Academy + Nutriser Web ── */}
           <div className="flex flex-col gap-2 mb-2 flex-1">
 
             {/* Tarjeta 1: Nutriser Shop */}
@@ -408,27 +408,26 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </button>
             </div>
 
-            {/* Tarjeta 3: Mis Tratamientos */}
+            {/* Tarjeta 3: Nutriser Web → sitio web oficial */}
             <div className="flex-1 min-h-[130px]">
               <button
-                onClick={() => handleNavigate('/mis-tratamientos')}
+                onClick={() => { if (onEnterSite) onEnterSite(); }}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
                 style={{ minHeight: "130px" }}
               >
-                <img src={IMG_TRATAMIENTOS} alt="Mis Tratamientos" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 25%' }} />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/85" />
+                <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-imac-web-T2sERsyMxZB3iGgxpbi7eW.webp" alt="Nutriser Web" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/85" />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 text-left">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]/80 backdrop-blur-sm">
-                      <Sparkles className="w-4 h-4 text-black" />
+                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
+                      <Globe className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">Mi Portal</span>
+                    <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">Sitio Web</span>
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold leading-tight mb-1 drop-shadow-lg text-white">Mis Tratamientos</h2>
-                    <p className="text-white/70 text-[11px] mb-2">Seguimiento a mis paquetes y compras</p>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A]/80 backdrop-blur-sm text-white border border-[#C5A55A]/40">
-                      <Sparkles className="w-3 h-3" /> Acceder
+                    <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Web</h2>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
+                      <Globe className="w-3 h-3" /> Ver sitio
                     </span>
                   </div>
                 </div>

@@ -1311,104 +1311,69 @@ export default function Memberships() {
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-gray-300" />
             </div>
-            {/* Logo grande + título */}
-            <div className="text-center pb-3">
-              <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-icon-1024_dccbcd3f.png" alt="Nutriser" className="w-28 h-auto object-contain mx-auto mb-1" />
+            {/* Título */}
+            <div className="text-center pb-3 px-5">
               <h2 className="text-lg font-bold text-gray-900">Tu Monedero Nutriser</h2>
             </div>
-            <div className="border-t border-gray-100" />
 
-            {/* ── Tarjeta rediseñada estilo premium ── */}
-            <div className="px-5 pt-5 pb-3">
-              <div className="relative bg-gradient-to-br from-[#1A1A1A] via-[#222222] to-[#1A1A1A] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden border border-[#C5A55A]/25">
-                {/* Gold line at top */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#C5A55A] to-transparent" />
-                {/* Decorative gold accents */}
-                <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-[#C5A55A]/8 to-transparent rounded-bl-full" />
-                <div className="absolute bottom-0 left-0 w-28 h-28 bg-gradient-to-tr from-[#C5A55A]/6 to-transparent rounded-tr-full" />
+            {/* ── Tarjeta compacta estilo Farmacias del Ahorro ── */}
+            <div className="px-5 pb-3">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                {/* Top dark section with logo + card info */}
+                <div className="bg-gradient-to-br from-[#1A1A1A] via-[#222] to-[#1A1A1A] p-4 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#C5A55A] to-transparent" />
+                  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-[#C5A55A]/8 to-transparent rounded-bl-full" />
 
-                <div className="relative z-10 p-5">
-                  {/* Card header */}
-                  <div className="flex items-start justify-between mb-1">
-                    <div>
-                      <h3 className="text-[#C5A55A] font-black text-sm tracking-widest uppercase">Monedero Nutriser</h3>
-                      <p className="text-gray-500 text-[10px] tracking-wide">aesthetic & nutrition</p>
+                  {/* Logo + Title + Status */}
+                  <div className="flex items-center gap-3 mb-3 relative z-10">
+                    <img src={LOGO_URL} alt="Nutriser" className="w-10 h-10 object-contain" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[#C5A55A] font-black text-xs tracking-widest uppercase">Monedero Nutriser</h3>
+                      <p className="text-gray-500 text-[9px] tracking-wide">aesthetic & nutrition</p>
                     </div>
-                    <div className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase border border-emerald-500/30">
-                      Activa
-                    </div>
+                    <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wider border border-emerald-500/30 flex-shrink-0">ACTIVA</span>
                   </div>
 
-                  {/* Gold separator */}
-                  <div className="h-px bg-gradient-to-r from-[#C5A55A]/40 via-[#C5A55A]/20 to-transparent my-3" />
-
-                  {/* Wallet number */}
-                  <div className="mb-3">
-                    <p className="text-gray-500 text-[10px] uppercase tracking-widest font-semibold mb-0.5">Número de tarjeta</p>
-                    <div className="flex items-center gap-2">
-                      <p className="text-white text-lg font-mono font-bold tracking-[0.2em]">
-                        {walletData?.walletNumber || '---'}
-                      </p>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(walletData?.walletNumber || "");
-                          toast.success("Número copiado");
-                        }}
-                        className="p-1 rounded hover:bg-white/10 transition-colors"
-                      >
-                        <Copy className="w-3.5 h-3.5 text-[#C5A55A]" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Titular + Saldo */}
-                  <div className="flex items-end justify-between mb-4">
-                    <div>
-                      <p className="text-gray-500 text-[10px] uppercase tracking-widest font-semibold">Titular</p>
-                      <p className="text-white font-bold text-sm">{patient?.name || '---'}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-gray-500 text-[10px] uppercase tracking-widest font-semibold">Saldo disponible</p>
-                      <p className="text-[#C5A55A] font-black text-2xl">${(walletBalance / 100).toFixed(2)}</p>
-                    </div>
-                  </div>
-
-                  {/* QR Code section */}
-                  <div className="flex flex-col items-center">
-                    {walletData ? (
-                      <>
-                        <div className="bg-white rounded-2xl p-3.5 shadow-lg">
-                          <QRCodeSVG
-                            value={`nutriser://wallet/${walletData.walletNumber || '0000000000'}`}
-                            size={130}
-                            level="H"
-                            includeMargin={false}
-                            bgColor="#FFFFFF"
-                            fgColor="#1A1A1A"
-                            imageSettings={{
-                              src: LOGO_URL,
-                              x: undefined,
-                              y: undefined,
-                              height: 26,
-                              width: 26,
-                              excavate: true,
-                            }}
-                          />
+                  {/* QR + Info inline */}
+                  <div className="flex items-center gap-3 relative z-10">
+                    <div className="bg-white rounded-xl p-2 flex-shrink-0">
+                      {walletData ? (
+                        <QRCodeSVG
+                          value={`nutriser://wallet/${walletData.walletNumber || '0000000000'}`}
+                          size={70}
+                          level="H"
+                          includeMargin={false}
+                          bgColor="#FFFFFF"
+                          fgColor="#1A1A1A"
+                        />
+                      ) : (
+                        <div className="w-[70px] h-[70px] flex items-center justify-center">
+                          <Loader2 className="w-6 h-6 animate-spin text-[#C5A55A]" />
                         </div>
-                        <p className="text-gray-500 text-[10px] mt-2">Escanea para acceder a tu monedero</p>
-                      </>
-                    ) : (
-                      <div className="py-6 text-center">
-                        <Loader2 className="w-8 h-8 animate-spin text-[#C5A55A] mx-auto mb-2" />
-                        <p className="text-gray-500 text-sm">Cargando tu monedero...</p>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-bold text-sm truncate">{patient?.name || '---'}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <p className="text-white/70 font-mono text-[11px] tracking-wider truncate">{walletData?.walletNumber || '---'}</p>
+                        <button onClick={() => { navigator.clipboard.writeText(walletData?.walletNumber || ""); toast.success("Número copiado"); }} className="text-[#C5A55A] flex-shrink-0">
+                          <Copy className="w-3 h-3" />
+                        </button>
                       </div>
-                    )}
+                      <div className="flex justify-end mt-1.5">
+                        <img src={LOGO_URL} alt="" className="w-12 h-auto object-contain opacity-25" />
+                      </div>
+                    </div>
                   </div>
+                </div>
 
-                  {/* Logo watermark */}
-                  <div className="flex justify-end mt-2">
-                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-icon-1024_dccbcd3f.png" alt="" className="w-16 h-auto object-contain opacity-30" />
+                {/* Bottom white section — saldo */}
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Saldo disponible</p>
+                    <p className="text-[#C5A55A] font-black text-xl">${(walletBalance / 100).toFixed(2)}</p>
                   </div>
+                  <button onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }} className="text-[#C5A55A] text-xs font-semibold hover:underline">Ver Estado de Cuenta</button>
                 </div>
               </div>
             </div>

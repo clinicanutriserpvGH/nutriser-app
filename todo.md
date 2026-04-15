@@ -1464,3 +1464,12 @@
 - [ ] Agregar botones de corazón en tarjetas de productos
 - [x] Crear banner promocional del Monedero Nutriser en el carrusel de cupones/promociones de la tienda
 - [x] Banner debe incitar a crear cuenta y obtener monedero con beneficios (cashback, puntos, recompensas)
+
+## Correcciones Sesión Actual - Monedero y PromoSplash
+
+- [x] Generar imagen de tarjeta tipo crédito elegante (no en mesa) para promo del monedero
+- [x] Corregir PromoSplash: navegación entre slides rota, no se puede cambiar a otras promos
+- [x] Reducir tamaño de la slide del monedero en PromoSplash para que quepa toda la info
+- [x] Rediseñar WalletPage: tarjeta compacta arriba estilo Farmacias del Ahorro con logo grande DENTRO
+- [x] Quitar el cuadro blanco separado del logo, integrar logo en la tarjeta misma
+- [x] Mover/ocultar botón de sonido para que no estorbe

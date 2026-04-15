@@ -458,7 +458,7 @@ export default function Memberships() {
       />
 
       {/* ── Carrito flotante ── */}
-      {cartCount > 0 && (
+      {cartCount > 0 && !checkoutOpen && !cartOpen && (
         <button onClick={() => setCartOpen(true)}
           className="fixed bottom-20 right-4 z-[55] bg-[#C5A55A] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:bg-[#B8963E] transition-all active:scale-95">
           <ShoppingCart className="w-6 h-6" />
@@ -974,17 +974,26 @@ export default function Memberships() {
           PANEL: CARRITO
       ══════════════════════════════════════════════════════════════════════ */}
       {cartOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={() => setCartOpen(false)} />
-          <div className="w-full max-w-sm bg-white h-full flex flex-col shadow-2xl overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+        <div className="fixed inset-0 z-[70] flex flex-col">
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setCartOpen(false)} />
+          {/* Cart panel — bottom sheet en móvil, sidebar en desktop */}
+          <div className="relative mt-auto sm:mt-0 sm:ml-auto w-full sm:w-full sm:max-w-sm bg-white sm:h-full max-h-[85vh] sm:max-h-full flex flex-col shadow-2xl rounded-t-3xl sm:rounded-none"
+            style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+            {/* Handle bar (solo móvil) */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden">
+              <div className="w-10 h-1 rounded-full bg-gray-300" />
+            </div>
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-[#C5A55A]" />
                 <h2 className="font-bold text-gray-900">Mi Carrito</h2>
                 <span className="bg-[#C5A55A] text-white text-xs font-black px-2 py-0.5 rounded-full">{cartCount}</span>
               </div>
-              <button onClick={() => setCartOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"><X className="w-5 h-5 text-gray-400" /></button>
+              <button onClick={() => setCartOpen(false)} className="p-2 rounded-full hover:bg-gray-100 transition-colors"><X className="w-5 h-5 text-gray-500" /></button>
             </div>
+            {/* Content */}
             {cart.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                 <ShoppingCart className="w-16 h-16 text-gray-200 mb-4" />
@@ -993,31 +1002,32 @@ export default function Memberships() {
               </div>
             ) : (
               <>
-                <div className="flex-1 p-4 space-y-3">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {cart.map(item => (
                     <div key={item.id} className="flex gap-3 bg-gray-50 rounded-xl p-3">
-                      {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />}
+                      {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />}
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2">{item.name}</p>
-                        <p className="text-[#C5A55A] font-black text-sm mt-0.5">{item.priceLabel}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-500"><Minus className="w-3 h-3" /></button>
-                          <span className="text-sm font-bold w-4 text-center text-gray-900">{item.qty}</span>
-                          <button onClick={() => updateQty(item.id, 1)} className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-500"><Plus className="w-3 h-3" /></button>
-                          <button onClick={() => removeFromCart(item.id)} className="ml-auto p-1 rounded-lg hover:bg-red-50 text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <p className="text-[#C5A55A] font-black text-sm mt-1">{item.priceLabel}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <button onClick={() => updateQty(item.id, -1)} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-500 active:scale-90 transition-all"><Minus className="w-3.5 h-3.5" /></button>
+                          <span className="text-sm font-bold w-5 text-center text-gray-900">{item.qty}</span>
+                          <button onClick={() => updateQty(item.id, 1)} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-500 active:scale-90 transition-all"><Plus className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => removeFromCart(item.id)} className="ml-auto p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="p-4 border-t border-gray-100 space-y-3 sticky bottom-0 bg-white">
+                {/* Footer fijo */}
+                <div className="p-4 border-t border-gray-100 space-y-3 bg-white">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-gray-900">Total</span>
                     <span className="text-xl font-black text-[#C5A55A]">${cartTotal.toLocaleString("es-MX")} MXN</span>
                   </div>
                   <button onClick={() => { setCartOpen(false); openCheckout(); }}
-                    className="w-full bg-[#C5A55A] text-white font-black py-3.5 rounded-xl hover:bg-[#B8963E] transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md">
-                    <Zap className="w-4 h-4" /> Proceder al pago
+                    className="w-full bg-[#C5A55A] text-white font-black py-4 rounded-xl hover:bg-[#B8963E] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg text-base">
+                    <Zap className="w-5 h-5" /> Proceder al pago
                   </button>
                 </div>
               </>
@@ -1210,7 +1220,7 @@ export default function Memberships() {
       {/* ══════════════════════════════════════════════════════════════════════
           BARRA DE NAVEGACIÓN INFERIOR (estilo Farmacias del Ahorro)
       ══════════════════════════════════════════════════════════════════════ */}
-      {!walletSheetOpen && (
+      {!walletSheetOpen && !checkoutOpen && !cartOpen && (
         <div className="fixed bottom-0 left-0 right-0 z-[60]">
           <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
             <div className="max-w-lg mx-auto flex items-end justify-around px-1 pt-1">
@@ -1315,21 +1325,29 @@ export default function Memberships() {
                   </div>
                 </div>
 
-                {/* Barcode section */}
-                <div className="px-5 py-3 flex flex-col items-center relative z-10">
+                {/* QR Code section */}
+                <div className="px-5 py-4 flex flex-col items-center relative z-10">
                   {walletData ? (
                     <>
-                      <div className="bg-white rounded-lg p-2 mb-2">
-                        <Barcode
-                          value={walletData.walletNumber?.replace(/-/g, '') || '0000000000'}
-                          format="CODE128"
-                          width={2}
-                          height={60}
-                          displayValue={false}
-                          background="transparent"
-                          lineColor="#1A1A1A"
+                      <div className="bg-white rounded-xl p-3 shadow-sm mb-3">
+                        <QRCodeSVG
+                          value={`nutriser://wallet/${walletData.walletNumber || '0000000000'}`}
+                          size={140}
+                          level="H"
+                          includeMargin={false}
+                          bgColor="#FFFFFF"
+                          fgColor="#1A1A1A"
+                          imageSettings={{
+                            src: LOGO_URL,
+                            x: undefined,
+                            y: undefined,
+                            height: 28,
+                            width: 28,
+                            excavate: true,
+                          }}
                         />
                       </div>
+                      <p className="text-[10px] text-gray-400 mb-2">Presenta este código en caja</p>
                       <p className="font-bold text-gray-800 text-lg tracking-wide uppercase">
                         {patient?.name}
                       </p>

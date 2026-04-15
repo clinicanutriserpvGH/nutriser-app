@@ -48,12 +48,12 @@ export default function BackgroundMusic() {
       title={playing ? "Pausar música de fondo" : "Reproducir música de fondo"}
       style={{
         position: "fixed",
-        // Posición: esquina inferior izquierda para no chocar con WhatsApp (esquina inferior derecha)
-        bottom: "24px",
+        // Posición: esquina superior izquierda para no chocar con barra de navegación inferior
+        top: "max(env(safe-area-inset-top, 0px) + 12px, 20px)",
         left: "16px",
         zIndex: 9999,
-        width: "44px",
-        height: "44px",
+        width: "36px",
+        height: "36px",
         borderRadius: "50%",
         background: "rgba(197, 165, 90, 0.95)",
         border: "2px solid rgba(255,255,255,0.3)",

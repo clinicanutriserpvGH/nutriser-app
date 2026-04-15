@@ -1439,3 +1439,8 @@
 - [x] Quitar badges "Sesión activa" de las tres tarjetas en SplashSelector
 - [x] Agregar nombre de usuario + punto verde "Activa" junto al icono de usuario en header del SplashSelector
 - [x] Agregar nombre de usuario + punto verde "Activa" junto al icono de usuario en header de Nutriser Shop
+- [x] Mover botón de música a esquina superior izquierda para no tapar barra inferior
+- [x] Ocultar barra de navegación inferior y carrito flotante cuando el modal de checkout está abierto
+- [x] Reemplazar código de barras por QR en el bottom sheet del monedero (con logo Nutriser al centro)
+- [ ] Crear sistema de cobro presencial en panel admin con escáner QR
+- [x] Mejorar carrito: respetar zona segura, ocultar barra inferior cuando está abierto, mejorar diseño

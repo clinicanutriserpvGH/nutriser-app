@@ -13,7 +13,7 @@ import {
   Loader2, Copy, CheckCheck, Apple, Sparkles, Scan, Syringe,
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
   Search, ArrowLeft, Upload, BookOpen, FlaskConical, User,
-  Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet,
+  Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
@@ -460,7 +460,7 @@ export default function Memberships() {
       {/* ── Carrito flotante ── */}
       {cartCount > 0 && (
         <button onClick={() => setCartOpen(true)}
-          className="fixed bottom-28 right-4 z-[55] bg-[#C5A55A] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:bg-[#B8963E] transition-all active:scale-95">
+          className="fixed bottom-20 right-4 z-[55] bg-[#C5A55A] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:bg-[#B8963E] transition-all active:scale-95">
           <ShoppingCart className="w-6 h-6" />
           <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-black rounded-full w-5 h-5 flex items-center justify-center">{cartCount}</span>
         </button>
@@ -483,8 +483,18 @@ export default function Memberships() {
             <div className="flex items-center gap-2 flex-shrink-0">
               {isLoggedIn && patient ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[#C5A55A] text-[10px] font-bold leading-tight">
+                      {patient.name.split(' ')[0]}
+                    </span>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.6)]" />
+                      <span className="text-green-600 text-[8px] font-semibold leading-tight">Activa</span>
+                    </div>
+                  </div>
+                  <div className="relative w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center">
                     <User className="w-4 h-4 text-[#C5A55A]" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white" />
                   </div>
                   <button onClick={logout} title="Cerrar sesión"
                     className="text-xs text-gray-400 hover:text-red-500 transition-colors">
@@ -539,35 +549,7 @@ export default function Memberships() {
       {/* ══════════════════════════════════════════════════════════════════════
           TABS — Estilo app comercial
       ══════════════════════════════════════════════════════════════════════ */}
-      <div className="sticky top-0 z-30 bg-white shadow-sm border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex">
-            {([
-              { id: "tratamientos", label: "Tratamientos", icon: Sparkles },
-              { id: "farmacy", label: "Farmacy", icon: FlaskConical },
-              { id: "library", label: "Library", icon: BookOpen },
-              { id: "monedero", label: "Monedero", icon: Wallet },
-            ] as { id: StoreTab; label: string; icon: React.ElementType }[]).map(tab => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button key={tab.id} onClick={() => {
-                    if (tab.id === "monedero") { navigate("/monedero"); return; }
-                    setActiveTab(tab.id);
-                  }}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-bold transition-all border-b-2 ${
-                    isActive
-                      ? "border-[#C5A55A] text-[#C5A55A]"
-                      : "border-transparent text-gray-400 hover:text-gray-600"
-                  }`}>
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      {/* Tabs moved to bottom navigation bar */}
 
       {/* ══════════════════════════════════════════════════════════════════════
           TAB: TRATAMIENTOS
@@ -1226,25 +1208,77 @@ export default function Memberships() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
-          BOTÓN FLOTANTE MONEDERO (estilo Farmacia del Ahorro)
+          BARRA DE NAVEGACIÓN INFERIOR (estilo Farmacias del Ahorro)
       ══════════════════════════════════════════════════════════════════════ */}
-      {!walletSheetOpen && <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-1">
-        {/* Pulse ring */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80px] h-[80px] rounded-full bg-[#C5A55A]/30 animate-ping" style={{ animationDuration: '2s' }} />
-        <button
-          onClick={() => {
-            if (!isLoggedIn) { setShowAuthModal(true); return; }
-            setWalletSheetOpen(true);
-          }}
-          className="relative w-[76px] h-[76px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B86A] to-[#B8963E] shadow-[0_6px_30px_rgba(197,165,90,0.6)] flex items-center justify-center border-[3px] border-white hover:scale-110 active:scale-95 transition-all"
-          aria-label="Mi Monedero Nutriser"
-        >
-          <div className="w-[58px] h-[58px] rounded-full bg-white flex items-center justify-center shadow-inner">
-            <img src={LOGO_URL} alt="Monedero Nutriser" className="w-11 h-11 rounded-full object-contain" />
+      {!walletSheetOpen && (
+        <div className="fixed bottom-0 left-0 right-0 z-[60]">
+          <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
+            <div className="max-w-lg mx-auto flex items-end justify-around px-1 pt-1">
+              {/* Tratamientos */}
+              <button
+                onClick={() => setActiveTab("tratamientos")}
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[56px] transition-colors ${
+                  activeTab === "tratamientos" ? "text-[#C5A55A]" : "text-gray-400"
+                }`}
+              >
+                <Sparkles className="w-5 h-5" />
+                <span className="text-[9px] font-semibold leading-tight">Tratamientos</span>
+              </button>
+
+              {/* Farmacy */}
+              <button
+                onClick={() => setActiveTab("farmacy")}
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[56px] transition-colors ${
+                  activeTab === "farmacy" ? "text-[#C5A55A]" : "text-gray-400"
+                }`}
+              >
+                <FlaskConical className="w-5 h-5" />
+                <span className="text-[9px] font-semibold leading-tight">Farmacy</span>
+              </button>
+
+              {/* Monedero — Botón central flotante */}
+              <button
+                onClick={() => {
+                  if (!isLoggedIn) { setShowAuthModal(true); return; }
+                  setWalletSheetOpen(true);
+                }}
+                className="flex flex-col items-center -mt-6 relative"
+                aria-label="Mi Monedero Nutriser"
+              >
+                <div className="w-[58px] h-[58px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B86A] to-[#B8963E] shadow-[0_4px_16px_rgba(197,165,90,0.5)] flex items-center justify-center border-[3px] border-white hover:scale-105 active:scale-95 transition-all">
+                  <div className="w-[44px] h-[44px] rounded-full bg-white flex items-center justify-center">
+                    <img src={LOGO_URL} alt="Monedero" className="w-8 h-8 rounded-full object-contain" />
+                  </div>
+                </div>
+                <span className="text-[9px] font-bold text-[#C5A55A] mt-0.5 leading-tight">Monedero</span>
+              </button>
+
+              {/* Library */}
+              <button
+                onClick={() => setActiveTab("library")}
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[56px] transition-colors ${
+                  activeTab === "library" ? "text-[#C5A55A]" : "text-gray-400"
+                }`}
+              >
+                <BookOpen className="w-5 h-5" />
+                <span className="text-[9px] font-semibold leading-tight">Library</span>
+              </button>
+
+              {/* Cuenta */}
+              <button
+                onClick={() => {
+                  if (!isLoggedIn) { setShowAuthModal(true); return; }
+                  navigate("/monedero");
+                }}
+                className="flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[56px] transition-colors text-gray-400"
+              >
+                <User className="w-5 h-5" />
+                <span className="text-[9px] font-semibold leading-tight">Cuenta</span>
+              </button>
+            </div>
           </div>
-        </button>
-        <span className="text-[10px] font-bold text-[#C5A55A] bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm border border-[#C5A55A]/20">Monedero</span>
-      </div>}
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════════════
           BOTTOM SHEET — TARJETA MONEDERO

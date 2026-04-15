@@ -299,10 +299,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                   <span className="text-[#C5A55A] text-[10px] font-bold leading-tight">
                     Hola, {patient.name.split(' ')[0]}
                   </span>
-                  <span className="text-white/40 text-[8px] leading-tight">Sesión activa</span>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+                    <span className="text-green-400 text-[8px] font-semibold leading-tight">Activa</span>
+                  </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/40 flex items-center justify-center flex-shrink-0">
+                <div className="relative w-8 h-8 rounded-full bg-[#C5A55A]/20 border border-[#C5A55A]/40 flex items-center justify-center flex-shrink-0">
                   <User className="w-4 h-4 text-[#C5A55A]" />
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-[#2a1f0a]" />
                 </div>
                 <button
                   onClick={handleLogout}
@@ -367,11 +371,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                       <ShoppingBag className="w-4 h-4 text-black" />
                     </div>
                     <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">Tienda</span>
-                    {isLoggedIn && (
-                      <span className="ml-auto text-[9px] bg-green-500/20 border border-green-500/40 text-green-400 px-2 py-0.5 rounded-full font-medium">
-                        Sesión activa
-                      </span>
-                    )}
                   </div>
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Shop</h2>
@@ -398,11 +397,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                       <GraduationCap className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">Educación</span>
-                    {isLoggedIn && (
-                      <span className="ml-auto text-[9px] bg-green-500/20 border border-green-500/40 text-green-400 px-2 py-0.5 rounded-full font-medium">
-                        Sesión activa
-                      </span>
-                    )}
                   </div>
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-2 drop-shadow-lg text-white">Nutriser Academy</h2>
@@ -429,11 +423,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                       <Sparkles className="w-4 h-4 text-black" />
                     </div>
                     <span className="text-[10px] font-semibold tracking-wide uppercase drop-shadow text-white/90">Mi Portal</span>
-                    {isLoggedIn && (
-                      <span className="ml-auto text-[9px] bg-green-500/20 border border-green-500/40 text-green-400 px-2 py-0.5 rounded-full font-medium">
-                        Sesión activa
-                      </span>
-                    )}
                   </div>
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold leading-tight mb-1 drop-shadow-lg text-white">Mis Tratamientos</h2>

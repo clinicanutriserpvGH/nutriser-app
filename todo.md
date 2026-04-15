@@ -1433,3 +1433,9 @@
 - [x] Ocultar botón flotante del monedero cuando el bottom sheet está abierto (tapa el contenido)
 - [x] Rediseñar tarjeta del monedero en bottom sheet estilo Farmacias del Ahorro: fondo blanco, código de barras, diseño limpio
 - [x] Ocultar botón flotante cuando bottom sheet está abierto
+- [x] Mover tabs de navegación (Tratamientos, Farmacy, Library, Monedero) a barra fija inferior estilo Farmacias del Ahorro
+- [x] Integrar botón flotante del monedero en el centro de la barra inferior
+- [x] Quitar tabs de navegación de la parte superior de la tienda
+- [x] Quitar badges "Sesión activa" de las tres tarjetas en SplashSelector
+- [x] Agregar nombre de usuario + punto verde "Activa" junto al icono de usuario en header del SplashSelector
+- [x] Agregar nombre de usuario + punto verde "Activa" junto al icono de usuario en header de Nutriser Shop

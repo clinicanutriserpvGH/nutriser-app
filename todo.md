@@ -1363,3 +1363,51 @@
 - [x] Respetar safe area del iPhone — espaciador con env(safe-area-inset-top) + modal con paddingTop
 - [x] Auto-rellenar nombre, correo y teléfono en formulario "Adquirir cupón" si el usuario ya inició sesión (usePatientAuth)
 - [x] Cambiar placeholder "Tony Robles" por "Tu nombre completo"
+
+## Monedero Electrónico Nutriser
+
+### Base de Datos
+- [x] Crear tabla `wallets` (id, patientAccountId, walletNumber, qrCode, balance, totalCashback, isActive, createdAt)
+- [x] Crear tabla `walletTransactions` (id, walletId, type: cashback/redeem/bonus/adjustment, amount, description, referenceId, createdAt)
+- [x] Crear tabla `loyaltyTracker` (id, walletId, nutritionConsultations, freeConsultationsEarned, freeConsultationsUsed, createdAt)
+- [x] Ejecutar migraciones con pnpm db:push
+
+### Backend (tRPC)
+- [x] Endpoint para crear monedero al registrarse (genera número único + QR)
+- [x] Endpoint para ver saldo y estado de cuenta
+- [x] Endpoint para acreditar cashback del 1% por compra
+- [x] Endpoint para canjear saldo del monedero
+- [x] Endpoint para registrar consultas nutricionales y calcular 4ta gratis
+- [x] Endpoint admin para gestionar monederos y transacciones
+
+### Frontend - Página Monedero
+- [x] Tarjeta digital estilo Farmacia del Ahorro con QR, nombre, número, saldo
+- [x] Diseño con identidad Nutriser (dorado, crema, negro)
+- [x] Estado de cuenta con historial de transacciones
+- [x] Progreso de programa de lealtad (consultas nutricionales)
+- [x] Botón copiar número de monedero
+
+### Integración
+- [x] Monedero integrado en checkout de Nutriser Shop
+- [x] Monedero integrado en checkout de Cupones
+- [x] Panel admin para gestionar monederos, acreditar cashback, ver lealtad
+
+### Programa de Lealtad por Producto (estilo Farmacia del Ahorro)
+- [x] Crear tabla `loyaltyPlans` (id, name, productName, requiredPurchases, vigencia, isActive)
+- [x] Crear tabla `loyaltyProgress` (id, walletId, planId, currentCount, rewardsEarned, rewardsUsed)
+- [x] Consultas nutricionales: 3 compras → 4ta GRATIS
+- [x] Productos: configurable por admin (acumula N → 1 GRATIS)
+- [x] Barra de progreso visual por cada plan (1 → 2 → 3 → GRATIS)
+- [x] Vigencia configurable por plan
+
+### Seguridad del Monedero
+- [x] Login requerido para ver/usar tarjeta
+- [x] QR escaneable que abre la página del monedero (requiere login)
+- [x] Código único de tarjeta para identificar usuario al comprar
+- [x] Descuento automático del saldo al usar monedero en checkout
+
+### Panel Admin - Gestión de Tarjetas
+- [x] Vista de todas las tarjetas: nombre, correo, código, saldo
+- [x] Acreditar/debitar saldo manualmente
+- [x] Gestionar planes de lealtad (crear, editar, desactivar)
+- [x] Registrar compras y consultas para acumular progreso

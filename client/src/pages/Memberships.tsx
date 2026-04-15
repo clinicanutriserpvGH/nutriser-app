@@ -13,7 +13,7 @@ import {
   Loader2, Copy, CheckCheck, Apple, Sparkles, Scan, Syringe,
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
   Search, ArrowLeft, Upload, BookOpen, FlaskConical, User,
-  Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent,
+  Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -323,6 +323,16 @@ export default function Memberships() {
     valid: boolean; discount: number | null; isGift: boolean; isTwoForOne: boolean; description: string | null;
   } | null>(null);
 
+  // ─── Monedero Nutriser ─────────────────────────────────────────────────────
+  const [useWallet, setUseWallet] = useState(false);
+  const [walletAmount, setWalletAmount] = useState(0);
+  const walletQuery = trpc.wallet.getMyWallet.useQuery(
+    { patientId: patient?.id || 0 },
+    { enabled: isLoggedIn && !!patient?.id && checkoutOpen }
+  );
+  const walletBalance = walletQuery.data?.wallet?.balance || 0;
+  const walletRedeemMutation = trpc.wallet.redeem.useMutation();
+
   const utils = trpc.useUtils();
   const servicePurchaseMutation = trpc.servicePurchases.create.useMutation({
     onSuccess: () => { setSuccessCode("PENDIENTE"); setIsSubmitting(false); },
@@ -352,6 +362,7 @@ export default function Memberships() {
     setBuyNowItem(item || null);
     setBuyerName(patient?.name || ""); setBuyerEmail(patient?.email || ""); setBuyerPhone((patient as any)?.phone || "");
     setProofFile(null); setSuccessCode(""); setDiscountCode(""); setDiscountInfo(null);
+    setUseWallet(false); setWalletAmount(0);
     setCheckoutOpen(true);
   };
 
@@ -1119,6 +1130,47 @@ export default function Memberships() {
                     </div>
                   </div>
                 )}
+                {/* Monedero Nutriser */}
+                {isLoggedIn && walletBalance > 0 && (
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Monedero Nutriser</p>
+                    <div className={`border rounded-xl p-3 transition-all ${useWallet ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={useWallet}
+                          onChange={(e) => {
+                            setUseWallet(e.target.checked);
+                            if (e.target.checked) {
+                              const maxApply = Math.min(walletBalance, discountedTotal);
+                              setWalletAmount(maxApply);
+                            } else {
+                              setWalletAmount(0);
+                            }
+                          }}
+                          className="w-4 h-4 accent-[#C5A55A]"
+                        />
+                        <Wallet className="w-5 h-5 text-[#C5A55A]" />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
+                          <p className="text-xs text-gray-500">Saldo disponible: <span className="font-bold text-[#C5A55A]">${(walletBalance / 100).toFixed(2)} MXN</span></p>
+                        </div>
+                      </label>
+                      {useWallet && (
+                        <div className="mt-2 pt-2 border-t border-gray-200">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Descuento monedero:</span>
+                            <span className="font-bold text-green-600">-${(walletAmount / 100).toFixed(2)} MXN</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm mt-1">
+                            <span className="text-gray-600">Restante a transferir:</span>
+                            <span className="font-bold text-[#C5A55A]">${((discountedTotal * 100 - walletAmount) / 100).toFixed(2)} MXN</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 {/* Datos bancarios */}
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
                   <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Datos para transferencia</p>
@@ -1129,7 +1181,7 @@ export default function Memberships() {
                     </div>
                     <CopyButton text={BANK_INFO.account} />
                   </div>
-                  <p className="text-xs text-gray-500">Monto: <span className="font-black text-[#C5A55A]">${(discountInfo?.isGift ? 0 : discountedTotal).toLocaleString("es-MX")} MXN</span></p>
+                  <p className="text-xs text-gray-500">Monto: <span className="font-black text-[#C5A55A]">${((discountInfo?.isGift ? 0 : discountedTotal) - (useWallet ? walletAmount / 100 : 0)).toLocaleString("es-MX")} MXN</span>{useWallet && walletAmount > 0 && <span className="text-green-600 text-[10px] ml-1">(monedero: -${(walletAmount / 100).toFixed(2)})</span>}</p>
                 </div>
                 {/* Comprobante */}
                 <div>

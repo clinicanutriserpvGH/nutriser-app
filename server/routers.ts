@@ -13,6 +13,7 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
+import { createWallet, getWalletByPatientId, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -1801,6 +1802,12 @@ export const appRouter = router({
           phone: input.phone,
           birthday: input.birthday,
         });
+        // Auto-crear monedero electrónico
+        try {
+          await createWallet(patient.id);
+        } catch (e) {
+          console.warn('Could not auto-create wallet:', e);
+        }
         // Devolver sin el hash
         const { passwordHash: _, resetToken: __, ...safe } = patient;
         return safe;
@@ -2378,6 +2385,262 @@ export const appRouter = router({
         const { clearCart } = await import('./db');
         await clearCart(input.patientId);
         return { success: true };
+      }),
+  }),
+
+  // ============================================================
+  // MONEDERO ELECTRÓNICO NUTRISER
+  // ============================================================
+  wallet: router({
+    // Obtener monedero del paciente (requiere login)
+    getMyWallet: publicProcedure
+      .input(z.object({ patientId: z.number() }))
+      .query(async ({ input }) => {
+        const wallet = await getWalletByPatientId(input.patientId);
+        if (!wallet) {
+          // Auto-crear si no existe
+          const newWallet = await createWallet(input.patientId);
+          const tracker = await getLoyaltyTracker(newWallet.id);
+          const progress = await getWalletLoyaltyProgress(newWallet.id);
+          return { wallet: newWallet, tracker, progress, transactions: [] };
+        }
+        const [tracker, progress, transactions] = await Promise.all([
+          getLoyaltyTracker(wallet.id),
+          getWalletLoyaltyProgress(wallet.id),
+          getWalletTransactions(wallet.id, 50),
+        ]);
+        return { wallet, tracker, progress, transactions };
+      }),
+
+    // Buscar monedero por número (para QR público — requiere login después)
+    lookupByNumber: publicProcedure
+      .input(z.object({ walletNumber: z.string() }))
+      .query(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Tarjeta no encontrada' });
+        const patient = await getPatientById(wallet.patientId);
+        return {
+          walletNumber: wallet.walletNumber,
+          patientName: patient?.name || 'Usuario',
+          isActive: wallet.isActive,
+        };
+      }),
+
+    // Obtener saldo por número de tarjeta (para checkout)
+    getBalanceByCode: publicProcedure
+      .input(z.object({ walletNumber: z.string(), patientId: z.number() }))
+      .query(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Tarjeta no encontrada' });
+        if (wallet.patientId !== input.patientId) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Esta tarjeta no te pertenece' });
+        }
+        if (!wallet.isActive) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Tarjeta desactivada' });
+        }
+        return { balance: wallet.balance, walletId: wallet.id };
+      }),
+
+    // Canjear saldo del monedero en una compra
+    redeem: publicProcedure
+      .input(z.object({
+        patientId: z.number(),
+        amount: z.number().min(1), // centavos a descontar
+        description: z.string(),
+        referenceType: z.string().optional(),
+        referenceId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByPatientId(input.patientId);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'No tienes monedero activo' });
+        if (!wallet.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Tarjeta desactivada' });
+        if (wallet.balance < input.amount) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Saldo insuficiente' });
+        
+        const txn = await addWalletTransaction({
+          walletId: wallet.id,
+          type: 'redeem',
+          amount: -input.amount,
+          description: input.description,
+          referenceType: input.referenceType,
+          referenceId: input.referenceId,
+          createdBy: 'system',
+        });
+        return { success: true, newBalance: txn.balanceAfter, transaction: txn };
+      }),
+
+    // Obtener planes de lealtad activos
+    getActivePlans: publicProcedure.query(async () => {
+      return getActiveLoyaltyPlans();
+    }),
+
+    // Obtener historial de transacciones
+    getTransactions: publicProcedure
+      .input(z.object({ patientId: z.number(), limit: z.number().optional() }))
+      .query(async ({ input }) => {
+        const wallet = await getWalletByPatientId(input.patientId);
+        if (!wallet) return [];
+        return getWalletTransactions(wallet.id, input.limit || 50);
+      }),
+
+    // ===== ADMIN ENDPOINTS =====
+
+    // Listar todas las tarjetas (admin)
+    adminListAll: publicProcedure.query(async () => {
+      return getAllWallets();
+    }),
+
+    // Acreditar cashback (admin)
+    adminAddCashback: publicProcedure
+      .input(z.object({
+        walletId: z.number(),
+        amount: z.number().min(1), // centavos
+        description: z.string(),
+        referenceType: z.string().optional(),
+        referenceId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const txn = await addWalletTransaction({
+          walletId: input.walletId,
+          type: 'cashback',
+          amount: input.amount,
+          description: input.description,
+          referenceType: input.referenceType,
+          referenceId: input.referenceId,
+          createdBy: 'admin',
+        });
+        return { success: true, transaction: txn };
+      }),
+
+    // Bonificación manual (admin)
+    adminAddBonus: publicProcedure
+      .input(z.object({
+        walletId: z.number(),
+        amount: z.number(), // puede ser positivo o negativo
+        description: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const txn = await addWalletTransaction({
+          walletId: input.walletId,
+          type: input.amount >= 0 ? 'bonus' : 'adjustment',
+          amount: input.amount,
+          description: input.description,
+          createdBy: 'admin',
+        });
+        return { success: true, transaction: txn };
+      }),
+
+    // Ajustar saldo directamente (admin)
+    adminSetBalance: publicProcedure
+      .input(z.object({
+        walletId: z.number(),
+        newBalance: z.number().min(0),
+        adminEmail: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        await adminSetWalletBalance(input.walletId, input.newBalance, input.adminEmail);
+        return { success: true };
+      }),
+
+    // Activar/desactivar tarjeta (admin)
+    adminToggleActive: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .mutation(async ({ input }) => {
+        const newStatus = await toggleWalletActive(input.walletId);
+        return { success: true, isActive: newStatus };
+      }),
+
+    // Registrar consulta nutricional (admin)
+    adminRecordConsultation: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .mutation(async ({ input }) => {
+        return recordConsultation(input.walletId);
+      }),
+
+    // Usar consulta gratis (admin)
+    adminUseFreeConsultation: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .mutation(async ({ input }) => {
+        const used = await useFreeConsultation(input.walletId);
+        if (!used) throw new TRPCError({ code: 'BAD_REQUEST', message: 'No hay consultas gratis disponibles' });
+        return { success: true };
+      }),
+
+    // Registrar compra para plan de lealtad (admin)
+    adminRecordLoyaltyPurchase: publicProcedure
+      .input(z.object({ walletId: z.number(), planId: z.number() }))
+      .mutation(async ({ input }) => {
+        return recordLoyaltyPurchase(input.walletId, input.planId);
+      }),
+
+    // Usar recompensa de lealtad (admin)
+    adminUseLoyaltyReward: publicProcedure
+      .input(z.object({ walletId: z.number(), planId: z.number() }))
+      .mutation(async ({ input }) => {
+        const used = await useLoyaltyReward(input.walletId, input.planId);
+        if (!used) throw new TRPCError({ code: 'BAD_REQUEST', message: 'No hay recompensas disponibles' });
+        return { success: true };
+      }),
+
+    // ===== PLANES DE LEALTAD (ADMIN) =====
+
+    adminCreatePlan: publicProcedure
+      .input(z.object({
+        name: z.string(),
+        productName: z.string(),
+        category: z.enum(['consultation', 'product', 'service']),
+        requiredPurchases: z.number().min(2),
+        rewardDescription: z.string().optional(),
+        expiresAt: z.string().optional(), // ISO date string
+      }))
+      .mutation(async ({ input }) => {
+        const plan = await createLoyaltyPlan({
+          name: input.name,
+          productName: input.productName,
+          category: input.category,
+          requiredPurchases: input.requiredPurchases,
+          rewardDescription: input.rewardDescription || '1 GRATIS',
+          expiresAt: input.expiresAt ? new Date(input.expiresAt) : undefined,
+        });
+        return plan;
+      }),
+
+    adminListPlans: publicProcedure.query(async () => {
+      return getAllLoyaltyPlans();
+    }),
+
+    adminUpdatePlan: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        productName: z.string().optional(),
+        requiredPurchases: z.number().optional(),
+        rewardDescription: z.string().optional(),
+        isActive: z.boolean().optional(),
+        expiresAt: z.string().nullable().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, expiresAt, ...rest } = input;
+        const data: any = { ...rest };
+        if (expiresAt !== undefined) {
+          data.expiresAt = expiresAt ? new Date(expiresAt) : null;
+        }
+        await updateLoyaltyPlan(id, data);
+        return { success: true };
+      }),
+
+    adminDeletePlan: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteLoyaltyPlan(input.id);
+        return { success: true };
+      }),
+
+    // Crear monedero para paciente existente que no tiene (admin)
+    adminCreateWallet: publicProcedure
+      .input(z.object({ patientId: z.number() }))
+      .mutation(async ({ input }) => {
+        const wallet = await createWallet(input.patientId);
+        return wallet;
       }),
   }),
 });

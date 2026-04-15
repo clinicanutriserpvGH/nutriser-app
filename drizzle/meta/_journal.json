@@ -267,6 +267,13 @@
       "when": 1776150626022,
       "tag": "0037_absent_loners",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "5",
+      "when": 1776218843215,
+      "tag": "0038_light_gunslinger",
+      "breakpoints": true
     }
   ]
 }

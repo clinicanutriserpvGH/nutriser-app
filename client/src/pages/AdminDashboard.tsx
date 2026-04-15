@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import AdminBeforeAfterTab from "@/components/AdminBeforeAfterTab";
 import AdminPatientsTab from "@/components/AdminPatientsTab";
+import AdminWalletTab from "@/components/AdminWalletTab";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ const ADMIN_TABS = [
   { value: 'courses', label: 'Cursos', emoji: '🎓' },
   { value: 'suggestions', label: 'Foro Expertos', emoji: '💡' },
   { value: 'beforeAfter', label: 'Transformaciones Pacientes', emoji: '✨' },
+  { value: 'wallet', label: 'Monedero Nutriser', emoji: '💳' },
 ] as const;
 
 type AdminTabValue = typeof ADMIN_TABS[number]['value'];
@@ -3558,6 +3560,9 @@ export default function AdminDashboard() {
           </TabsContent>
           <TabsContent value="patients" className="space-y-4">
             <AdminPatientsTab />
+          </TabsContent>
+          <TabsContent value="wallet" className="space-y-4">
+            <AdminWalletTab />
           </TabsContent>
         </Tabs>
         {/* Modal de Aprobar Cita */}

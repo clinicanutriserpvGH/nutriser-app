@@ -665,3 +665,103 @@ export const shopPromotions = mysqlTable("shopPromotions", {
 });
 export type ShopPromotion = typeof shopPromotions.$inferSelect;
 export type InsertShopPromotion = typeof shopPromotions.$inferInsert;
+
+
+// ============================================================
+// MONEDERO ELECTRÓNICO NUTRISER
+// ============================================================
+
+/**
+ * Monedero electrónico del paciente
+ * Cada paciente registrado obtiene un monedero único con QR
+ * Acumula cashback del 1% por cada compra verificada
+ */
+export const wallets = mysqlTable("wallets", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull().unique(), // FK a patientAccounts.id — 1:1
+  walletNumber: varchar("walletNumber", { length: 20 }).notNull().unique(), // Número único tipo NUT-XXXX-XXXX
+  balance: int("balance").default(0).notNull(), // Saldo en centavos MXN (ej: 4500 = $45.00)
+  totalCashback: int("totalCashback").default(0).notNull(), // Total acumulado histórico en centavos
+  totalRedeemed: int("totalRedeemed").default(0).notNull(), // Total canjeado histórico en centavos
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type Wallet = typeof wallets.$inferSelect;
+export type InsertWallet = typeof wallets.$inferInsert;
+
+/**
+ * Transacciones del monedero
+ * Registra cada movimiento: cashback, canje, bonificación, ajuste
+ */
+export const walletTransactions = mysqlTable("walletTransactions", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("walletId").notNull(), // FK a wallets.id
+  type: mysqlEnum("type", ["cashback", "redeem", "bonus", "adjustment", "free_consultation"]).notNull(),
+  amount: int("amount").notNull(), // Monto en centavos (positivo = ingreso, negativo = egreso)
+  description: varchar("description", { length: 500 }).notNull(),
+  referenceType: varchar("referenceType", { length: 50 }), // "membership", "service", "product", "gift", "consultation"
+  referenceId: int("referenceId"), // ID de la compra que generó el cashback
+  balanceAfter: int("balanceAfter").notNull(), // Saldo después de la transacción
+  createdBy: varchar("createdBy", { length: 100 }), // "system" o "admin:email"
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = typeof walletTransactions.$inferInsert;
+
+/**
+ * Programa de lealtad — Consultas nutricionales
+ * Por cada 3 consultas nutricionales, la 4ta es gratis
+ */
+export const loyaltyTracker = mysqlTable("loyaltyTracker", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("walletId").notNull().unique(), // FK a wallets.id — 1:1
+  nutritionConsultations: int("nutritionConsultations").default(0).notNull(), // Total de consultas pagadas
+  freeConsultationsEarned: int("freeConsultationsEarned").default(0).notNull(), // Consultas gratis ganadas
+  freeConsultationsUsed: int("freeConsultationsUsed").default(0).notNull(), // Consultas gratis usadas
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type LoyaltyTracker = typeof loyaltyTracker.$inferSelect;
+export type InsertLoyaltyTracker = typeof loyaltyTracker.$inferInsert;
+
+// ============================================================
+// PLANES DE LEALTAD POR PRODUCTO (estilo Farmacia del Ahorro)
+// ============================================================
+
+/**
+ * Planes de lealtad configurables por el admin
+ * Ej: "Acumula 3 consultas y la 4ta es GRATIS"
+ * Ej: "Acumula 4 compras de Serum y el 5to es GRATIS"
+ */
+export const loyaltyPlans = mysqlTable("loyaltyPlans", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(), // "Acumula 3 y llévate 1 gratis"
+  productName: varchar("productName", { length: 255 }).notNull(), // Nombre del producto/servicio
+  category: mysqlEnum("category", ["consultation", "product", "service"]).notNull(),
+  requiredPurchases: int("requiredPurchases").default(3).notNull(), // Compras necesarias para ganar recompensa
+  rewardDescription: varchar("rewardDescription", { length: 255 }).default("1 GRATIS").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  expiresAt: timestamp("expiresAt"), // Vigencia del plan (null = sin vencimiento)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type LoyaltyPlan = typeof loyaltyPlans.$inferSelect;
+export type InsertLoyaltyPlan = typeof loyaltyPlans.$inferInsert;
+
+/**
+ * Progreso individual de cada usuario en cada plan de lealtad
+ * Registra cuántas compras lleva y cuántas recompensas ha ganado/usado
+ */
+export const loyaltyProgress = mysqlTable("loyaltyProgress", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("walletId").notNull(), // FK a wallets.id
+  planId: int("planId").notNull(), // FK a loyaltyPlans.id
+  currentCount: int("currentCount").default(0).notNull(), // Compras acumuladas en ciclo actual
+  rewardsEarned: int("rewardsEarned").default(0).notNull(), // Total de recompensas ganadas
+  rewardsUsed: int("rewardsUsed").default(0).notNull(), // Total de recompensas usadas
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type LoyaltyProgress = typeof loyaltyProgress.$inferSelect;
+export type InsertLoyaltyProgress = typeof loyaltyProgress.$inferInsert;

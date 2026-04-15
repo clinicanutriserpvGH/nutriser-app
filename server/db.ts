@@ -1313,3 +1313,348 @@ export async function clearCart(patientId: number): Promise<void> {
   if (!db) return;
   await db.delete(shopCartItems).where(eq(shopCartItems.patientId, patientId));
 }
+
+
+// ============================================================
+// MONEDERO ELECTRÓNICO — DB Helpers
+// ============================================================
+import { wallets, InsertWallet, Wallet, walletTransactions, InsertWalletTransaction, WalletTransaction, loyaltyTracker, InsertLoyaltyTracker, LoyaltyTracker, loyaltyPlans, InsertLoyaltyPlan, LoyaltyPlan, loyaltyProgress, InsertLoyaltyProgress, LoyaltyProgress } from '../drizzle/schema';
+
+/** Generate unique wallet number like NUT-XXXX-XXXX */
+function generateWalletNumber(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const seg1 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const seg2 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `NUT-${seg1}-${seg2}`;
+}
+
+/** Create wallet for a patient (called on registration) */
+export async function createWallet(patientId: number): Promise<Wallet> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Check if wallet already exists
+  const existing = await db.select().from(wallets).where(eq(wallets.patientId, patientId)).limit(1);
+  if (existing.length > 0) return existing[0];
+  
+  // Generate unique number with retry
+  let walletNumber = generateWalletNumber();
+  for (let i = 0; i < 5; i++) {
+    const dup = await db.select().from(wallets).where(eq(wallets.walletNumber, walletNumber)).limit(1);
+    if (dup.length === 0) break;
+    walletNumber = generateWalletNumber();
+  }
+  
+  await db.insert(wallets).values({ patientId, walletNumber });
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.patientId, patientId)).limit(1);
+  
+  // Also create loyalty tracker
+  await db.insert(loyaltyTracker).values({ walletId: wallet.id }).catch(() => {});
+  
+  return wallet;
+}
+
+/** Get wallet by patient ID */
+export async function getWalletByPatientId(patientId: number): Promise<Wallet | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.patientId, patientId)).limit(1);
+  return wallet;
+}
+
+/** Get wallet by wallet number (for QR/code lookup) */
+export async function getWalletByNumber(walletNumber: string): Promise<Wallet | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.walletNumber, walletNumber)).limit(1);
+  return wallet;
+}
+
+/** Get all wallets (admin) */
+export async function getAllWallets() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    wallet: wallets,
+    patient: {
+      id: patientAccounts.id,
+      name: patientAccounts.name,
+      email: patientAccounts.email,
+      phone: patientAccounts.phone,
+    }
+  }).from(wallets)
+    .innerJoin(patientAccounts, eq(wallets.patientId, patientAccounts.id))
+    .orderBy(desc(wallets.createdAt));
+}
+
+/** Add a transaction to a wallet */
+export async function addWalletTransaction(data: {
+  walletId: number;
+  type: "cashback" | "redeem" | "bonus" | "adjustment" | "free_consultation";
+  amount: number; // centavos, positivo = ingreso, negativo = egreso
+  description: string;
+  referenceType?: string;
+  referenceId?: number;
+  createdBy?: string;
+}): Promise<WalletTransaction> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get current wallet
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.id, data.walletId)).limit(1);
+  if (!wallet) throw new Error("Wallet not found");
+  
+  const newBalance = wallet.balance + data.amount;
+  if (newBalance < 0) throw new Error("Saldo insuficiente");
+  
+  // Update wallet balance
+  const updateData: Record<string, any> = { balance: newBalance };
+  if (data.amount > 0 && (data.type === 'cashback' || data.type === 'bonus')) {
+    updateData.totalCashback = wallet.totalCashback + data.amount;
+  }
+  if (data.amount < 0 && data.type === 'redeem') {
+    updateData.totalRedeemed = wallet.totalRedeemed + Math.abs(data.amount);
+  }
+  await db.update(wallets).set(updateData).where(eq(wallets.id, data.walletId));
+  
+  // Insert transaction
+  await db.insert(walletTransactions).values({
+    walletId: data.walletId,
+    type: data.type,
+    amount: data.amount,
+    description: data.description,
+    referenceType: data.referenceType || null,
+    referenceId: data.referenceId || null,
+    balanceAfter: newBalance,
+    createdBy: data.createdBy || 'system',
+  });
+  
+  const txns = await db.select().from(walletTransactions)
+    .where(eq(walletTransactions.walletId, data.walletId))
+    .orderBy(desc(walletTransactions.createdAt))
+    .limit(1);
+  return txns[0];
+}
+
+/** Get wallet transactions */
+export async function getWalletTransactions(walletId: number, limit = 50): Promise<WalletTransaction[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(walletTransactions)
+    .where(eq(walletTransactions.walletId, walletId))
+    .orderBy(desc(walletTransactions.createdAt))
+    .limit(limit);
+}
+
+/** Get loyalty tracker for a wallet */
+export async function getLoyaltyTracker(walletId: number): Promise<LoyaltyTracker | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [tracker] = await db.select().from(loyaltyTracker).where(eq(loyaltyTracker.walletId, walletId)).limit(1);
+  return tracker;
+}
+
+/** Increment consultation count and check for free consultation */
+export async function recordConsultation(walletId: number): Promise<{ freeEarned: boolean; totalConsultations: number; freeAvailable: number }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let [tracker] = await db.select().from(loyaltyTracker).where(eq(loyaltyTracker.walletId, walletId)).limit(1);
+  if (!tracker) {
+    await db.insert(loyaltyTracker).values({ walletId });
+    [tracker] = await db.select().from(loyaltyTracker).where(eq(loyaltyTracker.walletId, walletId)).limit(1);
+  }
+  
+  const newCount = tracker.nutritionConsultations + 1;
+  const newFreeEarned = Math.floor(newCount / 3);
+  const earnedThisTime = newFreeEarned > tracker.freeConsultationsEarned;
+  
+  await db.update(loyaltyTracker).set({
+    nutritionConsultations: newCount,
+    freeConsultationsEarned: newFreeEarned,
+  }).where(eq(loyaltyTracker.id, tracker.id));
+  
+  if (earnedThisTime) {
+    await addWalletTransaction({
+      walletId,
+      type: 'free_consultation',
+      amount: 0,
+      description: `¡Consulta nutricional #${newCount}! Has ganado 1 consulta GRATIS`,
+      referenceType: 'consultation',
+      createdBy: 'system',
+    });
+  }
+  
+  return {
+    freeEarned: earnedThisTime,
+    totalConsultations: newCount,
+    freeAvailable: newFreeEarned - tracker.freeConsultationsUsed,
+  };
+}
+
+/** Use a free consultation */
+export async function useFreeConsultation(walletId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  const [tracker] = await db.select().from(loyaltyTracker).where(eq(loyaltyTracker.walletId, walletId)).limit(1);
+  if (!tracker) return false;
+  
+  const available = tracker.freeConsultationsEarned - tracker.freeConsultationsUsed;
+  if (available <= 0) return false;
+  
+  await db.update(loyaltyTracker).set({
+    freeConsultationsUsed: tracker.freeConsultationsUsed + 1,
+  }).where(eq(loyaltyTracker.id, tracker.id));
+  
+  return true;
+}
+
+// ============================================================
+// PLANES DE LEALTAD — DB Helpers
+// ============================================================
+
+/** Create a loyalty plan (admin) */
+export async function createLoyaltyPlan(data: InsertLoyaltyPlan): Promise<LoyaltyPlan> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(loyaltyPlans).values(data);
+  const plans = await db.select().from(loyaltyPlans).orderBy(desc(loyaltyPlans.createdAt)).limit(1);
+  return plans[0];
+}
+
+/** Get all active loyalty plans */
+export async function getActiveLoyaltyPlans(): Promise<LoyaltyPlan[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(loyaltyPlans).where(eq(loyaltyPlans.isActive, true)).orderBy(loyaltyPlans.createdAt);
+}
+
+/** Get all loyalty plans (admin) */
+export async function getAllLoyaltyPlans(): Promise<LoyaltyPlan[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(loyaltyPlans).orderBy(desc(loyaltyPlans.createdAt));
+}
+
+/** Update loyalty plan */
+export async function updateLoyaltyPlan(id: number, data: Partial<InsertLoyaltyPlan>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(loyaltyPlans).set(data).where(eq(loyaltyPlans.id, id));
+}
+
+/** Delete loyalty plan */
+export async function deleteLoyaltyPlan(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(loyaltyPlans).where(eq(loyaltyPlans.id, id));
+}
+
+/** Get loyalty progress for a wallet */
+export async function getWalletLoyaltyProgress(walletId: number): Promise<(LoyaltyProgress & { plan: LoyaltyPlan })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({
+    progress: loyaltyProgress,
+    plan: loyaltyPlans,
+  }).from(loyaltyProgress)
+    .innerJoin(loyaltyPlans, eq(loyaltyProgress.planId, loyaltyPlans.id))
+    .where(eq(loyaltyProgress.walletId, walletId));
+  return rows.map(r => ({ ...r.progress, plan: r.plan }));
+}
+
+/** Record a purchase for a loyalty plan */
+export async function recordLoyaltyPurchase(walletId: number, planId: number): Promise<{ rewardEarned: boolean; currentCount: number; required: number }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get plan
+  const [plan] = await db.select().from(loyaltyPlans).where(eq(loyaltyPlans.id, planId)).limit(1);
+  if (!plan) throw new Error("Plan not found");
+  
+  // Get or create progress
+  let [progress] = await db.select().from(loyaltyProgress)
+    .where(and(eq(loyaltyProgress.walletId, walletId), eq(loyaltyProgress.planId, planId)))
+    .limit(1);
+  
+  if (!progress) {
+    await db.insert(loyaltyProgress).values({ walletId, planId, currentCount: 0 });
+    [progress] = await db.select().from(loyaltyProgress)
+      .where(and(eq(loyaltyProgress.walletId, walletId), eq(loyaltyProgress.planId, planId)))
+      .limit(1);
+  }
+  
+  const newCount = progress.currentCount + 1;
+  const rewardEarned = newCount >= plan.requiredPurchases;
+  
+  if (rewardEarned) {
+    // Reset counter and increment rewards
+    await db.update(loyaltyProgress).set({
+      currentCount: 0,
+      rewardsEarned: progress.rewardsEarned + 1,
+    }).where(eq(loyaltyProgress.id, progress.id));
+  } else {
+    await db.update(loyaltyProgress).set({
+      currentCount: newCount,
+    }).where(eq(loyaltyProgress.id, progress.id));
+  }
+  
+  return {
+    rewardEarned,
+    currentCount: rewardEarned ? 0 : newCount,
+    required: plan.requiredPurchases,
+  };
+}
+
+/** Use a loyalty reward */
+export async function useLoyaltyReward(walletId: number, planId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  const [progress] = await db.select().from(loyaltyProgress)
+    .where(and(eq(loyaltyProgress.walletId, walletId), eq(loyaltyProgress.planId, planId)))
+    .limit(1);
+  
+  if (!progress) return false;
+  const available = progress.rewardsEarned - progress.rewardsUsed;
+  if (available <= 0) return false;
+  
+  await db.update(loyaltyProgress).set({
+    rewardsUsed: progress.rewardsUsed + 1,
+  }).where(eq(loyaltyProgress.id, progress.id));
+  
+  return true;
+}
+
+/** Admin: set wallet balance directly */
+export async function adminSetWalletBalance(walletId: number, newBalance: number, adminEmail: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.id, walletId)).limit(1);
+  if (!wallet) throw new Error("Wallet not found");
+  
+  const diff = newBalance - wallet.balance;
+  await db.update(wallets).set({ balance: newBalance }).where(eq(wallets.id, walletId));
+  
+  await db.insert(walletTransactions).values({
+    walletId,
+    type: 'adjustment',
+    amount: diff,
+    description: `Ajuste manual por admin: ${adminEmail}`,
+    balanceAfter: newBalance,
+    createdBy: `admin:${adminEmail}`,
+  });
+}
+
+/** Admin: toggle wallet active status */
+export async function toggleWalletActive(walletId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.id, walletId)).limit(1);
+  if (!wallet) throw new Error("Wallet not found");
+  const newStatus = !wallet.isActive;
+  await db.update(wallets).set({ isActive: newStatus }).where(eq(wallets.id, walletId));
+  return newStatus;
+}

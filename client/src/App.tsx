@@ -22,6 +22,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import DeleteAccount from "./pages/DeleteAccount";
 import MyTreatments from "./pages/MyTreatments";
 import NutriserHomePage from "./pages/NutriserHomePage";
+import WalletPage from "./pages/WalletPage";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
 import Splash0Entry from "@/components/Splash0Entry";
@@ -32,7 +33,7 @@ import { useLocation } from "wouter";
 import { isDesktopDevice } from "@/hooks/useDeviceType";
 
 // Rutas que NUNCA muestran el splash
-const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/services", "/privacy-policy", "/delete-account", "/mis-tratamientos", "/nutriser-home"];
+const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/services", "/privacy-policy", "/delete-account", "/mis-tratamientos", "/nutriser-home", "/monedero"];
 
 function isNoSplashRoute(path: string) {
   return NO_SPLASH_ROUTES.some((r) => path === r || path.startsWith(r + "/") || path.startsWith(r + "?"));
@@ -59,6 +60,7 @@ function Router() {
       <Route path={"/delete-account"} component={DeleteAccount} />
       <Route path={"/mis-tratamientos"} component={MyTreatments} />
       <Route path={"/nutriser-home"} component={NutriserHomePage} />
+      <Route path={"/monedero/:walletNumber?"} component={WalletPage} />
       <Route path={"/coupons"} component={() => { sessionStorage.setItem("nutriser_scroll_to", "promociones"); window.location.replace("/"); return null; }} />
       <Route path={"/services"} component={() => { sessionStorage.setItem("nutriser_scroll_to", "servicios"); window.location.replace("/"); return null; }} />
       <Route path={"/404"} component={NotFound} />

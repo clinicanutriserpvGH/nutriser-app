@@ -6,7 +6,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ArrowRight, Clock, Flame, AlertTriangle, Upload, CheckCircle, Tag } from "lucide-react";
+import { Loader2, ArrowRight, Clock, Flame, AlertTriangle, Upload, CheckCircle, Tag, Wallet } from "lucide-react";
 import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -42,6 +42,15 @@ export default function CouponPage() {
       if (!payPhone && patient.phone) setPayPhone(patient.phone);
     }
   }, [isLoggedIn, patient]);
+
+  // Monedero Nutriser
+  const [useWallet, setUseWallet] = useState(false);
+  const [walletAmount, setWalletAmount] = useState(0);
+  const walletQuery = trpc.wallet.getMyWallet.useQuery(
+    { patientId: patient?.id || 0 },
+    { enabled: isLoggedIn && !!patient?.id && showPaymentFlow }
+  );
+  const walletBalance = walletQuery.data?.wallet?.balance || 0;
 
   // Mutaciones
   const createServicePurchaseMutation = trpc.servicePurchases.create.useMutation({
@@ -359,13 +368,46 @@ export default function CouponPage() {
                             </div>
                           </div>
 
+                          {/* Monedero Nutriser */}
+                          {isLoggedIn && walletBalance > 0 && (
+                            <div className="mb-4">
+                              <div className={`border rounded-xl p-3 transition-all ${useWallet ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={useWallet}
+                                    onChange={(e) => {
+                                      setUseWallet(e.target.checked);
+                                      if (e.target.checked) {
+                                        setWalletAmount(walletBalance);
+                                      } else {
+                                        setWalletAmount(0);
+                                      }
+                                    }}
+                                    className="w-4 h-4 accent-[#C5A55A]"
+                                  />
+                                  <Wallet className="w-5 h-5 text-[#C5A55A]" />
+                                  <div className="flex-1">
+                                    <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
+                                    <p className="text-xs text-gray-500">Saldo: <span className="font-bold text-[#C5A55A]">${(walletBalance / 100).toFixed(2)} MXN</span></p>
+                                  </div>
+                                </label>
+                                {useWallet && (
+                                  <div className="mt-2 pt-2 border-t border-gray-200">
+                                    <p className="text-xs text-green-600 font-semibold">Se aplicará descuento de ${(walletAmount / 100).toFixed(2)} MXN de tu monedero</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
                           {/* Instrucciones de pago */}
                           <div className="bg-[#1A1A1A] rounded-xl p-4 mb-4 text-white text-sm">
                             <p className="font-bold mb-2">💳 Datos para transferencia:</p>
                             <p className="text-gray-300">Banco: Banamex</p>
                             <p className="text-gray-300">CLABE Interbancaria: <span className="font-mono font-bold text-white">002470701448743487</span></p>
                             <p className="text-[#C5A55A] font-bold mt-2">
-                              Monto a pagar: {promo.price}
+                              Monto a pagar: {promo.price}{useWallet && walletAmount > 0 && <span className="text-green-400 text-xs ml-2">(monedero: -${(walletAmount / 100).toFixed(2)})</span>}
                             </p>
                           </div>
 

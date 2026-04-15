@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import Barcode from "react-barcode";
 import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
@@ -1249,7 +1250,7 @@ export default function Memberships() {
           BOTTOM SHEET — TARJETA MONEDERO
       ══════════════════════════════════════════════════════════════════════ */}
       {walletSheetOpen && (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-[70]">
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setWalletSheetOpen(false)} />
           {/* Sheet */}
@@ -1259,43 +1260,47 @@ export default function Memberships() {
               <div className="w-10 h-1 rounded-full bg-gray-300" />
             </div>
             {/* Título */}
-            <h2 className="text-center text-lg font-bold text-gray-900 pb-3">Tu Monedero Nutriser</h2>
+            <h2 className="text-center text-xl font-bold text-gray-900 pb-3">Tu Monedero Nutriser</h2>
             <div className="border-t border-gray-100" />
 
-            {/* Tarjeta del monedero */}
-            <div className="p-5">
-              <div className="bg-gradient-to-br from-[#FAF7F2] to-[#F5EFE3] rounded-2xl shadow-lg border border-[#E8DCC8] overflow-hidden">
-                {/* Header tarjeta */}
-                <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2D2D2D] px-5 py-3 flex items-center justify-between">
+            {/* ── Tarjeta estilo Farmacias del Ahorro ── */}
+            <div className="px-5 pt-5 pb-3">
+              <div className="relative bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)] border border-gray-100 overflow-hidden">
+                {/* Decorative corner arc */}
+                <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full bg-gradient-to-tr from-[#C5A55A]/15 to-[#C5A55A]/5" />
+                <div className="absolute -bottom-3 -left-3 w-24 h-24 rounded-full bg-gradient-to-tr from-[#C5A55A]/10 to-transparent" />
+
+                {/* Card header */}
+                <div className="px-5 pt-4 pb-2 flex items-center justify-between relative z-10">
                   <div className="flex items-center gap-2">
-                    <span className="text-[#C5A55A] font-black text-xs tracking-widest uppercase">Monedero Nutriser</span>
-                    <img src={LOGO_URL} alt="" className="w-6 h-6 rounded-full" />
+                    <span className="text-[#C5A55A] font-black text-sm tracking-wider uppercase">Monedero Nutriser</span>
+                    <img src={LOGO_URL} alt="" className="w-7 h-7 object-contain" />
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded-full bg-[#C5A55A] flex items-center justify-center">
-                      <span className="text-white text-[9px] font-black">e$</span>
-                    </div>
-                    <span className="text-white font-black text-sm">{(walletBalance / 100).toFixed(0)}</span>
+                  <div className="bg-emerald-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full tracking-wider uppercase">
+                    Activa
                   </div>
                 </div>
 
-                {/* QR / Código */}
-                <div className="px-5 py-4 flex flex-col items-center">
+                {/* Barcode section */}
+                <div className="px-5 py-3 flex flex-col items-center relative z-10">
                   {walletData ? (
                     <>
-                      <QRCodeSVG
-                        value={`${window.location.origin}/monedero`}
-                        size={120}
-                        level="M"
-                        bgColor="transparent"
-                        fgColor="#1A1A1A"
-                        className="mb-3"
-                      />
-                      <p className="font-bold text-gray-900 text-base tracking-wide">
+                      <div className="bg-white rounded-lg p-2 mb-2">
+                        <Barcode
+                          value={walletData.walletNumber?.replace(/-/g, '') || '0000000000'}
+                          format="CODE128"
+                          width={2}
+                          height={60}
+                          displayValue={false}
+                          background="transparent"
+                          lineColor="#1A1A1A"
+                        />
+                      </div>
+                      <p className="font-bold text-gray-800 text-lg tracking-wide uppercase">
                         {patient?.name}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-gray-500 text-sm font-mono tracking-wider">
+                        <p className="text-gray-500 text-sm font-mono tracking-widest">
                           {walletData.walletNumber}
                         </p>
                         <button
@@ -1305,7 +1310,7 @@ export default function Memberships() {
                           }}
                           className="p-1 rounded hover:bg-gray-100 transition-colors"
                         >
-                          <Copy className="w-3.5 h-3.5 text-gray-400" />
+                          <Copy className="w-3.5 h-3.5 text-[#C5A55A]" />
                         </button>
                       </div>
                     </>
@@ -1317,24 +1322,26 @@ export default function Memberships() {
                   )}
                 </div>
 
-                {/* Footer tarjeta */}
-                <div className="px-5 pb-4 flex items-center justify-between">
-                  <img src={LOGO_URL} alt="Nutriser" className="h-8 object-contain opacity-60" />
-                  <p className="text-[10px] text-gray-400 font-medium">AESTHETIC & NUTRITION</p>
+                {/* Card footer */}
+                <div className="px-5 pb-4 flex items-center justify-between relative z-10">
+                  <img src={LOGO_URL} alt="Nutriser" className="h-9 object-contain opacity-50" />
+                  <div className="text-right">
+                    <p className="text-[10px] text-gray-400 font-semibold tracking-wider uppercase">Aesthetic & Nutrition</p>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Saldo y acciones */}
-              <div className="flex items-center justify-center gap-6 mt-4">
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+            {/* Saldo section */}
+            <div className="flex items-center justify-center gap-6 px-5 pb-3">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-[#C5A55A] flex items-center justify-center shadow-sm">
+                  <span className="text-white text-[10px] font-black">e$</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-6 h-6 rounded-full bg-[#C5A55A] flex items-center justify-center">
-                    <span className="text-white text-[9px] font-black">e$</span>
-                  </div>
-                  <span className="font-black text-[#C5A55A] text-lg">{(walletBalance / 100).toFixed(0)}</span>
-                </div>
+                <span className="font-black text-[#C5A55A] text-xl">{(walletBalance / 100).toFixed(0)}</span>
               </div>
             </div>
 

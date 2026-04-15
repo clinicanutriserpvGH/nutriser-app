@@ -1431,3 +1431,5 @@
 - [x] Texto del modal de login actualizado: menciona monedero, cupones y beneficios
 - [x] Carrito flotante reposicionado para no solapar con botón del monedero
 - [x] Ocultar botón flotante del monedero cuando el bottom sheet está abierto (tapa el contenido)
+- [x] Rediseñar tarjeta del monedero en bottom sheet estilo Farmacias del Ahorro: fondo blanco, código de barras, diseño limpio
+- [x] Ocultar botón flotante cuando bottom sheet está abierto

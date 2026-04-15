@@ -581,10 +581,14 @@ export default function Store() {
           if (!isLoggedIn) { setShowAuthModal(true); return; }
           setWalletSheetOpen(true);
         }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[68px] h-[68px] rounded-full bg-gradient-to-br from-[#C5A55A] to-[#B8963E] shadow-[0_4px_24px_rgba(197,165,90,0.5)] flex items-center justify-center border-[3px] border-white hover:scale-110 active:scale-95 transition-all"
+        className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 w-[76px] h-[76px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B96A] to-[#B8963E] shadow-[0_6px_32px_rgba(197,165,90,0.6),0_0_0_4px_rgba(255,255,255,0.9)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all animate-[pulse_2s_ease-in-out_infinite]"
         aria-label="Mi Monedero Nutriser"
+        style={{ animationDuration: '2.5s' }}
       >
-        <img src={LOGO_URL} alt="Monedero Nutriser" className="w-11 h-11 rounded-full object-contain" />
+        <div className="w-[62px] h-[62px] rounded-full bg-white/95 flex items-center justify-center">
+          <img src={LOGO_URL} alt="Monedero Nutriser" className="w-10 h-10 object-contain" />
+        </div>
+        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#C5A55A] bg-white/90 px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">Monedero</span>
       </button>
 
       {/* ══════════════════════════════════════════════════════════════════════

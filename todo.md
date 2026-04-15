@@ -1418,3 +1418,6 @@
 - [x] Bottom sheet al presionar botón flotante: tarjeta monedero (QR, nombre, número, saldo)
 - [x] Botón "Ir a mi monedero" en bottom sheet que navega a /monedero
 - [x] Asegurar que funcione en móvil y desktop
+
+### Mejora Botón Flotante Monedero
+- [x] Hacer botón flotante más grande y visible (más contraste, sombra, logo claro)

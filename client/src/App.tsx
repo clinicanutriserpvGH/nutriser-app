@@ -166,7 +166,8 @@ function AppContent() {
   return (
     <SplashThemeProvider>
     <SplashContext.Provider value={{ showSplash: handleShowSplash, showSplash1: handleShowSplash1 }}>
-      <BackgroundMusic />
+      {/* Música de fondo solo en la página principal del sitio web */}
+      {splashState === "site" && location === "/" && <BackgroundMusic />}
 
       {/* Splash 0: pantalla de entrada — Nutriser Home + Portal Salud + Nutriser Web */}
       {splashState === "splash0" && (

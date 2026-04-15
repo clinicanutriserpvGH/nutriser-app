@@ -1473,3 +1473,4 @@
 - [x] Rediseñar WalletPage: tarjeta compacta arriba estilo Farmacias del Ahorro con logo grande DENTRO
 - [x] Quitar el cuadro blanco separado del logo, integrar logo en la tarjeta misma
 - [x] Mover/ocultar botón de sonido para que no estorbe
+- [x] Quitar botón de sonido de la tienda (Memberships), dejarlo solo en el sitio web principal (Home)

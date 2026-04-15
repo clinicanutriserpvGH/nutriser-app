@@ -14,6 +14,7 @@ import { getAllCourses, getPublishedCourses, getCourseById, createCourse, update
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
+import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
@@ -1044,6 +1045,43 @@ export const appRouter = router({
         await db.delete(pushSubscriptions).where(eq(pushSubscriptions.id, input.id));
         return { success: true };
       }),
+
+    // ─── APNs (Native iOS App) ─────────────────────────────────────────────
+
+    // Register APNs device token from native iOS app
+    registerAPNsToken: publicProcedure
+      .input(z.object({
+        deviceToken: z.string().min(10),
+        email: z.string().email().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await saveAPNsToken(input.deviceToken, input.email);
+      }),
+
+    // Send push to all iOS native devices (APNs) — admin only
+    sendAPNsTest: publicProcedure
+      .input(z.object({
+        adminPassword: z.string(),
+        title: z.string().optional(),
+        body: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Contraseña incorrecta' });
+        }
+        if (!isAPNsConfigured()) {
+          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'APNs no está configurado. Agrega APNS_KEY_ID, APNS_TEAM_ID y APNS_PRIVATE_KEY.' });
+        }
+        const title = input.title?.trim() || '🔔 Notificación de Prueba - Nutriser';
+        const body = input.body?.trim() || 'Haz clic en la campanita y no te pierdas de los descuentos especiales que Nutriser tiene para ti';
+        return await sendAPNsPushToAll(title, body, 'https://nutriserpv.com');
+      }),
+
+    // Check if APNs is configured
+    apnsStatus: publicProcedure.query(() => {
+      return { configured: isAPNsConfigured() };
+    }),
   }),
 
   // ─── Catálogo de servicios (admin CRUD + público) ──────────────────────────

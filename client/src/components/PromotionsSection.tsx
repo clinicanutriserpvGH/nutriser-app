@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Gift, Copy, Check, X, ArrowRight, Flame, Clock, AlertTriangle, Bell, BellRing } from "lucide-react";
 import { toast } from "sonner";
-import { checkIOSPushReadiness, isPushSupported, subscribeToPush } from "@/lib/pushHelper";
+import { checkIOSPushReadiness, isPushSupported, subscribeToPush, isNativeApp as checkIsNativeApp, isAnyPushAvailable, requestNativePushPermission, isIOSDevice } from "@/lib/pushHelper";
 
 type Step = "form" | "type" | "payment" | "success";
 
@@ -83,6 +83,10 @@ export default function PromotionsSection() {
   const isIOSSafari = isIOS && isSafari;
   // Detect if running as PWA (added to home screen)
   const isPWA = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+  // Detect native iOS app (from App Store) — push via APNs bridge
+  const isNativeAppFlag = checkIsNativeApp();
+  // For backward compat: isNativeApp means "push not available via web" (only true for generic WKWebViews without our bridge)
+  const isNativeApp = isNativeAppFlag ? false : (isIOSDevice() && !('serviceWorker' in navigator));
 
   const subscribeMutation = trpc.couponSubscribers.subscribe.useMutation({
     onSuccess: () => {
@@ -111,6 +115,29 @@ export default function PromotionsSection() {
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
 
   const handleEnablePush = async () => {
+    // ---- Native iOS App: use APNs bridge ----
+    if (isNativeAppFlag) {
+      setPushLoading(true);
+      try {
+        const result = await requestNativePushPermission();
+        if (result.status === 'granted') {
+          setPushEnabled(true);
+          localStorage.setItem('nutriser_push_enabled', 'true');
+          toast.success('¡Notificaciones activadas! Recibirás alertas de promociones exclusivas.');
+        }
+      } catch (e: any) {
+        if (e?.message === 'PERMISSION_DENIED_NATIVE') {
+          toast.error('Permiso de notificaciones denegado. Ve a Ajustes > Nutriser > Notificaciones para activarlas.');
+        } else {
+          console.error('Native push error:', e);
+          toast.error('Error al activar notificaciones. Inténtalo de nuevo.');
+        }
+      }
+      setPushLoading(false);
+      return;
+    }
+
+    // ---- Web Push (browsers + iOS PWA) ----
     // Check iOS readiness first
     const iosCheck = checkIOSPushReadiness();
     if (!iosCheck.ready) {
@@ -323,14 +350,14 @@ export default function PromotionsSection() {
                 <span className="text-green-300 font-black">✅ Suscrito: correo y notificaciones activas</span>
               </div>
             ) : emailSubscribed && !pushEnabled ? (
-              /* Ya suscrito por correo, pero push no activo */
+              /* Ya suscrito por correo, push no activo — ofrecer push (web o nativo) */
               <button
                 onClick={() => setSubModalOpen(true)}
                 className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-green-800 to-green-900 hover:from-green-700 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-bold text-base shadow-xl border-2 border-green-500 transition-all duration-300"
               >
                 <Check className="w-5 h-5 text-green-400" />
                 <span className="text-green-300 font-black">✅ Suscrito por correo</span>
-                <span className="text-white/60 text-sm font-normal hidden sm:inline">— Activar notificaciones push</span>
+                {!isNativeApp && <span className="text-white/60 text-sm font-normal hidden sm:inline">— Activar notificaciones push</span>}
               </button>
             ) : !emailSubscribed && pushEnabled ? (
               /* Push activo, pero correo no suscrito */

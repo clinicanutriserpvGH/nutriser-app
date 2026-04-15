@@ -1334,3 +1334,20 @@
 - [x] Refactorizar PromotionsSection y SplashSelector para usar pushHelper
 - [x] Agregar update forzado del SW en index.html para dispositivos con cache viejo
 - [x] Tests unitarios para push notifications server-side
+
+## Corrección Push en App Nativa (WKWebView del App Store)
+- [x] En WKWebView genérico (Instagram, etc): ocultar botón push
+- [x] En app nativa Nutriser: mostrar botón push que usa APNs via bridge Swift
+- [x] En SplashSelector: usar showPushSection que detecta app nativa vs WKWebView genérico
+- [x] En PromotionsSection: usar isNativeAppFlag para habilitar push via bridge
+
+## Proyecto Xcode con APNs para App Nativa iOS
+- [x] Investigar integración APNs + WKWebView + backend Nutriser
+- [x] Crear endpoint en servidor para registrar device tokens de APNs (push.registerAPNsToken)
+- [x] Crear endpoint en servidor para enviar push via APNs (push.sendAPNsPush)
+- [x] Crear módulo apnsService.ts con JWT auth, envío individual y masivo
+- [x] Crear proyecto Xcode completo (WKWebView + APNs + NotificationServiceExtension)
+- [x] Crear bridge JavaScript ↔ Swift (window.NutriserNative)
+- [x] Actualizar pushHelper.ts con soporte nativo (requestNativePushPermission, checkNativePushStatus)
+- [x] Empaquetar proyecto como ZIP (NutriserApp-iOS-Push.zip)
+- [x] Tests unitarios para apnsService

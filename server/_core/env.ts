@@ -14,4 +14,9 @@ export const ENV = {
   cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME ?? "",
   cloudinaryApiKey: process.env.CLOUDINARY_API_KEY ?? "",
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET ?? "",
+  // APNs (Apple Push Notification service) for native iOS app
+  apnsKeyId: process.env.APNS_KEY_ID ?? "",
+  apnsTeamId: process.env.APNS_TEAM_ID ?? "",
+  apnsPrivateKey: process.env.APNS_PRIVATE_KEY ?? "",
+  apnsBundleId: process.env.APNS_BUNDLE_ID ?? "com.nutriser.app",
 };

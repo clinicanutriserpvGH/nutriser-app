@@ -1,13 +1,27 @@
 /**
- * Push Notification Helper — iOS/Safari compatible
+ * Push Notification Helper — iOS/Safari + Native App compatible
  *
- * iOS Web Push Requirements (iOS 16.4+):
- * 1. The PWA MUST be installed on Home Screen (Add to Home Screen)
- * 2. The app MUST be opened from the Home Screen icon (standalone mode)
- * 3. VAPID applicationServerKey MUST be a Uint8Array, not a string
- * 4. Safari does NOT support: vibrate, actions, requireInteraction in notifications
- * 5. Push permission can ONLY be requested from a user gesture (click/tap)
+ * Supports THREE environments:
+ * 1. Web browsers (Chrome, Firefox, etc.) → Web Push via Service Worker
+ * 2. iOS Safari PWA (Home Screen) → Web Push via Service Worker (iOS 16.4+)
+ * 3. Native iOS App (WKWebView from App Store) → APNs via Swift bridge
+ *
+ * The native app injects `window.isNutriserNativeApp = true` and
+ * `window.NutriserNative` object for communication.
  */
+
+declare global {
+  interface Window {
+    isNutriserNativeApp?: boolean;
+    isNutriserIOSApp?: boolean;
+    NutriserNative?: {
+      requestPushPermission: () => void;
+      getDeviceToken: () => void;
+      checkPushStatus: () => void;
+      openSettings: () => void;
+    };
+  }
+}
 
 /** Detect if running on iOS */
 export function isIOSDevice(): boolean {
@@ -22,14 +36,29 @@ export function isPWAStandalone(): boolean {
   );
 }
 
-/** Detect if running inside a WKWebView (native iOS app wrapper) */
+/** Detect if running inside the native Nutriser iOS app */
+export function isNativeApp(): boolean {
+  return window.isNutriserNativeApp === true;
+}
+
+/** Detect if running inside a WKWebView (native iOS app wrapper) WITHOUT our bridge */
 export function isWKWebView(): boolean {
+  // If our native bridge is present, it's our app — don't block
+  if (isNativeApp()) return false;
+  // Generic WKWebView detection (e.g., Instagram, Facebook in-app browser)
   return isIOSDevice() && !('serviceWorker' in navigator);
 }
 
-/** Check if push notifications are supported in the current environment */
+/** Check if Web Push notifications are supported in the current environment */
 export function isPushSupported(): boolean {
+  // Native app uses APNs, not Web Push
+  if (isNativeApp()) return false;
   return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+
+/** Check if ANY form of push is available (Web Push OR native APNs) */
+export function isAnyPushAvailable(): boolean {
+  return isNativeApp() || isPushSupported();
 }
 
 /**
@@ -38,19 +67,24 @@ export function isPushSupported(): boolean {
  */
 export function checkIOSPushReadiness(): {
   ready: boolean;
-  reason?: 'not_ios' | 'wkwebview' | 'not_standalone' | 'not_supported' | 'ready';
+  reason?: 'not_ios' | 'native_app' | 'wkwebview' | 'not_standalone' | 'not_supported' | 'ready';
   message?: string;
 } {
   if (!isIOSDevice()) {
     return { ready: true, reason: 'not_ios' };
   }
 
+  // Native Nutriser app — push is available via APNs bridge
+  if (isNativeApp()) {
+    return { ready: true, reason: 'native_app' };
+  }
+
   if (isWKWebView()) {
-    // WKWebView doesn't support service workers at all
+    // Generic WKWebView (Instagram, Facebook, etc.) — no push support
     return {
       ready: false,
       reason: 'wkwebview',
-      message: 'Las notificaciones push no están disponibles en esta app. Abre nutriserpv.com en Safari para activarlas.',
+      message: 'Las notificaciones push no están disponibles en este navegador. Abre nutriserpv.com en Safari para activarlas.',
     };
   }
 
@@ -89,9 +123,8 @@ export function vapidKeyToUint8Array(base64UrlKey: string): Uint8Array {
 }
 
 /**
- * Subscribe to push notifications.
- * Handles the full flow: permission request, service worker ready, subscribe.
- * Returns the subscription keys or throws an error.
+ * Subscribe to push notifications via Web Push (Service Worker).
+ * For web browsers and iOS PWA only — NOT for native app.
  */
 export async function subscribeToPush(vapidPublicKey: string): Promise<{
   endpoint: string;
@@ -130,4 +163,79 @@ export async function subscribeToPush(vapidPublicKey: string): Promise<{
     p256dh,
     auth,
   };
+}
+
+/**
+ * Request push permission in the native iOS app via the Swift bridge.
+ * Returns a Promise that resolves when the native app responds.
+ */
+export function requestNativePushPermission(): Promise<{
+  status: string;
+  token: string;
+  registered: boolean;
+}> {
+  return new Promise((resolve, reject) => {
+    if (!window.NutriserNative) {
+      reject(new Error('Native bridge not available'));
+      return;
+    }
+
+    // Listen for the response from the native app
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      window.removeEventListener('nutriserPushStatus', handler);
+      clearTimeout(timeout);
+
+      if (detail.status === 'granted') {
+        resolve(detail);
+      } else if (detail.status === 'denied') {
+        reject(new Error('PERMISSION_DENIED_NATIVE'));
+      } else {
+        reject(new Error(`Native push status: ${detail.status}`));
+      }
+    };
+
+    window.addEventListener('nutriserPushStatus', handler);
+
+    // Timeout after 15 seconds
+    const timeout = setTimeout(() => {
+      window.removeEventListener('nutriserPushStatus', handler);
+      reject(new Error('Native push permission timeout'));
+    }, 15000);
+
+    // Request permission via the bridge
+    window.NutriserNative.requestPushPermission();
+  });
+}
+
+/**
+ * Check native push status without requesting permission.
+ */
+export function checkNativePushStatus(): Promise<{
+  status: string;
+  token: string;
+  registered: boolean;
+}> {
+  return new Promise((resolve, reject) => {
+    if (!window.NutriserNative) {
+      reject(new Error('Native bridge not available'));
+      return;
+    }
+
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      window.removeEventListener('nutriserPushStatus', handler);
+      clearTimeout(timeout);
+      resolve(detail);
+    };
+
+    window.addEventListener('nutriserPushStatus', handler);
+
+    const timeout = setTimeout(() => {
+      window.removeEventListener('nutriserPushStatus', handler);
+      reject(new Error('Native push status check timeout'));
+    }, 5000);
+
+    window.NutriserNative.checkPushStatus();
+  });
 }

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { checkIOSPushReadiness, isPushSupported, subscribeToPush, isIOSDevice, isPWAStandalone, isWKWebView as checkIsWKWebView } from "@/lib/pushHelper";
+import { checkIOSPushReadiness, isPushSupported, subscribeToPush, isIOSDevice, isPWAStandalone, isWKWebView as checkIsWKWebView, isNativeApp as checkIsNativeApp, requestNativePushPermission, isAnyPushAvailable } from "@/lib/pushHelper";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
@@ -94,7 +94,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   // iOS detection via pushHelper
   const isIOS = isIOSDevice();
   const isPWA = isPWAStandalone();
-  const isWKWebViewFlag = checkIsWKWebView();
+  const isNativeAppFlag = checkIsNativeApp();
+  // isWKWebViewFlag: true only for generic WKWebViews WITHOUT our bridge (Instagram, etc.)
+  const isWKWebViewFlag = isNativeAppFlag ? false : checkIsWKWebView();
+  // Show push section if: native app (APNs) OR web push supported
+  const showPushSection = isNativeAppFlag || !isWKWebViewFlag;
 
   const { data: vapidData } = trpc.push.getVapidPublicKey.useQuery();
 
@@ -131,7 +135,31 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   };
 
   const handleEnablePush = async () => {
-    // Check iOS readiness first
+    // ---- Native iOS App: use APNs bridge ----
+    if (isNativeAppFlag) {
+      setPushLoading(true);
+      try {
+        const result = await requestNativePushPermission();
+        if (result.status === 'granted') {
+          setPushEnabled(true);
+          localStorage.setItem('nutriser_push_enabled', 'true');
+          toast.success('🔔 ¡Notificaciones activadas!');
+          setShowNotifModal(false);
+        }
+      } catch (e: any) {
+        if (e?.message === 'PERMISSION_DENIED_NATIVE') {
+          toast.error('Permiso denegado. Ve a Ajustes > Nutriser > Notificaciones para activarlas.');
+        } else {
+          console.error('Native push error:', e);
+          toast.error('Error al activar notificaciones. Inténtalo de nuevo.');
+        }
+      } finally {
+        setPushLoading(false);
+      }
+      return;
+    }
+
+    // ---- Web Push (browsers + iOS PWA) ----
     const iosCheck = checkIOSPushReadiness();
     if (!iosCheck.ready) {
       if (iosCheck.reason === 'not_standalone') {
@@ -493,7 +521,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                 )}
               </div>
 
-              {!isWKWebViewFlag && (
+              {showPushSection && (
                 <>
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-px bg-white/10" />
@@ -507,7 +535,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                       <div className="flex-1">
                         <p className="text-white font-semibold text-sm">Activa las notificaciones y no te pierdas nada</p>
                         <p className="text-white/50 text-xs mt-0.5">Recibe promociones y cupones exclusivos al instante</p>
-                        {isIOS && !isPWA && !isWKWebViewFlag && (
+                        {isIOS && !isPWA && !isNativeAppFlag && !isWKWebViewFlag && (
                           <div className="mt-2 bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl p-3">
                             <p className="text-[#C5A55A] text-xs font-bold mb-1">📱 Para activar en iPhone:</p>
                             <ol className="text-white/60 text-[11px] space-y-0.5 list-decimal list-inside">

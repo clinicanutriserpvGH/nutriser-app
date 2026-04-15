@@ -1489,3 +1489,6 @@
 - [x] Panel de lista de deseos donde se puedan ver todos los artículos guardados y agregar al carrito
 - [x] Corregir error de parse en SplashSelector.tsx (HTML entities &amp; en JSX)
 - [x] Lista de Deseos: botón Regresar debe mostrar también opción de ir al inicio (igual que Monedero)
+- [x] Tienda: restaurar solo botón Regresar (sin INICIO) en todas las pestañas excepto Deseos
+- [x] Lista de Deseos: Regresar debe llevar de vuelta a la tienda (pestaña Tratamientos), no al Splash
+- [x] Reducir tamaño de los botones de navegación (INICIO/Regresar) para que no sean tan grandes

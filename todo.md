@@ -1483,3 +1483,8 @@
 - [x] Mejorar diseño de Mis Tratamientos: fondo integrado a la tienda (crema, dorado, mismo estilo)
 - [x] Botón Regresar en Mis Tratamientos debe llevar de vuelta a la tienda (/memberships)
 - [x] Bug: Carrito se borra al navegar a /monedero y regresar — persistir carrito en localStorage
+- [x] Implementar lista de deseos (wishlist) con localStorage persistente
+- [x] Agregar botón de corazón en cada artículo (tratamientos, farmacy, library)
+- [x] Agregar pestaña 'Lista de Deseos' con icono de corazón en la barra inferior de la tienda
+- [x] Panel de lista de deseos donde se puedan ver todos los artículos guardados y agregar al carrito
+- [x] Corregir error de parse en SplashSelector.tsx (HTML entities &amp; en JSX)

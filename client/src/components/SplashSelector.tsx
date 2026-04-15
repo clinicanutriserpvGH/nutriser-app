@@ -234,7 +234,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
           <div className="flex flex-col items-center gap-1">
             <p className="text-[#C5A55A] text-xs tracking-[0.4em] uppercase font-light animate-pulse">Cargando</p>
-            <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase">Aesthetic &amp; Nutrition</p>
+            <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase">Aesthetic & Nutrition</p>
           </div>
         </div>
       </div>
@@ -284,7 +284,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             {/* Textos */}
             <div className="flex flex-col justify-center min-w-0 flex-1">
               <p className="text-[#C5A55A] text-[9px] md:text-[10px] tracking-[0.25em] uppercase font-light leading-tight">
-                Aesthetic &amp; Nutrition
+                Aesthetic & Nutrition
               </p>
               <h1 className="text-white text-xs md:text-sm font-semibold tracking-wider uppercase leading-tight mt-0.5">
                 Bienvenido a Nutriser
@@ -439,7 +439,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           {/* ── Footer ── */}
           <div className="flex items-center justify-between pb-2 pt-1">
             <p className={`text-[10px] ${isLight ? "text-[#9a8050]/50" : "text-white/20"}`}>
-              © 2025 Nutriser Aesthetic &amp; Nutrition · nutriserpv.com
+              © 2025 Nutriser Aesthetic & Nutrition · nutriserpv.com
             </p>
             <ThemeToggle
               isLight={isLight}

@@ -16,6 +16,7 @@ import {
   Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useWishlist } from "@/hooks/useWishlist";
 import { QRCodeSVG } from "qrcode.react";
 import Barcode from "react-barcode";
 import { useLocation } from "wouter";
@@ -29,7 +30,7 @@ const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-type StoreTab = "tratamientos" | "farmacy" | "library" | "monedero";
+type StoreTab = "tratamientos" | "farmacy" | "library" | "monedero" | "wishlist";
 
 interface CartItem {
   id: string;
@@ -250,6 +251,9 @@ export default function Memberships() {
   const [cartOpen, setCartOpen] = useState(false);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+  // ─── Lista de deseos (persistida en localStorage) ──────────────────
+  const { wishlist, wishlistCount, isInWishlist, toggleWishlist, removeFromWishlist } = useWishlist();
 
   const addToCart = (item: Omit<CartItem, "qty">) => {
     if (!isLoggedIn) {
@@ -649,8 +653,11 @@ export default function Memberships() {
                           <div className="absolute top-2 left-2 bg-[#C5A55A] text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1">
                             <Star className="w-3 h-3 fill-current" /> {pkg.badge}
                           </div>
-                          <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-full">
-                            -{savingsPct}%
+                          <div className="absolute top-2 right-2 flex items-center gap-1">
+                            <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: pkg.id, name: pkg.name, price: pkg.price, priceLabel: `$${pkg.price.toLocaleString("es-MX")} MXN`, imageUrl: pkg.imageUrl, category: pkg.category, itemType: "package" }); }} className="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                              <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(pkg.id) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
+                            </button>
+                            <span className="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-full">-{savingsPct}%</span>
                           </div>
                         </div>
 
@@ -738,6 +745,9 @@ export default function Memberships() {
                                       <Icon className="w-10 h-10 opacity-30" style={{ color: meta.color }} />
                                     </div>
                                   )}
+                                  <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: service.price ?? "Consultar", imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                                    <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`svc-${service.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
+                                  </button>
                                 </div>
                                 <div className="p-3">
                                   <h3 className="font-bold text-gray-900 text-xs lg:text-sm leading-snug mb-1 line-clamp-2">{service.name}</h3>
@@ -797,6 +807,9 @@ export default function Memberships() {
                                     <CatIcon className="w-10 h-10 opacity-30" style={{ color: catMeta.color }} />
                                   </div>
                                 )}
+                                <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: service.price ?? "Consultar", imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                                  <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`svc-${service.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
+                                </button>
                               </div>
                               <div className="p-3 flex-1 flex flex-col">
                                 <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{service.name}</h3>
@@ -874,6 +887,9 @@ export default function Memberships() {
                               <FlaskConical className="w-10 h-10 text-gray-200" />
                             </div>
                           )}
+                          <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product" }); }} className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                            <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`prd-${product.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
+                          </button>
                           {product.stock !== null && product.stock !== undefined && product.stock <= 5 && product.stock > 0 && (
                             <div className="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
                               Últimas {product.stock}
@@ -941,8 +957,11 @@ export default function Memberships() {
                 <div className="max-w-md mx-auto">
                   <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-md">
                     {ebook.coverUrl && (
-                      <div className="bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center p-8">
+                      <div className="relative bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center p-8">
                         <img src={ebook.coverUrl} alt={ebook.title} className="max-h-80 w-auto object-contain rounded-lg shadow-xl" />
+                        <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `ebook-${ebook.id}`, name: ebook.title, price: (ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : parseFloat(String(ebook.price)), priceLabel: `$${((ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : parseFloat(String(ebook.price))).toLocaleString("es-MX")} MXN`, imageUrl: ebook.coverUrl, category: "ebook", itemType: "ebook" }); }} className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 active:scale-90 transition-all">
+                          <Heart className={`w-4 h-4 transition-colors ${isInWishlist(`ebook-${ebook.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
+                        </button>
                       </div>
                     )}
                     <div className="p-5">
@@ -987,6 +1006,78 @@ export default function Memberships() {
                     </div>
                   </div>
                   <p className="text-center text-xs text-gray-400 mt-4">Para ver el eBook completo, visita <button onClick={() => navigate("/ebook")} className="text-[#C5A55A] underline hover:text-[#B8963E]">Nutriser Library</button></p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          TAB: LISTA DE DESEOS
+      ══════════════════════════════════════════════════════════════════════ */}
+      {activeTab === "wishlist" && (
+        <div className="pb-28 mt-2">
+          <div className="bg-white py-5">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center">
+                  <Heart className="w-4 h-4 text-red-500" />
+                </div>
+                <div>
+                  <h2 className="font-black text-gray-900 text-lg">Lista de Deseos</h2>
+                  <p className="text-gray-400 text-xs">{wishlistCount} {wishlistCount === 1 ? "artículo guardado" : "artículos guardados"}</p>
+                </div>
+              </div>
+
+              {wishlist.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                    <Heart className="w-10 h-10 text-gray-300" />
+                  </div>
+                  <h3 className="font-bold text-gray-400 text-xl mb-2">Tu lista está vacía</h3>
+                  <p className="text-gray-300 text-sm max-w-xs mx-auto">Toca el corazón en cualquier artículo para guardarlo aquí.</p>
+                  <button onClick={() => setActiveTab("tratamientos")} className="mt-4 text-[#C5A55A] font-bold text-sm hover:underline">Explorar tratamientos</button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {wishlist.map(item => {
+                    const typeLabels: Record<string, string> = { service: "Tratamiento", package: "Paquete", product: "Producto", ebook: "eBook" };
+                    return (
+                      <div key={item.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex">
+                        {/* Image */}
+                        <div className="relative w-24 h-24 flex-shrink-0 bg-gray-50">
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Heart className="w-6 h-6 text-gray-200" />
+                            </div>
+                          )}
+                        </div>
+                        {/* Info */}
+                        <div className="flex-1 p-3 flex flex-col min-w-0">
+                          <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">{typeLabels[item.itemType] || "Artículo"}</p>
+                          <h3 className="font-bold text-gray-900 text-xs leading-snug line-clamp-2 mt-0.5">{item.name}</h3>
+                          <p className="text-[#C5A55A] font-black text-sm mt-auto">{item.priceLabel}</p>
+                          <div className="flex gap-1.5 mt-2">
+                            <button
+                              onClick={() => addToCart({ id: item.id, name: item.name, price: item.price, priceLabel: item.priceLabel, imageUrl: item.imageUrl, category: item.category ?? "general", itemType: item.itemType, productId: item.productId, ebookId: item.ebookId })}
+                              className="flex-1 flex items-center justify-center gap-1 border border-gray-200 text-gray-600 font-bold text-[10px] py-1.5 rounded-lg hover:bg-gray-50 transition-all active:scale-95"
+                            >
+                              <ShoppingCart className="w-3 h-3" /> Agregar
+                            </button>
+                            <button
+                              onClick={() => removeFromWishlist(item.id)}
+                              className="flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-all active:scale-95"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1251,7 +1342,7 @@ export default function Memberships() {
               {/* Tratamientos */}
               <button
                 onClick={() => setActiveTab("tratamientos")}
-                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[56px] transition-colors ${
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors ${
                   activeTab === "tratamientos" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
@@ -1262,7 +1353,7 @@ export default function Memberships() {
               {/* Farmacy */}
               <button
                 onClick={() => setActiveTab("farmacy")}
-                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[56px] transition-colors ${
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors ${
                   activeTab === "farmacy" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
@@ -1290,7 +1381,7 @@ export default function Memberships() {
               {/* Library */}
               <button
                 onClick={() => setActiveTab("library")}
-                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] transition-colors ${
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors ${
                   activeTab === "library" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
@@ -1298,16 +1389,18 @@ export default function Memberships() {
                 <span className="text-[9px] font-semibold leading-tight">Library</span>
               </button>
 
-              {/* Mis Tratamientos */}
+              {/* Lista de Deseos */}
               <button
-                onClick={() => {
-                  if (!isLoggedIn) { setShowAuthModal(true); return; }
-                  navigate("/mis-tratamientos");
-                }}
-                className="flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] transition-colors text-gray-400"
+                onClick={() => setActiveTab("wishlist")}
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors relative ${
+                  activeTab === "wishlist" ? "text-red-500" : "text-gray-400"
+                }`}
               >
-                <ClipboardList className="w-5 h-5" />
-                <span className="text-[8px] font-semibold leading-tight">Mis<br/>Tratamientos</span>
+                <Heart className={`w-5 h-5 ${activeTab === "wishlist" || wishlistCount > 0 ? "" : ""}`} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 right-0 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center">{wishlistCount > 9 ? "9+" : wishlistCount}</span>
+                )}
+                <span className="text-[8px] font-semibold leading-tight">Deseos</span>
               </button>
 
               {/* Cuenta */}
@@ -1316,7 +1409,7 @@ export default function Memberships() {
                   if (!isLoggedIn) { setShowAuthModal(true); return; }
                   navigate("/monedero");
                 }}
-                className="flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] transition-colors text-gray-400"
+                className="flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors text-gray-400"
               >
                 <User className="w-5 h-5" />
                 <span className="text-[9px] font-semibold leading-tight">Cuenta</span>

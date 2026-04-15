@@ -456,7 +456,41 @@ export default function Memberships() {
   // ─── Render ─────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#f5f5f5]" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 3.5rem)" }}>
+      {/* Botón Regresar inteligente:
+          - Wishlist → vuelve a Tratamientos
+          - Categoría específica (no "all") → vuelve a "all"
+          - Pestaña distinta a tratamientos (farmacy, library, cuenta) → vuelve a tratamientos
+          - Vista principal (tratamientos + all) → BackToSplash (sale al splash)
+      */}
       {activeTab === "wishlist" ? (
+        <div
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 10px)" }}
+          className="fixed left-3 z-[60] flex items-center gap-1.5"
+        >
+          <button
+            onClick={() => setActiveTab("tratamientos")}
+            className="flex items-center gap-1 bg-black/60 backdrop-blur-sm border border-white/15 text-white/80 px-2.5 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase hover:bg-white/20 hover:text-white transition-all duration-300 shadow-md"
+            aria-label="Regresar a la tienda"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            Regresar
+          </button>
+        </div>
+      ) : (activeTab === "tratamientos" && activeCategory !== "all") ? (
+        <div
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 10px)" }}
+          className="fixed left-3 z-[60] flex items-center gap-1.5"
+        >
+          <button
+            onClick={() => setActiveCategory("all")}
+            className="flex items-center gap-1 bg-black/60 backdrop-blur-sm border border-white/15 text-white/80 px-2.5 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase hover:bg-white/20 hover:text-white transition-all duration-300 shadow-md"
+            aria-label="Regresar a la tienda"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            Regresar
+          </button>
+        </div>
+      ) : (activeTab !== "tratamientos") ? (
         <div
           style={{ top: "calc(env(safe-area-inset-top, 0px) + 10px)" }}
           className="fixed left-3 z-[60] flex items-center gap-1.5"

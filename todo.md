@@ -1492,3 +1492,4 @@
 - [x] Tienda: restaurar solo botón Regresar (sin INICIO) en todas las pestañas excepto Deseos
 - [x] Lista de Deseos: Regresar debe llevar de vuelta a la tienda (pestaña Tratamientos), no al Splash
 - [x] Reducir tamaño de los botones de navegación (INICIO/Regresar) para que no sean tan grandes
+- [x] Botón Regresar dentro de la tienda (al ver servicio/categoría) debe regresar a la tienda, no al Splash

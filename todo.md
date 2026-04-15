@@ -1493,3 +1493,4 @@
 - [x] Lista de Deseos: Regresar debe llevar de vuelta a la tienda (pestaña Tratamientos), no al Splash
 - [x] Reducir tamaño de los botones de navegación (INICIO/Regresar) para que no sean tan grandes
 - [x] Botón Regresar dentro de la tienda (al ver servicio/categoría) debe regresar a la tienda, no al Splash
+- [x] Tabletas (iPad) deben detectarse como móviles y mostrar Splashes, no el sitio web de escritorio

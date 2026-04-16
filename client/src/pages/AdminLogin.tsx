@@ -225,7 +225,7 @@ export default function AdminLogin() {
               <CardDescription>Accede al panel de administración</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
                 {/* Correo editable */}
                 <div>
                   <Label htmlFor="admin-email" className="flex items-center gap-2 mb-2 text-[#666]">
@@ -234,12 +234,15 @@ export default function AdminLogin() {
                   </Label>
                   <Input
                     id="admin-email"
+                    name="admin-email-field"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="tu-correo@ejemplo.com"
                     required
-                    autoComplete="email"
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-form-type="other"
                     className="border-[#C5A55A]/30 focus:border-[#C5A55A]"
                   />
                 </div>
@@ -253,11 +256,15 @@ export default function AdminLogin() {
                   <div className="relative">
                     <Input
                       id="password"
+                      name="admin-pass-field"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       required
+                      autoComplete="new-password"
+                      data-lpignore="true"
+                      data-form-type="other"
                       className="border-[#C5A55A]/30 focus:border-[#C5A55A] pr-10"
                     />
                     <button

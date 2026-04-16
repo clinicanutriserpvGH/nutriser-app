@@ -1550,3 +1550,4 @@
 - [x] Modificar flujo: login → esperar autorización (polling 3s) → acceso concedido
 - [x] Si no se presiona el enlace en 10 min, denegar acceso automáticamente
 - [x] Tests unitarios para el flujo 2FA
+- [x] Deshabilitar autocompletado del navegador en campos de correo y contraseña del login admin

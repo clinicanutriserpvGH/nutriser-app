@@ -1,63 +1,143 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Eye, EyeOff, User, Mail, CheckCircle2, ArrowLeft, Home } from "lucide-react";
+import { Lock, Eye, EyeOff, Mail, CheckCircle2, ArrowLeft, Home, Shield, Loader2, Clock } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-
-const ADMIN_EMAIL = "clinicanutriserpv@gmail.com";
-const ADMIN_PASSWORD = "nutriser2024";
 
 export default function AdminLogin() {
   const [, navigate] = useLocation();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Detectar si el usuario viene del Splash 2 (/nutriser-home) via query param
+  // Estado 2FA
+  const [awaitingAuth, setAwaitingAuth] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [countdown, setCountdown] = useState(600); // 10 min en segundos
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Detectar si el usuario viene del Splash 2
   const fromSplash2 = new URLSearchParams(window.location.search).get("from") === "splash2";
 
   // Estado para el modal de recuperación
   const [showForgot, setShowForgot] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const [resetSent, setResetSent] = useState(false);
 
   const requestResetMutation = trpc.auth.requestPasswordReset.useMutation({
     onSuccess: () => {
       setResetSent(true);
     },
-    onError: (err) => {
+    onError: (err: any) => {
       toast.error(err.message || "Error al enviar el correo");
     },
   });
 
+  const loginMutation = trpc.auth.adminLogin.useMutation({
+    onSuccess: (data) => {
+      if (data.pendingAuthorization) {
+        setPendingEmail(data.email);
+        setAwaitingAuth(true);
+        setCountdown(600);
+        toast.success("Correo de autorización enviado. Revisa tu bandeja.");
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Credenciales inválidas");
+      setIsLoading(false);
+    },
+  });
+
+  const authorizeMutation = trpc.auth.authorizeLogin.useMutation();
+
+  // Polling para verificar autorización
+  const checkAuthQuery = trpc.auth.checkLoginAuthorization.useQuery(
+    { email: pendingEmail },
+    {
+      enabled: awaitingAuth && !!pendingEmail,
+      refetchInterval: awaitingAuth ? 3000 : false, // cada 3 segundos
+    }
+  );
+
+  useEffect(() => {
+    if (checkAuthQuery.data?.authorized) {
+      // ¡Autorizado! Guardar sesión y redirigir
+      localStorage.setItem("adminSession", JSON.stringify({
+        email: checkAuthQuery.data.email,
+        loggedIn: true,
+        timestamp: new Date().toISOString(),
+      }));
+      toast.success("¡Acceso autorizado! Bienvenido al panel.");
+      setAwaitingAuth(false);
+      setIsLoading(false);
+      navigate("/admin/dashboard");
+    }
+  }, [checkAuthQuery.data]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (awaitingAuth) {
+      countdownRef.current = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            // Tiempo expirado
+            setAwaitingAuth(false);
+            setIsLoading(false);
+            toast.error("El tiempo de autorización ha expirado. Intenta de nuevo.");
+            if (countdownRef.current) clearInterval(countdownRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [awaitingAuth]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      if (password === ADMIN_PASSWORD) {
-        localStorage.setItem("adminSession", JSON.stringify({
-          email: ADMIN_EMAIL,
-          loggedIn: true,
-          timestamp: new Date().toISOString(),
-        }));
-        toast.success("Sesión iniciada correctamente");
-        navigate("/admin/dashboard");
-      } else {
-        toast.error("Contraseña incorrecta");
-      }
-    } finally {
-      setIsLoading(false);
+    if (!email || !password) {
+      toast.error("Ingresa tu correo y contraseña");
+      return;
     }
+    setIsLoading(true);
+    loginMutation.mutate({
+      email,
+      password,
+      origin: window.location.origin,
+    });
   };
 
   const handleRequestReset = () => {
+    if (!resetEmail) {
+      toast.error("Ingresa tu correo de administrador");
+      return;
+    }
     requestResetMutation.mutate({
-      email: ADMIN_EMAIL,
+      email: resetEmail,
       origin: window.location.origin,
     });
+  };
+
+  const handleCancelAuth = () => {
+    setAwaitingAuth(false);
+    setIsLoading(false);
+    setPendingEmail("");
+    setCountdown(600);
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -90,8 +170,55 @@ export default function AdminLogin() {
           <p className="text-[#666]">Panel de Administración</p>
         </div>
 
-        {!showForgot ? (
-          /* ── Login normal ── */
+        {awaitingAuth ? (
+          /* ── Esperando autorización 2FA ── */
+          <Card className="border-2 border-[#C5A55A]/20 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent text-center">
+              <div className="mx-auto mb-2">
+                <Shield className="w-12 h-12 text-[#C5A55A] mx-auto" />
+              </div>
+              <CardTitle className="text-[#C5A55A]">Verificación de Seguridad</CardTitle>
+              <CardDescription>Esperando autorización por correo</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-5">
+              <div className="bg-[#FFF8E1] border border-[#C5A55A]/30 rounded-lg p-4 text-center">
+                <p className="text-sm text-[#856404] mb-2">
+                  Se envió un enlace de autorización a los correos de seguridad de Nutriser.
+                </p>
+                <p className="text-xs text-[#856404]/80">
+                  Un administrador debe hacer clic en el enlace para autorizar tu acceso.
+                </p>
+              </div>
+
+              {/* Animación de espera */}
+              <div className="flex flex-col items-center gap-3 py-4">
+                <div className="relative">
+                  <Loader2 className="w-10 h-10 text-[#C5A55A] animate-spin" />
+                </div>
+                <p className="text-[#666] text-sm font-medium">Esperando autorización...</p>
+                <div className="flex items-center gap-2 text-[#999] text-xs">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Expira en {formatTime(countdown)}</span>
+                </div>
+              </div>
+
+              {/* Indicador de correo */}
+              <div className="bg-[#f5f5f5] rounded-lg p-3 text-center">
+                <p className="text-xs text-[#999] mb-1">Sesión solicitada para:</p>
+                <p className="text-sm font-semibold text-[#1A1A1A]">{pendingEmail}</p>
+              </div>
+
+              <Button
+                onClick={handleCancelAuth}
+                variant="outline"
+                className="w-full border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A]/10"
+              >
+                Cancelar e intentar de nuevo
+              </Button>
+            </CardContent>
+          </Card>
+        ) : !showForgot ? (
+          /* ── Login normal con campo de correo editable ── */
           <Card className="border-2 border-[#C5A55A]/20 shadow-lg">
             <CardHeader className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent">
               <CardTitle className="text-[#C5A55A]">Iniciar Sesión</CardTitle>
@@ -99,15 +226,22 @@ export default function AdminLogin() {
             </CardHeader>
             <CardContent className="pt-6">
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Correo pre-llenado (solo lectura) */}
+                {/* Correo editable */}
                 <div>
-                  <Label className="flex items-center gap-2 mb-2 text-[#666]">
-                    <User className="w-4 h-4 text-[#C5A55A]" />
-                    Administrador
+                  <Label htmlFor="admin-email" className="flex items-center gap-2 mb-2 text-[#666]">
+                    <Mail className="w-4 h-4 text-[#C5A55A]" />
+                    Correo de Administrador
                   </Label>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-md border border-[#C5A55A]/20 bg-[#FAF7F2] text-[#666] text-sm select-none">
-                    <span className="flex-1">{ADMIN_EMAIL}</span>
-                  </div>
+                  <Input
+                    id="admin-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tu-correo@ejemplo.com"
+                    required
+                    autoComplete="email"
+                    className="border-[#C5A55A]/30 focus:border-[#C5A55A]"
+                  />
                 </div>
 
                 {/* Contraseña */}
@@ -124,7 +258,6 @@ export default function AdminLogin() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       required
-                      autoFocus
                       className="border-[#C5A55A]/30 focus:border-[#C5A55A] pr-10"
                     />
                     <button
@@ -137,12 +270,25 @@ export default function AdminLogin() {
                   </div>
                 </div>
 
+                {/* Nota de seguridad */}
+                <div className="bg-[#f0f7ff] border border-blue-200 rounded-lg p-3 flex items-start gap-2">
+                  <Shield className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+                  <p className="text-xs text-blue-700">
+                    Después de verificar tus credenciales, se enviará un enlace de autorización a los correos de seguridad de Nutriser. Solo podrás acceder si se aprueba.
+                  </p>
+                </div>
+
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || loginMutation.isPending}
                   className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 text-lg font-bold tracking-wider"
                 >
-                  {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                  {isLoading || loginMutation.isPending ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Verificando...
+                    </span>
+                  ) : "Iniciar Sesión"}
                 </Button>
 
                 {/* Enlace olvidé contraseña */}
@@ -159,28 +305,33 @@ export default function AdminLogin() {
             </CardContent>
           </Card>
         ) : (
-          /* ── Modal de recuperación ── */
+          /* ── Modal de recuperación con campo editable ── */
           <Card className="border-2 border-[#C5A55A]/20 shadow-lg">
             <CardHeader className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent">
               <CardTitle className="text-[#C5A55A]">Recuperar Contraseña</CardTitle>
-              <CardDescription>Te enviaremos un enlace a tu correo registrado</CardDescription>
+              <CardDescription>Ingresa tu correo de administrador</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               {!resetSent ? (
                 <div className="space-y-5">
-                  {/* Correo pre-llenado */}
                   <div>
-                    <Label className="flex items-center gap-2 mb-2 text-[#666]">
+                    <Label htmlFor="reset-email" className="flex items-center gap-2 mb-2 text-[#666]">
                       <Mail className="w-4 h-4 text-[#C5A55A]" />
                       Correo del administrador
                     </Label>
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-md border border-[#C5A55A]/20 bg-[#FAF7F2] text-[#666] text-sm">
-                      <span className="flex-1">{ADMIN_EMAIL}</span>
-                    </div>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      placeholder="tu-correo@ejemplo.com"
+                      required
+                      className="border-[#C5A55A]/30 focus:border-[#C5A55A]"
+                    />
                   </div>
 
                   <p className="text-sm text-[#666]">
-                    Se enviará un enlace de restablecimiento a <strong>{ADMIN_EMAIL}</strong>. El enlace es válido por 1 hora.
+                    Se enviará un enlace de restablecimiento al correo ingresado. El enlace es válido por 1 hora.
                   </p>
 
                   <Button
@@ -206,11 +357,11 @@ export default function AdminLogin() {
                   <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto" />
                   <h3 className="text-xl font-bold text-[#1A1A1A]">¡Correo enviado!</h3>
                   <p className="text-[#666] text-sm">
-                    Revisa tu bandeja de entrada en <strong>{ADMIN_EMAIL}</strong> y haz clic en el enlace para crear una nueva contraseña.
+                    Revisa tu bandeja de entrada y haz clic en el enlace para crear una nueva contraseña.
                   </p>
                   <p className="text-[#999] text-xs">El enlace expira en 1 hora.</p>
                   <Button
-                    onClick={() => { setShowForgot(false); setResetSent(false); }}
+                    onClick={() => { setShowForgot(false); setResetSent(false); setResetEmail(""); }}
                     variant="outline"
                     className="border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A]/10"
                   >

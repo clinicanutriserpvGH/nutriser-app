@@ -234,6 +234,52 @@ export async function updateAdminPassword(email: string, newPasswordHash: string
     .where(eq(adminCredentials.email, email));
 }
 
+// ── 2FA Login Token helpers ──
+export async function setAdminLoginToken(email: string, token: string, expiresAt: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(adminCredentials)
+    .set({ loginToken: token, loginTokenExpiresAt: expiresAt, loginAuthorized: false })
+    .where(eq(adminCredentials.email, email));
+}
+
+export async function getAdminByLoginToken(token: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(adminCredentials)
+    .where(eq(adminCredentials.loginToken, token))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function authorizeAdminLogin(token: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(adminCredentials)
+    .set({ loginAuthorized: true })
+    .where(eq(adminCredentials.loginToken, token));
+}
+
+export async function checkAdminLoginAuthorized(email: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db.select().from(adminCredentials)
+    .where(eq(adminCredentials.email, email))
+    .limit(1);
+  if (result.length === 0) return false;
+  const admin = result[0];
+  if (!admin.loginToken || !admin.loginTokenExpiresAt) return false;
+  if (new Date() > admin.loginTokenExpiresAt) return false;
+  return admin.loginAuthorized === true;
+}
+
+export async function clearAdminLoginToken(email: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(adminCredentials)
+    .set({ loginToken: null, loginTokenExpiresAt: null, loginAuthorized: false })
+    .where(eq(adminCredentials.email, email));
+}
 
 // Coupon queries
 export async function getCouponByCode(code: string) {

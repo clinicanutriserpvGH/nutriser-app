@@ -281,6 +281,13 @@
       "when": 1776237185404,
       "tag": "0039_cheerful_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "5",
+      "when": 1776308364487,
+      "tag": "0040_strange_satana",
+      "breakpoints": true
     }
   ]
 }

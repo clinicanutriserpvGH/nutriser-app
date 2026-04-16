@@ -11,6 +11,7 @@ import Appointments from "./pages/Appointments";
 import AppointmentForm from "./pages/AppointmentForm";
 import AdminLogin from "./pages/AdminLogin";
 import AdminResetPassword from "./pages/AdminResetPassword";
+import AdminAuthorize from "./pages/AdminAuthorize";
 import AdminDashboard from "./pages/AdminDashboard";
 import EbookStore from "./pages/EbookStore";
 import EbookReader from "./pages/EbookReader";
@@ -48,6 +49,7 @@ function Router() {
       <Route path={"/appointment-form"} component={AppointmentForm} />
       <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin/reset-password"} component={AdminResetPassword} />
+      <Route path={"/admin/authorize"} component={AdminAuthorize} />
       <Route path={"/admin/dashboard"} component={AdminDashboard} />
       <Route path={"/admin/memberships"} component={AdminMemberships} />
       <Route path={"/ebook"} component={EbookStore} />

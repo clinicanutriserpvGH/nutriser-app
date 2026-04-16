@@ -529,3 +529,76 @@ export async function sendPatientNotificationEmail(
     html: htmlContent,
   });
 }
+
+/**
+ * Envía correo de autorización 2FA para login admin.
+ * Se envía a los dos correos de seguridad para que cualquiera autorice.
+ */
+export async function sendLoginAuthorizationEmail(
+  adminEmail: string,
+  authLink: string,
+  securityEmails: string[]
+) {
+  const transporter = getEmailTransporter();
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background-color: #1A1A1A; padding: 28px 32px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="color: #C5A55A; margin: 0; font-size: 22px; letter-spacing: 1px;">NUTRISER</h1>
+            <p style="color: #C5A55A; margin: 4px 0 0; font-size: 12px; letter-spacing: 2px;">PANEL DE ADMINISTRACI&Oacute;N</p>
+          </div>
+          
+          <div style="background-color: #fff; padding: 32px; border: 1px solid #eee; border-top: none;">
+            <div style="background-color: #FFF3CD; border: 1px solid #FFEAA7; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+              <p style="margin: 0; color: #856404; font-weight: bold;">&#9888;&#65039; Solicitud de Acceso al Panel Admin</p>
+            </div>
+            
+            <p>Alguien est&aacute; intentando acceder al panel de administraci&oacute;n con el correo:</p>
+            <p style="font-weight: bold; font-size: 18px; color: #1A1A1A; background: #f5f5f5; padding: 12px; border-radius: 6px; text-align: center;">${adminEmail}</p>
+            
+            <p>Si reconoces este acceso y deseas <strong>autorizar la entrada</strong>, haz clic en el siguiente bot&oacute;n:</p>
+            
+            <div style="text-align: center; margin: 28px 0;">
+              <a href="${authLink}" 
+                 style="background-color: #28a745; color: white; padding: 14px 36px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
+                &#10003; Autorizar Acceso
+              </a>
+            </div>
+            
+            <p style="color: #dc3545; font-weight: bold;">Si NO reconoces este intento de acceso, NO hagas clic en el bot&oacute;n. El acceso ser&aacute; denegado autom&aacute;ticamente.</p>
+            
+            <p style="color: #666; font-size: 14px;">
+              Este enlace es v&aacute;lido por <strong>10 minutos</strong>. Despu&eacute;s de ese tiempo, el intento de acceso ser&aacute; rechazado.
+            </p>
+            
+            <p style="color: #999; font-size: 12px; margin-top: 20px;">
+              Si el bot&oacute;n no funciona, copia y pega este enlace en tu navegador:<br/>
+              <a href="${authLink}" style="color: #C5A55A;">${authLink}</a>
+            </p>
+          </div>
+          
+          <div style="background-color: #1A1A1A; padding: 16px; text-align: center; border-radius: 0 0 8px 8px;">
+            <p style="color: #888; font-size: 12px; margin: 0;">
+              Nutriser Aesthetic &amp; Nutrition &mdash; Sistema de Seguridad
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  
+  // Enviar a todos los correos de seguridad
+  for (const email of securityEmails) {
+    try {
+      await transporter.sendMail({
+        from: `"Nutriser Seguridad" <${ENV.gmailUser}>`,
+        to: email,
+        subject: "Autorizacion de acceso - Panel Admin Nutriser",
+        html: htmlContent,
+      });
+    } catch (err) {
+      console.error(`[Email] Failed to send 2FA email to ${email}:`, err);
+    }
+  }
+}

@@ -1536,3 +1536,17 @@
 - [x] Escalar barra de búsqueda para desktop
 - [x] Escalar productos para desktop (imágenes, texto, grid 2 columnas)
 - [x] Escalar barra inferior de navegación para desktop (Tratamientos, Farmacy, Library, etc.)
+- [ ] Integrar cashback del monedero en el flujo de checkout (Finalizar Compra)
+- [ ] Mostrar cuánto cashback ganará el usuario con la compra
+- [ ] Agregar opción de usar saldo del monedero para pagar parte del pedido
+- [ ] Calcular totales correctamente con descuento de monedero y cashback
+
+## Admin Login con Doble Seguridad (2FA por correo)
+- [x] Quitar correo pre-llenado del login admin — campo editable vacío
+- [x] Crear campos loginToken/loginTokenExpiresAt/loginAuthorized en adminCredentials
+- [x] Crear procedimiento backend para enviar enlace de verificación a ambos correos
+- [x] Enviar enlace de autorización a clinicanutriserpv@gmail.com Y nutriologoantoniobustos@gmail.com
+- [x] Crear página /admin/authorize para autorizar el acceso por token
+- [x] Modificar flujo: login → esperar autorización (polling 3s) → acceso concedido
+- [x] Si no se presiona el enlace en 10 min, denegar acceso automáticamente
+- [x] Tests unitarios para el flujo 2FA

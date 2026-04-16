@@ -4,10 +4,10 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, setAdminResetToken, getAdminByResetToken, updateAdminPassword, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber, getAllServices, getAllActiveServices, createService, updateService, deleteService } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, setAdminResetToken, getAdminByResetToken, updateAdminPassword, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber, getAllServices, getAllActiveServices, createService, updateService, deleteService, setAdminLoginToken, getAdminByLoginToken, authorizeAdminLogin, checkAdminLoginAuthorized, clearAdminLoginToken } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
-import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail } from "./_core/email";
+import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail } from "./_core/email";
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
 import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
@@ -33,23 +33,81 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    // Paso 1: Verifica credenciales y envía correo de autorización 2FA
     adminLogin: publicProcedure
       .input(z.object({
         email: z.string().email(),
         password: z.string(),
+        origin: z.string(),
       }))
       .mutation(async ({ input }) => {
         const admin = await getAdminByEmail(input.email);
-        if (!admin) throw new Error("Admin not found");
+        if (!admin) throw new Error("Credenciales inv\u00e1lidas");
         
         const isPasswordValid = await bcrypt.compare(input.password, admin.passwordHash);
-        if (!isPasswordValid) throw new Error("Invalid password");
+        if (!isPasswordValid) throw new Error("Credenciales inv\u00e1lidas");
+        
+        // Generar token 2FA
+        const crypto = await import('crypto');
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+        
+        await setAdminLoginToken(input.email, token, expiresAt);
+        
+        // Construir enlace de autorización
+        const authLink = `${input.origin}/admin/authorize?token=${token}`;
+        
+        // Correos de seguridad que reciben la autorización
+        const securityEmails = [
+          'clinicanutriserpv@gmail.com',
+          'nutriologoantoniobustos@gmail.com',
+        ];
+        
+        await sendLoginAuthorizationEmail(input.email, authLink, securityEmails);
         
         return {
           success: true,
-          adminId: admin.id,
+          pendingAuthorization: true,
           email: admin.email,
+          message: 'Se envi\u00f3 un enlace de autorizaci\u00f3n a los correos de seguridad. Espera a que sea aprobado.',
         };
+      }),
+
+    // Paso 2: El frontend hace polling para verificar si ya se autorizó
+    checkLoginAuthorization: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+      }))
+      .query(async ({ input }) => {
+        const isAuthorized = await checkAdminLoginAuthorized(input.email);
+        if (isAuthorized) {
+          // Limpiar el token después de autorizar
+          const admin = await getAdminByEmail(input.email);
+          await clearAdminLoginToken(input.email);
+          return {
+            authorized: true,
+            adminId: admin?.id,
+            email: admin?.email,
+          };
+        }
+        return { authorized: false };
+      }),
+
+    // Paso 3: El enlace del correo llama esto para autorizar
+    authorizeLogin: publicProcedure
+      .input(z.object({
+        token: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const admin = await getAdminByLoginToken(input.token);
+        if (!admin) throw new Error('Token inv\u00e1lido o expirado');
+        
+        if (!admin.loginTokenExpiresAt || new Date() > admin.loginTokenExpiresAt) {
+          throw new Error('El enlace ha expirado. Solicita un nuevo inicio de sesi\u00f3n.');
+        }
+        
+        await authorizeAdminLogin(input.token);
+        return { success: true, email: admin.email };
       }),
 
     requestPasswordReset: publicProcedure

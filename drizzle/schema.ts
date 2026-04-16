@@ -96,6 +96,9 @@ export const adminCredentials = mysqlTable("adminCredentials", {
   passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
   resetToken: varchar("resetToken", { length: 128 }),       // Token para restablecer contraseña
   resetTokenExpiresAt: timestamp("resetTokenExpiresAt"),    // Expira en 1 hora
+  loginToken: varchar("loginToken", { length: 128 }),        // Token 2FA para autorizar login
+  loginTokenExpiresAt: timestamp("loginTokenExpiresAt"),    // Expira en 10 minutos
+  loginAuthorized: boolean("loginAuthorized").default(false), // Si el login fue autorizado por enlace
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

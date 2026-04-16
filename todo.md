@@ -1529,3 +1529,10 @@
 - [x] Fix Splash 0: imagen clínica sigue cortando la "n" de nutriser — mover objectPosition más a la izquierda (20% center)
 - [x] Fix Splash 1: tarjeta Shop demasiado alta vs Academy/Web en tablet — cambiado a 3 columnas iguales
 - [x] Fix monedero flotante en desktop: se abre pantalla completa, debe verse como tarjeta/popup pequeña
+- [x] Fix monedero popup desktop: usar flex centering para tarjeta centrada en sm+
+- [x] Escalar barra de categorías (Tratamientos, Farmacia, Library, etc.) para desktop
+- [x] Escalar botón flotante del monedero para desktop
+- [x] Escalar header de la tienda para desktop (título, usuario, carrito más grandes)
+- [x] Escalar barra de búsqueda para desktop
+- [x] Escalar productos para desktop (imágenes, texto, grid 2 columnas)
+- [x] Escalar barra inferior de navegación para desktop (Tratamientos, Farmacy, Library, etc.)

@@ -210,33 +210,33 @@ export default function Store() {
       {/* ─── Top Bar ─────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white shadow-sm">
         {/* Back + Brand + User */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <div className="flex items-center justify-between px-4 lg:px-8 py-3 lg:py-4 border-b border-gray-100">
           <BackToSplash />
           <div className="flex-1 text-center">
-            <h1 className="font-serif text-lg font-bold text-[#1A1A1A]">
+            <h1 className="font-serif text-lg lg:text-2xl font-bold text-[#1A1A1A]">
               Nutriser <span className="text-[#C5A55A]">Shop</span>
             </h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 lg:gap-4">
             {isLoggedIn ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 lg:gap-3">
                 <div className="hidden sm:block text-right">
-                  <p className="text-xs font-semibold text-[#1A1A1A] leading-tight truncate max-w-[100px]">{patient?.name}</p>
+                  <p className="text-xs lg:text-sm font-semibold text-[#1A1A1A] leading-tight truncate max-w-[100px] lg:max-w-[160px]">{patient?.name}</p>
                 </div>
                 <button
                   onClick={logout}
-                  className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center text-[#C5A55A] hover:bg-[#C5A55A]/20 transition"
+                  className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#C5A55A]/10 flex items-center justify-center text-[#C5A55A] hover:bg-[#C5A55A]/20 transition"
                   title="Cerrar sesión"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4 lg:w-5 lg:h-5" />
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="flex items-center gap-1.5 bg-[#1A1A1A] text-white text-xs font-semibold px-3 py-2 rounded-full hover:bg-[#333] transition"
+                className="flex items-center gap-1.5 bg-[#1A1A1A] text-white text-xs lg:text-sm font-semibold px-3 lg:px-5 py-2 lg:py-2.5 rounded-full hover:bg-[#333] transition"
               >
-                <User className="w-3.5 h-3.5" />
+                <User className="w-3.5 h-3.5 lg:w-5 lg:h-5" />
                 <span className="hidden sm:inline">Iniciar sesión</span>
               </button>
             )}
@@ -244,15 +244,15 @@ export default function Store() {
         </div>
 
         {/* Search Bar */}
-        <div className="px-4 py-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <div className="px-4 lg:px-8 py-3">
+          <div className="relative lg:max-w-2xl lg:mx-auto">
+            <Search className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5 text-gray-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="¿Qué estás buscando?"
-              className="w-full bg-gray-100 rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#1A1A1A] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 focus:bg-white transition"
+              className="w-full bg-gray-100 rounded-xl pl-10 lg:pl-12 pr-4 py-2.5 lg:py-3.5 text-sm lg:text-base text-[#1A1A1A] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 focus:bg-white transition"
             />
           </div>
         </div>
@@ -277,25 +277,25 @@ export default function Store() {
           <>
             {/* ─── Categories (circular icons, horizontal scroll) ─── */}
             {categories.length > 1 && (
-              <div className="px-4 pt-4 pb-2">
+              <div className="px-4 lg:px-8 pt-4 pb-2">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-bold text-[#1A1A1A]">Categorías</h2>
-                  <span className="text-xs text-[#C5A55A] font-medium">{products.length} productos</span>
+                  <h2 className="text-base lg:text-xl font-bold text-[#1A1A1A]">Categorías</h2>
+                  <span className="text-xs lg:text-sm text-[#C5A55A] font-medium">{products.length} productos</span>
                 </div>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-2 scrollbar-hide lg:justify-center">
                   {/* All */}
                   <button
                     onClick={() => setActiveCategory("all")}
-                    className="flex flex-col items-center gap-1.5 flex-shrink-0"
+                    className="flex flex-col items-center gap-1.5 lg:gap-2 flex-shrink-0"
                   >
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all ${
+                    <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-full flex items-center justify-center text-2xl lg:text-3xl transition-all ${
                       activeCategory === "all"
                         ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30 ring-2 ring-[#C5A55A]/50"
                         : "bg-white shadow-md hover:shadow-lg"
                     }`}>
                       {activeCategory === "all" ? "⭐" : "🏷️"}
                     </div>
-                    <span className={`text-[11px] font-medium text-center leading-tight ${
+                    <span className={`text-[11px] lg:text-sm font-medium text-center leading-tight ${
                       activeCategory === "all" ? "text-[#C5A55A] font-bold" : "text-gray-500"
                     }`}>
                       Todos
@@ -305,16 +305,16 @@ export default function Store() {
                     <button
                       key={cat.id}
                       onClick={() => setActiveCategory(cat.id)}
-                      className="flex flex-col items-center gap-1.5 flex-shrink-0"
+                      className="flex flex-col items-center gap-1.5 lg:gap-2 flex-shrink-0"
                     >
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all ${
+                      <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-full flex items-center justify-center text-2xl lg:text-3xl transition-all ${
                         activeCategory === cat.id
                           ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30 ring-2 ring-[#C5A55A]/50"
                           : "bg-white shadow-md hover:shadow-lg"
                       }`}>
                         {cat.icon}
                       </div>
-                      <span className={`text-[11px] font-medium text-center leading-tight max-w-[64px] ${
+                      <span className={`text-[11px] lg:text-sm font-medium text-center leading-tight max-w-[64px] lg:max-w-[80px] ${
                         activeCategory === cat.id ? "text-[#C5A55A] font-bold" : "text-gray-500"
                       }`}>
                         {cat.label}
@@ -329,12 +329,12 @@ export default function Store() {
             <div className="h-2 bg-gray-100 mt-2" />
 
             {/* ─── Products Section ─────────────────────────────────── */}
-            <div className="px-4 pt-4">
+            <div className="px-4 lg:px-8 pt-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-[#1A1A1A]">
+                <h2 className="text-base lg:text-xl font-bold text-[#1A1A1A]">
                   {activeCategory === "all" ? "Todos los productos" : CATEGORY_LABELS[activeCategory] || activeCategory}
                 </h2>
-                <span className="text-xs text-gray-400">{filteredProducts.length} resultados</span>
+                <span className="text-xs lg:text-sm text-gray-400">{filteredProducts.length} resultados</span>
               </div>
 
               {filteredProducts.length === 0 ? (
@@ -343,14 +343,14 @@ export default function Store() {
                   <p className="text-gray-400 text-sm">No se encontraron productos</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
                   {filteredProducts.map((product) => (
                     <div
                       key={product.id}
                       className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex hover:shadow-md transition-shadow"
                     >
                       {/* Product Image */}
-                      <div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 bg-[#F5F0E8] flex items-center justify-center overflow-hidden">
+                      <div className="w-28 h-28 sm:w-32 sm:h-32 lg:w-44 lg:h-44 flex-shrink-0 bg-[#F5F0E8] flex items-center justify-center overflow-hidden">
                         {product.imageUrl ? (
                           <img
                             src={product.imageUrl}
@@ -363,16 +363,16 @@ export default function Store() {
                       </div>
 
                       {/* Product Info */}
-                      <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
+                      <div className="flex-1 p-3 lg:p-5 flex flex-col justify-between min-w-0">
                         <div>
-                          <span className="text-[#C5A55A] text-[9px] tracking-[0.15em] uppercase font-bold">
+                          <span className="text-[#C5A55A] text-[9px] lg:text-xs tracking-[0.15em] uppercase font-bold">
                             {CATEGORY_LABELS[product.category] || product.category}
                           </span>
-                          <h3 className="font-semibold text-[#1A1A1A] text-sm leading-snug mt-0.5 line-clamp-2">
+                          <h3 className="font-semibold text-[#1A1A1A] text-sm lg:text-lg leading-snug mt-0.5 line-clamp-2">
                             {product.name}
                           </h3>
                           {product.description && (
-                            <p className="text-gray-400 text-xs leading-relaxed mt-1 line-clamp-2">
+                            <p className="text-gray-400 text-xs lg:text-sm leading-relaxed mt-1 line-clamp-2">
                               {product.description}
                             </p>
                           )}
@@ -380,7 +380,7 @@ export default function Store() {
                         <div className="flex items-end justify-between mt-2">
                           <div>
                             {product.price && (
-                              <p className="text-[#C5A55A] font-black text-lg leading-none">{product.price}</p>
+                              <p className="text-[#C5A55A] font-black text-lg lg:text-xl leading-none">{product.price}</p>
                             )}
                             {product.stock !== null && product.stock !== undefined && (
                               <p className={`text-[10px] mt-0.5 ${product.stock > 0 ? "text-green-500" : "text-red-400"}`}>
@@ -391,7 +391,7 @@ export default function Store() {
                           <button
                             onClick={() => handleOpenPurchase(product)}
                             disabled={product.stock === 0}
-                            className="flex items-center gap-1 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold px-3 py-2 rounded-xl transition-colors shadow-sm"
+                            className="flex items-center gap-1 lg:gap-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs lg:text-sm font-bold px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl transition-colors shadow-sm"
                           >
                             <ShoppingBag className="w-3.5 h-3.5" />
                             {product.stock === 0 ? "Agotado" : "Comprar"}
@@ -581,25 +581,25 @@ export default function Store() {
           if (!isLoggedIn) { setShowAuthModal(true); return; }
           setWalletSheetOpen(true);
         }}
-        className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 w-[76px] h-[76px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B96A] to-[#B8963E] shadow-[0_6px_32px_rgba(197,165,90,0.6),0_0_0_4px_rgba(255,255,255,0.9)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all animate-[pulse_2s_ease-in-out_infinite]"
+        className="fixed bottom-20 lg:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[76px] h-[76px] lg:w-[96px] lg:h-[96px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B96A] to-[#B8963E] shadow-[0_6px_32px_rgba(197,165,90,0.6),0_0_0_4px_rgba(255,255,255,0.9)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all animate-[pulse_2s_ease-in-out_infinite]"
         aria-label="Mi Monedero Nutriser"
         style={{ animationDuration: '2.5s' }}
       >
-        <div className="w-[62px] h-[62px] rounded-full bg-white/95 flex items-center justify-center">
-          <img src={LOGO_URL} alt="Monedero Nutriser" className="w-10 h-10 object-contain" />
+        <div className="w-[62px] h-[62px] lg:w-[78px] lg:h-[78px] rounded-full bg-white/95 flex items-center justify-center">
+          <img src={LOGO_URL} alt="Monedero Nutriser" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
         </div>
-        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#C5A55A] bg-white/90 px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">Monedero</span>
+        <span className="absolute -bottom-5 lg:-bottom-6 left-1/2 -translate-x-1/2 text-[10px] lg:text-xs font-bold text-[#C5A55A] bg-white/90 px-2 lg:px-3 py-0.5 lg:py-1 rounded-full shadow-sm whitespace-nowrap">Monedero</span>
       </button>
 
       {/* ══════════════════════════════════════════════════════════════════════
           BOTTOM SHEET — TARJETA MONEDERO
       ══════════════════════════════════════════════════════════════════════ */}
       {walletSheetOpen && (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center">
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setWalletSheetOpen(false)} />
           {/* Sheet: mobile = bottom sheet full width | desktop = centered card */}
-          <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-[420px] md:rounded-3xl bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto animate-[slideUp_0.3s_ease-out] md:animate-[fadeInScale_0.25s_ease-out]">
+          <div className="relative w-full sm:max-w-[420px] sm:rounded-3xl bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto" style={{ animation: 'slideUp 0.3s ease-out' }}>
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-gray-300" />
@@ -702,10 +702,6 @@ export default function Store() {
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
-        }
-        @keyframes fadeInScale {
-          from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
       `}</style>
     </div>

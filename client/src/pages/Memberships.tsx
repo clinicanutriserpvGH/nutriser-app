@@ -1450,27 +1450,27 @@ export default function Memberships() {
       {!walletSheetOpen && !checkoutOpen && !cartOpen && (
         <div className="fixed bottom-0 left-0 right-0 z-[60]">
           <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
-            <div className="max-w-lg mx-auto flex items-end justify-around px-1 pt-1">
+            <div className="max-w-lg lg:max-w-2xl mx-auto flex items-end justify-around px-1 lg:px-4 pt-1 lg:pt-2">
               {/* Tratamientos */}
               <button
                 onClick={() => setActiveTab("tratamientos")}
-                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors ${
+                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors ${
                   activeTab === "tratamientos" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
-                <Sparkles className="w-5 h-5" />
-                <span className="text-[9px] font-semibold leading-tight">Tratamientos</span>
+                <Sparkles className="w-5 h-5 lg:w-7 lg:h-7" />
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Tratamientos</span>
               </button>
 
               {/* Farmacy */}
               <button
                 onClick={() => setActiveTab("farmacy")}
-                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors ${
+                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors ${
                   activeTab === "farmacy" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
-                <FlaskConical className="w-5 h-5" />
-                <span className="text-[9px] font-semibold leading-tight">Farmacy</span>
+                <FlaskConical className="w-5 h-5 lg:w-7 lg:h-7" />
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Farmacy</span>
               </button>
 
               {/* Monedero — Botón central flotante */}
@@ -1479,40 +1479,40 @@ export default function Memberships() {
                   if (!isLoggedIn) { setShowAuthModal(true); return; }
                   setWalletSheetOpen(true);
                 }}
-                className="flex flex-col items-center -mt-6 relative"
+                className="flex flex-col items-center -mt-6 lg:-mt-8 relative"
                 aria-label="Mi Monedero Nutriser"
               >
-                <div className="w-[58px] h-[58px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B86A] to-[#B8963E] shadow-[0_4px_16px_rgba(197,165,90,0.5)] flex items-center justify-center border-[3px] border-white hover:scale-105 active:scale-95 transition-all">
-                  <div className="w-[44px] h-[44px] rounded-full bg-white flex items-center justify-center">
-                    <img src={LOGO_URL} alt="Monedero" className="w-8 h-8 rounded-full object-contain" />
+                <div className="w-[58px] h-[58px] lg:w-[76px] lg:h-[76px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B86A] to-[#B8963E] shadow-[0_4px_16px_rgba(197,165,90,0.5)] flex items-center justify-center border-[3px] lg:border-4 border-white hover:scale-105 active:scale-95 transition-all">
+                  <div className="w-[44px] h-[44px] lg:w-[58px] lg:h-[58px] rounded-full bg-white flex items-center justify-center">
+                    <img src={LOGO_URL} alt="Monedero" className="w-8 h-8 lg:w-11 lg:h-11 rounded-full object-contain" />
                   </div>
                 </div>
-                <span className="text-[9px] font-bold text-[#C5A55A] mt-0.5 leading-tight">Monedero</span>
+                <span className="text-[9px] lg:text-xs font-bold text-[#C5A55A] mt-0.5 leading-tight">Monedero</span>
               </button>
 
               {/* Library */}
               <button
                 onClick={() => setActiveTab("library")}
-                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors ${
+                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors ${
                   activeTab === "library" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
-                <BookOpen className="w-5 h-5" />
-                <span className="text-[9px] font-semibold leading-tight">Library</span>
+                <BookOpen className="w-5 h-5 lg:w-7 lg:h-7" />
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Library</span>
               </button>
 
               {/* Lista de Deseos */}
               <button
                 onClick={() => setActiveTab("wishlist")}
-                className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors relative ${
+                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors relative ${
                   activeTab === "wishlist" ? "text-red-500" : "text-gray-400"
                 }`}
               >
-                <Heart className={`w-5 h-5 ${activeTab === "wishlist" || wishlistCount > 0 ? "" : ""}`} />
+                <Heart className={`w-5 h-5 lg:w-7 lg:h-7 ${activeTab === "wishlist" || wishlistCount > 0 ? "" : ""}`} />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-0.5 right-0 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center">{wishlistCount > 9 ? "9+" : wishlistCount}</span>
                 )}
-                <span className="text-[8px] font-semibold leading-tight">Deseos</span>
+                <span className="text-[8px] lg:text-xs font-semibold leading-tight">Deseos</span>
               </button>
 
               {/* Cuenta */}
@@ -1521,10 +1521,10 @@ export default function Memberships() {
                   if (!isLoggedIn) { setShowAuthModal(true); return; }
                   navigate("/monedero");
                 }}
-                className="flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[44px] transition-colors text-gray-400"
+                className="flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors text-gray-400"
               >
-                <User className="w-5 h-5" />
-                <span className="text-[9px] font-semibold leading-tight">Cuenta</span>
+                <User className="w-5 h-5 lg:w-7 lg:h-7" />
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Cuenta</span>
               </button>
             </div>
           </div>
@@ -1535,11 +1535,11 @@ export default function Memberships() {
           BOTTOM SHEET — TARJETA MONEDERO
       ══════════════════════════════════════════════════════════════════════ */}
       {walletSheetOpen && (
-        <div className="fixed inset-0 z-[70]">
+        <div className="fixed inset-0 z-[70] flex items-end sm:items-center sm:justify-center">
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setWalletSheetOpen(false)} />
-          {/* Sheet */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto" style={{ animation: 'slideUp 0.3s ease-out' }}>
+          {/* Sheet: mobile = bottom sheet | desktop = centered card */}
+          <div className="relative w-full sm:max-w-[420px] sm:rounded-3xl bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto" style={{ animation: 'slideUp 0.3s ease-out' }}>
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-gray-300" />

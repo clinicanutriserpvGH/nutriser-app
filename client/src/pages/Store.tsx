@@ -598,8 +598,8 @@ export default function Store() {
         <div className="fixed inset-0 z-50">
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setWalletSheetOpen(false)} />
-          {/* Sheet */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto animate-[slideUp_0.3s_ease-out]">
+          {/* Sheet: mobile = bottom sheet full width | desktop = centered card */}
+          <div className="absolute bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-[420px] md:rounded-3xl bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto animate-[slideUp_0.3s_ease-out] md:animate-[fadeInScale_0.25s_ease-out]">
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-gray-300" />
@@ -697,11 +697,15 @@ export default function Store() {
         </div>
       )}
 
-      {/* CSS animation for bottom sheet */}
+      {/* CSS animation for bottom sheet & desktop card */}
       <style>{`
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
+        }
+        @keyframes fadeInScale {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
       `}</style>
     </div>

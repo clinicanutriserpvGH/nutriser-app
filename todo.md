@@ -1528,3 +1528,4 @@
 - [x] Revisar Splash 1 tablet: verificar que el layout de 3 tarjetas se vea correcto (ya se ve bien, no requiere cambios)
 - [x] Fix Splash 0: imagen clínica sigue cortando la "n" de nutriser — mover objectPosition más a la izquierda (20% center)
 - [x] Fix Splash 1: tarjeta Shop demasiado alta vs Academy/Web en tablet — cambiado a 3 columnas iguales
+- [x] Fix monedero flotante en desktop: se abre pantalla completa, debe verse como tarjeta/popup pequeña

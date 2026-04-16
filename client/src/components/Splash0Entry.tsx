@@ -119,7 +119,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   src={CLINIC_IMG2}
                   alt="Nutriser Home"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                  style={{ objectPosition: "center center" }}
+                  style={{ objectPosition: "30% center" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-black/90 pointer-events-none" />
                 <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-7 text-left pointer-events-none">

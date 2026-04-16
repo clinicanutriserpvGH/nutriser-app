@@ -1522,3 +1522,5 @@
 
 ### Acreditación Automática Online
 - [x] Al verificar comprobante de compra online → acreditar cashback automáticamente al monedero
+- [x] Ajustar tamaño del PromoSplash para que se vea más grande en pantallas de computadora
+- [x] Optimizar Splash 0 para tabletas (iPad) — tarjetas desproporcionadas, imágenes cortadas

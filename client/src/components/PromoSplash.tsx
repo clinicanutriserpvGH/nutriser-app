@@ -60,7 +60,7 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
 
   return (
     <div className="relative w-full flex-shrink-0">
-      <div className="relative h-[55vh] min-h-[380px] max-h-[520px] w-full overflow-hidden rounded-2xl">
+      <div className="relative h-[55vh] min-h-[380px] max-h-[520px] md:max-h-[600px] lg:max-h-[700px] w-full overflow-hidden rounded-2xl">
         {promo.imageUrl ? (
           <img src={promo.imageUrl} alt={promo.title} className="w-full h-full object-cover" />
         ) : (
@@ -74,7 +74,7 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-5 space-y-3">
-          <h3 className="text-white font-bold text-xl leading-tight drop-shadow-lg">{promo.title}</h3>
+          <h3 className="text-white font-bold text-xl md:text-2xl lg:text-3xl leading-tight drop-shadow-lg">{promo.title}</h3>
           {promo.description && (
             <p className="text-white/80 text-sm leading-relaxed line-clamp-2">{promo.description}</p>
           )}
@@ -112,7 +112,7 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
           </div>
           <button
             onClick={onAction}
-            className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#C5A55A]/30 transition-all active:scale-[0.98]"
+            className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-3.5 md:py-4 rounded-xl text-sm md:text-base flex items-center justify-center gap-2 shadow-lg shadow-[#C5A55A]/30 transition-all active:scale-[0.98]"
           >
             <Gift className="w-5 h-5" />
             ¡LO QUIERO!
@@ -133,7 +133,7 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
 
         <div className="relative z-10 flex flex-col items-center px-5 py-6">
           {/* Credit card image — compact */}
-          <div className="w-full max-w-[240px] mb-4">
+          <div className="w-full max-w-[240px] md:max-w-[300px] lg:max-w-[360px] mb-4 md:mb-6">
             <img
               src={WALLET_CARD_IMG}
               alt="Monedero Nutriser"
@@ -142,15 +142,15 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
           </div>
 
           {/* Title */}
-          <h3 className="text-[#C5A55A] font-black text-lg text-center leading-tight mb-1">
+          <h3 className="text-[#C5A55A] font-black text-lg md:text-xl lg:text-2xl text-center leading-tight mb-1">
             Crea tu Monedero Nutriser
           </h3>
-          <p className="text-gray-400 text-xs text-center leading-relaxed mb-4 max-w-[260px]">
+          <p className="text-gray-400 text-xs md:text-sm text-center leading-relaxed mb-4 md:mb-5 max-w-[260px] md:max-w-[320px]">
             Regístrate y obtén tu tarjeta digital con beneficios exclusivos
           </p>
 
           {/* Benefits — compact 2-column grid */}
-          <div className="grid grid-cols-2 gap-x-3 gap-y-2 mb-5 w-full max-w-[280px]">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-2 md:gap-x-4 md:gap-y-3 mb-5 md:mb-6 w-full max-w-[280px] md:max-w-[340px]">
             {[
               { icon: Percent, text: "Cashback en compras" },
               { icon: Star, text: "Lealtad y recompensas" },
@@ -161,7 +161,7 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
                 <div className="w-5 h-5 rounded-full bg-[#C5A55A]/15 flex items-center justify-center flex-shrink-0">
                   <item.icon className="w-2.5 h-2.5 text-[#C5A55A]" />
                 </div>
-                <span className="text-white/80 text-[11px]">{item.text}</span>
+                <span className="text-white/80 text-[11px] md:text-sm">{item.text}</span>
               </div>
             ))}
           </div>
@@ -169,7 +169,7 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
           {/* CTA Button */}
           <button
             onClick={onAction}
-            className="w-full max-w-[260px] bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#C5A55A]/30 transition-all active:scale-[0.98]"
+            className="w-full max-w-[260px] md:max-w-[320px] bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-3 md:py-4 rounded-xl text-sm md:text-base flex items-center justify-center gap-2 shadow-lg shadow-[#C5A55A]/30 transition-all active:scale-[0.98]"
           >
             <Wallet className="w-4 h-4" />
             ¡Crear mi Monedero!
@@ -247,12 +247,12 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: Pro
       </button>
 
       {/* Content */}
-      <div className="w-full max-w-sm relative">
+      <div className="w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl relative">
         {/* Header */}
         <div className="text-center mb-3">
           <div className="inline-flex items-center gap-2 bg-[#C5A55A]/20 backdrop-blur-sm rounded-full px-4 py-2 mb-1">
             <Gift className="w-4 h-4 text-[#C5A55A]" />
-            <span className="text-[#C5A55A] text-sm font-bold tracking-wide">
+            <span className="text-[#C5A55A] text-sm md:text-base lg:text-lg font-bold tracking-wide">
               {isMonederoSlide ? "BENEFICIOS EXCLUSIVOS" : "OFERTAS EXCLUSIVAS"}
             </span>
           </div>
@@ -280,13 +280,13 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: Pro
           <>
             <button
               onClick={goPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-20"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 md:-translate-x-5 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-20"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={goNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-20"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 md:translate-x-5 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-20"
             >
               <ChevronRight className="w-5 h-5" />
             </button>

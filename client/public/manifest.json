@@ -86,35 +86,35 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/splash.jpg",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/splash_e8bc00ab.jpg",
       "sizes": "1179x2556",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Selecciona el apartado de tu interés"
     },
     {
-      "src": "/screenshots/home.jpg",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/home_cf86a457.jpg",
       "sizes": "1179x2556",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Tu salud y belleza personalizada en un solo lugar"
     },
     {
-      "src": "/screenshots/cuponeras.jpg",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/cuponeras_e043447c.jpg",
       "sizes": "1179x2556",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Cuponera de Descuentos exclusivos"
     },
     {
-      "src": "/screenshots/wide_splash.jpg",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/wide_splash_bf17d56d.jpg",
       "sizes": "2560x1600",
       "type": "image/jpeg",
       "form_factor": "wide",
       "label": "Nutriser — Selecciona el apartado de tu interés"
     },
     {
-      "src": "/screenshots/wide_home.jpg",
+      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/wide_home_1456d662.jpg",
       "sizes": "2560x1600",
       "type": "image/jpeg",
       "form_factor": "wide",

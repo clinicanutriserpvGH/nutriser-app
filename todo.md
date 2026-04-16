@@ -1566,3 +1566,4 @@
 - [x] Quitar placeholder "Ej: Nutriser20" del campo de código de descuento
 - [x] Seed admin credentials en BD con bcrypt
 - [x] Monedero popup centrado en desktop (md+) como tarjeta de 420px
+- [ ] Implementar traducción completa ES/EN en la tienda — al presionar botón de idioma, todos los textos cambian automáticamente

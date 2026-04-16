@@ -1,0 +1,13 @@
+Notification Panel Issue Analysis:
+- The screenshot shows a patient portal (Splash0Entry or similar) with "Hola, Víctor" header
+- A notification panel drops down from the bell icon
+- The panel has a brown/dark header with "Notificaciones" title and "Cerrar" button
+- The notification text is CUT OFF on the left side:
+  - "luevo plan de dieta asignado" (should be "Nuevo plan de dieta asignado")
+  - "u nutricionista te ha asignado" (should be "Tu nutricionista te ha asignado")
+  - "5 abr, 03:20 p.m." (should be "15 abr, 03:20 p.m.")
+- The panel has NO left padding/margin, text starts at x=0
+- The panel appears to be positioned at left:0 without any padding
+- This is the Splash0Entry patient portal, NOT MyTreatments
+- The notification panel needs: proper left padding (px-4 at minimum), proper width constraints
+- The panel overlaps with the content behind it (cards visible behind)

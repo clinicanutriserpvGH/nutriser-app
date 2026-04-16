@@ -41,9 +41,9 @@ describe("Cashback calculation", () => {
     return Math.round(priceInCents * cashbackPercent / 100);
   }
 
-  it("should calculate 1% cashback correctly", () => {
-    // $2,500 MXN = 250000 centavos → 1% = 2500 centavos = $25.00
-    expect(calculateCashback(250000, 1)).toBe(2500);
+  it("should calculate 2% cashback correctly (default)", () => {
+    // $2,500 MXN = 250000 centavos → 2% = 5000 centavos = $50.00
+    expect(calculateCashback(250000, 2)).toBe(5000);
   });
 
   it("should calculate 5% cashback correctly", () => {
@@ -52,8 +52,8 @@ describe("Cashback calculation", () => {
   });
 
   it("should handle small amounts", () => {
-    // $10 MXN = 1000 centavos → 1% = 10 centavos = $0.10
-    expect(calculateCashback(1000, 1)).toBe(10);
+    // $10 MXN = 1000 centavos → 2% = 20 centavos = $0.20
+    expect(calculateCashback(1000, 2)).toBe(20);
   });
 
   it("should handle zero price", () => {

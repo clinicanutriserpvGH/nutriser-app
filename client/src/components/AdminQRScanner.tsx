@@ -28,7 +28,7 @@ export default function AdminQRScanner() {
     price: number; // centavos
   } | null>(null);
   const [customPrice, setCustomPrice] = useState("");
-  const [cashbackPercent, setCashbackPercent] = useState("1");
+  const [cashbackPercent, setCashbackPercent] = useState("2");
   const [notes, setNotes] = useState("");
   const scannerRef = useRef<any>(null);
   const scannerContainerRef = useRef<HTMLDivElement>(null);
@@ -149,7 +149,7 @@ export default function AdminQRScanner() {
   const handleConfirm = () => {
     if (!selectedItem || !walletNumber) return;
     const priceInCents = Math.round(parseFloat(customPrice || "0") * 100);
-    const cbPercent = parseFloat(cashbackPercent || "1");
+    const cbPercent = parseFloat(cashbackPercent || "2");
 
     registerMutation.mutate({
       walletNumber,

@@ -13,7 +13,7 @@ import {
   Loader2, Copy, CheckCheck, Apple, Sparkles, Scan, Syringe,
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
   Search, ArrowLeft, Upload, BookOpen, FlaskConical, User,
-  Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList,
+  Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList, Globe,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -138,6 +138,15 @@ function HScrollRail({ children, className = "" }: { children: React.ReactNode; 
       )}
     </div>
   );
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+/** Formatea precio de servicio: "$3500" → "$3,500 MXN", "$700" → "$700 MXN" */
+function formatServicePrice(raw: string | null | undefined): string {
+  if (!raw) return "Consultar precio";
+  const num = parseInt(raw.replace(/[^0-9]/g, ""), 10);
+  if (isNaN(num)) return raw; // "Consultar precio" etc.
+  return `$${num.toLocaleString("es-MX")} MXN`;
 }
 
 // ─── CopyButton ───────────────────────────────────────────────────────────────
@@ -349,6 +358,8 @@ export default function Memberships() {
   const [useWallet, setUseWallet] = useState(false);
   const [walletAmount, setWalletAmount] = useState(0);
   const [walletSheetOpen, setWalletSheetOpen] = useState(false);
+  const [lang, setLang] = useState<"ES" | "EN">("ES");
+  const toggleLang = () => setLang(prev => prev === "ES" ? "EN" : "ES");
   const walletQuery = trpc.wallet.getMyWallet.useQuery(
     { patientId: patient?.id || 0 },
     { enabled: isLoggedIn && !!patient?.id }
@@ -377,8 +388,8 @@ export default function Memberships() {
   const discountedTotal = discountInfo?.valid && discountInfo.discount
     ? Math.round(checkoutTotal * (1 - discountInfo.discount / 100))
     : discountInfo?.isGift ? 0 : checkoutTotal;
-  // Cashback: 1% de la compra (en centavos)
-  const cashbackAmount = hasValidPrice ? Math.round(discountedTotal * 0.01) : 0;
+  // Cashback: 2% de la compra
+  const cashbackAmount = hasValidPrice ? Math.round(discountedTotal * 0.02) : 0;
   // Monto final a transferir (considerando monedero)
   const transferAmount = Math.max(0, (discountInfo?.isGift ? 0 : discountedTotal) - (useWallet ? walletAmount / 100 : 0));
   const fullyCoveredByWallet = useWallet && transferAmount <= 0;
@@ -626,6 +637,15 @@ export default function Memberships() {
                   Iniciar sesión
                 </button>
               )}
+              {/* Language toggle */}
+              <button
+                onClick={toggleLang}
+                title={lang === "ES" ? "Switch to English" : "Cambiar a Español"}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-all text-xs font-bold text-gray-600 active:scale-95"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#C5A55A]" />
+                <span>{lang}</span>
+              </button>
               <button onClick={() => setCartOpen(true)} className="relative w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all">
                 <ShoppingCart className="w-5 h-5 text-gray-600" />
                 {cartCount > 0 && (
@@ -835,23 +855,23 @@ export default function Memberships() {
                                       <Icon className="w-10 h-10 opacity-30" style={{ color: meta.color }} />
                                     </div>
                                   )}
-                                  <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: service.price ?? "Consultar", imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                                  <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
                                     <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`svc-${service.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
                                   </button>
                                 </div>
                                 <div className="p-3">
                                   <h3 className="font-bold text-gray-900 text-xs lg:text-sm leading-snug mb-1 line-clamp-2">{service.name}</h3>
-                                  {service.price ? (
-                                    <p className="text-[#C5A55A] font-black text-sm mb-2">{service.price}</p>
+                                  {service.price && service.price !== "Consultar precio" ? (
+                                    <p className="text-[#C5A55A] font-black text-sm mb-2">{formatServicePrice(service.price)}</p>
                                   ) : (
                                     <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
                                   )}
                                   <div className="flex gap-1.5">
-                                    <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: service.price ?? "Consultar", imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
+                                    <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                       className="flex-1 flex items-center justify-center gap-0.5 border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95">
                                       <ShoppingCart className="w-3 h-3" />
                                     </button>
-                                    <button onClick={() => openCheckout({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: service.price ?? "Consultar", qty: 1, imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
+                                    <button onClick={() => openCheckout({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), qty: 1, imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                       className="flex-1 flex items-center justify-center gap-0.5 bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95">
                                       <Zap className="w-3 h-3" /> Comprar
                                     </button>
@@ -897,7 +917,7 @@ export default function Memberships() {
                                     <CatIcon className="w-10 h-10 opacity-30" style={{ color: catMeta.color }} />
                                   </div>
                                 )}
-                                <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: service.price ?? "Consultar", imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                                <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
                                   <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`svc-${service.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
                                 </button>
                               </div>
@@ -905,17 +925,17 @@ export default function Memberships() {
                                 <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{service.name}</h3>
                                 {service.description && <p className="text-gray-400 text-[10px] line-clamp-2 mb-2">{service.description}</p>}
                                 <div className="mt-auto">
-                                  {service.price ? (
-                                    <p className="text-[#C5A55A] font-black text-sm mb-2">{service.price}</p>
+                                  {service.price && service.price !== "Consultar precio" ? (
+                                    <p className="text-[#C5A55A] font-black text-sm mb-2">{formatServicePrice(service.price)}</p>
                                   ) : (
                                     <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
                                   )}
                                   <div className="flex gap-1.5">
-                                    <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: service.price ?? "Consultar", imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
+                                    <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                       className="flex-1 flex items-center justify-center gap-0.5 border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95">
                                       <ShoppingCart className="w-3 h-3" />
                                     </button>
-                                    <button onClick={() => openCheckout({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: service.price ?? "Consultar", qty: 1, imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
+                                    <button onClick={() => openCheckout({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), qty: 1, imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                       className="flex-1 flex items-center justify-center gap-0.5 bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95">
                                       <Zap className="w-3 h-3" /> Comprar
                                     </button>
@@ -1292,7 +1312,7 @@ export default function Memberships() {
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                      <Input value={discountCode} onChange={e => setDiscountCode(e.target.value)} placeholder="Ej: Nutriser20" className="pl-9" />
+                      <Input value={discountCode} onChange={e => setDiscountCode(e.target.value)} placeholder="Ingresa tu código de descuento" className="pl-9" />
                     </div>
                     <Button type="button" onClick={handleValidateDiscount} disabled={discountValidating} className="bg-[#C5A55A] hover:bg-[#B8963E] text-white px-3 text-sm">
                       {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Aplicar"}
@@ -1535,11 +1555,11 @@ export default function Memberships() {
           BOTTOM SHEET — TARJETA MONEDERO
       ══════════════════════════════════════════════════════════════════════ */}
       {walletSheetOpen && (
-        <div className="fixed inset-0 z-[70] flex items-end sm:items-center sm:justify-center">
+        <div className="fixed inset-0 z-[70] flex items-end md:items-center md:justify-center">
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setWalletSheetOpen(false)} />
-          {/* Sheet: mobile = bottom sheet | desktop = centered card */}
-          <div className="relative w-full sm:max-w-[420px] sm:rounded-3xl bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto" style={{ animation: 'slideUp 0.3s ease-out' }}>
+          {/* Sheet: mobile = bottom sheet | desktop (md+) = centered card */}
+          <div className="relative w-full md:max-w-[420px] md:rounded-3xl md:mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto" style={{ animation: typeof window !== 'undefined' && window.innerWidth >= 768 ? 'fadeInScale 0.25s ease-out' : 'slideUp 0.3s ease-out' }}>
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-gray-300" />
@@ -1624,11 +1644,15 @@ export default function Memberships() {
         </div>
       )}
 
-      {/* CSS animation for bottom sheet */}
+      {/* CSS animations for wallet popup */}
       <style>{`
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
+        }
+        @keyframes fadeInScale {
+          from { opacity: 0; transform: scale(0.92); }
+          to { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </div>

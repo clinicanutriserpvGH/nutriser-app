@@ -272,7 +272,7 @@ export const appRouter = router({
               if (wallet && wallet.isActive) {
                 const priceInCents = Math.round(parseFloat(String(membership.price)) * 100);
                 if (priceInCents > 0) {
-                  const CASHBACK_PERCENT = 1; // 1% cashback
+                  const CASHBACK_PERCENT = 2; // 2% cashback
                   const cashbackAmount = Math.round(priceInCents * CASHBACK_PERCENT / 100);
                   if (cashbackAmount > 0) {
                     await addWalletTransaction({
@@ -2737,7 +2737,7 @@ export const appRouter = router({
         itemType: z.enum(['service', 'package', 'product']),
         itemName: z.string(),
         itemPrice: z.number().min(0), // centavos
-        cashbackPercent: z.number().min(0).max(100).default(1),
+        cashbackPercent: z.number().min(0).max(100).default(2),
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {

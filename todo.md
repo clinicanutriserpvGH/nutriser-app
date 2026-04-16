@@ -1551,3 +1551,18 @@
 - [x] Si no se presiona el enlace en 10 min, denegar acceso automáticamente
 - [x] Tests unitarios para el flujo 2FA
 - [x] Deshabilitar autocompletado del navegador en campos de correo y contraseña del login admin
+- [x] Fix bug: credenciales válidas — tabla adminCredentials estaba vacía, se creó el registro
+- [ ] Cambiar cashback del monedero de 1% a 2%
+- [ ] Agregar "MXN" a precios de servicios individuales (igual que paquetes)
+- [ ] Botón de cambiar idioma (español/inglés) en la tienda al lado del carrito
+- [ ] Quitar placeholder "Ej: Nutriser20" del campo de código de descuento — dejarlo en blanco o genérico por seguridad
+
+## Correcciones Sesión Actual
+
+- [x] Corregir panel de notificaciones cortado en portal de salud — descartado, es de app externa (portaldesaludnutriser.club)
+- [x] Agregar botón de cambio de idioma (EN/ES) en la tienda
+- [x] Cambiar cashback de 1% a 2% en backend y frontend
+- [x] Formato de precios de servicios: "$500" → "$500 MXN", "$3500" → "$3,500 MXN"
+- [x] Quitar placeholder "Ej: Nutriser20" del campo de código de descuento
+- [x] Seed admin credentials en BD con bcrypt
+- [x] Monedero popup centrado en desktop (md+) como tarjeta de 420px

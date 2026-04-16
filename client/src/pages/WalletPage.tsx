@@ -300,7 +300,7 @@ export default function WalletPage() {
               </h3>
               <div className="space-y-2">
                 {[
-                  "1% de cashback en cada compra verificada",
+                  "2% de cashback en cada compra verificada",
                   "Dinero electrónico para usar en Nutriser Shop y Cupones",
                   "3 consultas nutricionales → la 4ta es GRATIS",
                   "Planes de lealtad por productos: acumula y gana GRATIS",

@@ -268,7 +268,7 @@ describe('servicePurchases router', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.serviceCode).toMatch(/^NUT-SRV-[A-Z0-9]{6}$/);
+    // serviceCode is no longer returned on create — it's generated on approval
     expect(db.createServicePurchase).toHaveBeenCalled();
     expect(emailExtra.sendServicePurchaseNotificationToAdmin).toHaveBeenCalled();
   });
@@ -294,12 +294,12 @@ describe('servicePurchases router', () => {
 
     const result = await caller.servicePurchases.approve({ id: 1 });
     expect(result.success).toBe(true);
-    expect(db.updateServicePurchaseStatus).toHaveBeenCalledWith(1, 'approved');
+    expect(db.updateServicePurchaseStatus).toHaveBeenCalledWith(1, 'approved', expect.stringMatching(/^NUT-SRV-[A-Z0-9]{6}$/));
     expect(emailExtra.sendServicePurchaseApprovedEmail).toHaveBeenCalledWith(
       'juan@example.com',
       'Juan',
       'Facial',
-      'NUT-SRV-XYZ123'
+      expect.stringMatching(/^NUT-SRV-[A-Z0-9]{6}$/)
     );
   });
 

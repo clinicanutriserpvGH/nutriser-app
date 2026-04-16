@@ -24,7 +24,6 @@ import BackToSplash from "@/components/BackToSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
 import PromoSplash from "@/components/PromoSplash";
-import { t, tArray, getCategoryLabel, getTypeLabel, type Lang } from "@/lib/shopTranslations";
 
 // ─── Assets ──────────────────────────────────────────────────────────────────
 const LOGO_URL =
@@ -53,10 +52,10 @@ const BANK_INFO = { bank: "Banamex", account: "002470701448743487" };
 const PACKAGES = [
   {
     id: "pkg-nutricion",
-    name: t("nutritionPkgName", lang),
+    name: "Paquete Nutrición",
     price: 2500,
     regularPrice: 3200,
-    badge: t("mostPopular", lang),
+    badge: "Más popular",
     description: "Programa completo de asesoría nutricional personalizada con seguimiento y escaneos corporales.",
     features: [
       "4 asesorías nutricionales personalizadas",
@@ -69,10 +68,10 @@ const PACKAGES = [
   },
   {
     id: "pkg-reductor",
-    name: t("reductorPkgName", lang),
+    name: "Paquete Reductor Nutriser",
     price: 4500,
     regularPrice: 6500,
-    badge: t("maxSavings", lang),
+    badge: "Ahorro máximo",
     description: "Paquete integral de reducción corporal: cavitaciones, radiofrecuencias y mesoterapia reductora.",
     features: [
       "4 asesorías nutricionales personalizadas",
@@ -88,13 +87,13 @@ const PACKAGES = [
 ];
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
-  nutricion: { label: t("catNutricion", lang), icon: Apple, color: "#16a34a", bg: "#dcfce7" },
-  corporales: { label: t("catCorporales", lang), icon: Sparkles, color: "#C5A55A", bg: "#fef3c7" },
-  faciales: { label: t("catFaciales", lang), icon: Scan, color: "#ec4899", bg: "#fce7f3" },
-  medicina: { label: t("catMedicina", lang), icon: Syringe, color: "#7c3aed", bg: "#ede9fe" },
-  otros: { label: t("catOtros", lang), icon: Droplets, color: "#0891b2", bg: "#cffafe" },
-  productos: { label: t("catProductos", lang), icon: ShoppingBag, color: "#ea580c", bg: "#ffedd5" },
-  general: { label: t("catGeneral", lang), icon: Package, color: "#6b7280", bg: "#f3f4f6" },
+  nutricion: { label: "Nutrición", icon: Apple, color: "#16a34a", bg: "#dcfce7" },
+  corporales: { label: "Corporales", icon: Sparkles, color: "#C5A55A", bg: "#fef3c7" },
+  faciales: { label: "Faciales", icon: Scan, color: "#ec4899", bg: "#fce7f3" },
+  medicina: { label: "Medicina", icon: Syringe, color: "#7c3aed", bg: "#ede9fe" },
+  otros: { label: "Otros", icon: Droplets, color: "#0891b2", bg: "#cffafe" },
+  productos: { label: "Productos", icon: ShoppingBag, color: "#ea580c", bg: "#ffedd5" },
+  general: { label: "General", icon: Package, color: "#6b7280", bg: "#f3f4f6" },
 };
 
 const CATEGORY_ORDER = ["nutricion", "corporales", "faciales", "medicina", "otros", "productos", "general"];
@@ -144,9 +143,9 @@ function HScrollRail({ children, className = "" }: { children: React.ReactNode; 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 /** Formatea precio de servicio: "$3500" → "$3,500 MXN", "$700" → "$700 MXN" */
 function formatServicePrice(raw: string | null | undefined): string {
-  if (!raw) return t("consultPrice", lang);
+  if (!raw) return "Consultar precio";
   const num = parseInt(raw.replace(/[^0-9]/g, ""), 10);
-  if (isNaN(num)) return raw; // t("consultPrice", lang) etc.
+  if (isNaN(num)) return raw; // "Consultar precio" etc.
   return `$${num.toLocaleString("es-MX")} MXN`;
 }
 
@@ -175,8 +174,8 @@ function PromoBanner({ onBannerClick }: { onBannerClick?: (pkgIndex: number) => 
   const [idx, setIdx] = useState(0);
   const banners = [
     {
-      title: t("nutritionPkgName", lang),
-      subtitle: t("save700", lang),
+      title: "Paquete Nutrición",
+      subtitle: "Ahorra $700 MXN",
       badge: "-22%",
       bg: "from-amber-500 to-amber-700",
       img: PACKAGES[0].imageUrl,
@@ -184,7 +183,7 @@ function PromoBanner({ onBannerClick }: { onBannerClick?: (pkgIndex: number) => 
     },
     {
       title: "Paquete Reductor",
-      subtitle: t("save2000", lang),
+      subtitle: "Ahorra $2,000 MXN",
       badge: "-31%",
       bg: "from-emerald-500 to-emerald-700",
       img: PACKAGES[1].imageUrl,
@@ -232,8 +231,6 @@ function PromoBanner({ onBannerClick }: { onBannerClick?: (pkgIndex: number) => 
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Memberships() {
   const [, navigate] = useLocation();
-  const [lang, setLang] = useState<Lang>("ES");
-  const toggleLang = () => setLang(prev => prev === "ES" ? "EN" : "ES");
   const [activeTab, setActiveTab] = useState<StoreTab>("tratamientos");
 
   // ─── Sesión unificada ────────────────────────────────────────────────
@@ -278,7 +275,7 @@ export default function Memberships() {
       if (existing) return prev.map(c => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
       return [...prev, { ...item, qty: 1 }];
     });
-    toast.success(`"${item.name}" $t("addedToCart", lang)`, { duration: 2000 });
+    toast.success(`"${item.name}" agregado al carrito`, { duration: 2000 });
   };
 
   const handleAuthSuccess = (_patient?: any) => {
@@ -288,7 +285,7 @@ export default function Memberships() {
         if (existing) return prev.map(c => c.id === pendingCartItem.id ? { ...c, qty: c.qty + 1 } : c);
         return [...prev, { ...pendingCartItem, qty: 1 }];
       });
-      toast.success(`"${pendingCartItem.name}" $t("addedToCart", lang)`, { duration: 2000 });
+      toast.success(`"${pendingCartItem.name}" agregado al carrito`, { duration: 2000 });
       setPendingCartItem(null);
     }
     setShowAuthModal(false);
@@ -361,6 +358,8 @@ export default function Memberships() {
   const [useWallet, setUseWallet] = useState(false);
   const [walletAmount, setWalletAmount] = useState(0);
   const [walletSheetOpen, setWalletSheetOpen] = useState(false);
+  const [lang, setLang] = useState<"ES" | "EN">("ES");
+  const toggleLang = () => setLang(prev => prev === "ES" ? "EN" : "ES");
   const walletQuery = trpc.wallet.getMyWallet.useQuery(
     { patientId: patient?.id || 0 },
     { enabled: isLoggedIn && !!patient?.id }
@@ -410,28 +409,28 @@ export default function Memberships() {
 
   const handleValidateDiscount = async () => {
     const code = discountCode.trim();
-    if (!code) { toast.error(t("enterCode", lang)); return; }
+    if (!code) { toast.error("Ingresa un código"); return; }
     setDiscountValidating(true);
     try {
       const result = await utils.discountCodes.validate.fetch({ code });
       if (result) {
         setDiscountInfo(result);
         if (result.valid) {
-          if (result.isTwoForOne) toast.success(t("twoForOneToast", lang));
-          else if (result.isGift) toast.success(t("giftCodeToast", lang));
-          else toast.success(`¡${result.discount}% $t("discountToast", lang)`);
-        } else toast.error(t("invalidCode", lang));
+          if (result.isTwoForOne) toast.success("¡Código 2x1 aplicado!");
+          else if (result.isGift) toast.success("¡Código de regalo aplicado!");
+          else toast.success(`¡${result.discount}% de descuento aplicado!`);
+        } else toast.error("Código inválido o no está activo.");
       }
-    } catch { toast.error(t("codeValidationError", lang)); }
+    } catch { toast.error("Error al validar el código."); }
     finally { setDiscountValidating(false); }
   };
 
   const handleSubmitCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!buyerName.trim()) { toast.error(t("enterName", lang)); return; }
-    if (!buyerEmail.trim()) { toast.error(t("enterEmail", lang)); return; }
-    if (!buyerPhone.trim()) { toast.error(t("enterPhone", lang)); return; }
-    if (!fullyCoveredByWallet && !proofFile) { toast.error(t("uploadProof", lang)); return; }
+    if (!buyerName.trim()) { toast.error("Ingresa tu nombre"); return; }
+    if (!buyerEmail.trim()) { toast.error("Ingresa tu correo"); return; }
+    if (!buyerPhone.trim()) { toast.error("Ingresa tu teléfono"); return; }
+    if (!fullyCoveredByWallet && !proofFile) { toast.error("Sube el comprobante de pago"); return; }
     setIsSubmitting(true);
 
     // Si paga todo con monedero, hacer redeem y no necesita comprobante
@@ -446,7 +445,7 @@ export default function Memberships() {
         setSuccessCode("MONEDERO");
         walletQuery.refetch();
       } catch (err: any) {
-        toast.error(t("walletPayError", lang) + " " + (err?.message || t("tryAgain", lang)));
+        toast.error("Error al procesar pago con monedero: " + (err?.message || "Intenta de nuevo"));
       }
       setIsSubmitting(false);
       return;
@@ -462,7 +461,7 @@ export default function Memberships() {
         });
         walletQuery.refetch();
       } catch (err: any) {
-        toast.error(t("walletDeductError", lang) + " " + (err?.message || ""));
+        toast.error("Error al descontar monedero: " + (err?.message || ""));
         setIsSubmitting(false);
         return;
       }
@@ -557,7 +556,7 @@ export default function Memberships() {
           </button>
         </div>
       ) : (
-        <BackToSplash hideHome desktopBackTo="/" desktopBackLabel=t("back", lang) />
+        <BackToSplash hideHome desktopBackTo="/" desktopBackLabel="Regresar" />
       )}
 
       {/* ── Pop-up de cupones/promociones ── */}
@@ -626,7 +625,7 @@ export default function Memberships() {
                     <User className="w-4 h-4 text-[#C5A55A]" />
                     <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white" />
                   </div>
-                  <button onClick={logout} title=t("closeSession", lang)
+                  <button onClick={logout} title="Cerrar sesión"
                     className="text-xs text-gray-400 hover:text-red-500 transition-colors">
                     <X className="w-4 h-4" />
                   </button>
@@ -660,7 +659,7 @@ export default function Memberships() {
           {activeTab === "tratamientos" && (
             <div className="relative mt-3">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="text" placeholder=t("searchPlaceholder", lang)
+              <input type="text" placeholder="¿Qué estás buscando?"
                 value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                 className="w-full bg-gray-100 border-0 rounded-full pl-10 pr-4 py-2.5 lg:py-3 text-sm lg:text-base text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/50 transition-all" />
             </div>
@@ -862,7 +861,7 @@ export default function Memberships() {
                                 </div>
                                 <div className="p-3">
                                   <h3 className="font-bold text-gray-900 text-xs lg:text-sm leading-snug mb-1 line-clamp-2">{service.name}</h3>
-                                  {service.price && service.price !== t("consultPrice", lang) ? (
+                                  {service.price && service.price !== "Consultar precio" ? (
                                     <p className="text-[#C5A55A] font-black text-sm mb-2">{formatServicePrice(service.price)}</p>
                                   ) : (
                                     <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
@@ -926,7 +925,7 @@ export default function Memberships() {
                                 <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{service.name}</h3>
                                 {service.description && <p className="text-gray-400 text-[10px] line-clamp-2 mb-2">{service.description}</p>}
                                 <div className="mt-auto">
-                                  {service.price && service.price !== t("consultPrice", lang) ? (
+                                  {service.price && service.price !== "Consultar precio" ? (
                                     <p className="text-[#C5A55A] font-black text-sm mb-2">{formatServicePrice(service.price)}</p>
                                   ) : (
                                     <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
@@ -1008,7 +1007,7 @@ export default function Memberships() {
                           )}
                         </div>
                         <div className="p-3 flex-1 flex flex-col">
-                          <p className="text-[9px] text-purple-600 font-semibold uppercase tracking-wider mb-0.5">{product.category || t("typeProduct", lang)}</p>
+                          <p className="text-[9px] text-purple-600 font-semibold uppercase tracking-wider mb-0.5">{product.category || "Producto"}</p>
                           <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{product.name}</h3>
                           <div className="mt-auto">
                             {product.price ? (
@@ -1137,7 +1136,7 @@ export default function Memberships() {
                 </div>
                 <div>
                   <h2 className="font-black text-gray-900 text-lg">Lista de Deseos</h2>
-                  <p className="text-gray-400 text-xs">{wishlistCount} {wishlistCount === 1 ? t("itemSaved", lang) : t("itemsSaved", lang)}</p>
+                  <p className="text-gray-400 text-xs">{wishlistCount} {wishlistCount === 1 ? "artículo guardado" : "artículos guardados"}</p>
                 </div>
               </div>
 
@@ -1153,7 +1152,7 @@ export default function Memberships() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {wishlist.map(item => {
-                    const typeLabels: Record<string, string> = { service: t("typeService", lang), package: t("typePackage", lang), product: t("typeProduct", lang), ebook: t("typeEbook", lang) };
+                    const typeLabels: Record<string, string> = { service: "Tratamiento", package: "Paquete", product: "Producto", ebook: "eBook" };
                     return (
                       <div key={item.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex">
                         {/* Image */}
@@ -1168,7 +1167,7 @@ export default function Memberships() {
                         </div>
                         {/* Info */}
                         <div className="flex-1 p-3 flex flex-col min-w-0">
-                          <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">{typeLabels[item.itemType] || t("typeItem", lang)}</p>
+                          <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">{typeLabels[item.itemType] || "Artículo"}</p>
                           <h3 className="font-bold text-gray-900 text-xs leading-snug line-clamp-2 mt-0.5">{item.name}</h3>
                           <p className="text-[#C5A55A] font-black text-sm mt-auto">{item.priceLabel}</p>
                           <div className="flex gap-1.5 mt-2">
@@ -1270,7 +1269,7 @@ export default function Memberships() {
           <div className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h2 className="font-bold text-gray-900 text-base">
-                {successCode ? t("orderSent", lang) : t("finalizePurchase", lang)}
+                {successCode ? "¡Pedido Enviado!" : "Finalizar Compra"}
               </h2>
               <button onClick={() => setCheckoutOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100"><X className="w-5 h-5 text-gray-400" /></button>
             </div>
@@ -1304,7 +1303,7 @@ export default function Memberships() {
                   ))}
                   <div className="border-t border-gray-200 pt-2 flex items-center justify-between font-bold">
                     <span className="text-gray-900">Total</span>
-                    <span className="text-[#C5A55A]">{hasValidPrice ? `$${checkoutTotal.toLocaleString("es-MX")} MXN` : t("consultPrice", lang)}</span>
+                    <span className="text-[#C5A55A]">{hasValidPrice ? `$${checkoutTotal.toLocaleString("es-MX")} MXN` : "Consultar precio"}</span>
                   </div>
                 </div>
                 {/* Código de descuento */}
@@ -1313,16 +1312,16 @@ export default function Memberships() {
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                      <Input value={discountCode} onChange={e => setDiscountCode(e.target.value)} placeholder=t("enterDiscountCode", lang) className="pl-9" />
+                      <Input value={discountCode} onChange={e => setDiscountCode(e.target.value)} placeholder="Ingresa tu código de descuento" className="pl-9" />
                     </div>
                     <Button type="button" onClick={handleValidateDiscount} disabled={discountValidating} className="bg-[#C5A55A] hover:bg-[#B8963E] text-white px-3 text-sm">
-                      {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : t("apply", lang)}
+                      {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Aplicar"}
                     </Button>
                   </div>
                   {discountInfo?.valid && (
                     <div className="mt-2 flex items-center gap-2 text-green-600 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
                       <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                      <span>{discountInfo.isGift ? t("giftApplied", lang) : discountInfo.isTwoForOne ? t("twoForOneApplied", lang) : `${discountInfo.discount}% de descuento — Total: $${discountedTotal.toLocaleString("es-MX")} MXN`}</span>
+                      <span>{discountInfo.isGift ? "¡Regalo aplicado! Tu compra es gratis." : discountInfo.isTwoForOne ? "¡2x1 aplicado!" : `${discountInfo.discount}% de descuento — Total: $${discountedTotal.toLocaleString("es-MX")} MXN`}</span>
                     </div>
                   )}
                 </div>
@@ -1344,11 +1343,11 @@ export default function Memberships() {
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Tus datos</p>
                     <div>
                       <Label htmlFor="co-name" className="text-sm text-gray-600">Nombre completo *</Label>
-                      <Input id="co-name" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder=t("fullNamePlaceholder", lang) required className="mt-1" />
+                      <Input id="co-name" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="Tu nombre completo" required className="mt-1" />
                     </div>
                     <div>
                       <Label htmlFor="co-email" className="text-sm text-gray-600">Correo electrónico *</Label>
-                      <Input id="co-email" type="email" value={buyerEmail} onChange={e => setBuyerEmail(e.target.value)} placeholder="+52 322..." required className="mt-1" />
+                      <Input id="co-email" type="email" value={buyerEmail} onChange={e => setBuyerEmail(e.target.value)} placeholder="tu@email.com" required className="mt-1" />
                     </div>
                     <div>
                       <Label htmlFor="co-phone" className="text-sm text-gray-600">Teléfono *</Label>
@@ -1395,7 +1394,7 @@ export default function Memberships() {
                             <span className="font-bold text-green-600">-${(walletAmount / 100).toFixed(2)} MXN</span>
                           </div>
                           <div className="flex items-center justify-between text-sm mt-1">
-                            <span className="text-gray-600">{fullyCoveredByWallet ? t("coveredByWallet", lang) : t("remainingToTransfer", lang)}:</span>
+                            <span className="text-gray-600">{fullyCoveredByWallet ? "Cubierto con monedero" : "Restante a transferir:"}:</span>
                             <span className={`font-bold ${fullyCoveredByWallet ? 'text-green-600' : 'text-[#C5A55A]'}`}>
                               {fullyCoveredByWallet ? "$0.00 MXN" : `$${transferAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN`}
                             </span>
@@ -1426,7 +1425,7 @@ export default function Memberships() {
                       </div>
                       <CopyButton text={BANK_INFO.account} />
                     </div>
-                    <p className="text-xs text-gray-500">Monto: <span className="font-black text-[#C5A55A]">{hasValidPrice ? `$${transferAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN` : t("consultPrice", lang)}</span>{useWallet && walletAmount > 0 && <span className="text-green-600 text-[10px] ml-1">(monedero: -${(walletAmount / 100).toFixed(2)})</span>}</p>
+                    <p className="text-xs text-gray-500">Monto: <span className="font-black text-[#C5A55A]">{hasValidPrice ? `$${transferAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN` : "Consultar precio"}</span>{useWallet && walletAmount > 0 && <span className="text-green-600 text-[10px] ml-1">(monedero: -${(walletAmount / 100).toFixed(2)})</span>}</p>
                   </div>
                 )}
                 {/* Comprobante — solo si necesita transferir */}
@@ -1450,14 +1449,14 @@ export default function Memberships() {
                       <input type="file" accept="image/jpeg,image/png,application/pdf" className="hidden" onChange={e => {
                         const file = e.target.files?.[0];
                         if (!file) return;
-                        if (file.size > 5 * 1024 * 1024) { toast.error(t("maxFileSize", lang)); return; }
+                        if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
                         setProofFile(file);
                       }} />
                     </label>
                   </div>
                 )}
                 <Button type="submit" disabled={isSubmitting} className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-black py-3.5 text-base rounded-xl shadow-md">
-                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (fullyCoveredByWallet ? t("confirmWalletPurchase", lang) : t("sendProofAndConfirm", lang))}
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (fullyCoveredByWallet ? "Confirmar compra con monedero" : "Enviar comprobante y confirmar pedido")}
                 </Button>
               </form>
             )}
@@ -1505,7 +1504,7 @@ export default function Memberships() {
               >
                 <div className="w-[58px] h-[58px] lg:w-[76px] lg:h-[76px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B86A] to-[#B8963E] shadow-[0_4px_16px_rgba(197,165,90,0.5)] flex items-center justify-center border-[3px] lg:border-4 border-white hover:scale-105 active:scale-95 transition-all">
                   <div className="w-[44px] h-[44px] lg:w-[58px] lg:h-[58px] rounded-full bg-white flex items-center justify-center">
-                    <img src={LOGO_URL} alt=t("tabWallet", lang) className="w-8 h-8 lg:w-11 lg:h-11 rounded-full object-contain" />
+                    <img src={LOGO_URL} alt="Monedero" className="w-8 h-8 lg:w-11 lg:h-11 rounded-full object-contain" />
                   </div>
                 </div>
                 <span className="text-[9px] lg:text-xs font-bold text-[#C5A55A] mt-0.5 leading-tight">Monedero</span>
@@ -1610,7 +1609,7 @@ export default function Memberships() {
                       <p className="text-white font-bold text-sm truncate">{patient?.name || '---'}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <p className="text-white/70 font-mono text-[11px] tracking-wider truncate">{walletData?.walletNumber || '---'}</p>
-                        <button onClick={() => { navigator.clipboard.writeText(walletData?.walletNumber || ""); toast.success(t("numberCopied", lang)); }} className="text-[#C5A55A] flex-shrink-0">
+                        <button onClick={() => { navigator.clipboard.writeText(walletData?.walletNumber || ""); toast.success("Número copiado"); }} className="text-[#C5A55A] flex-shrink-0">
                           <Copy className="w-3 h-3" />
                         </button>
                       </div>

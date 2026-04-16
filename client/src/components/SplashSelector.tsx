@@ -354,11 +354,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           </div>
 
           {/* ── 3 Tarjetas: Shop + Academy + Nutriser Web ── */}
-          {/* Mobile: columna vertical | Tablet (md+): grid 2 columnas con Shop grande */}
-          <div className="flex flex-col md:grid md:grid-cols-2 md:grid-rows-2 gap-2 md:gap-3 mb-2 flex-1">
+          {/* Mobile: columna vertical | Tablet (md+): 3 columnas iguales | lg+: 3 columnas */}
+          <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-3 mb-2 flex-1">
 
-            {/* Tarjeta 1: Nutriser Shop — en tablet ocupa toda la primera columna (2 filas) */}
-            <div className="flex-1 min-h-[130px] md:min-h-0 md:row-span-2">
+            {/* Tarjeta 1: Nutriser Shop */}
+            <div className="flex-1 min-h-[130px] md:min-h-0">
               <button
                 onClick={() => handleNavigate('/memberships')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
@@ -383,7 +383,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </button>
             </div>
 
-            {/* Tarjeta 2: Nutriser Academy — en tablet ocupa fila 1, columna 2 */}
+            {/* Tarjeta 2: Nutriser Academy */}
             <div className="flex-1 min-h-[130px] md:min-h-0">
               <button
                 onClick={() => handleNavigate('/cursos')}
@@ -409,7 +409,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </button>
             </div>
 
-            {/* Tarjeta 3: Nutriser Web — en tablet ocupa fila 2, columna 2 */}
+            {/* Tarjeta 3: Nutriser Web */}
             <div className="flex-1 min-h-[130px] md:min-h-0">
               <button
                 onClick={() => { if (onEnterSite) onEnterSite(); }}

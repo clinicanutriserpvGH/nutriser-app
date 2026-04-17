@@ -78,20 +78,14 @@ export default function AboutSection() {
               </span>
               <h2 className="font-serif text-4xl lg:text-5xl text-[#1A1A1A] mt-4 mb-6 leading-[1.15]">
                 Diseñamos protocolos{" "}
-                <span className="italic text-[#C5A55A]">únicos</span> para ti
+                <span className="italic text-[#C5A55A]">personalizados</span> para ti
               </h2>
               <div className="w-16 h-[1px] bg-[#C5A55A] mb-6" />
               <p className="text-[#1A1A1A]/70 text-lg leading-relaxed mb-6">
-                En Nutriser creemos que cada piel y cada cuerpo merecen
-                soluciones reales. No ofrecemos tratamientos genéricos: cada
-                protocolo es personalizado, combinando la mejor tecnología con
-                experiencia profesional comprobada.
+                En Nutriser entendemos que cada paciente tiene necesidades distintas. Por eso, diseñamos protocolos personalizados en nutrición y estética, adaptados a cada piel, cada cuerpo y cada objetivo, combinando tecnología especializada con experiencia profesional.
               </p>
               <p className="text-[#1A1A1A]/70 text-lg leading-relaxed mb-8">
-                Con más de 25 servicios especializados en nutrición, estética
-                facial, corporal y medicina estética, nuestra misión es
-                acompañarte en tu transformación integral, brindándote
-                resultados visibles y duraderos.
+                Contamos con más de 25 servicios especializados en nutrición, estética facial, corporal y medicina estética, enfocados en acompañarte de forma integral para ayudarte a mejorar tu salud, imagen y bienestar con resultados visibles y duraderos.
               </p>
                 <button
                 onClick={() => { navigate("/"); setTimeout(() => { document.getElementById('servicios')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}

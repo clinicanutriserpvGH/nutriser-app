@@ -1656,3 +1656,8 @@
 - [x] Remover "ADMINISTRACIÓN" del navbar
 - [x] Hacer logo clickeable para acceso secreto a admin
 - [x] Ajustar espaciado entre Hero y sección dorada
+
+
+## Correcciones Sesión 16 - Actualización de Descripción
+
+- [x] Cambiar descripción de "Sobre Nutriser" con nuevo texto más informativo

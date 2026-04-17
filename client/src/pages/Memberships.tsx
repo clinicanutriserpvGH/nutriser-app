@@ -388,14 +388,21 @@ export default function Memberships() {
     { patientId: patient?.id || 0 },
     {
       enabled: isLoggedIn && !!patient?.id,
-      staleTime: 60_000,
+      staleTime: 30_000,
       refetchOnMount: true,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: true,
     }
   );
   const walletBalance = walletQuery.data?.wallet?.balance || 0;
   const walletData = walletQuery.data?.wallet;
   const walletRedeemMutation = trpc.wallet.redeem.useMutation();
+
+  // Refetch wallet data when sheet opens to ensure fresh data
+  useEffect(() => {
+    if (walletSheetOpen && isLoggedIn && patient?.id) {
+      walletQuery.refetch();
+    }
+  }, [walletSheetOpen]);
 
   const utils = trpc.useUtils();
   const servicePurchaseMutation = trpc.servicePurchases.create.useMutation({

@@ -207,7 +207,17 @@
 - [ ] Cambiar sección de abajo a 4 botones: Llamada, WhatsApp, Agendar Valoración, Adquirir Programa
 - [ ] Hacer que todos los botones sean funcionales y consistentes
 
-## Correcciones Sesión 11 - Completadas
+## Correcciones Sesión 19 - Monedero QR y Migración BD
+- [x] Diagnóstico: columna balanceExpiresAt no existía en BD (schema vs BD desincronizados)
+- [x] Migración aplicada: ALTER TABLE wallets ADD COLUMN balanceExpiresAt DATETIME NULL
+- [x] Todos los monederos existentes actualizados con balanceExpiresAt = NOW() + 2 meses
+- [x] Monedero de Tony Robles (NUT-3PGA-YZMG): verificado activo, saldo $98.00, vence jun 2026
+- [x] API getMyWallet verificada: devuelve wallet, tracker, transactions correctamente
+- [x] walletQuery en Memberships.tsx: staleTime reducido a 30s, refetchOnWindowFocus activado
+- [x] useEffect agregado para refetch automático al abrir el wallet sheet
+- [x] Íconos de categorías verificados: PersonStanding, ScanFace, Smile, Gift existen en lucide-react
+
+## Correcciones Sesión 18 - Completadas
 
 ### Panel Admin - Citas
 - [x] Cambiar flujo: paciente selecciona hora, admin solo APRUEBA

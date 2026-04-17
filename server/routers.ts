@@ -1310,10 +1310,12 @@ export const appRouter = router({
               wallet = await createWallet(patient.id);
             }
             // Clean the price string: remove $, MXN, spaces, commas to get a pure number
+            // NOTE: purchase.originalPrice already stores the final price after discount
+            // (frontend sends discountedTotal, not checkoutTotal)
             const rawPrice = String(purchase.originalPrice || '0');
             const cleanedPrice = rawPrice.replace(/[^0-9.]/g, '');
-            const originalPrice = parseFloat(cleanedPrice) || 0;
-            const cashbackAmount = Math.round(originalPrice * 0.02 * 100); // 2% in cents
+            const finalPrice = parseFloat(cleanedPrice) || 0;
+            const cashbackAmount = Math.round(finalPrice * 0.02 * 100); // 2% of final price in cents
             if (cashbackAmount > 0) {
               await addWalletTransaction({
                 walletId: wallet.id,
@@ -2656,12 +2658,34 @@ export const appRouter = router({
 
     // ===== ADMIN ENDPOINTS =====
 
-    // Listar todas las tarjetas (admin)
+       // Listar todas las tarjetas (admin)
     adminListAll: publicProcedure.query(async () => {
-      return getAllWallets();
+      const rows = await getAllWallets();
+      // Flatten nested { wallet, patient } structure into a single object
+      return rows.map((row: any) => {
+        const w = row.wallet ?? row;
+        const p = row.patient ?? {};
+        return {
+          id: w.id,
+          patientId: w.patientId,
+          walletNumber: w.walletNumber,
+          balance: w.balance ?? 0,
+          totalCashback: w.totalCashback ?? 0,
+          totalRedeemed: w.totalRedeemed ?? 0,
+          isActive: w.isActive,
+          status: w.isActive ? 'active' : 'suspended',
+          createdAt: w.createdAt,
+          updatedAt: w.updatedAt,
+          patientName: p.name ?? w.patientName ?? null,
+          patientEmail: p.email ?? w.patientEmail ?? null,
+          patientPhone: p.phone ?? w.patientPhone ?? null,
+          consultationsInCycle: w.consultationsInCycle ?? 0,
+          totalConsultations: w.totalConsultations ?? 0,
+          totalCredited: w.totalCashback ?? 0,
+        };
+      });
     }),
-
-    // Acreditar cashback (admin)
+    // Acreditar cashback (admin))
     adminAddCashback: publicProcedure
       .input(z.object({
         walletId: z.number(),

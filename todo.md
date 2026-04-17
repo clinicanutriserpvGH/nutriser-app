@@ -1,5 +1,12 @@
 # Nutriser - Tareas Completadas
 
+## Sesión 18 - Correcciones Panel Admin Tarjetas y Cashback con Descuento
+- [x] Corregir panel admin tarjetas: datos anidados {wallet,patient} aplanados a campos planos
+- [x] Panel admin ahora muestra nombre del paciente, email y saldo correctamente
+- [x] Corregir cashback con descuento: originalPrice ahora guarda precio FINAL (con descuento)
+- [x] Cashback se calcula sobre precio pagado real, no precio original sin descuento
+- [x] Ejemplo: $4,500 con 10% descuento → paga $4,050 → cashback $81 (no $90)
+
 ## Sesión 17 - Correcciones de Cashback y UI
 - [x] Corregir búsqueda de email en getPatientByEmail para ser insensible a mayúsculas (LOWER() SQL)
 - [x] Agregar endpoint retryCashback para acreditar cashback manualmente a compras ya aprobadas

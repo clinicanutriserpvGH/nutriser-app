@@ -500,7 +500,7 @@ export default function Memberships() {
           proofMimeType: proofFile!.type,
           discountCode: discountInfo?.valid ? discountCode.trim() : undefined,
           discountPercent: discountInfo?.valid ? (discountInfo.discount ?? 0) : undefined,
-          originalPrice: `$${checkoutTotal.toLocaleString("es-MX")} MXN`,
+          originalPrice: `$${discountedTotal.toLocaleString("es-MX")} MXN`,
         });
       }
     };

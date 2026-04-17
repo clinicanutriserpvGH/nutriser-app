@@ -1628,3 +1628,10 @@
 - [x] Agregar espaciado en desktop entre Hero y sección dorada "Cada piel y cada cuerpo merecen soluciones"
 - [x] Actualizar todas las descripciones de servicios corporales, faciales y medicina
 - [x] Incluir servicios faltantes: Hidratación Facial, Peeling Químico, Microdermoabrasión, IPL, Mesoterapia Facial, Bioestimuladores
+
+## Correcciones Sesión 14 - CAPTCHA Anti-bots
+
+- [x] Crear componente SimpleCaptcha con verificación matemática local
+- [x] Integrar CAPTCHA en formulario de citas (AppointmentForm)
+- [x] CAPTCHA desactiva botón de envío hasta ser verificado
+- [x] Verificar funcionamiento en navegador

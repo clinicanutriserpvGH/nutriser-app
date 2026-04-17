@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Calendar, Clock, Mail, Phone, User, ArrowLeft, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { SimpleCaptcha } from "@/components/SimpleCaptcha";
 
 const SERVICES = [
   "Asesoría Nutricional Personalizada",
@@ -62,11 +63,17 @@ export default function AppointmentForm() {
   });
   const [isServiceOpen, setIsServiceOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
 
   const createMutation = trpc.appointments.create.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isCaptchaVerified) {
+      toast.error("Por favor verifica que eres humano");
+      return;
+    }
     
     if (!formData.clientName || !formData.clientEmail || !formData.clientPhone || !formData.appointmentDate || !formData.appointmentTime || !formData.serviceType) {
       toast.error("Por favor completa todos los campos requeridos");
@@ -265,11 +272,16 @@ export default function AppointmentForm() {
                 </select>
               </div>
 
+              {/* CAPTCHA */}
+              <div>
+                <SimpleCaptcha onVerify={setIsCaptchaVerified} isSubmitting={isSubmitting} />
+              </div>
+
               {/* Submit Button */}
               <Button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 text-lg font-bold tracking-wider"
+                disabled={isSubmitting || !isCaptchaVerified}
+                className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 text-lg font-bold tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? "Agendando..." : "Agendar Cita"}
               </Button>

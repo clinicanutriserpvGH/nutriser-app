@@ -15,11 +15,11 @@ const LOGO_URL =
 const GRID_IMAGES = [
   {
     src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hollywood-peel_9d9185ed.png",
-    label: "Hollywood Peel",
+    label: "Tratamientos Faciales",
   },
   {
     src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/mesoterapia_0df94f56.png",
-    label: "Mesoterapia",
+    label: "Tratamientos Corporales",
   },
   {
     src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/productos-nutriser_35a8adbb.png",
@@ -27,7 +27,7 @@ const GRID_IMAGES = [
   },
   {
     src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/libro-nutriser_2c47a34a.png",
-    label: "Librería",
+    label: "Librería Nutriser",
   },
 ];
 
@@ -64,9 +64,9 @@ function ShopCard({ onAction }: { onAction: () => void }) {
             src={LOGO_URL}
             alt="Nutriser"
             style={{
-              height: 64,
+              height: 90,
               objectFit: "contain",
-              filter: "drop-shadow(0 2px 8px rgba(197,165,90,0.4))",
+              filter: "drop-shadow(0 2px 12px rgba(197,165,90,0.5))",
             }}
           />
         </div>

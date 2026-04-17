@@ -188,8 +188,8 @@ function AppContent() {
       {/* Música de fondo solo en la página principal del sitio web */}
       {splashState === "site" && location === "/" && <BackgroundMusic />}
 
-      {/* ShopPromoSplash: aparece encima del Splash 0, una vez por sesión */}
-      {showShopPromo && (
+      {/* ShopPromoSplash: reemplaza completamente el Splash 0 hasta que el usuario lo cierre */}
+      {showShopPromo ? (
         <ShopPromoSplash
           onClose={() => {
             sessionStorage.setItem("nutriser_shop_promo_seen", "1");
@@ -201,28 +201,35 @@ function AppContent() {
             window.location.href = "/tienda";
           }}
         />
+      ) : (
+        <>
+          {/* Splash 0: pantalla de entrada — Nutriser Home + Portal Salud + Nutriser Web */}
+          {splashState === "splash0" && (
+            <Splash0Entry
+              onEnterNutriserWeb={handleEnterSplash1}
+              onGoToWebsite={() => { setSplashState('site'); }}
+              onNavigate={handleNavigateFromSplash}
+            />
+          )}
+        </>
       )}
 
-      {/* Splash 0: pantalla de entrada — Nutriser Home + Portal Salud + Nutriser Web */}
-      {splashState === "splash0" && (
-        <Splash0Entry
-          onEnterNutriserWeb={handleEnterSplash1}
-          onGoToWebsite={() => { setSplashState('site'); }}
-          onNavigate={handleNavigateFromSplash}
-        />
-      )}
+      {/* Splash 1 y sitio principal: solo si el ShopPromoSplash ya fue cerrado */}
+      {!showShopPromo && (
+        <>
+          {/* Splash 1: hub de servicios — Shop + Academy + Mis Tratamientos + login */}
+          {splashState === "splash1" && (
+            <SplashSelector
+              onEnterSite={handleEnterSite}
+              onNavigate={handleNavigateFromSplash}
+              onBack={() => setSplashState("splash0")}
+            />
+          )}
 
-      {/* Splash 1: hub de servicios — Shop + Academy + Mis Tratamientos + login */}
-      {splashState === "splash1" && (
-        <SplashSelector
-          onEnterSite={handleEnterSite}
-          onNavigate={handleNavigateFromSplash}
-          onBack={() => setSplashState("splash0")}
-        />
+          {/* Sitio principal */}
+          {splashState === "site" && <Router />}
+        </>
       )}
-
-      {/* Sitio principal */}
-      {splashState === "site" && <Router />}
     </SplashContext.Provider>
     </SplashThemeProvider>
   );

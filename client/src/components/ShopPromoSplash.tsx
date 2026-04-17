@@ -58,19 +58,6 @@ function ShopCard({ onAction }: { onAction: () => void }) {
         className="relative w-full overflow-hidden rounded-2xl"
         style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
       >
-        {/* Logo */}
-        <div className="flex justify-center pt-5 pb-3 px-4">
-          <img
-            src={LOGO_URL}
-            alt="Nutriser"
-            style={{
-              height: 90,
-              objectFit: "contain",
-              filter: "drop-shadow(0 2px 12px rgba(197,165,90,0.5))",
-            }}
-          />
-        </div>
-
         {/* 2x2 image grid */}
         <div
           style={{
@@ -96,19 +83,28 @@ function ShopCard({ onAction }: { onAction: () => void }) {
 
         {/* Bottom text + CTA */}
         <div className="px-5 pt-4 pb-5">
-          <h2
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: 36,
-              fontWeight: 700,
-              color: "#D4AF6A",
-              lineHeight: 1.1,
-              textAlign: "center",
-              marginBottom: 4,
-            }}
-          >
-            Nutriser Shop
-          </h2>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <img
+              src={LOGO_URL}
+              alt="Nutriser"
+              style={{
+                height: 36,
+                objectFit: "contain",
+                filter: "drop-shadow(0 1px 6px rgba(197,165,90,0.5))",
+              }}
+            />
+            <h2
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: 30,
+                fontWeight: 700,
+                color: "#D4AF6A",
+                lineHeight: 1.1,
+              }}
+            >
+              Nutriser Shop
+            </h2>
+          </div>
           <p style={{ color: "#b8b0a0", fontSize: 13, textAlign: "center", marginBottom: 16 }}>
             ¡Descuentos exclusivos solo para ti!
           </p>

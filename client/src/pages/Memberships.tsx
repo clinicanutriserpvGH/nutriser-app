@@ -14,6 +14,7 @@ import {
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
   Search, ArrowLeft, Upload, BookOpen, FlaskConical, User,
   Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList, Globe,
+  Info, Clock, Tag as TagIcon, DollarSign,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -24,6 +25,7 @@ import BackToSplash from "@/components/BackToSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
 import PromoSplash from "@/components/PromoSplash";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { t, type Lang } from "@/lib/i18n";
 
 // ─── Assets ──────────────────────────────────────────────────────────────────
@@ -334,6 +336,22 @@ export default function Memberships() {
     return map;
   }, [filteredServices]);
 
+  // ─── Modal de detalle ─────────────────────────────────────────────────────────
+  type DetailItem = {
+    name: string;
+    description?: string | null;
+    price?: string | null;
+    priceNum?: number | null;
+    category?: string | null;
+    imageUrl?: string | null;
+    features?: string[];
+    regularPrice?: number | null;
+    badge?: string | null;
+    itemType: "service" | "package";
+    id: string;
+  };
+  const [detailItem, setDetailItem] = useState<DetailItem | null>(null);
+
   // ─── Checkout ───────────────────────────────────────────────────────────────
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [buyNowItem, setBuyNowItem] = useState<CartItem | null>(null);
@@ -589,6 +607,128 @@ export default function Memberships() {
         contextMessage="Necesitas una cuenta para acceder a tu monedero, cupones, beneficios de lealtad y realizar compras."
       />
 
+      {/* ── Modal de detalle de servicio/paquete ── */}
+      <Dialog open={!!detailItem} onOpenChange={(open) => { if (!open) setDetailItem(null); }}>
+        <DialogContent
+          className="max-w-sm w-full p-0 overflow-hidden rounded-2xl border-0"
+          style={{ background: "#1A1A1A", maxHeight: "90vh", overflowY: "auto" }}
+        >
+          {detailItem && (
+            <>
+              {/* Imagen */}
+              {detailItem.imageUrl ? (
+                <div className="relative w-full" style={{ height: 220 }}>
+                  <img src={detailItem.imageUrl} alt={detailItem.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(26,26,26,0.9) 0%, transparent 60%)" }} />
+                  {detailItem.badge && (
+                    <div className="absolute top-3 left-3 flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black" style={{ background: "#C5A55A", color: "#1A1A1A" }}>
+                      <Star className="w-3 h-3 fill-current" /> {detailItem.badge}
+                    </div>
+                  )}
+                  {detailItem.category && (
+                    <div className="absolute bottom-3 left-3">
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#C5A55A" }}>
+                        {(CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="w-full flex items-center justify-center" style={{ height: 120, background: "#2a2a2a" }}>
+                  <Package className="w-12 h-12" style={{ color: "#C5A55A", opacity: 0.4 }} />
+                </div>
+              )}
+
+              {/* Contenido */}
+              <div className="px-5 pt-4 pb-6">
+                <DialogHeader>
+                  <DialogTitle
+                    style={{ fontFamily: "'Playfair Display', serif", color: "#FAF7F2", fontSize: 22, fontWeight: 700, lineHeight: 1.2 }}
+                    className="mb-1"
+                  >
+                    {detailItem.name}
+                  </DialogTitle>
+                </DialogHeader>
+
+                {/* Precio */}
+                {detailItem.price && (
+                  <div className="flex items-end gap-2 mt-2 mb-3">
+                    <span style={{ color: "#C5A55A", fontSize: 26, fontWeight: 900 }}>
+                      {detailItem.priceNum ? `$${detailItem.priceNum.toLocaleString("es-MX")}` : detailItem.price}
+                    </span>
+                    {detailItem.priceNum && <span style={{ color: "#b8b0a0", fontSize: 13, marginBottom: 2 }}>MXN</span>}
+                    {detailItem.regularPrice && (
+                      <span style={{ color: "#666", fontSize: 13, textDecoration: "line-through", marginBottom: 2 }}>
+                        ${detailItem.regularPrice.toLocaleString("es-MX")}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Separador dorado */}
+                <div style={{ height: 1, background: "linear-gradient(to right, #C5A55A, transparent)", marginBottom: 16 }} />
+
+                {/* Descripción */}
+                {detailItem.description && (
+                  <div className="mb-4">
+                    <p style={{ color: "#b8b0a0", fontSize: 14, lineHeight: 1.6 }}>{detailItem.description}</p>
+                  </div>
+                )}
+
+                {/* Beneficios/features (solo paquetes) */}
+                {detailItem.features && detailItem.features.length > 0 && (
+                  <div className="mb-5">
+                    <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Incluye</p>
+                    <ul className="space-y-2">
+                      {detailItem.features.map((f, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#C5A55A" }} />
+                          <span style={{ color: "#FAF7F2", fontSize: 13 }}>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Categoría */}
+                {detailItem.category && (
+                  <div className="flex items-center gap-2 mb-5">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).bg }}>
+                      {(() => { const Icon = (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).icon; return <Icon className="w-3.5 h-3.5" style={{ color: (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).color }} />; })()}
+                    </div>
+                    <span style={{ color: "#888", fontSize: 12 }}>{(CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label}</span>
+                  </div>
+                )}
+
+                {/* Botones de acción */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      addToCart({ id: detailItem.id, name: detailItem.name, price: detailItem.priceNum ?? 0, priceLabel: detailItem.price ? formatServicePrice(detailItem.price) : "Consultar precio", imageUrl: detailItem.imageUrl, category: detailItem.category ?? "general", itemType: detailItem.itemType });
+                      setDetailItem(null);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 font-bold text-sm py-3 rounded-xl transition-all active:scale-95"
+                    style={{ border: "1px solid #C5A55A", color: "#C5A55A", background: "transparent" }}
+                  >
+                    <ShoppingCart className="w-4 h-4" /> Al carrito
+                  </button>
+                  <button
+                    onClick={() => {
+                      openCheckout({ id: detailItem.id, name: detailItem.name, price: detailItem.priceNum ?? 0, priceLabel: detailItem.price ? formatServicePrice(detailItem.price) : "Consultar precio", qty: 1, imageUrl: detailItem.imageUrl, category: detailItem.category ?? "general", itemType: detailItem.itemType });
+                      setDetailItem(null);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 font-bold text-sm py-3 rounded-xl transition-all active:scale-95"
+                    style={{ background: "#C5A55A", color: "#1A1A1A" }}
+                  >
+                    <Zap className="w-4 h-4" /> Comprar
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* ── Carrito flotante ── */}
       {cartCount > 0 && !checkoutOpen && !cartOpen && (
         <button onClick={() => setCartOpen(true)}
@@ -800,6 +940,13 @@ export default function Memberships() {
                             )}
                           </ul>
 
+                          <button
+                            onClick={() => setDetailItem({ id: pkg.id, name: pkg.name, description: pkg.description, price: `$${pkg.price.toLocaleString("es-MX")} MXN`, priceNum: pkg.price, category: pkg.category, imageUrl: pkg.imageUrl, features: pkg.features, regularPrice: pkg.regularPrice, badge: pkg.badge, itemType: "package" })}
+                            className="w-full flex items-center justify-center gap-1.5 font-semibold text-[11px] py-2 rounded-xl mb-2 transition-all active:scale-95"
+                            style={{ border: "1px solid rgba(197,165,90,0.4)", color: "#C5A55A", background: "rgba(197,165,90,0.06)" }}
+                          >
+                            <Info className="w-3.5 h-3.5" /> Más información
+                          </button>
                           <div className="flex gap-2">
                             <button onClick={() => addToCart({ id: pkg.id, name: pkg.name, price: pkg.price, priceLabel: `$${pkg.price.toLocaleString("es-MX")} MXN`, imageUrl: pkg.imageUrl, category: pkg.category, itemType: "package" })}
                               className="flex-1 flex items-center justify-center gap-1 border border-[#C5A55A] text-[#C5A55A] font-bold text-[11px] py-2.5 rounded-xl hover:bg-[#C5A55A]/5 transition-all active:scale-95">
@@ -869,6 +1016,13 @@ export default function Memberships() {
                                   ) : (
                                     <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
                                   )}
+                                  <button
+                                    onClick={() => setDetailItem({ id: `svc-${service.id}`, name: service.name, description: service.description, price: service.price, priceNum, category: service.category, imageUrl: service.imageUrl, itemType: "service" })}
+                                    className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95"
+                                    style={{ border: "1px solid rgba(197,165,90,0.35)", color: "#C5A55A", background: "rgba(197,165,90,0.05)" }}
+                                  >
+                                    <Info className="w-3 h-3" /> Más información
+                                  </button>
                                   <div className="flex gap-1.5">
                                     <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                       className="flex-1 flex items-center justify-center gap-0.5 border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95">
@@ -933,6 +1087,13 @@ export default function Memberships() {
                                   ) : (
                                     <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
                                   )}
+                                  <button
+                                    onClick={() => setDetailItem({ id: `svc-${service.id}`, name: service.name, description: service.description, price: service.price, priceNum, category: service.category, imageUrl: service.imageUrl, itemType: "service" })}
+                                    className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95"
+                                    style={{ border: "1px solid rgba(197,165,90,0.35)", color: "#C5A55A", background: "rgba(197,165,90,0.05)" }}
+                                  >
+                                    <Info className="w-3 h-3" /> Más información
+                                  </button>
                                   <div className="flex gap-1.5">
                                     <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                       className="flex-1 flex items-center justify-center gap-0.5 border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95">

@@ -5,9 +5,29 @@
  * Slide 1+: cupones/promociones activos (igual que PromoSplash en la tienda)
  * El usuario DEBE cerrarlo manualmente (X o "Después").
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { X, ShoppingBag, Gift, Clock, ChevronLeft, ChevronRight, Flame } from "lucide-react";
+
+function useCountdown(expiresAt: Date | string | null | undefined) {
+  const [timeLeft, setTimeLeft] = useState("");
+  useEffect(() => {
+    if (!expiresAt) { setTimeLeft(""); return; }
+    const target = typeof expiresAt === "string" ? new Date(expiresAt) : expiresAt;
+    const tick = () => {
+      const diff = target.getTime() - Date.now();
+      if (diff <= 0) { setTimeLeft("Expirado"); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      setTimeLeft(`${d}d ${h}h ${m}m`);
+    };
+    tick();
+    const id = setInterval(tick, 60000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+  return timeLeft;
+}
 
 const SHOP_SPLASH_IMAGE =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-shop-splash_1d595b22.png";
@@ -57,6 +77,7 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
   const soldPercent = promo.maxCoupons
     ? Math.min(100, Math.round(((promo.couponsSold || 0) / promo.maxCoupons) * 100))
     : 0;
+  const countdown = useCountdown(promo.expiresAt);
 
   return (
     <div className="relative w-full flex-shrink-0">
@@ -94,14 +115,22 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
               )}
             </div>
           )}
-          {promo.maxCoupons && (
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                <div className="h-full bg-[#C5A55A] rounded-full transition-all" style={{ width: `${soldPercent}%` }} />
+          <div className="flex items-center gap-4">
+            {countdown && countdown !== "Expirado" && (
+              <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#C5A55A]" />
+                <span className="text-white text-xs font-medium">{countdown}</span>
               </div>
-              <span className="text-white/70 text-[10px] font-medium whitespace-nowrap">{soldPercent}% vendido</span>
-            </div>
-          )}
+            )}
+            {promo.maxCoupons && (
+              <div className="flex items-center gap-2 flex-1">
+                <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#C5A55A] rounded-full transition-all" style={{ width: `${soldPercent}%` }} />
+                </div>
+                <span className="text-white/70 text-[10px] font-medium whitespace-nowrap">{soldPercent}% vendido</span>
+              </div>
+            )}
+          </div>
           <button
             onClick={onAction}
             className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#C5A55A]/30 transition-all active:scale-[0.98]"

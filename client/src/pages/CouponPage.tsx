@@ -317,7 +317,7 @@ export default function CouponPage() {
                 <div className="mt-8 text-center">
                   <p className="text-[#666] text-sm mb-4">¿Quieres ver más ofertas?</p>
                   <button
-                    onClick={handleBack}
+                    onClick={() => navigate('/cupones')}
                     className="bg-[#1A1A1A] hover:bg-[#333] text-[#C5A55A] border border-[#C5A55A] px-6 py-3 rounded-xl font-bold transition"
                   >
                     Ver todas las promociones

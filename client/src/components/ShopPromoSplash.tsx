@@ -30,7 +30,7 @@ function useCountdown(expiresAt: Date | string | null | undefined) {
 }
 
 const SHOP_SPLASH_IMAGE =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-shop-splash-v2_e9a3a5ff.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-shop-splash-fixed_e318f2da.png";
 
 interface ShopPromoSplashProps {
   onClose: () => void;

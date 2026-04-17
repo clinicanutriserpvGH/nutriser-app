@@ -81,11 +81,10 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-white leading-[1.1] mb-6"
+            className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-white leading-[1.1] mb-4"
           >
-            Tu salud y belleza{" "}
-            <span className="italic text-[#C5A55A]">personalizada</span> en un
-            solo lugar
+            Clínica de Nutrición y Estética en{" "}
+            <span className="text-[#C5A55A]">Puerto Vallarta</span>
           </motion.h1>
 
           <motion.div
@@ -99,6 +98,15 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7 }}
+            className="text-white/70 text-lg lg:text-xl leading-relaxed mb-2 max-w-lg italic"
+          >
+            Tu salud y belleza personalizada en un solo lugar
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.75 }}
             className="text-white/70 text-lg lg:text-xl leading-relaxed mb-8 max-w-lg"
           >
             En Nutriser no vendemos terapias, vendemos soluciones. Nutrición,

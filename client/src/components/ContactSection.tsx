@@ -156,33 +156,7 @@ export default function ContactSection() {
                 </div>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="grid grid-cols-2 gap-3 pt-4">
-                <a
-                  href="tel:3224503257"
-                  className="flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E]"
-                >
-                  <Phone className="w-4 h-4" />
-                  Llamar
-                </a>
-                <a
-                  href="https://wa.me/523221007799"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-3 text-xs tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E]"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  WhatsApp
-                </a>
-                <button
-                  onClick={() => navigate("/appointment-form")}
-                  className="col-span-2 flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-4 py-2.5 text-xs tracking-[0.15em] uppercase font-semibold transition-all duration-300 hover:bg-[#B8963E]"
-                >
-                  <CalendarCheck className="w-3.5 h-3.5" />
-                  Agendar Cita
-                </button>
 
-              </div>
 
               {/* Social Links */}
               <div className="flex items-center gap-4 pt-4">

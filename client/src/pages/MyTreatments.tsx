@@ -202,7 +202,7 @@ export default function MyTreatments() {
   const [view, setView] = useState<"auth" | "consent" | "portal">("auth");
   const [authMode, setAuthMode] = useState<"login" | "register" | "register-form" | "forgot">("login");
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<"purchases" | "tracking" | "photos" | "consent">("purchases");
+  const [activeTab, setActiveTab] = useState<"tracking" | "photos" | "consent">("tracking");
 
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [signingConsent, setSigningConsent] = useState(false);
@@ -264,7 +264,7 @@ export default function MyTreatments() {
   );
   const { data: myPurchases, isLoading: purchasesLoading } = trpc.patients.getMyPurchases.useQuery(
     { email: patient?.email ?? 'x@x.com' },
-    { enabled: !!patient && view === 'portal' && activeTab === 'purchases' }
+    { enabled: false }
   );
 
   // ─── Mutations ──────────────────────────────────────────────────────────────
@@ -791,7 +791,6 @@ export default function MyTreatments() {
             {/* Tabs — horizontal en móvil, vertical en desktop */}
             <div className="flex lg:flex-col bg-white border border-gray-100 rounded-2xl p-1 gap-1 shadow-sm">
               {([
-                { id: "purchases", icon: ShieldCheck, label: "Mis Compras" },
                 { id: "tracking", icon: Sparkles, label: "Seguimiento" },
                 { id: "photos", icon: Camera, label: "Fotos" },
                 { id: "consent", icon: FileText, label: "Contrato" },
@@ -831,8 +830,8 @@ export default function MyTreatments() {
           {/* ── Columna derecha (contenido del tab) ── */}
           <div className="flex-1 min-w-0 space-y-5">
 
-        {/* ── Tab: Mis Compras ── */}
-        {activeTab === "purchases" && (
+        {/* Tab Mis Compras removed - moved to Monedero */}
+        {false && (
           <div className="space-y-5">
             <div className="bg-[#C5A55A]/5 border border-[#C5A55A]/20 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-1">

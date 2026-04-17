@@ -192,21 +192,12 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: Pro
 
   const shouldShow = totalSlides > 0 && !dismissed;
 
-  useEffect(() => {
-    const lastShown = sessionStorage.getItem("nutriser_promo_splash_shown");
-    if (lastShown) {
-      setDismissed(true);
-    }
-  }, []);
-
   const handleClose = useCallback(() => {
     setDismissed(true);
-    sessionStorage.setItem("nutriser_promo_splash_shown", "1");
     onClose();
   }, [onClose]);
 
   const handleAction = useCallback((promoId: number) => {
-    sessionStorage.setItem("nutriser_promo_splash_shown", "1");
     if (onGoToCoupon) {
       onGoToCoupon(promoId);
     } else {
@@ -215,7 +206,6 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: Pro
   }, [onGoToCoupon, handleClose]);
 
   const handleMonederoAction = useCallback(() => {
-    sessionStorage.setItem("nutriser_promo_splash_shown", "1");
     if (onOpenWallet) {
       onOpenWallet();
     }

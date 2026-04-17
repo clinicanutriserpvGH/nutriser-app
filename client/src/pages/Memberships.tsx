@@ -14,7 +14,7 @@ import {
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
   Search, ArrowLeft, Upload, BookOpen, FlaskConical, User,
   Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList, Globe,
-  Info, Clock, Tag as TagIcon, DollarSign,
+  Info, Clock, Tag as TagIcon, DollarSign, PersonStanding, ScanFace, Smile,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -91,10 +91,10 @@ const PACKAGES = [
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
   nutricion: { label: "Nutrición", icon: Apple, color: "#16a34a", bg: "#dcfce7" },
-  corporales: { label: "Corporales", icon: Sparkles, color: "#C5A55A", bg: "#fef3c7" },
-  faciales: { label: "Faciales", icon: Scan, color: "#ec4899", bg: "#fce7f3" },
+  corporales: { label: "Corporales", icon: PersonStanding, color: "#C5A55A", bg: "#fef3c7" },
+  faciales: { label: "Faciales", icon: ScanFace, color: "#ec4899", bg: "#fce7f3" },
   medicina: { label: "Medicina", icon: Syringe, color: "#7c3aed", bg: "#ede9fe" },
-  otros: { label: "Otros", icon: Droplets, color: "#0891b2", bg: "#cffafe" },
+  otros: { label: "Otros", icon: Smile, color: "#0891b2", bg: "#cffafe" },
   productos: { label: "Productos", icon: ShoppingBag, color: "#ea580c", bg: "#ffedd5" },
   general: { label: "General", icon: Package, color: "#6b7280", bg: "#f3f4f6" },
 };
@@ -1915,12 +1915,12 @@ onClick={() => {
                     <div className="bg-white rounded-xl p-2 flex-shrink-0">
                       {walletData ? (
                         <QRCodeSVG
-                          value={`nutriser://wallet/${walletData.walletNumber || '0000000000'}`}
+                          value={`https://nutriserpv.com/monedero/${walletData.walletNumber || ''}`}
                           size={70}
                           level="H"
                           includeMargin={false}
                           bgColor="#FFFFFF"
-                          fgColor="#1A1A1A"
+                          fgColor="#000000"
                         />
                       ) : (
                         <div className="w-[70px] h-[70px] flex items-center justify-center">

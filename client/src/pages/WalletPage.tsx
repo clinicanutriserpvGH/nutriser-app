@@ -230,9 +230,9 @@ export default function WalletPage() {
                 <div className="bg-white rounded-xl p-3 flex-shrink-0 shadow-sm">
                   <QRCodeSVG
                     value={qrUrl || "https://nutriserpv.com/monedero"}
-                    size={110}
+                    size={80}
                     level="H"
-                    includeMargin={true}
+                    includeMargin={false}
                     bgColor="#FFFFFF"
                     fgColor="#000000"
                   />

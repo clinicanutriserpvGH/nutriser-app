@@ -42,6 +42,8 @@ export const memberships = mysqlTable("memberships", {
   discountCode: varchar("discountCode", { length: 50 }), // Código de descuento aplicado
   discountPercent: int("discountPercent"), // Porcentaje de descuento aplicado
   originalPrice: decimal("originalPrice", { precision: 10, scale: 2 }), // Precio antes del descuento
+  walletDiscount: decimal("walletDiscount", { precision: 10, scale: 2 }).default("0"), // Descuento aplicado del monedero
+  patientEmail: varchar("patientEmail", { length: 320 }), // Email del paciente para vincular con monedero
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   verifiedAt: timestamp("verifiedAt"),
@@ -182,6 +184,8 @@ export const giftPurchases = mysqlTable("giftPurchases", {
   sharedWith: varchar("sharedWith", { length: 320 }), // Email del destinatario
   sharedMethod: mysqlEnum("sharedMethod", ["whatsapp", "email"]), // Método de compartir
   sharedAt: timestamp("sharedAt"),
+  walletDiscount: varchar("walletDiscount", { length: 20 }), // Monto descontado del monedero en pesos MXN
+  patientEmail: varchar("patientEmail", { length: 320 }), // Email del paciente para vincular con monedero
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -243,6 +247,8 @@ export const ebookPurchases = mysqlTable("ebookPurchases", {
   accessToken: varchar("accessToken", { length: 64 }).notNull().unique(), // Token único para acceder al PDF
   accessPasswordHash: varchar("accessPasswordHash", { length: 255 }), // Contraseña hasheada para login seguro
   referredBy: varchar("referredBy", { length: 255 }), // Nombre del comprador que recomendó el eBook
+  walletDiscount: decimal("walletDiscount", { precision: 10, scale: 2 }).default("0"), // Descuento del monedero
+  patientEmail: varchar("patientEmail", { length: 320 }), // Email del paciente para vincular con monedero
   status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
   approvedAt: timestamp("approvedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -287,6 +293,8 @@ export const servicePurchases = mysqlTable("servicePurchases", {
   discountCode: varchar("discountCode", { length: 50 }), // Código de descuento aplicado
   discountPercent: int("discountPercent"), // Porcentaje de descuento aplicado
   originalPrice: varchar("originalPrice", { length: 100 }), // Precio antes del descuento
+  walletDiscount: decimal("walletDiscount", { precision: 10, scale: 2 }).default("0"), // Descuento del monedero
+  patientEmail: varchar("patientEmail", { length: 320 }), // Email del paciente para vincular con monedero
   approvedAt: timestamp("approvedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -388,6 +396,8 @@ export const productPurchases = mysqlTable("productPurchases", {
   discountCode: varchar("discountCode", { length: 50 }), // Código de descuento aplicado
   discountPercent: int("discountPercent"), // Porcentaje de descuento aplicado
   originalPrice: varchar("originalPrice", { length: 100 }), // Precio antes del descuento
+  walletDiscount: decimal("walletDiscount", { precision: 10, scale: 2 }).default("0"), // Descuento del monedero
+  patientEmail: varchar("patientEmail", { length: 320 }), // Email del paciente para vincular con monedero
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

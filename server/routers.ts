@@ -161,15 +161,41 @@ export const appRouter = router({
         clientEmail: z.string().email(),
         clientPhone: z.string().optional(),
         programType: z.enum(["basic", "premium", "treatment"]),
-        programName: z.string().optional(), // Nombre real del paquete (ej: "Paquete Reductor Nutriser")
+        programName: z.string().optional(),
         discountCode: z.string().optional(),
         discountPercent: z.number().optional(),
+        walletDiscount: z.number().optional(),
+        patientEmail: z.string().email().optional(),
       }))
       .mutation(async ({ input }) => {
         const basePrice = input.programType === "basic" ? 2500 : input.programType === "premium" ? 4500 : 5499;
         const finalPrice = input.discountPercent
           ? Math.round(basePrice * (1 - input.discountPercent / 100))
           : basePrice;
+
+        // ── Descontar saldo del monedero INMEDIATAMENTE ──
+        const walletDiscountAmt = input.walletDiscount || 0;
+        if (walletDiscountAmt > 0 && input.patientEmail) {
+          try {
+            const patient = await getPatientByEmail(input.patientEmail);
+            if (patient) {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet && wallet.isActive) {
+                const toDeduct = Math.min(Math.round(walletDiscountAmt * 100), wallet.balance);
+                if (toDeduct > 0) {
+                  await addWalletTransaction({
+                    walletId: wallet.id,
+                    type: 'redeem',
+                    amount: -toDeduct,
+                    description: `Descuento monedero en ${input.programName || 'paquete'}`,
+                    referenceType: 'membership',
+                    createdBy: 'patient',
+                  });
+                }
+              }
+            }
+          } catch (e) { console.warn('Wallet deduct error (membership):', e); }
+        }
         const programLabel = input.programType === "basic" ? "Básico" : input.programType === "premium" ? "Premium" : "Tratamiento";
         const realProgramName = input.programName || (input.programType === "basic" ? "Paquete Nutrición" : input.programType === "premium" ? "Paquete Reductor Nutriser" : "Tratamiento");
         const membership = await createMembership({
@@ -488,6 +514,9 @@ export const appRouter = router({
         isGift: z.boolean().default(false),
         recipientName: z.string().optional(),
         recipientContact: z.string().optional(),
+        walletDiscount: z.number().optional(),
+        patientEmail: z.string().email().optional(),
+        promotionTitle: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         // NO se genera el código aquí — se genera al aprobar (igual que paquetes/membersías)
@@ -495,6 +524,30 @@ export const appRouter = router({
         const buffer = Buffer.from(input.proofData, 'base64');
         const fileName = `gift-proof-${Date.now()}.${input.proofMimeType.split('/')[1]}`;
         const { url } = await storagePut(`gift-proofs/${fileName}`, buffer, input.proofMimeType);
+
+        // ── Descontar saldo del monedero INMEDIATAMENTE ──
+        const walletDiscountAmt = input.walletDiscount || 0;
+        if (walletDiscountAmt > 0 && input.patientEmail) {
+          try {
+            const patient = await getPatientByEmail(input.patientEmail);
+            if (patient) {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet && wallet.isActive) {
+                const toDeduct = Math.min(Math.round(walletDiscountAmt * 100), wallet.balance);
+                if (toDeduct > 0) {
+                  await addWalletTransaction({
+                    walletId: wallet.id,
+                    type: 'redeem',
+                    amount: -toDeduct,
+                    description: `Descuento monedero en ${input.promotionTitle || 'cupón'}`,
+                    referenceType: 'gift_purchase',
+                    createdBy: 'patient',
+                  });
+                }
+              }
+            }
+          } catch (e) { console.warn('Wallet deduct error (gift):', e); }
+        }
 
         const purchase = await createGiftPurchase({
           promotionId: input.promotionId,
@@ -507,6 +560,8 @@ export const appRouter = router({
           recipientName: input.recipientName,
           recipientContact: input.recipientContact,
           status: 'pending',
+          walletDiscount: walletDiscountAmt > 0 ? String(walletDiscountAmt) : undefined,
+          patientEmail: input.patientEmail,
         });
 
         // Notify admin via Gmail (sin código aún)
@@ -827,11 +882,37 @@ export const appRouter = router({
         buyerName: z.string().min(1),
         buyerEmail: z.string().email(),
         proofBase64: z.string().min(1),
-        referredBy: z.string().optional(), // Nombre del comprador que recomendó
-        discountCode: z.string().optional(), // Código de descuento aplicado
+        referredBy: z.string().optional(),
+        discountCode: z.string().optional(),
+        walletDiscount: z.number().optional(),
+        patientEmail: z.string().email().optional(),
+        ebookTitle: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { proofBase64, discountCode, ...rest } = input;
+        const { proofBase64, discountCode, walletDiscount: walletDiscountAmt = 0, patientEmail, ebookTitle, ...rest } = input;
+
+        // ── Descontar saldo del monedero INMEDIATAMENTE ──
+        if (walletDiscountAmt > 0 && patientEmail) {
+          try {
+            const patient = await getPatientByEmail(patientEmail);
+            if (patient) {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet && wallet.isActive) {
+                const toDeduct = Math.min(Math.round(walletDiscountAmt * 100), wallet.balance);
+                if (toDeduct > 0) {
+                  await addWalletTransaction({
+                    walletId: wallet.id,
+                    type: 'redeem',
+                    amount: -toDeduct,
+                    description: `Descuento monedero en ${ebookTitle || 'ebook'}`,
+                    referenceType: 'ebook_purchase',
+                    createdBy: 'patient',
+                  });
+                }
+              }
+            }
+          } catch (e) { console.warn('Wallet deduct error (ebook):', e); }
+        }
         
         // Validar código de descuento si se proporcionó
         let discountInfo = '';
@@ -1237,6 +1318,8 @@ export const appRouter = router({
         discountCode: z.string().optional(),
         discountPercent: z.number().optional(),
         originalPrice: z.string().optional(),
+        walletDiscount: z.number().optional(), // Monto en pesos MXN a descontar del monedero
+        patientEmail: z.string().email().optional(),
       }))
       .mutation(async ({ input }) => {
         // Upload proof to S3
@@ -1248,6 +1331,30 @@ export const appRouter = router({
         // Increment discount code usage if provided
         if (input.discountCode) {
           try { await incrementDiscountCodeUsage(input.discountCode); } catch {}
+        }
+
+        // ── Descontar saldo del monedero INMEDIATAMENTE al enviar comprobante ──
+        const walletDiscountAmt = input.walletDiscount || 0;
+        if (walletDiscountAmt > 0 && input.patientEmail) {
+          try {
+            const patient = await getPatientByEmail(input.patientEmail);
+            if (patient) {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet && wallet.isActive) {
+                const toDeduct = Math.min(Math.round(walletDiscountAmt * 100), wallet.balance);
+                if (toDeduct > 0) {
+                  await addWalletTransaction({
+                    walletId: wallet.id,
+                    type: 'redeem',
+                    amount: -toDeduct,
+                    description: `Descuento monedero en ${input.serviceName}`,
+                    referenceType: 'service_purchase',
+                    createdBy: 'patient',
+                  });
+                }
+              }
+            }
+          } catch (e) { console.warn('Wallet deduct error (service):', e); }
         }
 
         // NOTE: serviceCode is NOT generated here — it is generated when admin approves
@@ -1262,6 +1369,8 @@ export const appRouter = router({
           discountCode: input.discountCode,
           discountPercent: input.discountPercent,
           originalPrice: input.originalPrice,
+          walletDiscount: walletDiscountAmt > 0 ? String(walletDiscountAmt) : undefined,
+          patientEmail: input.patientEmail,
         });
 
         // Notify admin via email (no code yet)
@@ -1499,6 +1608,9 @@ export const appRouter = router({
         quantity: z.number().int().min(1).default(1),
         proofData: z.string(),
         proofMimeType: z.string(),
+        walletDiscount: z.number().optional(),
+        patientEmail: z.string().email().optional(),
+        originalPrice: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -1508,6 +1620,31 @@ export const appRouter = router({
         const ext = input.proofMimeType.split('/')[1] || 'jpg';
         const fileName = `product-proof-${Date.now()}.${ext}`;
         const { url: proofUrl } = await storagePut(`product-proofs/${fileName}`, buffer, input.proofMimeType);
+
+        // ── Descontar saldo del monedero INMEDIATAMENTE ──
+        const walletDiscountAmt = input.walletDiscount || 0;
+        if (walletDiscountAmt > 0 && input.patientEmail) {
+          try {
+            const patient = await getPatientByEmail(input.patientEmail);
+            if (patient) {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet && wallet.isActive) {
+                const toDeduct = Math.min(Math.round(walletDiscountAmt * 100), wallet.balance);
+                if (toDeduct > 0) {
+                  await addWalletTransaction({
+                    walletId: wallet.id,
+                    type: 'redeem',
+                    amount: -toDeduct,
+                    description: `Descuento monedero en ${input.productName}`,
+                    referenceType: 'product_purchase',
+                    createdBy: 'patient',
+                  });
+                }
+              }
+            }
+          } catch (e) { console.warn('Wallet deduct error (product):', e); }
+        }
+
         const purchase = await createProductPurchase({
           productId: input.productId,
           productName: input.productName,
@@ -1518,6 +1655,8 @@ export const appRouter = router({
           proofUrl,
           purchaseCode,
           status: 'pending',
+          walletDiscount: walletDiscountAmt > 0 ? String(walletDiscountAmt) : undefined,
+          patientEmail: input.patientEmail,
         });
         return { purchaseCode, id: purchase.id };
       }),
@@ -2847,6 +2986,7 @@ export const appRouter = router({
         itemName: z.string(),
         itemPrice: z.number().min(0), // centavos
         cashbackPercent: z.number().min(0).max(100).default(2),
+        walletAmountToUse: z.number().min(0).default(0), // centavos a descontar del monedero
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -2854,9 +2994,29 @@ export const appRouter = router({
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         if (!wallet.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Monedero desactivado' });
 
-        const cashbackAmount = Math.round(input.itemPrice * (input.cashbackPercent / 100));
+        // Validar que hay saldo suficiente
+        const walletDeduct = Math.min(input.walletAmountToUse, wallet.balance);
+        if (walletDeduct > wallet.balance) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Saldo insuficiente en el monedero' });
+        }
+
+        // Descontar saldo del monedero si se usa
+        if (walletDeduct > 0) {
+          await addWalletTransaction({
+            walletId: wallet.id,
+            type: 'redeem',
+            amount: -walletDeduct,
+            description: `Pago presencial con monedero: ${input.itemName}${input.notes ? ` (${input.notes})` : ''}`,
+            referenceType: `presential_${input.itemType}`,
+            createdBy: 'admin',
+          });
+        }
+
+        // Calcular cashback sobre el monto pagado en efectivo (precio - monedero usado)
+        const efectivoPagado = Math.max(0, input.itemPrice - walletDeduct);
+        const cashbackAmount = Math.round(efectivoPagado * (input.cashbackPercent / 100));
         
-        // Acreditar cashback al monedero
+        // Acreditar cashback al monedero (sobre lo que pagó en efectivo)
         if (cashbackAmount > 0) {
           await addWalletTransaction({
             walletId: wallet.id,
@@ -2873,7 +3033,9 @@ export const appRouter = router({
           success: true,
           patientName: patient?.name || 'Usuario',
           cashbackAmount,
-          newBalance: wallet.balance + cashbackAmount,
+          walletDeducted: walletDeduct,
+          efectivoPagado,
+          newBalance: wallet.balance - walletDeduct + cashbackAmount,
         };
       }),
 

@@ -124,6 +124,9 @@ export default function CouponPage() {
         reader.readAsDataURL(payProofFile);
       });
 
+      // Calcular descuento real del monedero (en pesos MXN)
+      const walletDiscountPesos = useWallet && walletAmount > 0 ? walletAmount / 100 : 0;
+
       await createServicePurchaseMutation.mutateAsync({
         buyerName: payName.trim(),
         buyerPhone: payPhone.trim(),
@@ -132,6 +135,8 @@ export default function CouponPage() {
         proofData: base64Data,
         proofMimeType: payProofFile.type || 'image/jpeg',
         originalPrice: promo.price || undefined,
+        walletDiscount: walletDiscountPesos > 0 ? walletDiscountPesos : undefined,
+        patientEmail: walletDiscountPesos > 0 && patient?.email ? patient.email : undefined,
       });
     } catch (err: any) {
       setPayStep('form');

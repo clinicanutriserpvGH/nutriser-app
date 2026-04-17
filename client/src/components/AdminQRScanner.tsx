@@ -29,6 +29,7 @@ export default function AdminQRScanner() {
   } | null>(null);
   const [customPrice, setCustomPrice] = useState("");
   const [cashbackPercent, setCashbackPercent] = useState("2");
+  const [walletAmountToUse, setWalletAmountToUse] = useState("0"); // pesos
   const [notes, setNotes] = useState("");
   const scannerRef = useRef<any>(null);
   const scannerContainerRef = useRef<HTMLDivElement>(null);
@@ -151,6 +152,13 @@ export default function AdminQRScanner() {
     if (!selectedItem || !walletNumber) return;
     const priceInCents = Math.round(parseFloat(customPrice || "0") * 100);
     const cbPercent = parseFloat(cashbackPercent || "2");
+    const walletCents = Math.round(parseFloat(walletAmountToUse || "0") * 100);
+    const patientBalance = patientQuery.data?.balance ?? 0;
+
+    if (walletCents > patientBalance) {
+      toast.error(`Saldo insuficiente. El paciente tiene $${(patientBalance / 100).toFixed(2)} MXN`);
+      return;
+    }
 
     registerMutation.mutate({
       walletNumber,
@@ -158,6 +166,7 @@ export default function AdminQRScanner() {
       itemName: selectedItem.name,
       itemPrice: priceInCents,
       cashbackPercent: cbPercent,
+      walletAmountToUse: walletCents,
       notes: notes || undefined,
     });
   };
@@ -169,7 +178,8 @@ export default function AdminQRScanner() {
     setManualInput("");
     setSelectedItem(null);
     setCustomPrice("");
-    setCashbackPercent("1");
+    setCashbackPercent("2");
+    setWalletAmountToUse("0");
     setNotes("");
   };
 
@@ -485,6 +495,57 @@ export default function AdminQRScanner() {
                 />
               </div>
 
+              {/* Saldo del monedero a usar */}
+              {(patientQuery.data?.balance ?? 0) > 0 && (
+                <div className="bg-amber-50 border border-[#C5A55A]/30 rounded-xl p-3 space-y-2">
+                  <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                    <Wallet className="w-3 h-3 text-[#C5A55A]" /> Usar saldo del monedero
+                  </label>
+                  <p className="text-xs text-gray-500">Disponible: <span className="font-bold text-[#C5A55A]">${((patientQuery.data?.balance ?? 0) / 100).toFixed(2)} MXN</span></p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">$</span>
+                    <Input
+                      type="number"
+                      value={walletAmountToUse}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value || "0");
+                        const maxPesos = (patientQuery.data?.balance ?? 0) / 100;
+                        const price = parseFloat(customPrice || "0");
+                        setWalletAmountToUse(String(Math.min(val, maxPesos, price)));
+                      }}
+                      placeholder="0"
+                      min="0"
+                      max={Math.min((patientQuery.data?.balance ?? 0) / 100, parseFloat(customPrice || "0"))}
+                      step="0.01"
+                      className="text-center font-bold"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const maxPesos = (patientQuery.data?.balance ?? 0) / 100;
+                        const price = parseFloat(customPrice || "0");
+                        setWalletAmountToUse(String(Math.min(maxPesos, price)));
+                      }}
+                      className="text-xs text-[#C5A55A] font-bold whitespace-nowrap hover:underline"
+                    >
+                      Usar todo
+                    </button>
+                  </div>
+                  {parseFloat(walletAmountToUse) > 0 && parseFloat(customPrice) > 0 && (
+                    <div className="text-xs space-y-1 pt-1 border-t border-[#C5A55A]/20">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Monedero:</span>
+                        <span className="font-bold text-[#C5A55A]">-${parseFloat(walletAmountToUse).toFixed(2)} MXN</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Efectivo/transferencia:</span>
+                        <span className="font-bold text-green-700">${Math.max(0, parseFloat(customPrice) - parseFloat(walletAmountToUse)).toFixed(2)} MXN</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Cashback % */}
               <div>
                 <label className="text-xs font-semibold text-gray-600 block mb-1">
@@ -494,7 +555,7 @@ export default function AdminQRScanner() {
                   type="number"
                   value={cashbackPercent}
                   onChange={(e) => setCashbackPercent(e.target.value)}
-                  placeholder="1"
+                  placeholder="2"
                   min="0"
                   max="100"
                   className="text-center"
@@ -540,17 +601,39 @@ export default function AdminQRScanner() {
       )}
 
       {/* ═══ STEP 5: Completado ═══ */}
-      {step === "done" && (
+      {step === "done" && registerMutation.data && (
         <Card className="border-green-200 bg-gradient-to-br from-green-50 to-white">
           <CardContent className="p-6 text-center space-y-4">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
               <Check className="w-8 h-8 text-green-600" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-green-700">Compra Registrada</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                El cashback ha sido acreditado al monedero del paciente
-              </p>
+              <h3 className="font-bold text-lg text-green-700">¡Compra Registrada!</h3>
+              <p className="text-sm text-gray-600 font-semibold mt-1">{registerMutation.data.patientName}</p>
+            </div>
+            <div className="bg-white rounded-xl p-3 space-y-2 text-sm border border-green-100">
+              {registerMutation.data.walletDeducted > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Monedero usado:</span>
+                  <span className="font-bold text-[#C5A55A]">-${(registerMutation.data.walletDeducted / 100).toFixed(2)} MXN</span>
+                </div>
+              )}
+              {registerMutation.data.efectivoPagado > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Efectivo/transferencia:</span>
+                  <span className="font-bold text-gray-700">${(registerMutation.data.efectivoPagado / 100).toFixed(2)} MXN</span>
+                </div>
+              )}
+              {registerMutation.data.cashbackAmount > 0 && (
+                <div className="flex justify-between border-t border-green-100 pt-2">
+                  <span className="text-gray-500">Cashback acreditado:</span>
+                  <span className="font-bold text-green-600">+${(registerMutation.data.cashbackAmount / 100).toFixed(2)} MXN</span>
+                </div>
+              )}
+              <div className="flex justify-between border-t border-green-100 pt-2">
+                <span className="text-gray-500">Nuevo saldo monedero:</span>
+                <span className="font-black text-[#C5A55A]">${(registerMutation.data.newBalance / 100).toFixed(2)} MXN</span>
+              </div>
             </div>
             <Button
               onClick={handleReset}

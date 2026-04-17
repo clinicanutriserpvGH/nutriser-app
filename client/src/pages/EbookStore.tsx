@@ -6,12 +6,14 @@
 import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { ArrowLeft, BookOpen, Upload, Clock, CheckCircle, ShoppingCart, Eye, X, Share2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Upload, Clock, CheckCircle, ShoppingCart, Eye, X, Share2, Wallet } from "lucide-react";
 import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import { OFFICIAL_DOMAIN } from "@/const";
 import { useSplash } from "@/contexts/SplashContext";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
+import { trpc as trpcClient } from "@/lib/trpc";
 
 const BANK_INFO = {
   bank: "Banamex",
@@ -22,10 +24,19 @@ type Step = "view" | "form" | "proof" | "success";
 
 export default function EbookStore() {
   const { showSplash } = useSplash();
+  const { patient, isLoggedIn } = usePatientAuth();
 
   const [, navigate] = useLocation();
   const [step, setStep] = useState<Step>("view");
   const [formData, setFormData] = useState({ buyerName: "", buyerEmail: "" });
+  const [useWalletEbook, setUseWalletEbook] = useState(false);
+
+  // Wallet data
+  const walletQueryEbook = trpcClient.wallet.getMyWallet.useQuery(
+    { patientId: patient?.id ?? 0 },
+    { enabled: isLoggedIn && !!patient?.id }
+  );
+  const walletBalanceEbook = walletQueryEbook.data?.wallet?.balance ?? 0;
 
   // Capturar el parámetro de referido desde la URL (?ref=NombreDelReferido)
   const [referredBy, setReferredBy] = useState<string | null>(null);
@@ -172,6 +183,7 @@ export default function EbookStore() {
 
     setIsSubmitting(true);
     try {
+      const walletDiscountPesos = useWalletEbook && walletBalanceEbook > 0 ? walletBalanceEbook / 100 : 0;
       const result = await purchaseMutation.mutateAsync({
         ebookId: ebook.id,
         buyerName: formData.buyerName,
@@ -179,6 +191,9 @@ export default function EbookStore() {
         proofBase64: filePreview,
         referredBy: referredBy ?? undefined,
         discountCode: appliedCode ?? undefined,
+        walletDiscount: walletDiscountPesos > 0 ? walletDiscountPesos : undefined,
+        patientEmail: walletDiscountPesos > 0 && patient?.email ? patient.email : undefined,
+        ebookTitle: ebook.title,
       });
       setPurchaseId(result.purchaseId);
       setStep("success");
@@ -629,6 +644,30 @@ export default function EbookStore() {
                     </div>
                   </div>
                 </div>
+
+                {/* Monedero Nutriser */}
+                {isLoggedIn && walletBalanceEbook > 0 && (
+                  <div className={`border rounded-xl p-3 mb-4 transition-all ${useWalletEbook ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={useWalletEbook}
+                        onChange={(e) => setUseWalletEbook(e.target.checked)}
+                        className="w-4 h-4 accent-[#C5A55A]"
+                      />
+                      <Wallet className="w-5 h-5 text-[#C5A55A]" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
+                        <p className="text-xs text-gray-500">Saldo: <span className="font-bold text-[#C5A55A]">${(walletBalanceEbook / 100).toFixed(2)} MXN</span></p>
+                      </div>
+                    </label>
+                    {useWalletEbook && (
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <p className="text-xs text-green-600 font-semibold">Se descontarán ${(walletBalanceEbook / 100).toFixed(2)} MXN de tu monedero al enviar</p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* File Upload */}
                 <form onSubmit={handleProofSubmit} className="space-y-4">

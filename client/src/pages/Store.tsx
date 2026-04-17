@@ -107,6 +107,7 @@ export default function Store() {
   const [successCode, setSuccessCode] = useState("");
   const [discountCode, setDiscountCode] = useState("");
   const [discountInfo, setDiscountInfo] = useState<{ valid: boolean; discount: number | null; isGift: boolean; isTwoForOne: boolean; description: string | null } | null>(null);
+  const [useWalletStore, setUseWalletStore] = useState(false);
 
   const purchaseMutation = trpc.productPurchases.create.useMutation({
     onSuccess: (data) => {
@@ -179,6 +180,7 @@ export default function Store() {
     if (!proofFile) { toast.error("Sube el comprobante de pago"); return; }
     if (!selectedProduct) return;
     setIsSubmitting(true);
+    const walletDiscountPesos = useWalletStore && walletBalance > 0 ? walletBalance / 100 : 0;
     const reader = new FileReader();
     reader.onload = (ev) => {
       const base64 = (ev.target?.result as string).split(",")[1];
@@ -190,6 +192,8 @@ export default function Store() {
         quantity,
         proofData: base64,
         proofMimeType: proofFile.type,
+        walletDiscount: walletDiscountPesos > 0 ? walletDiscountPesos : undefined,
+        patientEmail: walletDiscountPesos > 0 && patient?.email ? patient.email : undefined,
       });
     };
     reader.readAsDataURL(proofFile);
@@ -549,6 +553,30 @@ export default function Store() {
                     <p className="mt-2 text-red-500 text-xs">Código inválido o no está activo.</p>
                   )}
                 </div>
+
+                {/* Monedero Nutriser */}
+                {isLoggedIn && walletBalance > 0 && (
+                  <div className={`border rounded-xl p-3 transition-all ${useWalletStore ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={useWalletStore}
+                        onChange={(e) => setUseWalletStore(e.target.checked)}
+                        className="w-4 h-4 accent-[#C5A55A]"
+                      />
+                      <Wallet className="w-5 h-5 text-[#C5A55A]" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
+                        <p className="text-xs text-gray-500">Saldo: <span className="font-bold text-[#C5A55A]">${(walletBalance / 100).toFixed(2)} MXN</span></p>
+                      </div>
+                    </label>
+                    {useWalletStore && (
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <p className="text-xs text-green-600 font-semibold">Se descontarán ${(walletBalance / 100).toFixed(2)} MXN de tu monedero al enviar</p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Proof upload */}
                 <div>

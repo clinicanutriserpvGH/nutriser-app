@@ -295,6 +295,20 @@
       "when": 1776415588839,
       "tag": "0041_mature_sheva_callister",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "5",
+      "when": 1776431895500,
+      "tag": "0042_stiff_sugar_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "5",
+      "when": 1776432388475,
+      "tag": "0043_talented_justin_hammer",
+      "breakpoints": true
     }
   ]
 }

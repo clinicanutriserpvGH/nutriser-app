@@ -386,7 +386,12 @@ export default function Memberships() {
 
   const walletQuery = trpc.wallet.getMyWallet.useQuery(
     { patientId: patient?.id || 0 },
-    { enabled: isLoggedIn && !!patient?.id }
+    {
+      enabled: isLoggedIn && !!patient?.id,
+      staleTime: 60_000,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+    }
   );
   const walletBalance = walletQuery.data?.wallet?.balance || 0;
   const walletData = walletQuery.data?.wallet;
@@ -1822,6 +1827,7 @@ onClick={() => {
               <button
                 onClick={() => {
                   if (!isLoggedIn) { setShowAuthModal(true); return; }
+                  if (!walletData && patient?.id) walletQuery.refetch();
                   setWalletSheetOpen(true);
                 }}
                 className="flex flex-col items-center -mt-6 lg:-mt-8 relative"

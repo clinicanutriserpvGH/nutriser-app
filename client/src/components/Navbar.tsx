@@ -86,7 +86,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
       <nav
         data-navbar
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled || lightBg
+          !isHome || scrolled || lightBg
             ? "bg-white/95 backdrop-blur-md shadow-[0_2px_20px_rgba(197,165,90,0.08)]"
             : "bg-transparent"
         }`}
@@ -118,8 +118,8 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
               <button
                 onClick={handleInicio}
                 title="Ir a la pantalla de inicio"
-                className={`flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase font-bold px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                  scrolled || lightBg
+                  className={`flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase font-bold px-3 py-1.5 rounded-full border transition-all duration-300 ${
+                  !isHome || scrolled || lightBg
                     ? "border-[#C5A55A]/30 text-[#C5A55A]/70 hover:bg-[#C5A55A]/10"
                     : "border-white/20 text-white/60 hover:bg-white/10"
                 }`}
@@ -134,7 +134,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
                   onClick={handleRegresar}
                   title="Regresar al menú de Nutriser"
                   className={`flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase font-bold px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                    scrolled || lightBg
+                    !isHome || scrolled || lightBg
                       ? "border-[#C5A55A]/30 text-[#C5A55A]/70 hover:bg-[#C5A55A]/10"
                       : "border-white/20 text-white/60 hover:bg-white/10"
                   }`}
@@ -163,7 +163,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
                     }
                   }}
                   className={`text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:text-[#C5A55A] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#C5A55A] after:transition-all after:duration-300 hover:after:w-full ${
-                    scrolled || lightBg ? "text-[#1A1A1A]/70" : "text-white/80"
+                    !isHome || scrolled || lightBg ? "text-[#1A1A1A]/70" : "text-white/80"
                   } ${(link as any).external ? "flex items-center gap-1" : ""}`}
                 >
                   {(link as any).external && <Ruler className="w-3.5 h-3.5" />}
@@ -255,7 +255,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className={`transition-colors duration-300 ${
-                scrolled || lightBg ? "text-[#1A1A1A]" : "text-white"
+                !isHome || scrolled || lightBg ? "text-[#1A1A1A]" : "text-white"
               }`}
               aria-label="Toggle menu"
             >

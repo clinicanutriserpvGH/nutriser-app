@@ -1635,3 +1635,24 @@
 - [x] Integrar CAPTCHA en formulario de citas (AppointmentForm)
 - [x] CAPTCHA desactiva botón de envío hasta ser verificado
 - [x] Verificar funcionamiento en navegador
+
+
+## Correcciones Sesión 15 - Limpieza de UI y Navegación
+
+- [ ] Remover botón "Cuponera de Descuentos" del Hero Section
+- [ ] Remover botón "CUPONERA NUTRISER" del footer/contacto
+- [ ] Remover texto "CATÁLOGO" del header en página de servicios
+- [ ] Arreglar botones "Volver" para regresar a sitio web principal (/)
+- [ ] Verificar cambios en móvil y desktop
+- [ ] Remover botón de llamada en desktop (mantener solo en móvil)
+
+
+## Correcciones Sesión 15 - Limpieza de UI y Acceso Admin
+
+- [x] Remover botón "Cuponera" del Hero
+- [x] Remover "CATÁLOGO" de servicios
+- [x] Arreglar botón "Volver" para regresar a sitio web (/)
+- [x] Remover botón de llamada en desktop (mantener solo en móvil)
+- [x] Remover "ADMINISTRACIÓN" del navbar
+- [x] Hacer logo clickeable para acceso secreto a admin
+- [x] Ajustar espaciado entre Hero y sección dorada

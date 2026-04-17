@@ -114,52 +114,30 @@ export default function HeroSection() {
             tecnología y experiencia profesional.
           </motion.p>
 
-          {/* ─── Botones (Limpiados) ─────────────────────────────────────────── */}
+          {/* ─── Botones (Solo Nutriser Shop y Agenda tu Cita) ─────────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
             className="flex flex-col gap-3 max-w-2xl"
           >
-            {/* 1. Desktop: Nutriser Shop / Móvil: Cuponera — ancho completo, parpadeante */}
-            {isDesktop ? (
-              <motion.a
-                href="/memberships"
-                onClick={(e) => { e.preventDefault(); window.location.href = '/memberships'; }}
-                className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
-                animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <motion.span
-                  className="relative w-3 h-3 rounded-full bg-[#C5A55A] flex-shrink-0"
-                  animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <Store className="relative w-5 h-5 flex-shrink-0" />
-                <span className="relative">Nutriser Shop</span>
-              </motion.a>
-            ) : (
-              <motion.button
-                onClick={(e) => {
-                  e.preventDefault();
-                  const el = document.querySelector("#promociones");
-                  if (el) el.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
-                animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <motion.span
-                  className="relative w-3 h-3 rounded-full bg-[#C5A55A] flex-shrink-0"
-                  animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <Gift className="relative w-5 h-5 flex-shrink-0" />
-                <span className="relative">Cuponera de Descuentos</span>
-              </motion.button>
-            )}
+            {/* 1. Nutriser Shop */}
+            <motion.a
+              href="/memberships"
+              onClick={(e) => { e.preventDefault(); window.location.href = '/memberships'; }}
+              className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
+              animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
+              transition={{ duration: 1.2, repeat: Infinity }}
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <motion.span
+                className="relative w-3 h-3 rounded-full bg-[#C5A55A] flex-shrink-0"
+                animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
+                transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <Store className="relative w-5 h-5 flex-shrink-0" />
+              <span className="relative">Nutriser Shop</span>
+            </motion.a>
             {/* 2. Agenda tu Cita */}
             <a
               href="/appointment-form"

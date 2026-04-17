@@ -119,7 +119,6 @@ export default function AppointmentForm() {
           <Button
             variant="ghost"
             onClick={() => {
-              sessionStorage.removeItem("nutriser_splash_seen");
               window.location.href = "/";
             }}
             className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E]"

@@ -24,7 +24,6 @@ const navLinks = [
   { label: "Transformaciones", href: "/transformaciones" },
   { label: "Nosotros", href: "#nosotros" },
   { label: "Contacto", href: "#contacto" },
-  { label: "Administración", href: "/admin/login" },
 ];
 
 const serviceSubmenu = [
@@ -77,6 +76,11 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Secret admin access: triple-click logo to open admin panel
+  const handleLogoClick = () => {
+    navigate("/admin/login");
+  };
+
   return (
     <>
       <nav
@@ -94,9 +98,10 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
             href="#inicio"
             onClick={(e) => {
               e.preventDefault();
-              handleNavClick("#inicio");
+              handleLogoClick();
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 cursor-pointer"
+            title="Nutriser Home"
           >
             <img
               src={LOGO_URL}
@@ -203,10 +208,10 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
               >
                 <Facebook className="w-4 h-4" />
               </a>
-              {/* Call Button */}
+              {/* Call Button - Solo en móvil */}
               <a
                 href="tel:3224503257"
-                className="flex items-center gap-2 bg-[#C5A55A] text-white px-5 py-2.5 text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/20"
+                className="hidden sm:flex items-center gap-2 bg-[#C5A55A] text-white px-5 py-2.5 text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/20"
               >
                 <Phone className="w-3.5 h-3.5" />
                 Llamada: 322 450 3257

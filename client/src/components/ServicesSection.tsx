@@ -200,9 +200,7 @@ export default function ServicesSection() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16"
         >
-          <span className="text-[#C5A55A] text-xs tracking-[0.3em] uppercase">
-            Catálogo Completo
-          </span>
+
           <h2 className="font-serif text-4xl lg:text-5xl text-[#1A1A1A] mt-4 mb-6">
             Nuestros <span className="italic">Servicios</span>
           </h2>

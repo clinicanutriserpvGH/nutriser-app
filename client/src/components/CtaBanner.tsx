@@ -11,7 +11,7 @@ export default function CtaBanner() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="relative py-20 lg:py-32 overflow-hidden lg:mt-16">
+    <section className="relative py-20 lg:py-32 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#C5A55A] via-[#B8963E] to-[#C5A55A]" />
       {/* Pattern overlay */}

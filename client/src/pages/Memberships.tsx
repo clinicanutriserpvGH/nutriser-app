@@ -1127,6 +1127,105 @@ export default function Memberships() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
+          TAB: MIS TRATAMIENTOS
+      ══════════════════════════════════════════════════════════════════════ */}
+      {activeTab === "misTratamientos" && (
+        <div className="pb-28 mt-2">
+          <div className="bg-white py-5">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-[#FAF7F2] flex items-center justify-center">
+                  <ClipboardList className="w-4 h-4 text-[#C5A55A]" />
+                </div>
+                <div>
+                  <h2 className="font-black text-gray-900 text-lg">Mis Tratamientos</h2>
+                  <p className="text-gray-400 text-xs">Tu historial, citas, cupones y consentimiento</p>
+                </div>
+              </div>
+              {!isLoggedIn ? (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 rounded-full bg-[#FAF7F2] flex items-center justify-center mx-auto mb-4">
+                    <ClipboardList className="w-10 h-10 text-[#C5A55A]" />
+                  </div>
+                  <h3 className="font-bold text-gray-700 text-xl mb-2">Accede a tu portal</h3>
+                  <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">Inicia sesión para ver tus tratamientos, citas, cupones y contrato de consentimiento.</p>
+                  <button
+                    onClick={() => navigate("/mis-tratamientos")}
+                    className="bg-[#C5A55A] text-white font-bold px-8 py-3 rounded-xl hover:bg-[#B8963E] transition-all active:scale-95 shadow-md"
+                  >
+                    Ir a Mis Tratamientos
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => navigate("/mis-tratamientos")}
+                    className="w-full flex items-center justify-between bg-[#FAF7F2] border border-[#E8DCC8] rounded-2xl p-4 hover:bg-[#F5EFE3] transition-all active:scale-[0.98]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#C5A55A]/10 flex items-center justify-center">
+                        <ClipboardList className="w-5 h-5 text-[#C5A55A]" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-gray-900 text-sm">Ver mis tratamientos</p>
+                        <p className="text-gray-400 text-xs">Historial, citas y seguimiento</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </button>
+                  <button
+                    onClick={() => navigate("/mis-tratamientos")}
+                    className="w-full flex items-center justify-between bg-[#FAF7F2] border border-[#E8DCC8] rounded-2xl p-4 hover:bg-[#F5EFE3] transition-all active:scale-[0.98]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#C5A55A]/10 flex items-center justify-center">
+                        <Tag className="w-5 h-5 text-[#C5A55A]" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-gray-900 text-sm">Mis cupones</p>
+                        <p className="text-gray-400 text-xs">Descuentos y promociones activas</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </button>
+                  <button
+                    onClick={() => navigate("/mis-tratamientos")}
+                    className="w-full flex items-center justify-between bg-[#FAF7F2] border border-[#E8DCC8] rounded-2xl p-4 hover:bg-[#F5EFE3] transition-all active:scale-[0.98]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#C5A55A]/10 flex items-center justify-center">
+                        <ShoppingBag className="w-5 h-5 text-[#C5A55A]" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-gray-900 text-sm">Mis compras</p>
+                        <p className="text-gray-400 text-xs">Paquetes y servicios adquiridos</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </button>
+                  <button
+                    onClick={() => navigate("/mis-tratamientos")}
+                    className="w-full flex items-center justify-between bg-[#FAF7F2] border border-[#E8DCC8] rounded-2xl p-4 hover:bg-[#F5EFE3] transition-all active:scale-[0.98]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#C5A55A]/10 flex items-center justify-center">
+                        <Shield className="w-5 h-5 text-[#C5A55A]" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-gray-900 text-sm">Consentimiento informado</p>
+                        <p className="text-gray-400 text-xs">Contrato firmado digitalmente</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════════════
           TAB: LISTA DE DESEOS
       ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === "wishlist" && (
@@ -1482,7 +1581,7 @@ export default function Memberships() {
                 }`}
               >
                 <Sparkles className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Tratamientos</span>
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Servicios</span>
               </button>
 
               {/* Mis Tratamientos */}
@@ -1493,7 +1592,7 @@ export default function Memberships() {
                 }`}
               >
                 <ClipboardList className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Mis Trat.</span>
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Mis Tratamientos</span>
               </button>
 
               {/* Farmacy */}

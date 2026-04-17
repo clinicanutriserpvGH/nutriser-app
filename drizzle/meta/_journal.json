@@ -288,6 +288,13 @@
       "when": 1776308364487,
       "tag": "0040_strange_satana",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1776415588839,
+      "tag": "0041_mature_sheva_callister",
+      "breakpoints": true
     }
   ]
 }

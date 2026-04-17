@@ -344,7 +344,10 @@ export default function Memberships() {
     priceNum?: number | null;
     category?: string | null;
     imageUrl?: string | null;
-    features?: string[];
+    features?: string[];       // paquetes: lista de lo que incluye
+    benefits?: string[];       // servicios: beneficios del tratamiento
+    duration?: string | null;  // servicios: duración del tratamiento
+    aftercare?: string[];      // servicios: cuidados post-tratamiento
     regularPrice?: number | null;
     badge?: string | null;
     itemType: "service" | "package";
@@ -675,7 +678,33 @@ export default function Memberships() {
                   </div>
                 )}
 
-                {/* Beneficios/features (solo paquetes) */}
+                {/* Duración del tratamiento (solo servicios) */}
+                {detailItem.duration && (
+                  <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "rgba(197,165,90,0.08)", border: "1px solid rgba(197,165,90,0.2)" }}>
+                    <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "#C5A55A" }} />
+                    <div>
+                      <span style={{ color: "#C5A55A", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Duración</span>
+                      <p style={{ color: "#FAF7F2", fontSize: 13, fontWeight: 600, marginTop: 1 }}>{detailItem.duration}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Beneficios (servicios) */}
+                {detailItem.benefits && detailItem.benefits.length > 0 && (
+                  <div className="mb-5">
+                    <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Beneficios</p>
+                    <ul className="space-y-2">
+                      {detailItem.benefits.map((b, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#C5A55A" }} />
+                          <span style={{ color: "#FAF7F2", fontSize: 13 }}>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Incluye (paquetes) */}
                 {detailItem.features && detailItem.features.length > 0 && (
                   <div className="mb-5">
                     <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Incluye</p>
@@ -684,6 +713,21 @@ export default function Memberships() {
                         <li key={i} className="flex items-start gap-2">
                           <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#C5A55A" }} />
                           <span style={{ color: "#FAF7F2", fontSize: 13 }}>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Cuidados post-tratamiento (servicios) */}
+                {detailItem.aftercare && detailItem.aftercare.length > 0 && (
+                  <div className="mb-5">
+                    <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Cuidados post-tratamiento</p>
+                    <ul className="space-y-2">
+                      {detailItem.aftercare.map((a, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#8BC4A8" }} />
+                          <span style={{ color: "#b8b0a0", fontSize: 13 }}>{a}</span>
                         </li>
                       ))}
                     </ul>
@@ -1017,17 +1061,21 @@ export default function Memberships() {
                                     <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
                                   )}
                                   <button
-                                    onClick={() => setDetailItem({ id: `svc-${service.id}`, name: service.name, description: service.description, price: service.price, priceNum, category: service.category, imageUrl: service.imageUrl, itemType: "service" })}
-                                    className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95"
-                                    style={{ border: "1px solid rgba(197,165,90,0.35)", color: "#C5A55A", background: "rgba(197,165,90,0.05)" }}
-                                  >
-                                    <Info className="w-3 h-3" /> Más información
-                                  </button>
-                                  <div className="flex gap-1.5">
-                                    <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
-                                      className="flex-1 flex items-center justify-center gap-0.5 border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95">
-                                      <ShoppingCart className="w-3 h-3" />
-                                    </button>
+onClick={() => {
+                                       const b = service.benefits ? (() => { try { return JSON.parse(service.benefits as string); } catch { return []; } })() : [];
+                                       const a = service.aftercare ? (() => { try { return JSON.parse(service.aftercare as string); } catch { return []; } })() : [];
+                                       setDetailItem({ id: `svc-${service.id}`, name: service.name, description: service.description, price: service.price, priceNum, category: service.category, imageUrl: service.imageUrl, itemType: "service", benefits: b, duration: service.duration, aftercare: a });
+                                     }}
+                                     className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95"
+                                     style={{ border: "1px solid rgba(197,165,90,0.35)", color: "#C5A55A", background: "rgba(197,165,90,0.05)" }}
+                                   >
+                                     <Info className="w-3 h-3" /> Más información
+                                   </button>
+                                   <div className="flex gap-1.5">
+                                     <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
+                                       className="flex-1 flex items-center justify-center gap-0.5 border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95">
+                                       <ShoppingCart className="w-3 h-3" />
+                                     </button>
                                     <button onClick={() => openCheckout({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), qty: 1, imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                       className="flex-1 flex items-center justify-center gap-0.5 bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95">
                                       <Zap className="w-3 h-3" /> Comprar

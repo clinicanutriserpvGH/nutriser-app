@@ -337,6 +337,9 @@ export const services = mysqlTable("services", {
   category: varchar("category", { length: 100 }).notNull().default("general"),
   price: varchar("price", { length: 100 }), // Precio libre: "$1,500 MXN" o "Desde $800"
   imageUrl: text("imageUrl"), // URL de la imagen en S3
+  benefits: text("benefits"), // JSON array de beneficios principales
+  duration: varchar("duration", { length: 255 }), // Duración del tratamiento
+  aftercare: text("aftercare"), // JSON array de cuidados post-tratamiento
   isActive: boolean("isActive").default(true).notNull(),
   sortOrder: int("sortOrder").default(0).notNull(), // Para ordenar los servicios
   createdAt: timestamp("createdAt").defaultNow().notNull(),

@@ -792,7 +792,7 @@ export default function MyTreatments() {
             <div className="flex lg:flex-col bg-white border border-gray-100 rounded-2xl p-1 gap-1 shadow-sm">
               {([
                 { id: "purchases", icon: ShieldCheck, label: "Mis Compras" },
-                { id: "tracking", icon: Sparkles, label: "Mis Tratamientos" },
+                { id: "tracking", icon: Sparkles, label: "Seguimiento" },
                 { id: "photos", icon: Camera, label: "Fotos" },
                 { id: "consent", icon: FileText, label: "Contrato" },
               ] as const).map(tab => (
@@ -993,6 +993,11 @@ export default function MyTreatments() {
                     <ShieldCheck className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500 text-sm">Aún no tienes compras registradas.</p>
                     <p className="text-gray-400 text-xs mt-1">Tus paquetes, servicios y cupones aparecerán aquí automáticamente.</p>
+                    <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 inline-block text-left">
+                      <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold mb-1">Cuenta vinculada</p>
+                      <p className="text-gray-700 text-xs font-mono">{patient?.email}</p>
+                      <p className="text-gray-400 text-[10px] mt-1">Asegúrate de haber comprado con este mismo correo.</p>
+                    </div>
                   </div>
                 )}
               </>

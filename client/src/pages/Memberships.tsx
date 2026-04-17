@@ -1586,10 +1586,8 @@ export default function Memberships() {
 
               {/* Mis Tratamientos */}
               <button
-                onClick={() => setActiveTab("misTratamientos")}
-                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors ${
-                  activeTab === "misTratamientos" ? "text-[#C5A55A]" : "text-gray-400"
-                }`}
+                onClick={() => navigate("/mis-tratamientos")}
+                className="flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors text-gray-400 hover:text-[#C5A55A]"
               >
                 <ClipboardList className="w-5 h-5 lg:w-7 lg:h-7" />
                 <span className="text-[9px] lg:text-xs font-semibold leading-tight">Mis Tratamientos</span>

@@ -74,8 +74,9 @@ function ShopCard({ onAction }: { onAction: () => void }) {
 
 /* ── Slides 1+: Tarjeta de cupón/promoción (igual que PromoSplash) ── */
 function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) {
+  // Porcentaje ficticio entre 40-75% basado en ID del cupón (igual que cuponera) para generar urgencia
   const soldPercent = promo.maxCoupons
-    ? Math.min(100, Math.round(((promo.couponsSold || 0) / promo.maxCoupons) * 100))
+    ? 40 + ((promo.id * 17 + 7) % 36)
     : 0;
   const countdown = useCountdown(promo.expiresAt);
 
@@ -124,10 +125,10 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
             )}
             {promo.maxCoupons && (
               <div className="flex items-center gap-2 flex-1">
-                <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#C5A55A] rounded-full transition-all" style={{ width: `${soldPercent}%` }} />
+                <div className="flex-1 h-2.5 bg-black/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-green-400 rounded-full transition-all duration-700" style={{ width: `${soldPercent}%` }} />
                 </div>
-                <span className="text-white/70 text-[10px] font-medium whitespace-nowrap">{soldPercent}% vendido</span>
+                <span className="text-orange-200 text-[10px] font-bold whitespace-nowrap">🔥 {soldPercent}% vendido</span>
               </div>
             )}
           </div>

@@ -1183,7 +1183,7 @@ onClick={() => {
                     <FlaskConical className="w-4 h-4 text-purple-600" />
                   </div>
                   <div>
-                    <h2 className="font-black text-gray-900 text-lg">Nutriser Farmacy</h2>
+                    <h2 className="font-black text-gray-900 text-lg">Farmacia Nutriser</h2>
                     <p className="text-gray-400 text-xs">Productos nutricionales y cosméticos premium</p>
                   </div>
                 </div>
@@ -1264,7 +1264,7 @@ onClick={() => {
                   <BookOpen className="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="font-black text-gray-900 text-lg">Nutriser Library</h2>
+                  <h2 className="font-black text-gray-900 text-lg">Librería Nutriser</h2>
                   <p className="text-gray-400 text-xs">Recursos digitales exclusivos para tu bienestar</p>
                 </div>
               </div>
@@ -1330,7 +1330,7 @@ onClick={() => {
                       )}
                     </div>
                   </div>
-                  <p className="text-center text-xs text-gray-400 mt-4">Para ver el eBook completo, visita <button onClick={() => navigate("/ebook")} className="text-[#C5A55A] underline hover:text-[#B8963E]">Nutriser Library</button></p>
+                  <p className="text-center text-xs text-gray-400 mt-4">Para ver el eBook completo, visita <button onClick={() => navigate("/ebook")} className="text-[#C5A55A] underline hover:text-[#B8963E]">Librería Nutriser</button></p>
                 </div>
               )}
             </div>

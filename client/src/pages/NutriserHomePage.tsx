@@ -14,9 +14,9 @@ const LOGO_URL =
 const IMG_NUTRICION =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-tratamientos-hub-LYqQYtUBc3Ef5CpkjsG9yP.webp";
 const IMG_TIENDA =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-mall-store-nzYwk9Q398ZngFrhSkhokJ.webp";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/farmacia-nutriser-derma_9c077232.jpg";
 const IMG_EBOOK =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-ebook-tablet_dccb4840.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/libreria-nutriser-aparador_3b1f97f8.png";
 const IMG_ACADEMY =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy-hub-v2-B6bpVdHqtSSKFqZdAvvqyS.webp";
 
@@ -163,7 +163,7 @@ export default function NutriserHomePage() {
               img={IMG_TIENDA}
               icon={ShoppingBag}
               label="Tienda"
-              title="Nutriser Farmacy"
+              title="Farmacia Nutriser"
               cta="Ver Tienda"
               onClick={() => goTo("/tienda")}
               imgPosition="center 50%"
@@ -183,7 +183,7 @@ export default function NutriserHomePage() {
               img={IMG_EBOOK}
               icon={BookOpen}
               label="Tienda"
-              title="Nutriser Library"
+              title="Librería Nutriser"
               cta="Ver eBooks"
               onClick={() => goTo("/ebook")}
               imgPosition="center 30%"

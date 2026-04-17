@@ -2800,10 +2800,15 @@ export const appRouter = router({
        // Listar todas las tarjetas (admin)
     adminListAll: publicProcedure.query(async () => {
       const rows = await getAllWallets();
-      // Flatten nested { wallet, patient } structure into a single object
+      // Flatten nested { wallet, patient, tracker, progress } structure
       return rows.map((row: any) => {
         const w = row.wallet ?? row;
         const p = row.patient ?? {};
+        const t = row.tracker ?? {}; // loyaltyTracker real
+        const prog = row.progress ?? []; // loyaltyProgress array
+        // Calcular consultas en ciclo actual (cada 3 consultas = 1 gratis)
+        const totalConsultations = t.nutritionConsultations ?? 0;
+        const consultationsInCycle = totalConsultations % 3; // posición en el ciclo actual
         return {
           id: w.id,
           patientId: w.patientId,
@@ -2818,9 +2823,13 @@ export const appRouter = router({
           patientName: p.name ?? w.patientName ?? null,
           patientEmail: p.email ?? w.patientEmail ?? null,
           patientPhone: p.phone ?? w.patientPhone ?? null,
-          consultationsInCycle: w.consultationsInCycle ?? 0,
-          totalConsultations: w.totalConsultations ?? 0,
+          consultationsInCycle,
+          totalConsultations,
+          freeConsultationsEarned: t.freeConsultationsEarned ?? 0,
+          freeConsultationsUsed: t.freeConsultationsUsed ?? 0,
+          freeConsultationsAvailable: (t.freeConsultationsEarned ?? 0) - (t.freeConsultationsUsed ?? 0),
           totalCredited: w.totalCashback ?? 0,
+          loyaltyProgress: prog, // progreso en planes de lealtad por producto
         };
       });
     }),

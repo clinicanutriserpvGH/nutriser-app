@@ -241,11 +241,25 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
         </div>
 
         {/* Loyalty info */}
-        <div className="flex gap-3 mt-2 text-[10px] text-gray-500">
+        <div className="flex flex-wrap gap-3 mt-2 text-[10px] text-gray-500">
           <span>Consultas ciclo: <b className="text-gray-700">{wallet.consultationsInCycle || 0}/3</b></span>
           <span>Total consultas: <b className="text-gray-700">{wallet.totalConsultations || 0}</b></span>
+          {(wallet.freeConsultationsAvailable || 0) > 0 && (
+            <span className="text-green-700 font-bold">🎁 {wallet.freeConsultationsAvailable} consulta{wallet.freeConsultationsAvailable > 1 ? 's' : ''} GRATIS disponible{wallet.freeConsultationsAvailable > 1 ? 's' : ''}</span>
+          )}
           <span>Acumulado: <b className="text-[#C5A55A]">${((wallet.totalCredited || 0) / 100).toFixed(2)}</b></span>
         </div>
+        {/* Planes de lealtad por producto */}
+        {(wallet.loyaltyProgress || []).length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-1">
+            {(wallet.loyaltyProgress || []).map((p: any) => (
+              <span key={p.id} className="text-[10px] bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 text-amber-800">
+                {p.plan?.productName || 'Producto'}: <b>{p.currentCount}/{p.plan?.requiredPurchases || '?'}</b>
+                {(p.rewardsEarned - p.rewardsUsed) > 0 && <span className="ml-1 text-green-700 font-bold">🎁 {p.rewardsEarned - p.rewardsUsed} GRATIS</span>}
+              </span>
+            ))}
+          </div>
+        )}
 
         {expanded && (
           <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
@@ -388,10 +402,25 @@ function LoyaltyRegistration({ wallets, plans, onRegisterConsultation, onRegiste
           <Card className="border-[#C5A55A]/30 bg-amber-50/50">
             <CardContent className="p-3">
               <p className="text-sm font-bold text-gray-900">{selectedWalletData.patientName}</p>
-              <div className="flex gap-4 mt-1 text-xs text-gray-500">
+              <div className="flex flex-wrap gap-4 mt-1 text-xs text-gray-500">
                 <span>Consultas ciclo: <b>{selectedWalletData.consultationsInCycle || 0}/3</b></span>
+                <span>Total consultas: <b>{selectedWalletData.totalConsultations || 0}</b></span>
+                {(selectedWalletData.freeConsultationsAvailable || 0) > 0 && (
+                  <span className="text-green-700 font-bold">🎁 {selectedWalletData.freeConsultationsAvailable} consulta{selectedWalletData.freeConsultationsAvailable > 1 ? 's' : ''} GRATIS</span>
+                )}
                 <span>Saldo: <b className="text-[#C5A55A]">${((selectedWalletData.balance || 0) / 100).toFixed(2)}</b></span>
               </div>
+              {/* Planes de lealtad por producto */}
+              {(selectedWalletData.loyaltyProgress || []).length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {(selectedWalletData.loyaltyProgress || []).map((p: any) => (
+                    <span key={p.id} className="text-[10px] bg-amber-100 border border-amber-300 rounded-full px-2 py-0.5 text-amber-900">
+                      {p.plan?.productName || 'Producto'}: <b>{p.currentCount}/{p.plan?.requiredPurchases || '?'}</b>
+                      {(p.rewardsEarned - p.rewardsUsed) > 0 && <span className="ml-1 text-green-700 font-bold">🎁 {p.rewardsEarned - p.rewardsUsed} GRATIS</span>}
+                    </span>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 

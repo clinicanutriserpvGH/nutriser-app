@@ -700,6 +700,7 @@ export const wallets = mysqlTable("wallets", {
   totalCashback: int("totalCashback").default(0).notNull(), // Total acumulado histórico en centavos
   totalRedeemed: int("totalRedeemed").default(0).notNull(), // Total canjeado histórico en centavos
   isActive: boolean("isActive").default(true).notNull(),
+  balanceExpiresAt: timestamp("balanceExpiresAt"), // Fecha de caducidad del saldo (bimestral)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

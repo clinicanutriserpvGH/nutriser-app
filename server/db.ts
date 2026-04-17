@@ -1394,7 +1394,11 @@ export async function createWallet(patientId: number): Promise<Wallet> {
     walletNumber = generateWalletNumber();
   }
   
-  await db.insert(wallets).values({ patientId, walletNumber });
+  // Calcular fecha de caducidad bimestral (2 meses desde hoy)
+  const expiresAt = new Date();
+  expiresAt.setMonth(expiresAt.getMonth() + 2);
+  
+  await db.insert(wallets).values({ patientId, walletNumber, balanceExpiresAt: expiresAt });
   const [wallet] = await db.select().from(wallets).where(eq(wallets.patientId, patientId)).limit(1);
   
   // Also create loyalty tracker
@@ -1423,7 +1427,8 @@ export async function getWalletByNumber(walletNumber: string): Promise<Wallet | 
 export async function getAllWallets() {
   const db = await getDb();
   if (!db) return [];
-  return db.select({
+  // Obtener wallets con datos del paciente
+  const rows = await db.select({
     wallet: wallets,
     patient: {
       id: patientAccounts.id,
@@ -1434,6 +1439,14 @@ export async function getAllWallets() {
   }).from(wallets)
     .innerJoin(patientAccounts, eq(wallets.patientId, patientAccounts.id))
     .orderBy(desc(wallets.createdAt));
+
+  // Enriquecer con loyaltyTracker y loyaltyProgress de cada wallet
+  const enriched = await Promise.all(rows.map(async (row) => {
+    const tracker = await getLoyaltyTracker(row.wallet.id);
+    const progress = await getWalletLoyaltyProgress(row.wallet.id);
+    return { ...row, tracker, progress };
+  }));
+  return enriched;
 }
 
 /** Add a transaction to a wallet */
@@ -1460,6 +1473,10 @@ export async function addWalletTransaction(data: {
   const updateData: Record<string, any> = { balance: newBalance };
   if (data.amount > 0 && (data.type === 'cashback' || data.type === 'bonus')) {
     updateData.totalCashback = wallet.totalCashback + data.amount;
+    // Renovar fecha de caducidad bimestral al acreditar saldo
+    const newExpiry = new Date();
+    newExpiry.setMonth(newExpiry.getMonth() + 2);
+    updateData.balanceExpiresAt = newExpiry;
   }
   if (data.amount < 0 && data.type === 'redeem') {
     updateData.totalRedeemed = wallet.totalRedeemed + Math.abs(data.amount);

@@ -1692,3 +1692,17 @@
 - [x] X para cerrar el splash
 - [x] Aparece una vez por sesión antes del Splash 0 (solo móvil/tablet)
 - [x] Integrado en App.tsx con sessionStorage para no repetirse
+
+## Sesión 19 - Sincronización Lealtad Admin, Caducidad Bimestral y QR
+
+- [x] Corregir panel admin: consultationsInCycle ahora lee loyaltyTracker.nutritionConsultations real (no campo inexistente)
+- [x] Panel admin muestra consultas en ciclo actual, total consultas y consultas GRATIS disponibles
+- [x] Panel admin muestra progreso de planes de lealtad por producto para cada usuario
+- [x] Agregar campo balanceExpiresAt a tabla wallets (caducidad bimestral del saldo)
+- [x] Al crear monedero, establecer balanceExpiresAt = hoy + 2 meses
+- [x] Al acreditar cashback/bonus, renovar balanceExpiresAt = hoy + 2 meses
+- [x] Mostrar "Válido hasta [fecha]" en tarjeta del usuario cuando tiene saldo
+- [x] Mostrar alerta roja "¡Tu saldo vence en X días!" cuando faltan 14 días o menos
+- [x] Mejorar QR: tamaño 110px (antes 80px), negro puro #000000, includeMargin=true para mejor detección por cámara iPad
+- [x] Corregir imagen ShopPromoSplash: solo cuadrantes inferiores reemplazados, formato original intacto
+- [x] Corregir texto "Librería Librería" → "Librería Nutriser" en toda la app

@@ -227,14 +227,14 @@ export default function WalletPage() {
 
               {/* QR Code — inline with card number */}
               <div className="flex items-center gap-4 relative z-10">
-                <div className="bg-white rounded-xl p-2.5 flex-shrink-0">
+                <div className="bg-white rounded-xl p-3 flex-shrink-0 shadow-sm">
                   <QRCodeSVG
                     value={qrUrl || "https://nutriserpv.com/monedero"}
-                    size={80}
+                    size={110}
                     level="H"
-                    includeMargin={false}
+                    includeMargin={true}
                     bgColor="#FFFFFF"
-                    fgColor="#1A1A1A"
+                    fgColor="#000000"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -258,17 +258,39 @@ export default function WalletPage() {
             </div>
 
             {/* Bottom section — saldo */}
-            <div className="px-5 py-3 flex items-center justify-between bg-white">
-              <div>
-                <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Saldo disponible</p>
-                <p className="text-[#C5A55A] font-black text-2xl">{formatMoney(wallet?.balance || 0)}</p>
+            <div className="px-5 py-3 bg-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Saldo disponible</p>
+                  <p className="text-[#C5A55A] font-black text-2xl">{formatMoney(wallet?.balance || 0)}</p>
+                </div>
+                <button
+                  onClick={() => setActiveTab("history")}
+                  className="text-[#C5A55A] text-xs font-semibold hover:underline"
+                >
+                  Ver Estado de Cuenta
+                </button>
               </div>
-              <button
-                onClick={() => setActiveTab("history")}
-                className="text-[#C5A55A] text-xs font-semibold hover:underline"
-              >
-                Ver Estado de Cuenta
-              </button>
+              {/* Fecha de caducidad bimestral */}
+              {wallet?.balanceExpiresAt && wallet.balance > 0 && (() => {
+                const expiry = new Date(wallet.balanceExpiresAt);
+                const now = new Date();
+                const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                const isExpiringSoon = daysLeft <= 14;
+                return (
+                  <div className={`mt-2 flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 w-fit ${
+                    isExpiringSoon
+                      ? 'bg-red-50 text-red-600 border border-red-200'
+                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                  }`}>
+                    <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    {isExpiringSoon
+                      ? `¡Tu saldo vence en ${daysLeft} día${daysLeft !== 1 ? 's' : ''}!`
+                      : `Válido hasta ${expiry.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                    }
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

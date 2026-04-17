@@ -309,6 +309,13 @@
       "when": 1776432388475,
       "tag": "0043_talented_justin_hammer",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "5",
+      "when": 1776456169188,
+      "tag": "0044_yellow_johnny_blaze",
+      "breakpoints": true
     }
   ]
 }

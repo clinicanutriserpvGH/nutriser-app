@@ -19,17 +19,21 @@ const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 const navLinks = [
-  { label: "Servicios", href: "#servicios", submenu: [
-    { label: "Nutriólogo", href: "/servicio/nutriologo" },
-    { label: "Hollywood Peel", href: "/servicio/hollywood_peel" },
-    { label: "Limpieza Facial", href: "/servicio/limpieza_facial" },
-    { label: "Mesoterapia", href: "/servicio/mesoterapia" },
-    { label: "Radiofrecuencia", href: "/servicio/radiofrecuencia" },
-    { label: "Rellenos Faciales", href: "/servicio/rellenos" },
-  ] },
+  { label: "Servicios", href: "/servicios" },
+  { label: "Cupones", href: "/cupones" },
+  { label: "Transformaciones", href: "/transformaciones" },
   { label: "Nosotros", href: "#nosotros" },
   { label: "Contacto", href: "#contacto" },
   { label: "Administración", href: "/admin/login" },
+];
+
+const serviceSubmenu = [
+  { label: "Nutriólogo", href: "/servicio/nutriologo" },
+  { label: "Hollywood Peel", href: "/servicio/hollywood_peel" },
+  { label: "Limpieza Facial", href: "/servicio/limpieza_facial" },
+  { label: "Mesoterapia", href: "/servicio/mesoterapia" },
+  { label: "Radiofrecuencia", href: "/servicio/radiofrecuencia" },
+  { label: "Rellenos Faciales", href: "/servicio/rellenos" },
 ];
 
 interface NavbarProps {

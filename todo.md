@@ -1618,3 +1618,13 @@
 
 ### Corrección de Typo
 - [ ] Corregir typo "Asthethic" a "Aesthetic" en el nombre del proyecto (para SEO)
+
+
+## Correcciones Sesión 13 - Descripciones y Espaciado
+
+- [x] Simplificar Hero Section (remover Catálogo y Ubicación)
+- [x] Expandir descripciones de servicios con información detallada (qué es, beneficios, duración, cuidados)
+- [x] Cambiar botón "Precio" por "WhatsApp" para mayor claridad
+- [x] Agregar espaciado en desktop entre Hero y sección dorada "Cada piel y cada cuerpo merecen soluciones"
+- [x] Actualizar todas las descripciones de servicios corporales, faciales y medicina
+- [x] Incluir servicios faltantes: Hidratación Facial, Peeling Químico, Microdermoabrasión, IPL, Mesoterapia Facial, Bioestimuladores

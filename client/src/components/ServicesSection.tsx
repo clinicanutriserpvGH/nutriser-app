@@ -20,7 +20,9 @@ import {
   Tag,
   CheckCircle2,
   CalendarCheck,
+  Info,
 } from "lucide-react";
+import { serviceDescriptions } from "@/lib/serviceDescriptions";
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   nutricion: { label: "Nutrición", icon: Apple, color: "#6B8E5B" },
@@ -83,6 +85,10 @@ export default function ServicesSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successCode, setSuccessCode] = useState("");
 
+  // ─── Modal de Más Información ─────────────────────────────────────────────
+  const [infoModal, setInfoModal] = useState(false);
+  const [selectedServiceInfo, setSelectedServiceInfo] = useState<string>("");
+
   // ─── Código de descuento ─────────────────────────────────────────────────────
   const [discountCode, setDiscountCode] = useState("");
   const [discountValidating, setDiscountValidating] = useState(false);
@@ -143,6 +149,11 @@ export default function ServicesSection() {
     setDiscountCode("");
     setDiscountInfo(null);
     setPurchaseModal(true);
+  };
+
+  const handleOpenInfo = (serviceName: string) => {
+    setSelectedServiceInfo(serviceName);
+    setInfoModal(true);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -288,8 +299,16 @@ export default function ServicesSection() {
 
                     {/* Card footer with buttons */}
                     <div className="px-6 pb-5 pt-2 border-t border-[#1A1A1A]/5 flex flex-col gap-2">
-                      {/* Fila 1: Precio + Adquirir */}
+                      {/* Fila 1: Más Información + Preguntar precio */}
                       <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenInfo(service.name)}
+                          className="flex-1 flex items-center justify-center gap-1.5 border border-[#C5A55A]/40 text-[#C5A55A] hover:bg-[#C5A55A]/10 text-xs font-semibold py-2.5 rounded-lg transition-colors"
+                        >
+                          <Info className="w-3.5 h-3.5" />
+                          Más Info
+                        </button>
                         <a
                           href={`https://wa.me/523221007799?text=${encodeURIComponent(`Hola, me gustaría pedir informes y precio sobre: ${service.name}`)}`}
                           target="_blank"
@@ -299,8 +318,11 @@ export default function ServicesSection() {
                           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/>
                           </svg>
-                          Preguntar precio
+                          Precio
                         </a>
+                      </div>
+                      {/* Fila 2: Adquirir + Agendar Cita */}
+                      <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={() => handleOpenPurchase(service.name, service.price)}
@@ -309,15 +331,14 @@ export default function ServicesSection() {
                           <ShoppingBag className="w-3.5 h-3.5" />
                           Adquirir
                         </button>
+                        <a
+                          href={`/appointment-form?service=${encodeURIComponent(service.name)}`}
+                          className="flex-1 flex items-center justify-center gap-1.5 border border-[#C5A55A]/60 text-[#C5A55A] hover:bg-[#C5A55A] hover:text-white text-xs font-bold py-2.5 rounded-lg transition-all duration-300"
+                        >
+                          <CalendarCheck className="w-3.5 h-3.5" />
+                          Cita
+                        </a>
                       </div>
-                      {/* Fila 2: Agendar Cita con servicio preseleccionado */}
-                      <a
-                        href={`/appointment-form?service=${encodeURIComponent(service.name)}`}
-                        className="w-full flex items-center justify-center gap-1.5 border border-[#C5A55A]/60 text-[#C5A55A] hover:bg-[#C5A55A] hover:text-white text-xs font-bold py-2.5 rounded-lg transition-all duration-300"
-                      >
-                        <CalendarCheck className="w-3.5 h-3.5" />
-                        Agendar Cita
-                      </a>
                     </div>
                   </motion.div>
                 ))}
@@ -529,6 +550,119 @@ export default function ServicesSection() {
               </form>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Modal de Más Información */}
+      {infoModal && selectedServiceInfo && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-[#C5A55A] to-[#B8963E] p-6 flex justify-between items-start rounded-t-2xl sticky top-0">
+              <div className="flex-1">
+                <h2 className="text-white font-bold text-2xl mb-1">{selectedServiceInfo}</h2>
+                <p className="text-white/80 text-sm">Información completa del servicio</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInfoModal(false)}
+                className="text-white hover:bg-white/20 p-2 rounded-full transition flex-shrink-0"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-8 space-y-6">
+              {serviceDescriptions[selectedServiceInfo as keyof typeof serviceDescriptions] ? (() => {
+                const desc = serviceDescriptions[selectedServiceInfo as keyof typeof serviceDescriptions];
+                return (
+                  <>
+                    {/* Qué es */}
+                    <div>
+                      <h3 className="text-lg font-bold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                        <span className="w-1 h-6 bg-[#C5A55A] rounded"></span>
+                        ¿Qué es?
+                      </h3>
+                      <p className="text-[#1A1A1A]/70 leading-relaxed">{desc.whatIs}</p>
+                    </div>
+
+                    {/* Beneficios */}
+                    <div>
+                      <h3 className="text-lg font-bold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                        <span className="w-1 h-6 bg-[#C5A55A] rounded"></span>
+                        Beneficios principales
+                      </h3>
+                      <ul className="space-y-2">
+                        {desc.benefits.map((benefit, i) => (
+                          <li key={i} className="flex gap-3 text-[#1A1A1A]/70">
+                            <span className="text-[#C5A55A] font-bold flex-shrink-0 mt-0.5">✓</span>
+                            <span>{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Duración */}
+                    <div>
+                      <h3 className="text-lg font-bold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                        <span className="w-1 h-6 bg-[#C5A55A] rounded"></span>
+                        Duración
+                      </h3>
+                      <p className="text-[#1A1A1A]/70 bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
+                        {desc.duration}
+                      </p>
+                    </div>
+
+                    {/* Cuidados */}
+                    <div>
+                      <h3 className="text-lg font-bold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                        <span className="w-1 h-6 bg-[#C5A55A] rounded"></span>
+                        Cuidados post-tratamiento
+                      </h3>
+                      <ul className="space-y-2">
+                        {desc.care.map((care, i) => (
+                          <li key={i} className="flex gap-3 text-[#1A1A1A]/70">
+                            <span className="text-[#C5A55A] font-bold flex-shrink-0 mt-0.5">•</span>
+                            <span>{care}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* CTA Buttons */}
+                    <div className="flex gap-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInfoModal(false);
+                          handleOpenPurchase(selectedServiceInfo, "");
+                        }}
+                        className="flex-1 bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"
+                      >
+                        <ShoppingBag className="w-4 h-4" />
+                        Adquirir Servicio
+                      </button>
+                      <a
+                        href={`/appointment-form?service=${encodeURIComponent(selectedServiceInfo)}`}
+                        className="flex-1 border-2 border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"
+                      >
+                        <CalendarCheck className="w-4 h-4" />
+                        Agendar Cita
+                      </a>
+                    </div>
+                  </>
+                );
+              })() : (
+                <p className="text-center text-gray-500 py-8">Información no disponible para este servicio.</p>
+              )}
+            </div>
+          </motion.div>
         </div>
       )}
     </section>

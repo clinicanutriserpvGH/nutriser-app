@@ -4,7 +4,7 @@
  * Portal de Salud as the primary featured element
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Gift, CalendarCheck, ShoppingBag, MapPin, Package, Store } from "lucide-react";
+import { ChevronDown, Gift, CalendarCheck, Store } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useDeviceType } from "@/hooks/useDeviceType";
 
@@ -114,38 +114,19 @@ export default function HeroSection() {
             tecnología y experiencia profesional.
           </motion.p>
 
-          {/* ─── Botones ─────────────────────────────────────────── */}
+          {/* ─── Botones (Limpiados) ─────────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
-            className="grid grid-cols-2 gap-3 max-w-2xl"
+            className="flex flex-col gap-3 max-w-2xl"
           >
-            {/* 1. Ver Servicios */}
-            <a
-              href="#servicios"
-              onClick={(e) => { e.preventDefault(); const el = document.querySelector("#servicios"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Catálogo de Servicios
-            </a>
-            {/* 2. Ubicación */}
-            <a
-              href="https://maps.google.com/?q=Nutriser+Aesthetic+%26+Nutrition+Puerto+Vallarta"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
-            >
-              <MapPin className="w-4 h-4" />
-              Ubicación
-            </a>
-            {/* 3. Desktop: Nutriser Shop / Móvil: Cuponera — ancho completo, parpadeante */}
+            {/* 1. Desktop: Nutriser Shop / Móvil: Cuponera — ancho completo, parpadeante */}
             {isDesktop ? (
               <motion.a
                 href="/memberships"
                 onClick={(e) => { e.preventDefault(); window.location.href = '/memberships'; }}
-                className="relative col-span-2 inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
+                className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
                 animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
                 transition={{ duration: 1.2, repeat: Infinity }}
               >
@@ -165,7 +146,7 @@ export default function HeroSection() {
                   const el = document.querySelector("#promociones");
                   if (el) el.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="relative col-span-2 inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
+                className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
                 animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
                 transition={{ duration: 1.2, repeat: Infinity }}
               >
@@ -179,11 +160,11 @@ export default function HeroSection() {
                 <span className="relative">Cuponera de Descuentos</span>
               </motion.button>
             )}
-            {/* 4. Agenda tu Cita — más compacto, ancho completo */}
+            {/* 2. Agenda tu Cita */}
             <a
               href="/appointment-form"
               onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
-              className="col-span-2 inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-2.5 text-xs tracking-[0.12em] uppercase font-semibold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-semibold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
             >
               <CalendarCheck className="w-3.5 h-3.5" />
               Agenda tu Cita

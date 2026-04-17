@@ -1566,3 +1566,55 @@
 - [x] Quitar placeholder "Ej: Nutriser20" del campo de código de descuento
 - [x] Seed admin credentials en BD con bcrypt
 - [x] Monedero popup centrado en desktop (md+) como tarjeta de 420px
+
+
+## Correcciones Sesión Actual - Simplificación y Expansión de Contenido
+
+### Home Page - Hero Section
+- [ ] Remover botón "Catálogo de Servicios"
+- [ ] Remover botón "Ubicación"
+- [ ] Dejar solo: "Nutriser Shop" (o Cuponera en móvil) y "Agenda tu Cita"
+- [ ] Agregar más espacio visual antes de la sección "Cada piel y cada cuerpo merecen soluciones"
+
+### Página de Servicios (/servicios)
+- [ ] Expandir descripciones de servicios con información detallada:
+  - [ ] ¿Qué es el servicio?
+  - [ ] Beneficios principales
+  - [ ] Duración del tratamiento
+  - [ ] Cuidados post-tratamiento
+  - [ ] Indicaciones y contraindicaciones
+- [ ] Agregar modal "Más Información" para cada servicio
+- [ ] Aplicar descripciones expandidas a los 27 servicios
+
+### Sistema de Traducción ES/EN
+- [ ] Extender diccionario de traducciones en client/src/lib/i18n.ts
+- [ ] Agregar claves para descripciones de servicios
+- [ ] Agregar claves para beneficios y cuidados
+- [ ] Implementar traducción en ServicesSection.tsx
+- [ ] Implementar traducción en Memberships.tsx (tienda)
+- [ ] Verificar que el toggle de idioma funciona en todas las páginas
+
+
+## Correcciones Sesión 13 - Descripciones de Servicios
+
+### Simplificación del Hero
+- [x] Remover botón "Catálogo de Servicios" del Hero
+- [x] Remover botón "Ubicación" del Hero
+- [x] Dejar solo "Nutriser Shop" y "Agenda tu Cita"
+- [x] Agregar espaciado adecuado antes de la sección de servicios
+
+### Expansión de Descripciones de Servicios
+- [x] Crear archivo serviceDescriptions.ts con descripciones detalladas para todos los 27 servicios
+- [x] Cada servicio incluye: qué es, beneficios, duración, cuidados post-tratamiento
+- [x] Agregar botón "Más Info" en cada tarjeta de servicio
+- [x] Crear modal de información detallada con:
+  - [x] Descripción completa del servicio
+  - [x] Lista de beneficios principales
+  - [x] Duración del tratamiento
+  - [x] Cuidados post-tratamiento
+  - [x] Botones de CTA (Adquirir y Agendar Cita)
+- [x] Reorganizar botones en tarjetas: "Más Info" + "Precio" en primera fila
+- [x] Segunda fila: "Adquirir" + "Cita"
+
+### Corrección de Typo
+- [ ] Corregir typo "Asthethic" a "Aesthetic" en el nombre del proyecto (para SEO)

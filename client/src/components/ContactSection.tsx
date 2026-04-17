@@ -90,6 +90,9 @@ export default function ContactSection() {
                   <p className="text-white text-lg font-medium">
                     322 450 3257
                   </p>
+                  <p className="text-white/50 text-sm">
+                    Llámanos para más información
+                  </p>
                 </div>
               </a>
 
@@ -106,7 +109,10 @@ export default function ContactSection() {
                     Email
                   </span>
                   <p className="text-white text-lg font-medium">
-                    clinicanutriserpv@gmail.com
+                    nutriserpv@gmail.com
+                  </p>
+                  <p className="text-white/50 text-sm">
+                    Envíanos tus dudas o solicita información
                   </p>
                 </div>
               </a>
@@ -123,13 +129,13 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <span className="text-xs tracking-[0.2em] uppercase text-[#C5A55A]">
-                    Ubicación
+                    Nutriser | Clínica de Nutrición y Estética
                   </span>
                   <p className="text-white text-lg font-medium">
                     Emiliano Zapata #2
                   </p>
-                  <p className="text-white/50">
-                    Col. Valentín Gómez Farías
+                  <p className="text-white/50 text-sm">
+                    Col. Valentín Gómez Farías, Puerto Vallarta, Jalisco
                   </p>
                 </div>
               </a>

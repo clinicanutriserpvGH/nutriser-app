@@ -19,7 +19,14 @@ const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 const navLinks = [
-  { label: "Servicios", href: "#servicios" },
+  { label: "Servicios", href: "#servicios", submenu: [
+    { label: "Nutriólogo", href: "/servicio/nutriologo" },
+    { label: "Hollywood Peel", href: "/servicio/hollywood_peel" },
+    { label: "Limpieza Facial", href: "/servicio/limpieza_facial" },
+    { label: "Mesoterapia", href: "/servicio/mesoterapia" },
+    { label: "Radiofrecuencia", href: "/servicio/radiofrecuencia" },
+    { label: "Rellenos Faciales", href: "/servicio/rellenos" },
+  ] },
   { label: "Nosotros", href: "#nosotros" },
   { label: "Contacto", href: "#contacto" },
   { label: "Administración", href: "/admin/login" },
@@ -134,25 +141,43 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
 
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target={(link as any).external ? "_blank" : undefined}
-                rel={(link as any).external ? "noopener noreferrer" : undefined}
-                onClick={(e) => {
-                  if (!(link as any).external) {
-                    e.preventDefault();
-                    handleNavClick(link.href);
-                  }
-                }}
-                className={`text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:text-[#C5A55A] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#C5A55A] after:transition-all after:duration-300 hover:after:w-full ${
-                  scrolled || lightBg ? "text-[#1A1A1A]/70" : "text-white/80"
-                } ${(link as any).external ? "flex items-center gap-1" : ""}`}
-              >
-                {(link as any).external && <Ruler className="w-3.5 h-3.5" />}
-                {link.label}
-              </a>
+            {navLinks.map((link: any) => (
+              <div key={link.href} className="relative group">
+                <a
+                  href={link.href}
+                  target={(link as any).external ? "_blank" : undefined}
+                  rel={(link as any).external ? "noopener noreferrer" : undefined}
+                  onClick={(e) => {
+                    if (!(link as any).external && !link.submenu) {
+                      e.preventDefault();
+                      handleNavClick(link.href);
+                    }
+                  }}
+                  className={`text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:text-[#C5A55A] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#C5A55A] after:transition-all after:duration-300 hover:after:w-full ${
+                    scrolled || lightBg ? "text-[#1A1A1A]/70" : "text-white/80"
+                  } ${(link as any).external ? "flex items-center gap-1" : ""}`}
+                >
+                  {(link as any).external && <Ruler className="w-3.5 h-3.5" />}
+                  {link.label}
+                </a>
+                {link.submenu && (
+                  <div className="absolute left-0 mt-0 w-56 bg-white shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                    {link.submenu.map((item: any) => (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleNavClick(item.href);
+                        }}
+                        className="block px-4 py-2.5 text-sm text-[#1A1A1A] hover:bg-[#FAF7F2] hover:text-[#C5A55A] transition-colors first:rounded-t-md last:rounded-b-md"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
             <div className="flex items-center gap-4">
               {/* Social Links */}

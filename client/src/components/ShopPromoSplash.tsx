@@ -60,7 +60,15 @@ function ShopCard({ onAction }: { onAction: () => void }) {
       >
         {/* Logo */}
         <div className="flex justify-center pt-5 pb-3 px-4">
-          <img src={LOGO_URL} alt="Nutriser" style={{ height: 48, objectFit: "contain" }} />
+          <img
+            src={LOGO_URL}
+            alt="Nutriser"
+            style={{
+              height: 64,
+              objectFit: "contain",
+              filter: "drop-shadow(0 2px 8px rgba(197,165,90,0.4))",
+            }}
+          />
         </div>
 
         {/* 2x2 image grid */}

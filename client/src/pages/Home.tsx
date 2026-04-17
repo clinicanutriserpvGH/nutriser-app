@@ -8,9 +8,6 @@
  */
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
-import PromotionsSection from "@/components/PromotionsSection";
-import ServicesSection from "@/components/ServicesSection";
-import BeforeAfterSection from "@/components/BeforeAfterSection";
 import CtaBanner from "@/components/CtaBanner";
 import AboutSection from "@/components/AboutSection";
 import ContactSection from "@/components/ContactSection";
@@ -48,9 +45,6 @@ export default function Home() {
       <Navbar onShowSplash={showSplash} isHome />
       <main>
         <HeroSection />
-        <PromotionsSection />
-        <ServicesSection />
-        <BeforeAfterSection />
         <CtaBanner />
         <AboutSection />
         <ContactSection />

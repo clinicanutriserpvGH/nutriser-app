@@ -10,7 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { X, ShoppingBag, Gift, Clock, ChevronLeft, ChevronRight, Flame } from "lucide-react";
 
 const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-icon-1024_3e95ef67.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 const GRID_IMAGES = [
   {

@@ -1300,6 +1300,32 @@ export const appRouter = router({
 
         await updateServicePurchaseStatus(input.id, 'approved', serviceCode);
 
+        // Add 2% cashback to patient's wallet
+        try {
+          const { getPatientByEmail, getWalletByPatientId, createWallet, addWalletTransaction } = await import('./db');
+          const patient = await getPatientByEmail(purchase.buyerEmail);
+          if (patient) {
+            let wallet = await getWalletByPatientId(patient.id);
+            if (!wallet) {
+              wallet = await createWallet(patient.id);
+            }
+            const originalPrice = purchase.originalPrice ? parseFloat(String(purchase.originalPrice)) : 0;
+            const cashbackAmount = Math.round(originalPrice * 0.02 * 100); // 2% in cents
+            if (cashbackAmount > 0) {
+              await addWalletTransaction({
+                walletId: wallet.id,
+                type: 'cashback',
+                amount: cashbackAmount,
+                description: `Cashback 2% por compra de ${purchase.serviceName}`,
+                referenceType: 'service_purchase',
+                referenceId: input.id,
+              });
+            }
+          }
+        } catch (e) {
+          console.warn('Error adding cashback to wallet:', e);
+        }
+
         // Send approval email to buyer WITH the code
         try {
           await sendServicePurchaseApprovedEmail(

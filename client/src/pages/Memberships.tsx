@@ -24,13 +24,14 @@ import BackToSplash from "@/components/BackToSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
 import PromoSplash from "@/components/PromoSplash";
+import { t, type Lang } from "@/lib/i18n";
 
 // ─── Assets ──────────────────────────────────────────────────────────────────
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-type StoreTab = "tratamientos" | "farmacy" | "library" | "monedero" | "wishlist";
+type StoreTab = "tratamientos" | "misTratamientos" | "farmacy" | "library" | "monedero" | "wishlist";
 
 interface CartItem {
   id: string;
@@ -231,6 +232,8 @@ function PromoBanner({ onBannerClick }: { onBannerClick?: (pkgIndex: number) => 
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Memberships() {
   const [, navigate] = useLocation();
+  const [lang, setLang] = useState<Lang>("ES");
+  const toggleLang = () => setLang(prev => prev === "ES" ? "EN" : "ES");
   const [activeTab, setActiveTab] = useState<StoreTab>("tratamientos");
 
   // ─── Sesión unificada ────────────────────────────────────────────────
@@ -358,8 +361,8 @@ export default function Memberships() {
   const [useWallet, setUseWallet] = useState(false);
   const [walletAmount, setWalletAmount] = useState(0);
   const [walletSheetOpen, setWalletSheetOpen] = useState(false);
-  const [lang, setLang] = useState<"ES" | "EN">("ES");
-  const toggleLang = () => setLang(prev => prev === "ES" ? "EN" : "ES");
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
+
   const walletQuery = trpc.wallet.getMyWallet.useQuery(
     { patientId: patient?.id || 0 },
     { enabled: isLoggedIn && !!patient?.id }
@@ -1480,6 +1483,17 @@ export default function Memberships() {
               >
                 <Sparkles className="w-5 h-5 lg:w-7 lg:h-7" />
                 <span className="text-[9px] lg:text-xs font-semibold leading-tight">Tratamientos</span>
+              </button>
+
+              {/* Mis Tratamientos */}
+              <button
+                onClick={() => setActiveTab("misTratamientos")}
+                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors ${
+                  activeTab === "misTratamientos" ? "text-[#C5A55A]" : "text-gray-400"
+                }`}
+              >
+                <ClipboardList className="w-5 h-5 lg:w-7 lg:h-7" />
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Mis Trat.</span>
               </button>
 
               {/* Farmacy */}

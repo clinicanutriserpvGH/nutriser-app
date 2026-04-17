@@ -87,12 +87,7 @@ export default function AboutSection() {
               <p className="text-[#1A1A1A]/70 text-lg leading-relaxed mb-8">
                 Contamos con más de 25 servicios especializados en nutrición, estética facial, corporal y medicina estética, enfocados en acompañarte de forma integral para ayudarte a mejorar tu salud, imagen y bienestar con resultados visibles y duraderos.
               </p>
-                <button
-                onClick={() => { navigate("/"); setTimeout(() => { document.getElementById('servicios')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}
-                className="inline-flex items-center justify-center bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
-              >
-                Catálogo de Servicios
-              </button>
+
             </div>
           </div>
 

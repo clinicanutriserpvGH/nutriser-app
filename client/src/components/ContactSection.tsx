@@ -41,11 +41,11 @@ export default function ContactSection() {
             <h2 className="font-serif text-4xl lg:text-5xl text-white mt-4 mb-6">
               Comienza tu{" "}
               <span className="italic text-[#C5A55A]">transformación</span>
+              {" "}con Nutriser
             </h2>
             <div className="w-16 h-[1px] bg-[#C5A55A] mx-auto mb-6" />
             <p className="text-white/60 max-w-xl mx-auto text-lg">
-              Agenda tu cita y déjanos acompañarte. Estamos para
-              responder todas tus preguntas.
+              Agenda tu cita y recibe atención personalizada en nutrición, estética facial, corporal y medicina estética. Estamos para orientarte, resolver tus dudas y ayudarte a elegir la mejor opción para ti.
             </p>
           </div>
 
@@ -98,7 +98,7 @@ export default function ContactSection() {
 
               {/* Email */}
               <a
-                href="mailto:clinicanutriserpv@gmail.com"
+                href="mailto:nutriserpv@gmail.com"
                 className="flex items-center gap-5 p-6 bg-white/5 border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-[#C5A55A]/30"
               >
                 <div className="w-14 h-14 flex items-center justify-center border border-[#C5A55A]/40 flex-shrink-0">
@@ -131,11 +131,11 @@ export default function ContactSection() {
                   <span className="text-xs tracking-[0.2em] uppercase text-[#C5A55A]">
                     Nutriser | Clínica de Nutrición y Estética
                   </span>
-                  <p className="text-white text-lg font-medium">
-                    Emiliano Zapata #2
+                  <p className="text-white text-base font-medium">
+                    Emiliano Zapata #2, Col. Valentín Gómez Farías, Puerto Vallarta, Jalisco
                   </p>
-                  <p className="text-white/50 text-sm">
-                    Col. Valentín Gómez Farías, Puerto Vallarta, Jalisco
+                  <p className="text-[#C5A55A] text-xs tracking-[0.15em] uppercase mt-1 font-semibold">
+                    Toca para abrir en Maps
                   </p>
                 </div>
               </a>

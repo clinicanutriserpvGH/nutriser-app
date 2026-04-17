@@ -1,5 +1,14 @@
 # Nutriser - Tareas Completadas
 
+## Sesión 17 - Correcciones de Cashback y UI
+- [x] Corregir búsqueda de email en getPatientByEmail para ser insensible a mayúsculas (LOWER() SQL)
+- [x] Agregar endpoint retryCashback para acreditar cashback manualmente a compras ya aprobadas
+- [x] Agregar botón "💰 Cashback" en panel admin para compras aprobadas sin cashback
+- [x] Corregir nombre duplicado en Mis Compras: "1x 1x Paquete Nutrición" → "Paquete Nutrición"
+- [x] Corregir precio duplicado en Mis Compras: "$$2,500 MXN MXN" → "$2,500 MXN"
+- [x] Corregir formato de serviceName al guardar: qty=1 no agrega prefijo "1x"
+- [x] Verificar que MyTreatments.tsx compila sin errores (error de Vite era caché de sesión anterior)
+
 ## Página Principal
 - [x] Leer catálogo completo DOCX para extraer todos los servicios
 - [x] Subir fotos reales de la clínica (recepción, sala de espera) como assets CDN

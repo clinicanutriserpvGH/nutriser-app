@@ -473,7 +473,7 @@ export default function Memberships() {
     reader.onload = async (ev) => {
       const base64 = (ev.target?.result as string).split(",")[1];
       const firstItem = checkoutItems[0];
-      const itemNames = checkoutItems.map(i => `${i.qty}x ${i.name}`).join(", ");
+      const itemNames = checkoutItems.map(i => i.qty > 1 ? `${i.qty}x ${i.name}` : i.name).join(", ");
 
       if (firstItem?.itemType === "product" && firstItem.productId) {
         productPurchaseMutation.mutate({

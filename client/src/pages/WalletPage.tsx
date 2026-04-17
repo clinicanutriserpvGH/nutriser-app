@@ -430,8 +430,8 @@ export default function WalletPage() {
                         }`}>
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <p className="text-[#1A1A1A] font-bold text-sm">1x {svc.serviceName}</p>
-                              {svc.originalPrice && <p className="text-gray-500 text-xs mt-0.5">${svc.originalPrice} MXN</p>}
+                              <p className="text-[#1A1A1A] font-bold text-sm">{svc.serviceName}</p>
+                              {svc.originalPrice && <p className="text-gray-500 text-xs mt-0.5">{svc.originalPrice.replace(/^\$+/, '$').replace(/\s*MXN\s*MXN/i, ' MXN').replace(/\s*MXN$/i, ' MXN').trim()}</p>}
                               {svc.approvedAt && <p className="text-gray-400 text-xs mt-0.5">Autorizado: {new Date(svc.approvedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
                             </div>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${

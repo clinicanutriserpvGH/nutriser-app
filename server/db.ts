@@ -1136,7 +1136,10 @@ export async function createPatientAccount(data: InsertPatientAccount) {
 export async function getPatientByEmail(email: string) {
   const db = await getDb();
   if (!db) return undefined;
-  const result = await db.select().from(patientAccounts).where(eq(patientAccounts.email, email)).limit(1);
+  // Case-insensitive email search
+  const result = await db.select().from(patientAccounts)
+    .where(sql`LOWER(${patientAccounts.email}) = LOWER(${email})`)
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 

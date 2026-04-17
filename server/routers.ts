@@ -1356,6 +1356,62 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await deleteServicePurchase(input.id);
       }),
+    // Reintentar cashback para una compra ya aprobada (backfill)
+    retryCashback: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const purchases = await getAllServicePurchases();
+        const purchase = purchases.find(p => p.id === input.id);
+        if (!purchase) throw new Error('Compra no encontrada');
+        if (purchase.status !== 'approved') throw new Error('La compra no está aprobada');
+
+        const { getPatientByEmail, getWalletByPatientId, createWallet, addWalletTransaction } = await import('./db');
+        const patient = await getPatientByEmail(purchase.buyerEmail);
+        if (!patient) throw new Error(`No se encontró paciente con email: ${purchase.buyerEmail}`);
+
+        let wallet = await getWalletByPatientId(patient.id);
+        if (!wallet) {
+          wallet = await createWallet(patient.id);
+        }
+
+        // Check if cashback was already credited for this purchase
+        const { getDb } = await import('./db');
+        const db = await getDb();
+        if (!db) throw new Error('DB no disponible');
+        const { walletTransactions } = await import('../drizzle/schema');
+        const { and, eq } = await import('drizzle-orm');
+        const existing = await db.select().from(walletTransactions)
+          .where(and(
+            eq(walletTransactions.walletId, wallet.id),
+            eq(walletTransactions.referenceType, 'service_purchase'),
+            eq(walletTransactions.referenceId, input.id),
+            eq(walletTransactions.type, 'cashback')
+          ))
+          .limit(1);
+
+        if (existing.length > 0) {
+          return { success: false, message: 'El cashback ya fue acreditado para esta compra' };
+        }
+
+        const rawPrice = String(purchase.originalPrice || '0');
+        const cleanedPrice = rawPrice.replace(/[^0-9.]/g, '');
+        const originalPrice = parseFloat(cleanedPrice) || 0;
+        const cashbackAmount = Math.round(originalPrice * 0.02 * 100); // 2% in cents
+
+        if (cashbackAmount <= 0) throw new Error('El precio no es válido para calcular cashback');
+
+        await addWalletTransaction({
+          walletId: wallet.id,
+          type: 'cashback',
+          amount: cashbackAmount,
+          description: `Cashback 2% por compra de ${purchase.serviceName} (reintento)`,
+          referenceType: 'service_purchase',
+          referenceId: input.id,
+        });
+
+        return { success: true, message: `Cashback de $${(cashbackAmount / 100).toFixed(2)} MXN acreditado correctamente` };
+      }),
+
     // Verificar servicio por email+código (paciente logueado)
     lookupByEmailAndCode: publicProcedure
       .input(z.object({ email: z.string().email(), code: z.string().min(1) }))

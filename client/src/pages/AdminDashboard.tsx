@@ -347,6 +347,18 @@ export default function AdminDashboard() {
     onError: (error) => toast.error('Error: ' + error.message),
   });
 
+  const retryCashbackMutation = trpc.servicePurchases.retryCashback.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message || 'Cashback acreditado correctamente.');
+      } else {
+        toast.info(data.message || 'El cashback ya fue acreditado.');
+      }
+      refetchServicePurchases();
+    },
+    onError: (error) => toast.error('Error al acreditar cashback: ' + error.message),
+  });
+
   const toggleDiscountCodeMutation = trpc.ebook.toggleDiscountCode.useMutation({
     onSuccess: (_, variables) => {
       toast.success(variables.isActive ? 'Código activado' : 'Código desactivado');
@@ -2870,6 +2882,18 @@ export default function AdminDashboard() {
                                       Rechazar
                                     </Button>
                                   </>
+                                )}
+                                {sp.status === 'approved' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs bg-purple-100 text-purple-700 hover:bg-purple-200"
+                                    onClick={() => retryCashbackMutation.mutate({ id: sp.id })}
+                                    disabled={retryCashbackMutation.isPending}
+                                    title="Acreditar cashback al monedero del paciente"
+                                  >
+                                    💰 Cashback
+                                  </Button>
                                 )}
                                 <Button
                                   size="sm"

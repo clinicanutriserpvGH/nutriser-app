@@ -407,14 +407,29 @@ export default function CouponPage() {
                           )}
 
                           {/* Instrucciones de pago */}
-                          <div className="bg-[#1A1A1A] rounded-xl p-4 mb-4 text-white text-sm">
-                            <p className="font-bold mb-2">💳 Datos para transferencia:</p>
-                            <p className="text-gray-300">Banco: Banamex</p>
-                            <p className="text-gray-300">CLABE Interbancaria: <span className="font-mono font-bold text-white">002470701448743487</span></p>
-                            <p className="text-[#C5A55A] font-bold mt-2">
-                              Monto a pagar: {promo.price}{useWallet && walletAmount > 0 && <span className="text-green-400 text-xs ml-2">(monedero: -${(walletAmount / 100).toFixed(2)})</span>}
-                            </p>
-                          </div>
+                          {(() => {
+                            // Parsear precio numérico del texto libre (ej: "$479 MXN" → 479)
+                            const rawPrice = promo.price || '';
+                            const numericPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
+                            const walletDeductPesos = useWallet && walletAmount > 0 ? walletAmount / 100 : 0;
+                            const finalAmount = Math.max(0, numericPrice - walletDeductPesos);
+                            return (
+                              <div className="bg-[#1A1A1A] rounded-xl p-4 mb-4 text-white text-sm">
+                                <p className="font-bold mb-2">💳 Datos para transferencia:</p>
+                                <p className="text-gray-300">Banco: Banamex</p>
+                                <p className="text-gray-300">CLABE Interbancaria: <span className="font-mono font-bold text-white">002470701448743487</span></p>
+                                {useWallet && walletDeductPesos > 0 && numericPrice > 0 ? (
+                                  <div className="mt-2 space-y-1">
+                                    <p className="text-gray-400 text-xs line-through">Precio original: {promo.price}</p>
+                                    <p className="text-green-400 text-xs">Monedero: -${walletDeductPesos.toFixed(2)} MXN</p>
+                                    <p className="text-[#C5A55A] font-bold text-base">Monto a pagar: ${finalAmount.toFixed(2)} MXN</p>
+                                  </div>
+                                ) : (
+                                  <p className="text-[#C5A55A] font-bold mt-2">Monto a pagar: {promo.price}</p>
+                                )}
+                              </div>
+                            );
+                          })()}
 
                           {/* Subir comprobante */}
                           <div className="mb-4">

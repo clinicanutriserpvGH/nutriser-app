@@ -1309,7 +1309,10 @@ export const appRouter = router({
             if (!wallet) {
               wallet = await createWallet(patient.id);
             }
-            const originalPrice = purchase.originalPrice ? parseFloat(String(purchase.originalPrice)) : 0;
+            // Clean the price string: remove $, MXN, spaces, commas to get a pure number
+            const rawPrice = String(purchase.originalPrice || '0');
+            const cleanedPrice = rawPrice.replace(/[^0-9.]/g, '');
+            const originalPrice = parseFloat(cleanedPrice) || 0;
             const cashbackAmount = Math.round(originalPrice * 0.02 * 100); // 2% in cents
             if (cashbackAmount > 0) {
               await addWalletTransaction({

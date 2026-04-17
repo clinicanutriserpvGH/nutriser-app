@@ -92,13 +92,13 @@ export default function AdminQRScanner() {
         },
         (decodedText) => {
           // Extraer walletNumber del URL del QR
-          // Formato: https://nutriserpv.com/monedero/NTRXXXXXXXX
-          const match = decodedText.match(/NTR[A-Z0-9]+/i);
+          // Formato: NUT-XXXX-XXXX o URL con ese número
+          const match = decodedText.match(/NUT-[A-Z0-9]+-[A-Z0-9]+/i);
           if (match) {
             setWalletNumber(match[0].toUpperCase());
             setStep("patient");
             stopScanner();
-          } else if (decodedText.startsWith("NTR")) {
+          } else if (decodedText.toUpperCase().startsWith("NUT-")) {
             setWalletNumber(decodedText.toUpperCase());
             setStep("patient");
             stopScanner();
@@ -136,7 +136,8 @@ export default function AdminQRScanner() {
   const handleManualSearch = () => {
     const num = manualInput.trim().toUpperCase();
     if (!num) return;
-    setWalletNumber(num.startsWith("NTR") ? num : `NTR${num}`);
+    // Wallet numbers are in format NUT-XXXX-XXXX
+    setWalletNumber(num.startsWith("NUT-") ? num : num);
     setStep("patient");
   };
 
@@ -248,7 +249,7 @@ export default function AdminQRScanner() {
               </p>
               <div className="flex gap-2">
                 <Input
-                  placeholder="NTR..."
+                  placeholder="NUT-XXXX-XXXX"
                   value={manualInput}
                   onChange={(e) => setManualInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleManualSearch()}

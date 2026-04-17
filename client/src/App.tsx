@@ -198,7 +198,7 @@ function AppContent() {
           onGoToShop={() => {
             sessionStorage.setItem("nutriser_shop_promo_seen", "1");
             setShowShopPromo(false);
-            window.location.href = "/tienda";
+            window.open("https://nutriserpv.com/memberships", "_blank");
           }}
         />
       ) : (

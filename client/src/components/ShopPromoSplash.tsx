@@ -9,27 +9,8 @@ import { useState, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { X, ShoppingBag, Gift, Clock, ChevronLeft, ChevronRight, Flame } from "lucide-react";
 
-const LOGO_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
-
-const GRID_IMAGES = [
-  {
-    src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/hollywood-peel_9d9185ed.png",
-    label: "Tratamientos Faciales",
-  },
-  {
-    src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/mesoterapia_0df94f56.png",
-    label: "Tratamientos Corporales",
-  },
-  {
-    src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/productos-nutriser_35a8adbb.png",
-    label: "Farmacia Nutriser",
-  },
-  {
-    src: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/libro-nutriser_2c47a34a.png",
-    label: "Librería Nutriser",
-  },
-];
+const SHOP_SPLASH_IMAGE =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-shop-splash_1d595b22.png";
 
 interface ShopPromoSplashProps {
   onClose: () => void;
@@ -54,75 +35,19 @@ interface Promo {
 function ShopCard({ onAction }: { onAction: () => void }) {
   return (
     <div className="relative w-full flex-shrink-0">
-      <div
-        className="relative w-full overflow-hidden rounded-2xl"
-        style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
+      <button
+        onClick={onAction}
+        className="relative w-full overflow-hidden rounded-2xl block transition-opacity hover:opacity-95 active:opacity-80"
+        style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)", padding: 0 }}
       >
-        {/* 2x2 image grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 2,
-            borderTop: "1px solid rgba(197,165,90,0.25)",
-            borderBottom: "1px solid rgba(197,165,90,0.25)",
-          }}
-        >
-          {GRID_IMAGES.map((img, i) => (
-            <div key={i} className="relative overflow-hidden" style={{ aspectRatio: "1/1" }}>
-              <img src={img.src} alt={img.label} className="w-full h-full object-cover" />
-              <div
-                className="absolute bottom-0 left-0 right-0 px-2 py-1"
-                style={{ background: "linear-gradient(transparent, rgba(0,0,0,0.75))" }}
-              >
-                <span style={{ color: "#C5A55A", fontSize: 11, fontWeight: 600 }}>{img.label}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom text + CTA */}
-        <div className="px-5 pt-4 pb-5">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <img
-              src={LOGO_URL}
-              alt="Nutriser"
-              style={{
-                height: 36,
-                objectFit: "contain",
-                filter: "drop-shadow(0 1px 6px rgba(197,165,90,0.5))",
-              }}
-            />
-            <h2
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: 30,
-                fontWeight: 700,
-                color: "#D4AF6A",
-                lineHeight: 1.1,
-              }}
-            >
-              Nutriser Shop
-            </h2>
-          </div>
-          <p style={{ color: "#b8b0a0", fontSize: 13, textAlign: "center", marginBottom: 16 }}>
-            ¡Descuentos exclusivos solo para ti!
-          </p>
-          <button
-            onClick={onAction}
-            className="w-full font-bold rounded-full transition-opacity hover:opacity-90 active:opacity-75 flex items-center justify-center gap-2"
-            style={{
-              background: "#C5A55A",
-              color: "#141008",
-              fontSize: 15,
-              padding: "13px 0",
-            }}
-          >
-            <ShoppingBag size={18} />
-            Visitar Tienda →
-          </button>
-        </div>
-      </div>
+        {/* Imagen completa del splash */}
+        <img
+          src={SHOP_SPLASH_IMAGE}
+          alt="Nutriser Shop"
+          className="w-full h-auto block"
+          style={{ display: "block" }}
+        />
+      </button>
     </div>
   );
 }

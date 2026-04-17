@@ -613,160 +613,163 @@ export default function Memberships() {
       {/* ── Modal de detalle de servicio/paquete ── */}
       <Dialog open={!!detailItem} onOpenChange={(open) => { if (!open) setDetailItem(null); }}>
         <DialogContent
-          className="max-w-sm w-full p-0 overflow-hidden rounded-2xl border-0"
-          style={{ background: "#1A1A1A", maxHeight: "90vh", overflowY: "auto" }}
+          className="max-w-sm w-full p-0 rounded-2xl border-0 flex flex-col"
+          style={{ background: "#1A1A1A", maxHeight: "85dvh", overflow: "hidden" }}
         >
           {detailItem && (
             <>
-              {/* Imagen */}
-              {detailItem.imageUrl ? (
-                <div className="relative w-full" style={{ height: 220 }}>
-                  <img src={detailItem.imageUrl} alt={detailItem.name} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(26,26,26,0.9) 0%, transparent 60%)" }} />
-                  {detailItem.badge && (
-                    <div className="absolute top-3 left-3 flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black" style={{ background: "#C5A55A", color: "#1A1A1A" }}>
-                      <Star className="w-3 h-3 fill-current" /> {detailItem.badge}
-                    </div>
-                  )}
-                  {detailItem.category && (
-                    <div className="absolute bottom-3 left-3">
-                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#C5A55A" }}>
-                        {(CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="w-full flex items-center justify-center" style={{ height: 120, background: "#2a2a2a" }}>
-                  <Package className="w-12 h-12" style={{ color: "#C5A55A", opacity: 0.4 }} />
-                </div>
-              )}
-
-              {/* Contenido */}
-              <div className="px-5 pt-4 pb-6">
-                <DialogHeader>
-                  <DialogTitle
-                    style={{ fontFamily: "'Playfair Display', serif", color: "#FAF7F2", fontSize: 22, fontWeight: 700, lineHeight: 1.2 }}
-                    className="mb-1"
-                  >
-                    {detailItem.name}
-                  </DialogTitle>
-                </DialogHeader>
-
-                {/* Precio */}
-                {detailItem.price && (
-                  <div className="flex items-end gap-2 mt-2 mb-3">
-                    <span style={{ color: "#C5A55A", fontSize: 26, fontWeight: 900 }}>
-                      {detailItem.priceNum ? `$${detailItem.priceNum.toLocaleString("es-MX")}` : detailItem.price}
-                    </span>
-                    {detailItem.priceNum && <span style={{ color: "#b8b0a0", fontSize: 13, marginBottom: 2 }}>MXN</span>}
-                    {detailItem.regularPrice && (
-                      <span style={{ color: "#666", fontSize: 13, textDecoration: "line-through", marginBottom: 2 }}>
-                        ${detailItem.regularPrice.toLocaleString("es-MX")}
-                      </span>
+              {/* Zona scrollable: imagen + contenido */}
+              <div className="flex-1 overflow-y-auto" style={{ overscrollBehavior: "contain" }}>
+                {/* Imagen */}
+                {detailItem.imageUrl ? (
+                  <div className="relative w-full" style={{ height: 220 }}>
+                    <img src={detailItem.imageUrl} alt={detailItem.name} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(26,26,26,0.9) 0%, transparent 60%)" }} />
+                    {detailItem.badge && (
+                      <div className="absolute top-3 left-3 flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black" style={{ background: "#C5A55A", color: "#1A1A1A" }}>
+                        <Star className="w-3 h-3 fill-current" /> {detailItem.badge}
+                      </div>
+                    )}
+                    {detailItem.category && (
+                      <div className="absolute bottom-3 left-3">
+                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#C5A55A" }}>
+                          {(CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label}
+                        </span>
+                      </div>
                     )}
                   </div>
-                )}
-
-                {/* Separador dorado */}
-                <div style={{ height: 1, background: "linear-gradient(to right, #C5A55A, transparent)", marginBottom: 16 }} />
-
-                {/* Descripción */}
-                {detailItem.description && (
-                  <div className="mb-4">
-                    <p style={{ color: "#b8b0a0", fontSize: 14, lineHeight: 1.6 }}>{detailItem.description}</p>
+                ) : (
+                  <div className="w-full flex items-center justify-center" style={{ height: 120, background: "#2a2a2a" }}>
+                    <Package className="w-12 h-12" style={{ color: "#C5A55A", opacity: 0.4 }} />
                   </div>
                 )}
 
-                {/* Duración del tratamiento (solo servicios) */}
-                {detailItem.duration && (
-                  <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "rgba(197,165,90,0.08)", border: "1px solid rgba(197,165,90,0.2)" }}>
-                    <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "#C5A55A" }} />
-                    <div>
-                      <span style={{ color: "#C5A55A", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Duración</span>
-                      <p style={{ color: "#FAF7F2", fontSize: 13, fontWeight: 600, marginTop: 1 }}>{detailItem.duration}</p>
+                {/* Contenido */}
+                <div className="px-5 pt-4 pb-4">
+                  <DialogHeader>
+                    <DialogTitle
+                      style={{ fontFamily: "'Playfair Display', serif", color: "#FAF7F2", fontSize: 22, fontWeight: 700, lineHeight: 1.2 }}
+                      className="mb-1"
+                    >
+                      {detailItem.name}
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  {/* Precio */}
+                  {detailItem.price && (
+                    <div className="flex items-end gap-2 mt-2 mb-3">
+                      <span style={{ color: "#C5A55A", fontSize: 26, fontWeight: 900 }}>
+                        {detailItem.priceNum ? `$${detailItem.priceNum.toLocaleString("es-MX")}` : detailItem.price}
+                      </span>
+                      {detailItem.priceNum && <span style={{ color: "#b8b0a0", fontSize: 13, marginBottom: 2 }}>MXN</span>}
+                      {detailItem.regularPrice && (
+                        <span style={{ color: "#666", fontSize: 13, textDecoration: "line-through", marginBottom: 2 }}>
+                          ${detailItem.regularPrice.toLocaleString("es-MX")}
+                        </span>
+                      )}
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Beneficios (servicios) */}
-                {detailItem.benefits && detailItem.benefits.length > 0 && (
-                  <div className="mb-5">
-                    <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Beneficios</p>
-                    <ul className="space-y-2">
-                      {detailItem.benefits.map((b, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#C5A55A" }} />
-                          <span style={{ color: "#FAF7F2", fontSize: 13 }}>{b}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {/* Separador dorado */}
+                  <div style={{ height: 1, background: "linear-gradient(to right, #C5A55A, transparent)", marginBottom: 16 }} />
 
-                {/* Incluye (paquetes) */}
-                {detailItem.features && detailItem.features.length > 0 && (
-                  <div className="mb-5">
-                    <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Incluye</p>
-                    <ul className="space-y-2">
-                      {detailItem.features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#C5A55A" }} />
-                          <span style={{ color: "#FAF7F2", fontSize: 13 }}>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Cuidados post-tratamiento (servicios) */}
-                {detailItem.aftercare && detailItem.aftercare.length > 0 && (
-                  <div className="mb-5">
-                    <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Cuidados post-tratamiento</p>
-                    <ul className="space-y-2">
-                      {detailItem.aftercare.map((a, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#8BC4A8" }} />
-                          <span style={{ color: "#b8b0a0", fontSize: 13 }}>{a}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Categoría */}
-                {detailItem.category && (
-                  <div className="flex items-center gap-2 mb-5">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).bg }}>
-                      {(() => { const Icon = (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).icon; return <Icon className="w-3.5 h-3.5" style={{ color: (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).color }} />; })()}
+                  {/* Descripción */}
+                  {detailItem.description && (
+                    <div className="mb-4">
+                      <p style={{ color: "#b8b0a0", fontSize: 14, lineHeight: 1.6 }}>{detailItem.description}</p>
                     </div>
-                    <span style={{ color: "#888", fontSize: 12 }}>{(CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label}</span>
-                  </div>
-                )}
+                  )}
 
-                {/* Botones de acción */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      addToCart({ id: detailItem.id, name: detailItem.name, price: detailItem.priceNum ?? 0, priceLabel: detailItem.price ? formatServicePrice(detailItem.price) : "Consultar precio", imageUrl: detailItem.imageUrl, category: detailItem.category ?? "general", itemType: detailItem.itemType });
-                      setDetailItem(null);
-                    }}
-                    className="flex-1 flex items-center justify-center gap-1.5 font-bold text-sm py-3 rounded-xl transition-all active:scale-95"
-                    style={{ border: "1px solid #C5A55A", color: "#C5A55A", background: "transparent" }}
-                  >
-                    <ShoppingCart className="w-4 h-4" /> Al carrito
-                  </button>
-                  <button
-                    onClick={() => {
-                      openCheckout({ id: detailItem.id, name: detailItem.name, price: detailItem.priceNum ?? 0, priceLabel: detailItem.price ? formatServicePrice(detailItem.price) : "Consultar precio", qty: 1, imageUrl: detailItem.imageUrl, category: detailItem.category ?? "general", itemType: detailItem.itemType });
-                      setDetailItem(null);
-                    }}
-                    className="flex-1 flex items-center justify-center gap-1.5 font-bold text-sm py-3 rounded-xl transition-all active:scale-95"
-                    style={{ background: "#C5A55A", color: "#1A1A1A" }}
-                  >
-                    <Zap className="w-4 h-4" /> Comprar
-                  </button>
+                  {/* Duración del tratamiento (solo servicios) */}
+                  {detailItem.duration && (
+                    <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "rgba(197,165,90,0.08)", border: "1px solid rgba(197,165,90,0.2)" }}>
+                      <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "#C5A55A" }} />
+                      <div>
+                        <span style={{ color: "#C5A55A", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Duración</span>
+                        <p style={{ color: "#FAF7F2", fontSize: 13, fontWeight: 600, marginTop: 1 }}>{detailItem.duration}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Beneficios (servicios) */}
+                  {detailItem.benefits && detailItem.benefits.length > 0 && (
+                    <div className="mb-5">
+                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Beneficios</p>
+                      <ul className="space-y-2">
+                        {detailItem.benefits.map((b, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#C5A55A" }} />
+                            <span style={{ color: "#FAF7F2", fontSize: 13 }}>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Incluye (paquetes) */}
+                  {detailItem.features && detailItem.features.length > 0 && (
+                    <div className="mb-5">
+                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Incluye</p>
+                      <ul className="space-y-2">
+                        {detailItem.features.map((f, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#C5A55A" }} />
+                            <span style={{ color: "#FAF7F2", fontSize: 13 }}>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Cuidados post-tratamiento (servicios) */}
+                  {detailItem.aftercare && detailItem.aftercare.length > 0 && (
+                    <div className="mb-4">
+                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Cuidados post-tratamiento</p>
+                      <ul className="space-y-2">
+                        {detailItem.aftercare.map((a, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#8BC4A8" }} />
+                            <span style={{ color: "#b8b0a0", fontSize: 13 }}>{a}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Categoría */}
+                  {detailItem.category && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).bg }}>
+                        {(() => { const Icon = (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).icon; return <Icon className="w-3.5 h-3.5" style={{ color: (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).color }} />; })()}
+                      </div>
+                      <span style={{ color: "#888", fontSize: 12 }}>{(CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label}</span>
+                    </div>
+                  )}
                 </div>
+              </div>
+
+              {/* Botones fijos en la parte inferior — siempre visibles */}
+              <div className="flex-shrink-0 flex gap-2 px-5 py-4" style={{ background: "#1A1A1A", borderTop: "1px solid rgba(197,165,90,0.15)" }}>
+                <button
+                  onClick={() => {
+                    addToCart({ id: detailItem.id, name: detailItem.name, price: detailItem.priceNum ?? 0, priceLabel: detailItem.price ? formatServicePrice(detailItem.price) : "Consultar precio", imageUrl: detailItem.imageUrl, category: detailItem.category ?? "general", itemType: detailItem.itemType });
+                    setDetailItem(null);
+                  }}
+                  className="flex-1 flex items-center justify-center gap-1.5 font-bold text-sm py-3 rounded-xl transition-all active:scale-95"
+                  style={{ border: "1px solid #C5A55A", color: "#C5A55A", background: "transparent" }}
+                >
+                  <ShoppingCart className="w-4 h-4" /> Al carrito
+                </button>
+                <button
+                  onClick={() => {
+                    openCheckout({ id: detailItem.id, name: detailItem.name, price: detailItem.priceNum ?? 0, priceLabel: detailItem.price ? formatServicePrice(detailItem.price) : "Consultar precio", qty: 1, imageUrl: detailItem.imageUrl, category: detailItem.category ?? "general", itemType: detailItem.itemType });
+                    setDetailItem(null);
+                  }}
+                  className="flex-1 flex items-center justify-center gap-1.5 font-bold text-sm py-3 rounded-xl transition-all active:scale-95"
+                  style={{ background: "#C5A55A", color: "#1A1A1A" }}
+                >
+                  <Zap className="w-4 h-4" /> Comprar
+                </button>
               </div>
             </>
           )}

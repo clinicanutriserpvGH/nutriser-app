@@ -31,6 +31,7 @@ import Transformaciones from "./pages/Transformaciones";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
 import Splash0Entry from "@/components/Splash0Entry";
+import ShopPromoSplash from "@/components/ShopPromoSplash";
 import { SplashContext } from "@/contexts/SplashContext";
 import { SplashThemeProvider } from "@/contexts/SplashThemeContext";
 import { useState } from "react";
@@ -90,6 +91,14 @@ const SPLASH_VERSION = "v3";
 
 function AppContent() {
   const [location] = useLocation();
+
+  // ShopPromoSplash: mostrar una vez por sesión antes del Splash 0 (solo móvil)
+  const [showShopPromo, setShowShopPromo] = useState<boolean>(() => {
+    if (isNoSplashRoute(location)) return false;
+    if (location !== "/") return false;
+    if (isDesktopDevice()) return false;
+    return !sessionStorage.getItem("nutriser_shop_promo_seen");
+  });
 
   const [splashState, setSplashState] = useState<SplashState>(() => {
     // Nunca mostrar splash en rutas de admin/internas
@@ -178,6 +187,21 @@ function AppContent() {
     <SplashContext.Provider value={{ showSplash: handleShowSplash, showSplash1: handleShowSplash1 }}>
       {/* Música de fondo solo en la página principal del sitio web */}
       {splashState === "site" && location === "/" && <BackgroundMusic />}
+
+      {/* ShopPromoSplash: aparece encima del Splash 0, una vez por sesión */}
+      {showShopPromo && (
+        <ShopPromoSplash
+          onClose={() => {
+            sessionStorage.setItem("nutriser_shop_promo_seen", "1");
+            setShowShopPromo(false);
+          }}
+          onGoToShop={() => {
+            sessionStorage.setItem("nutriser_shop_promo_seen", "1");
+            setShowShopPromo(false);
+            window.location.href = "/tienda";
+          }}
+        />
+      )}
 
       {/* Splash 0: pantalla de entrada — Nutriser Home + Portal Salud + Nutriser Web */}
       {splashState === "splash0" && (

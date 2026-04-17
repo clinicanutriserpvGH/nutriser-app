@@ -1677,3 +1677,18 @@
 ## Correcciones Sesión 16 - Actualización de Descripción
 
 - [x] Cambiar descripción de "Sobre Nutriser" con nuevo texto más informativo
+
+## Sesión 19 - Splash Promocional Nutriser Shop
+- [ ] Buscar imagen atractiva de compras/shopping para el splash
+- [ ] Crear componente ShopPromoSplash con imagen, botón a tienda y X para cerrar
+- [ ] Mostrar splash automáticamente al abrir la app (antes del Splash 0), una vez por sesión
+- [ ] Integrar splash también en la sección de Cupones
+
+## Sesión 19 - Splash Promocional Nutriser Shop
+- [x] Crear componente ShopPromoSplash con imágenes reales (Hollywood Peel, Mesoterapia, Farmacia, Librería)
+- [x] Logo Nutriser original sin modificar en la parte superior
+- [x] Cupones dinámicos desde BD (los que el admin tenga activos)
+- [x] Botón "Visitar Tienda" que lleva directo a /tienda
+- [x] X para cerrar el splash
+- [x] Aparece una vez por sesión antes del Splash 0 (solo móvil/tablet)
+- [x] Integrado en App.tsx con sessionStorage para no repetirse

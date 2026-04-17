@@ -110,7 +110,7 @@ function ShopCard({ onAction }: { onAction: () => void }) {
             Nutriser Shop
           </h2>
           <p style={{ color: "#b8b0a0", fontSize: 13, textAlign: "center", marginBottom: 16 }}>
-            Tu tienda digital de salud y bienestar
+            ¡Descuentos exclusivos solo para ti!
           </p>
           <button
             onClick={onAction}

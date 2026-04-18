@@ -1743,3 +1743,9 @@
 - [x] La misma cuenta de paciente funciona para Shop y Academy (sin cambios)
 - [x] Acceso admin al presionar el logo en Splash 0 se mantiene
 - [x] Imagen del Portal de Salud verificada en CDN (200 OK)
+
+## Corrección Academy Suscripción - Sesión 21
+- [x] Courses.tsx: si el paciente ya inició sesión, no mostrar botón "Suscríbeme y únete a la comunidad"
+- [x] Paciente logueado = acceso automático al contenido de Academy (misma cuenta que Shop)
+- [x] Solo mostrar el botón de suscripción a usuarios NO logueados
+- [x] Paciente logueado ve: "Ya eres miembro de la comunidad, [nombre]" + aviso de contenido próximamente

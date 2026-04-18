@@ -702,14 +702,26 @@ export default function Courses() {
                   </div>
                   <h3 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-3">Contenido en preparación</h3>
                   <p className="text-gray-500">Estamos preparando cursos, clases en video y recursos exclusivos para ti.</p>
-                  <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete para recibir notificaciones sobre nuevos contenidos y próximos lanzamientos de Nutriser Academy.</p>
-                  <Button
-                    onClick={() => setShowSubscribeModal(true)}
-                    className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3.5 rounded-full font-semibold shadow-lg shadow-[#C5A55A]/20"
-                  >
-                    <Bell className="w-4 h-4 mr-2" />
-                    Suscríbeme y únete a la comunidad
-                  </Button>
+                  {isLoggedIn && patient ? (
+                    <div className="flex flex-col items-center gap-3 mb-8">
+                      <div className="flex items-center gap-2 bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-full px-5 py-2">
+                        <CheckCircle className="w-4 h-4 text-[#C5A55A]" />
+                        <span className="text-[#C5A55A] text-sm font-medium">Ya eres miembro de la comunidad, <strong>{patient.name}</strong></span>
+                      </div>
+                      <p className="text-gray-400 text-sm">El contenido estará disponible próximamente. Te notificaremos cuando haya nuevos cursos.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete para recibir notificaciones sobre nuevos contenidos y próximos lanzamientos de Nutriser Academy.</p>
+                      <Button
+                        onClick={() => setShowSubscribeModal(true)}
+                        className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3.5 rounded-full font-semibold shadow-lg shadow-[#C5A55A]/20 mb-8"
+                      >
+                        <Bell className="w-4 h-4 mr-2" />
+                        Suscríbeme y únete a la comunidad
+                      </Button>
+                    </>
+                  )}
                   <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
                     <div className="bg-white rounded-xl border border-[#C5A55A]/15 p-4">
                       <div className="w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mb-3">

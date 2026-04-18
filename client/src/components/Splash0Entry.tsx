@@ -68,6 +68,11 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
     }, 400);
   };
 
+  // Secret admin access: click logo to open admin panel (same as Navbar)
+  const handleLogoClick = () => {
+    handleNavigate("/admin/login");
+  };
+
   return (
     <div
       className="fixed inset-0 z-[99999] overflow-x-hidden overflow-y-auto transition-all duration-500"
@@ -91,7 +96,14 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             isLight ? "bg-[#2a1f0a]/90 shadow-lg shadow-[#C5A55A]/10" : "bg-transparent"
           }`}>
             <div className="relative flex-shrink-0">
-              <img src={LOGO_URL} alt="Nutriser" className="relative w-11 h-11 md:w-14 md:h-14 object-contain" />
+              <button
+                type="button"
+                onClick={handleLogoClick}
+                className="block cursor-pointer focus:outline-none"
+                aria-label="Acceso administrador"
+              >
+                <img src={LOGO_URL} alt="Nutriser" className="relative w-11 h-11 md:w-14 md:h-14 object-contain" />
+              </button>
             </div>
             <div className="w-px h-10 bg-[#C5A55A]/50 flex-shrink-0" />
             <div className="flex flex-col justify-center min-w-0 flex-1">

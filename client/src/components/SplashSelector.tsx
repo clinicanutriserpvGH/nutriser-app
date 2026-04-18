@@ -274,10 +274,17 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           <div className={`flex items-center gap-3 mb-4 md:mb-5 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
             isLight ? "bg-[#2a1f0a]/90 shadow-lg shadow-[#C5A55A]/10" : "bg-black/40 backdrop-blur-sm border border-white/5"
           }`}>
-            {/* Logo */}
+            {/* Logo — click para acceso admin */}
             <div className="relative flex-shrink-0">
               <div className="absolute inset-0 rounded-full bg-[#C5A55A]/30 blur-lg scale-150" />
-              <img src={LOGO_URL} alt="Nutriser" className="relative w-12 h-12 md:w-14 md:h-14 object-contain" />
+              <button
+                type="button"
+                onClick={() => handleNavigate("/admin/login")}
+                className="block cursor-pointer focus:outline-none relative"
+                aria-label="Acceso administrador"
+              >
+                <img src={LOGO_URL} alt="Nutriser" className="relative w-12 h-12 md:w-14 md:h-14 object-contain" />
+              </button>
             </div>
             {/* Separador vertical */}
             <div className="w-px h-10 bg-[#C5A55A]/50 flex-shrink-0" />

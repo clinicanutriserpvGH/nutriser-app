@@ -1724,3 +1724,22 @@
 - [x] Tab Library en Memberships: eliminado texto "Para ver el eBook completo, visita Librería Nutriser"
 - [x] Ruta /ebook: redirige a /memberships?tab=library (la página separada ya no existe)
 - [x] Sistema de código de activación existente se mantiene intacto (EbookLogin + EbookReader)
+
+## Rediseño Splash - Sesión 20
+- [ ] Splash0Entry: eliminar tarjeta "Nutriser Home" (que abría Splash 1)
+- [ ] Splash0Entry: agregar tarjeta "Nutriser Shop" → navega a /memberships
+- [ ] Splash0Entry: agregar tarjeta "Nutriser Academy" → navega a /cursos
+- [ ] Splash0Entry: mantener tarjeta "Portal de Salud" → portaldesaludnutriser.club
+- [ ] Splash0Entry: grid de 3 tarjetas (layout equilibrado en móvil y tablet)
+- [ ] App.tsx: eliminar Splash 1 (SplashSelector) del flujo móvil/tablet
+- [ ] App.tsx: sitio web solo se muestra en escritorio (PC), no en móvil/tablet
+- [ ] SplashSelector: se oculta pero no se borra (por si se necesita en el futuro)
+
+## Rediseño Splash - Sesión 21
+- [x] Splash0Entry reescrito con 3 tarjetas: Nutriser Shop, Nutriser Academy, Portal de Salud
+- [x] Eliminado Nutriser Home del Splash 0 (ya no tiene razón de ser)
+- [x] Eliminado Splash 1 (SplashSelector) del flujo de App.tsx (solo queda Splash 0)
+- [x] Sitio web oculto del splash móvil/tablet (PC sigue yendo directo al sitio web)
+- [x] La misma cuenta de paciente funciona para Shop y Academy (sin cambios)
+- [x] Acceso admin al presionar el logo en Splash 0 se mantiene
+- [x] Imagen del Portal de Salud verificada en CDN (200 OK)

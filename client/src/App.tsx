@@ -81,10 +81,9 @@ function Router() {
 }
 
 // Estado del splash:
-// "splash0" → mostrar Splash 0 (pantalla de entrada: Nutriser Home + Portal Salud + Nutriser Web)
-// "splash1" → mostrar Splash 1 (hub: Shop + Academy + Mis Tratamientos + login)
-// "site"    → mostrar el sitio principal (Home)
-type SplashState = "splash0" | "splash1" | "site";
+// "splash0" → mostrar Splash 0 (pantalla de entrada: Shop + Academy + Portal de Salud)
+// "site"    → mostrar el sitio principal (Home) — solo en PC/escritorio
+type SplashState = "splash0" | "site";
 
 // Versión del splash — incrementar cuando cambie el diseño para forzar que todos vean el nuevo splash
 const SPLASH_VERSION = "v3";
@@ -127,42 +126,19 @@ function AppContent() {
       return "site";
     }
 
-    // Si hay bandera de ir directo al Splash 1 (ej: desde botón Regresar en Nutriser Shop/Academy/Tratamientos)
-    const goToSplash1 = sessionStorage.getItem("nutriser_go_to_splash1");
-    if (goToSplash1) {
-      sessionStorage.removeItem("nutriser_go_to_splash1");
-      return "splash1";
-    }
-
-    // Móvil/tablet → Splash 0
+      // Móvil/tablet → Splash 0
     return "splash0";
   });
 
-  // Desde Splash 0: el usuario eligió "Nutriser Web" → mostrar Splash 1
-  const handleEnterSplash1 = () => {
-    sessionStorage.setItem("nutriser_splash_seen", "1");
-    sessionStorage.setItem("nutriser_chose_splash1", "1");
-    setSplashState("splash1");
-  };
-
-  // Desde Splash 1: el usuario entra al sitio principal
-  const handleEnterSite = () => {
-    sessionStorage.setItem("nutriser_splash_seen", "1");
-    sessionStorage.removeItem("nutriser_chose_splash1");
-    setSplashState("site");
-  };
-
-  // Navegar a una ruta interna desde el Splash 1
+  // Navegar a una ruta interna desde el Splash 0
   const handleNavigateFromSplash = (path: string) => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    sessionStorage.removeItem("nutriser_chose_splash1");
     window.location.href = path;
   };
 
-  // Volver al Splash 0 (usado por botones "Regresar" en páginas internas cuando vienen de Splash 0)
+  // Volver al Splash 0 (usado por botones "Regresar" en páginas internas)
   const handleShowSplash = () => {
     sessionStorage.removeItem("nutriser_splash_seen");
-    sessionStorage.removeItem("nutriser_chose_splash1");
     if (location === "/") {
       setSplashState("splash0");
     } else {
@@ -170,13 +146,11 @@ function AppContent() {
     }
   };
 
-  // Volver al Splash 1 (hub de Nutriser) — usado por Nutriser Shop, Academy y Mis Tratamientos
+  // Compatibilidad: volver al Splash 0 (ya no hay Splash 1)
   const handleShowSplash1 = () => {
-    sessionStorage.setItem("nutriser_splash_seen", "1");
-    sessionStorage.setItem("nutriser_chose_splash1", "1");
-    sessionStorage.setItem("nutriser_go_to_splash1", "1");
+    sessionStorage.removeItem("nutriser_splash_seen");
     if (location === "/") {
-      setSplashState("splash1");
+      setSplashState("splash0");
     } else {
       window.location.href = "/";
     }
@@ -203,29 +177,20 @@ function AppContent() {
         />
       ) : (
         <>
-          {/* Splash 0: pantalla de entrada — Nutriser Home + Portal Salud + Nutriser Web */}
+          {/* Splash 0: pantalla de entrada — Shop + Academy + Portal de Salud */}
           {splashState === "splash0" && (
             <Splash0Entry
-              onEnterNutriserWeb={handleEnterSplash1}
-              onGoToWebsite={() => { setSplashState('site'); }}
+              onEnterNutriserWeb={() => setSplashState('site')}
+              onGoToWebsite={() => setSplashState('site')}
               onNavigate={handleNavigateFromSplash}
             />
           )}
         </>
       )}
 
-      {/* Splash 1 y sitio principal: solo si el ShopPromoSplash ya fue cerrado */}
+      {/* Sitio principal: solo si el ShopPromoSplash ya fue cerrado */}
       {!showShopPromo && (
         <>
-          {/* Splash 1: hub de servicios — Shop + Academy + Mis Tratamientos + login */}
-          {splashState === "splash1" && (
-            <SplashSelector
-              onEnterSite={handleEnterSite}
-              onNavigate={handleNavigateFromSplash}
-              onBack={() => setSplashState("splash0")}
-            />
-          )}
-
           {/* Sitio principal */}
           {splashState === "site" && <Router />}
         </>

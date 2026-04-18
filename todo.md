@@ -1716,3 +1716,11 @@
 - [x] Mejorar QR: tamaño 110px (antes 80px), negro puro #000000, includeMargin=true para mejor detección por cámara iPad
 - [x] Corregir imagen ShopPromoSplash: solo cuadrantes inferiores reemplazados, formato original intacto
 - [x] Corregir texto "Librería Librería" → "Librería Nutriser" en toda la app
+
+## Correcciones eBook - Sesión 20 (Preventa)
+- [x] BD: comingSoon = 1 activado para el ebook (era 0, por eso mostraba $499 y acceso inmediato)
+- [x] Tab Library en Memberships: botón cambiado a "Pre-comprar ahora" cuando hay presalePrice
+- [x] Tab Library en Memberships: aviso de pre-venta agregado con mensaje claro
+- [x] Tab Library en Memberships: eliminado texto "Para ver el eBook completo, visita Librería Nutriser"
+- [x] Ruta /ebook: redirige a /memberships?tab=library (la página separada ya no existe)
+- [x] Sistema de código de activación existente se mantiene intacto (EbookLogin + EbookReader)

@@ -57,7 +57,7 @@ function Router() {
       <Route path={"/admin/authorize"} component={AdminAuthorize} />
       <Route path={"/admin/dashboard"} component={AdminDashboard} />
       <Route path={"/admin/memberships"} component={AdminMemberships} />
-      <Route path={"/ebook"} component={EbookStore} />
+      <Route path={"/ebook"} component={() => { window.location.replace("/memberships?tab=library"); return null; }} />
       <Route path={"/ebook/login"} component={EbookLogin} />
       <Route path={"/ebook/read"} component={EbookReader} />
       <Route path={"/tienda"} component={Store} />

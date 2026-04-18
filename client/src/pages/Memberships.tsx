@@ -1323,7 +1323,17 @@ onClick={() => {
                           <span className="text-sm text-gray-400 mb-1">MXN</span>
                         </div>
                       )}
-                      {ebook.comingSoon ? (
+                      {/* Aviso de preventa si aplica */}
+                      {ebook.comingSoon && (ebook as any).presalePrice && (
+                        <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 mb-3 flex items-start gap-2">
+                          <span className="text-lg">⏳</span>
+                          <div>
+                            <p className="text-amber-800 font-bold text-xs mb-0.5">Pre-venta disponible</p>
+                            <p className="text-amber-700 text-xs leading-relaxed">Compra ahora al precio especial. El acceso para leer se activa automáticamente cuando el libro sea publicado.</p>
+                          </div>
+                        </div>
+                      )}
+                      {ebook.comingSoon && !(ebook as any).presalePrice ? (
                         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
                           <p className="text-amber-700 font-bold text-sm">Próximamente disponible</p>
                           <p className="text-gray-400 text-xs mt-1">Suscríbete para recibir notificación</p>
@@ -1337,12 +1347,13 @@ onClick={() => {
                           category: "ebook", itemType: "ebook", ebookId: ebook.id,
                         })}
                           className="w-full flex items-center justify-center gap-2 bg-[#C5A55A] text-white font-bold py-3.5 rounded-xl hover:bg-[#B8963E] transition-all active:scale-95 shadow-md">
-                          <Zap className="w-4 h-4" /> Comprar ahora
+                          <Zap className="w-4 h-4" />
+                          {(ebook as any).presalePrice ? "Pre-comprar ahora" : "Comprar ahora"}
                         </button>
                       )}
                     </div>
                   </div>
-                  <p className="text-center text-xs text-gray-400 mt-4">Para ver el eBook completo, visita <button onClick={() => navigate("/ebook")} className="text-[#C5A55A] underline hover:text-[#B8963E]">Librería Nutriser</button></p>
+
                 </div>
               )}
             </div>

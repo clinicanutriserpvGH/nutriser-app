@@ -2,8 +2,8 @@
  * Splash0Entry — Pantalla de entrada principal (único splash)
  * Solo para móvil/tablet (PC va directo al sitio web)
  * Grid de 3 tarjetas:
- *   - Nutriser Shop → /memberships
- *   - Nutriser Academy → /cursos
+ *   - Tienda Nutriser → /memberships
+ *   - Academia Nutriser → /cursos
  *   - Portal de Salud Nutriser → app externa
  * En móvil: apilado vertical
  * En tablet/desktop: 3 columnas iguales
@@ -106,7 +106,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
           {/* Móvil: columna vertical | Tablet/Desktop: 3 columnas iguales */}
           <div className="flex flex-col md:grid md:grid-cols-3 gap-3 md:gap-4 mb-3 flex-1 min-h-0">
 
-            {/* ── Tarjeta 1: Nutriser Shop ── */}
+            {/* ── Tarjeta 1: Tienda Nutriser ── */}
             <div className="flex-1 min-h-[150px] md:min-h-0">
               <button
                 type="button"
@@ -116,7 +116,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
               >
                 <img
                   src={CLINIC_SHOP_IMG}
-                  alt="Nutriser Shop"
+                  alt="Tienda Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   style={{ objectPosition: "center 30%" }}
                 />
@@ -130,7 +130,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   </div>
                   <div>
                     <h2 className="text-2xl sm:text-3xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
-                      Nutriser Shop
+                      Tienda Nutriser
                     </h2>
                     <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
                       <ShoppingBag className="w-3.5 h-3.5" /> Visitar
@@ -140,7 +140,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
               </button>
             </div>
 
-            {/* ── Tarjeta 2: Nutriser Academy ── */}
+            {/* ── Tarjeta 2: Academia Nutriser ── */}
             <div className="flex-1 min-h-[150px] md:min-h-0">
               <button
                 type="button"
@@ -150,7 +150,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
               >
                 <img
                   src={IMG_ACADEMY}
-                  alt="Nutriser Academy"
+                  alt="Academia Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   style={{ objectPosition: "center center" }}
                 />
@@ -164,7 +164,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   </div>
                   <div>
                     <h2 className="text-2xl sm:text-3xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
-                      Nutriser Academy
+                      Academia Nutriser
                     </h2>
                     <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
                       <GraduationCap className="w-3.5 h-3.5" /> Ver cursos

@@ -3,8 +3,8 @@
  *
  * Usado en:
  *   - Splash 1 (botón "Iniciar sesión" en la barra superior)
- *   - Nutriser Shop (al agregar al carrito sin sesión)
- *   - Nutriser Academy (al intentar suscribirse sin sesión)
+ *   - Tienda Nutriser (al agregar al carrito sin sesión)
+ *   - Academia Nutriser (al intentar suscribirse sin sesión)
  *   - Mis Tratamientos (pantalla de autenticación)
  */
 

@@ -1,5 +1,5 @@
 /*
- * Nutriser Shop — Rediseño limpio inspirado en apps de farmacia
+ * Tienda Nutriser — Rediseño limpio inspirado en apps de farmacia
  * Layout: Header con sesión + búsqueda → Categorías circulares → Grid de productos → WhatsApp flotante
  * Sesión unificada con usePatientAuth
  */

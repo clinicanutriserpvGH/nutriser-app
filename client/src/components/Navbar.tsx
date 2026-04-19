@@ -5,7 +5,7 @@
  *
  * LÓGICA DE DISPOSITIVOS:
  * ─ Móvil/Tableta (PWA): Botones Inicio (→ Splash 0) y Regresar (→ Splash 1)
- * ─ Desktop (computadora): Botón "Nutriser Shop" que lleva a /memberships
+ * ─ Desktop (computadora): Botón "Tienda Nutriser" que lleva a /memberships
  *   Los splashes son exclusivos de la app móvil, desktop NO debe ir a splashes.
  */
 import { useState, useEffect } from "react";
@@ -53,7 +53,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
   const handleRegresar = showSplash1;
   // Móvil: Inicio → Splash 0 (pantalla de entrada)
   const handleInicio = onShowSplash ?? showSplash;
-  // Desktop: Ir a Nutriser Shop
+  // Desktop: Ir a Tienda Nutriser
   const handleGoToShop = () => navigate("/memberships");
 
   useEffect(() => {
@@ -277,7 +277,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
             style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 6rem)' }}
           >
             <div className="flex flex-col gap-6">
-              {/* Desktop: Agregar enlace a Nutriser Shop en el menú móvil */}
+              {/* Desktop: Agregar enlace a Tienda Nutriser en el menú móvil */}
               {isDesktop && (
                 <motion.a
                   href="/memberships"
@@ -292,7 +292,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
                   className="font-serif text-3xl text-[#C5A55A] hover:text-[#B8963E] transition-colors flex items-center gap-3"
                 >
                   <ShoppingBag className="w-6 h-6" />
-                  Nutriser Shop
+                  Tienda Nutriser
                 </motion.a>
               )}
 

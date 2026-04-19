@@ -2,7 +2,7 @@ export const translations = {
   ES: {
     // Header
     aestheticNutrition: "Aesthetic & Nutrition",
-    nutriserShop: "Nutriser Shop",
+    nutriserShop: "Tienda Nutriser",
     searchPlaceholder: "¿Qué estás buscando?",
     closeSession: "Cerrar sesión",
     back: "Regresar",
@@ -61,7 +61,7 @@ export const translations = {
   EN: {
     // Header
     aestheticNutrition: "Aesthetic & Nutrition",
-    nutriserShop: "Nutriser Shop",
+    nutriserShop: "Tienda Nutriser",
     searchPlaceholder: "What are you looking for?",
     closeSession: "Close session",
     back: "Back",

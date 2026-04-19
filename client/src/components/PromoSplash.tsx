@@ -1,5 +1,5 @@
 /*
- * PromoSplash — Pop-up de publicidad al entrar a Nutriser Shop
+ * PromoSplash — Pop-up de publicidad al entrar a Tienda Nutriser
  * Muestra automáticamente los cupones/promociones activos de la cuponera
  * + una tarjeta promocional del Monedero Nutriser invitando a crear cuenta.
  * La tarjeta del monedero es la PRIMERA slide del carrusel.

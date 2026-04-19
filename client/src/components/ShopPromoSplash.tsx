@@ -1,7 +1,7 @@
 /*
- * ShopPromoSplash — Pop-up promocional de Nutriser Shop
+ * ShopPromoSplash — Pop-up promocional de Tienda Nutriser
  * Aparece automáticamente al abrir la app (antes del Splash 0), una vez por sesión.
- * Slide 0: tarjeta de Nutriser Shop con las 4 imágenes reales
+ * Slide 0: tarjeta de Tienda Nutriser con las 4 imágenes reales
  * Slide 1+: cupones/promociones activos (igual que PromoSplash en la tienda)
  * El usuario DEBE cerrarlo manualmente (X o "Después").
  */
@@ -30,7 +30,7 @@ function useCountdown(expiresAt: Date | string | null | undefined) {
 }
 
 const SHOP_SPLASH_IMAGE =
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663459263490/IlibdokxBlwzqOaF.png";
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663459263490/YZYSGKGuchmpBSLJ.png";
 
 interface ShopPromoSplashProps {
   onClose: () => void;
@@ -51,7 +51,7 @@ interface Promo {
   couponsRemaining?: number | null;
 }
 
-/* ── Slide 0: Tarjeta de Nutriser Shop ── */
+/* ── Slide 0: Tarjeta de Tienda Nutriser ── */
 function ShopCard({ onAction }: { onAction: () => void }) {
   return (
     <div className="relative w-full flex-shrink-0">
@@ -67,7 +67,7 @@ function ShopCard({ onAction }: { onAction: () => void }) {
         >
           <img
             src={SHOP_SPLASH_IMAGE}
-            alt="Nutriser Shop"
+            alt="Tienda Nutriser"
             className="w-full h-auto block"
             style={{ display: "block" }}
           />
@@ -205,7 +205,7 @@ export default function ShopPromoSplash({ onClose, onGoToShop }: ShopPromoSplash
               <Gift className="w-4 h-4 text-[#C5A55A]" />
             )}
             <span className="text-[#C5A55A] text-sm font-bold tracking-wide">
-              {isShopSlide ? "NUTRISER SHOP" : "OFERTAS EXCLUSIVAS"}
+              {isShopSlide ? "TIENDA NUTRISER" : "OFERTAS EXCLUSIVAS"}
             </span>
           </div>
           {totalSlides > 1 && (

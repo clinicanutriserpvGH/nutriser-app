@@ -1,5 +1,5 @@
 /**
- * Nutriser Shop — Tienda Digital Comercial
+ * Tienda Nutriser — Tienda Digital Comercial
  * Estilo: Farmacia del Ahorro / e-commerce moderno
  * Fondo claro, scroll horizontal, carrusel de ofertas, categorías con iconos
  */
@@ -807,7 +807,7 @@ export default function Memberships() {
             <img src={LOGO_URL} alt="Nutriser" className="w-10 h-10 lg:w-12 lg:h-12 object-contain flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[#C5A55A] text-[9px] lg:text-[10px] tracking-[0.2em] uppercase font-semibold">Aesthetic & Nutrition</p>
-              <h1 className="text-gray-900 text-lg lg:text-xl font-black leading-tight">Nutriser Shop</h1>
+              <h1 className="text-gray-900 text-lg lg:text-xl font-black leading-tight">Tienda Nutriser</h1>
             </div>
 
             {/* Session + Cart */}

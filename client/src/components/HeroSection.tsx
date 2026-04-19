@@ -114,14 +114,14 @@ export default function HeroSection() {
             tecnología y experiencia profesional.
           </motion.p>
 
-          {/* ─── Botones (Solo Nutriser Shop y Agenda tu Cita) ─────────────────────────────────────────── */}
+          {/* ─── Botones (Solo Tienda Nutriser y Agenda tu Cita) ─────────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
             className="flex flex-col gap-3 max-w-2xl"
           >
-            {/* 1. Nutriser Shop */}
+            {/* 1. Tienda Nutriser */}
             <motion.a
               href="/memberships"
               onClick={(e) => { e.preventDefault(); window.location.href = '/memberships'; }}
@@ -136,7 +136,7 @@ export default function HeroSection() {
                 transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
               />
               <Store className="relative w-5 h-5 flex-shrink-0" />
-              <span className="relative">Nutriser Shop</span>
+              <span className="relative">Tienda Nutriser</span>
             </motion.a>
             {/* 2. Agenda tu Cita */}
             <a

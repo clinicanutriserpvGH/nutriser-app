@@ -330,7 +330,7 @@ export default function WalletPage() {
               <div className="space-y-2">
                 {[
                   "2% de cashback en cada compra verificada",
-                  "Dinero electrónico para usar en Nutriser Shop y Cupones",
+                  "Dinero electrónico para usar en Tienda Nutriser y Cupones",
                   "3 consultas nutricionales → la 4ta es GRATIS",
                   "Planes de lealtad por productos: acumula y gana GRATIS",
                   "Historial completo de movimientos",
@@ -380,7 +380,7 @@ export default function WalletPage() {
               !tracker && (
                 <div className="text-center py-8">
                   <p className="text-gray-400 text-sm">Aún no tienes planes de lealtad activos.</p>
-                  <p className="text-gray-300 text-xs mt-1">Compra en Nutriser Shop para comenzar a acumular.</p>
+                  <p className="text-gray-300 text-xs mt-1">Compra en Tienda Nutriser para comenzar a acumular.</p>
                 </div>
               )
             )}

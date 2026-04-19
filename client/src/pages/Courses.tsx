@@ -201,7 +201,7 @@ export default function Courses() {
         name: subscribeName.trim(),
         email: subscribeEmail.trim(),
       }));
-      toast.success("¡Bienvenido a la comunidad Nutriser Academy! Ya puedes participar en el foro.");
+      toast.success("¡Bienvenido a la comunidad Academia Nutriser! Ya puedes participar en el foro.");
       setShowSubscribeModal(false);
       setSubscribeEmail("");
       setSubscribeName("");
@@ -329,7 +329,7 @@ export default function Courses() {
       <NutriserAuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        contextMessage="Inicia sesión para suscribirte y acceder a contenido exclusivo de Nutriser Academy."
+        contextMessage="Inicia sesión para suscribirte y acceder a contenido exclusivo de Academia Nutriser."
       />
 
       {/* Hero de Cursos */}
@@ -338,7 +338,7 @@ export default function Courses() {
         <div className="max-w-5xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <BookOpen className="w-8 h-8 text-[#C5A55A]" />
-            <span className="text-[#C5A55A] font-semibold text-sm uppercase tracking-widest">Nutriser Academy</span>
+            <span className="text-[#C5A55A] font-semibold text-sm uppercase tracking-widest">Academia Nutriser</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
             Formación Digital <span className="text-[#C5A55A] italic">en Salud</span>
@@ -712,7 +712,7 @@ export default function Courses() {
                     </div>
                   ) : (
                     <>
-                      <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete para recibir notificaciones sobre nuevos contenidos y próximos lanzamientos de Nutriser Academy.</p>
+                      <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete para recibir notificaciones sobre nuevos contenidos y próximos lanzamientos de Academia Nutriser.</p>
                       <Button
                         onClick={() => setShowSubscribeModal(true)}
                         className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3.5 rounded-full font-semibold shadow-lg shadow-[#C5A55A]/20 mb-8"
@@ -792,7 +792,7 @@ export default function Courses() {
           <DialogHeader>
             <DialogTitle className="font-serif text-xl flex items-center gap-2">
               <Bell className="w-5 h-5 text-[#C5A55A]" />
-              Únete a la comunidad Nutriser Academy
+              Únete a la comunidad Academia Nutriser
             </DialogTitle>
           </DialogHeader>
           <p className="text-gray-500 text-sm">Suscríbete para recibir notificaciones de nuevo contenido y pertenecer a la comunidad. Solo los miembros pueden participar en el foro de sugerencias.</p>
@@ -934,7 +934,7 @@ export default function Courses() {
                       className="bg-white/10 border-white/20 text-white placeholder:text-gray-500"
                     />
                     <p className="text-[11px] text-[#C5A55A]/70 -mt-1 px-1">
-                      ✓ Al enviar quedarás suscrito a la comunidad Nutriser Academy
+                      ✓ Al enviar quedarás suscrito a la comunidad Academia Nutriser
                     </p>
                   </>
                 )}

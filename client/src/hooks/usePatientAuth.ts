@@ -2,9 +2,9 @@
  * usePatientAuth — Hook de autenticación unificada para Nutriser
  *
  * Una sola cuenta funciona en:
- *   - Nutriser Shop (/memberships)
+ *   - Tienda Nutriser (/memberships)
  *   - Mis Tratamientos (/mis-tratamientos)
- *   - Nutriser Academy (/cursos)
+ *   - Academia Nutriser (/cursos)
  *   - Store (/store)
  *
  * La sesión se persiste en localStorage bajo la clave "nutriser_patient" (unificada con MyTreatments).

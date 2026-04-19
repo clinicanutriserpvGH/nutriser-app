@@ -3,7 +3,7 @@
  *
  * Estructura:
  *   - Header: Logo + "Iniciar sesión" / "Hola, [Nombre]" + Cerrar sesión
- *   - 3 tarjetas: Nutriser Shop | Nutriser Academy | Mis Tratamientos
+ *   - 3 tarjetas: Tienda Nutriser | Academia Nutriser | Mis Tratamientos
  *   - Botón Regresar → Splash 0
  *
  * La sesión es compartida con Shop, Academy y Mis Tratamientos.
@@ -364,14 +364,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
           {/* Mobile: columna vertical | Tablet (md+): 3 columnas iguales | lg+: 3 columnas */}
           <div className="flex flex-col md:grid md:grid-cols-3 gap-2 md:gap-3 mb-2 flex-1">
 
-            {/* Tarjeta 1: Nutriser Shop */}
+            {/* Tarjeta 1: Tienda Nutriser */}
             <div className="flex-1 min-h-[130px] md:min-h-0">
               <button
                 onClick={() => handleNavigate('/memberships')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
                 style={{ minHeight: "130px" }}
               >
-                <img src={CLINIC_IMG} alt="Nutriser Shop" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
+                <img src={CLINIC_IMG} alt="Tienda Nutriser" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center 30%' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 md:p-5 text-left">
                   <div className="flex items-center gap-1.5">
@@ -381,7 +381,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <span className="text-[10px] md:text-xs font-semibold tracking-wide uppercase drop-shadow text-white/90">Tienda</span>
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white">Nutriser Shop</h2>
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white">Tienda Nutriser</h2>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-[10px] sm:text-xs md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
                       <ShoppingBag className="w-3 h-3 md:w-4 md:h-4" /> Visitar
                     </span>
@@ -390,14 +390,14 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               </button>
             </div>
 
-            {/* Tarjeta 2: Nutriser Academy */}
+            {/* Tarjeta 2: Academia Nutriser */}
             <div className="flex-1 min-h-[130px] md:min-h-0">
               <button
                 onClick={() => handleNavigate('/cursos')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full"
                 style={{ minHeight: "130px" }}
               >
-                <img src={IMG_ACADEMY} alt="Nutriser Academy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
+                <img src={IMG_ACADEMY} alt="Academia Nutriser" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: 'center center' }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/80" />
                 <div className="relative h-full flex flex-col justify-between p-3 sm:p-4 md:p-5 text-left">
                   <div className="flex items-center gap-1.5">
@@ -407,7 +407,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
                     <span className="text-[10px] md:text-xs font-semibold tracking-wide uppercase drop-shadow text-white/90">Educación</span>
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white">Nutriser Academy</h2>
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white">Academia Nutriser</h2>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-[10px] sm:text-xs md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
                       <GraduationCap className="w-3 h-3 md:w-4 md:h-4" /> Ver cursos
                     </span>
@@ -464,7 +464,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
       <NutriserAuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        contextMessage="Inicia sesión para acceder a tu monedero, cupones, beneficios de lealtad, Nutriser Shop y Academy."
+        contextMessage="Inicia sesión para acceder a tu monedero, cupones, beneficios de lealtad, Tienda Nutriser y Academy."
         onSuccess={() => setShowAuthModal(false)}
       />
 

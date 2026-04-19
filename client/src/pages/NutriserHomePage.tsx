@@ -1,5 +1,5 @@
 /*
- * NutriserHomePage — Splash 2 / Nutriser Shop
+ * NutriserHomePage — Splash 2 / Tienda Nutriser
  * Soporta modo claro (crema) y oscuro (negro) con toggle palanca persistente
  */
 import {
@@ -76,7 +76,7 @@ export default function NutriserHomePage() {
     window.location.href = "/";
   };
   const goToSplash1 = () => {
-    // Regresar → Splash 1 (hub con Sitio Web y Nutriser Shop)
+    // Regresar → Splash 1 (hub con Sitio Web y Tienda Nutriser)
     sessionStorage.setItem("nutriser_go_to_splash1", "1");
     window.location.href = "/";
   };
@@ -141,7 +141,7 @@ export default function NutriserHomePage() {
                 Aesthetic &amp; Nutrition
               </p>
               <h1 className="text-white text-xs md:text-sm font-bold tracking-wide leading-tight mt-0.5">
-                Nutriser Shop
+                Tienda Nutriser
               </h1>
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function NutriserHomePage() {
               img={IMG_ACADEMY}
               icon={GraduationCap}
               label="Educación"
-              title="Nutriser Academy"
+              title="Academia Nutriser"
               cta="Ver Cursos"
               onClick={() => goTo("/cursos")}
               imgPosition="center 30%"

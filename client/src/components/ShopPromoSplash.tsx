@@ -68,18 +68,18 @@ function ShopCard({ onAction }: { onAction: () => void }) {
             className="w-full h-auto block"
             style={{ display: "block" }}
           />
-          {/* Etiqueta "Productos" — cuadrante inferior izquierdo */}
+          {/* Etiqueta "Productos" — borde inferior del cuadrante inferior izquierdo */}
           <div
             className="absolute flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-[11px] font-bold px-2 py-1 rounded-sm"
-            style={{ bottom: "52%", left: "2%", transform: "translateY(100%)" }}
+            style={{ bottom: "2%", left: "2%" }}
           >
             <span>Productos</span>
             <span className="text-[#C5A55A] text-[9px] font-normal">nutriser</span>
           </div>
-          {/* Etiqueta "Librería" — cuadrante inferior derecho */}
+          {/* Etiqueta "Librería" — borde inferior del cuadrante inferior derecho */}
           <div
             className="absolute flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-[11px] font-bold px-2 py-1 rounded-sm"
-            style={{ bottom: "52%", right: "2%", transform: "translateY(100%)" }}
+            style={{ bottom: "2%", right: "2%" }}
           >
             <span>Librería</span>
             <span className="text-[#C5A55A] text-[9px] font-normal">nutriser</span>

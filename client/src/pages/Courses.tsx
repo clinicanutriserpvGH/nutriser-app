@@ -384,7 +384,6 @@ export default function Courses() {
               <div className="flex items-center gap-2 bg-white/10 rounded-full px-5 py-2">
                 <span className="text-white/70 text-sm">Hola,</span>
                 <span className="text-[#C5A55A] font-semibold text-sm">{patient.name}</span>
-                <button onClick={logout} className="text-white/30 hover:text-white/60 text-xs ml-2 transition-colors">(Cerrar sesión)</button>
               </div>
             </div>
           ) : (

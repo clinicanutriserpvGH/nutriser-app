@@ -872,10 +872,7 @@ export default function Memberships() {
                     <User className="w-4 h-4 text-[#C5A55A]" />
                     <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white" />
                   </div>
-                  <button onClick={logout} title="Cerrar sesión"
-                    className="text-xs text-gray-400 hover:text-red-500 transition-colors">
-                    <X className="w-4 h-4" />
-                  </button>
+
                 </div>
               ) : (
                 // Solo visible en escritorio — en móvil el usuario inicia sesión desde Mi Cuenta Nutriser en el splash

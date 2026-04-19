@@ -254,7 +254,12 @@ export default function Courses() {
   const handleSubscribe = async () => {
     // Requerir login antes de suscribirse
     if (!isLoggedIn) {
-      setShowAuthModal(true);
+      if (isMobile) {
+        setMobileGuardFeature("suscribirte a Academia Nutriser");
+        setMobileGuardOpen(true);
+      } else {
+        setShowAuthModal(true);
+      }
       return;
     }
     if (!subscribeName.trim()) {
@@ -391,12 +396,6 @@ export default function Courses() {
                 <Bell className="w-5 h-5" />
                 Suscríbete para acceder a contenido exclusivo
               </Button>
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className="text-white/50 hover:text-[#C5A55A] text-sm transition-colors hidden md:block"
-              >
-                👤 Ya tengo cuenta — Iniciar sesión
-              </button>
             </div>
           )}
         </div>
@@ -740,7 +739,7 @@ export default function Courses() {
                     <>
                       <p className="text-gray-400 text-sm max-w-md mx-auto mb-8">Suscríbete para recibir notificaciones sobre nuevos contenidos y próximos lanzamientos de Academia Nutriser.</p>
                       <Button
-                        onClick={() => setShowSubscribeModal(true)}
+                        onClick={() => requireAuth("unirte a la comunidad y recibir contenido exclusivo de Academia Nutriser") && setShowSubscribeModal(true)}
                         className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3.5 rounded-full font-semibold shadow-lg shadow-[#C5A55A]/20 mb-8"
                       >
                         <Bell className="w-4 h-4 mr-2" />

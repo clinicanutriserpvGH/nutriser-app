@@ -1823,7 +1823,7 @@ export async function getBehaviorTrend(days = 7) {
         GROUP BY DATE(createdAt), eventType
         ORDER BY DATE(createdAt) ASC`
   );
-  return (rows[0] as any[]).map((r: any) => ({
+  return (rows[0] as unknown as any[]).map((r: any) => ({
     date: typeof r.date === "string" ? r.date : (r.date instanceof Date ? r.date.toISOString().slice(0, 10) : String(r.date)),
     eventType: r.eventType as string,
     count: Number(r.count),

@@ -3,10 +3,15 @@
  * Muestra automáticamente los cupones/promociones activos de la cuponera
  * + una tarjeta promocional del Monedero Nutriser invitando a crear cuenta.
  * La tarjeta del monedero es la PRIMERA slide del carrusel.
+ *
+ * Guard: si el usuario no está autenticado y presiona "¡LO QUIERO!" o "¡Crear mi Monedero!",
+ * se muestra el MobileAuthGuard. Al presionar "Después" en el guard, regresa a la tienda
+ * (ya que el usuario estaba navegando en /memberships).
  */
 import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { X, Gift, Clock, ChevronLeft, ChevronRight, Flame, Wallet, Star, Percent, Sparkles } from "lucide-react";
+import MobileAuthGuard from "@/components/MobileAuthGuard";
 
 const WALLET_CARD_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-wallet-card-promo_af671ddf.png";
@@ -35,6 +40,8 @@ interface PromoSplashProps {
   onClose: () => void;
   onGoToCoupon?: (promoId: number) => void;
   onOpenWallet?: () => void;
+  /** Si el usuario ya inició sesión; si no, se muestra el guard al intentar comprar */
+  isAuthenticated?: boolean;
 }
 
 interface Promo {
@@ -181,11 +188,13 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
   );
 }
 
-export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: PromoSplashProps) {
+export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAuthenticated = false }: PromoSplashProps) {
   const { data: promotions = [] } = trpc.promotions.list.useQuery();
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
+  const [showAuthGuard, setShowAuthGuard] = useState(false);
+  const [guardFeature, setGuardFeature] = useState("acceder a esta función");
 
   // Monedero is always slide 0, promos start at index 1
   const totalSlides = activePromos.length + 1;
@@ -199,19 +208,31 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: Pro
   }, [onClose]);
 
   const handleAction = useCallback((promoId: number) => {
+    if (!isAuthenticated) {
+      // Mostrar guard: el usuario debe crear cuenta antes de comprar
+      setGuardFeature("comprar cupones y acceder a ofertas exclusivas");
+      setShowAuthGuard(true);
+      return;
+    }
     if (onGoToCoupon) {
       onGoToCoupon(promoId);
     } else {
       handleClose();
     }
-  }, [onGoToCoupon, handleClose]);
+  }, [isAuthenticated, onGoToCoupon, handleClose]);
 
   const handleMonederoAction = useCallback(() => {
+    if (!isAuthenticated) {
+      // Mostrar guard: el usuario debe crear cuenta antes de crear monedero
+      setGuardFeature("crear tu Monedero Nutriser y acceder a beneficios exclusivos");
+      setShowAuthGuard(true);
+      return;
+    }
     if (onOpenWallet) {
       onOpenWallet();
     }
     handleClose();
-  }, [onOpenWallet, handleClose]);
+  }, [isAuthenticated, onOpenWallet, handleClose]);
 
   const goNext = useCallback(() => {
     setCurrentIndex((i) => (i + 1) % totalSlides);
@@ -224,91 +245,106 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet }: Pro
   if (!shouldShow) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-      style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
-    >
-      {/* Close button */}
-      <button
-        onClick={handleClose}
-        className="absolute right-4 z-[110] w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
-        style={{ top: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
+    <>
+      <div
+        className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
       >
-        <X className="w-5 h-5" />
-      </button>
-
-      {/* Content */}
-      <div className="w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl relative">
-        {/* Header */}
-        <div className="text-center mb-3">
-          <div className="inline-flex items-center gap-2 bg-[#C5A55A]/20 backdrop-blur-sm rounded-full px-4 py-2 mb-1">
-            <Gift className="w-4 h-4 text-[#C5A55A]" />
-            <span className="text-[#C5A55A] text-sm md:text-base lg:text-lg font-bold tracking-wide">
-              {isMonederoSlide ? "BENEFICIOS EXCLUSIVOS" : "OFERTAS EXCLUSIVAS"}
-            </span>
-          </div>
-          {totalSlides > 1 && (
-            <p className="text-white/60 text-xs">
-              {currentIndex + 1} de {totalSlides}
-            </p>
-          )}
-        </div>
-
-        {/* Card — monedero first (index 0), then promos */}
-        {isMonederoSlide ? (
-          <MonederoPromoCard onAction={handleMonederoAction} />
-        ) : (
-          activePromos[currentIndex - 1] && (
-            <PromoCard
-              promo={activePromos[currentIndex - 1]}
-              onAction={() => handleAction(activePromos[currentIndex - 1].id)}
-            />
-          )
-        )}
-
-        {/* Navigation arrows */}
-        {totalSlides > 1 && (
-          <>
-            <button
-              onClick={goPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 md:-translate-x-5 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-20"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={goNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 md:translate-x-5 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-20"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </>
-        )}
-
-        {/* Dots indicator */}
-        {totalSlides > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-3">
-            {Array.from({ length: totalSlides }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={`h-2 rounded-full transition-all ${
-                  i === currentIndex
-                    ? "bg-[#C5A55A] w-6"
-                    : "bg-white/30 hover:bg-white/50 w-2"
-                }`}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Dismiss text */}
+        {/* Close button */}
         <button
           onClick={handleClose}
-          className="w-full text-center mt-3 text-white/50 text-sm hover:text-white/70 transition"
+          className="absolute right-4 z-[110] w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
         >
-          Después
+          <X className="w-5 h-5" />
         </button>
+
+        {/* Content */}
+        <div className="w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl relative">
+          {/* Header */}
+          <div className="text-center mb-3">
+            <div className="inline-flex items-center gap-2 bg-[#C5A55A]/20 backdrop-blur-sm rounded-full px-4 py-2 mb-1">
+              <Gift className="w-4 h-4 text-[#C5A55A]" />
+              <span className="text-[#C5A55A] text-sm md:text-base lg:text-lg font-bold tracking-wide">
+                {isMonederoSlide ? "BENEFICIOS EXCLUSIVOS" : "OFERTAS EXCLUSIVAS"}
+              </span>
+            </div>
+            {totalSlides > 1 && (
+              <p className="text-white/60 text-xs">
+                {currentIndex + 1} de {totalSlides}
+              </p>
+            )}
+          </div>
+
+          {/* Card — monedero first (index 0), then promos */}
+          {isMonederoSlide ? (
+            <MonederoPromoCard onAction={handleMonederoAction} />
+          ) : (
+            activePromos[currentIndex - 1] && (
+              <PromoCard
+                promo={activePromos[currentIndex - 1]}
+                onAction={() => handleAction(activePromos[currentIndex - 1].id)}
+              />
+            )
+          )}
+
+          {/* Navigation arrows */}
+          {totalSlides > 1 && (
+            <>
+              <button
+                onClick={goPrev}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 md:-translate-x-5 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-20"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={goNext}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 md:translate-x-5 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition z-20"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </>
+          )}
+
+          {/* Dots indicator */}
+          {totalSlides > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-3">
+              {Array.from({ length: totalSlides }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  className={`h-2 rounded-full transition-all ${
+                    i === currentIndex
+                      ? "bg-[#C5A55A] w-6"
+                      : "bg-white/30 hover:bg-white/50 w-2"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Dismiss text */}
+          <button
+            onClick={handleClose}
+            className="w-full text-center mt-3 text-white/50 text-sm hover:text-white/70 transition"
+          >
+            Después
+          </button>
+        </div>
       </div>
-    </div>
+
+      {/* MobileAuthGuard: se muestra encima del PromoSplash cuando el usuario no está autenticado */}
+      {/* Al presionar 'Después': cierra el guard y el splash, el usuario queda en la tienda (/memberships) */}
+      <MobileAuthGuard
+        isOpen={showAuthGuard}
+        onClose={() => setShowAuthGuard(false)}
+        featureDescription={guardFeature}
+        onDismiss={() => {
+          setShowAuthGuard(false);
+          // Cerrar el PromoSplash también — el usuario queda en la tienda donde ya estaba
+          handleClose();
+        }}
+      />
+    </>
   );
 }

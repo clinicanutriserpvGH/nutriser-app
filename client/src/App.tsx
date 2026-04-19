@@ -37,6 +37,7 @@ import { SplashThemeProvider } from "@/contexts/SplashThemeContext";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { isDesktopDevice } from "@/hooks/useDeviceType";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 // Rutas que NUNCA muestran el splash
 const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/cupones", "/servicios", "/transformaciones", "/services", "/privacy-policy", "/delete-account", "/mis-tratamientos", "/nutriser-home", "/monedero", "/servicio"];
@@ -90,6 +91,8 @@ const SPLASH_VERSION = "v3";
 
 function AppContent() {
   const [location] = useLocation();
+  // Auth del paciente para pasar isAuthenticated a los splashes
+  const { isLoggedIn: patientIsLoggedIn } = usePatientAuth();
 
   // ShopPromoSplash: mostrar una vez por sesión antes del Splash 0 (solo móvil)
   const [showShopPromo, setShowShopPromo] = useState<boolean>(() => {
@@ -165,6 +168,7 @@ function AppContent() {
       {/* ShopPromoSplash: reemplaza completamente el Splash 0 hasta que el usuario lo cierre */}
       {showShopPromo ? (
         <ShopPromoSplash
+          isAuthenticated={patientIsLoggedIn}
           onClose={() => {
             sessionStorage.setItem("nutriser_shop_promo_seen", "1");
             setShowShopPromo(false);

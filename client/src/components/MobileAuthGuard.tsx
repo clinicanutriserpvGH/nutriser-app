@@ -22,12 +22,19 @@ interface MobileAuthGuardProps {
   onClose: () => void;
   /** Descripción de la función que requiere sesión, p. ej. "ver tu monedero" */
   featureDescription?: string;
+  /**
+   * Callback opcional para el botón "Después".
+   * Si se omite, simplemente llama a onClose.
+   * Úsalo para redirigir al usuario a un destino específico (ej: Splash 0, tienda).
+   */
+  onDismiss?: () => void;
 }
 
 export default function MobileAuthGuard({
   isOpen,
   onClose,
   featureDescription = "acceder a esta función",
+  onDismiss,
 }: MobileAuthGuardProps) {
   const { isMobile } = useDeviceType();
 
@@ -137,7 +144,7 @@ export default function MobileAuthGuard({
 
             {/* Botón secundario: después */}
             <button
-              onClick={onClose}
+              onClick={onDismiss ?? onClose}
               className="w-full flex items-center justify-center gap-2 font-semibold text-sm py-3.5 rounded-2xl transition-all active:scale-[0.97]"
               style={{
                 background: "rgba(255,255,255,0.06)",

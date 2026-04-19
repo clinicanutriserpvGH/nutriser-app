@@ -631,23 +631,17 @@ export default function Memberships() {
       {/* ── Pop-up de cupones/promociones ── */}
       {showPromoSplash && (
         <PromoSplash
+          isAuthenticated={isLoggedIn}
           onClose={() => setShowPromoSplash(false)}
           onGoToCoupon={(promoId) => {
+            // Solo se llama si isAuthenticated=true (el guard ya intercepta si no hay sesión)
             setShowPromoSplash(false);
             navigate(`/cupon/${promoId}?from=store`);
           }}
           onOpenWallet={() => {
+            // Solo se llama si isAuthenticated=true
             setShowPromoSplash(false);
-            if (isLoggedIn) {
-              setWalletSheetOpen(true);
-            } else if (isMobile) {
-              // En móvil: mostrar guard con opciones Crear cuenta / Después
-              setMobileGuardFeature("crear tu Monedero Nutriser y acceder a beneficios exclusivos");
-              setMobileGuardOpen(true);
-            } else {
-              // En desktop: modal de login normal
-              setShowAuthModal(true);
-            }
+            setWalletSheetOpen(true);
           }}
         />
       )}

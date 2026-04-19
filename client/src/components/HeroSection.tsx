@@ -4,9 +4,11 @@
  * Portal de Salud as the primary featured element
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Gift, CalendarCheck, Store } from "lucide-react";
+import { ChevronDown, CalendarCheck, Store, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useDeviceType } from "@/hooks/useDeviceType";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
+import { useLocation } from "wouter";
 
 const HERO_IMAGES = [
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-recepcion-hero_de9ce8ee.png",
@@ -17,6 +19,8 @@ const HERO_IMAGES = [
 export default function HeroSection() {
   const [currentImg, setCurrentImg] = useState(0);
   const { isDesktop } = useDeviceType();
+  const { isLoggedIn } = usePatientAuth();
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,6 +28,26 @@ export default function HeroSection() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Guard desktop: si no hay sesión → redirigir a Mi Cuenta Nutriser con returnTo
+  // En móvil/tableta los botones no aparecen (solo en desktop)
+  const handleTienda = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDesktop && !isLoggedIn) {
+      navigate("/mis-tratamientos?returnTo=/memberships");
+    } else {
+      window.location.href = "/memberships";
+    }
+  };
+
+  const handleAcademia = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDesktop && !isLoggedIn) {
+      navigate("/mis-tratamientos?returnTo=/cursos");
+    } else {
+      window.location.href = "/cursos";
+    }
+  };
 
   return (
     <section
@@ -114,31 +138,44 @@ export default function HeroSection() {
             tecnología y experiencia profesional.
           </motion.p>
 
-          {/* ─── Botones (Solo Tienda Nutriser y Agenda tu Cita) ─────────────────────────────────────────── */}
+          {/* ─── Botones (Tienda Nutriser + Academia Nutriser + Agenda tu Cita) ─────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
             className="flex flex-col gap-3 max-w-2xl"
           >
-            {/* 1. Tienda Nutriser */}
-            <motion.a
-              href="/memberships"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/memberships'; }}
-              className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
-              animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
-              transition={{ duration: 1.2, repeat: Infinity }}
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <motion.span
-                className="relative w-3 h-3 rounded-full bg-[#C5A55A] flex-shrink-0"
-                animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <Store className="relative w-5 h-5 flex-shrink-0" />
-              <span className="relative">Tienda Nutriser</span>
-            </motion.a>
-            {/* 2. Agenda tu Cita */}
+            {/* Fila con Tienda y Academia en desktop, apilados en móvil */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* 1. Tienda Nutriser */}
+              <motion.a
+                href="/memberships"
+                onClick={handleTienda}
+                className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg flex-1"
+                animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <motion.span
+                  className="relative w-3 h-3 rounded-full bg-[#C5A55A] flex-shrink-0"
+                  animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <Store className="relative w-5 h-5 flex-shrink-0" />
+                <span className="relative">Tienda Nutriser</span>
+              </motion.a>
+              {/* 2. Academia Nutriser */}
+              <a
+                href="/cursos"
+                onClick={handleAcademia}
+                className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg flex-1"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <BookOpen className="relative w-5 h-5 flex-shrink-0" />
+                <span className="relative">Academia Nutriser</span>
+              </a>
+            </div>
+            {/* 3. Agenda tu Cita */}
             <a
               href="/appointment-form"
               onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}

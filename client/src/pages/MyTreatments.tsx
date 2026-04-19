@@ -7,6 +7,7 @@
  * DISEÑO: Tema claro integrado con la tienda (fondo #f5f5f5, tarjetas blancas, acentos dorados)
  */
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useDeviceType } from "@/hooks/useDeviceType";
 import SignatureCanvas from "react-signature-canvas";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -195,7 +196,15 @@ Establecimiento: Nutriser Aesthetic & Nutrition`;
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function MyTreatments() {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
+  const { isDesktop } = useDeviceType();
+  // Leer returnTo del query string (ej: /mis-tratamientos?returnTo=/memberships)
+  const returnTo = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('returnTo') || null;
+    } catch { return null; }
+  })();
   // Sesión unificada: si el usuario ya inició sesión en Shop/Academy/Splash1, se detecta aquí
   const { patient: unifiedPatient, login: unifiedLogin, logout: unifiedLogout, updateSession } = usePatientAuth();
   const patient = unifiedPatient as PatientSafe | null;
@@ -278,10 +287,23 @@ export default function MyTreatments() {
     onError: (e) => toast.error(e.message),
   });
 
+  // Redirigir al destino returnTo tras login/registro exitoso (solo cuando el consentimiento ya está firmado)
+  const redirectAfterAuth = useCallback((p: PatientSafe) => {
+    if (returnTo && p.consentAcceptedAt) {
+      window.location.href = returnTo;
+    }
+  }, [returnTo]);
+
   const loginMutation = trpc.patients.login.useMutation({
     onSuccess: (data) => {
-      persistPatient(data as PatientSafe);
-      setView((data as PatientSafe).consentAcceptedAt ? "portal" : "consent");
+      const p = data as PatientSafe;
+      persistPatient(p);
+      if (returnTo && p.consentAcceptedAt) {
+        // Desktop con returnTo: redirigir al destino
+        window.location.href = returnTo;
+      } else {
+        setView(p.consentAcceptedAt ? "portal" : "consent");
+      }
     },
     onError: (e) => toast.error(e.message),
   });
@@ -349,6 +371,11 @@ export default function MyTreatments() {
       if (patient) {
         const updated = { ...patient, consentAcceptedAt: new Date(), consentPdfUrl: data.pdfUrl, consentSignature: data.pdfUrl };
         persistPatient(updated as PatientSafe);
+        if (returnTo) {
+          // Tras firmar el consentimiento, redirigir al destino original
+          window.location.href = returnTo;
+          return;
+        }
       }
       setView("portal");
       toast.success("¡Consentimiento firmado y guardado exitosamente!");
@@ -408,7 +435,13 @@ export default function MyTreatments() {
 
   const { showSplash } = useSplash();
   const goBackToStore = () => {
-    showSplash();
+    if (isDesktop) {
+      // Desktop: siempre regresa al sitio web, nunca a splashes
+      navigate('/');
+    } else {
+      // Móvil/tableta: regresa al splash hub
+      showSplash();
+    }
   };
 
   // ─── Helpers UI ─────────────────────────────────────────────────────────────
@@ -511,7 +544,9 @@ export default function MyTreatments() {
                 <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
                   <p className="text-[#C5A55A] text-xs font-semibold uppercase tracking-wider mb-2">¿Cómo firmar?</p>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Usa tu dedo o S Pen para firmar directamente en la pantalla. Se debe usar la firma de tu identificación oficial.
+                    {isDesktop
+                      ? "Usa el mouse para dibujar tu firma en el recuadro. Se debe usar la firma de tu identificación oficial."
+                      : "Usa tu dedo o S Pen para firmar directamente en la pantalla. Se debe usar la firma de tu identificación oficial."}
                   </p>
                 </div>
                 <Button
@@ -627,7 +662,9 @@ export default function MyTreatments() {
 
             {/* Firma digital */}
             <div className="space-y-3">
-              <label className="text-gray-700 text-sm font-semibold">Firma digital (dibuja con tu dedo o mouse):</label>
+              <label className="text-gray-700 text-sm font-semibold">
+                {isDesktop ? "Firma digital (dibuja con el mouse):" : "Firma digital (dibuja con tu dedo):"}
+              </label>
               <div className="bg-white rounded-2xl p-2 border border-gray-200">
                 <SignatureCanvas
                   ref={sigCanvasRef}

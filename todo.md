@@ -1772,3 +1772,18 @@
 - [x] Guard aplicado en Academia (Courses.tsx): cursos, suscripción, foro de sugerencias
 - [x] En desktop: sigue usando NutriserAuthModal (comportamiento anterior sin cambios)
 - [x] En móvil/tablet: usa MobileAuthGuard con flujo de 2 opciones
+
+## Sesión Actual - Guard Desktop + Firma con Mouse
+
+- [x] HeroSection: botón Tienda Nutriser → si no hay sesión en desktop → navigate('/mis-tratamientos?returnTo=/memberships')
+- [x] HeroSection: botón Academia Nutriser → si no hay sesión en desktop → navigate('/mis-tratamientos?returnTo=/cursos')
+- [x] MyTreatments: leer query param returnTo y redirigir al destino después del login/registro exitoso
+- [x] MyTreatments: botón Regresar en desktop → navigate('/') en lugar de showSplash()
+- [x] MyTreatments: texto de firma actualizado para mencionar mouse en desktop
+- [x] Firma de consentimiento: soporte de mouse nativo via signature_pad (ya incluido en la librería)
+- [x] Courses.tsx: BackToSplash usa desktopBackTo="/" por defecto (confirmado)
+- [x] Memberships.tsx: BackToSplash usa desktopBackTo="/" por defecto (confirmado)
+- [x] TypeScript: 0 errores con npx tsc --noEmit
+- [x] Guardar checkpoint
+- [x] Tienda (Memberships.tsx): agregar botón LogOut en desktop (hidden en móvil) junto al nombre del usuario en el header
+- [x] Academia (Courses.tsx): agregar botón LogOut en desktop (hidden en móvil) en el header del usuario autenticado

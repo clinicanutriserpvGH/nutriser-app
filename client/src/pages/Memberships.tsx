@@ -12,7 +12,7 @@ import {
   ShoppingCart, X, Plus, Minus, Trash2, Tag, CheckCircle2,
   Loader2, Copy, CheckCheck, Apple, Sparkles, Scan, Syringe,
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
-  Search, ArrowLeft, Upload, BookOpen, FlaskConical, User,
+  Search, ArrowLeft, Upload, BookOpen, FlaskConical, User, LogOut,
   Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList, Globe,
   Info, Clock, Tag as TagIcon, DollarSign, PersonStanding, ScanFace, Smile,
 } from "lucide-react";
@@ -866,7 +866,14 @@ export default function Memberships() {
                     <User className="w-4 h-4 text-[#C5A55A]" />
                     <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white" />
                   </div>
-
+                  {/* Cerrar sesión — solo visible en desktop */}
+                  <button
+                    onClick={() => logout()}
+                    title="Cerrar sesión"
+                    className="hidden md:flex items-center justify-center w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
                 </div>
               ) : (
                 // Solo visible en escritorio — en móvil el usuario inicia sesión desde Mi Cuenta Nutriser en el splash

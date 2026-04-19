@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { PlayCircle, FileText, MessageSquare, Bell, BellOff, ChevronLeft, Download, Clock, BookOpen, Send, CheckCircle, ThumbsUp, Lightbulb, Users } from "lucide-react";
+import { PlayCircle, FileText, MessageSquare, Bell, BellOff, ChevronLeft, Download, Clock, BookOpen, Send, CheckCircle, ThumbsUp, Lightbulb, Users, LogOut } from "lucide-react";
 import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -385,6 +385,14 @@ export default function Courses() {
                 <span className="text-white/70 text-sm">Hola,</span>
                 <span className="text-[#C5A55A] font-semibold text-sm">{patient.name}</span>
               </div>
+              {/* Cerrar sesión — solo visible en desktop */}
+              <button
+                onClick={() => logout()}
+                className="hidden md:flex items-center gap-1.5 text-white/50 hover:text-white/80 text-xs transition-colors"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Cerrar sesión
+              </button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3">

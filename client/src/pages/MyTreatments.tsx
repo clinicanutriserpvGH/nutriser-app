@@ -455,7 +455,7 @@ export default function MyTreatments() {
             <img src={LOGO_URL} alt="Nutriser" className="h-16 mb-3" />
             <h1 className="text-2xl font-bold text-gray-900">Mis Tratamientos</h1>
             <p className="text-gray-500 text-sm text-center mt-2 max-w-xs leading-relaxed">
-              Consulta tus compras, paquetes y cupones, y da seguimiento a tus tratamientos estéticos.
+              Seguimiento a tus tratamientos adquiridos y firma de contrato de consentimiento.
             </p>
           </div>
 

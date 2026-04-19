@@ -3149,18 +3149,16 @@ export const appRouter = router({
       }),
 
     // Admin: ver todos los pagos pendientes en efectivo
-    getAllPending: protectedProcedure
-      .query(async ({ ctx }) => {
-        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+    getAllPending: publicProcedure
+      .query(async () => {
         return await getAllCashPendingPayments();
       }),
 
     // Admin: confirmar un pago en efectivo y acumular cashback
-    confirm: protectedProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
-        const payment = await confirmCashPayment(input.id, ctx.user.email ?? 'admin');
+    confirm: publicProcedure
+      .input(z.object({ id: z.number(), adminEmail: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const payment = await confirmCashPayment(input.id, input.adminEmail ?? 'admin');
         // Acumular cashback si corresponde
         if (payment.cashbackPercent > 0) {
           const cashbackCents = Math.round(payment.amountCents * payment.cashbackPercent / 100);
@@ -3172,18 +3170,17 @@ export const appRouter = router({
               description: `Cashback ${payment.cashbackPercent}% por pago en efectivo: ${payment.concept}`,
               referenceType: 'cash_payment',
               referenceId: payment.id,
-              createdBy: `admin:${ctx.user.email ?? 'admin'}`,
+              createdBy: `admin:${input.adminEmail ?? 'admin'}`,
             });
           }
         }
         return { success: true, payment };
       }),
 
-    // Admin o paciente: cancelar un pago pendiente
-    cancel: protectedProcedure
+    // Admin: cancelar un pago pendiente
+    cancel: publicProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+      .mutation(async ({ input }) => {
         await cancelCashPayment(input.id);
         return { success: true };
       }),

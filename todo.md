@@ -1827,3 +1827,16 @@
 - [ ] Campana activa: mostrar indicador visual claro (campana dorada con punto verde)
 - [ ] Verificar TypeScript sin errores
 - [ ] Guardar checkpoint
+
+## Sesión Actual - Corrección Campana Push
+- [ ] MyTreatments: eliminar campana pequeña (BellOff) del header
+- [ ] MyTreatments: corregir handleEnableNotifications — detectar iOS y mostrar instrucciones de agregar a pantalla de inicio
+- [ ] MyTreatments: en Android/desktop activar notificaciones directamente con Notification.requestPermission()
+- [ ] Verificar TypeScript sin errores
+- [ ] Guardar checkpoint
+
+## Sesión Actual - Simplificar Banner Push
+- [ ] MyTreatments: eliminar botón "Activar" del banner de notificaciones push
+- [ ] MyTreatments: eliminar campana pequeña (BellOff) del header
+- [ ] Verificar TypeScript sin errores
+- [ ] Guardar checkpoint

@@ -743,28 +743,17 @@ export default function MyTreatments() {
                 <span className="text-green-600 text-[8px] font-semibold">Activa</span>
               </div>
             </div>
-            {/* Notificaciones */}
-            <button
-              onClick={notifStatus === 'granted' ? handleDisableNotifications : handleEnableNotifications}
-              disabled={notifStatus === 'loading'}
-              title={notifStatus === 'granted' ? 'Notificaciones push activas — haz clic para desactivar' : 'Haz clic en la campanita y recibe promociones exclusivas solo para ti'}
-              className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all ${
-                notifStatus === 'granted'
-                  ? 'bg-[#C5A55A]/10 text-[#C5A55A]'
-                  : 'text-gray-400 hover:text-[#C5A55A]'
-              }`}
-            >
-              {notifStatus === 'loading' ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : notifStatus === 'granted' ? (
-                <>
-                  <Bell className="w-4 h-4" />
-                  <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[#C5A55A] rounded-full" />
-                </>
-              ) : (
-                <BellOff className="w-4 h-4" />
-              )}
-            </button>
+            {/* Notificaciones activas: solo mostrar campana dorada en el header cuando ya están activas */}
+            {notifStatus === 'granted' && (
+              <button
+                onClick={handleDisableNotifications}
+                title="Notificaciones push activas — haz clic para desactivar"
+                className="relative flex items-center justify-center w-8 h-8 rounded-full bg-[#C5A55A]/10 text-[#C5A55A] transition-all"
+              >
+                <Bell className="w-4 h-4" />
+                <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[#C5A55A] rounded-full" />
+              </button>
+            )}
             {/* Cerrar sesión */}
             <button onClick={handleLogout} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-xs transition-colors">
               <LogOut className="w-4 h-4" />
@@ -797,13 +786,7 @@ export default function MyTreatments() {
                 Suscríbete y no te pierdas de exclusivas promociones y cupones de descuento solo para ti.
               </p>
             </div>
-            {/* Botón */}
-            <button
-              onClick={handleEnableNotifications}
-              className="flex-shrink-0 bg-[#C5A55A] hover:bg-[#B8963E] text-black text-xs font-bold px-3 py-2 rounded-xl transition-colors whitespace-nowrap shadow"
-            >
-              Activar
-            </button>
+
           </div>
         </div>
       )}

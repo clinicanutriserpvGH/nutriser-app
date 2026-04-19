@@ -1141,9 +1141,105 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await deleteCouponSubscriber(input.id);
       }),
+    // Enviar correo masivo a todos los suscriptores de cupones
+    sendEmailToAll: publicProcedure
+      .input(z.object({
+        subject: z.string().min(1),
+        message: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const subscribers = await getAllCouponSubscribers();
+        let sent = 0;
+        let failed = 0;
+        for (const sub of subscribers) {
+          try {
+            await sendPatientNotificationEmail(
+              sub.email,
+              input.subject,
+              input.subject,
+              input.message
+            );
+            sent++;
+          } catch (e) {
+            console.warn('[Email] Error sending to subscriber:', sub.email, e);
+            failed++;
+          }
+        }
+        return { success: true, sent, failed, total: subscribers.length };
+      }),
+    // Enviar correo masivo a TODOS: suscriptores de cupones + pacientes del portal
+    sendEmailToAllContacts: publicProcedure
+      .input(z.object({
+        subject: z.string().min(1),
+        message: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const subscribers = await getAllCouponSubscribers();
+        const patients = await getAllPatients();
+        // Unificar por email (evitar duplicados)
+        const emailSet = new Set<string>();
+        const allEmails: string[] = [];
+        for (const s of subscribers) {
+          if (!emailSet.has(s.email.toLowerCase())) {
+            emailSet.add(s.email.toLowerCase());
+            allEmails.push(s.email);
+          }
+        }
+        for (const p of patients) {
+          if (!emailSet.has(p.email.toLowerCase())) {
+            emailSet.add(p.email.toLowerCase());
+            allEmails.push(p.email);
+          }
+        }
+        let sent = 0;
+        let failed = 0;
+        for (const email of allEmails) {
+          try {
+            await sendPatientNotificationEmail(
+              email,
+              input.subject,
+              input.subject,
+              input.message
+            );
+            sent++;
+          } catch (e) {
+            console.warn('[Email] Error sending to contact:', email, e);
+            failed++;
+          }
+        }
+        await notifyOwner({
+          title: `📧 Correo masivo enviado`,
+          content: `Se envió el correo "${input.subject}" a ${sent} contactos (${failed} fallidos).`,
+        });
+        return { success: true, sent, failed, total: allEmails.length };
+      }),
+    // Listar todos los contactos únicos (suscriptores + pacientes)
+    listAllContacts: publicProcedure.query(async () => {
+      const subscribers = await getAllCouponSubscribers();
+      const patients = await getAllPatients();
+      const emailSet = new Set<string>();
+      const contacts: Array<{ email: string; name?: string; phone?: string; source: string; createdAt: Date }> = [];
+      for (const s of subscribers) {
+        if (!emailSet.has(s.email.toLowerCase())) {
+          emailSet.add(s.email.toLowerCase());
+          contacts.push({ email: s.email, phone: s.whatsapp || undefined, source: 'cuponera', createdAt: s.createdAt });
+        }
+      }
+      for (const p of patients) {
+        if (!emailSet.has(p.email.toLowerCase())) {
+          emailSet.add(p.email.toLowerCase());
+          contacts.push({ email: p.email, name: p.name, phone: p.phone || undefined, source: 'portal', createdAt: p.createdAt });
+        } else {
+          // Enriquecer con nombre si ya existe como suscriptor
+          const existing = contacts.find(c => c.email.toLowerCase() === p.email.toLowerCase());
+          if (existing && !existing.name) existing.name = p.name;
+        }
+      }
+      contacts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return contacts;
+    }),
   }),
-
-  // ─── Push Notifications ─────────────────────────────────────────────────────
+  // ─── Push Notificationss ─────────────────────────────────────────────────────
   push: router({
     subscribe: publicProcedure
       .input(z.object({
@@ -2129,6 +2225,12 @@ export const appRouter = router({
           await createWallet(patient.id);
         } catch (e) {
           console.warn('Could not auto-create wallet:', e);
+        }
+        // Auto-suscribir al correo de cupones y notificaciones (upsert silencioso)
+        try {
+          await subscribeToCoupons({ email: input.email, whatsapp: input.phone || '', isActive: true });
+        } catch (e) {
+          console.warn('Could not auto-subscribe patient to coupons:', e);
         }
         // Devolver sin el hash
         const { passwordHash: _, resetToken: __, ...safe } = patient;

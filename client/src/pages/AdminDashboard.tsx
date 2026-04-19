@@ -202,6 +202,31 @@ export default function AdminDashboard() {
     onError: (error) => toast.error('Error: ' + error.message),
   });
 
+  // Todos los contactos únicos (suscriptores + pacientes del portal)
+  const { data: allContacts = [] } = trpc.couponSubscribers.listAllContacts.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  // Estado del formulario de correo masivo
+  const [bulkEmailSubject, setBulkEmailSubject] = useState('');
+  const [bulkEmailMessage, setBulkEmailMessage] = useState('');
+  const [bulkEmailTarget, setBulkEmailTarget] = useState<'all' | 'subscribers'>('all');
+  const sendEmailToAllMutation = trpc.couponSubscribers.sendEmailToAllContacts.useMutation({
+    onSuccess: (data) => {
+      toast.success(`✅ Correo enviado a ${data.sent} contactos${data.failed > 0 ? ` (${data.failed} fallidos)` : ''}`);
+      setBulkEmailSubject('');
+      setBulkEmailMessage('');
+    },
+    onError: (error) => toast.error('Error al enviar: ' + error.message),
+  });
+  const sendEmailToSubscribersMutation = trpc.couponSubscribers.sendEmailToAll.useMutation({
+    onSuccess: (data) => {
+      toast.success(`✅ Correo enviado a ${data.sent} suscriptores${data.failed > 0 ? ` (${data.failed} fallidos)` : ''}`);
+      setBulkEmailSubject('');
+      setBulkEmailMessage('');
+    },
+    onError: (error) => toast.error('Error al enviar: ' + error.message),
+  });
+
   // Notificaciones push de prueba
   const [pushTestTitle, setPushTestTitle] = useState('');
   const [pushTestBody, setPushTestBody] = useState('');
@@ -2634,8 +2659,158 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
 
+            {/* ===== PANEL DE CORREO MASIVO ===== */}
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                  <Send className="w-5 h-5" />
+                  Enviar Correo Masivo
+                </CardTitle>
+                <CardDescription>
+                  Envía un correo a todos tus contactos registrados: suscriptores de cupones + usuarios del Portal de Salud.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Selector de destinatarios */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setBulkEmailTarget('all')}
+                    className={`flex-1 py-2 px-4 rounded-xl text-sm font-semibold border transition ${
+                      bulkEmailTarget === 'all'
+                        ? 'bg-[#C5A55A] text-white border-[#C5A55A]'
+                        : 'bg-white text-[#666] border-[#C5A55A]/30 hover:bg-[#FAF7F2]'
+                    }`}
+                  >
+                    📧 Todos los contactos
+                    <span className="ml-1 text-xs opacity-80">({allContacts.length})</span>
+                  </button>
+                  <button
+                    onClick={() => setBulkEmailTarget('subscribers')}
+                    className={`flex-1 py-2 px-4 rounded-xl text-sm font-semibold border transition ${
+                      bulkEmailTarget === 'subscribers'
+                        ? 'bg-[#C5A55A] text-white border-[#C5A55A]'
+                        : 'bg-white text-[#666] border-[#C5A55A]/30 hover:bg-[#FAF7F2]'
+                    }`}
+                  >
+                    🔔 Solo suscriptores de cupones
+                    <span className="ml-1 text-xs opacity-80">({couponSubscribers?.length ?? 0})</span>
+                  </button>
+                </div>
+
+                {/* Asunto */}
+                <div>
+                  <label className="text-xs font-semibold text-[#666] block mb-1">Asunto del correo</label>
+                  <input
+                    type="text"
+                    value={bulkEmailSubject}
+                    onChange={(e) => setBulkEmailSubject(e.target.value)}
+                    placeholder="Ej: 🎉 Oferta especial solo para ti - Nutriser"
+                    className="w-full border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40"
+                    maxLength={150}
+                  />
+                </div>
+
+                {/* Mensaje */}
+                <div>
+                  <label className="text-xs font-semibold text-[#666] block mb-1">Mensaje</label>
+                  <textarea
+                    value={bulkEmailMessage}
+                    onChange={(e) => setBulkEmailMessage(e.target.value)}
+                    placeholder="Escribe aquí el contenido del correo. Puedes usar saltos de línea para separar párrafos."
+                    className="w-full border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40 resize-none"
+                    rows={5}
+                    maxLength={2000}
+                  />
+                  <p className="text-xs text-[#999] mt-1">{bulkEmailMessage.length}/2000 caracteres</p>
+                </div>
+
+                {/* Botón enviar */}
+                <button
+                  disabled={
+                    !bulkEmailSubject.trim() ||
+                    !bulkEmailMessage.trim() ||
+                    sendEmailToAllMutation.isPending ||
+                    sendEmailToSubscribersMutation.isPending
+                  }
+                  onClick={() => {
+                    if (!bulkEmailSubject.trim() || !bulkEmailMessage.trim()) return;
+                    if (bulkEmailTarget === 'all') {
+                      sendEmailToAllMutation.mutate({ subject: bulkEmailSubject, message: bulkEmailMessage });
+                    } else {
+                      sendEmailToSubscribersMutation.mutate({ subject: bulkEmailSubject, message: bulkEmailMessage });
+                    }
+                  }}
+                  className="w-full py-3 rounded-xl font-bold text-white bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+                >
+                  {(sendEmailToAllMutation.isPending || sendEmailToSubscribersMutation.isPending) ? (
+                    <>⏳ Enviando correos...</>
+                  ) : (
+                    <><Send className="w-4 h-4" /> Enviar correo a {bulkEmailTarget === 'all' ? `${allContacts.length} contactos` : `${couponSubscribers?.length ?? 0} suscriptores`}</>
+                  )}
+                </button>
+              </CardContent>
+            </Card>
+
+            {/* ===== LISTA DE TODOS LOS CONTACTOS ===== */}
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Base de Contactos
+                    </CardTitle>
+                    <CardDescription>Todos los usuarios registrados: suscriptores de cupones + pacientes del portal</CardDescription>
+                  </div>
+                  <div className="bg-[#FAF7F2] border border-[#C5A55A]/30 rounded-xl px-4 py-2 text-center">
+                    <p className="text-2xl font-bold text-[#C5A55A]">{allContacts.length}</p>
+                    <p className="text-xs text-[#999]">contactos únicos</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-[#C5A55A]/20">
+                        <th className="text-left py-2 px-2 text-[#C5A55A] font-semibold">Nombre</th>
+                        <th className="text-left py-2 px-2 text-[#C5A55A] font-semibold">Correo</th>
+                        <th className="text-left py-2 px-2 text-[#C5A55A] font-semibold">Teléfono</th>
+                        <th className="text-left py-2 px-2 text-[#C5A55A] font-semibold">Origen</th>
+                        <th className="text-left py-2 px-2 text-[#C5A55A] font-semibold">Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allContacts.length > 0 ? (
+                        allContacts.map((contact, idx) => (
+                          <tr key={idx} className="border-b border-[#C5A55A]/10 hover:bg-[#FAF7F2]">
+                            <td className="py-2 px-2 text-[#1A1A1A]">{contact.name || <span className="text-[#999] italic">Sin nombre</span>}</td>
+                            <td className="py-2 px-2 text-[#444]">{contact.email}</td>
+                            <td className="py-2 px-2 text-[#666]">{contact.phone || '—'}</td>
+                            <td className="py-2 px-2">
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                contact.source === 'portal'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-amber-100 text-amber-700'
+                              }`}>
+                                {contact.source === 'portal' ? '🏥 Portal' : '🔔 Cuponera'}
+                              </span>
+                            </td>
+                            <td className="py-2 px-2 text-[#999] text-xs">{new Date(contact.createdAt).toLocaleDateString('es-MX')}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="py-8 text-center text-[#999]">No hay contactos registrados aún.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
           {/* Tab de Catálogo de Servicios */}
           <TabsContent value="services" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

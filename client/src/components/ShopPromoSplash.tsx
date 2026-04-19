@@ -12,7 +12,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { X, ShoppingBag, Gift, Clock, ChevronLeft, ChevronRight, Flame } from "lucide-react";
-import MobileAuthGuard from "@/components/MobileAuthGuard";
+import NutriserAuthModal from "@/components/NutriserAuthModal";
 import { useDeviceType } from "@/hooks/useDeviceType";
 
 function useCountdown(expiresAt: Date | string | null | undefined) {
@@ -180,19 +180,13 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
 
   const handlePromoAction = useCallback((promoId: number) => {
     if (!isAuthenticated) {
-      if (isMobile) {
-        // Móvil: mostrar guard con opción de ir a Mi Cuenta Nutriser
-        setShowAuthGuard(true);
-      } else {
-        // Desktop: redirigir al formulario completo de registro/login con firma
-        navigate("/mis-tratamientos?returnTo=/memberships");
-        onClose();
-      }
+      // Mostrar modal de login integrado (funciona en móvil y desktop)
+      setShowAuthGuard(true);
       return;
     }
     // Usuario autenticado: navegar al cupón
     window.location.href = `/cupon/${promoId}`;
-  }, [isAuthenticated, isMobile, navigate, onClose]);
+  }, [isAuthenticated, onClose]);
 
   const goNext = useCallback(() => {
     setCurrentIndex((i) => (i + 1) % totalSlides);
@@ -291,17 +285,12 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
         </div>
       </div>
 
-      {/* MobileAuthGuard: se muestra encima del splash cuando el usuario no está autenticado */}
-      {/* Al presionar 'Después': cierra el guard Y el splash pop, regresando al Splash 0 */}
-      <MobileAuthGuard
+      {/* Modal de login/registro integrado — funciona sin salir de la página */}
+      <NutriserAuthModal
         isOpen={showAuthGuard}
         onClose={() => setShowAuthGuard(false)}
-        featureDescription="comprar cupones y acceder a ofertas exclusivas"
-        onDismiss={() => {
-          setShowAuthGuard(false);
-          // Cerrar el ShopPromoSplash también para regresar al Splash 0
-          onClose();
-        }}
+        contextMessage="comprar cupones y acceder a ofertas exclusivas"
+        onSuccess={() => setShowAuthGuard(false)}
       />
     </>
   );

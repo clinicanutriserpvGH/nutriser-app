@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import { useDeviceType } from "@/hooks/useDeviceType";
 import { useLocation } from "wouter";
-import MobileAuthGuard from "@/components/MobileAuthGuard";
+import NutriserAuthModal from "@/components/NutriserAuthModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -345,11 +345,12 @@ export default function Courses() {
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
       <BackToSplash hideHome />
 
-      {/* Guard móvil: modal con opción de ir a Mi Cuenta Nutriser o continuar después */}
-      <MobileAuthGuard
+      {/* Modal de login/registro integrado — funciona sin salir de la página */}
+      <NutriserAuthModal
         isOpen={mobileGuardOpen}
         onClose={() => setMobileGuardOpen(false)}
-        featureDescription={mobileGuardFeature}
+        contextMessage={`Inicia sesión para ${mobileGuardFeature}`}
+        onSuccess={() => setMobileGuardOpen(false)}
       />
 
       {/* Hero de Cursos */}

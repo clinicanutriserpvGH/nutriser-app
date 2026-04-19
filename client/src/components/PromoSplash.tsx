@@ -12,7 +12,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { X, Gift, Clock, ChevronLeft, ChevronRight, Flame, Wallet, Star, Percent, Sparkles } from "lucide-react";
-import MobileAuthGuard from "@/components/MobileAuthGuard";
+import NutriserAuthModal from "@/components/NutriserAuthModal";
 import { useDeviceType } from "@/hooks/useDeviceType";
 
 const WALLET_CARD_IMG =
@@ -347,15 +347,12 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
         </div>
       </div>
 
-      {/* MobileAuthGuard: solo en móvil */}
-      <MobileAuthGuard
+      {/* Modal de login/registro integrado — funciona sin salir de la página */}
+      <NutriserAuthModal
         isOpen={showAuthGuard}
         onClose={() => setShowAuthGuard(false)}
-        featureDescription={guardFeature}
-        onDismiss={() => {
-          setShowAuthGuard(false);
-          handleClose();
-        }}
+        contextMessage={`Inicia sesión para ${guardFeature}`}
+        onSuccess={() => { setShowAuthGuard(false); handleClose(); }}
       />
 
     </>

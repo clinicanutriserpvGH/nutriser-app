@@ -22,10 +22,9 @@ import { QRCodeSVG } from "qrcode.react";
 import Barcode from "react-barcode";
 import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
-import MobileAuthGuard from "@/components/MobileAuthGuard";
+import NutriserAuthModal from "@/components/NutriserAuthModal";
 import { useDeviceType } from "@/hooks/useDeviceType";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
-// NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import PromoSplash from "@/components/PromoSplash";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { t, type Lang } from "@/lib/i18n";
@@ -651,12 +650,12 @@ export default function Memberships() {
         />
       )}
 
-      {/* Guard móvil: modal con opción de ir a Mi Cuenta Nutriser o continuar después */}
-      <MobileAuthGuard
+      {/* Modal de login/registro integrado — funciona sin salir de la página */}
+      <NutriserAuthModal
         isOpen={mobileGuardOpen}
         onClose={() => setMobileGuardOpen(false)}
-        featureDescription={mobileGuardFeature}
-        returnTo="/memberships"
+        contextMessage={`Inicia sesión para ${mobileGuardFeature}`}
+        onSuccess={() => setMobileGuardOpen(false)}
       />
 
       {/* ── Modal de detalle de servicio/paquete ── */}

@@ -21,6 +21,7 @@ import {
 import { jsPDF } from "jspdf";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import { useLocation } from "wouter";
+import { useSplash } from "@/contexts/SplashContext";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -405,8 +406,9 @@ export default function MyTreatments() {
     setAuthMode("login");
   };
 
+  const { showSplash } = useSplash();
   const goBackToStore = () => {
-    navigate("/");
+    showSplash();
   };
 
   // ─── Helpers UI ─────────────────────────────────────────────────────────────

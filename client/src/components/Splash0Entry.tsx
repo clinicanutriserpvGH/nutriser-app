@@ -100,11 +100,26 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 Bienvenido a Nutriser
               </h1>
             </div>
+            {/* Botón pequeño Mis Tratamientos — a la derecha del header */}
+            <button
+              type="button"
+              onClick={() => handleNavigate('/mis-tratamientos')}
+              className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all duration-200 active:scale-95 group"
+              style={{
+                background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 100%)',
+                boxShadow: '0 0 10px rgba(197,165,90,0.7), 0 0 20px rgba(197,165,90,0.3)',
+                border: '1px solid rgba(232,201,122,0.5)'
+              }}
+              aria-label="Mis Tratamientos"
+            >
+              <ClipboardList className="w-3.5 h-3.5 text-black flex-shrink-0" />
+              <span className="text-[9px] font-bold tracking-wide uppercase text-black leading-tight">Mis<br/>Tratamientos</span>
+            </button>
           </div>
 
-          {/* ── Grid principal — 4 tarjetas ── */}
-          {/* Móvil: columna vertical | Tablet/Desktop: 4 columnas iguales */}
-          <div className="flex flex-col md:grid md:grid-cols-4 gap-3 md:gap-4 mb-3 flex-1 min-h-0">
+          {/* ── Grid principal — 3 tarjetas ── */}
+          {/* Móvil: columna vertical | Tablet/Desktop: 3 columnas iguales */}
+          <div className="flex flex-col md:grid md:grid-cols-3 gap-3 md:gap-4 mb-3 flex-1 min-h-0">
 
             {/* ── Tarjeta 1: Tienda Nutriser ── */}
             <div className="flex-1 min-h-[150px] md:min-h-0">
@@ -234,35 +249,6 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
               </button>
             </div>
 
-
-            {/* ── Tarjeta 4: Mis Tratamientos ── */}
-            <div className="flex-1 min-h-[130px] md:min-h-0">
-              <button
-                type="button"
-                onClick={() => handleNavigate('/mis-tratamientos')}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full cursor-pointer"
-                style={{ minHeight: "130px", WebkitTapHighlightColor: "transparent", background: isLight ? 'linear-gradient(160deg, #2a1f0a 0%, #1a1208 100%)' : 'linear-gradient(160deg, #1a1208 0%, #0f0c06 100%)' }}
-              >
-                {/* Fondo decorativo */}
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 70% 30%, #C5A55A 0%, transparent 60%)' }} />
-                <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-4 text-left">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-9 h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 100%)', boxShadow: '0 0 10px rgba(197,165,90,0.6)' }}>
-                      <ClipboardList className="w-4 h-4 md:w-5 md:h-5 text-black" />
-                    </div>
-                    <span className="text-[10px] md:text-[9px] font-semibold tracking-wide uppercase drop-shadow text-[#C5A55A]/90">Seguimiento</span>
-                  </div>
-                  <div>
-                    <h2 className="text-xl sm:text-2xl md:text-xl font-bold leading-tight mb-2 md:mb-2 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>
-                      Mis<br/>Tratamientos
-                    </h2>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3 md:py-1.5 rounded-xl text-xs font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105" style={{ background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 100%)', color: '#1A1A1A', boxShadow: '0 0 8px rgba(197,165,90,0.5)' }}>
-                      <ClipboardList className="w-3 h-3" /> Ver ahora
-                    </span>
-                  </div>
-                </div>
-              </button>
-            </div>
 
           </div>{/* fin grid principal */}
 

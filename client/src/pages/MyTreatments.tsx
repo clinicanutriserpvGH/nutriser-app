@@ -406,7 +406,7 @@ export default function MyTreatments() {
   };
 
   const goBackToStore = () => {
-    navigate("/memberships");
+    navigate("/");
   };
 
   // ─── Helpers UI ─────────────────────────────────────────────────────────────
@@ -437,14 +437,14 @@ export default function MyTreatments() {
       <div className="min-h-full flex flex-col items-center justify-center px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 24px, 40px)' }}>
         <div className="w-full max-w-md">
 
-          {/* Botón Regresar a la tienda */}
+          {/* Botón Regresar */}
           <div className="flex justify-start mb-6">
             <button
               onClick={goBackToStore}
               className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-full text-sm font-bold shadow-sm hover:bg-gray-50 active:scale-95 transition-all duration-200"
             >
               <ArrowLeft className="w-4 h-4" />
-              Regresar a la tienda
+              Regresar
             </button>
           </div>
 

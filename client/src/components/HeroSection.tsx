@@ -6,9 +6,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, CalendarCheck, Store, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useDeviceType } from "@/hooks/useDeviceType";
-import { usePatientAuth } from "@/hooks/usePatientAuth";
-import { useLocation } from "wouter";
+
 
 const HERO_IMAGES = [
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-recepcion-hero_de9ce8ee.png",
@@ -18,9 +16,6 @@ const HERO_IMAGES = [
 
 export default function HeroSection() {
   const [currentImg, setCurrentImg] = useState(0);
-  const { isDesktop } = useDeviceType();
-  const { isLoggedIn } = usePatientAuth();
-  const [, navigate] = useLocation();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -29,25 +24,9 @@ export default function HeroSection() {
     return () => clearInterval(interval);
   }, []);
 
-  // Guard desktop: si no hay sesión → redirigir a Mi Cuenta Nutriser con returnTo
-  // En móvil/tableta los botones no aparecen (solo en desktop)
-  const handleTienda = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isDesktop && !isLoggedIn) {
-      navigate("/mis-tratamientos?returnTo=/memberships");
-    } else {
-      window.location.href = "/memberships";
-    }
-  };
-
-  const handleAcademia = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isDesktop && !isLoggedIn) {
-      navigate("/mis-tratamientos?returnTo=/cursos");
-    } else {
-      window.location.href = "/cursos";
-    }
-  };
+  // Navegación directa sin guard — el login se pide solo al intentar comprar/agregar al carrito
+  const handleTienda = () => { window.location.href = "/memberships"; };
+  const handleAcademia = () => { window.location.href = "/cursos"; };
 
   return (
     <section

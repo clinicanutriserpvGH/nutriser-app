@@ -784,7 +784,7 @@ export default function Courses() {
                 {courses.map((course) => (
                   <button
                     key={course.id}
-                    onClick={() => { if (!requireAuth("ver los cursos y videos de Academia Nutriser")) return; setSelectedCourse(course); }}
+                    onClick={() => setSelectedCourse(course)}
                     className="text-left bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-[#C5A55A] hover:shadow-xl transition-all group"
                   >
                     <div className="relative aspect-video bg-[#1A1A1A]">

@@ -1787,3 +1787,13 @@
 - [x] Guardar checkpoint
 - [x] Tienda (Memberships.tsx): agregar botón LogOut en desktop (hidden en móvil) junto al nombre del usuario en el header
 - [x] Academia (Courses.tsx): agregar botón LogOut en desktop (hidden en móvil) en el header del usuario autenticado
+
+## Sesión Actual - Corrección Guard: Navegación libre en Tienda y Academia
+
+- [x] HeroSection: eliminar guard de sesión — botones Tienda y Academia van directo a /memberships y /cursos sin verificar sesión
+- [x] Memberships: navegación libre sin sesión; solo pedir sesión al agregar al carrito, comprar o crear monedero
+- [x] Memberships: wishlist (desear) disponible sin sesión para analítica (ya estaba implementado)
+- [x] Courses: navegación libre sin sesión; solo pedir sesión al suscribirse o participar en comunidad
+- [x] Courses: cursos y videos navegables sin sesión (guard eliminado del onClick de tarjetas de cursos)
+- [x] Verificar TypeScript sin errores
+- [x] Guardar checkpoint

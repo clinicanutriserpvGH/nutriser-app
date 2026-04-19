@@ -508,20 +508,11 @@ export default function MyTreatments() {
                     <strong className="text-gray-700">Contrato de Consentimiento Informado</strong>.
                   </p>
                 </div>
-                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
-                  <p className="text-[#C5A55A] text-xs font-semibold uppercase tracking-wider">¿Cómo firmar?</p>
-                  <div className="flex items-start gap-3">
-                    <span className="text-xl mt-0.5">📱</span>
-                    <p className="text-gray-500 text-sm">
-                      <strong className="text-gray-700">Celular o Tablet:</strong> Usa tu dedo para trazar tu firma directamente en la pantalla.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-xl mt-0.5">💻</span>
-                    <p className="text-gray-500 text-sm">
-                      <strong className="text-gray-700">Computadora:</strong> Usa el mouse para dibujar tu firma en el área indicada.
-                    </p>
-                  </div>
+                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
+                  <p className="text-[#C5A55A] text-xs font-semibold uppercase tracking-wider mb-2">¿Cómo firmar?</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Usa tu dedo o S Pen para firmar directamente en la pantalla. Se debe usar la firma de tu identificación oficial.
+                  </p>
                 </div>
                 <Button
                   type="button"

@@ -18,7 +18,11 @@ export default function AdminAuthorize() {
       setAuthorizedEmail(data.email);
       if (data.sessionToken) {
         setSessionToken(data.sessionToken);
-        localStorage.setItem("adminSessionToken", data.sessionToken);
+        // sessionStorage: expira al cerrar el tab/navegador (más seguro)
+        sessionStorage.setItem("adminSession", data.sessionToken);
+        // Limpiar localStorage viejo por seguridad
+        localStorage.removeItem("adminSession");
+        localStorage.removeItem("adminSessionToken");
         // Redirigir automáticamente al panel después de 2 segundos
         setTimeout(() => {
           window.location.href = `/admin/dashboard?st=${data.sessionToken}`;

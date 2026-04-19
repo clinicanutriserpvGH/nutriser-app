@@ -68,11 +68,15 @@ export default function AdminLogin() {
   useEffect(() => {
     if (checkAuthQuery.data?.authorized) {
       // ¡Autorizado! Guardar sesión y redirigir
-      localStorage.setItem("adminSession", JSON.stringify({
+      // sessionStorage: la sesión expira al cerrar el tab/navegador (más seguro que localStorage)
+      sessionStorage.setItem("adminSession", JSON.stringify({
         email: checkAuthQuery.data.email,
         loggedIn: true,
         timestamp: new Date().toISOString(),
       }));
+      // Limpiar cualquier sesión vieja de localStorage por seguridad
+      localStorage.removeItem("adminSession");
+      localStorage.removeItem("adminSessionToken");
       toast.success("¡Acceso autorizado! Bienvenido al panel.");
       setAwaitingAuth(false);
       setIsLoading(false);

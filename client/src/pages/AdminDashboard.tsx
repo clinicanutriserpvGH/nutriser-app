@@ -118,16 +118,21 @@ export default function AdminDashboard() {
     const urlParams = new URLSearchParams(window.location.search);
     const stFromUrl = urlParams.get("st");
     if (stFromUrl) {
-      // Guardar en localStorage y limpiar la URL
-      localStorage.setItem("adminSession", stFromUrl);
-      localStorage.setItem("adminSessionToken", stFromUrl);
+      // Guardar en sessionStorage (expira al cerrar el tab/navegador) y limpiar la URL
+      sessionStorage.setItem("adminSession", stFromUrl);
+      // Limpiar cualquier sesión vieja de localStorage por seguridad
+      localStorage.removeItem("adminSession");
+      localStorage.removeItem("adminSessionToken");
       window.history.replaceState({}, document.title, "/admin/dashboard");
       setIsAuthenticated(true);
       return;
     }
-    // Verificar si hay sesión guardada (flujo normal)
-    const adminSession = localStorage.getItem("adminSession") || localStorage.getItem("adminSessionToken");
+    // Verificar si hay sesión en sessionStorage (NO en localStorage por seguridad)
+    const adminSession = sessionStorage.getItem("adminSession");
     if (!adminSession) {
+      // Limpiar cualquier sesión vieja de localStorage si existe
+      localStorage.removeItem("adminSession");
+      localStorage.removeItem("adminSessionToken");
       navigate("/admin/login");
       return;
     }
@@ -1161,9 +1166,12 @@ export default function AdminDashboard() {
   const selectedAppointment = appointments?.find((a) => a.id === selectedAppointmentId);
 
   const handleLogout = () => {
+    // Limpiar sesión de sessionStorage Y localStorage (limpieza completa)
+    sessionStorage.removeItem("adminSession");
     localStorage.removeItem("adminSession");
+    localStorage.removeItem("adminSessionToken");
     toast.success("Sesión cerrada");
-    navigate("/");
+    navigate("/admin/login");
   };
 
   if (!isAuthenticated) {

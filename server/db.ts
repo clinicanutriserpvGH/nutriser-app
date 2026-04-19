@@ -1400,6 +1400,14 @@ export async function getWalletByPatientId(patientId: number): Promise<Wallet | 
   return wallet;
 }
 
+/** Get wallet by ID */
+export async function getWalletById(walletId: number): Promise<Wallet | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.id, walletId)).limit(1);
+  return wallet;
+}
+
 /** Get wallet by wallet number (for QR/code lookup) */
 export async function getWalletByNumber(walletNumber: string): Promise<Wallet | undefined> {
   const db = await getDb();

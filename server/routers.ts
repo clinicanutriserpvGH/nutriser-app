@@ -13,7 +13,7 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
-import { createWallet, getWalletByPatientId, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet } from './db';
+import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -3165,15 +3165,20 @@ export const appRouter = router({
         const payment = await confirmCashPayment(input.id, input.adminEmail ?? 'admin');
         // 1. Descontar saldo del monedero si el paciente eligió usar parte de su saldo
         if (payment.walletAmountUsedCents > 0) {
-          await addWalletTransaction({
-            walletId: payment.walletId,
-            type: 'redeem',
-            amount: -payment.walletAmountUsedCents, // negativo = descuento
-            description: `Saldo usado para pago en efectivo: ${payment.concept}`,
-            referenceType: 'cash_payment',
-            referenceId: payment.id,
-            createdBy: `admin:${input.adminEmail ?? 'admin'}`,
-          });
+          const walletRow = await getWalletById(payment.walletId);
+          const availableBalance = walletRow?.balance ?? 0;
+          const amountToDeduct = Math.min(payment.walletAmountUsedCents, availableBalance);
+          if (amountToDeduct > 0) {
+            await addWalletTransaction({
+              walletId: payment.walletId,
+              type: 'redeem',
+              amount: -amountToDeduct,
+              description: `Saldo usado para pago en efectivo: ${payment.concept}`,
+              referenceType: 'cash_payment',
+              referenceId: payment.id,
+              createdBy: `admin:${input.adminEmail ?? 'admin'}`,
+            });
+          }
         }
         // 2. Acumular cashback si corresponde (sobre el monto total)
         if (payment.cashbackPercent > 0) {

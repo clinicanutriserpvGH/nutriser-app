@@ -1378,11 +1378,26 @@ onClick={() => {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          TAB: MIS TRATAMIENTOS
-      ══════════════════════════════════════════════════════════════════════ */}
+      {/* TAB: MIS TRATAMIENTOS — movido al Splash Hub */}
       {activeTab === "misTratamientos" && (
-        <div className="pb-28 mt-2">
+        <div className="pb-28 mt-2 flex flex-col items-center justify-center min-h-[60vh]">
+          <div className="text-center px-6">
+            <div className="w-20 h-20 rounded-full bg-[#FAF7F2] flex items-center justify-center mx-auto mb-4">
+              <ClipboardList className="w-10 h-10 text-[#C5A55A]" />
+            </div>
+            <h2 className="font-black text-gray-900 text-xl mb-2">Mis Tratamientos</h2>
+            <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">Accede a tu seguimiento de tratamientos, fotos y contrato de consentimiento desde el inicio de la app.</p>
+            <button
+              onClick={() => navigate("/mis-tratamientos")}
+              className="bg-[#C5A55A] text-white font-bold px-8 py-3 rounded-xl hover:bg-[#B8963E] transition-all active:scale-95 shadow-md"
+            >
+              Ir a Mis Tratamientos
+            </button>
+          </div>
+        </div>
+      )}
+      {false && (
+        <div className="hidden">
           <div className="bg-white py-5">
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-center gap-2 mb-4">
@@ -1890,14 +1905,7 @@ onClick={() => {
                 <span className="text-[8px] lg:text-xs font-semibold leading-tight">Deseos</span>
               </button>
 
-              {/* Mi Seguimiento */}
-              <button
-                onClick={() => navigate("/mis-tratamientos")}
-                className="flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors text-gray-400 hover:text-[#C5A55A]"
-              >
-                <ClipboardList className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Mi Seguimiento</span>
-              </button>
+
 
               {/* Cuenta */}
               <button

@@ -113,7 +113,19 @@ export default function AdminDashboard() {
   ];
 
   useEffect(() => {
-    const adminSession = localStorage.getItem("adminSession");
+    // Verificar si viene un sessionToken en la URL (nuevo flujo Safari-compatible)
+    const urlParams = new URLSearchParams(window.location.search);
+    const stFromUrl = urlParams.get("st");
+    if (stFromUrl) {
+      // Guardar en localStorage y limpiar la URL
+      localStorage.setItem("adminSession", stFromUrl);
+      localStorage.setItem("adminSessionToken", stFromUrl);
+      window.history.replaceState({}, document.title, "/admin/dashboard");
+      setIsAuthenticated(true);
+      return;
+    }
+    // Verificar si hay sesión guardada (flujo normal)
+    const adminSession = localStorage.getItem("adminSession") || localStorage.getItem("adminSessionToken");
     if (!adminSession) {
       navigate("/admin/login");
       return;

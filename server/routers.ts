@@ -4,7 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, setAdminResetToken, getAdminByResetToken, updateAdminPassword, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber, getAllServices, getAllActiveServices, createService, updateService, deleteService, setAdminLoginToken, getAdminByLoginToken, authorizeAdminLogin, checkAdminLoginAuthorized, clearAdminLoginToken } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, setAdminResetToken, getAdminByResetToken, updateAdminPassword, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber, getAllServices, getAllActiveServices, createService, updateService, deleteService, setAdminLoginToken, getAdminByLoginToken, authorizeAdminLogin, checkAdminLoginAuthorized, clearAdminLoginToken, getAdminBySessionToken } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail } from "./_core/email";
@@ -100,14 +100,23 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         const admin = await getAdminByLoginToken(input.token);
-        if (!admin) throw new Error('Token inv\u00e1lido o expirado');
+        if (!admin) throw new Error('Token inválido o expirado');
         
         if (!admin.loginTokenExpiresAt || new Date() > admin.loginTokenExpiresAt) {
-          throw new Error('El enlace ha expirado. Solicita un nuevo inicio de sesi\u00f3n.');
+          throw new Error('El enlace ha expirado. Solicita un nuevo inicio de sesión.');
         }
         
-        await authorizeAdminLogin(input.token);
-        return { success: true, email: admin.email };
+        const sessionToken = await authorizeAdminLogin(input.token);
+        return { success: true, email: admin.email, sessionToken };
+      }),
+
+    // Verificar session token (para acceso al panel sin cookies)
+    verifySessionToken: publicProcedure
+      .input(z.object({ sessionToken: z.string() }))
+      .query(async ({ input }) => {
+        const admin = await getAdminBySessionToken(input.sessionToken);
+        if (!admin) return { valid: false };
+        return { valid: true, email: admin.email, adminId: admin.id };
       }),
 
     requestPasswordReset: publicProcedure

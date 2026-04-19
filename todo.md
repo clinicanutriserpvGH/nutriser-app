@@ -1755,3 +1755,11 @@
 - [x] Splash promocional: etiqueta "Librería" superpuesta en cuadrante inferior derecho
 - [x] Farmacia Nutriser → renombrado a "Productos Nutriser" en la sección de la tienda
 - [x] Barra de navegación: "Farmacy" cambiado a "Productos"
+
+## Sistema de Analítica de Comportamiento - Sesión actual
+- [ ] Schema: tabla userBehaviorEvents (itemType, itemId, itemName, eventType, userId, sessionId)
+- [ ] DB helpers: trackBehaviorEvent, getBehaviorAnalytics, getTopItems
+- [ ] tRPC: trackEvent (público) y analytics.getTopItems (admin)
+- [ ] Tracking en tienda: vistas de producto/servicio/libro, wishlist, carrito, más info
+- [ ] Panel admin: sección "Analítica de Comportamiento" con top 10 ítems
+- [ ] Botón admin: crear splash promocional desde ítem popular

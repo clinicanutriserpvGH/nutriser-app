@@ -252,12 +252,29 @@ export async function getAdminByLoginToken(token: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function authorizeAdminLogin(token: string) {
+export async function authorizeAdminLogin(token: string): Promise<string | null> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  return await db.update(adminCredentials)
-    .set({ loginAuthorized: true })
+  // Generar session token único de 24 horas
+  const crypto = await import('crypto');
+  const sessionToken = crypto.randomBytes(32).toString('hex');
+  const sessionTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+  await db.update(adminCredentials)
+    .set({ loginAuthorized: true, sessionToken, sessionTokenExpiresAt })
     .where(eq(adminCredentials.loginToken, token));
+  return sessionToken;
+}
+
+export async function getAdminBySessionToken(sessionToken: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(adminCredentials)
+    .where(eq(adminCredentials.sessionToken, sessionToken))
+    .limit(1);
+  if (result.length === 0) return undefined;
+  const admin = result[0];
+  if (!admin.sessionTokenExpiresAt || new Date() > admin.sessionTokenExpiresAt) return undefined;
+  return admin;
 }
 
 export async function checkAdminLoginAuthorized(email: string): Promise<boolean> {
@@ -278,6 +295,14 @@ export async function clearAdminLoginToken(email: string) {
   if (!db) throw new Error("Database not available");
   return await db.update(adminCredentials)
     .set({ loginToken: null, loginTokenExpiresAt: null, loginAuthorized: false })
+    .where(eq(adminCredentials.email, email));
+}
+
+export async function clearAdminSessionToken(email: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(adminCredentials)
+    .set({ sessionToken: null, sessionTokenExpiresAt: null })
     .where(eq(adminCredentials.email, email));
 }
 

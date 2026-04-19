@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, CheckCircle2, XCircle, Loader2, Home } from "lucide-react";
+import { Shield, CheckCircle2, XCircle, Loader2, Home, LogIn } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 export default function AdminAuthorize() {
@@ -10,11 +10,20 @@ export default function AdminAuthorize() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [authorizedEmail, setAuthorizedEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   const authorizeMutation = trpc.auth.authorizeLogin.useMutation({
     onSuccess: (data) => {
       setStatus("success");
       setAuthorizedEmail(data.email);
+      if (data.sessionToken) {
+        setSessionToken(data.sessionToken);
+        localStorage.setItem("adminSessionToken", data.sessionToken);
+        // Redirigir automáticamente al panel después de 2 segundos
+        setTimeout(() => {
+          window.location.href = `/admin/dashboard?st=${data.sessionToken}`;
+        }, 2000);
+      }
     },
     onError: (err: any) => {
       setStatus("error");
@@ -62,21 +71,23 @@ export default function AdminAuthorize() {
                 <h3 className="text-xl font-bold text-[#1A1A1A]">¡Acceso Autorizado!</h3>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <p className="text-sm text-green-700">
-                    Se ha autorizado el acceso al panel de administración para:
+                    Acceso autorizado para:
                   </p>
                   <p className="text-lg font-bold text-green-800 mt-1">{authorizedEmail}</p>
                 </div>
                 <p className="text-sm text-[#666]">
-                  El administrador ahora puede acceder al panel. Puedes cerrar esta ventana.
+                  Redirigiendo al panel de administración...
                 </p>
-                <Button
-                  onClick={() => navigate("/")}
-                  variant="outline"
-                  className="border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A]/10 mt-2"
-                >
-                  <Home className="w-4 h-4 mr-2" />
-                  Ir al inicio
-                </Button>
+                <Loader2 className="w-6 h-6 text-[#C5A55A] animate-spin mx-auto" />
+                {sessionToken && (
+                  <Button
+                    onClick={() => { window.location.href = `/admin/dashboard?st=${sessionToken}`; }}
+                    className="bg-[#C5A55A] hover:bg-[#B8944A] text-white mt-2 w-full"
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Ir al Panel Ahora
+                  </Button>
+                )}
               </div>
             )}
 
@@ -91,12 +102,12 @@ export default function AdminAuthorize() {
                   El enlace puede haber expirado o ya fue utilizado. El administrador deberá intentar iniciar sesión nuevamente.
                 </p>
                 <Button
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/admin/login")}
                   variant="outline"
                   className="border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A]/10 mt-2"
                 >
                   <Home className="w-4 h-4 mr-2" />
-                  Ir al inicio
+                  Volver al Login
                 </Button>
               </div>
             )}

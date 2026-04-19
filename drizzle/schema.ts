@@ -101,6 +101,8 @@ export const adminCredentials = mysqlTable("adminCredentials", {
   loginToken: varchar("loginToken", { length: 128 }),        // Token 2FA para autorizar login
   loginTokenExpiresAt: timestamp("loginTokenExpiresAt"),    // Expira en 10 minutos
   loginAuthorized: boolean("loginAuthorized").default(false), // Si el login fue autorizado por enlace
+  sessionToken: varchar("sessionToken", { length: 128 }),      // Token de sesión generado al autorizar
+  sessionTokenExpiresAt: timestamp("sessionTokenExpiresAt"),  // Expira en 24 horas
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -805,3 +807,27 @@ export const favorites = mysqlTable("favorites", {
 });
 export type Favorite = typeof favorites.$inferSelect;
 export type InsertFavorite = typeof favorites.$inferInsert;
+
+// ============================================================
+// ANALÍTICA DE COMPORTAMIENTO — Tracking de interacciones en tienda
+// ============================================================
+/**
+ * Registra cada interacción del usuario con ítems de la tienda:
+ * - view: el usuario vio el detalle del ítem
+ * - wishlist: lo agregó a lista de deseos / favoritos
+ * - cart: lo agregó al carrito
+ * - info: presionó "Más información"
+ * - purchase: completó la compra
+ */
+export const userBehaviorEvents = mysqlTable("userBehaviorEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  itemType: mysqlEnum("itemType", ["service", "product", "ebook", "package", "promotion"]).notNull(),
+  itemId: varchar("itemId", { length: 100 }).notNull(),   // ej: "svc-5", "product-2", "ebook-1"
+  itemName: varchar("itemName", { length: 255 }).notNull(),
+  eventType: mysqlEnum("eventType", ["view", "wishlist", "cart", "info", "purchase"]).notNull(),
+  patientId: int("patientId"),       // null si no está logueado
+  sessionId: varchar("sessionId", { length: 64 }), // ID de sesión anónima
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type UserBehaviorEvent = typeof userBehaviorEvents.$inferSelect;
+export type InsertUserBehaviorEvent = typeof userBehaviorEvents.$inferInsert;

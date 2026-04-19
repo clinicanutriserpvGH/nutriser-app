@@ -578,7 +578,7 @@ export default function WalletPage() {
             </div>
             <button onClick={() => setLocation("/memberships")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
               <BookOpen className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Library</span>
+              <span className="text-[10px] font-medium text-gray-400">Librería</span>
             </button>
             <button onClick={() => setLocation("/memberships")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
               <User className="w-5 h-5 text-gray-400" />

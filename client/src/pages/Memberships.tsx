@@ -1827,7 +1827,7 @@ onClick={() => {
                 }`}
               >
                 <BookOpen className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Library</span>
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Librería</span>
               </button>
 
               {/* Farmacy */}

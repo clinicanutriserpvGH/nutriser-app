@@ -11,7 +11,7 @@ export const translations = {
     tabTreatments: "Tratamientos",
     tabFarmacy: "Farmacy",
     tabWallet: "Monedero",
-    tabLibrary: "Library",
+    tabLibrary: "Librería",
     tabWishlist: "Deseos",
     tabAccount: "Cuenta",
     
@@ -70,7 +70,7 @@ export const translations = {
     tabTreatments: "Treatments",
     tabFarmacy: "Pharmacy",
     tabWallet: "Wallet",
-    tabLibrary: "Library",
+    tabLibrary: "Librería",
     tabWishlist: "Wishlist",
     tabAccount: "Account",
     

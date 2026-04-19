@@ -30,7 +30,7 @@ function useCountdown(expiresAt: Date | string | null | undefined) {
 }
 
 const SHOP_SPLASH_IMAGE =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-shop-splash-fixed_e318f2da.png";
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663459263490/IlibdokxBlwzqOaF.png";
 
 interface ShopPromoSplashProps {
   onClose: () => void;
@@ -55,37 +55,24 @@ interface Promo {
 function ShopCard({ onAction }: { onAction: () => void }) {
   return (
     <div className="relative w-full flex-shrink-0">
-      <button
-        onClick={onAction}
-        className="relative w-full overflow-hidden rounded-2xl block transition-opacity hover:opacity-95 active:opacity-80"
-        style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)", padding: 0 }}
+      <div
+        className="relative w-full overflow-hidden rounded-2xl"
+        style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
       >
-        {/* Imagen completa del splash */}
-        <div className="relative w-full">
+        {/* Imagen 2x2 con etiquetas ya incluidas en el PNG */}
+        <button
+          onClick={onAction}
+          className="relative w-full block transition-opacity hover:opacity-95 active:opacity-80"
+          style={{ padding: 0 }}
+        >
           <img
             src={SHOP_SPLASH_IMAGE}
             alt="Nutriser Shop"
             className="w-full h-auto block"
             style={{ display: "block" }}
           />
-          {/* Etiqueta "Productos" — borde inferior del cuadrante inferior izquierdo */}
-          <div
-            className="absolute flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-[11px] font-bold px-2 py-1 rounded-sm"
-            style={{ bottom: "2%", left: "2%" }}
-          >
-            <span>Productos</span>
-            <span className="text-[#C5A55A] text-[9px] font-normal">nutriser</span>
-          </div>
-          {/* Etiqueta "Librería" — borde inferior del cuadrante inferior derecho */}
-          <div
-            className="absolute flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-[11px] font-bold px-2 py-1 rounded-sm"
-            style={{ bottom: "2%", right: "2%" }}
-          >
-            <span>Librería</span>
-            <span className="text-[#C5A55A] text-[9px] font-normal">nutriser</span>
-          </div>
-        </div>
-      </button>
+        </button>
+      </div>
     </div>
   );
 }

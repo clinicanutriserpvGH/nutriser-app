@@ -61,12 +61,30 @@ function ShopCard({ onAction }: { onAction: () => void }) {
         style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)", padding: 0 }}
       >
         {/* Imagen completa del splash */}
-        <img
-          src={SHOP_SPLASH_IMAGE}
-          alt="Nutriser Shop"
-          className="w-full h-auto block"
-          style={{ display: "block" }}
-        />
+        <div className="relative w-full">
+          <img
+            src={SHOP_SPLASH_IMAGE}
+            alt="Nutriser Shop"
+            className="w-full h-auto block"
+            style={{ display: "block" }}
+          />
+          {/* Etiqueta "Productos" — cuadrante inferior izquierdo */}
+          <div
+            className="absolute flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-[11px] font-bold px-2 py-1 rounded-sm"
+            style={{ bottom: "52%", left: "2%", transform: "translateY(100%)" }}
+          >
+            <span>Productos</span>
+            <span className="text-[#C5A55A] text-[9px] font-normal">nutriser</span>
+          </div>
+          {/* Etiqueta "Librería" — cuadrante inferior derecho */}
+          <div
+            className="absolute flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-[11px] font-bold px-2 py-1 rounded-sm"
+            style={{ bottom: "52%", right: "2%", transform: "translateY(100%)" }}
+          >
+            <span>Librería</span>
+            <span className="text-[#C5A55A] text-[9px] font-normal">nutriser</span>
+          </div>
+        </div>
       </button>
     </div>
   );

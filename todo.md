@@ -1749,3 +1749,9 @@
 - [x] Paciente logueado = acceso automático al contenido de Academy (misma cuenta que Shop)
 - [x] Solo mostrar el botón de suscripción a usuarios NO logueados
 - [x] Paciente logueado ve: "Ya eres miembro de la comunidad, [nombre]" + aviso de contenido próximamente
+
+## Etiquetas Splash Promocional y Renombrado Farmacy - Sesión 22
+- [x] Splash promocional: etiqueta "Productos" superpuesta en cuadrante inferior izquierdo (estilo igual que Tratamientos Faciales/Corporales)
+- [x] Splash promocional: etiqueta "Librería" superpuesta en cuadrante inferior derecho
+- [x] Farmacia Nutriser → renombrado a "Productos Nutriser" en la sección de la tienda
+- [x] Barra de navegación: "Farmacy" cambiado a "Productos"

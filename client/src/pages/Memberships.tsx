@@ -1195,7 +1195,7 @@ onClick={() => {
                     <FlaskConical className="w-4 h-4 text-purple-600" />
                   </div>
                   <div>
-                    <h2 className="font-black text-gray-900 text-lg">Farmacia Nutriser</h2>
+                    <h2 className="font-black text-gray-900 text-lg">Productos Nutriser</h2>
                     <p className="text-gray-400 text-xs">Productos nutricionales y cosméticos premium</p>
                   </div>
                 </div>
@@ -1208,7 +1208,7 @@ onClick={() => {
                     <FlaskConical className="w-10 h-10 text-gray-300" />
                   </div>
                   <h3 className="font-bold text-gray-400 text-xl mb-2">Próximamente</h3>
-                  <p className="text-gray-300 text-sm max-w-xs mx-auto">Estamos preparando nuestra farmacia con productos nutricionales y cosméticos de alta calidad.</p>
+                  <p className="text-gray-300 text-sm max-w-xs mx-auto">Estamos preparando nuestros productos nutricionales y cosméticos de alta calidad.</p>
                 </div>
               ) : (
                 <HScrollRail>
@@ -1838,7 +1838,7 @@ onClick={() => {
                 }`}
               >
                 <FlaskConical className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Farmacy</span>
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Productos</span>
               </button>
 
               {/* Monedero — Botón central flotante */}

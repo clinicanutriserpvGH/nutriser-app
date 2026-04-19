@@ -1,6 +1,8 @@
 /**
  * AdminPatientsTab — Pestaña de gestión de pacientes presenciales
- * El admin puede: ver pacientes, asignar tratamientos, citas, subir fotos y enviar notificaciones.
+ * Base de datos unificada: pacientes del portal + suscriptores de cuponera.
+ * El admin puede: ver todos los contactos, enviar correo masivo, asignar tratamientos,
+ * citas, subir fotos, ver contratos y enviar notificaciones individuales.
  */
 import { useState, useRef } from "react";
 import { trpc } from "@/lib/trpc";
@@ -11,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { toast } from "sonner";
 import {
   Bell, Calendar, Camera, ChevronDown, ChevronRight, FileText,
-  Loader2, Mail, Package, Phone, Plus, Activity, Send, Sparkles, Tag, Trash2, User, X,
+  Loader2, Mail, Package, Phone, Plus, Activity, Send, Sparkles, Tag, Trash2, User, X, Users, Search,
 } from "lucide-react";
 
 type Patient = {
@@ -56,10 +58,19 @@ export default function AdminPatientsTab() {
   const [selectedTreatmentForAppt, setSelectedTreatmentForAppt] = useState<number | undefined>();
   const [newTreatmentSessions, setNewTreatmentSessions] = useState(1);
   const [expandedTreatment, setExpandedTreatment] = useState<number | null>(null);
+  // ── Estado correo masivo ────────────────────────────────────────────────────────────────────────────
+  const [showBulkEmail, setShowBulkEmail] = useState(false);
+  const [bulkEmailSubject, setBulkEmailSubject] = useState("");
+  const [bulkEmailMessage, setBulkEmailMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // ── Queries ──────────────────────────────────────────────────────────────────
+  // ── Queries ────────────────────────────────────────────────────────────────────────────
   const { data: patients = [], isLoading: loadingPatients, refetch: refetchPatients } =
     trpc.patients.listAll.useQuery();
+
+  // Suscriptores de cuponera (sin cuenta de portal)
+  const { data: allContacts = [], isLoading: loadingContacts } =
+    trpc.couponSubscribers.listAllContacts.useQuery();
 
   const { data: treatments = [], refetch: refetchTreatments } =
     trpc.patients.getTreatments.useQuery(
@@ -159,6 +170,16 @@ export default function AdminPatientsTab() {
     onError: (e) => toast.error(e.message),
   });
 
+  const sendBulkEmailMutation = trpc.couponSubscribers.sendEmailToAllContacts.useMutation({
+    onSuccess: (d) => {
+      toast.success(`✅ Correo enviado a ${d.sent} contactos${d.failed > 0 ? ` (${d.failed} fallidos)` : ''}`);
+      setShowBulkEmail(false);
+      setBulkEmailSubject('');
+      setBulkEmailMessage('');
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleAddTreatment = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -248,38 +269,135 @@ export default function AdminPatientsTab() {
   const appointmentsForTreatment = (tid: number) =>
     appointments.filter(a => a.treatmentId === tid);
 
+  // ── Datos unificados ────────────────────────────────────────────────────────────────────────────
+  const patientEmails = new Set((patients as Patient[]).map(p => p.email.toLowerCase()));
+  const couponOnlyContacts = allContacts.filter(c => !patientEmails.has(c.email.toLowerCase()));
+  const totalContacts = (patients as Patient[]).length + couponOnlyContacts.length;
+
+  const filteredPatients = (patients as Patient[]).filter(p =>
+    !searchQuery ||
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.phone || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const filteredCouponOnly = couponOnlyContacts.filter(c =>
+    !searchQuery ||
+    c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (c.phone || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (c.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-3">
-          <div>
-            <CardTitle className="text-[#1A1A1A] text-xl">🏥 Gestión de Pacientes</CardTitle>
-            <CardDescription>
-              Administra los pacientes presenciales: tratamientos, citas, fotos antes/después y notificaciones.
-            </CardDescription>
+        <CardHeader>
+          <div className="flex flex-row items-start justify-between flex-wrap gap-3">
+            <div>
+              <CardTitle className="text-[#1A1A1A] text-xl">🏥 Gestión de Pacientes</CardTitle>
+              <CardDescription>
+                Base de datos unificada: pacientes del portal + suscriptores de cuponera.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="bg-[#FAF7F2] border border-[#C5A55A]/30 rounded-xl px-3 py-1.5 text-center">
+                <p className="text-lg font-bold text-[#C5A55A]">{totalContacts}</p>
+                <p className="text-[10px] text-gray-400">contactos</p>
+              </div>
+              <Button
+                onClick={() => setShowBulkEmail(v => !v)}
+                variant="outline"
+                className="border-[#C5A55A]/40 text-[#C5A55A] hover:bg-[#C5A55A]/10 text-xs flex items-center gap-1.5"
+              >
+                <Mail className="w-3.5 h-3.5" /> Correo masivo
+              </Button>
+              <Button
+                onClick={() => setShowNotifyModal(true)}
+                className="bg-[#C5A55A] hover:bg-[#d4b46a] text-black text-xs flex items-center gap-1.5"
+              >
+                <Bell className="w-3.5 h-3.5" /> Notificar a todos
+              </Button>
+            </div>
           </div>
-          <Button
-            onClick={() => setShowNotifyModal(true)}
-            className="bg-[#C5A55A] hover:bg-[#d4b46a] text-black text-sm flex items-center gap-2"
-          >
-            <Bell className="w-4 h-4" /> Notificar a todos
-          </Button>
+
+          {/* Buscador */}
+          <div className="relative mt-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Buscar por nombre, correo o teléfono..."
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30"
+            />
+          </div>
+
+          {/* Panel de correo masivo */}
+          {showBulkEmail && (
+            <div className="mt-3 bg-[#FAF7F2] border border-[#C5A55A]/30 rounded-xl p-4 space-y-3">
+              <h4 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#C5A55A]" />
+                Correo masivo a todos los contactos
+                <span className="ml-auto text-xs font-normal text-gray-500">{totalContacts} destinatarios</span>
+              </h4>
+              <input
+                type="text"
+                value={bulkEmailSubject}
+                onChange={e => setBulkEmailSubject(e.target.value)}
+                placeholder="Asunto del correo"
+                className="w-full border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30"
+                maxLength={150}
+              />
+              <textarea
+                value={bulkEmailMessage}
+                onChange={e => setBulkEmailMessage(e.target.value)}
+                placeholder="Escribe el mensaje del correo..."
+                rows={4}
+                className="w-full border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 resize-none"
+                maxLength={2000}
+              />
+              <p className="text-xs text-gray-400">{bulkEmailMessage.length}/2000 caracteres</p>
+              <div className="flex gap-2">
+                <button
+                  disabled={!bulkEmailSubject.trim() || !bulkEmailMessage.trim() || sendBulkEmailMutation.isPending}
+                  onClick={() => {
+                    if (!bulkEmailSubject.trim() || !bulkEmailMessage.trim()) return;
+                    sendBulkEmailMutation.mutate({ subject: bulkEmailSubject, message: bulkEmailMessage });
+                  }}
+                  className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+                >
+                  {sendBulkEmailMutation.isPending ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
+                  ) : (
+                    <><Send className="w-4 h-4" /> Enviar a {totalContacts} contactos</>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowBulkEmail(false)}
+                  className="px-4 py-2.5 rounded-xl text-sm border border-gray-200 text-gray-500 hover:bg-gray-50 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
         </CardHeader>
+
         <CardContent>
-          {loadingPatients ? (
+          {(loadingPatients || loadingContacts) ? (
             <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-[#C5A55A]" /></div>
-          ) : (patients as Patient[]).length === 0 ? (
+          ) : totalContacts === 0 ? (
             <div className="text-center py-8 text-gray-400">
-              <User className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p>Aún no hay pacientes registrados.</p>
-              <p className="text-xs mt-1">Los pacientes se registran desde la app en "Mis Tratamientos".</p>
+              <Users className="w-10 h-10 mx-auto mb-2 opacity-30" />
+              <p>Aún no hay contactos registrados.</p>
+              <p className="text-xs mt-1">Los pacientes se registran desde la app en "Mis Tratamientos" y los suscriptores desde la cuponera.</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {(patients as Patient[]).map(p => (
+              {/* Pacientes del portal (con cuenta completa) */}
+              {filteredPatients.map(p => (
                 <div
-                  key={p.id}
+                  key={`patient-${p.id}`}
                   onClick={() => { setSelectedPatient(p); setPatientTab("treatments"); }}
                   className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedPatient?.id === p.id ? "border-[#C5A55A] bg-[#C5A55A]/5" : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"}`}
                 >
@@ -293,6 +411,7 @@ export default function AdminPatientsTab() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Badge className="bg-blue-50 text-blue-600 text-[9px] border border-blue-200">🏥 Portal</Badge>
                     {p.consentAcceptedAt ? (
                       <Badge className="bg-green-100 text-green-700 text-[10px]">✅ Firmado</Badge>
                     ) : (
@@ -302,6 +421,36 @@ export default function AdminPatientsTab() {
                   </div>
                 </div>
               ))}
+
+              {/* Suscriptores solo de cuponera */}
+              {filteredCouponOnly.length > 0 && (
+                <>
+                  {filteredPatients.length > 0 && (
+                    <div className="flex items-center gap-2 py-1">
+                      <div className="flex-1 h-px bg-gray-100" />
+                      <span className="text-[10px] text-gray-400 font-medium">Suscriptores de cuponera</span>
+                      <div className="flex-1 h-px bg-gray-100" />
+                    </div>
+                  )}
+                  {filteredCouponOnly.map((c, idx) => (
+                    <div
+                      key={`coupon-${idx}`}
+                      className="flex items-center justify-between p-3 rounded-xl border border-amber-100 bg-amber-50/30"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center">
+                          <Mail className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-[#1A1A1A] text-sm">{c.name || <span className="text-gray-400 italic text-xs">Sin nombre</span>}</p>
+                          <p className="text-xs text-gray-400">{c.email}{c.phone ? ` · ${c.phone}` : ''}</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-amber-100 text-amber-700 text-[9px] border border-amber-200">🔔 Cuponera</Badge>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           )}
         </CardContent>

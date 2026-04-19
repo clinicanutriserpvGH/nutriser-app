@@ -1840,3 +1840,60 @@
 - [ ] MyTreatments: eliminar campana pequeña (BellOff) del header
 - [ ] Verificar TypeScript sin errores
 - [ ] Guardar checkpoint
+
+## Sesión Actual - Modal Auth Universal (Desktop)
+- [ ] MobileAuthGuard: hacer que funcione en desktop también (no solo móvil)
+- [ ] Memberships: reemplazar navigate('/mis-tratamientos') por MobileAuthGuard modal
+- [ ] Courses: reemplazar navigate('/mis-tratamientos') por MobileAuthGuard modal
+- [ ] Store: reemplazar navigate('/mis-tratamientos') por MobileAuthGuard modal
+- [ ] WalletPage: reemplazar navigate('/mis-tratamientos') por MobileAuthGuard modal
+- [ ] SplashSelector: reemplazar navigate('/mis-tratamientos') por MobileAuthGuard modal
+- [ ] PromoSplash: reemplazar navigate('/mis-tratamientos') por MobileAuthGuard modal
+- [ ] ShopPromoSplash: reemplazar navigate('/mis-tratamientos') por MobileAuthGuard modal
+- [ ] Verificar TypeScript sin errores
+- [ ] Guardar checkpoint
+
+## Sesión Actual - Eliminar Cuponera y WhatsApp en teléfono
+
+- [ ] Eliminar tabla/datos de suscriptores de cuponera de la base de datos
+- [ ] Eliminar la tabla couponSubscribers (o similar) del esquema Drizzle
+- [ ] AdminDashboard: eliminar sección "Suscriptores de Cuponera" de Gestión de Pacientes
+- [ ] AdminDashboard: mostrar solo pacientes del portal con contrato firmado
+- [ ] AdminDashboard: hacer que el número de teléfono del paciente sea enlace directo a WhatsApp
+- [ ] Verificar TypeScript sin errores
+- [ ] Guardar checkpoint
+
+## Sesión Actual - Tareas Pendientes
+
+- [ ] Eliminar couponSubscribers de routers.ts (router completo ~líneas 1119-1241)
+- [ ] Eliminar referencias couponSubscribers de AdminPatientsTab.tsx
+- [ ] Eliminar referencias couponSubscribers de AdminDashboard.tsx
+- [ ] Eliminar emailSubscribeMutation de SplashSelector.tsx
+- [ ] Eliminar subscribeMutation de PromotionsSection.tsx
+- [ ] Actualizar comment en pushSubscriptions schema (quitar referencia a couponSubscribers)
+- [ ] Actualizar tests en subscriptions.test.ts (quitar describe couponSubscribers)
+- [ ] Agregar botón "Reiniciar" en Analítica de Comportamiento (AdminDashboard)
+- [ ] Agregar tRPC procedure analytics.resetAll en routers.ts
+- [ ] Agregar función resetAllBehaviorEvents en db.ts
+- [ ] Implementar flujo Pago en Efectivo: tabla cashPaymentPendingItems en schema.ts
+- [ ] Agregar opción "Pagar en Efectivo" en Tienda (Memberships.tsx / Store.tsx)
+- [ ] Agregar opción "Pagar en Efectivo" en Academia (Courses.tsx)
+- [ ] Agregar opción "Pagar en Efectivo" en Cupones
+- [ ] Al elegir efectivo: crear pendiente en monedero del paciente
+- [ ] En escáner admin (WalletScanner): mostrar pendientes de pago claramente
+- [ ] Admin puede confirmar pago en efectivo → acumula puntos de lealtad
+- [ ] Completar MobileAuthGuard en Courses.tsx (requireAuth → modal)
+
+## Sesión Actual - Botón Reiniciar Analítica + Pago en Efectivo
+- [x] Botón Reiniciar en Analítica de Comportamiento (con doble confirmación)
+- [x] Función resetAllBehaviorEvents en db.ts
+- [x] Mutation resetBehaviorEvents en router analytics de routers.ts
+- [x] Tabla cashPendingPayments creada en schema.ts y migrada a DB
+- [x] Funciones CRUD de cashPendingPayments en db.ts
+- [x] Router cashPayments en routers.ts (createPending, getMyPending, confirm, cancel, getHistory)
+- [x] Selector de método de pago (Transferencia / Efectivo) en modal de checkout de Memberships.tsx
+- [x] Selector de método de pago en CouponPage.tsx
+- [x] Sección de pagos pendientes en WalletPage.tsx (tab Mi Tarjeta)
+- [x] Sección de pagos pendientes en AdminQRScanner.tsx con botones Confirmar y Cancelar
+- [x] Al confirmar pago en efectivo: cashback acreditado automáticamente al monedero
+- [x] Eliminar couponSubscribers de schema, db.ts, routers.ts, AdminDashboard, AdminPatientsTab, PromotionsSection, SplashSelector

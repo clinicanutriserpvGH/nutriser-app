@@ -110,19 +110,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
     onError: () => toast.error("No se pudieron activar las notificaciones push."),
   });
 
-  const emailSubscribeMutation = trpc.couponSubscribers.subscribe.useMutation({
-    onSuccess: () => {
-      setEmailDone(true);
-      setEmailSubmitting(false);
-      localStorage.setItem("nutriser_email_subscribed", "true");
-      toast.success("✉️ ¡Listo! Recibirás alertas de descuentos en tu correo.");
-    },
-    onError: () => {
-      setEmailSubmitting(false);
-      toast.error("No se pudo guardar tu correo. Intenta de nuevo.");
-    },
-  });
-
   const handleNavigate = (path: string) => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
     setLeaving(true);
@@ -206,8 +193,11 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailInput.trim()) return;
-    setEmailSubmitting(true);
-    await emailSubscribeMutation.mutateAsync({ email: emailInput.trim() });
+    // Guardar email localmente (couponSubscribers eliminado)
+    localStorage.setItem("nutriser_email_subscribed", "true");
+    localStorage.setItem("nutriser_subscriber_email", emailInput.trim());
+    setEmailDone(true);
+    toast.success("✉️ ¡Listo! Recibirás alertas de descuentos en tu correo.");
   };
 
   const handleLogout = () => {

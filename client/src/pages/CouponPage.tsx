@@ -52,6 +52,10 @@ export default function CouponPage() {
   );
   const walletBalance = walletQuery.data?.wallet?.balance || 0;
 
+  // Método de pago
+  const [paymentMethod, setPaymentMethod] = useState<'transfer' | 'cash'>('transfer');
+  const walletData = walletQuery.data?.wallet;
+
   // Mutaciones
   const createServicePurchaseMutation = trpc.servicePurchases.create.useMutation({
     onSuccess: () => {
@@ -61,6 +65,16 @@ export default function CouponPage() {
     onError: (e) => {
       setPayStep('form');
       toast.error('Error al enviar: ' + e.message);
+    },
+  });
+  const cashPendingMutation = trpc.cashPayments.createPending.useMutation({
+    onSuccess: () => {
+      setPayStep('done');
+      toast.success('¡Pendiente de pago en efectivo registrado en tu monedero!');
+    },
+    onError: (e) => {
+      setPayStep('form');
+      toast.error('Error al registrar: ' + e.message);
     },
   });
 
@@ -101,11 +115,40 @@ export default function CouponPage() {
       toast.error('Nombre y teléfono son requeridos');
       return;
     }
+    if (!promo) return;
+
+    // — Pago en Efectivo —
+    if (paymentMethod === 'cash') {
+      if (!walletData?.id || !patient?.id) {
+        toast.error('Necesitas un monedero activo para pagar en efectivo.');
+        return;
+      }
+      const rawPrice = promo.price || '';
+      const numericPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
+      const walletDeductPesos = useWallet && walletAmount > 0 ? walletAmount / 100 : 0;
+      const finalAmount = Math.max(0, numericPrice - walletDeductPesos);
+      if (finalAmount <= 0) {
+        toast.error('El monedero ya cubre el total. No es necesario pago en efectivo.');
+        return;
+      }
+      setPayStep('uploading');
+      cashPendingMutation.mutate({
+        walletId: walletData.id,
+        patientId: patient.id,
+        concept: promo.title,
+        itemType: 'promotion',
+        itemId: String(promo.id),
+        amountCents: Math.round(finalAmount * 100),
+        cashbackPercent: 2,
+        notes: `Cupón: ${promo.title}. Pago en efectivo solicitado por ${payName}.`,
+      });
+      return;
+    }
+
     if (!payProofFile) {
       toast.error('Sube el comprobante de pago');
       return;
     }
-    if (!promo) return;
 
     setPayStep('uploading');
     try {
@@ -406,9 +449,52 @@ export default function CouponPage() {
                             </div>
                           )}
 
-                          {/* Instrucciones de pago */}
-                          {(() => {
-                            // Parsear precio numérico del texto libre (ej: "$479 MXN" → 479)
+                          {/* Selector de método de pago */}
+                          <div className="mb-4">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Método de pago</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setPaymentMethod('transfer')}
+                                className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${
+                                  paymentMethod === 'transfer'
+                                    ? 'border-[#C5A55A] bg-amber-50 text-[#C5A55A]'
+                                    : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                                }`}
+                              >
+                                <span className="text-xl">🏦</span>
+                                <span className="text-xs font-bold">Transferencia</span>
+                                <span className="text-[10px] text-center leading-tight opacity-70">Sube comprobante</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPaymentMethod('cash')}
+                                className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${
+                                  paymentMethod === 'cash'
+                                    ? 'border-green-500 bg-green-50 text-green-700'
+                                    : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                                }`}
+                              >
+                                <span className="text-xl">💵</span>
+                                <span className="text-xs font-bold">Efectivo</span>
+                                <span className="text-[10px] text-center leading-tight opacity-70">Paga en clínica</span>
+                              </button>
+                            </div>
+                            {paymentMethod === 'cash' && !walletData?.id && (
+                              <p className="text-xs text-orange-600 mt-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                                ⚠️ Necesitas una cuenta con monedero para pagar en efectivo.
+                              </p>
+                            )}
+                            {paymentMethod === 'cash' && walletData?.id && (
+                              <div className="mt-2 bg-green-50 border border-green-200 rounded-xl p-3 space-y-1">
+                                <p className="text-xs font-bold text-green-700">✅ Se creará un pendiente en tu monedero</p>
+                                <p className="text-xs text-green-600">El admin lo verá al escanear tu QR y confirmará en clínica.</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Instrucciones de transferencia — solo si es transferencia */}
+                          {paymentMethod === 'transfer' && (() => {
                             const rawPrice = promo.price || '';
                             const numericPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
                             const walletDeductPesos = useWallet && walletAmount > 0 ? walletAmount / 100 : 0;
@@ -431,8 +517,8 @@ export default function CouponPage() {
                             );
                           })()}
 
-                          {/* Subir comprobante */}
-                          <div className="mb-4">
+                          {/* Subir comprobante — solo si es transferencia */}
+                          {paymentMethod === 'transfer' && <div className="mb-4">
                             <p className="text-sm font-semibold text-[#1A1A1A] mb-2">Comprobante de pago *</p>
                             <button
                               onClick={() => payProofRef.current?.click()}
@@ -457,20 +543,31 @@ export default function CouponPage() {
                               className="hidden"
                               onChange={e => setPayProofFile(e.target.files?.[0] || null)}
                             />
-                          </div>
+                          </div>}
 
                           <Button
                             onClick={handleSubmitPayment}
-                            disabled={payStep === 'uploading' || !payName || !payPhone || !payProofFile}
-                            className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-3"
+                            disabled={payStep === 'uploading' || !payName || !payPhone || (paymentMethod === 'transfer' && !payProofFile)}
+                            className={`w-full text-white font-bold py-3 ${
+                              paymentMethod === 'cash'
+                                ? 'bg-green-600 hover:bg-green-700'
+                                : 'bg-[#C5A55A] hover:bg-[#B8963E]'
+                            }`}
                           >
                             {payStep === 'uploading' ? (
-                              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enviando...</>
+                              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Procesando...</>
+                            ) : paymentMethod === 'cash' ? (
+                              '💵 Registrar pago en efectivo'
                             ) : (
                               '📤 Enviar comprobante de pago'
                             )}
                           </Button>
-                          <p className="text-xs text-gray-400 text-center mt-2">El equipo Nutriser verificará tu pago y te confirmará por WhatsApp</p>
+                          <p className="text-xs text-gray-400 text-center mt-2">
+                            {paymentMethod === 'cash'
+                              ? 'El admin confirmará tu pago al escanear tu monedero en clínica'
+                              : 'El equipo Nutriser verificará tu pago y te confirmará por WhatsApp'
+                            }
+                          </p>
                         </>
                       )}
                     </div>

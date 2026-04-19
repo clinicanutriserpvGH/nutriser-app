@@ -68,9 +68,7 @@ export default function AdminPatientsTab() {
   const { data: patients = [], isLoading: loadingPatients, refetch: refetchPatients } =
     trpc.patients.listAll.useQuery();
 
-  // Suscriptores de cuponera (sin cuenta de portal)
-  const { data: allContacts = [], isLoading: loadingContacts } =
-    trpc.couponSubscribers.listAllContacts.useQuery();
+
 
   const { data: treatments = [], refetch: refetchTreatments } =
     trpc.patients.getTreatments.useQuery(
@@ -170,9 +168,9 @@ export default function AdminPatientsTab() {
     onError: (e) => toast.error(e.message),
   });
 
-  const sendBulkEmailMutation = trpc.couponSubscribers.sendEmailToAllContacts.useMutation({
+  const sendBulkEmailMutation = trpc.patients.emailAllPatients.useMutation({
     onSuccess: (d) => {
-      toast.success(`✅ Correo enviado a ${d.sent} contactos${d.failed > 0 ? ` (${d.failed} fallidos)` : ''}`);
+      toast.success(`✅ Correo enviado a ${d.sent} pacientes`);
       setShowBulkEmail(false);
       setBulkEmailSubject('');
       setBulkEmailMessage('');
@@ -269,10 +267,7 @@ export default function AdminPatientsTab() {
   const appointmentsForTreatment = (tid: number) =>
     appointments.filter(a => a.treatmentId === tid);
 
-  // ── Datos unificados ────────────────────────────────────────────────────────────────────────────
-  const patientEmails = new Set((patients as Patient[]).map(p => p.email.toLowerCase()));
-  const couponOnlyContacts = allContacts.filter(c => !patientEmails.has(c.email.toLowerCase()));
-  const totalContacts = (patients as Patient[]).length + couponOnlyContacts.length;
+  const totalContacts = (patients as Patient[]).length;
 
   const filteredPatients = (patients as Patient[]).filter(p =>
     !searchQuery ||
@@ -280,14 +275,8 @@ export default function AdminPatientsTab() {
     p.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (p.phone || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const filteredCouponOnly = couponOnlyContacts.filter(c =>
-    !searchQuery ||
-    c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (c.phone || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (c.name || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
-  // ── Render ────────────────────────────────────────────────────────────────────
+  // Render
   return (
     <div className="space-y-6">
       <Card>
@@ -384,13 +373,13 @@ export default function AdminPatientsTab() {
         </CardHeader>
 
         <CardContent>
-          {(loadingPatients || loadingContacts) ? (
+          {loadingPatients ? (
             <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-[#C5A55A]" /></div>
           ) : totalContacts === 0 ? (
             <div className="text-center py-8 text-gray-400">
               <Users className="w-10 h-10 mx-auto mb-2 opacity-30" />
               <p>Aún no hay contactos registrados.</p>
-              <p className="text-xs mt-1">Los pacientes se registran desde la app en "Mis Tratamientos" y los suscriptores desde la cuponera.</p>
+              <p className="text-xs mt-1">Los pacientes se registran desde la app en "Mis Tratamientos".</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -407,7 +396,18 @@ export default function AdminPatientsTab() {
                     </div>
                     <div>
                       <p className="font-semibold text-[#1A1A1A] text-sm">{p.name}</p>
-                      <p className="text-xs text-gray-400">{p.email} · {p.phone}</p>
+                      <p className="text-xs text-gray-400">
+                        {p.email}
+                        {p.phone && (
+                          <> · <a
+                            href={`https://wa.me/52${p.phone.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-600 hover:underline"
+                            onClick={e => e.stopPropagation()}
+                          >{p.phone}</a></>
+                        )}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -422,35 +422,7 @@ export default function AdminPatientsTab() {
                 </div>
               ))}
 
-              {/* Suscriptores solo de cuponera */}
-              {filteredCouponOnly.length > 0 && (
-                <>
-                  {filteredPatients.length > 0 && (
-                    <div className="flex items-center gap-2 py-1">
-                      <div className="flex-1 h-px bg-gray-100" />
-                      <span className="text-[10px] text-gray-400 font-medium">Suscriptores de cuponera</span>
-                      <div className="flex-1 h-px bg-gray-100" />
-                    </div>
-                  )}
-                  {filteredCouponOnly.map((c, idx) => (
-                    <div
-                      key={`coupon-${idx}`}
-                      className="flex items-center justify-between p-3 rounded-xl border border-amber-100 bg-amber-50/30"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center">
-                          <Mail className="w-4 h-4 text-amber-600" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-[#1A1A1A] text-sm">{c.name || <span className="text-gray-400 italic text-xs">Sin nombre</span>}</p>
-                          <p className="text-xs text-gray-400">{c.email}{c.phone ? ` · ${c.phone}` : ''}</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-amber-100 text-amber-700 text-[9px] border border-amber-200">🔔 Cuponera</Badge>
-                    </div>
-                  ))}
-                </>
-              )}
+
             </div>
           )}
         </CardContent>

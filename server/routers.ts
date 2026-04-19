@@ -4,7 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, setAdminResetToken, getAdminByResetToken, updateAdminPassword, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, subscribeToCoupons, getAllCouponSubscribers, deleteCouponSubscriber, getAllServices, getAllActiveServices, createService, updateService, deleteService, setAdminLoginToken, getAdminByLoginToken, authorizeAdminLogin, checkAdminLoginAuthorized, clearAdminLoginToken, getAdminBySessionToken } from "./db";
+import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, setAdminResetToken, getAdminByResetToken, updateAdminPassword, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, getAllServices, getAllActiveServices, createService, updateService, deleteService, setAdminLoginToken, getAdminByLoginToken, authorizeAdminLogin, checkAdminLoginAuthorized, clearAdminLoginToken, getAdminBySessionToken } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail } from "./_core/email";
@@ -13,7 +13,7 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
-import { createWallet, getWalletByPatientId, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend } from './db';
+import { createWallet, getWalletByPatientId, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -766,22 +766,7 @@ export const appRouter = router({
           isActive: true,
         });
 
-        // Notify all active subscribers about the new coupon
-        try {
-          const subscribers = await getAllCouponSubscribers();
-          if (subscribers.length > 0) {
-            await sendNewCouponNotificationToSubscribers(
-              subscribers,
-              input.title,
-              input.description ?? null,
-              input.price ?? null,
-              input.regularPrice ?? null,
-              newPromo.id
-            );
-          }
-        } catch (e) {
-          console.error('Error notifying subscribers:', e);
-        }
+        // Push notifications are sent to all push subscribers (couponSubscribers concept removed)
 
         // Send push notification to all push subscribers
         try {
@@ -1116,129 +1101,6 @@ export const appRouter = router({
       }),
   }),
 
-  // ─── Suscriptores a la cuponera ─────────────────────────────────────────────
-  couponSubscribers: router({
-    subscribe: publicProcedure
-      .input(z.object({
-        email: z.string().email(),
-        whatsapp: z.string().optional().default(""),
-      }))
-      .mutation(async ({ input }) => {
-        await subscribeToCoupons({
-          email: input.email,
-          whatsapp: input.whatsapp || "",
-          isActive: true,
-        });
-        return { success: true };
-      }),
-
-    list: publicProcedure.query(async () => {
-      return await getAllCouponSubscribers();
-    }),
-
-    delete: publicProcedure
-      .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
-        return await deleteCouponSubscriber(input.id);
-      }),
-    // Enviar correo masivo a todos los suscriptores de cupones
-    sendEmailToAll: publicProcedure
-      .input(z.object({
-        subject: z.string().min(1),
-        message: z.string().min(1),
-      }))
-      .mutation(async ({ input }) => {
-        const subscribers = await getAllCouponSubscribers();
-        let sent = 0;
-        let failed = 0;
-        for (const sub of subscribers) {
-          try {
-            await sendPatientNotificationEmail(
-              sub.email,
-              input.subject,
-              input.subject,
-              input.message
-            );
-            sent++;
-          } catch (e) {
-            console.warn('[Email] Error sending to subscriber:', sub.email, e);
-            failed++;
-          }
-        }
-        return { success: true, sent, failed, total: subscribers.length };
-      }),
-    // Enviar correo masivo a TODOS: suscriptores de cupones + pacientes del portal
-    sendEmailToAllContacts: publicProcedure
-      .input(z.object({
-        subject: z.string().min(1),
-        message: z.string().min(1),
-      }))
-      .mutation(async ({ input }) => {
-        const subscribers = await getAllCouponSubscribers();
-        const patients = await getAllPatients();
-        // Unificar por email (evitar duplicados)
-        const emailSet = new Set<string>();
-        const allEmails: string[] = [];
-        for (const s of subscribers) {
-          if (!emailSet.has(s.email.toLowerCase())) {
-            emailSet.add(s.email.toLowerCase());
-            allEmails.push(s.email);
-          }
-        }
-        for (const p of patients) {
-          if (!emailSet.has(p.email.toLowerCase())) {
-            emailSet.add(p.email.toLowerCase());
-            allEmails.push(p.email);
-          }
-        }
-        let sent = 0;
-        let failed = 0;
-        for (const email of allEmails) {
-          try {
-            await sendPatientNotificationEmail(
-              email,
-              input.subject,
-              input.subject,
-              input.message
-            );
-            sent++;
-          } catch (e) {
-            console.warn('[Email] Error sending to contact:', email, e);
-            failed++;
-          }
-        }
-        await notifyOwner({
-          title: `📧 Correo masivo enviado`,
-          content: `Se envió el correo "${input.subject}" a ${sent} contactos (${failed} fallidos).`,
-        });
-        return { success: true, sent, failed, total: allEmails.length };
-      }),
-    // Listar todos los contactos únicos (suscriptores + pacientes)
-    listAllContacts: publicProcedure.query(async () => {
-      const subscribers = await getAllCouponSubscribers();
-      const patients = await getAllPatients();
-      const emailSet = new Set<string>();
-      const contacts: Array<{ email: string; name?: string; phone?: string; source: string; createdAt: Date }> = [];
-      for (const s of subscribers) {
-        if (!emailSet.has(s.email.toLowerCase())) {
-          emailSet.add(s.email.toLowerCase());
-          contacts.push({ email: s.email, phone: s.whatsapp || undefined, source: 'cuponera', createdAt: s.createdAt });
-        }
-      }
-      for (const p of patients) {
-        if (!emailSet.has(p.email.toLowerCase())) {
-          emailSet.add(p.email.toLowerCase());
-          contacts.push({ email: p.email, name: p.name, phone: p.phone || undefined, source: 'portal', createdAt: p.createdAt });
-        } else {
-          // Enriquecer con nombre si ya existe como suscriptor
-          const existing = contacts.find(c => c.email.toLowerCase() === p.email.toLowerCase());
-          if (existing && !existing.name) existing.name = p.name;
-        }
-      }
-      contacts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      return contacts;
-    }),
-  }),
   // ─── Push Notificationss ─────────────────────────────────────────────────────
   push: router({
     subscribe: publicProcedure
@@ -2226,12 +2088,7 @@ export const appRouter = router({
         } catch (e) {
           console.warn('Could not auto-create wallet:', e);
         }
-        // Auto-suscribir al correo de cupones y notificaciones (upsert silencioso)
-        try {
-          await subscribeToCoupons({ email: input.email, whatsapp: input.phone || '', isActive: true });
-        } catch (e) {
-          console.warn('Could not auto-subscribe patient to coupons:', e);
-        }
+        // couponSubscribers concept removed — patients receive push notifications instead
         // Devolver sin el hash
         const { passwordHash: _, resetToken: __, ...safe } = patient;
         return safe;
@@ -3236,6 +3093,99 @@ export const appRouter = router({
         return Object.entries(byDate)
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([date, counts]) => ({ date, ...counts }));
+      }),
+
+    // Admin: reiniciar todos los eventos de comportamiento
+    resetAll: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN', message: 'Solo administradores pueden reiniciar la analítica.' });
+        const result = await resetAllBehaviorEvents();
+        return { success: true, deleted: result.deleted };
+      }),
+  }),
+
+  // ============================================================
+  // PAGOS EN EFECTIVO PENDIENTES
+  // ============================================================
+  cashPayments: router({
+    // Paciente: crear un pago en efectivo pendiente (al elegir "Pagar en Efectivo")
+    createPending: publicProcedure
+      .input(z.object({
+        walletId: z.number(),
+        patientId: z.number(),
+        concept: z.string().min(1),
+        itemType: z.enum(['service', 'product', 'ebook', 'package', 'promotion', 'course', 'other']),
+        itemId: z.string().optional(),
+        amountCents: z.number().min(1),
+        cashbackPercent: z.number().min(0).max(100).default(0),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const payment = await createCashPendingPayment({
+          walletId: input.walletId,
+          patientId: input.patientId,
+          concept: input.concept,
+          itemType: input.itemType,
+          itemId: input.itemId ?? null,
+          amountCents: input.amountCents,
+          cashbackPercent: input.cashbackPercent,
+          notes: input.notes ?? null,
+        });
+        return { success: true, payment };
+      }),
+
+    // Paciente: ver sus pagos pendientes en efectivo
+    getMyPending: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .query(async ({ input }) => {
+        return await getCashPendingPaymentsByWallet(input.walletId);
+      }),
+
+    // Paciente: historial completo de pagos en efectivo
+    getMyHistory: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .query(async ({ input }) => {
+        return await getCashPaymentHistoryByWallet(input.walletId);
+      }),
+
+    // Admin: ver todos los pagos pendientes en efectivo
+    getAllPending: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+        return await getAllCashPendingPayments();
+      }),
+
+    // Admin: confirmar un pago en efectivo y acumular cashback
+    confirm: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+        const payment = await confirmCashPayment(input.id, ctx.user.email ?? 'admin');
+        // Acumular cashback si corresponde
+        if (payment.cashbackPercent > 0) {
+          const cashbackCents = Math.round(payment.amountCents * payment.cashbackPercent / 100);
+          if (cashbackCents > 0) {
+            await addWalletTransaction({
+              walletId: payment.walletId,
+              type: 'cashback',
+              amount: cashbackCents,
+              description: `Cashback ${payment.cashbackPercent}% por pago en efectivo: ${payment.concept}`,
+              referenceType: 'cash_payment',
+              referenceId: payment.id,
+              createdBy: `admin:${ctx.user.email ?? 'admin'}`,
+            });
+          }
+        }
+        return { success: true, payment };
+      }),
+
+    // Admin o paciente: cancelar un pago pendiente
+    cancel: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+        await cancelCashPayment(input.id);
+        return { success: true };
       }),
   }),
 });

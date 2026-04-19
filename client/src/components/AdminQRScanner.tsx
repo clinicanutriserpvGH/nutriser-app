@@ -36,6 +36,28 @@ export default function AdminQRScanner() {
 
   const utils = trpc.useUtils();
 
+  // Query para pagos en efectivo pendientes del wallet actual
+  const [walletIdForCash, setWalletIdForCash] = useState<number | null>(null);
+  const cashPendingQuery = trpc.cashPayments.getMyPending.useQuery(
+    { walletId: walletIdForCash! },
+    { enabled: !!walletIdForCash }
+  );
+  const confirmCashMutation = trpc.cashPayments.confirm.useMutation({
+    onSuccess: (data) => {
+      toast.success(`✅ Pago confirmado. Cashback acreditado a ${patientQuery.data?.patientName ?? 'paciente'}.`);
+      utils.cashPayments.getMyPending.invalidate();
+      utils.wallet.adminLookupByNumber.invalidate();
+    },
+    onError: (e) => toast.error('Error al confirmar: ' + e.message),
+  });
+  const cancelCashMutation = trpc.cashPayments.cancel.useMutation({
+    onSuccess: () => {
+      toast.success('Pago pendiente cancelado.');
+      utils.cashPayments.getMyPending.invalidate();
+    },
+    onError: (e) => toast.error('Error al cancelar: ' + e.message),
+  });
+
   // Query para buscar monedero por número
   const patientQuery = trpc.wallet.adminLookupByNumber.useQuery(
     { walletNumber },
@@ -132,6 +154,13 @@ export default function AdminQRScanner() {
       stopScanner();
     };
   }, [stopScanner]);
+
+  // Cuando se obtiene el paciente, cargar sus pagos pendientes
+  useEffect(() => {
+    if (patientQuery.data?.walletId) {
+      setWalletIdForCash(patientQuery.data.walletId);
+    }
+  }, [patientQuery.data?.walletId]);
 
   // ─── Handlers ─────────────────────────────────────────────────
   const handleManualSearch = () => {
@@ -344,6 +373,56 @@ export default function AdminQRScanner() {
                   <p className="text-center text-red-500 text-sm font-semibold">
                     Monedero suspendido — no se puede registrar compra
                   </p>
+                )}
+
+                {/* — Pagos en Efectivo Pendientes — */}
+                {cashPendingQuery.isLoading ? (
+                  <div className="flex justify-center py-2"><Loader2 className="w-4 h-4 animate-spin text-amber-500" /></div>
+                ) : (cashPendingQuery.data && cashPendingQuery.data.length > 0) ? (
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-red-500" />
+                      <span className="text-sm font-bold text-red-700">Pagos en Efectivo Pendientes ({cashPendingQuery.data.length})</span>
+                    </div>
+                    {cashPendingQuery.data.map((p: any) => (
+                      <div key={p.id} className="bg-red-50 border border-red-200 rounded-xl p-3 space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-900 truncate">{p.concept}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(p.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </p>
+                          </div>
+                          <div className="text-right ml-2">
+                            <p className="text-base font-black text-red-700">${(p.amountCents / 100).toFixed(2)}</p>
+                            {p.cashbackPercent > 0 && (
+                              <p className="text-[10px] text-green-600 font-semibold">+{p.cashbackPercent}% cashback</p>
+                            )}
+                          </div>
+                        </div>
+                        {p.notes && <p className="text-xs text-gray-500 italic">{p.notes}</p>}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => confirmCashMutation.mutate({ id: p.id })}
+                            disabled={confirmCashMutation.isPending}
+                            className="flex-1 py-1.5 rounded-lg bg-green-600 text-white text-xs font-bold hover:bg-green-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                          >
+                            <Check className="w-3 h-3" />
+                            {confirmCashMutation.isPending ? 'Confirmando...' : 'Confirmar pago'}
+                          </button>
+                          <button
+                            onClick={() => cancelCashMutation.mutate({ id: p.id })}
+                            disabled={cancelCashMutation.isPending}
+                            className="px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-300 disabled:opacity-50 transition-all"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-center text-gray-400 mt-1">Sin pagos en efectivo pendientes</p>
                 )}
               </CardContent>
             </Card>

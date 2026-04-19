@@ -2,9 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock all DB functions
 vi.mock('./db', () => ({
-  subscribeToCoupons: vi.fn(),
-  getAllCouponSubscribers: vi.fn(),
-  deleteCouponSubscriber: vi.fn(),
   createServicePurchase: vi.fn(),
   getAllServicePurchases: vi.fn(),
   updateServicePurchaseStatus: vi.fn(),
@@ -113,68 +110,6 @@ function createPublicContext(): TrpcContext {
 }
 
 const caller = appRouter.createCaller(createPublicContext());
-
-describe('couponSubscribers router', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('subscribe: should create a new subscriber', async () => {
-    const mockSubscriber = { id: 1, email: 'test@example.com', whatsapp: '3221234567', isActive: true, createdAt: new Date() };
-    vi.mocked(db.subscribeToCoupons).mockResolvedValue(mockSubscriber as any);
-
-    const result = await caller.couponSubscribers.subscribe({
-      email: 'test@example.com',
-      whatsapp: '3221234567',
-    });
-
-    expect(result.success).toBe(true);
-    expect(db.subscribeToCoupons).toHaveBeenCalledWith({
-      email: 'test@example.com',
-      whatsapp: '3221234567',
-      isActive: true,
-    });
-  });
-
-  it('subscribe: should fail with invalid email', async () => {
-    await expect(
-      caller.couponSubscribers.subscribe({
-        email: 'not-an-email',
-        whatsapp: '3221234567',
-      })
-    ).rejects.toThrow();
-  });
-
-  it('subscribe: should succeed with short or no whatsapp (field is optional)', async () => {
-    // whatsapp is optional with no minimum length validation in the router
-    const mockSubscriber = { id: 2, email: 'test@example.com', whatsapp: '123', isActive: true, createdAt: new Date() };
-    vi.mocked(db.subscribeToCoupons).mockResolvedValue(mockSubscriber as any);
-    const result = await caller.couponSubscribers.subscribe({
-      email: 'test@example.com',
-      whatsapp: '123',
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it('list: should return all subscribers', async () => {
-    const mockSubscribers = [
-      { id: 1, email: 'a@example.com', whatsapp: '3221234567', isActive: true, createdAt: new Date() },
-      { id: 2, email: 'b@example.com', whatsapp: '3227654321', isActive: true, createdAt: new Date() },
-    ];
-    vi.mocked(db.getAllCouponSubscribers).mockResolvedValue(mockSubscribers as any);
-
-    const result = await caller.couponSubscribers.list();
-    expect(result).toHaveLength(2);
-    expect(result[0].email).toBe('a@example.com');
-  });
-
-  it('delete: should remove a subscriber by id', async () => {
-    vi.mocked(db.deleteCouponSubscriber).mockResolvedValue(undefined as any);
-
-    await caller.couponSubscribers.delete({ id: 1 });
-    expect(db.deleteCouponSubscriber).toHaveBeenCalledWith(1);
-  });
-});
 
 describe('push router', () => {
   beforeEach(() => {

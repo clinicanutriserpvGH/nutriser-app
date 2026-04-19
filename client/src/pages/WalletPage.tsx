@@ -140,6 +140,12 @@ export default function WalletPage() {
 
   const plansQuery = trpc.wallet.getActivePlans.useQuery(undefined, { enabled: isLoggedIn });
 
+  const cashPendingQuery = trpc.cashPayments.getMyPending.useQuery(
+    { walletId: walletQuery.data?.wallet?.id || 0 },
+    { enabled: isLoggedIn && !!walletQuery.data?.wallet?.id }
+  );
+  const cashPendingList = cashPendingQuery.data || [];
+
   const wallet = walletQuery.data?.wallet;
   const tracker = walletQuery.data?.tracker;
   const progressList = walletQuery.data?.progress || [];
@@ -320,6 +326,36 @@ export default function WalletPage() {
       <div className="max-w-md mx-auto px-4 mt-4 pb-32">
         {activeTab === "card" && (
           <div>
+            {/* Pagos en Efectivo Pendientes */}
+            {cashPendingList.length > 0 && (
+              <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-4">
+                <h3 className="text-orange-800 font-bold text-sm mb-3 flex items-center gap-2">
+                  <span className="text-lg">💵</span>
+                  Pagos en Efectivo Pendientes
+                </h3>
+                <div className="space-y-2">
+                  {cashPendingList.map((p: any) => (
+                    <div key={p.id} className="bg-white rounded-xl border border-orange-200 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800 truncate">{p.concept}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{new Date(p.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                          {p.notes && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{p.notes}</p>}
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-orange-700 font-black text-base">${(p.amountCents / 100).toFixed(2)}</p>
+                          <span className="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">PENDIENTE</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-orange-600 mt-3 text-center">
+                  Presenta tu monedero en clínica para confirmar el pago
+                </p>
+              </div>
+            )}
+
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
               <h3 className="text-[#1A1A1A] font-bold text-sm mb-3 flex items-center gap-2">
                 <span className="w-6 h-6 bg-[#C5A55A]/10 rounded-full flex items-center justify-center text-[#C5A55A] text-xs">★</span>

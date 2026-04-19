@@ -67,16 +67,11 @@ export default function Courses() {
   const [mobileGuardOpen, setMobileGuardOpen] = useState(false);
   const [mobileGuardFeature, setMobileGuardFeature] = useState("acceder a esta función");
 
-  /** Muestra el guard móvil o redirige a /mis-tratamientos en desktop */
+  /** Muestra el modal de auth (funciona en móvil, tableta y desktop) */
   const requireAuth = (featureDescription: string): boolean => {
     if (isLoggedIn) return true;
-    if (isMobile) {
-      setMobileGuardFeature(featureDescription);
-      setMobileGuardOpen(true);
-    } else {
-      // Desktop: redirigir al formulario completo con registro, consentimiento y firma
-      navigate("/mis-tratamientos?returnTo=/cursos");
-    }
+    setMobileGuardFeature(featureDescription);
+    setMobileGuardOpen(true);
     return false;
   };
 

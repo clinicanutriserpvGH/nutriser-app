@@ -1,6 +1,6 @@
 import { eq, desc, and, lt, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, couponSubscribers, InsertCouponSubscriber, services, InsertService, topicSuggestions, InsertTopicSuggestion, topicVotes } from "../drizzle/schema";
+import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, services, InsertService, topicSuggestions, InsertTopicSuggestion, topicVotes } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { products, InsertProduct, productPurchases, InsertProductPurchase, discountCodes, InsertDiscountCode, DiscountCode } from '../drizzle/schema';
 import { patientAccounts, InsertPatientAccount, PatientAccount, patientTreatments, InsertPatientTreatment, patientAppointments, InsertPatientAppointment, patientPhotos, InsertPatientPhoto } from '../drizzle/schema';
@@ -685,46 +685,6 @@ export async function deleteServicePurchase(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(servicePurchases).where(eq(servicePurchases.id, id));
-  return { success: true };
-}
-
-// ===== COUPON SUBSCRIBERS =====
-
-export async function subscribeToCoupons(data: InsertCouponSubscriber) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  // Upsert: si ya existe el email, actualiza el whatsapp y reactiva
-  try {
-    await db.insert(couponSubscribers).values(data);
-  } catch (e: any) {
-    // Drizzle wraps MySQL errors inside e.cause — check both levels
-    const mysqlCode = e?.code || e?.cause?.code || '';
-    const mysqlMessage = e?.message || e?.cause?.message || '';
-    const isDuplicate = mysqlCode === 'ER_DUP_ENTRY' || mysqlMessage.includes('ER_DUP_ENTRY') || mysqlMessage.includes('Duplicate entry');
-    if (isDuplicate) {
-      // Email already subscribed — silently update whatsapp and reactivate
-      await db.update(couponSubscribers)
-        .set({ whatsapp: data.whatsapp, isActive: true })
-        .where(eq(couponSubscribers.email, data.email));
-    } else {
-      throw e;
-    }
-  }
-  return { success: true };
-}
-
-export async function getAllCouponSubscribers() {
-  const db = await getDb();
-  if (!db) return [];
-  return await db.select().from(couponSubscribers)
-    .where(eq(couponSubscribers.isActive, true))
-    .orderBy(desc(couponSubscribers.createdAt));
-}
-
-export async function deleteCouponSubscriber(id: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  await db.delete(couponSubscribers).where(eq(couponSubscribers.id, id));
   return { success: true };
 }
 
@@ -1828,4 +1788,84 @@ export async function getBehaviorTrend(days = 7) {
     eventType: r.eventType as string,
     count: Number(r.count),
   }));
+}
+
+/** Reiniciar todos los eventos de comportamiento (borrar todos los registros) */
+export async function resetAllBehaviorEvents(): Promise<{ deleted: number }> {
+  const db = await getDb();
+  if (!db) return { deleted: 0 };
+  // Count first
+  const countResult = await db.select({ count: sql<number>`COUNT(*)` }).from(userBehaviorEvents);
+  const total = Number(countResult[0]?.count ?? 0);
+  // Delete all
+  await db.delete(userBehaviorEvents);
+  return { deleted: total };
+}
+
+// ============================================================
+// PAGOS EN EFECTIVO PENDIENTES
+// ============================================================
+
+import { cashPendingPayments, type InsertCashPendingPayment, type CashPendingPayment } from '../drizzle/schema';
+
+/** Crear un pago en efectivo pendiente */
+export async function createCashPendingPayment(data: InsertCashPendingPayment): Promise<CashPendingPayment> {
+  const db = await getDb();
+  if (!db) throw new Error('DB not available');
+  const [row] = await db.insert(cashPendingPayments).values(data).$returningId();
+  const result = await db.select().from(cashPendingPayments).where(eq(cashPendingPayments.id, row.id)).limit(1);
+  return result[0];
+}
+
+/** Obtener pagos pendientes de un wallet */
+export async function getCashPendingPaymentsByWallet(walletId: number): Promise<CashPendingPayment[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(cashPendingPayments)
+    .where(and(eq(cashPendingPayments.walletId, walletId), eq(cashPendingPayments.status, 'pending')))
+    .orderBy(cashPendingPayments.createdAt);
+}
+
+/** Obtener todos los pagos pendientes (para admin) */
+export async function getAllCashPendingPayments(): Promise<CashPendingPayment[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(cashPendingPayments)
+    .where(eq(cashPendingPayments.status, 'pending'))
+    .orderBy(cashPendingPayments.createdAt);
+}
+
+/** Confirmar un pago en efectivo (admin) */
+export async function confirmCashPayment(id: number, confirmedBy: string): Promise<CashPendingPayment> {
+  const db = await getDb();
+  if (!db) throw new Error('DB not available');
+  await db.update(cashPendingPayments)
+    .set({ status: 'confirmed', confirmedAt: new Date(), confirmedBy })
+    .where(eq(cashPendingPayments.id, id));
+  const result = await db.select().from(cashPendingPayments).where(eq(cashPendingPayments.id, id)).limit(1);
+  return result[0];
+}
+
+/** Cancelar un pago en efectivo */
+export async function cancelCashPayment(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(cashPendingPayments)
+    .set({ status: 'cancelled', cancelledAt: new Date() })
+    .where(eq(cashPendingPayments.id, id));
+}
+
+/** Historial de pagos en efectivo de un wallet (todos los estados) */
+export async function getCashPaymentHistoryByWallet(walletId: number): Promise<CashPendingPayment[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(cashPendingPayments)
+    .where(eq(cashPendingPayments.walletId, walletId))
+    .orderBy(cashPendingPayments.createdAt);
 }

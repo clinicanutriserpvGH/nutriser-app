@@ -88,19 +88,6 @@ export default function PromotionsSection() {
   // For backward compat: isNativeApp means "push not available via web" (only true for generic WKWebViews without our bridge)
   const isNativeApp = isNativeAppFlag ? false : (isIOSDevice() && !('serviceWorker' in navigator));
 
-  const subscribeMutation = trpc.couponSubscribers.subscribe.useMutation({
-    onSuccess: () => {
-      setSubSuccess(true);
-      setSubSubmitting(false);
-      localStorage.setItem('nutriser_email_subscribed', 'true');
-      setEmailSubscribed(true);
-    },
-    onError: (err) => {
-      toast.error("Error al suscribirse: " + err.message);
-      setSubSubmitting(false);
-    },
-  });
-
   const pushSubscribeMutation = trpc.push.subscribe.useMutation({
     onSuccess: () => {
       setPushEnabled(true);
@@ -187,10 +174,11 @@ export default function PromotionsSection() {
   const handleSubscribeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subEmail.trim()) { toast.error("Ingresa tu correo"); return; }
-    setSubSubmitting(true);
-    // Guardar email en localStorage para vincularlo con la suscripción push
+    // Solo guardar email en localStorage para vincularlo con la suscripción push
     localStorage.setItem('nutriser_subscriber_email', subEmail.trim());
-    subscribeMutation.mutate({ email: subEmail, whatsapp: "" });
+    localStorage.setItem('nutriser_email_subscribed', 'true');
+    setEmailSubscribed(true);
+    setSubSuccess(true);
   };
 
   const [giftModalOpen, setGiftModalOpen] = useState(false);

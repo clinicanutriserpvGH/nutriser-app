@@ -304,20 +304,6 @@ export const servicePurchases = mysqlTable("servicePurchases", {
 export type ServicePurchase = typeof servicePurchases.$inferSelect;
 export type InsertServicePurchase = typeof servicePurchases.$inferInsert;
 
-/**
- * Suscriptores a la cuponera de descuentos
- * Reciben notificaciones por correo y WhatsApp cuando se publican nuevas promociones
- */
-export const couponSubscribers = mysqlTable("couponSubscribers", {
-  id: int("id").autoincrement().primaryKey(),
-  email: varchar("email", { length: 320 }).notNull().unique(),
-  whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
-  isActive: boolean("isActive").default(true).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-export type CouponSubscriber = typeof couponSubscribers.$inferSelect;
-export type InsertCouponSubscriber = typeof couponSubscribers.$inferInsert;
 
 /**
  * Suscripciones push del navegador
@@ -831,3 +817,32 @@ export const userBehaviorEvents = mysqlTable("userBehaviorEvents", {
 });
 export type UserBehaviorEvent = typeof userBehaviorEvents.$inferSelect;
 export type InsertUserBehaviorEvent = typeof userBehaviorEvents.$inferInsert;
+
+// ============================================================
+// PAGOS EN EFECTIVO PENDIENTES — Flujo de pago presencial
+// ============================================================
+/**
+ * Cuando un paciente elige "Pagar en Efectivo" al comprar (tienda, academia, cupones),
+ * se crea un registro pendiente en su monedero.
+ * El admin lo ve al escanear el monedero y lo confirma en persona.
+ * Al confirmar: se acumulan los puntos de cashback correspondientes.
+ */
+export const cashPendingPayments = mysqlTable("cashPendingPayments", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("walletId").notNull(),          // FK a wallets.id
+  patientId: int("patientId").notNull(),         // FK a patientAccounts.id
+  concept: varchar("concept", { length: 500 }).notNull(), // Ej: "Cavitación 80K", "Cupón Promo Verano", "Curso Nutrición"
+  itemType: mysqlEnum("itemType", ["service", "product", "ebook", "package", "promotion", "course", "other"]).notNull(),
+  itemId: varchar("itemId", { length: 100 }),   // ID del ítem si aplica
+  amountCents: int("amountCents").notNull(),     // Monto en centavos MXN
+  cashbackPercent: int("cashbackPercent").default(0).notNull(), // % de cashback a acumular al confirmar
+  status: mysqlEnum("status", ["pending", "confirmed", "cancelled"]).default("pending").notNull(),
+  notes: text("notes"),                          // Notas opcionales del paciente
+  confirmedAt: timestamp("confirmedAt"),         // Cuándo lo confirmó el admin
+  confirmedBy: varchar("confirmedBy", { length: 100 }), // Email del admin que confirmó
+  cancelledAt: timestamp("cancelledAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type CashPendingPayment = typeof cashPendingPayments.$inferSelect;
+export type InsertCashPendingPayment = typeof cashPendingPayments.$inferInsert;

@@ -250,16 +250,11 @@ export default function Memberships() {
   const [mobileGuardOpen, setMobileGuardOpen] = useState(false);
   const [mobileGuardFeature, setMobileGuardFeature] = useState("acceder a esta función");
 
-  /** Muestra el guard móvil o redirige a /mis-tratamientos en desktop */
+  /** Muestra el modal de auth (funciona en móvil, tableta y desktop) */
   const requireAuth = (featureDescription: string): boolean => {
     if (isLoggedIn) return true;
-    if (isMobile) {
-      setMobileGuardFeature(featureDescription);
-      setMobileGuardOpen(true);
-    } else {
-      // Desktop: redirigir al formulario completo con registro, consentimiento y firma
-      navigate("/mis-tratamientos?returnTo=/memberships");
-    }
+    setMobileGuardFeature(featureDescription);
+    setMobileGuardOpen(true);
     return false;
   };
 
@@ -377,6 +372,7 @@ export default function Memberships() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successCode, setSuccessCode] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<'transfer' | 'cash'>('transfer');
   const [discountCode, setDiscountCode] = useState("");
   const [discountValidating, setDiscountValidating] = useState(false);
   const [discountInfo, setDiscountInfo] = useState<{
@@ -426,6 +422,10 @@ export default function Memberships() {
     onSuccess: () => { setSuccessCode("PENDIENTE"); setIsSubmitting(false); },
     onError: (err) => { toast.error("Error: " + err.message); setIsSubmitting(false); },
   });
+  const cashPendingMutation = trpc.cashPayments.createPending.useMutation({
+    onSuccess: () => { setSuccessCode("EFECTIVO"); setIsSubmitting(false); },
+    onError: (err) => { toast.error("Error: " + err.message); setIsSubmitting(false); },
+  });
   const productPurchaseMutation = trpc.productPurchases.create.useMutation({
     onSuccess: (data) => { setSuccessCode(data.purchaseCode); setIsSubmitting(false); },
     onError: (err) => { toast.error("Error: " + err.message); setIsSubmitting(false); },
@@ -454,7 +454,7 @@ export default function Memberships() {
     setBuyNowItem(item || null);
     setBuyerName(patient?.name || ""); setBuyerEmail(patient?.email || ""); setBuyerPhone((patient as any)?.phone || "");
     setProofFile(null); setSuccessCode(""); setDiscountCode(""); setDiscountInfo(null);
-    setUseWallet(false); setWalletAmount(0);
+    setUseWallet(false); setWalletAmount(0); setPaymentMethod('transfer');
     setCheckoutOpen(true);
   };
 
@@ -481,6 +481,29 @@ export default function Memberships() {
     if (!buyerName.trim()) { toast.error("Ingresa tu nombre"); return; }
     if (!buyerEmail.trim()) { toast.error("Ingresa tu correo"); return; }
     if (!buyerPhone.trim()) { toast.error("Ingresa tu teléfono"); return; }
+
+    // — Pago en Efectivo: crear pendiente en monedero —
+    if (paymentMethod === 'cash' && !fullyCoveredByWallet) {
+      if (!walletData?.id || !patient?.id) {
+        toast.error("Necesitas tener un monedero activo para pagar en efectivo.");
+        return;
+      }
+      setIsSubmitting(true);
+      const itemNames = checkoutItems.map(i => i.qty > 1 ? `${i.qty}x ${i.name}` : i.name).join(", ");
+      const firstItem = checkoutItems[0];
+      cashPendingMutation.mutate({
+        walletId: walletData.id,
+        patientId: patient.id,
+        concept: itemNames,
+        itemType: (firstItem?.itemType === 'product' ? 'product' : firstItem?.itemType === 'ebook' ? 'ebook' : firstItem?.itemType === 'package' ? 'package' : 'service') as any,
+        itemId: firstItem?.id,
+        amountCents: Math.round(discountedTotal * 100),
+        cashbackPercent: 2,
+        notes: `Pago en efectivo solicitado por ${buyerName}`,
+      });
+      return;
+    }
+
     if (!fullyCoveredByWallet && !proofFile) { toast.error("Sube el comprobante de pago"); return; }
     setIsSubmitting(true);
 
@@ -633,6 +656,7 @@ export default function Memberships() {
         isOpen={mobileGuardOpen}
         onClose={() => setMobileGuardOpen(false)}
         featureDescription={mobileGuardFeature}
+        returnTo="/memberships"
       />
 
       {/* ── Modal de detalle de servicio/paquete ── */}
@@ -1647,19 +1671,41 @@ onClick={() => {
 
             {successCode ? (
               <div className="p-6 text-center">
-                <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-200">
-                  <CheckCircle2 className="w-8 h-8 text-green-500" />
-                </div>
-                <h3 className="font-bold text-gray-900 text-xl mb-2">¡Comprobante recibido!</h3>
-                <p className="text-gray-500 text-sm mb-4">Tu pedido está en revisión. Te contactaremos pronto para confirmar.</p>
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-                  <p className="text-xs text-gray-400 mb-1">Código de seguimiento</p>
-                  <p className="font-black text-[#C5A55A] text-lg font-mono">{successCode}</p>
-                </div>
-                <button onClick={() => { setCheckoutOpen(false); setCart([]); }}
-                  className="w-full bg-[#C5A55A] text-white font-bold py-3 rounded-xl hover:bg-[#B8963E] transition-all">
-                  Listo
-                </button>
+                {successCode === 'EFECTIVO' ? (
+                  <>
+                    <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-orange-200">
+                      <span className="text-3xl">💵</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-xl mb-2">¡Pendiente de pago registrado!</h3>
+                    <p className="text-gray-500 text-sm mb-4">Tu pedido quedó guardado como <strong>pago en efectivo pendiente</strong> en tu monedero.</p>
+                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4 text-left space-y-2">
+                      <p className="text-xs font-bold text-orange-700 uppercase tracking-wider">¿Qué sigue?</p>
+                      <p className="text-sm text-orange-800">1. Acude a la clínica con el monto en efectivo.</p>
+                      <p className="text-sm text-orange-800">2. El administrador escaneará tu monedero y verá el pendiente.</p>
+                      <p className="text-sm text-orange-800">3. Al confirmar el pago, se acreditará tu cashback automáticamente.</p>
+                    </div>
+                    <button onClick={() => { setCheckoutOpen(false); setCart([]); }}
+                      className="w-full bg-[#C5A55A] text-white font-bold py-3 rounded-xl hover:bg-[#B8963E] transition-all">
+                      Entendido
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-200">
+                      <CheckCircle2 className="w-8 h-8 text-green-500" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-xl mb-2">¡Comprobante recibido!</h3>
+                    <p className="text-gray-500 text-sm mb-4">Tu pedido está en revisión. Te contactaremos pronto para confirmar.</p>
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                      <p className="text-xs text-gray-400 mb-1">Código de seguimiento</p>
+                      <p className="font-black text-[#C5A55A] text-lg font-mono">{successCode}</p>
+                    </div>
+                    <button onClick={() => { setCheckoutOpen(false); setCart([]); }}
+                      className="w-full bg-[#C5A55A] text-white font-bold py-3 rounded-xl hover:bg-[#B8963E] transition-all">
+                      Listo
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <form onSubmit={handleSubmitCheckout} className="p-4 space-y-5">
@@ -1785,8 +1831,53 @@ onClick={() => {
                     )}
                   </div>
                 )}
-                {/* Datos bancarios — ocultar si el monedero cubre todo */}
+                {/* — Selector de método de pago — */}
                 {!fullyCoveredByWallet && (
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Método de pago</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('transfer')}
+                        className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${
+                          paymentMethod === 'transfer'
+                            ? 'border-[#C5A55A] bg-amber-50 text-[#C5A55A]'
+                            : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="text-xl">🏦</span>
+                        <span className="text-xs font-bold">Transferencia</span>
+                        <span className="text-[10px] text-center leading-tight opacity-70">Sube tu comprobante</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('cash')}
+                        className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${
+                          paymentMethod === 'cash'
+                            ? 'border-green-500 bg-green-50 text-green-700'
+                            : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="text-xl">💵</span>
+                        <span className="text-xs font-bold">Efectivo</span>
+                        <span className="text-[10px] text-center leading-tight opacity-70">Paga en clínica</span>
+                      </button>
+                    </div>
+                    {paymentMethod === 'cash' && !walletData?.id && (
+                      <p className="text-xs text-orange-600 mt-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                        ⚠️ Necesitas una cuenta registrada con monedero para usar pago en efectivo.
+                      </p>
+                    )}
+                    {paymentMethod === 'cash' && walletData?.id && (
+                      <div className="mt-2 bg-green-50 border border-green-200 rounded-xl p-3 space-y-1">
+                        <p className="text-xs font-bold text-green-700">✅ Se creará un pendiente en tu monedero</p>
+                        <p className="text-xs text-green-600">El administrador lo verá al escanear tu QR y confirmará el pago en clínica.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* Datos bancarios — solo si es transferencia y no cubre monedero */}
+                {!fullyCoveredByWallet && paymentMethod === 'transfer' && (
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
                     <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Datos para transferencia</p>
                     <div className="flex items-center justify-between">
@@ -1799,8 +1890,8 @@ onClick={() => {
                     <p className="text-xs text-gray-500">Monto: <span className="font-black text-[#C5A55A]">{hasValidPrice ? `$${transferAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN` : "Consultar precio"}</span>{useWallet && walletAmount > 0 && <span className="text-green-600 text-[10px] ml-1">(monedero: -${(walletAmount / 100).toFixed(2)})</span>}</p>
                   </div>
                 )}
-                {/* Comprobante — solo si necesita transferir */}
-                {!fullyCoveredByWallet && (
+                {/* Comprobante — solo si es transferencia */}
+                {!fullyCoveredByWallet && paymentMethod === 'transfer' && (
                   <div>
                     <Label className="text-sm text-gray-600">Comprobante de pago *</Label>
                     <label className="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-5 cursor-pointer hover:border-[#C5A55A] hover:bg-amber-50/50 transition-all">
@@ -1826,8 +1917,16 @@ onClick={() => {
                     </label>
                   </div>
                 )}
-                <Button type="submit" disabled={isSubmitting} className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-black py-3.5 text-base rounded-xl shadow-md">
-                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (fullyCoveredByWallet ? "Confirmar compra con monedero" : "Enviar comprobante y confirmar pedido")}
+                <Button type="submit" disabled={isSubmitting} className={`w-full text-white font-black py-3.5 text-base rounded-xl shadow-md ${
+                  paymentMethod === 'cash' && !fullyCoveredByWallet
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-[#C5A55A] hover:bg-[#B8963E]'
+                }`}>
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                    fullyCoveredByWallet ? "Confirmar compra con monedero" :
+                    paymentMethod === 'cash' ? "💵 Registrar pago en efectivo" :
+                    "Enviar comprobante y confirmar pedido"
+                  )}
                 </Button>
               </form>
             )}

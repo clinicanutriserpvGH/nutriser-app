@@ -13,7 +13,7 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
-import { createWallet, getWalletByPatientId, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive } from './db';
+import { createWallet, getWalletByPatientId, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -3075,6 +3075,65 @@ export const appRouter = router({
           isActive: wallet.isActive,
           recentTransactions: transactions,
         };
+      }),
+  }),
+
+  // ─── Analítica de Comportamiento ─────────────────────────────────────────────
+  analytics: router({
+    // Público: registrar un evento de comportamiento (fire-and-forget)
+    track: publicProcedure
+      .input(z.object({
+        itemType: z.enum(["service", "product", "ebook", "package", "promotion"]),
+        itemId: z.string(),
+        itemName: z.string(),
+        eventType: z.enum(["view", "wishlist", "cart", "info", "purchase"]),
+        sessionId: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await trackBehaviorEvent({
+          itemType: input.itemType,
+          itemId: input.itemId,
+          itemName: input.itemName,
+          eventType: input.eventType,
+          sessionId: input.sessionId ?? null,
+          patientId: null,
+        });
+        return { ok: true };
+      }),
+
+    // Admin: top items por evento/tipo
+    getTopItems: publicProcedure
+      .input(z.object({
+        eventType: z.enum(["view", "wishlist", "cart", "info", "purchase"]).optional(),
+        itemType: z.enum(["service", "product", "ebook", "package", "promotion"]).optional(),
+        limit: z.number().default(10),
+        days: z.number().default(30),
+      }))
+      .query(async ({ input }) => getTopBehaviorItems(input)),
+
+    // Admin: resumen de eventos (objeto con conteos por tipo)
+    getSummary: publicProcedure
+      .input(z.object({ days: z.number().default(30) }))
+      .query(async ({ input }) => {
+        const rows = await getBehaviorSummary(input.days);
+        const result: Record<string, number> = { view: 0, info: 0, cart: 0, wishlist: 0, purchase: 0 };
+        for (const row of rows) { result[row.eventType] = Number(row.count); }
+        return result;
+      }),
+
+    // Admin: tendencia diaria (array de {date, view, info, cart, wishlist, purchase})
+    getTrend: publicProcedure
+      .input(z.object({ days: z.number().default(7) }))
+      .query(async ({ input }) => {
+        const rows = await getBehaviorTrend(input.days);
+        const byDate: Record<string, Record<string, number>> = {};
+        for (const row of rows) {
+          if (!byDate[row.date]) byDate[row.date] = { view: 0, info: 0, cart: 0, wishlist: 0, purchase: 0 };
+          byDate[row.date][row.eventType] = Number(row.count);
+        }
+        return Object.entries(byDate)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([date, counts]) => ({ date, ...counts }));
       }),
   }),
 });

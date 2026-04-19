@@ -270,6 +270,8 @@ export default function Memberships() {
   const { wishlist, wishlistCount, isInWishlist, toggleWishlist, removeFromWishlist } = useWishlist();
 
   const addToCart = (item: Omit<CartItem, "qty">) => {
+    // Tracking: evento cart
+    track(item.itemType as any, item.id, item.name, "cart");
     if (!isLoggedIn) {
       setPendingCartItem(item);
       setShowAuthModal(true);
@@ -405,6 +407,18 @@ export default function Memberships() {
   }, [walletSheetOpen]);
 
   const utils = trpc.useUtils();
+
+  // ─── Analítica de Comportamiento ────────────────────────────────────────────
+  const trackMutation = trpc.analytics.track.useMutation();
+  const sessionId = useMemo(() => {
+    let sid = sessionStorage.getItem("nutriser-sid");
+    if (!sid) { sid = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem("nutriser-sid", sid); }
+    return sid;
+  }, []);
+  const track = (itemType: "service" | "product" | "ebook" | "package" | "promotion", itemId: string, itemName: string, eventType: "view" | "wishlist" | "cart" | "info" | "purchase") => {
+    trackMutation.mutate({ itemType, itemId, itemName, eventType, sessionId });
+  };
+
   const servicePurchaseMutation = trpc.servicePurchases.create.useMutation({
     onSuccess: () => { setSuccessCode("PENDIENTE"); setIsSubmitting(false); },
     onError: (err) => { toast.error("Error: " + err.message); setIsSubmitting(false); },
@@ -431,6 +445,8 @@ export default function Memberships() {
   const fullyCoveredByWallet = useWallet && transferAmount <= 0;
 
   const openCheckout = (item?: CartItem) => {
+    // Tracking: evento view (intención de compra)
+    if (item) track(item.itemType as any, item.id, item.name, "view");
     if (!isLoggedIn) {
       if (item) setPendingCartItem(item);
       setShowAuthModal(true);
@@ -966,7 +982,7 @@ export default function Memberships() {
                             <Star className="w-3 h-3 fill-current" /> {pkg.badge}
                           </div>
                           <div className="absolute top-2 right-2 flex items-center gap-1">
-                            <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: pkg.id, name: pkg.name, price: pkg.price, priceLabel: `$${pkg.price.toLocaleString("es-MX")} MXN`, imageUrl: pkg.imageUrl, category: pkg.category, itemType: "package" }); }} className="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); track("package", pkg.id, pkg.name, "wishlist"); toggleWishlist({ id: pkg.id, name: pkg.name, price: pkg.price, priceLabel: `$${pkg.price.toLocaleString("es-MX")} MXN`, imageUrl: pkg.imageUrl, category: pkg.category, itemType: "package" }); }} className="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
                               <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(pkg.id) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
                             </button>
                             <span className="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-full">-{savingsPct}%</span>
@@ -1000,7 +1016,7 @@ export default function Memberships() {
                           </ul>
 
                           <button
-                            onClick={() => setDetailItem({ id: pkg.id, name: pkg.name, description: pkg.description, price: `$${pkg.price.toLocaleString("es-MX")} MXN`, priceNum: pkg.price, category: pkg.category, imageUrl: pkg.imageUrl, features: pkg.features, regularPrice: pkg.regularPrice, badge: pkg.badge, itemType: "package" })}
+                            onClick={() => { track("package", pkg.id, pkg.name, "info"); setDetailItem({ id: pkg.id, name: pkg.name, description: pkg.description, price: `$${pkg.price.toLocaleString("es-MX")} MXN`, priceNum: pkg.price, category: pkg.category, imageUrl: pkg.imageUrl, features: pkg.features, regularPrice: pkg.regularPrice, badge: pkg.badge, itemType: "package" }); }}
                             className="w-full flex items-center justify-center gap-1.5 font-semibold text-[11px] py-2 rounded-xl mb-2 transition-all active:scale-95"
                             style={{ border: "1px solid rgba(197,165,90,0.4)", color: "#C5A55A", background: "rgba(197,165,90,0.06)" }}
                           >
@@ -1064,7 +1080,7 @@ export default function Memberships() {
                                       <Icon className="w-10 h-10 opacity-30" style={{ color: meta.color }} />
                                     </div>
                                   )}
-                                  <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                                  <button onClick={(e) => { e.stopPropagation(); track("service", `svc-${service.id}`, service.name, "wishlist"); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
                                     <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`svc-${service.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
                                   </button>
                                 </div>
@@ -1079,6 +1095,7 @@ export default function Memberships() {
 onClick={() => {
                                        const b = service.benefits ? (() => { try { return JSON.parse(service.benefits as string); } catch { return []; } })() : [];
                                        const a = service.aftercare ? (() => { try { return JSON.parse(service.aftercare as string); } catch { return []; } })() : [];
+                                       track("service", `svc-${service.id}`, service.name, "info");
                                        setDetailItem({ id: `svc-${service.id}`, name: service.name, description: service.description, price: service.price, priceNum, category: service.category, imageUrl: service.imageUrl, itemType: "service", benefits: b, duration: service.duration, aftercare: a });
                                      }}
                                      className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95"
@@ -1137,7 +1154,7 @@ onClick={() => {
                                     <CatIcon className="w-10 h-10 opacity-30" style={{ color: catMeta.color }} />
                                   </div>
                                 )}
-                                <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                                <button onClick={(e) => { e.stopPropagation(); track("service", `svc-${service.id}`, service.name, "wishlist"); toggleWishlist({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" }); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
                                   <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`svc-${service.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
                                 </button>
                               </div>
@@ -1151,7 +1168,7 @@ onClick={() => {
                                     <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
                                   )}
                                   <button
-                                    onClick={() => setDetailItem({ id: `svc-${service.id}`, name: service.name, description: service.description, price: service.price, priceNum, category: service.category, imageUrl: service.imageUrl, itemType: "service" })}
+                                    onClick={() => { track("service", `svc-${service.id}`, service.name, "info"); setDetailItem({ id: `svc-${service.id}`, name: service.name, description: service.description, price: service.price, priceNum, category: service.category, imageUrl: service.imageUrl, itemType: "service" }); }}
                                     className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95"
                                     style={{ border: "1px solid rgba(197,165,90,0.35)", color: "#C5A55A", background: "rgba(197,165,90,0.05)" }}
                                   >
@@ -1224,7 +1241,7 @@ onClick={() => {
                               <FlaskConical className="w-10 h-10 text-gray-200" />
                             </div>
                           )}
-                          <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product" }); }} className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                          <button onClick={(e) => { e.stopPropagation(); track("product", `prd-${product.id}`, product.name, "wishlist"); toggleWishlist({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product" }); }} className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
                             <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`prd-${product.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
                           </button>
                           {product.stock !== null && product.stock !== undefined && product.stock <= 5 && product.stock > 0 && (
@@ -1296,7 +1313,7 @@ onClick={() => {
                     {ebook.coverUrl && (
                       <div className="relative bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center p-8">
                         <img src={ebook.coverUrl} alt={ebook.title} className="max-h-80 w-auto object-contain rounded-lg shadow-xl" />
-                        <button onClick={(e) => { e.stopPropagation(); toggleWishlist({ id: `ebook-${ebook.id}`, name: ebook.title, price: (ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : parseFloat(String(ebook.price)), priceLabel: `$${((ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : parseFloat(String(ebook.price))).toLocaleString("es-MX")} MXN`, imageUrl: ebook.coverUrl, category: "ebook", itemType: "ebook" }); }} className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 active:scale-90 transition-all">
+                        <button onClick={(e) => { e.stopPropagation(); track("ebook", `ebook-${ebook.id}`, ebook.title, "wishlist"); toggleWishlist({ id: `ebook-${ebook.id}`, name: ebook.title, price: (ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : parseFloat(String(ebook.price)), priceLabel: `$${((ebook as any).presalePrice ? parseFloat(String((ebook as any).presalePrice)) : parseFloat(String(ebook.price))).toLocaleString("es-MX")} MXN`, imageUrl: ebook.coverUrl, category: "ebook", itemType: "ebook" }); }} className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 active:scale-90 transition-all">
                           <Heart className={`w-4 h-4 transition-colors ${isInWishlist(`ebook-${ebook.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
                         </button>
                       </div>

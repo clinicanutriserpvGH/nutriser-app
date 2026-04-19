@@ -27,6 +27,7 @@ const ADMIN_TABS = [
   { value: 'suggestions', label: 'Foro Expertos', emoji: '💡' },
   { value: 'beforeAfter', label: 'Transformaciones Pacientes', emoji: '✨' },
   { value: 'wallet', label: 'Monedero Nutriser', emoji: '💳' },
+  { value: 'analytics', label: 'Analítica de Comportamiento', emoji: '📊' },
 ] as const;
 
 type AdminTabValue = typeof ADMIN_TABS[number]['value'];
@@ -831,6 +832,31 @@ export default function AdminDashboard() {
       toast.error("Error al actualizar promoción: " + error.message);
     },
   });
+
+  // ─── Analítica de Comportamiento ────────────────────────────────────────────
+  const [analyticsDays, setAnalyticsDays] = useState(30);
+  const [analyticsEventType, setAnalyticsEventType] = useState<"view" | "wishlist" | "cart" | "info" | "purchase" | "all">("all");
+  const [analyticsItemType, setAnalyticsItemType] = useState<"service" | "product" | "ebook" | "package" | "promotion" | "all">("all");
+
+  const { data: analyticsSummary, isLoading: loadingSummary, refetch: refetchSummary } = trpc.analytics.getSummary.useQuery(
+    { days: analyticsDays },
+    { enabled: isAuthenticated }
+  );
+  const { data: analyticsTrend, isLoading: loadingTrend, refetch: refetchTrend } = trpc.analytics.getTrend.useQuery(
+    { days: Math.min(analyticsDays, 30) },
+    { enabled: isAuthenticated }
+  );
+  const { data: analyticsTopItems, isLoading: loadingTopItems, refetch: refetchTopItems } = trpc.analytics.getTopItems.useQuery(
+    {
+      eventType: analyticsEventType === "all" ? undefined : analyticsEventType,
+      itemType: analyticsItemType === "all" ? undefined : analyticsItemType,
+      limit: 10,
+      days: analyticsDays,
+    },
+    { enabled: isAuthenticated }
+  );
+
+  const refetchAnalytics = () => { refetchSummary(); refetchTrend(); refetchTopItems(); };
 
   // Funciones para eBook
   const handleFileToBase64 = (file: File): Promise<string> => {
@@ -3600,6 +3626,180 @@ export default function AdminDashboard() {
           <TabsContent value="wallet" className="space-y-4">
             <AdminWalletTab />
           </TabsContent>
+
+          {/* ─── TAB: ANALÍTICA ─────────────────────────────────────────────────────────────── */}
+          <TabsContent value="analytics" className="space-y-6">
+            {/* Filtros */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <CardTitle className="text-lg">Analítica de Comportamiento</CardTitle>
+                    <CardDescription>Interacciones de usuarios en la tienda</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {/* Rango de días */}
+                    <select
+                      value={analyticsDays}
+                      onChange={e => setAnalyticsDays(Number(e.target.value))}
+                      className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40"
+                    >
+                      <option value={7}>7 días</option>
+                      <option value={14}>14 días</option>
+                      <option value={30}>30 días</option>
+                      <option value={60}>60 días</option>
+                      <option value={90}>90 días</option>
+                    </select>
+                    {/* Tipo de evento */}
+                    <select
+                      value={analyticsEventType}
+                      onChange={e => setAnalyticsEventType(e.target.value as any)}
+                      className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40"
+                    >
+                      <option value="all">Todos los eventos</option>
+                      <option value="view">Intención de compra</option>
+                      <option value="info">Más información</option>
+                      <option value="cart">Agregó al carrito</option>
+                      <option value="wishlist">Lista de deseos</option>
+                      <option value="purchase">Compra</option>
+                    </select>
+                    {/* Tipo de ítem */}
+                    <select
+                      value={analyticsItemType}
+                      onChange={e => setAnalyticsItemType(e.target.value as any)}
+                      className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40"
+                    >
+                      <option value="all">Todos los tipos</option>
+                      <option value="service">Servicios</option>
+                      <option value="package">Paquetes</option>
+                      <option value="product">Productos</option>
+                      <option value="ebook">eBook</option>
+                    </select>
+                    <button
+                      onClick={refetchAnalytics}
+                      className="px-3 py-1.5 rounded-lg bg-[#C5A55A] text-white text-sm font-semibold hover:bg-[#B8963E] transition-all"
+                    >
+                      Actualizar
+                    </button>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+
+            {/* Tarjetas de resumen */}
+            {loadingSummary ? (
+              <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-[#C5A55A] border-t-transparent rounded-full animate-spin" /></div>
+            ) : analyticsSummary ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {([
+                  { key: 'view', label: 'Intención de compra', emoji: '🛍️', color: 'bg-blue-50 border-blue-200 text-blue-700' },
+                  { key: 'info', label: 'Más información', emoji: 'ℹ️', color: 'bg-amber-50 border-amber-200 text-amber-700' },
+                  { key: 'cart', label: 'Al carrito', emoji: '🛒', color: 'bg-green-50 border-green-200 text-green-700' },
+                  { key: 'wishlist', label: 'Lista de deseos', emoji: '❤️', color: 'bg-pink-50 border-pink-200 text-pink-700' },
+                  { key: 'purchase', label: 'Compras', emoji: '💰', color: 'bg-purple-50 border-purple-200 text-purple-700' },
+                ] as const).map(({ key, label, emoji, color }) => (
+                  <div key={key} className={`rounded-2xl border p-4 ${color}`}>
+                    <div className="text-2xl mb-1">{emoji}</div>
+                    <div className="text-2xl font-black">{(analyticsSummary as any)[key] ?? 0}</div>
+                    <div className="text-xs font-semibold mt-0.5 opacity-80">{label}</div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {/* Tendencia diaria */}
+            {!loadingTrend && analyticsTrend && analyticsTrend.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Tendencia Diaria</CardTitle>
+                  <CardDescription>Eventos por día en los últimos {Math.min(analyticsDays, 30)} días</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-100">
+                          <th className="text-left py-2 pr-4 text-gray-500 font-semibold">Fecha</th>
+                          <th className="text-right py-2 px-2 text-blue-600 font-semibold">Compra</th>
+                          <th className="text-right py-2 px-2 text-amber-600 font-semibold">Info</th>
+                          <th className="text-right py-2 px-2 text-green-600 font-semibold">Carrito</th>
+                          <th className="text-right py-2 px-2 text-pink-600 font-semibold">Wishlist</th>
+                          <th className="text-right py-2 pl-2 text-purple-600 font-semibold">Compras</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analyticsTrend.map((row: any) => (
+                          <tr key={row.date} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                            <td className="py-2 pr-4 text-gray-700 font-medium">{new Date(row.date + 'T12:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}</td>
+                            <td className="text-right py-2 px-2 text-blue-700 font-bold">{row.view ?? 0}</td>
+                            <td className="text-right py-2 px-2 text-amber-700 font-bold">{row.info ?? 0}</td>
+                            <td className="text-right py-2 px-2 text-green-700 font-bold">{row.cart ?? 0}</td>
+                            <td className="text-right py-2 px-2 text-pink-700 font-bold">{row.wishlist ?? 0}</td>
+                            <td className="text-right py-2 pl-2 text-purple-700 font-bold">{row.purchase ?? 0}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Top ítems */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Top Ítems más Interactuados</CardTitle>
+                <CardDescription>
+                  {analyticsEventType === 'all' ? 'Todos los eventos' : analyticsEventType === 'view' ? 'Intención de compra' : analyticsEventType === 'info' ? 'Más información' : analyticsEventType === 'cart' ? 'Al carrito' : analyticsEventType === 'wishlist' ? 'Lista de deseos' : 'Compras'}
+                  {analyticsItemType !== 'all' && ` • ${analyticsItemType === 'service' ? 'Servicios' : analyticsItemType === 'package' ? 'Paquetes' : analyticsItemType === 'product' ? 'Productos' : 'eBook'}`}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingTopItems ? (
+                  <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-[#C5A55A] border-t-transparent rounded-full animate-spin" /></div>
+                ) : !analyticsTopItems || analyticsTopItems.length === 0 ? (
+                  <div className="text-center py-10">
+                    <div className="text-4xl mb-2">📊</div>
+                    <p className="text-gray-400 font-medium">Sin datos para este período</p>
+                    <p className="text-gray-300 text-sm mt-1">Los eventos se registrarán cuando los usuarios interactúen con la tienda</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-100">
+                          <th className="text-left py-2 pr-4 text-gray-500 font-semibold">#</th>
+                          <th className="text-left py-2 pr-4 text-gray-500 font-semibold">Nombre</th>
+                          <th className="text-left py-2 pr-4 text-gray-500 font-semibold">Tipo</th>
+                          <th className="text-right py-2 text-gray-500 font-semibold">Eventos</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analyticsTopItems.map((item: any, idx: number) => (
+                          <tr key={item.itemId} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                            <td className="py-2 pr-4 text-gray-400 font-bold">{idx + 1}</td>
+                            <td className="py-2 pr-4 text-gray-800 font-semibold max-w-[200px] truncate">{item.itemName}</td>
+                            <td className="py-2 pr-4">
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                item.itemType === 'service' ? 'bg-blue-50 text-blue-700' :
+                                item.itemType === 'package' ? 'bg-amber-50 text-amber-700' :
+                                item.itemType === 'product' ? 'bg-purple-50 text-purple-700' :
+                                'bg-green-50 text-green-700'
+                              }`}>
+                                {item.itemType === 'service' ? 'Servicio' : item.itemType === 'package' ? 'Paquete' : item.itemType === 'product' ? 'Producto' : 'eBook'}
+                              </span>
+                            </td>
+                            <td className="text-right py-2 text-[#C5A55A] font-black text-base">{item.count}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
         </Tabs>
         {/* Modal de Aprobar Cita */}
         {selectedAppointmentId !== null && selectedAppointment && (

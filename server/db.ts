@@ -1749,3 +1749,83 @@ export async function toggleWalletActive(walletId: number): Promise<boolean> {
   await db.update(wallets).set({ isActive: newStatus }).where(eq(wallets.id, walletId));
   return newStatus;
 }
+
+// ─── Analítica de Comportamiento ──────────────────────────────────────────────
+import { userBehaviorEvents, InsertUserBehaviorEvent } from '../drizzle/schema';
+
+/** Registrar un evento de comportamiento de usuario */
+export async function trackBehaviorEvent(data: InsertUserBehaviorEvent): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(userBehaviorEvents).values(data);
+}
+
+/** Obtener top items por tipo de evento */
+export async function getTopBehaviorItems(opts: {
+  eventType?: "view" | "wishlist" | "cart" | "info" | "purchase";
+  itemType?: "service" | "product" | "ebook" | "package" | "promotion";
+  limit?: number;
+  days?: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  const { eventType, itemType, limit = 10, days = 30 } = opts;
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const conditions: any[] = [sql`${userBehaviorEvents.createdAt} >= ${since}`];
+  if (eventType) conditions.push(eq(userBehaviorEvents.eventType, eventType));
+  if (itemType) conditions.push(eq(userBehaviorEvents.itemType, itemType));
+  return await db
+    .select({
+      itemId: userBehaviorEvents.itemId,
+      itemName: userBehaviorEvents.itemName,
+      itemType: userBehaviorEvents.itemType,
+      eventType: userBehaviorEvents.eventType,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(userBehaviorEvents)
+    .where(and(...conditions))
+    .groupBy(
+      userBehaviorEvents.itemId,
+      userBehaviorEvents.itemName,
+      userBehaviorEvents.itemType,
+      userBehaviorEvents.eventType
+    )
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+}
+
+/** Resumen de eventos por tipo */
+export async function getBehaviorSummary(days = 30) {
+  const db = await getDb();
+  if (!db) return [];
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  return await db
+    .select({
+      eventType: userBehaviorEvents.eventType,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(userBehaviorEvents)
+    .where(sql`${userBehaviorEvents.createdAt} >= ${since}`)
+    .groupBy(userBehaviorEvents.eventType)
+    .orderBy(sql`COUNT(*) DESC`);
+}
+
+/** Tendencia diaria */
+export async function getBehaviorTrend(days = 7) {
+  const db = await getDb();
+  if (!db) return [];
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  // Use raw SQL with alias to avoid MySQL only_full_group_by restriction
+  const rows = await db.execute(
+    sql`SELECT DATE(createdAt) AS date, eventType, COUNT(*) AS count
+        FROM userBehaviorEvents
+        WHERE createdAt >= ${since}
+        GROUP BY DATE(createdAt), eventType
+        ORDER BY DATE(createdAt) ASC`
+  );
+  return (rows[0] as any[]).map((r: any) => ({
+    date: typeof r.date === "string" ? r.date : (r.date instanceof Date ? r.date.toISOString().slice(0, 10) : String(r.date)),
+    eventType: r.eventType as string,
+    count: Number(r.count),
+  }));
+}

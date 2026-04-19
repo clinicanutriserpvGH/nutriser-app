@@ -9,7 +9,6 @@
  * El guard SOLO aplica en móvil/tablet. En desktop (md+) se usa el flujo normal
  * de la tienda (NutriserAuthModal).
  */
-import { useSplash } from "@/contexts/SplashContext";
 import { useDeviceType } from "@/hooks/useDeviceType";
 import { UserCircle, X, LogIn, Clock } from "lucide-react";
 
@@ -30,7 +29,6 @@ export default function MobileAuthGuard({
   onClose,
   featureDescription = "acceder a esta función",
 }: MobileAuthGuardProps) {
-  const { showSplash } = useSplash();
   const { isMobile } = useDeviceType();
 
   // Solo renderizar en móvil/tablet
@@ -38,7 +36,9 @@ export default function MobileAuthGuard({
 
   const handleGoToAccount = () => {
     onClose();
-    showSplash();
+    // Navegar directo a Mi Cuenta Nutriser (/mis-tratamientos)
+    // Esta ruta está en NO_SPLASH_ROUTES, por lo que bypasea el splash y va directo al login/registro
+    window.location.href = "/mis-tratamientos";
   };
 
   return (

@@ -19,6 +19,7 @@ const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 const navLinks = [
+  { label: "Inicio", href: "/" },
   { label: "Servicios", href: "/servicios" },
   { label: "Cupones", href: "/cupones" },
   { label: "Transformaciones", href: "/transformaciones" },
@@ -72,8 +73,17 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false }
       navigate(href);
       return;
     }
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    // Enlace de ancla (#nosotros, #contacto, etc.)
+    const sectionId = href.replace("#", "");
+    const el = document.getElementById(sectionId);
+    if (el) {
+      // La sección existe en la página actual → scroll directo
+      el.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // La sección no existe aquí → ir a Home y luego hacer scroll
+      sessionStorage.setItem("nutriser_scroll_to", sectionId);
+      navigate("/");
+    }
   };
 
   // Secret admin access: triple-click logo to open admin panel

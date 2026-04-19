@@ -2,7 +2,9 @@ import { useState, useMemo, useEffect } from "react";
 import { useSplash } from "@/contexts/SplashContext";
 import { trpc } from "@/lib/trpc";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
+import { useDeviceType } from "@/hooks/useDeviceType";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
+import MobileAuthGuard from "@/components/MobileAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,7 +60,24 @@ export default function Courses() {
 
   // Sesión unificada: detecta si el usuario ya inició sesión en Shop/Mis Tratamientos/Splash1
   const { patient, isLoggedIn, logout } = usePatientAuth();
+  const { isMobile } = useDeviceType();
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Guard móvil
+  const [mobileGuardOpen, setMobileGuardOpen] = useState(false);
+  const [mobileGuardFeature, setMobileGuardFeature] = useState("acceder a esta función");
+
+  /** Muestra el guard móvil o el modal de escritorio según el dispositivo */
+  const requireAuth = (featureDescription: string): boolean => {
+    if (isLoggedIn) return true;
+    if (isMobile) {
+      setMobileGuardFeature(featureDescription);
+      setMobileGuardOpen(true);
+    } else {
+      setShowAuthModal(true);
+    }
+    return false;
+  };
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
@@ -325,11 +344,18 @@ export default function Courses() {
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
       <BackToSplash hideHome />
 
-      {/* Modal de autenticación unificada */}
+      {/* Modal de autenticación unificada (escritorio) */}
       <NutriserAuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         contextMessage="Inicia sesión para suscribirte y acceder a contenido exclusivo de Academia Nutriser."
+      />
+
+      {/* Guard móvil: modal con opción de ir a Mi Cuenta Nutriser o continuar después */}
+      <MobileAuthGuard
+        isOpen={mobileGuardOpen}
+        onClose={() => setMobileGuardOpen(false)}
+        featureDescription={mobileGuardFeature}
       />
 
       {/* Hero de Cursos */}
@@ -359,7 +385,7 @@ export default function Courses() {
           ) : (
             <div className="flex flex-col items-center gap-3">
               <Button
-                onClick={() => setShowSubscribeModal(true)}
+                onClick={() => requireAuth("suscribirte y acceder a contenido exclusivo de Academia") && setShowSubscribeModal(true)}
                 className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
               >
                 <Bell className="w-5 h-5" />
@@ -367,7 +393,7 @@ export default function Courses() {
               </Button>
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="text-white/50 hover:text-[#C5A55A] text-sm transition-colors"
+                className="text-white/50 hover:text-[#C5A55A] text-sm transition-colors hidden md:block"
               >
                 👤 Ya tengo cuenta — Iniciar sesión
               </button>
@@ -752,7 +778,7 @@ export default function Courses() {
                 {courses.map((course) => (
                   <button
                     key={course.id}
-                    onClick={() => setSelectedCourse(course)}
+                    onClick={() => { if (!requireAuth("ver los cursos y videos de Academia Nutriser")) return; setSelectedCourse(course); }}
                     className="text-left bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-[#C5A55A] hover:shadow-xl transition-all group"
                   >
                     <div className="relative aspect-video bg-[#1A1A1A]">
@@ -865,7 +891,7 @@ export default function Courses() {
           {!showSuggestionForm && !suggestionSubmitted ? (
             <div className="text-center mb-10">
               <Button
-                onClick={() => setShowSuggestionForm(true)}
+                onClick={() => { if (!requireAuth("participar en el foro y sugerir temas")) return; setShowSuggestionForm(true); }}
                 className="bg-[#C5A55A] hover:bg-[#B8944A] text-white px-8 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto"
               >
                 <Lightbulb className="w-5 h-5" />

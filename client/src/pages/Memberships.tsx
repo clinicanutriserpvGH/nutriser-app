@@ -22,6 +22,8 @@ import { QRCodeSVG } from "qrcode.react";
 import Barcode from "react-barcode";
 import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
+import MobileAuthGuard from "@/components/MobileAuthGuard";
+import { useDeviceType } from "@/hooks/useDeviceType";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
 import PromoSplash from "@/components/PromoSplash";
@@ -240,9 +242,26 @@ export default function Memberships() {
 
   // ─── Sesión unificada ────────────────────────────────────────────────
   const { patient, isLoggedIn, logout } = usePatientAuth();
+  const { isMobile } = useDeviceType();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPromoSplash, setShowPromoSplash] = useState(true);
   const [pendingCartItem, setPendingCartItem] = useState<Omit<CartItem, "qty"> | null>(null);
+
+  // ─── Guard móvil ─────────────────────────────────────────────────────
+  const [mobileGuardOpen, setMobileGuardOpen] = useState(false);
+  const [mobileGuardFeature, setMobileGuardFeature] = useState("acceder a esta función");
+
+  /** Muestra el guard móvil o el modal de escritorio según el dispositivo */
+  const requireAuth = (featureDescription: string, desktopAction?: () => void): boolean => {
+    if (isLoggedIn) return true;
+    if (isMobile) {
+      setMobileGuardFeature(featureDescription);
+      setMobileGuardOpen(true);
+    } else {
+      desktopAction ? desktopAction() : setShowAuthModal(true);
+    }
+    return false;
+  };
 
   // ─── Carrito unificado (persistido en localStorage) ─────────────────
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -272,11 +291,10 @@ export default function Memberships() {
   const addToCart = (item: Omit<CartItem, "qty">) => {
     // Tracking: evento cart
     track(item.itemType as any, item.id, item.name, "cart");
-    if (!isLoggedIn) {
+    if (!requireAuth("agregar al carrito y realizar compras", () => {
       setPendingCartItem(item);
       setShowAuthModal(true);
-      return;
-    }
+    })) return;
     setCart(prev => {
       const existing = prev.find(c => c.id === item.id);
       if (existing) return prev.map(c => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
@@ -447,11 +465,10 @@ export default function Memberships() {
   const openCheckout = (item?: CartItem) => {
     // Tracking: evento view (intención de compra)
     if (item) track(item.itemType as any, item.id, item.name, "view");
-    if (!isLoggedIn) {
+    if (!requireAuth("realizar compras en la tienda", () => {
       if (item) setPendingCartItem(item);
       setShowAuthModal(true);
-      return;
-    }
+    })) return;
     setBuyNowItem(item || null);
     setBuyerName(patient?.name || ""); setBuyerEmail(patient?.email || ""); setBuyerPhone((patient as any)?.phone || "");
     setProofFile(null); setSuccessCode(""); setDiscountCode(""); setDiscountInfo(null);
@@ -630,12 +647,19 @@ export default function Memberships() {
         />
       )}
 
-      {/* Modal de autenticación unificada */}
+      {/* Modal de autenticación unificada (escritorio) */}
       <NutriserAuthModal
         isOpen={showAuthModal}
         onClose={() => { setShowAuthModal(false); setPendingCartItem(null); }}
         onSuccess={handleAuthSuccess}
         contextMessage="Necesitas una cuenta para acceder a tu monedero, cupones, beneficios de lealtad y realizar compras."
+      />
+
+      {/* Guard móvil: modal con opción de ir a Mi Cuenta Nutriser o continuar después */}
+      <MobileAuthGuard
+        isOpen={mobileGuardOpen}
+        onClose={() => setMobileGuardOpen(false)}
+        featureDescription={mobileGuardFeature}
       />
 
       {/* ── Modal de detalle de servicio/paquete ── */}
@@ -1877,7 +1901,7 @@ onClick={() => {
               {/* Monedero — Botón central flotante */}
               <button
                 onClick={() => {
-                  if (!isLoggedIn) { setShowAuthModal(true); return; }
+                  if (!requireAuth("ver tu Monedero Nutriser", () => setShowAuthModal(true))) return;
                   if (!walletData && patient?.id) walletQuery.refetch();
                   setWalletSheetOpen(true);
                 }}
@@ -1911,7 +1935,7 @@ onClick={() => {
               {/* Cuenta */}
               <button
                 onClick={() => {
-                  if (!isLoggedIn) { setShowAuthModal(true); return; }
+                  if (!requireAuth("ver tu cuenta y estado de monedero", () => setShowAuthModal(true))) return;
                   navigate("/monedero");
                 }}
                 className="flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors text-gray-400"

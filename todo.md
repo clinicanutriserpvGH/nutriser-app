@@ -1763,3 +1763,12 @@
 - [ ] Tracking en tienda: vistas de producto/servicio/libro, wishlist, carrito, más info
 - [ ] Panel admin: sección "Analítica de Comportamiento" con top 10 ítems
 - [ ] Botón admin: crear splash promocional desde ítem popular
+
+## Guard de Autenticación Móvil - Sesión Actual
+- [x] Crear componente MobileAuthGuard reutilizable (bottom sheet oscuro con animación)
+- [x] Botón "Crear cuenta / Iniciar sesión" → redirige a Mi Cuenta Nutriser (showSplash)
+- [x] Botón "Después" → cierra el modal, usuario sigue navegando sin funciones
+- [x] Guard aplicado en Tienda (Memberships.tsx): monedero, carrito, compras, cuenta
+- [x] Guard aplicado en Academia (Courses.tsx): cursos, suscripción, foro de sugerencias
+- [x] En desktop: sigue usando NutriserAuthModal (comportamiento anterior sin cambios)
+- [x] En móvil/tablet: usa MobileAuthGuard con flujo de 2 opciones

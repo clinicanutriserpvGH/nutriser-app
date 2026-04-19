@@ -9,9 +9,11 @@
  * (ya que el usuario estaba navegando en /memberships).
  */
 import { useState, useEffect, useCallback } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { X, Gift, Clock, ChevronLeft, ChevronRight, Flame, Wallet, Star, Percent, Sparkles } from "lucide-react";
 import MobileAuthGuard from "@/components/MobileAuthGuard";
+import { useDeviceType } from "@/hooks/useDeviceType";
 
 const WALLET_CARD_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-wallet-card-promo_af671ddf.png";
@@ -195,6 +197,8 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
   const [dismissed, setDismissed] = useState(false);
   const [showAuthGuard, setShowAuthGuard] = useState(false);
   const [guardFeature, setGuardFeature] = useState("acceder a esta función");
+  const { isMobile } = useDeviceType();
+  const [, navigate] = useLocation();
 
   // Monedero is always slide 0, promos start at index 1
   const totalSlides = activePromos.length + 1;
@@ -209,9 +213,14 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
 
   const handleAction = useCallback((promoId: number) => {
     if (!isAuthenticated) {
-      // Mostrar guard: el usuario debe crear cuenta antes de comprar
-      setGuardFeature("comprar cupones y acceder a ofertas exclusivas");
-      setShowAuthGuard(true);
+      if (isMobile) {
+        setGuardFeature("comprar cupones y acceder a ofertas exclusivas");
+        setShowAuthGuard(true);
+      } else {
+        // Desktop: redirigir al formulario completo de registro/login con firma
+        navigate("/mis-tratamientos?returnTo=/memberships");
+        handleClose();
+      }
       return;
     }
     if (onGoToCoupon) {
@@ -219,20 +228,25 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
     } else {
       handleClose();
     }
-  }, [isAuthenticated, onGoToCoupon, handleClose]);
+  }, [isAuthenticated, isMobile, navigate, onGoToCoupon, handleClose]);
 
   const handleMonederoAction = useCallback(() => {
     if (!isAuthenticated) {
-      // Mostrar guard: el usuario debe crear cuenta antes de crear monedero
-      setGuardFeature("crear tu Monedero Nutriser y acceder a beneficios exclusivos");
-      setShowAuthGuard(true);
+      if (isMobile) {
+        setGuardFeature("crear tu Monedero Nutriser y acceder a beneficios exclusivos");
+        setShowAuthGuard(true);
+      } else {
+        // Desktop: redirigir al formulario completo de registro/login con firma
+        navigate("/mis-tratamientos?returnTo=/memberships");
+        handleClose();
+      }
       return;
     }
     if (onOpenWallet) {
       onOpenWallet();
     }
     handleClose();
-  }, [isAuthenticated, onOpenWallet, handleClose]);
+  }, [isAuthenticated, isMobile, navigate, onOpenWallet, handleClose]);
 
   const goNext = useCallback(() => {
     setCurrentIndex((i) => (i + 1) % totalSlides);
@@ -333,18 +347,17 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
         </div>
       </div>
 
-      {/* MobileAuthGuard: se muestra encima del PromoSplash cuando el usuario no está autenticado */}
-      {/* Al presionar 'Después': cierra el guard y el splash, el usuario queda en la tienda (/memberships) */}
+      {/* MobileAuthGuard: solo en móvil */}
       <MobileAuthGuard
         isOpen={showAuthGuard}
         onClose={() => setShowAuthGuard(false)}
         featureDescription={guardFeature}
         onDismiss={() => {
           setShowAuthGuard(false);
-          // Cerrar el PromoSplash también — el usuario queda en la tienda donde ya estaba
           handleClose();
         }}
       />
+
     </>
   );
 }

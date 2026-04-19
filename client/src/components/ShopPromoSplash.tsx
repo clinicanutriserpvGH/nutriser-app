@@ -9,9 +9,11 @@
  * se muestra el MobileAuthGuard en lugar de navegar al cupón.
  */
 import { useState, useCallback, useEffect } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { X, ShoppingBag, Gift, Clock, ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import MobileAuthGuard from "@/components/MobileAuthGuard";
+import { useDeviceType } from "@/hooks/useDeviceType";
 
 function useCountdown(expiresAt: Date | string | null | undefined) {
   const [timeLeft, setTimeLeft] = useState("");
@@ -161,6 +163,8 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAuthGuard, setShowAuthGuard] = useState(false);
+  const { isMobile } = useDeviceType();
+  const [, navigate] = useLocation();
 
   // Slide 0 = ShopCard, slides 1+ = active promos
   const totalSlides = activePromos.length + 1;
@@ -176,13 +180,19 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
 
   const handlePromoAction = useCallback((promoId: number) => {
     if (!isAuthenticated) {
-      // Mostrar guard: el usuario debe crear cuenta antes de comprar
-      setShowAuthGuard(true);
+      if (isMobile) {
+        // Móvil: mostrar guard con opción de ir a Mi Cuenta Nutriser
+        setShowAuthGuard(true);
+      } else {
+        // Desktop: redirigir al formulario completo de registro/login con firma
+        navigate("/mis-tratamientos?returnTo=/memberships");
+        onClose();
+      }
       return;
     }
     // Usuario autenticado: navegar al cupón
     window.location.href = `/cupon/${promoId}`;
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isMobile, navigate, onClose]);
 
   const goNext = useCallback(() => {
     setCurrentIndex((i) => (i + 1) % totalSlides);

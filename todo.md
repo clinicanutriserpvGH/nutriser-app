@@ -1797,3 +1797,17 @@
 - [x] Courses: cursos y videos navegables sin sesión (guard eliminado del onClick de tarjetas de cursos)
 - [x] Verificar TypeScript sin errores
 - [x] Guardar checkpoint
+
+## Sesión Actual - PromoSplash: botones sin acción en desktop
+
+- [ ] PromoSplash/Memberships: botón "¡Lo Quiero!" en desktop → abrir NutriserAuthModal (actualmente solo activa MobileAuthGuard que no funciona en desktop)
+- [ ] PromoSplash/Memberships: botón "¡Crear mi Monedero!" en desktop → abrir NutriserAuthModal
+- [ ] Verificar TypeScript sin errores
+- [ ] Guardar checkpoint
+
+## Sesión Actual - PromoSplash: redirigir a /mis-tratamientos en desktop (no NutriserAuthModal)
+
+- [ ] PromoSplash: eliminar NutriserAuthModal agregado por error; en desktop sin sesión → navigate('/mis-tratamientos?returnTo=/memberships') al presionar ¡Lo Quiero! o ¡Crear mi Monedero!
+- [ ] ShopPromoSplash: en desktop sin sesión → navigate('/mis-tratamientos?returnTo=/memberships') al presionar ¡Lo Quiero!
+- [ ] Verificar TypeScript sin errores
+- [ ] Guardar checkpoint

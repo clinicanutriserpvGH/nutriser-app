@@ -755,8 +755,9 @@ export default function MyTreatments() {
               </button>
             )}
             {/* Cerrar sesión */}
-            <button onClick={handleLogout} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-xs transition-colors">
+            <button onClick={handleLogout} className="flex items-center gap-1.5 text-gray-400 hover:text-red-500 text-xs font-medium transition-colors">
               <LogOut className="w-4 h-4" />
+              <span>Salir</span>
             </button>
           </div>
         </div>

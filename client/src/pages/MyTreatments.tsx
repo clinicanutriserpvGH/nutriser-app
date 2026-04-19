@@ -747,7 +747,7 @@ export default function MyTreatments() {
             <button
               onClick={notifStatus === 'granted' ? handleDisableNotifications : handleEnableNotifications}
               disabled={notifStatus === 'loading'}
-              title={notifStatus === 'granted' ? 'Desactivar notificaciones' : 'Activar notificaciones'}
+              title={notifStatus === 'granted' ? 'Notificaciones push activas — haz clic para desactivar' : 'Haz clic en la campanita y recibe promociones exclusivas solo para ti'}
               className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all ${
                 notifStatus === 'granted'
                   ? 'bg-[#C5A55A]/10 text-[#C5A55A]'
@@ -772,6 +772,41 @@ export default function MyTreatments() {
           </div>
         </div>
       </div>
+
+      {/* ─── Banner de notificaciones push (solo visible cuando no están activas) ─── */}
+      {notifStatus !== 'granted' && notifStatus !== 'loading' && (
+        <div className="max-w-5xl mx-auto px-4 pt-3 pb-0">
+          <div className="relative overflow-hidden bg-gradient-to-r from-[#1A1A1A] to-[#2a2a2a] rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-lg">
+            {/* Fondo decorativo */}
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 80% 50%, #C5A55A 0%, transparent 60%)' }} />
+            {/* Campana animada */}
+            <button
+              onClick={handleEnableNotifications}
+              className="relative flex-shrink-0 w-12 h-12 rounded-full bg-[#C5A55A] flex items-center justify-center shadow-md shadow-[#C5A55A]/40 animate-bounce hover:scale-110 transition-transform"
+              aria-label="Activar notificaciones push"
+            >
+              <Bell className="w-6 h-6 text-black" />
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-[#1A1A1A]" />
+            </button>
+            {/* Texto */}
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-bold text-sm leading-tight">
+                ¡Activa las notificaciones push!
+              </p>
+              <p className="text-[#C5A55A] text-xs mt-0.5 leading-snug">
+                Suscríbete y no te pierdas de exclusivas promociones y cupones de descuento solo para ti.
+              </p>
+            </div>
+            {/* Botón */}
+            <button
+              onClick={handleEnableNotifications}
+              className="flex-shrink-0 bg-[#C5A55A] hover:bg-[#B8963E] text-black text-xs font-bold px-3 py-2 rounded-xl transition-colors whitespace-nowrap shadow"
+            >
+              Activar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Layout: mobile=1col, desktop=2col */}
       <div className="max-w-5xl mx-auto px-4 py-5">

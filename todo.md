@@ -1820,3 +1820,10 @@
 - [ ] WalletPage.tsx: reemplazar NutriserAuthModal por navigate('/mis-tratamientos?returnTo=/wallet') en desktop
 - [ ] Verificar TypeScript sin errores
 - [ ] Guardar checkpoint
+
+## Sesión Actual - Campana de Notificaciones Push
+- [ ] MyTreatments: mejorar campana con tooltip/banner "Activa notificaciones push y no te pierdas descuentos"
+- [ ] Campana tachada (sin suscripción): mostrar banner con texto atractivo y botón "Activar notificaciones"
+- [ ] Campana activa: mostrar indicador visual claro (campana dorada con punto verde)
+- [ ] Verificar TypeScript sin errores
+- [ ] Guardar checkpoint

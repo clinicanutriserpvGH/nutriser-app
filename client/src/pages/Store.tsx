@@ -14,7 +14,7 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
-import NutriserAuthModal from "@/components/NutriserAuthModal";
+// NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import PromoSplash from "@/components/PromoSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 
@@ -40,7 +40,6 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 export default function Store() {
   const { patient, isLoggedIn, logout } = usePatientAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPromoSplash, setShowPromoSplash] = useState(true);
   const [walletSheetOpen, setWalletSheetOpen] = useState(false);
   const [, navigate] = useLocation();
@@ -122,7 +121,7 @@ export default function Store() {
 
   const handleOpenPurchase = (product: (typeof products)[0]) => {
     if (!isLoggedIn) {
-      setShowAuthModal(true);
+      navigate("/mis-tratamientos?returnTo=/store");
       return;
     }
     setSelectedProduct(product);
@@ -237,7 +236,7 @@ export default function Store() {
               </div>
             ) : (
               <button
-                onClick={() => setShowAuthModal(true)}
+                onClick={() => navigate("/mis-tratamientos?returnTo=/store")}
                 className="flex items-center gap-1.5 bg-[#1A1A1A] text-white text-xs lg:text-sm font-semibold px-3 lg:px-5 py-2 lg:py-2.5 rounded-full hover:bg-[#333] transition"
               >
                 <User className="w-3.5 h-3.5 lg:w-5 lg:h-5" />
@@ -423,15 +422,7 @@ export default function Store() {
         <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" />
       </a>
 
-      {/* ─── Auth Modal ──────────────────────────────────────────────── */}
-      <NutriserAuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => setShowAuthModal(false)}
-        contextMessage="Necesitas una cuenta para acceder a tu monedero, cupones, beneficios de lealtad y realizar compras."
-      />
-
-      {/* ─── Purchase Modal ──────────────────────────────────────────── */}
+      {/* ─── Purchase Modal ───────────────────────────────────────────────────── */}
       {purchaseModal && selectedProduct && (
         <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50">
           <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
@@ -606,7 +597,7 @@ export default function Store() {
       ══════════════════════════════════════════════════════════════════════ */}
       <button
         onClick={() => {
-          if (!isLoggedIn) { setShowAuthModal(true); return; }
+          if (!isLoggedIn) { navigate("/mis-tratamientos?returnTo=/store"); return; }
           setWalletSheetOpen(true);
         }}
         className="fixed bottom-20 lg:bottom-24 left-1/2 -translate-x-1/2 z-40 w-[76px] h-[76px] lg:w-[96px] lg:h-[96px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B96A] to-[#B8963E] shadow-[0_6px_32px_rgba(197,165,90,0.6),0_0_0_4px_rgba(255,255,255,0.9)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all animate-[pulse_2s_ease-in-out_infinite]"

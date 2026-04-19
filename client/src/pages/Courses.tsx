@@ -3,7 +3,7 @@ import { useSplash } from "@/contexts/SplashContext";
 import { trpc } from "@/lib/trpc";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 import { useDeviceType } from "@/hooks/useDeviceType";
-import NutriserAuthModal from "@/components/NutriserAuthModal";
+import { useLocation } from "wouter";
 import MobileAuthGuard from "@/components/MobileAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,20 +61,21 @@ export default function Courses() {
   // Sesión unificada: detecta si el usuario ya inició sesión en Shop/Mis Tratamientos/Splash1
   const { patient, isLoggedIn, logout } = usePatientAuth();
   const { isMobile } = useDeviceType();
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [, navigate] = useLocation();
 
   // Guard móvil
   const [mobileGuardOpen, setMobileGuardOpen] = useState(false);
   const [mobileGuardFeature, setMobileGuardFeature] = useState("acceder a esta función");
 
-  /** Muestra el guard móvil o el modal de escritorio según el dispositivo */
+  /** Muestra el guard móvil o redirige a /mis-tratamientos en desktop */
   const requireAuth = (featureDescription: string): boolean => {
     if (isLoggedIn) return true;
     if (isMobile) {
       setMobileGuardFeature(featureDescription);
       setMobileGuardOpen(true);
     } else {
-      setShowAuthModal(true);
+      // Desktop: redirigir al formulario completo con registro, consentimiento y firma
+      navigate("/mis-tratamientos?returnTo=/cursos");
     }
     return false;
   };
@@ -258,7 +259,7 @@ export default function Courses() {
         setMobileGuardFeature("suscribirte a Academia Nutriser");
         setMobileGuardOpen(true);
       } else {
-        setShowAuthModal(true);
+        navigate("/mis-tratamientos?returnTo=/cursos");
       }
       return;
     }
@@ -348,13 +349,6 @@ export default function Courses() {
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
       <BackToSplash hideHome />
-
-      {/* Modal de autenticación unificada (escritorio) */}
-      <NutriserAuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        contextMessage="Inicia sesión para suscribirte y acceder a contenido exclusivo de Academia Nutriser."
-      />
 
       {/* Guard móvil: modal con opción de ir a Mi Cuenta Nutriser o continuar después */}
       <MobileAuthGuard

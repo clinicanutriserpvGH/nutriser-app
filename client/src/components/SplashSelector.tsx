@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { checkIOSPushReadiness, isPushSupported, subscribeToPush, isIOSDevice, isPWAStandalone, isWKWebView as checkIsWKWebView, isNativeApp as checkIsNativeApp, requestNativePushPermission, isAnyPushAvailable } from "@/lib/pushHelper";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
-import NutriserAuthModal from "@/components/NutriserAuthModal";
+import { useLocation } from "wouter";
 
 /* ─── Assets ────────────────────────────────────────────────────────────── */
 const LOGO_URL =
@@ -77,9 +77,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
   const [leaving, setLeaving] = useState(false);
   const { isLight, isAuto, toggleSplashTheme, resetToAuto } = useSplashTheme();
   const { patient, isLoggedIn, logout } = usePatientAuth();
-
-  // Modal de autenticación
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [, navigate] = useLocation();
 
   // Notificaciones push
   const [pushLoading, setPushLoading] = useState(false);
@@ -341,7 +339,7 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
             ) : (
               /* No logueado: botón "Iniciar sesión / Crear cuenta" */
               <button
-                onClick={() => setShowAuthModal(true)}
+                onClick={() => navigate("/mis-tratamientos")}
                 className="flex flex-col items-center gap-0 px-3 py-1.5 rounded-xl transition-all duration-200 bg-[#C5A55A] text-black hover:bg-[#d4b46a] active:scale-95 flex-shrink-0"
               >
                 <div className="flex items-center gap-1">
@@ -474,14 +472,6 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
 
         </div>
       </div>
-
-      {/* ── Modal de Autenticación ── */}
-      <NutriserAuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        contextMessage="Inicia sesión para acceder a tu monedero, cupones, beneficios de lealtad, Tienda Nutriser y Academy."
-        onSuccess={() => setShowAuthModal(false)}
-      />
 
       {/* ── Modal de Notificaciones ── */}
       {showNotifModal && (

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Home, Sparkles, BookOpen, User, ChevronLeft } from "lucide-react";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
-import NutriserAuthModal from "@/components/NutriserAuthModal";
+// NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import { trpc } from "@/lib/trpc";
 import { QRCodeSVG } from "qrcode.react";
 import { useRoute } from "wouter";
@@ -121,7 +121,6 @@ function TransactionRow({ txn }: { txn: any }) {
 export default function WalletPage() {
   const { patient, isLoggedIn } = usePatientAuth();
   const [, setLocation] = useLocation();
-  const [showAuth, setShowAuth] = useState(false);
   const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history">("card");
 
   const purchasesQuery = trpc.patients.getMyPurchases.useQuery(
@@ -170,10 +169,9 @@ export default function WalletPage() {
           <img src={LOGO_URL} alt="Nutriser" className="w-24 h-24 object-contain mb-6" />
           <h1 className="text-2xl font-bold text-[#C5A55A] mb-2 text-center">Monedero Nutriser</h1>
           <p className="text-gray-400 text-center mb-8 max-w-sm">Inicia sesión para ver tu tarjeta digital, saldo y beneficios exclusivos.</p>
-          <button onClick={() => setShowAuth(true)} className="bg-[#C5A55A] text-white font-bold py-3 px-8 rounded-xl text-lg hover:bg-[#b8963f] transition-all">
+          <button onClick={() => setLocation("/mis-tratamientos?returnTo=/monedero")} className="bg-[#C5A55A] text-white font-bold py-3 px-8 rounded-xl text-lg hover:bg-[#b8963f] transition-all">
             Iniciar Sesión
           </button>
-          <NutriserAuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
         </div>
       </div>
     );

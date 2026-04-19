@@ -1811,3 +1811,12 @@
 - [ ] ShopPromoSplash: en desktop sin sesión → navigate('/mis-tratamientos?returnTo=/memberships') al presionar ¡Lo Quiero!
 - [ ] Verificar TypeScript sin errores
 - [ ] Guardar checkpoint
+
+## Sesión Actual - Auditoría completa de NutriserAuthModal
+
+- [ ] Memberships.tsx: reemplazar requireAuth+NutriserAuthModal por navigate('/mis-tratamientos?returnTo=/memberships') en desktop
+- [ ] Courses.tsx: reemplazar requireAuth+NutriserAuthModal por navigate('/mis-tratamientos?returnTo=/cursos') en desktop
+- [ ] Store.tsx: reemplazar NutriserAuthModal por navigate('/mis-tratamientos?returnTo=/store') en desktop
+- [ ] WalletPage.tsx: reemplazar NutriserAuthModal por navigate('/mis-tratamientos?returnTo=/wallet') en desktop
+- [ ] Verificar TypeScript sin errores
+- [ ] Guardar checkpoint

@@ -312,7 +312,7 @@ export const serviceDescriptions: Record<string, {
     duration: "45-60 minutos",
     care: [
       "Evita el sol completamente por 2 semanas",
-      "Usa protector solar SPF 70+",
+      "Usa protector solar SPF 50+",
       "Mantén la piel muy hidratada",
       "Evita maquillaje por 48 horas",
       "Descamación es normal (3-7 días)",
@@ -356,7 +356,7 @@ export const serviceDescriptions: Record<string, {
     duration: "60-90 minutos",
     care: [
       "Evita el sol directo por 2 semanas",
-      "Usa protector solar SPF 70+",
+      "Usa protector solar SPF 50+",
       "No hagas ejercicio intenso por 48 horas",
       "Evita alcohol por 48 horas",
       "Mantén la piel hidratada",
@@ -378,7 +378,7 @@ export const serviceDescriptions: Record<string, {
     duration: "45-60 minutos",
     care: [
       "Evita el sol completamente por 2 semanas",
-      "Usa protector solar SPF 70+",
+      "Usa protector solar SPF 50+",
       "Mantén la piel hidratada",
       "Evita maquillaje por 24 horas",
       "Evita productos irritantes por 3 días",
@@ -511,7 +511,7 @@ export const serviceDescriptions: Record<string, {
     duration: "30-45 minutos",
     care: [
       "Evita el sol directo por 2 semanas",
-      "Usa protector solar SPF 70+",
+      "Usa protector solar SPF 50+",
       "No hagas ejercicio intenso por 48 horas",
       "Evita el calor extremo por 48 horas",
       "Mantén la piel hidratada",
@@ -556,7 +556,7 @@ export const serviceDescriptions: Record<string, {
     duration: "15-45 minutos (según tamaño)",
     care: [
       "Evita el sol directo por 2 semanas",
-      "Usa protector solar SPF 70+",
+      "Usa protector solar SPF 50+",
       "Mantén la zona limpia e hidratada",
       "Evita productos irritantes",
       "No rasques la zona tratada",

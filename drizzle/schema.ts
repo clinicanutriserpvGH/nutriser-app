@@ -834,7 +834,8 @@ export const cashPendingPayments = mysqlTable("cashPendingPayments", {
   concept: varchar("concept", { length: 500 }).notNull(), // Ej: "Cavitación 80K", "Cupón Promo Verano", "Curso Nutrición"
   itemType: mysqlEnum("itemType", ["service", "product", "ebook", "package", "promotion", "course", "other"]).notNull(),
   itemId: varchar("itemId", { length: 100 }),   // ID del ítem si aplica
-  amountCents: int("amountCents").notNull(),     // Monto en centavos MXN
+  amountCents: int("amountCents").notNull(),     // Monto total en centavos MXN
+  walletAmountUsedCents: int("walletAmountUsedCents").default(0).notNull(), // Saldo del monedero a descontar
   cashbackPercent: int("cashbackPercent").default(0).notNull(), // % de cashback a acumular al confirmar
   status: mysqlEnum("status", ["pending", "confirmed", "cancelled"]).default("pending").notNull(),
   notes: text("notes"),                          // Notas opcionales del paciente

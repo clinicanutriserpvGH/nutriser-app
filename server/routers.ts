@@ -3117,10 +3117,13 @@ export const appRouter = router({
         itemType: z.enum(['service', 'product', 'ebook', 'package', 'promotion', 'course', 'other']),
         itemId: z.string().optional(),
         amountCents: z.number().min(1),
+        walletAmountUsedCents: z.number().min(0).default(0), // Saldo del monedero a descontar
         cashbackPercent: z.number().min(0).max(100).default(0),
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
+        // Validar que el saldo a usar no supere el total
+        const walletUsed = Math.min(input.walletAmountUsedCents, input.amountCents);
         const payment = await createCashPendingPayment({
           walletId: input.walletId,
           patientId: input.patientId,
@@ -3128,6 +3131,7 @@ export const appRouter = router({
           itemType: input.itemType,
           itemId: input.itemId ?? null,
           amountCents: input.amountCents,
+          walletAmountUsedCents: walletUsed,
           cashbackPercent: input.cashbackPercent,
           notes: input.notes ?? null,
         });
@@ -3154,12 +3158,24 @@ export const appRouter = router({
         return await getAllCashPendingPayments();
       }),
 
-    // Admin: confirmar un pago en efectivo y acumular cashback
+    // Admin: confirmar un pago en efectivo, descontar saldo del monedero y acumular cashback
     confirm: publicProcedure
       .input(z.object({ id: z.number(), adminEmail: z.string().optional() }))
       .mutation(async ({ input }) => {
         const payment = await confirmCashPayment(input.id, input.adminEmail ?? 'admin');
-        // Acumular cashback si corresponde
+        // 1. Descontar saldo del monedero si el paciente eligió usar parte de su saldo
+        if (payment.walletAmountUsedCents > 0) {
+          await addWalletTransaction({
+            walletId: payment.walletId,
+            type: 'redeem',
+            amount: -payment.walletAmountUsedCents, // negativo = descuento
+            description: `Saldo usado para pago en efectivo: ${payment.concept}`,
+            referenceType: 'cash_payment',
+            referenceId: payment.id,
+            createdBy: `admin:${input.adminEmail ?? 'admin'}`,
+          });
+        }
+        // 2. Acumular cashback si corresponde (sobre el monto total)
         if (payment.cashbackPercent > 0) {
           const cashbackCents = Math.round(payment.amountCents * payment.cashbackPercent / 100);
           if (cashbackCents > 0) {

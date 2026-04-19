@@ -400,6 +400,22 @@ export default function AdminQRScanner() {
                             )}
                           </div>
                         </div>
+                        {/* Desglose: saldo del monedero + efectivo a cobrar */}
+                        {p.walletAmountUsedCents > 0 && (() => {
+                          const cashCents = p.amountCents - p.walletAmountUsedCents;
+                          return (
+                            <div className="bg-white border border-amber-200 rounded-lg px-3 py-2 space-y-1">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-gray-500">Saldo monedero (descontar):</span>
+                                <span className="font-bold text-[#C5A55A]">-${(p.walletAmountUsedCents / 100).toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-gray-500 font-bold">Cobrar en efectivo:</span>
+                                <span className="font-black text-green-700 text-sm">${(cashCents / 100).toFixed(2)}</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                         {p.notes && <p className="text-xs text-gray-500 italic">{p.notes}</p>}
                         <div className="flex gap-2">
                           <button

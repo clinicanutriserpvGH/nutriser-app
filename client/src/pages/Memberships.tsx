@@ -490,6 +490,8 @@ export default function Memberships() {
       setIsSubmitting(true);
       const itemNames = checkoutItems.map(i => i.qty > 1 ? `${i.qty}x ${i.name}` : i.name).join(", ");
       const firstItem = checkoutItems[0];
+      // El saldo del monedero a usar se descuenta al confirmar el admin
+      const walletUsedCents = useWallet ? Math.min(walletAmount, Math.round(discountedTotal * 100)) : 0;
       cashPendingMutation.mutate({
         walletId: walletData.id,
         patientId: patient.id,
@@ -497,6 +499,7 @@ export default function Memberships() {
         itemType: (firstItem?.itemType === 'product' ? 'product' : firstItem?.itemType === 'ebook' ? 'ebook' : firstItem?.itemType === 'package' ? 'package' : 'service') as any,
         itemId: firstItem?.id,
         amountCents: Math.round(discountedTotal * 100),
+        walletAmountUsedCents: walletUsedCents,
         cashbackPercent: 2,
         notes: `Pago en efectivo solicitado por ${buyerName}`,
       });
@@ -1867,12 +1870,27 @@ onClick={() => {
                         ⚠️ Necesitas una cuenta registrada con monedero para usar pago en efectivo.
                       </p>
                     )}
-                    {paymentMethod === 'cash' && walletData?.id && (
-                      <div className="mt-2 bg-green-50 border border-green-200 rounded-xl p-3 space-y-1">
-                        <p className="text-xs font-bold text-green-700">✅ Se creará un pendiente en tu monedero</p>
-                        <p className="text-xs text-green-600">El administrador lo verá al escanear tu QR y confirmará el pago en clínica.</p>
-                      </div>
-                    )}
+                    {paymentMethod === 'cash' && walletData?.id && (() => {
+                      const totalCents = Math.round(discountedTotal * 100);
+                      const walletUsedCents = useWallet ? Math.min(walletAmount, totalCents) : 0;
+                      const cashCents = totalCents - walletUsedCents;
+                      return (
+                        <div className="mt-2 bg-green-50 border border-green-200 rounded-xl p-3 space-y-2">
+                          <p className="text-xs font-bold text-green-700">✅ Pendiente de pago en efectivo</p>
+                          {walletUsedCents > 0 && (
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-600">Saldo monedero:</span>
+                              <span className="font-bold text-[#C5A55A]">-${(walletUsedCents / 100).toFixed(2)} MXN</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">A pagar en efectivo:</span>
+                            <span className="font-bold text-green-700">${(cashCents / 100).toFixed(2)} MXN</span>
+                          </div>
+                          <p className="text-xs text-green-600">El admin verá este desglose al escanear tu QR y confirmará el cobro en clínica.</p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
                 {/* Datos bancarios — solo si es transferencia y no cubre monedero */}

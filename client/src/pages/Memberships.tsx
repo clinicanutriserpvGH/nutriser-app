@@ -640,7 +640,12 @@ export default function Memberships() {
             setShowPromoSplash(false);
             if (isLoggedIn) {
               setWalletSheetOpen(true);
+            } else if (isMobile) {
+              // En móvil: mostrar guard con opciones Crear cuenta / Después
+              setMobileGuardFeature("crear tu Monedero Nutriser y acceder a beneficios exclusivos");
+              setMobileGuardOpen(true);
             } else {
+              // En desktop: modal de login normal
               setShowAuthModal(true);
             }
           }}

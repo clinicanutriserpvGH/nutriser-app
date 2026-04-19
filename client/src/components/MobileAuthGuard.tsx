@@ -113,28 +113,10 @@ export default function MobileAuthGuard({
             }}
           />
 
-          {/* Beneficios rápidos */}
-          <ul className="space-y-2 mb-6">
-            {[
-              "Monedero Nutriser con cashback en cada compra",
-              "Historial de compras y tratamientos",
-              "Acceso a Academia y foro de la comunidad",
-              "Cupones y promociones exclusivas",
-            ].map((benefit, i) => (
-              <li key={i} className="flex items-center gap-2.5">
-                <div
-                  className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(197,165,90,0.15)" }}
-                >
-                  <div
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ background: "#C5A55A" }}
-                  />
-                </div>
-                <span className="text-white/70 text-xs">{benefit}</span>
-              </li>
-            ))}
-          </ul>
+          {/* Descripción principal */}
+          <p className="text-white/65 text-sm text-center leading-relaxed mb-6 px-1">
+            Crea tu cuenta Nutriser para dar seguimiento a tus tratamientos, acceder a descuentos exclusivos en tienda y disfrutar de cursos, contenido especializado y la comunidad de Academia Nutriser.
+          </p>
 
           {/* Botones */}
           <div className="space-y-3">

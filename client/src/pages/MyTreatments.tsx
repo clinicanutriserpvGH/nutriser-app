@@ -1,5 +1,5 @@
 /**
- * Nutriser — Portal "Mis Tratamientos"
+ * Nutriser — Portal "Mi Cuenta Nutriser"
  * Registro / Login de pacientes presenciales.
  * Tras autenticarse ven sus tratamientos, citas, fotos antes/después,
  * consentimiento informado, cupones y catálogo de servicios.
@@ -453,9 +453,9 @@ export default function MyTreatments() {
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <img src={LOGO_URL} alt="Nutriser" className="h-16 mb-3" />
-            <h1 className="text-2xl font-bold text-gray-900">Mis Tratamientos</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Mi Cuenta Nutriser</h1>
             <p className="text-gray-500 text-sm text-center mt-2 max-w-xs leading-relaxed">
-              Seguimiento a tus tratamientos adquiridos y firma de contrato de consentimiento.
+              Crea tu cuenta y da seguimiento a tus tratamientos adquiridos, compra en tienda con descuentos exclusivos y accede a cursos y foro en la comunidad de la Academia Nutriser.
             </p>
           </div>
 
@@ -692,7 +692,7 @@ export default function MyTreatments() {
             <img src={LOGO_URL} alt="Nutriser" className="h-8" />
             <div>
               <p className="text-[#C5A55A] text-[9px] tracking-[0.15em] uppercase font-semibold">Aesthetic & Nutrition</p>
-              <p className="text-gray-900 text-sm font-bold leading-tight">Mis Tratamientos</p>
+              <p className="text-gray-900 text-sm font-bold leading-tight">Mi Cuenta Nutriser</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

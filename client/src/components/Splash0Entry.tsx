@@ -10,8 +10,9 @@
  * Nota: la misma cuenta de paciente funciona para Shop y Academy.
  */
 import { useState } from "react";
-import { ShoppingBag, GraduationCap, CalendarCheck, Moon, Sun, Utensils, Camera, ClipboardList, PauseCircle, BookOpen, Ruler, Repeat2 } from "lucide-react";
+import { ShoppingBag, GraduationCap, CalendarCheck, Moon, Sun, Utensils, Camera, ClipboardList, PauseCircle, BookOpen, Ruler, Repeat2, User, LogIn } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -33,6 +34,7 @@ interface Splash0EntryProps {
 export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavigate }: Splash0EntryProps) {
   const [leaving, setLeaving] = useState(false);
   const { isLight, isAuto, toggleSplashTheme, resetToAuto } = useSplashTheme();
+  const { patient, isLoggedIn } = usePatientAuth();
 
   const bg = isLight
     ? "linear-gradient(160deg, #FAF7F2 0%, #F5EFE4 50%, #FAF7F2 100%)"
@@ -100,20 +102,37 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 Bienvenido a Nutriser
               </h1>
             </div>
-            {/* Botón pequeño Mis Tratamientos — a la derecha del header */}
+            {/* Botón Mi Cuenta Nutriser — muestra nombre si hay sesión activa */}
             <button
               type="button"
               onClick={() => handleNavigate('/mis-tratamientos')}
               className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all duration-200 active:scale-95 group"
               style={{
-                background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 100%)',
-                boxShadow: '0 0 10px rgba(197,165,90,0.7), 0 0 20px rgba(197,165,90,0.3)',
-                border: '1px solid rgba(232,201,122,0.5)'
+                background: isLoggedIn
+                  ? 'linear-gradient(145deg, #1a3a1a 0%, #2d5a2d 100%)'
+                  : 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 100%)',
+                boxShadow: isLoggedIn
+                  ? '0 0 10px rgba(50,180,50,0.5), 0 0 20px rgba(50,180,50,0.2)'
+                  : '0 0 10px rgba(197,165,90,0.7), 0 0 20px rgba(197,165,90,0.3)',
+                border: isLoggedIn
+                  ? '1px solid rgba(80,200,80,0.4)'
+                  : '1px solid rgba(232,201,122,0.5)'
               }}
-              aria-label="Mis Tratamientos"
+              aria-label="Mi Cuenta Nutriser"
             >
-              <ClipboardList className="w-3.5 h-3.5 text-black flex-shrink-0" />
-              <span className="text-[9px] font-bold tracking-wide uppercase text-black leading-tight">Mis<br/>Tratamientos</span>
+              {isLoggedIn ? (
+                <>
+                  <User className="w-3.5 h-3.5 text-green-300 flex-shrink-0" />
+                  <span className="text-[9px] font-bold tracking-wide uppercase text-green-200 leading-tight max-w-[60px] truncate">
+                    {patient?.name?.split(' ')[0] ?? 'Mi Cuenta'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-3.5 h-3.5 text-black flex-shrink-0" />
+                  <span className="text-[9px] font-bold tracking-wide uppercase text-black leading-tight">Mi<br/>Cuenta</span>
+                </>
+              )}
             </button>
           </div>
 

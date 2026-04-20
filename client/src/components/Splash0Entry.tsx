@@ -95,9 +95,16 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             </div>
             <div className="w-px h-10 bg-[#C5A55A]/50 flex-shrink-0" />
             <div className="flex flex-col justify-center min-w-0 flex-1">
-              <p className="text-[#C5A55A] text-[9px] md:text-[11px] tracking-[0.25em] uppercase font-light leading-tight">
-                Aesthetic &amp; Nutrition
-              </p>
+              <button
+                type="button"
+                onClick={() => window.open('https://nutriserpv.com', '_blank')}
+                className="text-left cursor-pointer focus:outline-none active:opacity-70"
+                title="Ver sitio web Nutriser"
+              >
+                <p className="text-[#C5A55A] text-[9px] md:text-[11px] tracking-[0.25em] uppercase font-light leading-tight hover:text-[#E8C97A] transition-colors">
+                  Aesthetic &amp; Nutrition
+                </p>
+              </button>
               <h1 className="text-white text-xs md:text-sm font-semibold tracking-wider uppercase leading-tight mt-0.5">
                 Bienvenido a Nutriser
               </h1>

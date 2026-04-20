@@ -2093,8 +2093,8 @@ onClick={() => {
                   }}
                 />
 
-                {/* Contenido principal */}
-                <div style={{ position: "relative", zIndex: 2, padding: "10px 14px 0 14px", height: "calc(87% - 0px)" }}>
+                {/* Contenido principal — ocupa solo el 62% izquierdo para dejar la silueta libre */}
+                <div style={{ position: "relative", zIndex: 2, padding: "10px 14px 0 14px", height: "calc(87% - 0px)", width: "62%" }}>
 
                   {/* Fila superior: Logo + Título + Badge */}
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -2137,7 +2137,6 @@ onClick={() => {
                       padding: "7px 10px",
                       flex: 1,
                       minWidth: 0,
-                      maxWidth: "42%",
                       boxShadow: "0 2px 8px rgba(197,165,90,0.3)",
                     }}>
                       <div style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 12, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>

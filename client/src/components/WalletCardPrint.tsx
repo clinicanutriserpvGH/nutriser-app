@@ -255,7 +255,7 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
           <div style={{ background: "#FFFFFF", borderRadius: "1.2mm", padding: "0.8mm", flexShrink: 0 }}>
             <QRCodeSVG
               value={card.qrUrl || "https://nutriserpv.com/monedero"}
-              size={80}
+              size={55}
               level="H"
               includeMargin={false}
               bgColor="#FFFFFF"

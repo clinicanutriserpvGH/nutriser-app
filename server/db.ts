@@ -1942,3 +1942,21 @@ export async function updateSplashAdOrder(id: number, sortOrder: number) {
   if (!db) throw new Error('Database not available');
   await db.update(splashAds).set({ sortOrder }).where(eq(splashAds.id, id));
 }
+
+// ─── Splash Config ───────────────────────────────────────────────────────────
+import { splashConfig } from '../drizzle/schema';
+
+/** Obtiene si se debe mostrar la slide fija (Monedero/ShopCard) para un tipo de splash */
+export async function getSplashConfig(type: 'inicio' | 'tienda') {
+  const db = await getDb();
+  if (!db) return { showDefault: false };
+  const [row] = await db.select().from(splashConfig).where(eq(splashConfig.type, type)).limit(1);
+  return row ?? { showDefault: false };
+}
+
+/** Actualiza si se debe mostrar la slide fija para un tipo de splash */
+export async function setSplashShowDefault(type: 'inicio' | 'tienda', showDefault: boolean) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(splashConfig).set({ showDefault }).where(eq(splashConfig.type, type));
+}

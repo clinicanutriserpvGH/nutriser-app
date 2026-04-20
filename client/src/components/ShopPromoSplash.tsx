@@ -161,6 +161,7 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
 export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated = false }: ShopPromoSplashProps) {
   const { data: promotions = [] } = trpc.promotions.list.useQuery();
   const { data: splashAds = [] } = (trpc.splashAds.getActive as any).useQuery({ type: 'inicio' });
+  const { data: splashConfigData } = (trpc.splashAds.getConfig as any).useQuery({ type: 'inicio' });
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAuthGuard, setShowAuthGuard] = useState(false);
@@ -168,13 +169,19 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   const [, navigate] = useLocation();
 
   // Slides: imágenes del admin (tipo inicio) + cupones activos
-  // Si no hay imágenes del admin, se usa la ShopCard fija
+  // Si hay imágenes del admin Y showDefault=false → reemplazan la ShopCard fija
+  // Si showDefault=true → la ShopCard fija aparece junto a las imágenes del admin
+  // Si no hay imágenes del admin → se usa la ShopCard fija siempre
   const adminAds = splashAds as Array<{ id: number; imageUrl: string; title: string }>;
+  const showDefaultSlide = !!(splashConfigData?.showDefault) || adminAds.length === 0;
   const hasAdminAds = adminAds.length > 0;
-  const totalSlides = (hasAdminAds ? adminAds.length : 1) + activePromos.length;
-  const isAdminAdSlide = hasAdminAds && currentIndex < adminAds.length;
-  const isShopSlide = !hasAdminAds && currentIndex === 0;
-  const promoIndex = hasAdminAds ? currentIndex - adminAds.length : currentIndex - 1;
+  // Orden: [imágenes admin] + [ShopCard si showDefault] + [cupones activos]
+  const adminAdsCount = adminAds.length;
+  const defaultSlideCount = showDefaultSlide ? 1 : 0;
+  const totalSlides = adminAdsCount + defaultSlideCount + activePromos.length;
+  const isAdminAdSlide = currentIndex < adminAdsCount;
+  const isShopSlide = !isAdminAdSlide && currentIndex === adminAdsCount && showDefaultSlide;
+  const promoIndex = currentIndex - adminAdsCount - defaultSlideCount;
 
   const handleClose = useCallback(() => {
     onClose();

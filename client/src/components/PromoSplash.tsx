@@ -193,6 +193,7 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
 export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAuthenticated = false }: PromoSplashProps) {
   const { data: promotions = [] } = trpc.promotions.list.useQuery();
   const { data: tiendaAds = [] } = (trpc.splashAds.getActive as any).useQuery({ type: 'tienda' });
+  const { data: splashConfigData } = (trpc.splashAds.getConfig as any).useQuery({ type: 'tienda' });
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
@@ -201,12 +202,15 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
   const { isMobile } = useDeviceType();
   const [, navigate] = useLocation();
 
-  // Slides: imágenes admin (tipo tienda) + monedero + promos activas
+  // Slides: imágenes admin (tipo tienda) + [Monedero si showDefault o sin imágenes] + promos activas
   const adminTiendaAds = tiendaAds as Array<{ id: number; imageUrl: string; title: string }>;
-  const totalSlides = adminTiendaAds.length + 1 + activePromos.length;
-  const isAdminTiendaSlide = currentIndex < adminTiendaAds.length;
-  const isMonederoSlide = !isAdminTiendaSlide && currentIndex === adminTiendaAds.length;
-  const promoIndex = currentIndex - adminTiendaAds.length - 1;
+  const showDefaultSlide = !!(splashConfigData?.showDefault) || adminTiendaAds.length === 0;
+  const adminAdsCount = adminTiendaAds.length;
+  const defaultSlideCount = showDefaultSlide ? 1 : 0;
+  const totalSlides = adminAdsCount + defaultSlideCount + activePromos.length;
+  const isAdminTiendaSlide = currentIndex < adminAdsCount;
+  const isMonederoSlide = !isAdminTiendaSlide && currentIndex === adminAdsCount && showDefaultSlide;
+  const promoIndex = currentIndex - adminAdsCount - defaultSlideCount;
 
   const shouldShow = totalSlides > 0 && !dismissed;
 

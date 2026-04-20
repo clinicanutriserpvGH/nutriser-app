@@ -867,9 +867,22 @@ export const splashAds = mysqlTable("splashAds", {
   subtitle: varchar("subtitle", { length: 500 }),
   linkUrl: varchar("linkUrl", { length: 500 }),  // URL a donde redirige al tocar (opcional)
   isActive: boolean("isActive").notNull().default(true),
+  showDefault: boolean("showDefault").notNull().default(false), // Si true, muestra la slide fija original (Monedero/ShopCard) aunque haya imágenes activas
   sortOrder: int("sortOrder").notNull().default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type SplashAd = typeof splashAds.$inferSelect;
 export type InsertSplashAd = typeof splashAds.$inferInsert;
+
+/**
+ * Configuración global de los splash pop-ups
+ * showDefault: si true, muestra la slide fija original (Monedero/ShopCard) aunque haya imágenes activas
+ */
+export const splashConfig = mysqlTable("splashConfig", {
+  id: int("id").autoincrement().primaryKey(),
+  type: mysqlEnum("type", ["inicio", "tienda"]).notNull().unique(),
+  showDefault: boolean("showDefault").notNull().default(false),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SplashConfig = typeof splashConfig.$inferSelect;

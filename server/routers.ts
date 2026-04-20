@@ -14,7 +14,7 @@ import { getAllCourses, getPublishedCourses, getCourseById, createCourse, update
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet } from './db';
-import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder } from './db';
+import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -3271,6 +3271,21 @@ export const appRouter = router({
       .input(z.object({ id: z.number(), sortOrder: z.number() }))
       .mutation(async ({ input }) => {
         await updateSplashAdOrder(input.id, input.sortOrder);
+        return { success: true };
+      }),
+
+    // Público: obtener configuración de showDefault para un tipo
+    getConfig: publicProcedure
+      .input(z.object({ type: z.enum(['inicio', 'tienda']) }))
+      .query(async ({ input }) => {
+        return await getSplashConfig(input.type);
+      }),
+
+    // Admin: activar/desactivar la slide fija (Monedero/ShopCard)
+    setShowDefault: publicProcedure
+      .input(z.object({ type: z.enum(['inicio', 'tienda']), showDefault: z.boolean() }))
+      .mutation(async ({ input }) => {
+        await setSplashShowDefault(input.type, input.showDefault);
         return { success: true };
       }),
   }),

@@ -1904,3 +1904,11 @@
 - [ ] Panel admin: sección para subir/gestionar imágenes de splash con preview
 - [ ] SplashSelector: cargar imágenes dinámicas desde DB (tipo: inicio)
 - [ ] ShopPromoSplash: cargar imágenes dinámicas desde DB (tipo: tienda)
+
+## Sesión Actual - Corrección Tablas DB Splash
+- [x] Tabla splashAds creada en DB (con SQL directo, nombre exacto del schema Drizzle)
+- [x] Tabla splashConfig creada en DB (con SQL directo, nombre exacto del schema Drizzle)
+- [x] Registros iniciales insertados en splashConfig (inicio: showDefault=1, tienda: showDefault=1)
+- [x] Tabla splash_config (con guión bajo, incorrecta) eliminada de DB
+- [x] Verificado: endpoints splashAds.getConfig y splashAds.getActive responden correctamente
+- [x] AESTHETIC & NUTRITION en header del splash es enlace <a> a nutriserpv.com (acceso secreto)

@@ -1899,11 +1899,11 @@
 - [x] Eliminar couponSubscribers de schema, db.ts, routers.ts, AdminDashboard, AdminPatientsTab, PromotionsSection, SplashSelector
 
 ## Splash Ads - Aparador de Publicidad Dinámica
-- [ ] Tabla splashAds en DB (tipo: inicio/tienda, imagen URL, activo, orden, título opcional)
-- [ ] Backend: CRUD de splash ads en db.ts y routers.ts
-- [ ] Panel admin: sección para subir/gestionar imágenes de splash con preview
-- [ ] SplashSelector: cargar imágenes dinámicas desde DB (tipo: inicio)
-- [ ] ShopPromoSplash: cargar imágenes dinámicas desde DB (tipo: tienda)
+- [x] Tabla splashAds en DB (tipo: inicio/tienda, imagen URL, activo, orden, título opcional)
+- [x] Backend: CRUD de splash ads en db.ts y routers.ts
+- [x] Panel admin: sección para subir/gestionar imágenes de splash con preview
+- [x] SplashSelector: cargar imágenes dinámicas desde DB (tipo: inicio)
+- [x] ShopPromoSplash: cargar imágenes dinámicas desde DB (tipo: tienda)
 
 ## Sesión Actual - Corrección Tablas DB Splash
 - [x] Tabla splashAds creada en DB (con SQL directo, nombre exacto del schema Drizzle)
@@ -1912,3 +1912,10 @@
 - [x] Tabla splash_config (con guión bajo, incorrecta) eliminada de DB
 - [x] Verificado: endpoints splashAds.getConfig y splashAds.getActive responden correctamente
 - [x] AESTHETIC & NUTRITION en header del splash es enlace <a> a nutriserpv.com (acceso secreto)
+
+## Sesión Actual - Corrección Cupones Vencidos
+- [x] Diagnosticado: cupones tenían expiresAt = 2026-04-20 (fecha pasada), servidor los marcaba isActive=false automáticamente
+- [x] Cupones actualizados: expiresAt extendido a 2027-12-31, isActive=1
+- [x] Verificado: PromoSplash de tienda muestra correctamente "2 de 3" con cupón de Mesoterapia
+- [x] Verificado: endpoint promotions.list devuelve los 2 cupones activos con imagen, precio y countdown
+- [x] Sitio web nutriserpv.com carga correctamente

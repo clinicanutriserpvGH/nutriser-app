@@ -115,27 +115,27 @@ export default function AdminWalletTab() {
         </Card>
       </div>
 
-      {/* Sub-tabs */}
-      <div className="flex gap-2 border-b border-gray-200 pb-2">
+      {/* Sub-tabs — Grid 2x3 para fácil uso en móvil */}
+      <div className="grid grid-cols-3 gap-2 pb-2">
         {([
           { key: "qrscan" as SubTab, label: "Escanear QR", icon: QrCode },
           { key: "wallets" as SubTab, label: "Tarjetas", icon: CreditCard },
-          { key: "printCards" as SubTab, label: "Imprimir Tarjetas", icon: Printer },
-          { key: "requests" as SubTab, label: "Solicitudes", icon: Printer },
-          { key: "loyalty" as SubTab, label: "Registrar Lealtad", icon: Star },
-          { key: "plans" as SubTab, label: "Planes de Producto", icon: Gift },
+          { key: "printCards" as SubTab, label: "Imprimir", icon: Printer },
+          { key: "requests" as SubTab, label: "Solicitudes", icon: Calendar },
+          { key: "loyalty" as SubTab, label: "Lealtad", icon: Star },
+          { key: "plans" as SubTab, label: "Planes", icon: Gift },
         ]).map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setSubTab(key)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+            className={`flex flex-col items-center gap-1 px-2 py-3 rounded-xl text-xs font-semibold transition ${
               subTab === key
-                ? "bg-[#C5A55A] text-white shadow"
+                ? "bg-[#C5A55A] text-white shadow-md"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            <Icon className="w-4 h-4" />
-            {label}
+            <Icon className="w-5 h-5" />
+            <span className="leading-tight text-center">{label}</span>
           </button>
         ))}
       </div>
@@ -710,7 +710,7 @@ function PrintCardsTab({
   const previewScale = 0.72;
 
   // Impresión via html2canvas: convierte la tarjeta a imagen PNG y la imprime
-  // Esto garantiza que los fondos oscuros se impriman en iOS/Safari
+  // Convierte la tarjeta a PNG y la descarga directamente (funciona en iOS/Safari sin popups)
   const handlePrint = useCallback(async () => {
     if (selectedWallets.length === 0) {
       toast.error("Selecciona al menos una tarjeta para imprimir");
@@ -720,53 +720,53 @@ function PrintCardsTab({
     try {
       const html2canvas = (await import("html2canvas")).default;
       const container = printContainerRef.current;
-      if (!container) { window.print(); return; }
+      if (!container) {
+        toast.error("Error al preparar la tarjeta. Intenta de nuevo.");
+        return;
+      }
 
-      // Mostrar temporalmente el contenedor para capturarlo
+      // Mostrar temporalmente el contenedor fuera de pantalla para capturarlo
       container.style.display = "block";
       container.style.position = "fixed";
       container.style.top = "-9999px";
       container.style.left = "-9999px";
       container.style.zIndex = "-1";
+      container.style.background = "white";
 
       // Esperar a que el DOM se actualice y las imágenes carguen
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 1000));
 
       const canvas = await html2canvas(container, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: null,
+        backgroundColor: "#ffffff",
         logging: false,
       });
 
+      // Ocultar el contenedor de nuevo
       container.style.display = "none";
       container.style.position = "";
       container.style.top = "";
       container.style.left = "";
       container.style.zIndex = "";
 
+      // Descargar la imagen PNG directamente (funciona en iOS sin popups)
       const imgData = canvas.toDataURL("image/png");
-      const printWin = window.open("", "_blank");
-      if (!printWin) {
-        // Fallback: imprimir directamente si el popup está bloqueado
-        window.print();
-        return;
-      }
-      printWin.document.write(`<!DOCTYPE html><html><head><title>Tarjetas Nutriser</title>
-<style>
-  @page { size: auto; margin: 0; }
-  body { margin: 0; padding: 0; background: white; }
-  img { display: block; max-width: 100%; height: auto; }
-</style></head><body>
-<img src="${imgData}" />
-<script>window.onload = function() { window.print(); window.close(); };<\/script>
-</body></html>`);
-      printWin.document.close();
+      const link = document.createElement("a");
+      const fileName = selectedWallets.length === 1
+        ? `tarjeta-${selectedWallets[0].walletNumber || "nutriser"}.png`
+        : `tarjetas-nutriser-${selectedWallets.length}.png`;
+      link.href = imgData;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`Imagen descargada: ${fileName}. Ábrela y usa "Imprimir" desde tu galería o visor de fotos.`);
     } catch (err) {
       console.error("[Print] html2canvas error:", err);
-      // Fallback al método CSS
-      window.print();
+      toast.error("Error al generar la imagen. Intenta de nuevo.");
     } finally {
       setIsPrinting(false);
     }
@@ -779,11 +779,11 @@ function PrintCardsTab({
         <div className="flex items-start gap-3">
           <Printer className="w-5 h-5 text-[#C5A55A] flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-bold text-amber-900">Impresión de Tarjetas Físicas CR-80</p>
+            <p className="text-sm font-bold text-amber-900">Imprimir Tarjetas Físicas CR-80</p>
             <p className="text-xs text-amber-700 mt-1">
-              Formato estándar de tarjeta de crédito: <b>85.5 × 54 mm</b>. Selecciona los pacientes,
-              elige el modo de impresión y haz clic en "Imprimir". Usa papel de tarjetas PVC o
-              cartulina gruesa (300 g/m²) para mejor resultado.
+              Selecciona los pacientes y haz clic en <b>"Descargar imagen"</b>. Se guardará un PNG
+              en tu dispositivo — ábrelo y usa <b>"Imprimir"</b> desde tu galería o visor de fotos.
+              Usa papel PVC o cartulina gruesa (300 g/m²) para mejor resultado.
             </p>
             <p className="text-xs text-amber-600 mt-1">
               💡 <b>Hoja A4:</b> caben 8 tarjetas por hoja. <b>Individual:</b> una tarjeta por página.
@@ -830,9 +830,9 @@ function PrintCardsTab({
           className="bg-[#C5A55A] hover:bg-[#b8944d] text-white font-bold"
         >
           {isPrinting ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Preparando...</>
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generando imagen...</>
           ) : (
-            <><Printer className="w-4 h-4 mr-2" />Imprimir {selectedCards.size > 0 ? `(${selectedCards.size})` : ""}</>
+            <><Printer className="w-4 h-4 mr-2" />Descargar imagen {selectedCards.size > 0 ? `(${selectedCards.size})` : ""}</>
           )}
         </Button>
       </div>

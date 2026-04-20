@@ -1932,3 +1932,10 @@
 - [x] Fix: cambiado a <button> que llama a onGoToWebsite() para cambiar splashState a "site"
 - [x] Fix: guardar nutriser_splash_seen en sessionStorage al entrar al sitio para no volver al splash al recargar
 - [x] Fix: leer nutriser_splash_seen en la inicialización de splashState para ir directo al sitio si ya eligió
+
+## Tarjeta Física del Monedero (Formato CR-80)
+- [x] Redimensionar tarjeta del monedero al formato CR-80 (85.5×54mm, proporción 1.585:1)
+- [x] Panel admin: sección "Tarjetas Físicas" con lista de todas las tarjetas por usuario
+- [x] Panel admin: botón imprimir/descargar PDF de tarjeta individual (listo para imprimir en plástico)
+- [x] Panel admin: opción de imprimir múltiples tarjetas en una hoja A4 (layout de impresión)
+- [x] Usuario: botón "Descargar mi tarjeta" en la vista del monedero

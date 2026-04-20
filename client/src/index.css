@@ -184,3 +184,35 @@ nav[data-navbar] {
 *, *::before, *::after {
   box-sizing: border-box;
 }
+
+/* ── Estilos de impresión para tarjetas físicas del Monedero Nutriser ────────── */
+@media print {
+  /* Ocultar TODO excepto el contenido de impresión */
+  body > * {
+    display: none !important;
+  }
+  /* Mostrar solo el div de impresión */
+  .print-only {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 99999 !important;
+  }
+  /* Configuración de página A4 sin márgenes */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  /* Asegurar que los colores de fondo se impriman */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  /* Cada tarjeta no se parte entre páginas */
+  .wallet-card-cr80 {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}

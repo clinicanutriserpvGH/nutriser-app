@@ -12,16 +12,20 @@ import { toast } from "sonner";
 import {
   Search, Plus, Minus, CreditCard,
   Gift, Star, ChevronDown, ChevronUp, Loader2,
-  DollarSign, Users, Award, Trash2, Calendar, QrCode,
+  DollarSign, Users, Award, Trash2, Calendar, QrCode, Printer, CheckSquare, Square, PrinterCheck,
 } from "lucide-react";
 
 import AdminQRScanner from "./AdminQRScanner";
+import { WalletCard as WalletCardPrint, WalletCardPrintSheet } from "./WalletCardPrint";
 
-type SubTab = "wallets" | "loyalty" | "plans" | "qrscan";
+type SubTab = "wallets" | "loyalty" | "plans" | "qrscan" | "printCards";
 
 export default function AdminWalletTab() {
   const [subTab, setSubTab] = useState<SubTab>("wallets");
   const [search, setSearch] = useState("");
+  const [printSearch, setPrintSearch] = useState("");
+  const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
+  const [printMode, setPrintMode] = useState<"single" | "sheet">("sheet");
 
   // ─── Queries ─────────────────────────────────────────────────────
   const walletsQuery = trpc.wallet.adminListAll.useQuery();
@@ -116,6 +120,7 @@ export default function AdminWalletTab() {
         {([
           { key: "qrscan" as SubTab, label: "Escanear QR", icon: QrCode },
           { key: "wallets" as SubTab, label: "Tarjetas", icon: CreditCard },
+          { key: "printCards" as SubTab, label: "Imprimir Tarjetas", icon: Printer },
           { key: "loyalty" as SubTab, label: "Registrar Lealtad", icon: Star },
           { key: "plans" as SubTab, label: "Planes de Producto", icon: Gift },
         ]).map(({ key, label, icon: Icon }) => (
@@ -136,6 +141,20 @@ export default function AdminWalletTab() {
 
       {/* ═══ SUB-TAB: Escanear QR ═══ */}
       {subTab === "qrscan" && <AdminQRScanner />}
+
+      {/* ═══ SUB-TAB: Imprimir Tarjetas ═══ */}
+      {subTab === "printCards" && (
+        <PrintCardsTab
+          wallets={wallets}
+          isLoading={walletsQuery.isLoading}
+          search={printSearch}
+          setSearch={setPrintSearch}
+          selectedCards={selectedCards}
+          setSelectedCards={setSelectedCards}
+          printMode={printMode}
+          setPrintMode={setPrintMode}
+        />
+      )}
 
       {/* ═══ SUB-TAB: Tarjetas ═══ */}
       {subTab === "wallets" && (
@@ -624,6 +643,219 @@ function PlansManager({ plans, onCreate, onDelete, isLoading }: {
                 </Button>
               </CardContent>
             </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── PrintCardsTab — Imprimir Tarjetas Físicas CR-80 ────────────────────────
+function PrintCardsTab({
+  wallets,
+  isLoading,
+  search,
+  setSearch,
+  selectedCards,
+  setSelectedCards,
+  printMode,
+  setPrintMode,
+}: {
+  wallets: any[];
+  isLoading: boolean;
+  search: string;
+  setSearch: (s: string) => void;
+  selectedCards: Set<number>;
+  setSelectedCards: (s: Set<number>) => void;
+  printMode: "single" | "sheet";
+  setPrintMode: (m: "single" | "sheet") => void;
+}) {
+  const filtered = useMemo(() => {
+    if (!search.trim()) return wallets;
+    const q = search.toLowerCase();
+    return wallets.filter((w: any) =>
+      w.patientName?.toLowerCase().includes(q) ||
+      w.walletNumber?.toLowerCase().includes(q) ||
+      w.patientEmail?.toLowerCase().includes(q)
+    );
+  }, [wallets, search]);
+
+  const toggleCard = (id: number) => {
+    const next = new Set(selectedCards);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedCards(next);
+  };
+
+  const selectAll = () => setSelectedCards(new Set(filtered.map((w: any) => w.id)));
+  const clearAll = () => setSelectedCards(new Set());
+
+  const selectedWallets = wallets.filter((w: any) => selectedCards.has(w.id));
+
+  const handlePrint = () => {
+    if (selectedWallets.length === 0) {
+      toast.error("Selecciona al menos una tarjeta para imprimir");
+      return;
+    }
+    window.print();
+  };
+
+  // Convertir datos de wallet al formato de WalletCardData
+  const toCardData = (w: any) => ({
+    patientName: w.patientName || "Usuario",
+    walletNumber: w.walletNumber || "---",
+    qrUrl: `https://nutriserpv.com/monedero?w=${w.walletNumber}`,
+    isActive: w.status === "active",
+  });
+
+  // Escala para preview en pantalla (la tarjeta CR-80 mide 323×204px a 96dpi)
+  const previewScale = 0.72;
+
+  return (
+    <div className="space-y-4">
+      {/* Instrucciones */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <Printer className="w-5 h-5 text-[#C5A55A] flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-amber-900">Impresión de Tarjetas Físicas CR-80</p>
+            <p className="text-xs text-amber-700 mt-1">
+              Formato estándar de tarjeta de crédito: <b>85.5 × 54 mm</b>. Selecciona los pacientes,
+              elige el modo de impresión y haz clic en "Imprimir". Usa papel de tarjetas PVC o
+              cartulina gruesa (300 g/m²) para mejor resultado.
+            </p>
+            <p className="text-xs text-amber-600 mt-1">
+              💡 <b>Hoja A4:</b> caben 8 tarjetas por hoja. <b>Individual:</b> una tarjeta por página.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Controles */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Input
+            placeholder="Buscar paciente..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Button variant="outline" size="sm" onClick={selectAll} className="text-xs">
+          <CheckSquare className="w-3.5 h-3.5 mr-1" /> Todos ({filtered.length})
+        </Button>
+        <Button variant="outline" size="sm" onClick={clearAll} className="text-xs">
+          <Square className="w-3.5 h-3.5 mr-1" /> Limpiar
+        </Button>
+        {/* Modo de impresión */}
+        <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+          <button
+            onClick={() => setPrintMode("sheet")}
+            className={`px-3 py-1.5 text-xs font-medium transition ${printMode === "sheet" ? "bg-[#C5A55A] text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+          >
+            Hoja A4 (8/hoja)
+          </button>
+          <button
+            onClick={() => setPrintMode("single")}
+            className={`px-3 py-1.5 text-xs font-medium transition ${printMode === "single" ? "bg-[#C5A55A] text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+          >
+            Individual
+          </button>
+        </div>
+        <Button
+          onClick={handlePrint}
+          disabled={selectedCards.size === 0}
+          className="bg-[#C5A55A] hover:bg-[#b8944d] text-white font-bold"
+        >
+          <Printer className="w-4 h-4 mr-2" />
+          Imprimir {selectedCards.size > 0 ? `(${selectedCards.size})` : ""}
+        </Button>
+      </div>
+
+      {/* Lista de wallets para seleccionar */}
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin text-[#C5A55A]" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
+          {filtered.map((w: any) => {
+            const isSelected = selectedCards.has(w.id);
+            return (
+              <button
+                key={w.id}
+                onClick={() => toggleCard(w.id)}
+                className={`flex items-center gap-3 p-3 rounded-xl border text-left transition ${
+                  isSelected
+                    ? "border-[#C5A55A] bg-amber-50 shadow-sm"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                }`}
+              >
+                <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${isSelected ? "bg-[#C5A55A]" : "border-2 border-gray-300"}`}>
+                  {isSelected && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{w.patientName || "Sin nombre"}</p>
+                  <p className="text-[10px] text-gray-400 font-mono">{w.walletNumber}</p>
+                </div>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${w.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                  {w.status === "active" ? "Activa" : "Inactiva"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Preview de tarjetas seleccionadas */}
+      {selectedWallets.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <PrinterCheck className="w-4 h-4 text-[#C5A55A]" />
+            <p className="text-sm font-bold text-gray-700">
+              Vista previa ({selectedWallets.length} tarjeta{selectedWallets.length !== 1 ? "s" : ""})
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-4 p-4 bg-gray-100 rounded-xl">
+            {selectedWallets.map((w: any) => (
+              <div
+                key={w.id}
+                style={{ width: 323 * previewScale, height: 204 * previewScale, position: "relative", flexShrink: 0 }}
+              >
+                <WalletCardPrint card={toCardData(w)} scale={previewScale} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Contenido oculto para impresión */}
+      <div className="print-only" style={{ display: "none" }}>
+        {printMode === "sheet" ? (
+          // Hoja A4 con hasta 8 tarjetas
+          <WalletCardPrintSheet cards={selectedWallets.map(toCardData)} />
+        ) : (
+          // Una tarjeta por página
+          selectedWallets.map((w: any, i: number) => (
+            <div
+              key={w.id}
+              style={{
+                pageBreakAfter: i < selectedWallets.length - 1 ? "always" : "auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "210mm",
+                height: "297mm",
+                padding: "20mm",
+                boxSizing: "border-box",
+              }}
+            >
+              <div style={{ width: "85.5mm", height: "54mm", overflow: "hidden", borderRadius: "3.5mm" }}>
+                {/* Importamos WalletCardPrintSheet con una sola tarjeta */}
+                <WalletCardPrintSheet cards={[toCardData(w)]} />
+              </div>
+            </div>
           ))
         )}
       </div>

@@ -6,12 +6,13 @@
  */
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Home, Sparkles, BookOpen, User, ChevronLeft } from "lucide-react";
+import { Home, Sparkles, BookOpen, User, ChevronLeft, Download } from "lucide-react";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 // NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import { trpc } from "@/lib/trpc";
 import { QRCodeSVG } from "qrcode.react";
 import { useRoute } from "wouter";
+import { WalletCard as WalletCardCR80, WalletCardPrintSheet } from "@/components/WalletCardPrint";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -207,95 +208,78 @@ export default function WalletPage() {
         <h1 className="text-base font-bold text-[#1A1A1A]">Monedero Nutriser</h1>
       </div>
 
-      {/* ── Tarjeta compacta estilo Farmacias del Ahorro ── */}
+      {/* ── Tarjeta CR-80 (formato tarjeta de crédito 85.5×54mm) ── */}
       <div className="px-4 pt-4 pb-2">
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            {/* Top section — dark with logo + card info */}
-            <div className="bg-gradient-to-br from-[#1A1A1A] via-[#222] to-[#1A1A1A] p-5 relative overflow-hidden">
-              {/* Subtle gold accent */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#C5A55A] to-transparent" />
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#C5A55A]/8 to-transparent rounded-bl-full" />
+          {/* Tarjeta CR-80 escalada para pantalla móvil */}
+          <div style={{ width: 323 * 0.88, height: 204 * 0.88, position: "relative" }}>
+            <WalletCardCR80
+              card={{
+                patientName: patient?.name || "Usuario",
+                walletNumber: wallet?.walletNumber || "---",
+                qrUrl: qrUrl || "https://nutriserpv.com/monedero",
+                isActive: wallet?.isActive ?? true,
+              }}
+              scale={0.88}
+            />
+          </div>
 
-              {/* Row: Logo + Title + Status */}
-              <div className="flex items-center gap-3 mb-4 relative z-10">
-                <img src={LOGO_URL} alt="Nutriser" className="w-12 h-12 object-contain" />
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-[#C5A55A] font-black text-sm tracking-widest uppercase">Monedero Nutriser</h2>
-                  <p className="text-gray-500 text-[10px] tracking-wide">aesthetic & nutrition</p>
-                </div>
-                <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold tracking-wider flex-shrink-0 ${wallet?.isActive ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}>
-                  {wallet?.isActive ? "ACTIVA" : "INACTIVA"}
-                </span>
+          {/* Saldo + acciones debajo de la tarjeta */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mt-3 px-5 py-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Saldo disponible</p>
+                <p className="text-[#C5A55A] font-black text-2xl">{formatMoney(wallet?.balance || 0)}</p>
               </div>
-
-              {/* QR Code — inline with card number */}
-              <div className="flex items-center gap-4 relative z-10">
-                <div className="bg-white rounded-xl p-3 flex-shrink-0 shadow-sm">
-                  <QRCodeSVG
-                    value={qrUrl || "https://nutriserpv.com/monedero"}
-                    size={80}
-                    level="H"
-                    includeMargin={false}
-                    bgColor="#FFFFFF"
-                    fgColor="#000000"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white font-bold text-sm uppercase truncate">{patient?.name || "Usuario"}</p>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <p className="text-white/70 font-mono text-xs tracking-wider truncate">{wallet?.walletNumber || "---"}</p>
-                    <button onClick={copyWalletNumber} className="text-[#C5A55A] hover:text-[#d4b96e] transition-colors flex-shrink-0" title="Copiar">
-                      {copied ? (
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                      ) : (
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                      )}
-                    </button>
-                  </div>
-                  {/* Logo watermark */}
-                  <div className="flex justify-end mt-2">
-                    <img src={LOGO_URL} alt="" className="w-14 h-auto object-contain opacity-25" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom section — saldo */}
-            <div className="px-5 py-3 bg-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Saldo disponible</p>
-                  <p className="text-[#C5A55A] font-black text-2xl">{formatMoney(wallet?.balance || 0)}</p>
-                </div>
+              <div className="flex flex-col items-end gap-1.5">
                 <button
                   onClick={() => setActiveTab("history")}
                   className="text-[#C5A55A] text-xs font-semibold hover:underline"
                 >
                   Ver Estado de Cuenta
                 </button>
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1 text-gray-400 text-[10px] hover:text-[#C5A55A] transition-colors"
+                  title="Imprimir mi tarjeta"
+                >
+                  <Download className="w-3 h-3" />
+                  Imprimir mi tarjeta
+                </button>
               </div>
-              {/* Fecha de caducidad bimestral */}
-              {wallet?.balanceExpiresAt && wallet.balance > 0 && (() => {
-                const expiry = new Date(wallet.balanceExpiresAt);
-                const now = new Date();
-                const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-                const isExpiringSoon = daysLeft <= 14;
-                return (
-                  <div className={`mt-2 flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 w-fit ${
-                    isExpiringSoon
-                      ? 'bg-red-50 text-red-600 border border-red-200'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200'
-                  }`}>
-                    <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {isExpiringSoon
-                      ? `¡Tu saldo vence en ${daysLeft} día${daysLeft !== 1 ? 's' : ''}!`
-                      : `Válido hasta ${expiry.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                    }
-                  </div>
-                );
-              })()}
             </div>
+            {/* Fecha de caducidad bimestral */}
+            {wallet?.balanceExpiresAt && wallet.balance > 0 && (() => {
+              const expiry = new Date(wallet.balanceExpiresAt);
+              const now = new Date();
+              const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              const isExpiringSoon = daysLeft <= 14;
+              return (
+                <div className={`mt-2 flex items-center gap-1.5 text-[10px] font-semibold rounded-full px-2.5 py-1 w-fit ${
+                  isExpiringSoon
+                    ? 'bg-red-50 text-red-600 border border-red-200'
+                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                }`}>
+                  <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  {isExpiringSoon
+                    ? `¡Tu saldo vence en ${daysLeft} día${daysLeft !== 1 ? 's' : ''}!`
+                    : `Válido hasta ${expiry.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                  }
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Contenido oculto para impresión — solo se muestra al imprimir */}
+          <div className="print-only" style={{ display: "none" }}>
+            <WalletCardPrintSheet
+              cards={[{
+                patientName: patient?.name || "Usuario",
+                walletNumber: wallet?.walletNumber || "---",
+                qrUrl: qrUrl || "https://nutriserpv.com/monedero",
+                isActive: wallet?.isActive ?? true,
+              }]}
+            />
           </div>
         </div>
       </div>

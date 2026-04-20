@@ -1,17 +1,19 @@
 /**
- * WalletCardPrint — Tarjeta física del Monedero Nutriser
+ * WalletCardPrint -- Tarjeta fisica del Monedero Nutriser
  *
- * Formato CR-80 estándar: 85.5 × 54 mm (igual que tarjeta de crédito)
- * Resolución de impresión: 300 DPI → 1011 × 638 px
+ * Formato CR-80 estandar: 85.5 x 54 mm (igual que tarjeta de credito)
+ * Resolucion de impresion: 300 DPI -> 1011 x 638 px
  *
  * Dos modos de uso:
- *  1. <WalletCardPrint /> — Vista previa en pantalla (escala adaptable)
- *  2. <WalletCardPrintSheet cards={[...]} /> — Hoja A4 con 8 tarjetas para imprimir
+ *  1. <WalletCard /> -- Vista previa en pantalla (escala adaptable)
+ *  2. <WalletCardPrintSheet cards={[...]} /> -- Hoja A4 con 8 tarjetas para imprimir
  */
 import { QRCodeSVG } from "qrcode.react";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
+
+const SILUETA_URL = "/manus-storage/nutriser-silueta_f6738ee7.png";
 
 export interface WalletCardData {
   patientName: string;
@@ -20,12 +22,11 @@ export interface WalletCardData {
   isActive: boolean;
 }
 
-// ── Tarjeta individual en proporción CR-80 ─────────────────────────────────
-// Usamos unidades absolutas en mm para impresión exacta.
+// -- Tarjeta individual en proporcion CR-80 ---------------------------------
+// Usamos unidades absolutas en mm para impresion exacta.
 // En pantalla se escala con transform para caber en el contenedor.
 export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: number }) {
-  // CR-80: 85.5mm × 54mm @ 96dpi → 323px × 204px
-  // Para impresión a 300dpi usamos mm directamente vía @page
+  // CR-80: 85.5mm x 54mm @ 96dpi -> 323px x 204px
   const W = 323; // px a 96dpi
   const H = 204;
 
@@ -46,14 +47,33 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
         flexShrink: 0,
       }}
     >
-      {/* Línea dorada superior */}
+      {/* Linea dorada superior */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, transparent, #C5A55A 30%, #E8C97A 50%, #C5A55A 70%, transparent)" }} />
 
       {/* Brillo diagonal decorativo */}
       <div style={{ position: "absolute", top: -30, right: -20, width: 100, height: 100, background: "radial-gradient(circle, rgba(197,165,90,0.12) 0%, transparent 70%)", borderRadius: "50%" }} />
       <div style={{ position: "absolute", bottom: -20, left: -10, width: 80, height: 80, background: "radial-gradient(circle, rgba(197,165,90,0.07) 0%, transparent 70%)", borderRadius: "50%" }} />
 
-      {/* ── Fila superior: Logo + Título + Estado ── */}
+      {/* Silueta dorada de Nutriser como marca de agua */}
+      <img
+        src={SILUETA_URL}
+        alt=""
+        style={{
+          position: "absolute",
+          right: 8,
+          bottom: 22,
+          height: "80%",
+          width: "auto",
+          objectFit: "contain",
+          objectPosition: "right bottom",
+          opacity: 0.18,
+          pointerEvents: "none",
+          zIndex: 1,
+          filter: "sepia(1) saturate(2) hue-rotate(5deg) brightness(1.2)",
+        }}
+      />
+
+      {/* -- Fila superior: Logo + Titulo -- */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 12px 6px 12px", position: "relative", zIndex: 2 }}>
         <img src={LOGO_URL} alt="Nutriser" style={{ width: 28, height: 28, objectFit: "contain" }} />
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -64,10 +84,9 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
             aesthetic &amp; nutrition
           </div>
         </div>
-
       </div>
 
-      {/* ── Fila central: QR + Datos del titular ── */}
+      {/* -- Fila central: QR + Datos del titular -- */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 12px", position: "relative", zIndex: 2 }}>
         {/* QR */}
         <div style={{ background: "#FFFFFF", borderRadius: 6, padding: 5, flexShrink: 0 }}>
@@ -89,14 +108,10 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
           <div style={{ color: "rgba(255,255,255,0.55)", fontFamily: "monospace", fontSize: 9, letterSpacing: "0.15em", marginTop: 3 }}>
             {card.walletNumber}
           </div>
-          {/* Logo watermark */}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-            <img src={LOGO_URL} alt="" style={{ width: 36, height: "auto", objectFit: "contain", opacity: 0.18 }} />
-          </div>
         </div>
       </div>
 
-      {/* ── Banda dorada inferior ── */}
+      {/* -- Banda dorada inferior -- */}
       <div style={{
         position: "absolute",
         bottom: 0,
@@ -108,20 +123,21 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 12px",
+        zIndex: 3,
       }}>
         <span style={{ color: "rgba(0,0,0,0.6)", fontSize: 6.5, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>
           nutriserpv.com/monedero
         </span>
         <span style={{ color: "rgba(0,0,0,0.5)", fontSize: 6, letterSpacing: "0.08em" }}>
-          Válida solo en Nutriser PV
+          Valida solo en Nutriser PV
         </span>
       </div>
     </div>
   );
 }
 
-// ── Hoja A4 con 8 tarjetas para imprimir ──────────────────────────────────
-// A4: 210mm × 297mm — caben 2 columnas × 4 filas con margen de 10mm
+// -- Hoja A4 con 8 tarjetas para imprimir -----------------------------------
+// A4: 210mm x 297mm -- caben 2 columnas x 4 filas con margen de 10mm
 export function WalletCardPrintSheet({ cards }: { cards: WalletCardData[] }) {
   return (
     <div
@@ -151,7 +167,7 @@ export function WalletCardPrintSheet({ cards }: { cards: WalletCardData[] }) {
             pageBreakInside: "avoid",
           }}
         >
-          {/* Usamos mm directamente para impresión */}
+          {/* Usamos mm directamente para impresion */}
           <WalletCardMM card={card} />
         </div>
       ))}
@@ -159,7 +175,7 @@ export function WalletCardPrintSheet({ cards }: { cards: WalletCardData[] }) {
   );
 }
 
-// ── Versión en mm para impresión exacta ───────────────────────────────────
+// -- Version en mm para impresion exacta ------------------------------------
 function WalletCardMM({ card }: { card: WalletCardData }) {
   return (
     <div style={{
@@ -171,8 +187,27 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
       overflow: "hidden",
       boxSizing: "border-box",
     }}>
-      {/* Línea dorada superior */}
+      {/* Linea dorada superior */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "0.5mm", background: "linear-gradient(90deg, transparent, #C5A55A 30%, #E8C97A 50%, #C5A55A 70%, transparent)" }} />
+
+      {/* Silueta dorada de Nutriser como marca de agua */}
+      <img
+        src={SILUETA_URL}
+        alt=""
+        style={{
+          position: "absolute",
+          right: "1mm",
+          bottom: "5.5mm",
+          height: "78%",
+          width: "auto",
+          objectFit: "contain",
+          objectPosition: "right bottom",
+          opacity: 0.18,
+          pointerEvents: "none",
+          zIndex: 1,
+          filter: "sepia(1) saturate(2) hue-rotate(5deg) brightness(1.2)",
+        }}
+      />
 
       {/* Fila superior */}
       <div style={{ display: "flex", alignItems: "center", gap: "1.5mm", padding: "2.5mm 3mm 1.5mm 3mm", position: "relative", zIndex: 2 }}>
@@ -206,9 +241,6 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
           <div style={{ color: "rgba(255,255,255,0.55)", fontFamily: "monospace", fontSize: "2.2mm", letterSpacing: "0.15em", marginTop: "0.8mm" }}>
             {card.walletNumber}
           </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "2mm" }}>
-            <img src={LOGO_URL} alt="" style={{ width: "9mm", height: "auto", objectFit: "contain", opacity: 0.18 }} />
-          </div>
         </div>
       </div>
 
@@ -224,12 +256,13 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 3mm",
+        zIndex: 3,
       }}>
         <span style={{ color: "rgba(0,0,0,0.6)", fontSize: "1.6mm", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>
           nutriserpv.com/monedero
         </span>
         <span style={{ color: "rgba(0,0,0,0.5)", fontSize: "1.5mm", letterSpacing: "0.08em" }}>
-          Válida solo en Nutriser PV
+          Valida solo en Nutriser PV
         </span>
       </div>
     </div>

@@ -1971,3 +1971,17 @@
 - [x] Agregar procedimiento physicalCard.getMyStatus para verificar si el usuario ya tiene solicitud
 - [x] Deshabilitar botón "Solicitar tarjeta física" si ya existe solicitud pendiente/impresa/entregada
 - [x] Mostrar estado actual ("Solicitud enviada", "En preparación", "Tarjeta entregada")
+
+## Silueta en tarjeta del monedero
+- [ ] Subir silueta dorada de Nutriser al CDN
+- [ ] Agregar silueta como marca de agua en el espacio vacío negro de la tarjeta (WalletCard y WalletCardMM)
+
+## Sesion Actual - Silueta y Correcciones
+- [x] Corregir storageProxy.ts: error TS7053 en req.params[0] -> usar req.path.replace()
+- [x] Registrar storageProxy en server/_core/index.ts (import + registerStorageProxy antes de OAuth)
+- [x] Corregir WalletCardPrint.tsx: reescribir archivo limpio sin caracteres problematicos
+- [x] Agregar silueta dorada de Nutriser como marca de agua en WalletCard (pantalla)
+- [x] Agregar silueta dorada de Nutriser como marca de agua en WalletCardMM (impresion)
+- [x] Silueta: position absolute, right, bottom sobre banda dorada, opacity 0.18, filter dorado
+- [x] Proxy de storage verificado: /manus-storage/nutriser-silueta_f6738ee7.png devuelve 307 -> 200
+- [x] TypeScript: 0 errores en todo el proyecto

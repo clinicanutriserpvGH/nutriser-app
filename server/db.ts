@@ -1,4 +1,4 @@
-import { eq, desc, and, lt, sql, inArray } from "drizzle-orm";
+import { eq, desc, asc, and, lt, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, memberships, paymentProofs, InsertMembership, InsertPaymentProof, appointments, InsertAppointment, adminCredentials, InsertAdminCredential, coupons, InsertCoupon, membershipCoupons, InsertMembershipCoupon, promotions, InsertPromotion, giftPurchases, InsertGiftPurchase, ebooks, InsertEbook, ebookPurchases, InsertEbookPurchase, ebookDiscountCodes, servicePurchases, InsertServicePurchase, services, InsertService, topicSuggestions, InsertTopicSuggestion, topicVotes } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -1815,6 +1815,7 @@ export async function resetAllBehaviorEvents(): Promise<{ deleted: number }> {
 // ============================================================
 
 import { cashPendingPayments, type InsertCashPendingPayment, type CashPendingPayment } from '../drizzle/schema';
+import { splashAds, type SplashAd, type InsertSplashAd } from '../drizzle/schema';
 
 /** Crear un pago en efectivo pendiente */
 export async function createCashPendingPayment(data: InsertCashPendingPayment): Promise<CashPendingPayment> {
@@ -1876,4 +1877,68 @@ export async function getCashPaymentHistoryByWallet(walletId: number): Promise<C
     .from(cashPendingPayments)
     .where(eq(cashPendingPayments.walletId, walletId))
     .orderBy(cashPendingPayments.createdAt);
+}
+
+// ─── Splash Ads ────────────────────────────────────────────────────────────────
+
+/** Obtener todos los splash ads activos de un tipo (para mostrar al paciente) */
+export async function getActiveSplashAds(type: 'inicio' | 'tienda') {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(splashAds)
+    .where(and(eq(splashAds.type, type), eq(splashAds.isActive, true)))
+    .orderBy(asc(splashAds.sortOrder), desc(splashAds.createdAt));
+}
+
+/** Obtener todos los splash ads (admin) */
+export async function getAllSplashAds() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(splashAds)
+    .orderBy(asc(splashAds.type), asc(splashAds.sortOrder), desc(splashAds.createdAt));
+}
+
+/** Crear un nuevo splash ad */
+export async function createSplashAd(data: {
+  type: 'inicio' | 'tienda';
+  imageUrl: string;
+  title?: string | null;
+  subtitle?: string | null;
+  linkUrl?: string | null;
+  sortOrder?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const [result] = await db.insert(splashAds).values({
+    type: data.type,
+    imageUrl: data.imageUrl,
+    title: data.title ?? null,
+    subtitle: data.subtitle ?? null,
+    linkUrl: data.linkUrl ?? null,
+    isActive: true,
+    sortOrder: data.sortOrder ?? 0,
+  });
+  const [ad] = await db.select().from(splashAds).where(eq(splashAds.id, (result as any).insertId)).limit(1);
+  return ad;
+}
+
+/** Activar/desactivar un splash ad */
+export async function toggleSplashAd(id: number, isActive: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  await db.update(splashAds).set({ isActive }).where(eq(splashAds.id, id));
+}
+
+/** Eliminar un splash ad */
+export async function deleteSplashAd(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  await db.delete(splashAds).where(eq(splashAds.id, id));
+}
+
+/** Actualizar orden de splash ads */
+export async function updateSplashAdOrder(id: number, sortOrder: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  await db.update(splashAds).set({ sortOrder }).where(eq(splashAds.id, id));
 }

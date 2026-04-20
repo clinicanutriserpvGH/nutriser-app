@@ -192,6 +192,7 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
 
 export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAuthenticated = false }: PromoSplashProps) {
   const { data: promotions = [] } = trpc.promotions.list.useQuery();
+  const { data: tiendaAds = [] } = (trpc.splashAds.getActive as any).useQuery({ type: 'tienda' });
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
@@ -200,9 +201,12 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
   const { isMobile } = useDeviceType();
   const [, navigate] = useLocation();
 
-  // Monedero is always slide 0, promos start at index 1
-  const totalSlides = activePromos.length + 1;
-  const isMonederoSlide = currentIndex === 0;
+  // Slides: imágenes admin (tipo tienda) + monedero + promos activas
+  const adminTiendaAds = tiendaAds as Array<{ id: number; imageUrl: string; title: string }>;
+  const totalSlides = adminTiendaAds.length + 1 + activePromos.length;
+  const isAdminTiendaSlide = currentIndex < adminTiendaAds.length;
+  const isMonederoSlide = !isAdminTiendaSlide && currentIndex === adminTiendaAds.length;
+  const promoIndex = currentIndex - adminTiendaAds.length - 1;
 
   const shouldShow = totalSlides > 0 && !dismissed;
 
@@ -290,14 +294,28 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
             )}
           </div>
 
-          {/* Card — monedero first (index 0), then promos */}
-          {isMonederoSlide ? (
+          {/* Card — admin ads (tienda) first, then monedero, then promos */}
+          {isAdminTiendaSlide ? (
+            <div className="relative w-full flex-shrink-0">
+              <div
+                className="relative w-full overflow-hidden rounded-2xl"
+                style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
+              >
+                <img
+                  src={adminTiendaAds[currentIndex]?.imageUrl}
+                  alt={adminTiendaAds[currentIndex]?.title || 'Publicidad Nutriser'}
+                  className="w-full h-auto block"
+                  style={{ display: 'block' }}
+                />
+              </div>
+            </div>
+          ) : isMonederoSlide ? (
             <MonederoPromoCard onAction={handleMonederoAction} />
           ) : (
-            activePromos[currentIndex - 1] && (
+            activePromos[promoIndex] && (
               <PromoCard
-                promo={activePromos[currentIndex - 1]}
-                onAction={() => handleAction(activePromos[currentIndex - 1].id)}
+                promo={activePromos[promoIndex]}
+                onAction={() => handleAction(activePromos[promoIndex].id)}
               />
             )
           )}

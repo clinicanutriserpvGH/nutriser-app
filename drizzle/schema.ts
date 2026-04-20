@@ -847,3 +847,29 @@ export const cashPendingPayments = mysqlTable("cashPendingPayments", {
 });
 export type CashPendingPayment = typeof cashPendingPayments.$inferSelect;
 export type InsertCashPendingPayment = typeof cashPendingPayments.$inferInsert;
+
+
+/**
+ * Splash Ads - Aparador de publicidad dinámica
+ * El admin puede subir imágenes para los pop-ups de inicio y tienda.
+ * Especificaciones recomendadas:
+ *   - Formato: JPG o PNG (no GIF ni WebP)
+ *   - Tamaño máximo: 2 MB
+ *   - Resolución: 1080 × 1920 px (vertical/portrait, relación 9:16)
+ *   - Orientación: VERTICAL (como historia de Instagram)
+ *   - Texto en imagen: fuente grande, mínimo 40px, con buen contraste
+ */
+export const splashAds = mysqlTable("splashAds", {
+  id: int("id").autoincrement().primaryKey(),
+  type: mysqlEnum("type", ["inicio", "tienda"]).notNull().default("inicio"),
+  imageUrl: text("imageUrl").notNull(),          // URL en S3
+  title: varchar("title", { length: 255 }),      // Título opcional (para referencia interna)
+  subtitle: varchar("subtitle", { length: 500 }),
+  linkUrl: varchar("linkUrl", { length: 500 }),  // URL a donde redirige al tocar (opcional)
+  isActive: boolean("isActive").notNull().default(true),
+  sortOrder: int("sortOrder").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SplashAd = typeof splashAds.$inferSelect;
+export type InsertSplashAd = typeof splashAds.$inferInsert;

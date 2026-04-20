@@ -14,6 +14,7 @@ import { getAllCourses, getPublishedCourses, getCourseById, createCourse, update
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet } from './db';
+import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -3203,6 +3204,73 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await cancelCashPayment(input.id);
+        return { success: true };
+      }),
+  }),
+
+  // ─── Splash Ads ────────────────────────────────────────────────────────────
+  splashAds: router({
+    // Público: obtener splash ads activos por tipo
+    getActive: publicProcedure
+      .input(z.object({ type: z.enum(['inicio', 'tienda']) }))
+      .query(async ({ input }) => {
+        return await getActiveSplashAds(input.type);
+      }),
+
+    // Admin: obtener todos los splash ads
+    getAll: publicProcedure
+      .query(async () => {
+        return await getAllSplashAds();
+      }),
+
+    // Admin: crear splash ad (subir imagen a S3 primero, luego registrar)
+    create: publicProcedure
+      .input(z.object({
+        type: z.enum(['inicio', 'tienda']),
+        imageBase64: z.string(), // base64 de la imagen
+        mimeType: z.string().default('image/jpeg'),
+        title: z.string().optional(),
+        subtitle: z.string().optional(),
+        linkUrl: z.string().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Subir imagen a S3
+        const buffer = Buffer.from(input.imageBase64, 'base64');
+        const fileName = `splash-ads/${input.type}-${Date.now()}.jpg`;
+        const { url } = await storagePut(fileName, buffer, input.mimeType);
+        const ad = await createSplashAd({
+          type: input.type,
+          imageUrl: url,
+          title: input.title ?? null,
+          subtitle: input.subtitle ?? null,
+          linkUrl: input.linkUrl ?? null,
+          sortOrder: input.sortOrder ?? 0,
+        });
+        return { success: true, ad };
+      }),
+
+    // Admin: activar/desactivar
+    toggle: publicProcedure
+      .input(z.object({ id: z.number(), isActive: z.boolean() }))
+      .mutation(async ({ input }) => {
+        await toggleSplashAd(input.id, input.isActive);
+        return { success: true };
+      }),
+
+    // Admin: eliminar
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteSplashAd(input.id);
+        return { success: true };
+      }),
+
+    // Admin: actualizar orden
+    updateOrder: publicProcedure
+      .input(z.object({ id: z.number(), sortOrder: z.number() }))
+      .mutation(async ({ input }) => {
+        await updateSplashAdOrder(input.id, input.sortOrder);
         return { success: true };
       }),
   }),

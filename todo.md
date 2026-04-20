@@ -1897,3 +1897,10 @@
 - [x] Sección de pagos pendientes en AdminQRScanner.tsx con botones Confirmar y Cancelar
 - [x] Al confirmar pago en efectivo: cashback acreditado automáticamente al monedero
 - [x] Eliminar couponSubscribers de schema, db.ts, routers.ts, AdminDashboard, AdminPatientsTab, PromotionsSection, SplashSelector
+
+## Splash Ads - Aparador de Publicidad Dinámica
+- [ ] Tabla splashAds en DB (tipo: inicio/tienda, imagen URL, activo, orden, título opcional)
+- [ ] Backend: CRUD de splash ads en db.ts y routers.ts
+- [ ] Panel admin: sección para subir/gestionar imágenes de splash con preview
+- [ ] SplashSelector: cargar imágenes dinámicas desde DB (tipo: inicio)
+- [ ] ShopPromoSplash: cargar imágenes dinámicas desde DB (tipo: tienda)

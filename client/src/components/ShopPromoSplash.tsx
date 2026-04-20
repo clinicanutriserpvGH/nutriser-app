@@ -160,15 +160,21 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
 
 export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated = false }: ShopPromoSplashProps) {
   const { data: promotions = [] } = trpc.promotions.list.useQuery();
+  const { data: splashAds = [] } = (trpc.splashAds.getActive as any).useQuery({ type: 'inicio' });
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAuthGuard, setShowAuthGuard] = useState(false);
   const { isMobile } = useDeviceType();
   const [, navigate] = useLocation();
 
-  // Slide 0 = ShopCard, slides 1+ = active promos
-  const totalSlides = activePromos.length + 1;
-  const isShopSlide = currentIndex === 0;
+  // Slides: imágenes del admin (tipo inicio) + cupones activos
+  // Si no hay imágenes del admin, se usa la ShopCard fija
+  const adminAds = splashAds as Array<{ id: number; imageUrl: string; title: string }>;
+  const hasAdminAds = adminAds.length > 0;
+  const totalSlides = (hasAdminAds ? adminAds.length : 1) + activePromos.length;
+  const isAdminAdSlide = hasAdminAds && currentIndex < adminAds.length;
+  const isShopSlide = !hasAdminAds && currentIndex === 0;
+  const promoIndex = hasAdminAds ? currentIndex - adminAds.length : currentIndex - 1;
 
   const handleClose = useCallback(() => {
     onClose();
@@ -216,13 +222,13 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
           {/* Header */}
           <div className="text-center mb-3">
             <div className="inline-flex items-center gap-2 bg-[#C5A55A]/20 backdrop-blur-sm rounded-full px-4 py-2 mb-1">
-              {isShopSlide ? (
+              {(isShopSlide || isAdminAdSlide) ? (
                 <ShoppingBag className="w-4 h-4 text-[#C5A55A]" />
               ) : (
                 <Gift className="w-4 h-4 text-[#C5A55A]" />
               )}
               <span className="text-[#C5A55A] text-sm font-bold tracking-wide">
-                {isShopSlide ? "TIENDA NUTRISER" : "OFERTAS EXCLUSIVAS"}
+                {(isShopSlide || isAdminAdSlide) ? "NUTRISER" : "OFERTAS EXCLUSIVAS"}
               </span>
             </div>
             {totalSlides > 1 && (
@@ -231,13 +237,34 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
           </div>
 
           {/* Slide content */}
-          {isShopSlide ? (
+          {isAdminAdSlide ? (
+            // Imagen publicitaria subida por el admin
+            <div className="relative w-full flex-shrink-0">
+              <div
+                className="relative w-full overflow-hidden rounded-2xl"
+                style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
+              >
+                <button
+                  onClick={handleGoToShop}
+                  className="relative w-full block transition-opacity hover:opacity-95 active:opacity-80"
+                  style={{ padding: 0 }}
+                >
+                  <img
+                    src={adminAds[currentIndex]?.imageUrl}
+                    alt={adminAds[currentIndex]?.title || 'Publicidad Nutriser'}
+                    className="w-full h-auto block"
+                    style={{ display: 'block' }}
+                  />
+                </button>
+              </div>
+            </div>
+          ) : isShopSlide ? (
             <ShopCard onAction={handleGoToShop} />
           ) : (
-            activePromos[currentIndex - 1] && (
+            activePromos[promoIndex] && (
               <PromoCard
-                promo={activePromos[currentIndex - 1]}
-                onAction={() => handlePromoAction(activePromos[currentIndex - 1].id)}
+                promo={activePromos[promoIndex]}
+                onAction={() => handlePromoAction(activePromos[promoIndex].id)}
               />
             )
           )}

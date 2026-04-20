@@ -8,6 +8,7 @@
  *  1. <WalletCard /> -- Vista previa en pantalla (escala adaptable)
  *  2. <WalletCardPrintSheet cards={[...]} /> -- Hoja A4 con 8 tarjetas para imprimir
  */
+import React from "react";
 import { QRCodeSVG } from "qrcode.react";
 
 const LOGO_URL =
@@ -45,7 +46,9 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
         fontFamily: "'Helvetica Neue', Arial, sans-serif",
         boxShadow: "0 4px 24px rgba(0,0,0,0.35)",
         flexShrink: 0,
-      }}
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
+      } as React.CSSProperties}
     >
       {/* Linea dorada superior */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, transparent, #C5A55A 30%, #E8C97A 50%, #C5A55A 70%, transparent)" }} />
@@ -186,7 +189,9 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
       fontFamily: "'Helvetica Neue', Arial, sans-serif",
       overflow: "hidden",
       boxSizing: "border-box",
-    }}>
+      WebkitPrintColorAdjust: "exact",
+      printColorAdjust: "exact",
+    } as React.CSSProperties}>
       {/* Linea dorada superior */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "0.5mm", background: "linear-gradient(90deg, transparent, #C5A55A 30%, #E8C97A 50%, #C5A55A 70%, transparent)" }} />
 

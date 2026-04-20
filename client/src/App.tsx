@@ -129,7 +129,13 @@ function AppContent() {
       return "site";
     }
 
-      // Móvil/tablet → Splash 0
+    // Si el usuario ya eligió ir al sitio web en esta sesión, no volver al splash
+    const splashSeen = sessionStorage.getItem("nutriser_splash_seen");
+    if (splashSeen) {
+      return "site";
+    }
+
+    // Móvil/tablet → Splash 0
     return "splash0";
   });
 
@@ -184,8 +190,8 @@ function AppContent() {
           {/* Splash 0: pantalla de entrada — Shop + Academy + Portal de Salud */}
           {splashState === "splash0" && (
             <Splash0Entry
-              onEnterNutriserWeb={() => setSplashState('site')}
-              onGoToWebsite={() => setSplashState('site')}
+              onEnterNutriserWeb={() => { sessionStorage.setItem('nutriser_splash_seen', '1'); setSplashState('site'); }}
+              onGoToWebsite={() => { sessionStorage.setItem('nutriser_splash_seen', '1'); setSplashState('site'); }}
               onNavigate={handleNavigateFromSplash}
             />
           )}

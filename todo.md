@@ -1926,3 +1926,9 @@
 - [x] Fix: agregar touchAction: manipulation a los 3 botones de tarjeta del Splash0Entry
 - [x] Fix: reducir delay de navegación de 400ms a 200ms en handleNavigate
 - [x] Fix: eliminar overflow-hidden del contenedor principal del Splash0Entry
+
+## Corrección Gesto Secreto AESTHETIC & NUTRITION
+- [x] Bug: el enlace era un <a href> que abría nueva pestaña en lugar de entrar al sitio web dentro de la app
+- [x] Fix: cambiado a <button> que llama a onGoToWebsite() para cambiar splashState a "site"
+- [x] Fix: guardar nutriser_splash_seen en sessionStorage al entrar al sitio para no volver al splash al recargar
+- [x] Fix: leer nutriser_splash_seen en la inicialización de splashState para ir directo al sitio si ya eligió

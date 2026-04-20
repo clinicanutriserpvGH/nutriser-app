@@ -4,7 +4,7 @@
  * Logo grande DENTRO de la tarjeta, código de barras/QR, saldo
  * Identidad visual: dorado (#C5A55A), crema (#FAF7F2), negro (#1A1A1A)
  */
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Home, Sparkles, BookOpen, User, ChevronLeft, Download } from "lucide-react";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
@@ -123,6 +123,17 @@ export default function WalletPage() {
   const { patient, isLoggedIn } = usePatientAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history">("card");
+  const cardContainerRef = useRef<HTMLDivElement>(null);
+  const [cardScale, setCardScale] = useState(0.88);
+  useEffect(() => {
+    const el = cardContainerRef.current;
+    if (!el) return;
+    const update = () => setCardScale(el.clientWidth / 323);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const purchasesQuery = trpc.patients.getMyPurchases.useQuery(
     { email: patient?.email ?? 'x@x.com' },
@@ -233,8 +244,8 @@ export default function WalletPage() {
       {/* ── Tarjeta CR-80 (formato tarjeta de crédito 85.5×54mm) ── */}
       <div className="px-4 pt-4 pb-2">
         <div className="max-w-md mx-auto">
-          {/* Tarjeta CR-80 escalada para pantalla móvil */}
-          <div style={{ width: 323 * 0.88, height: 204 * 0.88, position: "relative" }}>
+          {/* Tarjeta CR-80 — escala dinámica según ancho del contenedor */}
+          <div ref={cardContainerRef} style={{ width: "100%", height: 204 * cardScale, position: "relative", overflow: "hidden", borderRadius: 10 }}>
             <WalletCardCR80
               card={{
                 patientName: patient?.name || "Usuario",
@@ -242,7 +253,7 @@ export default function WalletPage() {
                 qrUrl: qrUrl || "https://nutriserpv.com/monedero",
                 isActive: wallet?.isActive ?? true,
               }}
-              scale={0.88}
+              scale={cardScale}
             />
           </div>
 

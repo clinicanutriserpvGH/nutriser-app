@@ -169,20 +169,26 @@ function drawCard(
 
   // ── Línea dorada superior ─────────────────────────────────────────────────
   doc.rect(x, y, w, 1.5 * s).fill(GOLD);
-
-  // ── Silueta como marca de agua ────────────────────────────────────────────
+  // ── Silueta como marca de agua ──────────────────────────────────────────────
   if (siluetaBuf) {
-    const silH = h * 0.72;
-    const silW = silH * 0.55; // proporción aproximada de la silueta
+    // La imagen es 1024x1024 cuadrada, pero la figura ocupa ~35% del ancho
+    // y ~85% del alto del canvas. Para que no se estire, usamos fit: mantener
+    // proporciones 1:1 (la imagen es cuadrada) y definir solo la altura.
+    // La silueta debe ocupar ~80% de la altura de la tarjeta (sin la banda).
+    const bandH = 14 * s;
+    const availH = h - bandH - 4 * s; // altura disponible sin la banda dorada
+    const silSize = availH * 0.90; // cuadrado: misma medida en ancho y alto
+    const silX = x + w - silSize - 4 * s;
+    const silY = y + 2 * s;
     doc.save();
-    doc.opacity(0.18);
-    doc.image(siluetaBuf, x + w - silW - 6 * s, y + h * 0.05, {
-      width: silW,
-      height: silH,
+    doc.opacity(0.20);
+    // Pasar solo width=silSize y height=silSize para mantener 1:1
+    doc.image(siluetaBuf, silX, silY, {
+      width: silSize,
+      height: silSize,
     });
     doc.restore();
   }
-
   // ── Logo Nutriser ─────────────────────────────────────────────────────────
   const logoSize = 20 * s;
   const logoX = x + 10 * s;

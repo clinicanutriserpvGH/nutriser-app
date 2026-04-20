@@ -3280,6 +3280,20 @@ export const appRouter = router({
           .where(eq(physicalCardRequests.id, input.id));
         return { success: true };
       }),
+
+    getMyStatus: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { hasRequest: false, status: null };
+        const { physicalCardRequests } = await import('../drizzle/schema');
+        const rows = await db.select().from(physicalCardRequests)
+          .where(eq(physicalCardRequests.walletId, input.walletId))
+          .orderBy(desc(physicalCardRequests.requestedAt))
+          .limit(1);
+        if (rows.length === 0) return { hasRequest: false, status: null };
+        return { hasRequest: true, status: rows[0].status, requestedAt: rows[0].requestedAt };
+      }),
   }),
 
   splashAds: router({

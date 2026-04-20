@@ -164,6 +164,19 @@ export default function WalletPage() {
 
   const qrUrl = wallet ? `https://nutriserpv.com/c/${wallet.walletNumber}` : "";
 
+  const physicalCardStatusQuery = trpc.physicalCard.getMyStatus.useQuery(
+    { walletId: wallet?.id || 0 },
+    { enabled: !!wallet?.id }
+  );
+  const hasExistingRequest = physicalCardStatusQuery.data?.hasRequest === true;
+  const physicalCardStatusLabel = (() => {
+    const s = physicalCardStatusQuery.data?.status;
+    if (s === 'pending') return 'Solicitud enviada';
+    if (s === 'printed') return 'En preparación';
+    if (s === 'delivered') return 'Tarjeta entregada';
+    return null;
+  })();
+
   const copyWalletNumber = () => {
     if (wallet) {
       navigator.clipboard.writeText(wallet.walletNumber);
@@ -247,14 +260,21 @@ export default function WalletPage() {
                 >
                   Ver Estado de Cuenta
                 </button>
-                <button
-                  onClick={() => setShowPhysicalCardDialog(true)}
-                  className="flex items-center gap-1 text-[#C5A55A] text-[10px] hover:text-[#b8963f] transition-colors font-semibold"
-                  title="Solicitar tarjeta física"
-                >
-                  <Download className="w-3 h-3" />
-                  Solicitar tarjeta física
-                </button>
+                {hasExistingRequest ? (
+                  <span className="flex items-center gap-1 text-[10px] font-semibold" style={{ color: physicalCardStatusQuery.data?.status === 'delivered' ? '#34d399' : '#C5A55A' }}>
+                    <Download className="w-3 h-3" />
+                    {physicalCardStatusLabel}
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setShowPhysicalCardDialog(true)}
+                    className="flex items-center gap-1 text-[#C5A55A] text-[10px] hover:text-[#b8963f] transition-colors font-semibold"
+                    title="Solicitar tarjeta física"
+                  >
+                    <Download className="w-3 h-3" />
+                    Solicitar tarjeta física
+                  </button>
+                )}
               </div>
             </div>
             {/* Fecha de caducidad bimestral */}

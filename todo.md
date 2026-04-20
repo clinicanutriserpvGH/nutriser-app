@@ -1966,3 +1966,8 @@
 - [x] Sub-tab "Solicitudes" en AdminWalletTab con lista y botón imprimir
 - [x] Quitar badge ACTIVA/INACTIVA de la tarjeta
 - [x] Corregir URL a nutriserpv.com/monedero en la banda dorada inferior
+
+## Fix: Solicitud tarjeta física - bloquear si ya existe
+- [x] Agregar procedimiento physicalCard.getMyStatus para verificar si el usuario ya tiene solicitud
+- [x] Deshabilitar botón "Solicitar tarjeta física" si ya existe solicitud pendiente/impresa/entregada
+- [x] Mostrar estado actual ("Solicitud enviada", "En preparación", "Tarjeta entregada")

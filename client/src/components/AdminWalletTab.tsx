@@ -710,7 +710,7 @@ function PrintCardsTab({
   const previewScale = 0.72;
 
   // Impresión via html2canvas: convierte la tarjeta a imagen PNG y la imprime
-  // Convierte la tarjeta a PNG y la descarga directamente (funciona en iOS/Safari sin popups)
+  // Genera la imagen de la tarjeta usando Canvas nativo (sin CORS, funciona en iOS/Safari)
   const handlePrint = useCallback(async () => {
     if (selectedWallets.length === 0) {
       toast.error("Selecciona al menos una tarjeta para imprimir");
@@ -718,54 +718,39 @@ function PrintCardsTab({
     }
     setIsPrinting(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const container = printContainerRef.current;
-      if (!container) {
-        toast.error("Error al preparar la tarjeta. Intenta de nuevo.");
-        return;
+      const { drawWalletCardToCanvas, drawWalletSheetToCanvas } = await import("./walletCardCanvas");
+
+      const cards = selectedWallets.map((w: any) => ({
+        patientName: w.patientName || "Sin nombre",
+        walletNumber: w.walletNumber || "",
+        qrUrl: `https://nutriserpv.com/c/${w.walletNumber || ""}`,
+      }));
+
+      let resultCanvas: HTMLCanvasElement;
+      if (printMode === "sheet" && cards.length > 1) {
+        resultCanvas = await drawWalletSheetToCanvas(cards);
+      } else if (printMode === "sheet" && cards.length === 1) {
+        resultCanvas = await drawWalletCardToCanvas(cards[0], 3);
+      } else {
+        // Individual: una tarjeta por descarga (primera seleccionada)
+        resultCanvas = await drawWalletCardToCanvas(cards[0], 3);
       }
 
-      // Mostrar temporalmente el contenedor fuera de pantalla para capturarlo
-      container.style.display = "block";
-      container.style.position = "fixed";
-      container.style.top = "-9999px";
-      container.style.left = "-9999px";
-      container.style.zIndex = "-1";
-      container.style.background = "white";
-
-      // Esperar a que el DOM se actualice y las imágenes carguen
-      await new Promise(r => setTimeout(r, 1000));
-
-      const canvas = await html2canvas(container, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-      });
-
-      // Ocultar el contenedor de nuevo
-      container.style.display = "none";
-      container.style.position = "";
-      container.style.top = "";
-      container.style.left = "";
-      container.style.zIndex = "";
-
-      // Descargar la imagen PNG directamente (funciona en iOS sin popups)
-      const imgData = canvas.toDataURL("image/png");
+      // Descargar PNG directamente (funciona en iOS sin popups)
+      const imgData = resultCanvas.toDataURL("image/png");
       const link = document.createElement("a");
-      const fileName = selectedWallets.length === 1
-        ? `tarjeta-${selectedWallets[0].walletNumber || "nutriser"}.png`
-        : `tarjetas-nutriser-${selectedWallets.length}.png`;
+      const fileName = cards.length === 1
+        ? `tarjeta-${cards[0].walletNumber || "nutriser"}.png`
+        : `tarjetas-nutriser-${cards.length}.png`;
       link.href = imgData;
       link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      toast.success(`Imagen descargada: ${fileName}. Ábrela y usa "Imprimir" desde tu galería o visor de fotos.`);
+      toast.success(`✅ Imagen descargada. Ábrela y usa "Imprimir" desde tu galería o visor de fotos.`);
     } catch (err) {
-      console.error("[Print] html2canvas error:", err);
+      console.error("[Print] Canvas error:", err);
       toast.error("Error al generar la imagen. Intenta de nuevo.");
     } finally {
       setIsPrinting(false);

@@ -414,6 +414,33 @@ async function startServer() {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   }
   
+  // ─── Wallet Card PDF ─────────────────────────────────────────────────────
+  // GET /api/wallet/card-pdf?wallets=[{patientName,walletNumber,qrUrl},...]
+  // Genera un PDF con la(s) tarjeta(s) del monedero y lo sirve directamente.
+  // No requiere autenticación para simplificar el flujo en iOS.
+  app.get("/api/wallet/card-pdf", async (req, res) => {
+    try {
+      const raw = req.query.wallets as string;
+      if (!raw) return res.status(400).json({ error: "Missing wallets param" });
+      const cards = JSON.parse(decodeURIComponent(raw));
+      if (!Array.isArray(cards) || cards.length === 0) {
+        return res.status(400).json({ error: "Invalid wallets param" });
+      }
+      const { generateWalletCardPdf } = await import("../walletCardPdf");
+      const pdfBuffer = await generateWalletCardPdf(cards);
+      const filename = cards.length === 1
+        ? `tarjeta-${cards[0].walletNumber || "nutriser"}.pdf`
+        : `tarjetas-nutriser-${cards.length}.pdf`;
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
+      res.setHeader("Cache-Control", "no-cache");
+      res.send(pdfBuffer);
+    } catch (err) {
+      console.error("[WalletPDF] Error:", err);
+      res.status(500).json({ error: "Error generating PDF" });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

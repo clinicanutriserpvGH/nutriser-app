@@ -709,8 +709,8 @@ function PrintCardsTab({
   // Escala para preview en pantalla (la tarjeta CR-80 mide 323×204px a 96dpi)
   const previewScale = 0.72;
 
-  // Impresión via html2canvas: convierte la tarjeta a imagen PNG y la imprime
-  // Genera la imagen de la tarjeta usando Canvas nativo (sin CORS, funciona en iOS/Safari)
+  // Genera el PDF de la tarjeta en el servidor y lo abre en una nueva pestaña.
+  // El servidor usa PDFKit + qrcode (sin CORS), funciona en iOS/Safari.
   const handlePrint = useCallback(async () => {
     if (selectedWallets.length === 0) {
       toast.error("Selecciona al menos una tarjeta para imprimir");
@@ -718,44 +718,25 @@ function PrintCardsTab({
     }
     setIsPrinting(true);
     try {
-      const { drawWalletCardToCanvas, drawWalletSheetToCanvas } = await import("./walletCardCanvas");
-
       const cards = selectedWallets.map((w: any) => ({
         patientName: w.patientName || "Sin nombre",
         walletNumber: w.walletNumber || "",
         qrUrl: `https://nutriserpv.com/c/${w.walletNumber || ""}`,
       }));
 
-      let resultCanvas: HTMLCanvasElement;
-      if (printMode === "sheet" && cards.length > 1) {
-        resultCanvas = await drawWalletSheetToCanvas(cards);
-      } else if (printMode === "sheet" && cards.length === 1) {
-        resultCanvas = await drawWalletCardToCanvas(cards[0], 3);
-      } else {
-        // Individual: una tarjeta por descarga (primera seleccionada)
-        resultCanvas = await drawWalletCardToCanvas(cards[0], 3);
-      }
+      const params = encodeURIComponent(JSON.stringify(cards));
+      const pdfUrl = `/api/wallet/card-pdf?wallets=${params}`;
 
-      // Descargar PNG directamente (funciona en iOS sin popups)
-      const imgData = resultCanvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      const fileName = cards.length === 1
-        ? `tarjeta-${cards[0].walletNumber || "nutriser"}.png`
-        : `tarjetas-nutriser-${cards.length}.png`;
-      link.href = imgData;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast.success(`✅ Imagen descargada. Ábrela y usa "Imprimir" desde tu galería o visor de fotos.`);
+      // Abrir el PDF directamente en el navegador (iOS lo muestra en visor nativo)
+      window.open(pdfUrl, "_blank");
+      toast.success(`✅ PDF generado. Usa el botón de compartir → Imprimir en el visor.`);
     } catch (err) {
-      console.error("[Print] Canvas error:", err);
-      toast.error("Error al generar la imagen. Intenta de nuevo.");
+      console.error("[Print] PDF error:", err);
+      toast.error("Error al generar el PDF. Intenta de nuevo.");
     } finally {
       setIsPrinting(false);
     }
-  }, [selectedWallets, printMode]);
+  }, [selectedWallets]);
 
   return (
     <div className="space-y-4">
@@ -765,11 +746,9 @@ function PrintCardsTab({
           <Printer className="w-5 h-5 text-[#C5A55A] flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-bold text-amber-900">Imprimir Tarjetas Físicas CR-80</p>
-            <p className="text-xs text-amber-700 mt-1">
-              Selecciona los pacientes y haz clic en <b>"Descargar imagen"</b>. Se guardará un PNG
-              en tu dispositivo — ábrelo y usa <b>"Imprimir"</b> desde tu galería o visor de fotos.
-              Usa papel PVC o cartulina gruesa (300 g/m²) para mejor resultado.
-            </p>
+                 <p className="text-sm text-amber-800 mt-1">
+            Selecciona los pacientes y haz clic en <strong>"Generar PDF"</strong>. El PDF se abrirá en el visor de tu dispositivo — usa el botón de compartir → <strong>"Imprimir"</strong>. Usa papel PVC o cartulina gruesa (300 g/m²) para mejor resultado.
+          </p>
             <p className="text-xs text-amber-600 mt-1">
               💡 <b>Hoja A4:</b> caben 8 tarjetas por hoja. <b>Individual:</b> una tarjeta por página.
             </p>
@@ -815,9 +794,9 @@ function PrintCardsTab({
           className="bg-[#C5A55A] hover:bg-[#b8944d] text-white font-bold"
         >
           {isPrinting ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generando imagen...</>
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generando PDF...</>
           ) : (
-            <><Printer className="w-4 h-4 mr-2" />Descargar imagen {selectedCards.size > 0 ? `(${selectedCards.size})` : ""}</>
+            <><Printer className="w-4 h-4 mr-2" />Generar PDF {selectedCards.size > 0 ? `(${selectedCards.size})` : ""}</>
           )}
         </Button>
       </div>

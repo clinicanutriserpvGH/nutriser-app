@@ -202,11 +202,14 @@ function drawCard(
     .font("Helvetica")
     .text("aesthetic & nutrition", titleX, y + 17 * s, { width: titleMaxW, lineBreak: false });
 
-  // ── QR Code ────────────────────────────────────────────────────────────────
+   // ── QR Code ────────────────────────────────────────────────────────────
   const qrPad   = 3 * s;
   const qrSize  = 52 * s;
   const qrX     = x + 8 * s;
-  const qrY     = y + 32 * s;
+  // Posicionar el QR en la mitad inferior: centrado entre el header (y+28*s) y la banda inferior
+  const contentTop = y + 28 * s;   // justo debajo del header
+  const contentBot = bandY - 4 * s; // justo encima de la banda dorada
+  const qrY = contentTop + (contentBot - contentTop - qrSize) / 2;
 
   // Fondo blanco del QR con borde redondeado
   doc.roundedRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad * 2, qrSize + qrPad * 2, 3 * s)

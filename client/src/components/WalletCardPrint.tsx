@@ -236,22 +236,22 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
       />
 
       {/* Contenido izquierdo: 62% del ancho */}
-      <div style={{ position: "relative", zIndex: 2, width: "62%", height: "100%", display: "flex", flexDirection: "column" }}>
+      <div style={{ position: "relative", zIndex: 2, width: "62%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         {/* Fila superior */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1.5mm", padding: "2.5mm 2.5mm 1mm 2.5mm" }}>
-          <img src={LOGO_URL} alt="Nutriser" style={{ width: "6.5mm", height: "6.5mm", objectFit: "contain" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "1.5mm", padding: "2mm 2.5mm 1mm 2.5mm" }}>
+          <img src={LOGO_URL} alt="Nutriser" style={{ width: "5.5mm", height: "5.5mm", objectFit: "contain" }} />
           <div style={{ flex: 1 }}>
-            <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: "2.1mm", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+            <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: "1.9mm", letterSpacing: "0.18em", textTransform: "uppercase" }}>
               Monedero Nutriser
             </div>
-            <div style={{ color: "rgba(255,255,255,0.45)", fontSize: "1.6mm", letterSpacing: "0.12em" }}>
+            <div style={{ color: "rgba(255,255,255,0.45)", fontSize: "1.5mm", letterSpacing: "0.12em" }}>
               aesthetic &amp; nutrition
             </div>
           </div>
         </div>
 
-        {/* Fila central: QR + Placa dorada */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1.8mm", padding: "1mm 2.5mm", flex: 1 }}>
+        {/* Fila central: QR + Placa dorada — centrada verticalmente */}
+        <div style={{ display: "flex", alignItems: "center", gap: "1.8mm", padding: "0 2.5mm 7mm 2.5mm" }}>
           <div style={{ background: "#FFFFFF", borderRadius: "1.2mm", padding: "0.8mm", flexShrink: 0 }}>
             <QRCodeSVG
               value={card.qrUrl || "https://nutriserpv.com/monedero"}

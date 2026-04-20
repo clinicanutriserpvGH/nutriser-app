@@ -68,10 +68,10 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
           width: "auto",
           objectFit: "contain",
           objectPosition: "center",
-          opacity: 0.85,
+          opacity: 0.92,
           pointerEvents: "none",
           zIndex: 1,
-          filter: "sepia(1) saturate(4) hue-rotate(5deg) brightness(1.5)",
+          filter: "sepia(1) saturate(2.8) hue-rotate(3deg) brightness(1.05)",
         }}
       />
 
@@ -228,10 +228,10 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
           width: "auto",
           objectFit: "contain",
           objectPosition: "center",
-          opacity: 0.85,
+          opacity: 0.92,
           pointerEvents: "none",
           zIndex: 1,
-          filter: "sepia(1) saturate(4) hue-rotate(5deg) brightness(1.5)",
+          filter: "sepia(1) saturate(2.8) hue-rotate(3deg) brightness(1.05)",
         }}
       />
 

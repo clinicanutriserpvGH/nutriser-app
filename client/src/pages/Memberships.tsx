@@ -2086,10 +2086,10 @@ onClick={() => {
                     width: "auto",
                     objectFit: "contain",
                     objectPosition: "right center",
-                    opacity: 0.82,
+                    opacity: 0.92,
                     pointerEvents: "none",
                     zIndex: 1,
-                    filter: "sepia(1) saturate(2.2) hue-rotate(5deg) brightness(1.15)",
+                    filter: "sepia(1) saturate(2.8) hue-rotate(3deg) brightness(1.05)",
                   }}
                 />
 

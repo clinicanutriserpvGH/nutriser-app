@@ -14,6 +14,14 @@ import { trpc } from "@/lib/trpc";
 import { X, Gift, Clock, ChevronLeft, ChevronRight, Flame, Wallet, Star, Percent, Sparkles } from "lucide-react";
 import NutriserAuthModal from "@/components/NutriserAuthModal";
 import { useDeviceType } from "@/hooks/useDeviceType";
+import { WalletCard } from "@/components/WalletCardPrint";
+
+const DEMO_CARD = {
+  patientName: "SOFÍA MARTÍNEZ",
+  walletNumber: "NUT-XXXX-XXXX",
+  qrUrl: "https://nutriserpv.com/monedero",
+  isActive: true,
+};
 
 const WALLET_CARD_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-wallet-card-promo_af671ddf.png";
@@ -142,13 +150,9 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#C5A55A]/60 to-transparent" />
 
         <div className="relative z-10 flex flex-col items-center px-5 py-6">
-          {/* Credit card image — compact */}
-          <div className="w-full max-w-[240px] md:max-w-[300px] lg:max-w-[360px] mb-4 md:mb-6">
-            <img
-              src={WALLET_CARD_IMG}
-              alt="Monedero Nutriser"
-              className="w-full h-auto rounded-lg shadow-[0_6px_24px_rgba(197,165,90,0.25)]"
-            />
+          {/* Tarjeta real del Monedero — con nombre ficticio */}
+          <div className="mb-4 md:mb-6" style={{ transform: "scale(0.78)", transformOrigin: "top center", height: 160 }}>
+            <WalletCard card={DEMO_CARD} />
           </div>
 
           {/* Title */}

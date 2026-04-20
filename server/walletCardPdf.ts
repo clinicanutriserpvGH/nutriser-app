@@ -3,10 +3,14 @@
  *
  * Genera un PDF con la tarjeta del Monedero Nutriser usando PDFKit.
  * Formato CR-80: 85.5mm x 54mm (tarjeta de crédito estándar).
- * El PDF se genera en el servidor y se sirve directamente al cliente,
- * sin depender de Canvas, html2canvas ni imágenes externas con CORS.
  *
- * El QR se genera con la librería `qrcode` directamente en el servidor.
+ * Diseño de referencia:
+ * - Fondo negro brillante con esquinas redondeadas
+ * - Logo Nutriser + "MONEDERO NUTRISER / aesthetic & nutrition" arriba izquierda
+ * - Silueta dorada grande a la derecha (marca de agua visible)
+ * - QR blanco a la izquierda centro
+ * - Placa dorada (rectángulo) con nombre del paciente y número de monedero
+ * - Banda dorada inferior con URL y "Valida solo en Nutriser PV"
  */
 
 import PDFDocument from "pdfkit";
@@ -20,13 +24,12 @@ const CARD_W = 85.5 * MM; // ~242pt
 const CARD_H = 54 * MM;   // ~153pt
 
 // Colores
-const GOLD = "#C5A55A";
-const GOLD_LIGHT = "#E8C97A";
-const GOLD_DARK = "#8B6914";
-const BLACK = "#1A1A1A";
-const DARK_WARM = "#2a2010";
-const WHITE = "#FFFFFF";
-const WHITE_DIM = "rgba(255,255,255,0.55)";
+const GOLD        = "#C5A55A";
+const GOLD_LIGHT  = "#E8C97A";
+const GOLD_DARK   = "#8B6914";
+const BLACK       = "#1A1A1A";
+const WHITE       = "#FFFFFF";
+const GRAY_DIM    = "#888888";
 
 // Descarga una imagen remota como Buffer
 function fetchImage(url: string): Promise<Buffer> {
@@ -34,7 +37,6 @@ function fetchImage(url: string): Promise<Buffer> {
     const client = url.startsWith("https") ? https : http;
     const req = client.get(url, (res) => {
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        // Seguir redirecciones
         fetchImage(res.headers.location).then(resolve).catch(reject);
         return;
       }
@@ -44,10 +46,7 @@ function fetchImage(url: string): Promise<Buffer> {
       res.on("error", reject);
     });
     req.on("error", reject);
-    req.setTimeout(8000, () => {
-      req.destroy();
-      reject(new Error("Timeout fetching image"));
-    });
+    req.setTimeout(8000, () => { req.destroy(); reject(new Error("Timeout")); });
   });
 }
 
@@ -57,57 +56,39 @@ export interface WalletPdfCard {
   qrUrl: string;
 }
 
-/**
- * Genera un PDF con una o varias tarjetas del monedero.
- * Si hay más de 1 tarjeta, las acomoda en hoja A4 (2 columnas x 4 filas).
- * Devuelve un Buffer con el PDF completo.
- */
 export async function generateWalletCardPdf(cards: WalletPdfCard[]): Promise<Buffer> {
-  // Generar QR para cada tarjeta como PNG buffer
+  // Generar QR para cada tarjeta
   const qrBuffers: (Buffer | null)[] = await Promise.all(
     cards.map(async (card) => {
       try {
-        const qrUrl = card.qrUrl || `https://nutriserpv.com/c/${card.walletNumber}`;
-        const pngBuffer = await QRCode.toBuffer(qrUrl, {
-          type: "png",
-          width: 200,
-          margin: 1,
+        return await QRCode.toBuffer(card.qrUrl || `https://nutriserpv.com/c/${card.walletNumber}`, {
+          type: "png", width: 220, margin: 1,
           errorCorrectionLevel: "H",
           color: { dark: "#000000", light: "#FFFFFF" },
         });
-        return pngBuffer;
-      } catch {
-        return null;
-      }
+      } catch { return null; }
     })
   );
 
-  // Intentar descargar el logo de Nutriser
+  // Descargar logo
   let logoBuffer: Buffer | null = null;
   try {
     logoBuffer = await fetchImage(
       "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png"
     );
-  } catch {
-    logoBuffer = null;
-  }
+  } catch { logoBuffer = null; }
 
-  // Intentar descargar la silueta
+  // Descargar silueta
   let siluetaBuffer: Buffer | null = null;
   try {
-    // Usar la URL absoluta de producción para el servidor
     siluetaBuffer = await fetchImage(
       "https://nutriserpv.com/manus-storage/nutriser-silueta_f6738ee7.png"
     );
-  } catch {
-    siluetaBuffer = null;
-  }
+  } catch { siluetaBuffer = null; }
 
   return new Promise((resolve, reject) => {
     const isSingle = cards.length === 1;
 
-    // Para una sola tarjeta: página del tamaño exacto de la tarjeta
-    // Para múltiples: página A4
     const doc = new PDFDocument({
       size: isSingle ? [CARD_W, CARD_H] : "A4",
       margin: 0,
@@ -122,9 +103,7 @@ export async function generateWalletCardPdf(cards: WalletPdfCard[]): Promise<Buf
     if (isSingle) {
       drawCard(doc, cards[0], qrBuffers[0], logoBuffer, siluetaBuffer, 0, 0, CARD_W, CARD_H);
     } else {
-      // A4: 595.28 x 841.89 pt
       const PAGE_W = 595.28;
-      const PAGE_H = 841.89;
       const MARGIN = 20;
       const GAP = 8;
       const cols = 2;
@@ -157,74 +136,79 @@ function drawCard(
 ) {
   const s = w / CARD_W; // factor de escala
 
-  // ── Fondo oscuro ──────────────────────────────────────────────────────────
   doc.save();
-  doc.roundedRect(x, y, w, h, 6 * s).fill(BLACK);
 
-  // Degradado cálido en el centro (simulado con un rectángulo semitransparente)
-  doc.roundedRect(x + w * 0.2, y, w * 0.6, h, 6 * s)
-    .fillOpacity(0.15)
-    .fill(DARK_WARM);
-  doc.fillOpacity(1);
+  // ── Fondo negro ────────────────────────────────────────────────────────────
+  doc.roundedRect(x, y, w, h, 7 * s).fill(BLACK);
 
-  // ── Línea dorada superior ─────────────────────────────────────────────────
-  doc.rect(x, y, w, 1.5 * s).fill(GOLD);
-  // ── Silueta como marca de agua ──────────────────────────────────────────────
-  if (siluetaBuf) {
-    // La imagen es 1024x1024 cuadrada, pero la figura ocupa ~35% del ancho
-    // y ~85% del alto del canvas. Para que no se estire, usamos fit: mantener
-    // proporciones 1:1 (la imagen es cuadrada) y definir solo la altura.
-    // La silueta debe ocupar ~80% de la altura de la tarjeta (sin la banda).
-    const bandH = 14 * s;
-    const availH = h - bandH - 4 * s; // altura disponible sin la banda dorada
-    const silSize = availH * 0.90; // cuadrado: misma medida en ancho y alto
-    const silX = x + w - silSize - 4 * s;
-    const silY = y + 2 * s;
-    doc.save();
-    doc.opacity(0.20);
-    // Pasar solo width=silSize y height=silSize para mantener 1:1
-    doc.image(siluetaBuf, silX, silY, {
-      width: silSize,
-      height: silSize,
+  // ── Banda dorada inferior ──────────────────────────────────────────────────
+  const bandH = 13 * s;
+  const bandY = y + h - bandH;
+  doc.rect(x, bandY, w, bandH).fill(GOLD);
+
+  // Texto izquierdo en la banda
+  doc.fillColor(BLACK)
+    .fontSize(4.8 * s)
+    .font("Helvetica-Bold")
+    .text("NUTRISERPV.COM/MONEDERO", x + 7 * s, bandY + bandH / 2 - 3 * s, {
+      width: w * 0.52,
+      lineBreak: false,
     });
+
+  // Texto derecho en la banda
+  doc.fillColor("#3a2800")
+    .fontSize(4.2 * s)
+    .font("Helvetica")
+    .text("Valida solo en Nutriser PV", x + w * 0.54, bandY + bandH / 2 - 2.5 * s, {
+      width: w * 0.44,
+      align: "right",
+      lineBreak: false,
+    });
+
+  // ── Silueta dorada grande a la derecha ─────────────────────────────────────
+  // La imagen es 1024×1024 cuadrada; la dibujamos como cuadrado para no estirar
+  if (siluetaBuf) {
+    const silSize = (h - bandH) * 0.88; // cuadrado que cabe en la altura disponible
+    const silX = x + w - silSize - 2 * s;
+    const silY = y + (h - bandH - silSize) / 2; // centrada verticalmente
+    doc.save();
+    doc.opacity(0.85); // visible, no solo marca de agua
+    doc.image(siluetaBuf, silX, silY, { width: silSize, height: silSize });
     doc.restore();
   }
-  // ── Logo Nutriser ─────────────────────────────────────────────────────────
-  const logoSize = 20 * s;
-  const logoX = x + 10 * s;
-  const logoY = y + 8 * s;
+
+  // ── Logo Nutriser arriba izquierda ─────────────────────────────────────────
+  const logoSize = 18 * s;
+  const logoX = x + 8 * s;
+  const logoY = y + 7 * s;
   if (logoBuf) {
     doc.image(logoBuf, logoX, logoY, { width: logoSize, height: logoSize });
   } else {
-    // Fallback: círculo dorado con "N"
-    doc.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2)
-      .fill(GOLD);
-    doc.fillColor(BLACK)
-      .fontSize(10 * s)
-      .font("Helvetica-Bold")
+    doc.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2).fill(GOLD);
+    doc.fillColor(BLACK).fontSize(9 * s).font("Helvetica-Bold")
       .text("N", logoX, logoY + logoSize * 0.2, { width: logoSize, align: "center" });
   }
 
-  // ── Título "MONEDERO NUTRISER" ────────────────────────────────────────────
+  // ── Título "MONEDERO NUTRISER" ─────────────────────────────────────────────
   const titleX = logoX + logoSize + 5 * s;
-  const titleW = w - titleX - 10 * s + x;
+  const titleMaxW = w * 0.52; // no solapar con la silueta
   doc.fillColor(GOLD)
-    .fontSize(6.5 * s)
+    .fontSize(7 * s)
     .font("Helvetica-Bold")
-    .text("MONEDERO NUTRISER", titleX, y + 9 * s, { width: titleW, lineBreak: false });
+    .text("MONEDERO NUTRISER", titleX, y + 8 * s, { width: titleMaxW, lineBreak: false });
 
-  doc.fillColor("#888888")
+  doc.fillColor(GRAY_DIM)
     .fontSize(5 * s)
     .font("Helvetica")
-    .text("aesthetic & nutrition", titleX, y + 17 * s, { width: titleW, lineBreak: false });
+    .text("aesthetic & nutrition", titleX, y + 17 * s, { width: titleMaxW, lineBreak: false });
 
-  // ── QR Code ───────────────────────────────────────────────────────────────
-  const qrPad = 3 * s;
-  const qrSize = 52 * s;
-  const qrX = x + 10 * s;
-  const qrY = y + 30 * s;
+  // ── QR Code ────────────────────────────────────────────────────────────────
+  const qrPad   = 3 * s;
+  const qrSize  = 52 * s;
+  const qrX     = x + 8 * s;
+  const qrY     = y + 32 * s;
 
-  // Fondo blanco del QR
+  // Fondo blanco del QR con borde redondeado
   doc.roundedRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad * 2, qrSize + qrPad * 2, 3 * s)
     .fill(WHITE);
 
@@ -232,51 +216,32 @@ function drawCard(
     doc.image(qrBuf, qrX, qrY, { width: qrSize, height: qrSize });
   }
 
-  // ── Nombre del paciente ───────────────────────────────────────────────────
-  const dataX = qrX + qrSize + qrPad * 2 + 4 * s;
-  const dataW = w - (dataX - x) - 8 * s;
-  const nameY = qrY + 4 * s;
+  // ── Placa dorada con nombre y número ──────────────────────────────────────
+  const plateX  = qrX + qrSize + qrPad * 2 + 5 * s;
+  const plateW  = w * 0.34;
+  const plateH  = 24 * s;
+  const plateY  = qrY + (qrSize - plateH) / 2;
 
-  doc.fillColor(WHITE)
-    .fontSize(8 * s)
+  // Rectángulo dorado (placa)
+  doc.roundedRect(plateX, plateY, plateW, plateH, 3 * s).fill(GOLD_LIGHT);
+
+  // Nombre del paciente en la placa (texto oscuro sobre dorado)
+  const nameStr = card.patientName.toUpperCase();
+  doc.fillColor(BLACK)
+    .fontSize(7.5 * s)
     .font("Helvetica-Bold")
-    .text(card.patientName.toUpperCase(), dataX, nameY, {
-      width: dataW,
+    .text(nameStr, plateX + 4 * s, plateY + 4 * s, {
+      width: plateW - 8 * s,
       lineBreak: false,
       ellipsis: true,
     });
 
-  // ── Número de monedero ────────────────────────────────────────────────────
-  doc.fillColor("#888888")
-    .fontSize(6 * s)
-    .font("Courier")
-    .text(card.walletNumber, dataX, nameY + 13 * s, {
-      width: dataW,
-      lineBreak: false,
-    });
-
-  // ── Banda dorada inferior ─────────────────────────────────────────────────
-  const bandH = 14 * s;
-  const bandY = y + h - bandH;
-
-  doc.rect(x, bandY, w, bandH).fill(GOLD);
-
-  // Texto izquierdo en la banda
-  doc.fillColor(BLACK)
-    .fontSize(4.5 * s)
-    .font("Helvetica-Bold")
-    .text("NUTRISERPV.COM/MONEDERO", x + 8 * s, bandY + bandH / 2 - 3 * s, {
-      width: w * 0.55,
-      lineBreak: false,
-    });
-
-  // Texto derecho en la banda
-  doc.fillColor("rgba(0,0,0,0.6)")
-    .fontSize(4 * s)
-    .font("Helvetica")
-    .text("Valida solo en Nutriser PV", x + w * 0.55, bandY + bandH / 2 - 2.5 * s, {
-      width: w * 0.42,
-      align: "right",
+  // Número de monedero en la placa
+  doc.fillColor(GOLD_DARK)
+    .fontSize(5.5 * s)
+    .font("Courier-Bold")
+    .text(card.walletNumber, plateX + 4 * s, plateY + 14 * s, {
+      width: plateW - 8 * s,
       lineBreak: false,
     });
 

@@ -746,9 +746,9 @@ function PrintCardsTab({
           <Printer className="w-5 h-5 text-[#C5A55A] flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-bold text-amber-900">Imprimir Tarjetas Físicas CR-80</p>
-                 <p className="text-sm text-amber-800 mt-1">
-            Selecciona los pacientes y haz clic en <strong>"Generar PDF"</strong>. El PDF se abrirá en el visor de tu dispositivo — usa el botón de compartir → <strong>"Imprimir"</strong>. Usa papel PVC o cartulina gruesa (300 g/m²) para mejor resultado.
-          </p>
+            <p className="text-sm text-amber-800 mt-1">
+              Selecciona los pacientes y haz clic en <strong>"Generar PDF"</strong>. El PDF se abrirá en el visor de tu dispositivo — usa el botón de compartir → <strong>"Imprimir"</strong>. Usa papel PVC o cartulina gruesa (300 g/m²) para mejor resultado.
+            </p>
             <p className="text-xs text-amber-600 mt-1">
               💡 <b>Hoja A4:</b> caben 8 tarjetas por hoja. <b>Individual:</b> una tarjeta por página.
             </p>

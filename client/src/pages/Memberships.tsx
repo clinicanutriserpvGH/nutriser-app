@@ -2061,88 +2061,95 @@ onClick={() => {
 
             {/* ── Tarjeta digital estilo CR-80 (igual que la física) ── */}
             <div className="px-5 pb-3">
-              {/* Tarjeta oscura con silueta dorada */}
+              {/* Tarjeta oscura — diseño de referencia: silueta grande + placa dorada */}
               <div
                 style={{
-                  background: "linear-gradient(135deg, #1A1A1A 0%, #2a2010 60%, #1A1A1A 100%)",
+                  background: "#1A1A1A",
                   borderRadius: 16,
                   overflow: "hidden",
                   position: "relative",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
+                  boxShadow: "0 8px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(197,165,90,0.15)",
                   fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  aspectRatio: "85.5 / 54",
                 }}
               >
-                {/* Línea dorada superior */}
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, transparent, #C5A55A 30%, #E8C97A 50%, #C5A55A 70%, transparent)" }} />
-
-                {/* Brillos decorativos */}
-                <div style={{ position: "absolute", top: -30, right: -20, width: 120, height: 120, background: "radial-gradient(circle, rgba(197,165,90,0.12) 0%, transparent 70%)", borderRadius: "50%" }} />
-                <div style={{ position: "absolute", bottom: -20, left: -10, width: 100, height: 100, background: "radial-gradient(circle, rgba(197,165,90,0.07) 0%, transparent 70%)", borderRadius: "50%" }} />
-
-                {/* Silueta dorada de Nutriser como marca de agua */}
+                {/* Silueta dorada grande a la derecha — visible y elegante */}
                 <img
                   src="/manus-storage/nutriser-silueta_f6738ee7.png"
                   alt=""
                   style={{
                     position: "absolute",
-                    right: 10,
-                    bottom: 28,
-                    height: "72%",
+                    right: 0,
+                    top: 0,
+                    bottom: "13%", // dejar espacio para la banda dorada
+                    height: "87%",
                     width: "auto",
                     objectFit: "contain",
-                    objectPosition: "right bottom",
-                    opacity: 0.18,
+                    objectPosition: "right center",
+                    opacity: 0.82,
                     pointerEvents: "none",
                     zIndex: 1,
-                    filter: "sepia(1) saturate(2) hue-rotate(5deg) brightness(1.2)",
+                    filter: "sepia(1) saturate(2.2) hue-rotate(5deg) brightness(1.15)",
                   }}
                 />
 
                 {/* Contenido principal */}
-                <div style={{ position: "relative", zIndex: 2, padding: "14px 16px 10px 16px" }}>
-                  {/* Fila: Logo + Título + Badge */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                    <img src={LOGO_URL} alt="Nutriser" style={{ width: 36, height: 36, objectFit: "contain", flexShrink: 0 }} />
+                <div style={{ position: "relative", zIndex: 2, padding: "10px 14px 0 14px", height: "calc(87% - 0px)" }}>
+
+                  {/* Fila superior: Logo + Título + Badge */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <img src={LOGO_URL} alt="Nutriser" style={{ width: 30, height: 30, objectFit: "contain", flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" }}>Monedero Nutriser</div>
-                      <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 9, letterSpacing: "0.12em" }}>aesthetic &amp; nutrition</div>
+                      <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", lineHeight: 1.2 }}>Monedero Nutriser</div>
+                      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 8, letterSpacing: "0.1em" }}>aesthetic &amp; nutrition</div>
                     </div>
                     {walletData?.isActive !== false ? (
-                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>ACTIVA</span>
+                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>ACTIVA</span>
                     ) : (
-                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>INACTIVA</span>
+                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>INACTIVA</span>
                     )}
                   </div>
 
-                  {/* Fila: QR + Datos */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ background: "#FFFFFF", borderRadius: 8, padding: 6, flexShrink: 0 }}>
+                  {/* Fila central: QR + Placa dorada con nombre */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {/* QR */}
+                    <div style={{ background: "#FFFFFF", borderRadius: 6, padding: 5, flexShrink: 0 }}>
                       {walletData ? (
                         <QRCodeSVG
                           value={`https://nutriserpv.com/c/${walletData.walletNumber || ''}`}
-                          size={72}
+                          size={62}
                           level="H"
                           includeMargin={false}
                           bgColor="#FFFFFF"
                           fgColor="#000000"
                         />
                       ) : (
-                        <div style={{ width: 72, height: 72, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <Loader2 className="w-6 h-6 animate-spin text-[#C5A55A]" />
+                        <div style={{ width: 62, height: 62, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Loader2 className="w-5 h-5 animate-spin text-[#C5A55A]" />
                         </div>
                       )}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ color: "#FFFFFF", fontWeight: 700, fontSize: 14, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+
+                    {/* Placa dorada con nombre y número */}
+                    <div style={{
+                      background: "linear-gradient(135deg, #E8C97A 0%, #C5A55A 50%, #d4af60 100%)",
+                      borderRadius: 6,
+                      padding: "7px 10px",
+                      flex: 1,
+                      minWidth: 0,
+                      maxWidth: "42%",
+                      boxShadow: "0 2px 8px rgba(197,165,90,0.3)",
+                    }}>
+                      <div style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 12, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>
                         {patient?.name || '---'}
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
-                        <span style={{ color: "rgba(255,255,255,0.6)", fontFamily: "monospace", fontSize: 11, letterSpacing: "0.15em" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3 }}>
+                        <span style={{ color: "#5a3e00", fontFamily: "monospace", fontSize: 9, letterSpacing: "0.12em", fontWeight: 700 }}>
                           {walletData?.walletNumber || '---'}
                         </span>
                         <button
                           onClick={() => { navigator.clipboard.writeText(walletData?.walletNumber || ""); toast.success("Número copiado"); }}
-                          style={{ color: "#C5A55A", flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          style={{ color: "#5a3e00", flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, opacity: 0.7 }}
                         >
                           <Copy className="w-3 h-3" />
                         </button>
@@ -2151,23 +2158,26 @@ onClick={() => {
                   </div>
                 </div>
 
-                {/* Banda dorada inferior con saldo y Ver Estado de Cuenta */}
+                {/* Banda dorada inferior con URL + saldo + Ver Estado de Cuenta */}
                 <div style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
                   background: "linear-gradient(90deg, #8B6914 0%, #C5A55A 25%, #E8C97A 50%, #C5A55A 75%, #8B6914 100%)",
-                  padding: "8px 16px",
+                  padding: "5px 14px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  position: "relative",
                   zIndex: 3,
                 }}>
-                  <div>
-                    <div style={{ color: "rgba(0,0,0,0.55)", fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>Saldo disponible</div>
-                    <div style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 18, lineHeight: 1.1 }}>${(walletBalance / 100).toFixed(2)}</div>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span style={{ color: "rgba(0,0,0,0.55)", fontSize: 6, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>NUTRISERPV.COM/MONEDERO</span>
+                    <span style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 14, lineHeight: 1 }}>${(walletBalance / 100).toFixed(2)}</span>
                   </div>
                   <button
                     onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }}
-                    style={{ color: "rgba(0,0,0,0.7)", fontSize: 11, fontWeight: 700, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", letterSpacing: "0.02em" }}
+                    style={{ color: "rgba(0,0,0,0.65)", fontSize: 9, fontWeight: 700, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", letterSpacing: "0.02em" }}
                   >
                     Ver Estado de Cuenta
                   </button>

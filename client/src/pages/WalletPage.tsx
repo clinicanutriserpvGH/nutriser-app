@@ -130,6 +130,15 @@ export default function WalletPage() {
   );
   const myPurchases = purchasesQuery.data;
   const [copied, setCopied] = useState(false);
+  const [showPhysicalCardDialog, setShowPhysicalCardDialog] = useState(false);
+  const [physicalCardRequested, setPhysicalCardRequested] = useState(false);
+
+  const requestPhysicalCard = trpc.physicalCard.request.useMutation({
+    onSuccess: (data) => {
+      setPhysicalCardRequested(true);
+      setShowPhysicalCardDialog(false);
+    },
+  });
 
   const [matchRoute, params] = useRoute("/monedero/:walletNumber");
   const walletNumberFromUrl = matchRoute ? params?.walletNumber : null;
@@ -153,7 +162,7 @@ export default function WalletPage() {
   const transactions = walletQuery.data?.transactions || [];
   const plans = plansQuery.data || [];
 
-  const qrUrl = wallet ? `https://nutriserpv.com/monedero/${wallet.walletNumber}` : "";
+  const qrUrl = wallet ? `https://nutriserpv.com/c/${wallet.walletNumber}` : "";
 
   const copyWalletNumber = () => {
     if (wallet) {
@@ -239,12 +248,12 @@ export default function WalletPage() {
                   Ver Estado de Cuenta
                 </button>
                 <button
-                  onClick={() => window.print()}
-                  className="flex items-center gap-1 text-gray-400 text-[10px] hover:text-[#C5A55A] transition-colors"
-                  title="Imprimir mi tarjeta"
+                  onClick={() => setShowPhysicalCardDialog(true)}
+                  className="flex items-center gap-1 text-[#C5A55A] text-[10px] hover:text-[#b8963f] transition-colors font-semibold"
+                  title="Solicitar tarjeta física"
                 >
                   <Download className="w-3 h-3" />
-                  Imprimir mi tarjeta
+                  Solicitar tarjeta física
                 </button>
               </div>
             </div>
@@ -605,6 +614,73 @@ export default function WalletPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Diálogo: Solicitar tarjeta física ── */}
+      {showPhysicalCardDialog && wallet && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-end justify-center"
+          style={{ background: "rgba(0,0,0,0.6)" }}
+          onClick={() => setShowPhysicalCardDialog(false)}
+        >
+          <div
+            className="bg-white rounded-t-3xl w-full max-w-md px-6 pt-6 pb-10 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-[#C5A55A]/10 rounded-2xl flex items-center justify-center">
+                <Download className="w-6 h-6 text-[#C5A55A]" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#1A1A1A]">Solicitar tarjeta física</h3>
+                <p className="text-xs text-gray-400">Tarjeta Monedero Nutriser</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Solicita tu tarjeta física del Monedero Nutriser. El equipo Nutriser la preparará e imprimirá para ti. Puedes recogerla en clínica.
+            </p>
+            <div className="bg-[#FAF7F2] rounded-xl p-3 mb-5 flex items-center gap-3">
+              <div className="w-8 h-8 bg-[#C5A55A]/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-[#C5A55A] text-xs font-bold">QR</span>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-[#1A1A1A]">{patient?.name}</p>
+                <p className="text-[10px] text-gray-400 font-mono">{wallet.walletNumber}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                if (!wallet) return;
+                requestPhysicalCard.mutate({
+                  walletId: wallet.id,
+                  patientName: patient?.name || "Paciente",
+                  walletNumber: wallet.walletNumber,
+                  patientEmail: patient?.email || undefined,
+                });
+              }}
+              disabled={requestPhysicalCard.isPending}
+              className="w-full bg-[#C5A55A] text-white font-bold py-3.5 rounded-2xl text-sm hover:bg-[#b8963f] transition-all disabled:opacity-60"
+            >
+              {requestPhysicalCard.isPending ? "Enviando solicitud..." : "Confirmar solicitud"}
+            </button>
+            <button
+              onClick={() => setShowPhysicalCardDialog(false)}
+              className="w-full mt-3 text-gray-400 text-sm py-2"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Toast de éxito */}
+      {physicalCardRequested && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] bg-green-600 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-lg flex items-center gap-2">
+          <span>&#10003;</span> ¡Solicitud enviada! Te avisaremos cuando esté lista.
+          <button onClick={() => setPhysicalCardRequested(false)} className="ml-2 text-white/70 hover:text-white">×</button>
+        </div>
+      )}
+
     </div>
   );
 }

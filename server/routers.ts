@@ -3209,6 +3209,79 @@ export const appRouter = router({
   }),
 
   // ─── Splash Ads ────────────────────────────────────────────────────────────
+  // --- Solicitudes de Tarjeta Fisica ---
+  physicalCard: router({
+    request: publicProcedure
+      .input(z.object({
+        walletId: z.number(),
+        patientName: z.string(),
+        walletNumber: z.string(),
+        patientEmail: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { physicalCardRequests } = await import('../drizzle/schema');
+        const existing = await db.select().from(physicalCardRequests)
+          .where(eq(physicalCardRequests.walletId, input.walletId))
+          .limit(1);
+        const hasPending = existing.some((r) => r.status === 'pending');
+        if (hasPending) {
+          return { success: true, alreadyRequested: true };
+        }
+        await db.insert(physicalCardRequests).values({
+          walletId: input.walletId,
+          patientName: input.patientName,
+          walletNumber: input.walletNumber,
+          patientEmail: input.patientEmail || null,
+          status: 'pending',
+        });
+        await notifyOwner({
+          title: 'Nueva solicitud de tarjeta fisica',
+          content: input.patientName + ' (' + input.walletNumber + ') ha solicitado su tarjeta fisica del Monedero Nutriser.',
+        });
+        return { success: true, alreadyRequested: false };
+      }),
+
+    adminList: publicProcedure
+      .input(z.object({ status: z.enum(['pending', 'printed', 'delivered', 'all']).optional() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { physicalCardRequests } = await import('../drizzle/schema');
+        const rows = await db.select().from(physicalCardRequests)
+          .orderBy(desc(physicalCardRequests.requestedAt));
+        if (input.status && input.status !== 'all') {
+          return rows.filter((r) => r.status === input.status);
+        }
+        return rows;
+      }),
+
+    markPrinted: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { physicalCardRequests } = await import('../drizzle/schema');
+        await db.update(physicalCardRequests)
+          .set({ status: 'printed', printedAt: new Date() })
+          .where(eq(physicalCardRequests.id, input.id));
+        return { success: true };
+      }),
+
+    markDelivered: publicProcedure
+      .input(z.object({ id: z.number(), notes: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { physicalCardRequests } = await import('../drizzle/schema');
+        await db.update(physicalCardRequests)
+          .set({ status: 'delivered', deliveredAt: new Date(), notes: input.notes || null })
+          .where(eq(physicalCardRequests.id, input.id));
+        return { success: true };
+      }),
+  }),
+
   splashAds: router({
     // Público: obtener splash ads activos por tipo
     getActive: publicProcedure

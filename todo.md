@@ -1939,3 +1939,30 @@
 - [x] Panel admin: botón imprimir/descargar PDF de tarjeta individual (listo para imprimir en plástico)
 - [x] Panel admin: opción de imprimir múltiples tarjetas en una hoja A4 (layout de impresión)
 - [x] Usuario: botón "Descargar mi tarjeta" en la vista del monedero
+
+## Fix: Impresión Tarjeta CR-80
+- [ ] Instalar html2canvas + jsPDF para generar imagen/PDF descargable de la tarjeta
+- [ ] Reemplazar window.print() con descarga de imagen PNG de la tarjeta
+- [ ] Corregir panel admin: generar PDF con múltiples tarjetas descargable
+
+## Solicitud de Tarjeta Física
+- [ ] Crear tabla physicalCardRequests en DB (walletId, status: pending/printed/delivered, requestedAt, notes)
+- [ ] Backend: procedimiento requestPhysicalCard (usuario) y listPhysicalCardRequests + markPrinted (admin)
+- [ ] UI usuario: cambiar "Imprimir mi tarjeta" por "Solicitar tarjeta física" con confirmación y notificación al admin
+- [ ] UI admin: sección de solicitudes pendientes en sub-tab "Imprimir Tarjetas" con botón imprimir por html2canvas
+- [ ] Notificación al admin cuando usuario solicita tarjeta física
+
+## QR Inteligente del Monedero
+- [ ] Página pública /monedero/:walletNumber que detecta el rol del usuario
+- [ ] Si es el dueño de la tarjeta: redirige a /wallet (su monedero)
+- [ ] Si es admin: redirige al panel admin con la ficha del paciente
+- [ ] Si es visitante: muestra página pública con nombre y número (sin datos sensibles)
+- [ ] Actualizar el QR de la tarjeta para apuntar a nutriserpv.com/monedero/:walletNumber
+
+## QR Inteligente del Monedero
+- [x] Página /c/:walletNumber: si es admin va a ficha del paciente, cualquier otro va a la tienda
+- [x] Actualizar QR de la tarjeta para apuntar a nutriserpv.com/c/:walletNumber
+- [x] Botón "Solicitar tarjeta física" en WalletPage (reemplaza "Imprimir mi tarjeta")
+- [x] Sub-tab "Solicitudes" en AdminWalletTab con lista y botón imprimir
+- [x] Quitar badge ACTIVA/INACTIVA de la tarjeta
+- [x] Corregir URL a nutriserpv.com/monedero en la banda dorada inferior

@@ -886,3 +886,23 @@ export const splashConfig = mysqlTable("splashConfig", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type SplashConfig = typeof splashConfig.$inferSelect;
+
+/**
+ * Solicitudes de tarjeta física del Monedero Nutriser
+ * El usuario solicita su tarjeta desde la app y el admin la imprime y entrega.
+ */
+export const physicalCardRequests = mysqlTable("physicalCardRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("walletId").notNull(),           // FK a wallets.id
+  patientName: varchar("patientName", { length: 255 }).notNull(),
+  walletNumber: varchar("walletNumber", { length: 50 }).notNull(),
+  patientEmail: varchar("patientEmail", { length: 320 }),
+  status: mysqlEnum("status", ["pending", "printed", "delivered"]).default("pending").notNull(),
+  notes: text("notes"),                          // Notas del admin (ej. "entregada en consulta")
+  requestedAt: timestamp("requestedAt").defaultNow().notNull(),
+  printedAt: timestamp("printedAt"),             // Cuándo el admin la imprimió
+  deliveredAt: timestamp("deliveredAt"),         // Cuándo la entregó al paciente
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PhysicalCardRequest = typeof physicalCardRequests.$inferSelect;
+export type InsertPhysicalCardRequest = typeof physicalCardRequests.$inferInsert;

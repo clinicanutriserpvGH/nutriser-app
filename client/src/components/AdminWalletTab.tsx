@@ -18,7 +18,7 @@ import {
 import AdminQRScanner from "./AdminQRScanner";
 import { WalletCard as WalletCardPrint, WalletCardPrintSheet } from "./WalletCardPrint";
 
-type SubTab = "wallets" | "loyalty" | "plans" | "qrscan" | "printCards";
+type SubTab = "wallets" | "loyalty" | "plans" | "qrscan" | "printCards" | "requests";
 
 export default function AdminWalletTab() {
   const [subTab, setSubTab] = useState<SubTab>("wallets");
@@ -121,6 +121,7 @@ export default function AdminWalletTab() {
           { key: "qrscan" as SubTab, label: "Escanear QR", icon: QrCode },
           { key: "wallets" as SubTab, label: "Tarjetas", icon: CreditCard },
           { key: "printCards" as SubTab, label: "Imprimir Tarjetas", icon: Printer },
+          { key: "requests" as SubTab, label: "Solicitudes", icon: Printer },
           { key: "loyalty" as SubTab, label: "Registrar Lealtad", icon: Star },
           { key: "plans" as SubTab, label: "Planes de Producto", icon: Gift },
         ]).map(({ key, label, icon: Icon }) => (
@@ -141,6 +142,9 @@ export default function AdminWalletTab() {
 
       {/* ═══ SUB-TAB: Escanear QR ═══ */}
       {subTab === "qrscan" && <AdminQRScanner />}
+
+      {/* ═══ SUB-TAB: Solicitudes de Tarjeta Física ═══ */}
+      {subTab === "requests" && <PhysicalCardRequestsTab />}
 
       {/* ═══ SUB-TAB: Imprimir Tarjetas ═══ */}
       {subTab === "printCards" && (
@@ -859,6 +863,165 @@ function PrintCardsTab({
           ))
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── PhysicalCardRequestsTab — Solicitudes de Tarjeta Física ────────────────
+function PhysicalCardRequestsTab() {
+  const [filter, setFilter] = useState<"all" | "pending" | "printed" | "delivered">("pending");
+  const [printingId, setPrintingId] = useState<number | null>(null);
+
+  const requestsQuery = trpc.physicalCard.adminList.useQuery({ status: filter });
+  const requests = requestsQuery.data || [];
+
+  const markPrinted = trpc.physicalCard.markPrinted.useMutation({
+    onSuccess: () => { requestsQuery.refetch(); toast.success("Marcada como impresa"); },
+  });
+  const markDelivered = trpc.physicalCard.markDelivered.useMutation({
+    onSuccess: () => { requestsQuery.refetch(); toast.success("Marcada como entregada"); },
+  });
+
+  const handlePrint = (req: any) => {
+    setPrintingId(req.id);
+    // Abrir ventana de impresión con la tarjeta
+    const printWin = window.open("", "_blank", "width=900,height=700");
+    if (!printWin) { toast.error("Activa las ventanas emergentes"); return; }
+    const logoUrl = "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
+    const qrUrl = `https://nutriserpv.com/c/${req.walletNumber}`;
+    printWin.document.write(`<!DOCTYPE html><html><head><title>Tarjeta ${req.walletNumber}</title>
+<style>
+  @page { size: 85.5mm 54mm; margin: 0; }
+  body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .card { width: 85.5mm; height: 54mm; background: linear-gradient(135deg, #1A1A1A 0%, #2a2010 60%, #1A1A1A 100%); position: relative; font-family: 'Helvetica Neue', Arial, sans-serif; overflow: hidden; box-sizing: border-box; }
+  .gold-top { position: absolute; top: 0; left: 0; right: 0; height: 0.5mm; background: linear-gradient(90deg, transparent, #C5A55A 30%, #E8C97A 50%, #C5A55A 70%, transparent); }
+  .header { display: flex; align-items: center; gap: 1.5mm; padding: 2.5mm 3mm 1.5mm 3mm; }
+  .logo { width: 7mm; height: 7mm; object-fit: contain; }
+  .title { color: #C5A55A; font-weight: 900; font-size: 2.2mm; letter-spacing: 0.18em; text-transform: uppercase; }
+  .subtitle { color: rgba(255,255,255,0.45); font-size: 1.7mm; letter-spacing: 0.12em; }
+  .badge { font-size: 1.7mm; font-weight: 800; padding: 0.5mm 1.8mm; border-radius: 5mm; border: 0.3mm solid rgba(52,211,153,0.5); color: #34d399; background: rgba(52,211,153,0.12); }
+  .body { display: flex; align-items: center; gap: 2.5mm; padding: 1mm 3mm; }
+  .qr-wrap { background: #fff; border-radius: 1.5mm; padding: 1.2mm; }
+  .name { color: #fff; font-weight: 700; font-size: 2.8mm; text-transform: uppercase; }
+  .num { color: rgba(255,255,255,0.55); font-family: monospace; font-size: 2.2mm; letter-spacing: 0.15em; margin-top: 0.8mm; }
+  .footer { position: absolute; bottom: 0; left: 0; right: 0; height: 5.5mm; background: linear-gradient(90deg, #8B6914 0%, #C5A55A 25%, #E8C97A 50%, #C5A55A 75%, #8B6914 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 3mm; }
+  .footer-l { color: rgba(0,0,0,0.6); font-size: 1.6mm; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .footer-r { color: rgba(0,0,0,0.5); font-size: 1.5mm; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head><body>
+<div class="card">
+  <div class="gold-top"></div>
+  <div class="header">
+    <img class="logo" src="${logoUrl}" />
+    <div style="flex:1"><div class="title">Monedero Nutriser</div><div class="subtitle">aesthetic &amp; nutrition</div></div>
+  </div>
+  <div class="body">
+    <div class="qr-wrap"><canvas id="qr"></canvas></div>
+    <div style="flex:1">
+      <div class="name">${req.patientName}</div>
+      <div class="num">${req.walletNumber}</div>
+    </div>
+  </div>
+  <div class="footer">
+    <span class="footer-l">nutriserpv.com/monedero</span>
+    <span class="footer-r">Válida solo en Nutriser PV</span>
+  </div>
+</div>
+<script>
+QRCode.toCanvas(document.getElementById('qr'), '${qrUrl}', { width: 85, margin: 0, color: { dark: '#000000', light: '#ffffff' } }, function() {
+  setTimeout(function() { window.print(); window.close(); }, 500);
+});
+</script>
+</body></html>`);
+    printWin.document.close();
+    markPrinted.mutate({ id: req.id });
+    setPrintingId(null);
+  };
+
+  const statusColors: Record<string, string> = {
+    pending: "bg-amber-100 text-amber-700",
+    printed: "bg-blue-100 text-blue-700",
+    delivered: "bg-green-100 text-green-700",
+  };
+  const statusLabels: Record<string, string> = {
+    pending: "Pendiente",
+    printed: "Impresa",
+    delivered: "Entregada",
+  };
+
+  return (
+    <div className="space-y-4 mt-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold text-[#1A1A1A] text-base">Solicitudes de Tarjeta Física</h3>
+        <span className="text-xs text-gray-400">{requests.length} resultado{requests.length !== 1 ? "s" : ""}</span>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex gap-2 flex-wrap">
+        {(["pending", "printed", "delivered", "all"] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setFilter(s)}
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
+              filter === s ? "bg-[#C5A55A] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            {s === "all" ? "Todas" : statusLabels[s]}
+          </button>
+        ))}
+      </div>
+
+      {requestsQuery.isLoading ? (
+        <div className="flex items-center justify-center py-10">
+          <Loader2 className="w-6 h-6 animate-spin text-[#C5A55A]" />
+        </div>
+      ) : requests.length === 0 ? (
+        <div className="text-center py-10 text-gray-400 text-sm">
+          No hay solicitudes {filter !== "all" ? statusLabels[filter].toLowerCase() + "s" : ""}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {requests.map((req: any) => (
+            <div key={req.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-semibold text-sm text-[#1A1A1A] truncate">{req.patientName}</p>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColors[req.status] || "bg-gray-100 text-gray-600"}`}>
+                      {statusLabels[req.status] || req.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 font-mono">{req.walletNumber}</p>
+                  {req.patientEmail && <p className="text-xs text-gray-400">{req.patientEmail}</p>}
+                  <p className="text-[10px] text-gray-300 mt-1">
+                    Solicitado: {new Date(req.requestedAt).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => handlePrint(req)}
+                    disabled={printingId === req.id}
+                    className="flex items-center gap-1.5 bg-[#C5A55A] text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-[#b8963f] transition disabled:opacity-60"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    Imprimir
+                  </button>
+                  {req.status !== "delivered" && (
+                    <button
+                      onClick={() => markDelivered.mutate({ id: req.id })}
+                      className="flex items-center gap-1.5 bg-green-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-green-700 transition"
+                    >
+                      <CheckSquare className="w-3.5 h-3.5" />
+                      Entregada
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

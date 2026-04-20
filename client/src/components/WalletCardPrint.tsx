@@ -64,18 +64,7 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
             aesthetic &amp; nutrition
           </div>
         </div>
-        <div style={{
-          fontSize: 7,
-          fontWeight: 800,
-          letterSpacing: "0.1em",
-          padding: "2px 7px",
-          borderRadius: 20,
-          border: card.isActive ? "1px solid rgba(52,211,153,0.5)" : "1px solid rgba(239,68,68,0.5)",
-          color: card.isActive ? "#34d399" : "#f87171",
-          background: card.isActive ? "rgba(52,211,153,0.12)" : "rgba(239,68,68,0.12)",
-        }}>
-          {card.isActive ? "ACTIVA" : "INACTIVA"}
-        </div>
+
       </div>
 
       {/* ── Fila central: QR + Datos del titular ── */}
@@ -121,7 +110,7 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
         padding: "0 12px",
       }}>
         <span style={{ color: "rgba(0,0,0,0.6)", fontSize: 6.5, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-          nutriser.com/monedero
+          nutriserpv.com/monedero
         </span>
         <span style={{ color: "rgba(0,0,0,0.5)", fontSize: 6, letterSpacing: "0.08em" }}>
           Válida solo en Nutriser PV
@@ -196,18 +185,6 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
             aesthetic &amp; nutrition
           </div>
         </div>
-        <div style={{
-          fontSize: "1.7mm",
-          fontWeight: 800,
-          letterSpacing: "0.1em",
-          padding: "0.5mm 1.8mm",
-          borderRadius: "5mm",
-          border: card.isActive ? "0.3mm solid rgba(52,211,153,0.5)" : "0.3mm solid rgba(239,68,68,0.5)",
-          color: card.isActive ? "#34d399" : "#f87171",
-          background: card.isActive ? "rgba(52,211,153,0.12)" : "rgba(239,68,68,0.12)",
-        }}>
-          {card.isActive ? "ACTIVA" : "INACTIVA"}
-        </div>
       </div>
 
       {/* Fila central: QR + Datos */}
@@ -249,7 +226,7 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
         padding: "0 3mm",
       }}>
         <span style={{ color: "rgba(0,0,0,0.6)", fontSize: "1.6mm", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-          nutriser.com/monedero
+          nutriserpv.com/monedero
         </span>
         <span style={{ color: "rgba(0,0,0,0.5)", fontSize: "1.5mm", letterSpacing: "0.08em" }}>
           Válida solo en Nutriser PV

@@ -24,6 +24,7 @@ import DeleteAccount from "./pages/DeleteAccount";
 import MyTreatments from "./pages/MyTreatments";
 import NutriserHomePage from "./pages/NutriserHomePage";
 import WalletPage from "./pages/WalletPage";
+import WalletQR from "./pages/WalletQR";
 import ServicePage from "./pages/ServicePage";
 import Cupones from "./pages/Cupones";
 import Servicios from "./pages/Servicios";
@@ -40,7 +41,7 @@ import { isDesktopDevice } from "@/hooks/useDeviceType";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 // Rutas que NUNCA muestran el splash
-const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/cupones", "/servicios", "/transformaciones", "/services", "/privacy-policy", "/delete-account", "/mis-tratamientos", "/nutriser-home", "/monedero", "/servicio"];
+const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/cupones", "/servicios", "/transformaciones", "/services", "/privacy-policy", "/delete-account", "/mis-tratamientos", "/nutriser-home", "/monedero", "/servicio", "/c"];
 
 function isNoSplashRoute(path: string) {
   return NO_SPLASH_ROUTES.some((r) => path === r || path.startsWith(r + "/") || path.startsWith(r + "?"));
@@ -69,6 +70,7 @@ function Router() {
       <Route path={"/mis-tratamientos"} component={MyTreatments} />
       <Route path={"/nutriser-home"} component={NutriserHomePage} />
       <Route path={"/monedero/:walletNumber?"} component={WalletPage} />
+      <Route path={"/c/:walletNumber"} component={WalletQR} />
       <Route path={"/servicio/:serviceId"} component={(props: any) => <ServicePage serviceId={props.params.serviceId} />} />
       <Route path={"/cupones"} component={Cupones} />
       <Route path={"/servicios"} component={Servicios} />

@@ -24,7 +24,7 @@ export interface WalletCardData {
 }
 
 // -- Tarjeta individual en proporcion CR-80 ---------------------------------
-// Usamos unidades absolutas en mm para impresion exacta.
+// Usamos unidades absolutas en px para pantalla.
 // En pantalla se escala con transform para caber en el contenedor.
 export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: number }) {
   // CR-80: 85.5mm x 54mm @ 96dpi -> 323px x 204px
@@ -53,31 +53,28 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
       {/* Linea dorada superior */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, transparent, #C5A55A 30%, #E8C97A 50%, #C5A55A 70%, transparent)" }} />
 
-      {/* Brillo diagonal decorativo */}
-      <div style={{ position: "absolute", top: -30, right: -20, width: 100, height: 100, background: "radial-gradient(circle, rgba(197,165,90,0.12) 0%, transparent 70%)", borderRadius: "50%" }} />
-      <div style={{ position: "absolute", bottom: -20, left: -10, width: 80, height: 80, background: "radial-gradient(circle, rgba(197,165,90,0.07) 0%, transparent 70%)", borderRadius: "50%" }} />
-
-      {/* Silueta dorada de Nutriser como marca de agua */}
+      {/* Silueta dorada de Nutriser — grande y visible a la derecha */}
       <img
         src={SILUETA_URL}
         alt=""
         style={{
           position: "absolute",
-          right: 8,
-          bottom: 22,
-          height: "80%",
+          right: 6,
+          top: "50%",
+          transform: "translateY(-50%)",
+          height: "88%",
           width: "auto",
           objectFit: "contain",
-          objectPosition: "right bottom",
-          opacity: 0.18,
+          objectPosition: "center",
+          opacity: 0.55,
           pointerEvents: "none",
           zIndex: 1,
-          filter: "sepia(1) saturate(2) hue-rotate(5deg) brightness(1.2)",
+          filter: "sepia(1) saturate(3) hue-rotate(5deg) brightness(1.4)",
         }}
       />
 
       {/* -- Fila superior: Logo + Titulo -- */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 12px 6px 12px", position: "relative", zIndex: 2 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 12px 4px 12px", position: "relative", zIndex: 2 }}>
         <img src={LOGO_URL} alt="Nutriser" style={{ width: 28, height: 28, objectFit: "contain" }} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase" }}>
@@ -89,13 +86,13 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
         </div>
       </div>
 
-      {/* -- Fila central: QR + Datos del titular -- */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 12px", position: "relative", zIndex: 2 }}>
+      {/* -- Fila central: QR + Placa dorada con nombre -- */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 12px 4px 12px", position: "relative", zIndex: 2 }}>
         {/* QR */}
-        <div style={{ background: "#FFFFFF", borderRadius: 6, padding: 5, flexShrink: 0 }}>
+        <div style={{ background: "#FFFFFF", borderRadius: 6, padding: 4, flexShrink: 0 }}>
           <QRCodeSVG
             value={card.qrUrl || "https://nutriserpv.com/monedero"}
-            size={72}
+            size={68}
             level="H"
             includeMargin={false}
             bgColor="#FFFFFF"
@@ -103,12 +100,34 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
           />
         </div>
 
-        {/* Datos */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: "#FFFFFF", fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.04em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {/* Placa dorada con nombre y número */}
+        <div style={{
+          flex: 1,
+          minWidth: 0,
+          background: "linear-gradient(135deg, #8B6914 0%, #C5A55A 30%, #E8C97A 55%, #C5A55A 80%, #8B6914 100%)",
+          borderRadius: 6,
+          padding: "8px 10px",
+          boxShadow: "0 2px 8px rgba(197,165,90,0.4)",
+        }}>
+          <div style={{
+            color: "#1A1A1A",
+            fontWeight: 900,
+            fontSize: 11,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}>
             {card.patientName}
           </div>
-          <div style={{ color: "rgba(255,255,255,0.55)", fontFamily: "monospace", fontSize: 9, letterSpacing: "0.15em", marginTop: 3 }}>
+          <div style={{
+            color: "rgba(0,0,0,0.65)",
+            fontFamily: "monospace",
+            fontSize: 8.5,
+            letterSpacing: "0.15em",
+            marginTop: 3,
+          }}>
             {card.walletNumber}
           </div>
         </div>
@@ -170,7 +189,6 @@ export function WalletCardPrintSheet({ cards }: { cards: WalletCardData[] }) {
             pageBreakInside: "avoid",
           }}
         >
-          {/* Usamos mm directamente para impresion */}
           <WalletCardMM card={card} />
         </div>
       ))}
@@ -195,27 +213,28 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
       {/* Linea dorada superior */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "0.5mm", background: "linear-gradient(90deg, transparent, #C5A55A 30%, #E8C97A 50%, #C5A55A 70%, transparent)" }} />
 
-      {/* Silueta dorada de Nutriser como marca de agua */}
+      {/* Silueta dorada de Nutriser — grande y visible a la derecha */}
       <img
         src={SILUETA_URL}
         alt=""
         style={{
           position: "absolute",
-          right: "1mm",
-          bottom: "5.5mm",
-          height: "78%",
+          right: "1.5mm",
+          top: "50%",
+          transform: "translateY(-50%)",
+          height: "88%",
           width: "auto",
           objectFit: "contain",
-          objectPosition: "right bottom",
-          opacity: 0.18,
+          objectPosition: "center",
+          opacity: 0.55,
           pointerEvents: "none",
           zIndex: 1,
-          filter: "sepia(1) saturate(2) hue-rotate(5deg) brightness(1.2)",
+          filter: "sepia(1) saturate(3) hue-rotate(5deg) brightness(1.4)",
         }}
       />
 
       {/* Fila superior */}
-      <div style={{ display: "flex", alignItems: "center", gap: "1.5mm", padding: "2.5mm 3mm 1.5mm 3mm", position: "relative", zIndex: 2 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "1.5mm", padding: "2.5mm 3mm 1mm 3mm", position: "relative", zIndex: 2 }}>
         <img src={LOGO_URL} alt="Nutriser" style={{ width: "7mm", height: "7mm", objectFit: "contain" }} />
         <div style={{ flex: 1 }}>
           <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: "2.2mm", letterSpacing: "0.18em", textTransform: "uppercase" }}>
@@ -227,23 +246,46 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
         </div>
       </div>
 
-      {/* Fila central: QR + Datos */}
-      <div style={{ display: "flex", alignItems: "center", gap: "2.5mm", padding: "1mm 3mm", position: "relative", zIndex: 2 }}>
-        <div style={{ background: "#FFFFFF", borderRadius: "1.5mm", padding: "1.2mm", flexShrink: 0 }}>
+      {/* Fila central: QR + Placa dorada */}
+      <div style={{ display: "flex", alignItems: "center", gap: "2mm", padding: "1mm 3mm", position: "relative", zIndex: 2 }}>
+        <div style={{ background: "#FFFFFF", borderRadius: "1.5mm", padding: "1mm", flexShrink: 0 }}>
           <QRCodeSVG
             value={card.qrUrl || "https://nutriserpv.com/monedero"}
-            size={85}
+            size={80}
             level="H"
             includeMargin={false}
             bgColor="#FFFFFF"
             fgColor="#000000"
           />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: "#FFFFFF", fontWeight: 700, fontSize: "2.8mm", textTransform: "uppercase", letterSpacing: "0.04em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {/* Placa dorada */}
+        <div style={{
+          flex: 1,
+          minWidth: 0,
+          background: "linear-gradient(135deg, #8B6914 0%, #C5A55A 30%, #E8C97A 55%, #C5A55A 80%, #8B6914 100%)",
+          borderRadius: "1.5mm",
+          padding: "2mm 2.5mm",
+          boxShadow: "0 0.5mm 2mm rgba(197,165,90,0.4)",
+        }}>
+          <div style={{
+            color: "#1A1A1A",
+            fontWeight: 900,
+            fontSize: "2.8mm",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}>
             {card.patientName}
           </div>
-          <div style={{ color: "rgba(255,255,255,0.55)", fontFamily: "monospace", fontSize: "2.2mm", letterSpacing: "0.15em", marginTop: "0.8mm" }}>
+          <div style={{
+            color: "rgba(0,0,0,0.65)",
+            fontFamily: "monospace",
+            fontSize: "2.1mm",
+            letterSpacing: "0.15em",
+            marginTop: "0.8mm",
+          }}>
             {card.walletNumber}
           </div>
         </div>

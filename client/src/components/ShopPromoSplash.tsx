@@ -165,6 +165,7 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAuthGuard, setShowAuthGuard] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const { isMobile } = useDeviceType();
   const [, navigate] = useLocation();
 
@@ -184,10 +185,12 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   const promoIndex = currentIndex - adminAdsCount - defaultSlideCount;
 
   const handleClose = useCallback(() => {
+    setIsClosing(true); // Deshabilitar pointer-events inmediatamente para evitar bloqueo de taps en iOS
     onClose();
   }, [onClose]);
 
   const handleGoToShop = useCallback(() => {
+    setIsClosing(true);
     onGoToShop();
   }, [onGoToShop]);
 
@@ -213,7 +216,7 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
     <>
       <div
         className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4"
-        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)", pointerEvents: isClosing ? 'none' : 'auto' }}
       >
         {/* Close button */}
         <button

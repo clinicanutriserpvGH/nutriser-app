@@ -1919,3 +1919,10 @@
 - [x] Verificado: PromoSplash de tienda muestra correctamente "2 de 3" con cupón de Mesoterapia
 - [x] Verificado: endpoint promotions.list devuelve los 2 cupones activos con imagen, precio y countdown
 - [x] Sitio web nutriserpv.com carga correctamente
+
+## Sesión Actual - Corrección Botones Splash0Entry
+- [x] Diagnóstico: overlay del ShopPromoSplash (fixed inset-0 z-[9999]) bloqueaba taps en iOS al cerrarse
+- [x] Fix: agregar estado isClosing en ShopPromoSplash → pointer-events: none inmediatamente al cerrar
+- [x] Fix: agregar touchAction: manipulation a los 3 botones de tarjeta del Splash0Entry
+- [x] Fix: reducir delay de navegación de 400ms a 200ms en handleNavigate
+- [x] Fix: eliminar overflow-hidden del contenedor principal del Splash0Entry

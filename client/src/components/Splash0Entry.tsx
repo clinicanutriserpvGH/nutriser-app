@@ -45,7 +45,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
     setTimeout(() => {
       if (onNavigate) onNavigate(path);
       else window.location.href = path;
-    }, 400);
+    }, 200);
   };
 
   // Portal de Salud → app externa
@@ -53,7 +53,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
     setLeaving(true);
     setTimeout(() => {
       window.location.href = "https://portaldesaludnutriser.club";
-    }, 400);
+    }, 200);
   };
 
   // Secret admin access: click logo to open admin panel
@@ -71,7 +71,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
       }}
     >
       <div
-        className="h-screen w-full flex flex-col items-center px-3 sm:px-4 md:px-6 lg:px-12 xl:px-16 box-border overflow-hidden"
+        className="h-screen w-full flex flex-col items-center px-3 sm:px-4 md:px-6 lg:px-12 xl:px-16 box-border"
         style={{
           paddingTop: "max(env(safe-area-inset-top, 0px) + 12px, 20px)",
           paddingBottom: "max(env(safe-area-inset-bottom, 0px) + 8px, 16px)",
@@ -154,7 +154,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 type="button"
                 onClick={() => handleNavigate('/memberships')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full cursor-pointer"
-                style={{ minHeight: "150px", WebkitTapHighlightColor: "transparent" }}
+                style={{ minHeight: "150px", WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
               >
                 <img
                   src={CLINIC_SHOP_IMG}
@@ -188,7 +188,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 type="button"
                 onClick={() => handleNavigate('/cursos')}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full cursor-pointer"
-                style={{ minHeight: "150px", WebkitTapHighlightColor: "transparent" }}
+                style={{ minHeight: "150px", WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
               >
                 <img
                   src={IMG_ACADEMY}
@@ -222,7 +222,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 type="button"
                 onClick={handlePortalSalud}
                 className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full cursor-pointer"
-                style={{ minHeight: "150px", WebkitTapHighlightColor: "transparent" }}
+                style={{ minHeight: "150px", WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
               >
                 <img
                   src={PORTAL_IMG}

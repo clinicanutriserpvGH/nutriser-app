@@ -2059,64 +2059,118 @@ onClick={() => {
               <h2 className="text-lg font-bold text-gray-900">Tu Monedero Nutriser</h2>
             </div>
 
-            {/* ── Tarjeta compacta estilo Farmacias del Ahorro ── */}
+            {/* ── Tarjeta digital estilo CR-80 (igual que la física) ── */}
             <div className="px-5 pb-3">
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                {/* Top dark section with logo + card info */}
-                <div className="bg-gradient-to-br from-[#1A1A1A] via-[#222] to-[#1A1A1A] p-4 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#C5A55A] to-transparent" />
-                  <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-[#C5A55A]/8 to-transparent rounded-bl-full" />
+              {/* Tarjeta oscura con silueta dorada */}
+              <div
+                style={{
+                  background: "linear-gradient(135deg, #1A1A1A 0%, #2a2010 60%, #1A1A1A 100%)",
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  position: "relative",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                }}
+              >
+                {/* Línea dorada superior */}
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, transparent, #C5A55A 30%, #E8C97A 50%, #C5A55A 70%, transparent)" }} />
 
-                  {/* Logo + Title + Status */}
-                  <div className="flex items-center gap-3 mb-3 relative z-10">
-                    <img src={LOGO_URL} alt="Nutriser" className="w-10 h-10 object-contain" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-[#C5A55A] font-black text-xs tracking-widest uppercase">Monedero Nutriser</h3>
-                      <p className="text-gray-500 text-[9px] tracking-wide">aesthetic & nutrition</p>
+                {/* Brillos decorativos */}
+                <div style={{ position: "absolute", top: -30, right: -20, width: 120, height: 120, background: "radial-gradient(circle, rgba(197,165,90,0.12) 0%, transparent 70%)", borderRadius: "50%" }} />
+                <div style={{ position: "absolute", bottom: -20, left: -10, width: 100, height: 100, background: "radial-gradient(circle, rgba(197,165,90,0.07) 0%, transparent 70%)", borderRadius: "50%" }} />
+
+                {/* Silueta dorada de Nutriser como marca de agua */}
+                <img
+                  src="/manus-storage/nutriser-silueta_f6738ee7.png"
+                  alt=""
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    bottom: 28,
+                    height: "72%",
+                    width: "auto",
+                    objectFit: "contain",
+                    objectPosition: "right bottom",
+                    opacity: 0.18,
+                    pointerEvents: "none",
+                    zIndex: 1,
+                    filter: "sepia(1) saturate(2) hue-rotate(5deg) brightness(1.2)",
+                  }}
+                />
+
+                {/* Contenido principal */}
+                <div style={{ position: "relative", zIndex: 2, padding: "14px 16px 10px 16px" }}>
+                  {/* Fila: Logo + Título + Badge */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <img src={LOGO_URL} alt="Nutriser" style={{ width: 36, height: 36, objectFit: "contain", flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" }}>Monedero Nutriser</div>
+                      <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 9, letterSpacing: "0.12em" }}>aesthetic &amp; nutrition</div>
                     </div>
-                    <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wider border border-emerald-500/30 flex-shrink-0">ACTIVA</span>
+                    {walletData?.isActive !== false ? (
+                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>ACTIVA</span>
+                    ) : (
+                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>INACTIVA</span>
+                    )}
                   </div>
 
-                  {/* QR + Info inline */}
-                  <div className="flex items-center gap-3 relative z-10">
-                    <div className="bg-white rounded-xl p-2 flex-shrink-0">
+                  {/* Fila: QR + Datos */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ background: "#FFFFFF", borderRadius: 8, padding: 6, flexShrink: 0 }}>
                       {walletData ? (
                         <QRCodeSVG
-                          value={`https://nutriserpv.com/monedero/${walletData.walletNumber || ''}`}
-                          size={70}
+                          value={`https://nutriserpv.com/c/${walletData.walletNumber || ''}`}
+                          size={72}
                           level="H"
                           includeMargin={false}
                           bgColor="#FFFFFF"
                           fgColor="#000000"
                         />
                       ) : (
-                        <div className="w-[70px] h-[70px] flex items-center justify-center">
+                        <div style={{ width: 72, height: 72, display: "flex", alignItems: "center", justifyContent: "center" }}>
                           <Loader2 className="w-6 h-6 animate-spin text-[#C5A55A]" />
                         </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-bold text-sm truncate">{patient?.name || '---'}</p>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <p className="text-white/70 font-mono text-[11px] tracking-wider truncate">{walletData?.walletNumber || '---'}</p>
-                        <button onClick={() => { navigator.clipboard.writeText(walletData?.walletNumber || ""); toast.success("Número copiado"); }} className="text-[#C5A55A] flex-shrink-0">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ color: "#FFFFFF", fontWeight: 700, fontSize: 14, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {patient?.name || '---'}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+                        <span style={{ color: "rgba(255,255,255,0.6)", fontFamily: "monospace", fontSize: 11, letterSpacing: "0.15em" }}>
+                          {walletData?.walletNumber || '---'}
+                        </span>
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(walletData?.walletNumber || ""); toast.success("Número copiado"); }}
+                          style={{ color: "#C5A55A", flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                        >
                           <Copy className="w-3 h-3" />
                         </button>
-                      </div>
-                      <div className="flex justify-end mt-1.5">
-                        <img src={LOGO_URL} alt="" className="w-12 h-auto object-contain opacity-25" />
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Bottom white section — saldo */}
-                <div className="px-4 py-3 flex items-center justify-between">
+                {/* Banda dorada inferior con saldo y Ver Estado de Cuenta */}
+                <div style={{
+                  background: "linear-gradient(90deg, #8B6914 0%, #C5A55A 25%, #E8C97A 50%, #C5A55A 75%, #8B6914 100%)",
+                  padding: "8px 16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  position: "relative",
+                  zIndex: 3,
+                }}>
                   <div>
-                    <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Saldo disponible</p>
-                    <p className="text-[#C5A55A] font-black text-xl">${(walletBalance / 100).toFixed(2)}</p>
+                    <div style={{ color: "rgba(0,0,0,0.55)", fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>Saldo disponible</div>
+                    <div style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 18, lineHeight: 1.1 }}>${(walletBalance / 100).toFixed(2)}</div>
                   </div>
-                  <button onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }} className="text-[#C5A55A] text-xs font-semibold hover:underline">Ver Estado de Cuenta</button>
+                  <button
+                    onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }}
+                    style={{ color: "rgba(0,0,0,0.7)", fontSize: 11, fontWeight: 700, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", letterSpacing: "0.02em" }}
+                  >
+                    Ver Estado de Cuenta
+                  </button>
                 </div>
               </div>
             </div>

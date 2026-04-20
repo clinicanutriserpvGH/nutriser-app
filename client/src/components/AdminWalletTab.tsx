@@ -3,7 +3,7 @@
  * Permite: ver todas las tarjetas, acreditar saldo, ver movimientos,
  * gestionar planes de lealtad por producto, y registrar consultas.
  */
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -695,25 +695,82 @@ function PrintCardsTab({
   const clearAll = () => setSelectedCards(new Set());
 
   const selectedWallets = wallets.filter((w: any) => selectedCards.has(w.id));
-
-  const handlePrint = () => {
-    if (selectedWallets.length === 0) {
-      toast.error("Selecciona al menos una tarjeta para imprimir");
-      return;
-    }
-    window.print();
-  };
+  const [isPrinting, setIsPrinting] = useState(false);
+  const printContainerRef = useRef<HTMLDivElement>(null);
 
   // Convertir datos de wallet al formato de WalletCardData
   const toCardData = (w: any) => ({
     patientName: w.patientName || "Usuario",
     walletNumber: w.walletNumber || "---",
-    qrUrl: `https://nutriserpv.com/monedero?w=${w.walletNumber}`,
+    qrUrl: `https://nutriserpv.com/c/${w.walletNumber}`,
     isActive: w.status === "active",
   });
 
   // Escala para preview en pantalla (la tarjeta CR-80 mide 323×204px a 96dpi)
   const previewScale = 0.72;
+
+  // Impresión via html2canvas: convierte la tarjeta a imagen PNG y la imprime
+  // Esto garantiza que los fondos oscuros se impriman en iOS/Safari
+  const handlePrint = useCallback(async () => {
+    if (selectedWallets.length === 0) {
+      toast.error("Selecciona al menos una tarjeta para imprimir");
+      return;
+    }
+    setIsPrinting(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const container = printContainerRef.current;
+      if (!container) { window.print(); return; }
+
+      // Mostrar temporalmente el contenedor para capturarlo
+      container.style.display = "block";
+      container.style.position = "fixed";
+      container.style.top = "-9999px";
+      container.style.left = "-9999px";
+      container.style.zIndex = "-1";
+
+      // Esperar a que el DOM se actualice y las imágenes carguen
+      await new Promise(r => setTimeout(r, 800));
+
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false,
+      });
+
+      container.style.display = "none";
+      container.style.position = "";
+      container.style.top = "";
+      container.style.left = "";
+      container.style.zIndex = "";
+
+      const imgData = canvas.toDataURL("image/png");
+      const printWin = window.open("", "_blank");
+      if (!printWin) {
+        // Fallback: imprimir directamente si el popup está bloqueado
+        window.print();
+        return;
+      }
+      printWin.document.write(`<!DOCTYPE html><html><head><title>Tarjetas Nutriser</title>
+<style>
+  @page { size: auto; margin: 0; }
+  body { margin: 0; padding: 0; background: white; }
+  img { display: block; max-width: 100%; height: auto; }
+</style></head><body>
+<img src="${imgData}" />
+<script>window.onload = function() { window.print(); window.close(); };<\/script>
+</body></html>`);
+      printWin.document.close();
+    } catch (err) {
+      console.error("[Print] html2canvas error:", err);
+      // Fallback al método CSS
+      window.print();
+    } finally {
+      setIsPrinting(false);
+    }
+  }, [selectedWallets, printMode]);
 
   return (
     <div className="space-y-4">
@@ -769,11 +826,14 @@ function PrintCardsTab({
         </div>
         <Button
           onClick={handlePrint}
-          disabled={selectedCards.size === 0}
+          disabled={selectedCards.size === 0 || isPrinting}
           className="bg-[#C5A55A] hover:bg-[#b8944d] text-white font-bold"
         >
-          <Printer className="w-4 h-4 mr-2" />
-          Imprimir {selectedCards.size > 0 ? `(${selectedCards.size})` : ""}
+          {isPrinting ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Preparando...</>
+          ) : (
+            <><Printer className="w-4 h-4 mr-2" />Imprimir {selectedCards.size > 0 ? `(${selectedCards.size})` : ""}</>
+          )}
         </Button>
       </div>
 
@@ -834,8 +894,8 @@ function PrintCardsTab({
         </div>
       )}
 
-      {/* Contenido oculto para impresión */}
-      <div className="print-only" style={{ display: "none" }}>
+      {/* Contenedor oculto para html2canvas — se muestra temporalmente al imprimir */}
+      <div ref={printContainerRef} style={{ display: "none", background: "white", padding: "10mm" }}>
         {printMode === "sheet" ? (
           // Hoja A4 con hasta 8 tarjetas
           <WalletCardPrintSheet cards={selectedWallets.map(toCardData)} />

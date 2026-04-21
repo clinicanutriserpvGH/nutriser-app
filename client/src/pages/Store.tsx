@@ -123,6 +123,10 @@ export default function Store() {
     return items;
   }, [services, products, ebookActive]);
 
+  // Helper: normalizar texto quitando tildes/acentos para búsqueda flexible
+  const normalize = (text: string) =>
+    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
   // Filtrar por búsqueda y pestaña activa
   const filteredItems = useMemo((): SearchResult[] => {
     let items = allItems;
@@ -132,15 +136,15 @@ export default function Store() {
     else if (activeTab === "products") items = items.filter(i => i.type === "product");
     else if (activeTab === "ebooks") items = items.filter(i => i.type === "ebook");
 
-    // Filtrar por búsqueda
+    // Filtrar por búsqueda (sin tildes, sin mayúsculas)
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+      const q = normalize(searchQuery);
       items = items.filter(i =>
-        i.name.toLowerCase().includes(q) ||
-        (i.description || "").toLowerCase().includes(q) ||
-        (i.category || "").toLowerCase().includes(q) ||
-        SERVICE_CATEGORY_LABELS[i.category || ""]?.toLowerCase().includes(q) ||
-        PRODUCT_CATEGORY_LABELS[i.category || ""]?.toLowerCase().includes(q)
+        normalize(i.name).includes(q) ||
+        normalize(i.description || "").includes(q) ||
+        normalize(i.category || "").includes(q) ||
+        normalize(SERVICE_CATEGORY_LABELS[i.category || ""] || "").includes(q) ||
+        normalize(PRODUCT_CATEGORY_LABELS[i.category || ""] || "").includes(q)
       );
     }
 

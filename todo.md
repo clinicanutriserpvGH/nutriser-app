@@ -1985,3 +1985,12 @@
 - [x] Silueta: position absolute, right, bottom sobre banda dorada, opacity 0.18, filter dorado
 - [x] Proxy de storage verificado: /manus-storage/nutriser-silueta_f6738ee7.png devuelve 307 -> 200
 - [x] TypeScript: 0 errores en todo el proyecto
+
+## Sesión - Correcciones Cupones y Buscador Tienda
+- [x] Desactivar las dos promociones con fecha errónea 2028 (Hollywood Peel y Mesoterapia Corporal) directamente en la BD
+- [x] Verificar que el panel admin sigue mostrando todas las promociones (activas e inactivas) con getAllPromotionsForAdmin
+- [x] Rediseñar buscador de tienda: ahora busca en servicios (19), productos y ebooks (1) de forma unificada
+- [x] Agregar tabs de filtro: Todo / Servicios / Productos / Libros con contadores
+- [x] Cada resultado muestra badge de tipo (Servicio/Producto/Libro) + categoría + precio
+- [x] Botón de acción contextual: "Agendar" para servicios, "Ver libro" para ebooks, "Comprar" para productos
+- [x] Buscador filtra en tiempo real por nombre, descripción y categoría

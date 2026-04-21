@@ -1,26 +1,32 @@
 /*
- * Tienda Nutriser — Rediseño limpio inspirado en apps de farmacia
- * Layout: Header con sesión + búsqueda → Categorías circulares → Grid de productos → WhatsApp flotante
- * Sesión unificada con usePatientAuth
+ * Tienda Nutriser — Buscador unificado: Servicios + Productos + Ebooks
+ * Layout: Header con sesión + búsqueda → Resultados de búsqueda unificados → Grid normal
  */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
   ShoppingBag, X, Upload, Loader2, Package, Search,
-  User, LogOut, ChevronRight, ShoppingCart, MessageCircle,
-  Wallet, Copy,
+  User, LogOut, MessageCircle,
+  Wallet, Copy, BookOpen, Scissors, Tag,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
-// NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import PromoSplash from "@/components/PromoSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
-const CATEGORY_LABELS: Record<string, string> = {
+const SERVICE_CATEGORY_LABELS: Record<string, string> = {
+  nutricion: "Nutrición",
+  corporales: "Corporales",
+  faciales: "Faciales",
+  medicina: "Medicina Estética",
+  otros: "Otros",
+};
+
+const PRODUCT_CATEGORY_LABELS: Record<string, string> = {
   general: "General",
   nutricionales: "Nutricionales",
   cosmeticos: "Cosméticos",
@@ -29,13 +35,17 @@ const CATEGORY_LABELS: Record<string, string> = {
   otros: "Otros",
 };
 
-const CATEGORY_ICONS: Record<string, string> = {
-  general: "🏪",
-  nutricionales: "🥗",
-  cosmeticos: "✨",
-  suplementos: "💊",
-  cuidado_piel: "🧴",
-  otros: "📦",
+// Tipo unificado para resultados de búsqueda
+type SearchResult = {
+  id: number;
+  type: "service" | "product" | "ebook";
+  name: string;
+  description?: string | null;
+  price?: string | null;
+  imageUrl?: string | null;
+  category?: string | null;
+  stock?: number | null;
+  raw: unknown;
 };
 
 export default function Store() {
@@ -52,49 +62,92 @@ export default function Store() {
   const walletData = walletQuery.data;
   const walletBalance = walletData?.wallet?.balance ?? 0;
 
-  const { data: products = [], isLoading } = trpc.products.list.useQuery();
+  // Cargar las tres fuentes de datos
+  const { data: products = [], isLoading: loadingProducts } = trpc.products.list.useQuery();
+  const { data: services = [], isLoading: loadingServices } = trpc.services.list.useQuery();
+  const { data: ebookActive } = trpc.ebook.getActive.useQuery();
+
+  const isLoading = loadingProducts || loadingServices;
 
   // Search
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<"all" | "services" | "products" | "ebooks">("all");
 
-  // Group by category
-  const categoryMap = useMemo(() => {
-    const map = new Map<string, typeof products>();
-    for (const p of products) {
-      const cat = p.category || "general";
-      if (!map.has(cat)) map.set(cat, []);
-      map.get(cat)!.push(p);
+  // Construir lista unificada de resultados
+  const allItems = useMemo((): SearchResult[] => {
+    const items: SearchResult[] = [];
+
+    // Servicios
+    for (const s of services) {
+      items.push({
+        id: s.id,
+        type: "service",
+        name: s.name,
+        description: s.description,
+        price: s.price,
+        imageUrl: s.imageUrl,
+        category: s.category,
+        raw: s,
+      });
     }
-    return map;
-  }, [products]);
 
-  const categories = useMemo(() =>
-    Array.from(categoryMap.entries()).map(([id, items]) => ({
-      id,
-      label: CATEGORY_LABELS[id] || id,
-      icon: CATEGORY_ICONS[id] || "📦",
-      items,
-    })),
-    [categoryMap]
-  );
+    // Productos
+    for (const p of products) {
+      items.push({
+        id: p.id,
+        type: "product",
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        imageUrl: p.imageUrl,
+        category: p.category,
+        stock: p.stock,
+        raw: p,
+      });
+    }
 
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+    // Ebook activo
+    if (ebookActive) {
+      items.push({
+        id: ebookActive.id,
+        type: "ebook",
+        name: ebookActive.title,
+        description: ebookActive.description,
+        price: ebookActive.presalePrice ? `$${ebookActive.presalePrice}` : `$${ebookActive.price}`,
+        imageUrl: ebookActive.coverUrl,
+        category: "ebook",
+        raw: ebookActive,
+      });
+    }
 
-  // Filtered products
-  const filteredProducts = useMemo(() => {
-    let items = activeCategory === "all" ? products : (categoryMap.get(activeCategory) || []);
+    return items;
+  }, [services, products, ebookActive]);
+
+  // Filtrar por búsqueda y pestaña activa
+  const filteredItems = useMemo((): SearchResult[] => {
+    let items = allItems;
+
+    // Filtrar por pestaña
+    if (activeTab === "services") items = items.filter(i => i.type === "service");
+    else if (activeTab === "products") items = items.filter(i => i.type === "product");
+    else if (activeTab === "ebooks") items = items.filter(i => i.type === "ebook");
+
+    // Filtrar por búsqueda
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      items = items.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        (p.description || "").toLowerCase().includes(q) ||
-        (p.category || "").toLowerCase().includes(q)
+      items = items.filter(i =>
+        i.name.toLowerCase().includes(q) ||
+        (i.description || "").toLowerCase().includes(q) ||
+        (i.category || "").toLowerCase().includes(q) ||
+        SERVICE_CATEGORY_LABELS[i.category || ""]?.toLowerCase().includes(q) ||
+        PRODUCT_CATEGORY_LABELS[i.category || ""]?.toLowerCase().includes(q)
       );
     }
-    return items;
-  }, [activeCategory, products, categoryMap, searchQuery]);
 
-  // ─── Modal de Compra ──────────────────────────────────────────────────────
+    return items;
+  }, [allItems, searchQuery, activeTab]);
+
+  // ─── Modal de Compra (Producto) ────────────────────────────────────────────
   const [purchaseModal, setPurchaseModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<(typeof products)[0] | null>(null);
   const [buyerName, setBuyerName] = useState("");
@@ -125,7 +178,6 @@ export default function Store() {
       return;
     }
     setSelectedProduct(product);
-    // Pre-fill from session
     setBuyerName(patient?.name || "");
     setBuyerEmail(patient?.email || "");
     setBuyerPhone(patient?.phone || "");
@@ -146,13 +198,9 @@ export default function Store() {
       const result = await utils.discountCodes.validate.fetch({ code });
       if (result?.valid) {
         setDiscountInfo({ valid: true, discount: result.discount, isGift: result.isGift ?? false, isTwoForOne: result.isTwoForOne ?? false, description: result.description ?? null });
-        if (result.isTwoForOne) {
-          toast.success("¡Código 2x1 aplicado!");
-        } else if (result.isGift) {
-          toast.success("¡Código de regalo aplicado!");
-        } else {
-          toast.success(`¡${result.discount}% de descuento aplicado!`);
-        }
+        if (result.isTwoForOne) toast.success("¡Código 2x1 aplicado!");
+        else if (result.isGift) toast.success("¡Código de regalo aplicado!");
+        else toast.success(`¡${result.discount}% de descuento aplicado!`);
       } else {
         setDiscountInfo({ valid: false, discount: null, isGift: false, isTwoForOne: false, description: null });
         toast.error("Código inválido o no está activo.");
@@ -198,18 +246,66 @@ export default function Store() {
     reader.readAsDataURL(proofFile);
   };
 
+  // Helper para obtener la etiqueta de categoría
+  const getCategoryLabel = (item: SearchResult) => {
+    if (item.type === "service") return SERVICE_CATEGORY_LABELS[item.category || ""] || item.category || "Servicio";
+    if (item.type === "product") return PRODUCT_CATEGORY_LABELS[item.category || ""] || item.category || "Producto";
+    if (item.type === "ebook") return "Libro Digital";
+    return "";
+  };
+
+  // Helper para el icono de tipo
+  const getTypeIcon = (type: SearchResult["type"]) => {
+    if (type === "service") return <Scissors className="w-3 h-3" />;
+    if (type === "product") return <Tag className="w-3 h-3" />;
+    if (type === "ebook") return <BookOpen className="w-3 h-3" />;
+    return null;
+  };
+
+  // Helper para el color de tipo
+  const getTypeBadgeClass = (type: SearchResult["type"]) => {
+    if (type === "service") return "bg-purple-100 text-purple-700";
+    if (type === "product") return "bg-blue-100 text-blue-700";
+    if (type === "ebook") return "bg-amber-100 text-amber-700";
+    return "";
+  };
+
+  // Helper para el label de tipo
+  const getTypeLabel = (type: SearchResult["type"]) => {
+    if (type === "service") return "Servicio";
+    if (type === "product") return "Producto";
+    if (type === "ebook") return "Libro";
+    return "";
+  };
+
+  // Acción al hacer clic en un resultado
+  const handleItemClick = (item: SearchResult) => {
+    if (item.type === "product") {
+      handleOpenPurchase(item.raw as (typeof products)[0]);
+    } else if (item.type === "ebook") {
+      navigate("/ebook");
+    } else if (item.type === "service") {
+      navigate("/#servicios");
+    }
+  };
+
+  const tabCounts = useMemo(() => ({
+    all: allItems.length,
+    services: allItems.filter(i => i.type === "service").length,
+    products: allItems.filter(i => i.type === "product").length,
+    ebooks: allItems.filter(i => i.type === "ebook").length,
+  }), [allItems]);
+
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
-      {/* ─── Promo Splash (aparador de publicidad) ──────────────────── */}
+      {/* ─── Promo Splash ──────────────────────────────────────────────── */}
       {showPromoSplash && (
         <PromoSplash
           onClose={() => setShowPromoSplash(false)}
-          onGoToCoupon={() => {
-            setShowPromoSplash(false);
-            // Scroll to top and let user navigate
-          }}
+          onGoToCoupon={() => setShowPromoSplash(false)}
         />
       )}
+
       {/* ─── Top Bar ─────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white shadow-sm">
         {/* Back + Brand + User */}
@@ -254,165 +350,170 @@ export default function Store() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="¿Qué estás buscando?"
-              className="w-full bg-gray-100 rounded-xl pl-10 lg:pl-12 pr-4 py-2.5 lg:py-3.5 text-sm lg:text-base text-[#1A1A1A] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 focus:bg-white transition"
+              placeholder="Buscar servicios, productos o libros..."
+              className="w-full bg-gray-100 rounded-xl pl-10 lg:pl-12 pr-10 py-2.5 lg:py-3.5 text-sm lg:text-base text-[#1A1A1A] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 focus:bg-white transition"
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Tabs de filtro */}
+        <div className="px-4 lg:px-8 pb-3 flex gap-2 overflow-x-auto scrollbar-hide">
+          {[
+            { id: "all" as const, label: "Todo", count: tabCounts.all },
+            { id: "services" as const, label: "Servicios", count: tabCounts.services },
+            { id: "products" as const, label: "Productos", count: tabCounts.products },
+            { id: "ebooks" as const, label: "Libros", count: tabCounts.ebooks },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs lg:text-sm font-semibold transition-all ${
+                activeTab === tab.id
+                  ? "bg-[#C5A55A] text-white shadow-md shadow-[#C5A55A]/30"
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+              }`}
+            >
+              {tab.label}
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                activeTab === tab.id ? "bg-white/20 text-white" : "bg-gray-200 text-gray-500"
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
       {/* ─── Content ─────────────────────────────────────────────────── */}
-      <div className="pb-24">
+      <div className="pb-32">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-[#C5A55A]" />
-            <p className="text-sm text-gray-400">Cargando productos...</p>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-24 px-4">
-            <div className="w-20 h-20 bg-[#C5A55A]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Package className="w-10 h-10 text-[#C5A55A]/40" />
-            </div>
-            <h2 className="font-serif text-2xl text-[#1A1A1A]/50 mb-2">Próximamente</h2>
-            <p className="text-[#1A1A1A]/40 text-sm">Estamos preparando nuestra tienda. Vuelve pronto.</p>
+            <p className="text-sm text-gray-400">Cargando...</p>
           </div>
         ) : (
-          <>
-            {/* ─── Categories (circular icons, horizontal scroll) ─── */}
-            {categories.length > 1 && (
-              <div className="px-4 lg:px-8 pt-4 pb-2">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base lg:text-xl font-bold text-[#1A1A1A]">Categorías</h2>
-                  <span className="text-xs lg:text-sm text-[#C5A55A] font-medium">{products.length} productos</span>
-                </div>
-                <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-2 scrollbar-hide lg:justify-center">
-                  {/* All */}
-                  <button
-                    onClick={() => setActiveCategory("all")}
-                    className="flex flex-col items-center gap-1.5 lg:gap-2 flex-shrink-0"
+          <div className="px-4 lg:px-8 pt-4">
+            {/* Header de resultados */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base lg:text-xl font-bold text-[#1A1A1A]">
+                {searchQuery.trim()
+                  ? `Resultados para "${searchQuery}"`
+                  : activeTab === "all" ? "Todo en Nutriser"
+                  : activeTab === "services" ? "Servicios"
+                  : activeTab === "products" ? "Productos"
+                  : "Libros Digitales"}
+              </h2>
+              <span className="text-xs lg:text-sm text-gray-400">{filteredItems.length} resultado{filteredItems.length !== 1 ? "s" : ""}</span>
+            </div>
+
+            {filteredItems.length === 0 ? (
+              <div className="text-center py-16">
+                <Search className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                <p className="text-gray-400 text-sm font-medium">No se encontraron resultados</p>
+                {searchQuery && (
+                  <p className="text-gray-300 text-xs mt-1">Intenta con otro término de búsqueda</p>
+                )}
+                <button
+                  onClick={() => { setSearchQuery(""); setActiveTab("all"); }}
+                  className="mt-4 text-[#C5A55A] text-sm font-semibold underline"
+                >
+                  Ver todo
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+                {filteredItems.map((item) => (
+                  <div
+                    key={`${item.type}-${item.id}`}
+                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => handleItemClick(item)}
                   >
-                    <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-full flex items-center justify-center text-2xl lg:text-3xl transition-all ${
-                      activeCategory === "all"
-                        ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30 ring-2 ring-[#C5A55A]/50"
-                        : "bg-white shadow-md hover:shadow-lg"
-                    }`}>
-                      {activeCategory === "all" ? "⭐" : "🏷️"}
+                    {/* Image */}
+                    <div className="w-28 h-28 sm:w-32 sm:h-32 lg:w-44 lg:h-44 flex-shrink-0 bg-[#F5F0E8] flex items-center justify-center overflow-hidden">
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : item.type === "ebook" ? (
+                        <BookOpen className="w-10 h-10 text-[#C5A55A]/30" />
+                      ) : item.type === "service" ? (
+                        <Scissors className="w-10 h-10 text-[#C5A55A]/30" />
+                      ) : (
+                        <Package className="w-10 h-10 text-[#C5A55A]/20" />
+                      )}
                     </div>
-                    <span className={`text-[11px] lg:text-sm font-medium text-center leading-tight ${
-                      activeCategory === "all" ? "text-[#C5A55A] font-bold" : "text-gray-500"
-                    }`}>
-                      Todos
-                    </span>
-                  </button>
-                  {categories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => setActiveCategory(cat.id)}
-                      className="flex flex-col items-center gap-1.5 lg:gap-2 flex-shrink-0"
-                    >
-                      <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-full flex items-center justify-center text-2xl lg:text-3xl transition-all ${
-                        activeCategory === cat.id
-                          ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30 ring-2 ring-[#C5A55A]/50"
-                          : "bg-white shadow-md hover:shadow-lg"
-                      }`}>
-                        {cat.icon}
-                      </div>
-                      <span className={`text-[11px] lg:text-sm font-medium text-center leading-tight max-w-[64px] lg:max-w-[80px] ${
-                        activeCategory === cat.id ? "text-[#C5A55A] font-bold" : "text-gray-500"
-                      }`}>
-                        {cat.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Divider */}
-            <div className="h-2 bg-gray-100 mt-2" />
-
-            {/* ─── Products Section ─────────────────────────────────── */}
-            <div className="px-4 lg:px-8 pt-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base lg:text-xl font-bold text-[#1A1A1A]">
-                  {activeCategory === "all" ? "Todos los productos" : CATEGORY_LABELS[activeCategory] || activeCategory}
-                </h2>
-                <span className="text-xs lg:text-sm text-gray-400">{filteredProducts.length} resultados</span>
-              </div>
-
-              {filteredProducts.length === 0 ? (
-                <div className="text-center py-12">
-                  <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-400 text-sm">No se encontraron productos</p>
-                </div>
-              ) : (
-                <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex hover:shadow-md transition-shadow"
-                    >
-                      {/* Product Image */}
-                      <div className="w-28 h-28 sm:w-32 sm:h-32 lg:w-44 lg:h-44 flex-shrink-0 bg-[#F5F0E8] flex items-center justify-center overflow-hidden">
-                        {product.imageUrl ? (
-                          <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Package className="w-10 h-10 text-[#C5A55A]/20" />
+                    {/* Info */}
+                    <div className="flex-1 p-3 lg:p-5 flex flex-col justify-between min-w-0">
+                      <div>
+                        {/* Type badge + category */}
+                        <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                          <span className={`inline-flex items-center gap-1 text-[9px] lg:text-[10px] font-bold px-2 py-0.5 rounded-full ${getTypeBadgeClass(item.type)}`}>
+                            {getTypeIcon(item.type)}
+                            {getTypeLabel(item.type)}
+                          </span>
+                          <span className="text-[#C5A55A] text-[9px] lg:text-xs tracking-[0.1em] uppercase font-bold">
+                            {getCategoryLabel(item)}
+                          </span>
+                        </div>
+                        <h3 className="font-semibold text-[#1A1A1A] text-sm lg:text-lg leading-snug line-clamp-2">
+                          {item.name}
+                        </h3>
+                        {item.description && (
+                          <p className="text-gray-400 text-xs lg:text-sm leading-relaxed mt-1 line-clamp-2">
+                            {item.description}
+                          </p>
                         )}
                       </div>
-
-                      {/* Product Info */}
-                      <div className="flex-1 p-3 lg:p-5 flex flex-col justify-between min-w-0">
+                      <div className="flex items-end justify-between mt-2">
                         <div>
-                          <span className="text-[#C5A55A] text-[9px] lg:text-xs tracking-[0.15em] uppercase font-bold">
-                            {CATEGORY_LABELS[product.category] || product.category}
-                          </span>
-                          <h3 className="font-semibold text-[#1A1A1A] text-sm lg:text-lg leading-snug mt-0.5 line-clamp-2">
-                            {product.name}
-                          </h3>
-                          {product.description && (
-                            <p className="text-gray-400 text-xs lg:text-sm leading-relaxed mt-1 line-clamp-2">
-                              {product.description}
+                          {item.price && (
+                            <p className="text-[#C5A55A] font-black text-lg lg:text-xl leading-none">{item.price}</p>
+                          )}
+                          {item.type === "product" && item.stock !== null && item.stock !== undefined && (
+                            <p className={`text-[10px] mt-0.5 ${item.stock > 0 ? "text-green-500" : "text-red-400"}`}>
+                              {item.stock > 0 ? `${item.stock} disponibles` : "Agotado"}
                             </p>
                           )}
                         </div>
-                        <div className="flex items-end justify-between mt-2">
-                          <div>
-                            {product.price && (
-                              <p className="text-[#C5A55A] font-black text-lg lg:text-xl leading-none">{product.price}</p>
-                            )}
-                            {product.stock !== null && product.stock !== undefined && (
-                              <p className={`text-[10px] mt-0.5 ${product.stock > 0 ? "text-green-500" : "text-red-400"}`}>
-                                {product.stock > 0 ? `${product.stock} disponibles` : "Agotado"}
-                              </p>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => handleOpenPurchase(product)}
-                            disabled={product.stock === 0}
-                            className="flex items-center gap-1 lg:gap-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs lg:text-sm font-bold px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl transition-colors shadow-sm"
-                          >
-                            <ShoppingBag className="w-3.5 h-3.5" />
-                            {product.stock === 0 ? "Agotado" : "Comprar"}
-                          </button>
-                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleItemClick(item); }}
+                          disabled={item.type === "product" && item.stock === 0}
+                          className="flex items-center gap-1 lg:gap-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs lg:text-sm font-bold px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl transition-colors shadow-sm"
+                        >
+                          {item.type === "ebook" ? (
+                            <><BookOpen className="w-3.5 h-3.5" /> Ver libro</>
+                          ) : item.type === "service" ? (
+                            <><Scissors className="w-3.5 h-3.5" /> Agendar</>
+                          ) : item.stock === 0 ? (
+                            "Agotado"
+                          ) : (
+                            <><ShoppingBag className="w-3.5 h-3.5" /> Comprar</>
+                          )}
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
       {/* ─── WhatsApp Floating Button ────────────────────────────────── */}
       <a
-        href="https://wa.me/523221007799?text=Hola%2C%20me%20interesa%20un%20producto%20de%20Nutriser%20Shop"
+        href="https://wa.me/523221007799?text=Hola%2C%20me%20interesa%20un%20servicio%20de%20Nutriser"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-lg shadow-[#25D366]/30 hover:shadow-xl hover:shadow-[#25D366]/40 hover:scale-110 transition-all duration-300"
@@ -422,11 +523,10 @@ export default function Store() {
         <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" />
       </a>
 
-      {/* ─── Purchase Modal ───────────────────────────────────────────────────── */}
+      {/* ─── Purchase Modal (solo para productos) ─────────────────────── */}
       {purchaseModal && selectedProduct && (
         <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50">
           <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
-            {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex justify-between items-center rounded-t-3xl sm:rounded-t-2xl">
               <div>
                 <h2 className="font-bold text-lg text-[#1A1A1A] flex items-center gap-2">
@@ -454,7 +554,6 @@ export default function Store() {
               </div>
             ) : (
               <form onSubmit={handleSubmitPurchase} className="p-5 space-y-4">
-                {/* Product summary */}
                 <div className="flex gap-3 bg-[#FAF7F2] rounded-2xl p-3">
                   {selectedProduct.imageUrl ? (
                     <img src={selectedProduct.imageUrl} alt={selectedProduct.name} className="w-16 h-16 object-cover rounded-xl" />
@@ -467,7 +566,6 @@ export default function Store() {
                   </div>
                 </div>
 
-                {/* Payment info */}
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm">
                   <p className="font-bold text-amber-800 mb-2">Realiza tu pago:</p>
                   <p className="text-amber-700 text-xs">Transferencia bancaria a:</p>
@@ -477,7 +575,6 @@ export default function Store() {
                   <p className="text-amber-600 text-xs mt-2">Después sube tu comprobante aquí abajo.</p>
                 </div>
 
-                {/* Form fields */}
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Nombre completo</label>
                   <input type="text" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="Tu nombre" className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 focus:border-[#C5A55A] bg-gray-50" required />
@@ -495,7 +592,6 @@ export default function Store() {
                   <input type="number" value={quantity} onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} min={1} max={selectedProduct.stock || 99} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 focus:border-[#C5A55A] bg-gray-50" />
                 </div>
 
-                {/* Discount code */}
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Código de descuento (opcional)</label>
                   <div className="flex gap-2">
@@ -507,11 +603,7 @@ export default function Store() {
                       <div className="flex items-center gap-2 text-green-700 text-xs bg-green-50 border border-green-200 rounded-xl px-3 py-2">
                         <span className="text-green-600 font-bold">✓</span>
                         <span>
-                          {discountInfo.isTwoForOne
-                            ? "¡2x1 aplicado!"
-                            : discountInfo.isGift
-                            ? "¡Regalo aplicado! Producto gratis."
-                            : `¡${discountInfo.discount}% de descuento!`}
+                          {discountInfo.isTwoForOne ? "¡2x1 aplicado!" : discountInfo.isGift ? "¡Regalo aplicado! Producto gratis." : `¡${discountInfo.discount}% de descuento!`}
                         </span>
                       </div>
                       {selectedProduct?.price && !discountInfo.isTwoForOne && (() => {
@@ -545,16 +637,10 @@ export default function Store() {
                   )}
                 </div>
 
-                {/* Monedero Nutriser */}
                 {isLoggedIn && walletBalance > 0 && (
                   <div className={`border rounded-xl p-3 transition-all ${useWalletStore ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
                     <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={useWalletStore}
-                        onChange={(e) => setUseWalletStore(e.target.checked)}
-                        className="w-4 h-4 accent-[#C5A55A]"
-                      />
+                      <input type="checkbox" checked={useWalletStore} onChange={(e) => setUseWalletStore(e.target.checked)} className="w-4 h-4 accent-[#C5A55A]" />
                       <Wallet className="w-5 h-5 text-[#C5A55A]" />
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
@@ -569,7 +655,6 @@ export default function Store() {
                   </div>
                 )}
 
-                {/* Proof upload */}
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-2">Comprobante de pago *</label>
                   <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-[#C5A55A]/40 rounded-2xl cursor-pointer hover:bg-[#C5A55A]/5 transition">
@@ -593,7 +678,7 @@ export default function Store() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
-          BOTÓN FLOTANTE MONEDERO (estilo Farmacia del Ahorro)
+          BOTÓN FLOTANTE MONEDERO
       ══════════════════════════════════════════════════════════════════════ */}
       <button
         onClick={() => {
@@ -615,22 +700,16 @@ export default function Store() {
       ══════════════════════════════════════════════════════════════════════ */}
       {walletSheetOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center">
-          {/* Overlay */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setWalletSheetOpen(false)} />
-          {/* Sheet: mobile = bottom sheet full width | desktop = centered card */}
           <div className="relative w-full sm:max-w-[420px] sm:rounded-3xl bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto" style={{ animation: 'slideUp 0.3s ease-out' }}>
-            {/* Handle */}
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-gray-300" />
             </div>
-            {/* Título */}
             <h2 className="text-center text-lg font-bold text-gray-900 pb-3">Tu Monedero Nutriser</h2>
             <div className="border-t border-gray-100" />
 
-            {/* Tarjeta del monedero */}
             <div className="p-5">
               <div className="bg-gradient-to-br from-[#FAF7F2] to-[#F5EFE3] rounded-2xl shadow-lg border border-[#E8DCC8] overflow-hidden">
-                {/* Header tarjeta */}
                 <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2D2D2D] px-5 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-[#C5A55A] font-black text-xs tracking-widest uppercase">Monedero Nutriser</span>
@@ -644,7 +723,6 @@ export default function Store() {
                   </div>
                 </div>
 
-                {/* QR / Código */}
                 <div className="px-5 py-4 flex flex-col items-center">
                   {walletData ? (
                     <>
@@ -656,18 +734,11 @@ export default function Store() {
                         fgColor="#1A1A1A"
                         className="mb-3"
                       />
-                      <p className="font-bold text-gray-900 text-base tracking-wide">
-                        {patient?.name}
-                      </p>
+                      <p className="font-bold text-gray-900 text-base tracking-wide">{patient?.name}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-gray-500 text-sm font-mono tracking-wider">
-                          {walletData.wallet.walletNumber}
-                        </p>
+                        <p className="text-gray-500 text-sm font-mono tracking-wider">{walletData.wallet.walletNumber}</p>
                         <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(walletData.wallet.walletNumber || "");
-                            toast.success("Número copiado");
-                          }}
+                          onClick={() => { navigator.clipboard.writeText(walletData.wallet.walletNumber || ""); toast.success("Número copiado"); }}
                           className="p-1 rounded hover:bg-gray-100 transition-colors"
                         >
                           <Copy className="w-3.5 h-3.5 text-gray-400" />
@@ -682,18 +753,13 @@ export default function Store() {
                   )}
                 </div>
 
-                {/* Footer tarjeta */}
                 <div className="px-5 pb-4 flex items-center justify-between">
                   <img src={LOGO_URL} alt="Nutriser" className="h-8 object-contain opacity-60" />
                   <p className="text-[10px] text-gray-400 font-medium">AESTHETIC & NUTRITION</p>
                 </div>
               </div>
 
-              {/* Saldo y acciones */}
               <div className="flex items-center justify-center gap-6 mt-4">
-                <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                </button>
                 <div className="flex items-center gap-1.5">
                   <div className="w-6 h-6 rounded-full bg-[#C5A55A] flex items-center justify-center">
                     <span className="text-white text-[9px] font-black">e$</span>
@@ -703,7 +769,6 @@ export default function Store() {
               </div>
             </div>
 
-            {/* Botón Ir a mi monedero */}
             <div className="px-5 pb-8">
               <button
                 onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }}
@@ -716,7 +781,6 @@ export default function Store() {
         </div>
       )}
 
-      {/* CSS animation for bottom sheet & desktop card */}
       <style>{`
         @keyframes slideUp {
           from { transform: translateY(100%); }

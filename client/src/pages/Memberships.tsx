@@ -308,6 +308,54 @@ export default function Memberships() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // ─── Normalización de texto (quita tildes, minúsculas) ─────────────────────
+  const normalize = (text: string) =>
+    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+  // ─── Búsqueda unificada (servicios + productos + ebook) ────────────────────
+  const unifiedSearchResults = useMemo(() => {
+    const q = normalize(searchQuery);
+    if (!q) return null;
+    const results: Array<{
+      id: string;
+      name: string;
+      description?: string | null;
+      price?: string | null;
+      imageUrl?: string | null;
+      category?: string | null;
+      itemType: "service" | "product" | "ebook";
+      originalId: number;
+    }> = [];
+    services.forEach(s => {
+      if (
+        normalize(s.name).includes(q) ||
+        (s.description && normalize(s.description).includes(q)) ||
+        (s.category && normalize(s.category).includes(q))
+      ) {
+        results.push({ id: `svc-${s.id}`, name: s.name, description: s.description, price: s.price, imageUrl: s.imageUrl, category: s.category, itemType: "service", originalId: s.id });
+      }
+    });
+    products.forEach(p => {
+      if (
+        normalize(p.name).includes(q) ||
+        (p.description && normalize(p.description).includes(q)) ||
+        (p.category && normalize(p.category).includes(q))
+      ) {
+        results.push({ id: `prd-${p.id}`, name: p.name, description: p.description, price: p.price, imageUrl: p.imageUrl, category: p.category, itemType: "product", originalId: p.id });
+      }
+    });
+    if (ebook) {
+      if (
+        normalize(ebook.title).includes(q) ||
+        (ebook.description && normalize(ebook.description).includes(q)) ||
+        normalize("libro ebook digital").includes(q)
+      ) {
+        results.push({ id: `ebook-${ebook.id}`, name: ebook.title, description: ebook.description, price: (ebook as any).presalePrice ? String((ebook as any).presalePrice) : String(ebook.price), imageUrl: ebook.coverUrl, category: "Libro Digital", itemType: "ebook", originalId: ebook.id });
+      }
+    }
+    return results;
+  }, [searchQuery, services, products, ebook]);
+
   const sortedCategories = useMemo(() => {
     const catSet = new Set<string>();
     services.forEach(s => { if (s.category) catSet.add(s.category); });
@@ -901,20 +949,31 @@ export default function Memberships() {
             </div>
           </div>
 
-          {/* Search bar */}
-          {activeTab === "tratamientos" && (
-            <div className="relative mt-3">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="text" placeholder="¿Qué estás buscando?"
-                value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-100 border-0 rounded-full pl-10 pr-4 py-2.5 lg:py-3 text-sm lg:text-base text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/50 transition-all" />
-            </div>
-          )}
+          {/* Search bar — siempre visible, busca en servicios + productos + libros */}
+          <div className="relative mt-3">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar tratamientos, productos, libros…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-100 border-0 rounded-full pl-10 pr-10 py-2.5 lg:py-3 text-sm lg:text-base text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/50 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center hover:bg-gray-400 transition-all"
+              >
+                <X className="w-3 h-3 text-gray-600" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* ── Banner Carrusel de Ofertas (clickeable → comprar paquete) ── */}
-      <PromoBanner onBannerClick={(pkgIndex) => {
+      {/* Ocultar banner cuando hay búsqueda activa */}
+      {!searchQuery && <PromoBanner onBannerClick={(pkgIndex) => {
         const pkg = PACKAGES[pkgIndex];
         if (pkg) {
           openCheckout({
@@ -928,17 +987,142 @@ export default function Memberships() {
             itemType: "package",
           });
         }
-      }} />
+      }} />}
 
-      {/* ══════════════════════════════════════════════════════════════════════
+      {/* ════════════════════════════════════════════════════════════════════
+          VISTA DE RESULTADOS DE BÚSqueda UNIFICADA
+      ════════════════════════════════════════════════════════════════════ */}
+      {unifiedSearchResults !== null && (
+        <div className="pb-28 bg-gray-50 min-h-screen">
+          <div className="max-w-7xl mx-auto px-4 py-5">
+            {/* Header de resultados */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="font-black text-gray-900 text-lg">
+                  {unifiedSearchResults.length > 0
+                    ? `${unifiedSearchResults.length} resultado${unifiedSearchResults.length !== 1 ? "s" : ""} para “${searchQuery}”`
+                    : `Sin resultados para “${searchQuery}”`}
+                </h2>
+                {unifiedSearchResults.length > 0 && (
+                  <p className="text-gray-400 text-xs mt-0.5">Servicios, productos y libros</p>
+                )}
+              </div>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-[#C5A55A] text-xs font-bold flex items-center gap-1 hover:underline"
+              >
+                <X className="w-3.5 h-3.5" /> Limpiar
+              </button>
+            </div>
+
+            {/* Estado vacío */}
+            {unifiedSearchResults.length === 0 && (
+              <div className="text-center py-20">
+                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-10 h-10 text-gray-300" />
+                </div>
+                <h3 className="font-bold text-gray-400 text-xl mb-2">Sin resultados</h3>
+                <p className="text-gray-300 text-sm max-w-xs mx-auto">
+                  No encontramos nada para “{searchQuery}”. Intenta con otra palabra.
+                </p>
+              </div>
+            )}
+
+            {/* Grid de resultados */}
+            {unifiedSearchResults.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
+                {unifiedSearchResults.map(item => {
+                  const catMeta = CATEGORY_META[item.category ?? "general"] ?? CATEGORY_META.general;
+                  const CatIcon = catMeta.icon;
+                  const priceNum = item.price ? parseInt(item.price.replace(/[^0-9]/g, "")) : null;
+                  const typeLabel = item.itemType === "service" ? "Servicio" : item.itemType === "product" ? "Producto" : "Libro";
+                  const typeBg = item.itemType === "service" ? "bg-[#C5A55A]/10 text-[#C5A55A]" : item.itemType === "product" ? "bg-purple-100 text-purple-600" : "bg-blue-100 text-blue-600";
+                  return (
+                    <div
+                      key={item.id}
+                      className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col cursor-pointer active:scale-95"
+                      onClick={() => {
+                        if (item.itemType === "service") {
+                          track("service", item.id, item.name, "info");
+                          const svc = services.find(s => s.id === item.originalId);
+                          if (svc) setDetailItem({ id: item.id, name: svc.name, description: svc.description, price: svc.price, priceNum, category: svc.category, imageUrl: svc.imageUrl, itemType: "service" });
+                        } else if (item.itemType === "product") {
+                          track("product", item.id, item.name, "view");
+                          openCheckout({ id: item.id, name: item.name, price: priceNum ?? 0, priceLabel: item.price ?? "Consultar", qty: 1, imageUrl: item.imageUrl, category: item.category ?? "general", itemType: "product", productId: item.originalId });
+                        } else if (item.itemType === "ebook") {
+                          track("ebook", item.id, item.name, "view");
+                          openCheckout({ id: item.id, name: item.name, price: priceNum ?? 0, priceLabel: `$${(priceNum ?? 0).toLocaleString("es-MX")} MXN`, qty: 1, imageUrl: item.imageUrl, category: "ebook", itemType: "ebook", ebookId: item.originalId });
+                        }
+                      }}
+                    >
+                      <div className="relative h-32 overflow-hidden">
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: catMeta.bg }}>
+                            <CatIcon className="w-10 h-10 opacity-30" style={{ color: catMeta.color }} />
+                          </div>
+                        )}
+                        <span className={`absolute top-2 left-2 text-[9px] font-black px-2 py-0.5 rounded-full ${typeBg}`}>{typeLabel}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleWishlist({ id: item.id, name: item.name, price: priceNum ?? 0, priceLabel: item.price ?? "Consultar", imageUrl: item.imageUrl, category: item.category ?? "general", itemType: item.itemType });
+                          }}
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all"
+                        >
+                          <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(item.id) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
+                        </button>
+                      </div>
+                      <div className="p-3 flex-1 flex flex-col">
+                        <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{item.name}</h3>
+                        {item.description && <p className="text-gray-400 text-[10px] line-clamp-2 mb-2">{item.description}</p>}
+                        <div className="mt-auto">
+                          {item.price && priceNum && priceNum > 0 ? (
+                            <p className="text-[#C5A55A] font-black text-sm mb-2">
+                              {item.itemType === "service" ? formatServicePrice(item.price) : `$${priceNum.toLocaleString("es-MX")} MXN`}
+                            </p>
+                          ) : (
+                            <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (item.itemType === "service") {
+                                const svc = services.find(s => s.id === item.originalId);
+                                if (svc) openCheckout({ id: item.id, name: svc.name, price: priceNum ?? 0, priceLabel: formatServicePrice(svc.price), qty: 1, imageUrl: svc.imageUrl, category: svc.category ?? "general", itemType: "service" });
+                              } else if (item.itemType === "product") {
+                                openCheckout({ id: item.id, name: item.name, price: priceNum ?? 0, priceLabel: item.price ?? "Consultar", qty: 1, imageUrl: item.imageUrl, category: item.category ?? "general", itemType: "product", productId: item.originalId });
+                              } else {
+                                openCheckout({ id: item.id, name: item.name, price: priceNum ?? 0, priceLabel: `$${(priceNum ?? 0).toLocaleString("es-MX")} MXN`, qty: 1, imageUrl: item.imageUrl, category: "ebook", itemType: "ebook", ebookId: item.originalId });
+                              }
+                            }}
+                            className="w-full flex items-center justify-center gap-1 font-bold text-[10px] py-2 rounded-xl transition-all active:scale-95 text-white"
+                            style={{ background: "#C5A55A" }}
+                          >
+                            <Zap className="w-3 h-3" />
+                            {item.itemType === "service" ? "Agendar" : item.itemType === "ebook" ? "Comprar libro" : "Comprar"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════
           TABS — Estilo app comercial
-      ══════════════════════════════════════════════════════════════════════ */}
+      ════════════════════════════════════════════════════════════════════ */}
       {/* Tabs moved to bottom navigation bar */}
 
       {/* ══════════════════════════════════════════════════════════════════════
           TAB: TRATAMIENTOS
       ══════════════════════════════════════════════════════════════════════ */}
-      {activeTab === "tratamientos" && (
+      {activeTab === "tratamientos" && !searchQuery && (
         <div className="pb-28">
           {/* ── Categorías con iconos circulares (scroll horizontal) ── */}
           <div className="bg-white mt-2 py-4">
@@ -1230,7 +1414,7 @@ onClick={() => {
       {/* ══════════════════════════════════════════════════════════════════════
           TAB: FARMACY
       ══════════════════════════════════════════════════════════════════════ */}
-      {activeTab === "farmacy" && (
+      {activeTab === "farmacy" && !searchQuery && (
         <div className="pb-28 mt-2">
           <div className="bg-white py-5">
             <div className="max-w-7xl mx-auto px-4">
@@ -1312,7 +1496,7 @@ onClick={() => {
       {/* ══════════════════════════════════════════════════════════════════════
           TAB: LIBRARY
       ══════════════════════════════════════════════════════════════════════ */}
-      {activeTab === "library" && (
+      {activeTab === "library" && !searchQuery && (
         <div className="pb-28 mt-2">
           <div className="bg-white py-5">
             <div className="max-w-7xl mx-auto px-4">
@@ -1407,7 +1591,7 @@ onClick={() => {
       )}
 
       {/* TAB: MIS TRATAMIENTOS — movido al Splash Hub */}
-      {activeTab === "misTratamientos" && (
+      {activeTab === "misTratamientos" && !searchQuery && (
         <div className="pb-28 mt-2 flex flex-col items-center justify-center min-h-[60vh]">
           <div className="text-center px-6">
             <div className="w-20 h-20 rounded-full bg-[#FAF7F2] flex items-center justify-center mx-auto mb-4">
@@ -1523,7 +1707,7 @@ onClick={() => {
       {/* ══════════════════════════════════════════════════════════════════════
           TAB: LISTA DE DESEOS
       ══════════════════════════════════════════════════════════════════════ */}
-      {activeTab === "wishlist" && (
+      {activeTab === "wishlist" && !searchQuery && (
         <div className="pb-28 mt-2">
           <div className="bg-white py-5">
             <div className="max-w-7xl mx-auto px-4">

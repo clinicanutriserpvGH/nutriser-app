@@ -279,6 +279,10 @@ export const translations = {
     totalHistoric: "Total histórico:",
     nutritionConsultations: "consultas nutricionales",
     consultationsFree: "consulta(s) gratis disponible(s)",
+    walletPanelTitle: "Tu Monedero Nutriser",
+    walletStatusActive: "ACTIVA",
+    walletStatusInactive: "INACTIVA",
+    goToMyWallet: "Ir a mi monedero",
   },
   EN: {
     // Header
@@ -560,6 +564,10 @@ export const translations = {
     totalHistoric: "Total historic:",
     nutritionConsultations: "nutrition consultations",
     consultationsFree: "free consultation(s) available",
+    walletPanelTitle: "Your Nutriser Wallet",
+    walletStatusActive: "ACTIVE",
+    walletStatusInactive: "INACTIVE",
+    goToMyWallet: "Go to my wallet",
   },
 };
 

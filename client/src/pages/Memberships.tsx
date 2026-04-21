@@ -2304,7 +2304,7 @@ onClick={() => {
             </div>
             {/* Título */}
             <div className="text-center pb-3 px-5">
-              <h2 className="text-lg font-bold text-gray-900">Tu Monedero Nutriser</h2>
+              <h2 className="text-lg font-bold text-gray-900">{t("walletPanelTitle", lang)}</h2>
             </div>
 
             {/* ── Tarjeta digital estilo CR-80 (igual que la física) ── */}
@@ -2352,9 +2352,13 @@ onClick={() => {
                       <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 8, letterSpacing: "0.1em" }}>aesthetic &amp; nutrition</div>
                     </div>
                     {walletData?.isActive !== false ? (
-                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>ACTIVA</span>
+                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>
+                        {t("walletStatusActive", lang)}
+                      </span>
                     ) : (
-                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>INACTIVA</span>
+                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>
+                        {t("walletStatusInactive", lang)}
+                      </span>
                     )}
                   </div>
 
@@ -2426,7 +2430,7 @@ onClick={() => {
                     onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }}
                     style={{ color: "rgba(0,0,0,0.65)", fontSize: 9, fontWeight: 700, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", letterSpacing: "0.02em" }}
                   >
-                    Ver Estado de Cuenta
+                    {t("viewStatement", lang)}
                   </button>
                 </div>
               </div>
@@ -2438,7 +2442,7 @@ onClick={() => {
                 onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }}
                 className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-2xl text-base hover:bg-[#2D2D2D] active:scale-[0.98] transition-all shadow-lg"
               >
-                Ir a mi monedero
+                {t("goToMyWallet", lang)}
               </button>
             </div>
           </div>

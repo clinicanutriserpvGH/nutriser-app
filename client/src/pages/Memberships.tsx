@@ -893,8 +893,8 @@ export default function Memberships() {
             {/* Logo */}
             <img src={LOGO_URL} alt="Nutriser" className="w-10 h-10 lg:w-12 lg:h-12 object-contain flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-[#C5A55A] text-[9px] lg:text-[10px] tracking-[0.2em] uppercase font-semibold">Aesthetic & Nutrition</p>
-              <h1 className="text-gray-900 text-lg lg:text-xl font-black leading-tight">Tienda Nutriser</h1>
+              <p className="text-[#C5A55A] text-[9px] lg:text-[10px] tracking-[0.2em] uppercase font-semibold">{t("aestheticNutrition", lang)}</p>
+              <h1 className="text-gray-900 text-lg lg:text-xl font-black leading-tight">{t("nutriserShop", lang)}</h1>
             </div>
 
             {/* Session + Cart */}
@@ -917,7 +917,7 @@ export default function Memberships() {
                   {/* Cerrar sesión — solo visible en desktop */}
                   <button
                     onClick={() => logout()}
-                    title="Cerrar sesión"
+                    title={t("closeSession", lang)}
                     className="hidden md:flex items-center justify-center w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
                   >
                     <LogOut className="w-4 h-4" />
@@ -928,7 +928,7 @@ export default function Memberships() {
                 <button onClick={() => navigate("/mis-tratamientos?returnTo=/memberships")}
                   className="hidden md:flex items-center gap-1.5 bg-[#C5A55A] text-white px-3 py-2 rounded-full text-xs font-bold hover:bg-[#B8963E] active:scale-95 transition-all">
                   <User className="w-3.5 h-3.5" />
-                  Iniciar sesión
+                  {t("signIn", lang)}
                 </button>
               )}
               {/* Language toggle */}
@@ -954,7 +954,7 @@ export default function Memberships() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Buscar tratamientos, productos, libros…"
+              placeholder={t("searchPlaceholder", lang)}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="w-full bg-gray-100 border-0 rounded-full pl-10 pr-10 py-2.5 lg:py-3 text-sm lg:text-base text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/50 transition-all"
@@ -1000,18 +1000,18 @@ export default function Memberships() {
               <div>
                 <h2 className="font-black text-gray-900 text-lg">
                   {unifiedSearchResults.length > 0
-                    ? `${unifiedSearchResults.length} resultado${unifiedSearchResults.length !== 1 ? "s" : ""} para “${searchQuery}”`
-                    : `Sin resultados para “${searchQuery}”`}
+                    ? `${unifiedSearchResults.length} ${t("resultsFor", lang)} "${searchQuery}"`
+                    : `${t("noResultsFor", lang)} "${searchQuery}"`}
                 </h2>
                 {unifiedSearchResults.length > 0 && (
-                  <p className="text-gray-400 text-xs mt-0.5">Servicios, productos y libros</p>
+                  <p className="text-gray-400 text-xs mt-0.5">{t("searchAllTypes", lang)}</p>
                 )}
               </div>
               <button
                 onClick={() => setSearchQuery("")}
                 className="text-[#C5A55A] text-xs font-bold flex items-center gap-1 hover:underline"
               >
-                <X className="w-3.5 h-3.5" /> Limpiar
+                <X className="w-3.5 h-3.5" /> {t("clear", lang)}
               </button>
             </div>
 
@@ -1021,9 +1021,9 @@ export default function Memberships() {
                 <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                   <Search className="w-10 h-10 text-gray-300" />
                 </div>
-                <h3 className="font-bold text-gray-400 text-xl mb-2">Sin resultados</h3>
+                <h3 className="font-bold text-gray-400 text-xl mb-2">{t("noResults", lang)}</h3>
                 <p className="text-gray-300 text-sm max-w-xs mx-auto">
-                  No encontramos nada para “{searchQuery}”. Intenta con otra palabra.
+                  {t("noResultsDesc", lang)} "{searchQuery}". {t("tryOtherWord", lang)}
                 </p>
               </div>
             )}
@@ -1035,7 +1035,7 @@ export default function Memberships() {
                   const catMeta = CATEGORY_META[item.category ?? "general"] ?? CATEGORY_META.general;
                   const CatIcon = catMeta.icon;
                   const priceNum = item.price ? Math.round(parseFloat(item.price.replace(/[^0-9.]/g, ""))) : null;
-                  const typeLabel = item.itemType === "service" ? "Servicio" : item.itemType === "product" ? "Producto" : "Libro";
+                  const typeLabel = item.itemType === "service" ? t("typeService", lang) : item.itemType === "product" ? t("typeProduct", lang) : t("typeBook", lang);
                   const typeBg = item.itemType === "service" ? "bg-[#C5A55A]/10 text-[#C5A55A]" : item.itemType === "product" ? "bg-purple-100 text-purple-600" : "bg-blue-100 text-blue-600";
                   return (
                     <div
@@ -1083,7 +1083,7 @@ export default function Memberships() {
                               {item.itemType === "service" ? formatServicePrice(item.price) : `$${priceNum.toLocaleString("es-MX")} MXN`}
                             </p>
                           ) : (
-                            <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
+                            <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
                           )}
                           <button
                             onClick={(e) => {
@@ -1101,7 +1101,7 @@ export default function Memberships() {
                             style={{ background: "#C5A55A" }}
                           >
                             <Zap className="w-3 h-3" />
-                            {item.itemType === "service" ? "Agendar" : item.itemType === "ebook" ? "Comprar libro" : "Comprar"}
+                            {item.itemType === "service" ? t("schedule", lang) : item.itemType === "ebook" ? t("buyBook", lang) : t("buy", lang)}
                           </button>
                         </div>
                       </div>
@@ -1127,7 +1127,7 @@ export default function Memberships() {
           {/* ── Categorías con iconos circulares (scroll horizontal) ── */}
           <div className="bg-white mt-2 py-4">
             <div className="max-w-7xl mx-auto px-4">
-              <h3 className="text-gray-900 font-bold text-base mb-3">Categorías</h3>
+              <h3 className="text-gray-900 font-bold text-base mb-3">{t("categories", lang)}</h3>
               <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-1 lg:justify-center" style={{ scrollbarWidth: "none" }}>
                 {/* Todos */}
                 <button onClick={() => setActiveCategory("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
@@ -1136,7 +1136,7 @@ export default function Memberships() {
                   }`}>
                     <Package className={`w-6 h-6 ${activeCategory === "all" ? "text-white" : "text-gray-500"}`} />
                   </div>
-                  <span className={`text-[10px] font-semibold ${activeCategory === "all" ? "text-[#C5A55A]" : "text-gray-500"}`}>Todos</span>
+                  <span className={`text-[10px] font-semibold ${activeCategory === "all" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catAll", lang)}</span>
                 </button>
                 {/* Paquetes */}
                 <button onClick={() => setActiveCategory("packages")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px]">
@@ -1145,7 +1145,7 @@ export default function Memberships() {
                   }`}>
                     <Crown className={`w-6 h-6 ${activeCategory === "packages" ? "text-white" : "text-amber-600"}`} />
                   </div>
-                  <span className={`text-[10px] font-semibold ${activeCategory === "packages" ? "text-[#C5A55A]" : "text-gray-500"}`}>Paquetes</span>
+                  <span className={`text-[10px] font-semibold ${activeCategory === "packages" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catPackages", lang)}</span>
                 </button>
                 {sortedCategories.map(cat => {
                   const meta = CATEGORY_META[cat] ?? { label: cat, icon: Package, color: "#888", bg: "#f3f4f6" };
@@ -1172,11 +1172,11 @@ export default function Memberships() {
               <div className="max-w-7xl mx-auto px-4">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="font-black text-gray-900 text-lg">Paquetes Especiales</h2>
+                    <h2 className="font-black text-gray-900 text-lg">{t("specialPackages", lang)}</h2>
                     <p className="text-gray-400 text-xs">Los mejores precios en tratamientos combinados</p>
                   </div>
                   <span className="text-[#C5A55A] text-xs font-bold flex items-center gap-0.5">
-                    Ver todo <ChevronRight className="w-3.5 h-3.5" />
+                    {t("viewAll", lang)} <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
 
@@ -1212,7 +1212,7 @@ export default function Memberships() {
                           <div className="flex items-center gap-2 mb-3">
                             <span className="text-xs text-gray-300 line-through">${pkg.regularPrice.toLocaleString("es-MX")}</span>
                             <span className="text-[10px] bg-green-50 text-green-600 font-bold px-2 py-0.5 rounded-full">
-                              Ahorras ${savings.toLocaleString("es-MX")}
+                              {t("savings", lang)} ${savings.toLocaleString("es-MX")}
                             </span>
                           </div>
 
@@ -1232,16 +1232,16 @@ export default function Memberships() {
                             className="w-full flex items-center justify-center gap-1.5 font-semibold text-[11px] py-2 rounded-xl mb-2 transition-all active:scale-95"
                             style={{ border: "1px solid rgba(197,165,90,0.4)", color: "#C5A55A", background: "rgba(197,165,90,0.06)" }}
                           >
-                            <Info className="w-3.5 h-3.5" /> Más información
+                            <Info className="w-3.5 h-3.5" /> {t("seeDetails", lang)}
                           </button>
                           <div className="flex gap-2">
                             <button onClick={() => addToCart({ id: pkg.id, name: pkg.name, price: pkg.price, priceLabel: `$${pkg.price.toLocaleString("es-MX")} MXN`, imageUrl: pkg.imageUrl, category: pkg.category, itemType: "package" })}
                               className="flex-1 flex items-center justify-center gap-1 border border-[#C5A55A] text-[#C5A55A] font-bold text-[11px] py-2.5 rounded-xl hover:bg-[#C5A55A]/5 transition-all active:scale-95">
-                              <ShoppingCart className="w-3.5 h-3.5" /> Al carrito
+                              <ShoppingCart className="w-3.5 h-3.5" /> {t("addToCart", lang)}
                             </button>
                             <button onClick={() => openCheckout({ id: pkg.id, name: pkg.name, price: pkg.price, priceLabel: `$${pkg.price.toLocaleString("es-MX")} MXN`, qty: 1, imageUrl: pkg.imageUrl, category: pkg.category, itemType: "package" })}
                               className="flex-1 flex items-center justify-center gap-1 bg-[#C5A55A] text-white font-bold text-[11px] py-2.5 rounded-xl hover:bg-[#B8963E] transition-all active:scale-95">
-                              <Zap className="w-3.5 h-3.5" /> Comprar
+                              <Zap className="w-3.5 h-3.5" /> {t("buy", lang)}
                             </button>
                           </div>
                         </div>
@@ -1275,7 +1275,7 @@ export default function Memberships() {
                             <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{catServices.length}</span>
                           </div>
                           <button onClick={() => setActiveCategory(cat)} className="text-[#C5A55A] text-xs font-bold flex items-center gap-0.5">
-                            Ver todo <ChevronRight className="w-3.5 h-3.5" />
+                            {t("viewAll", lang)} <ChevronRight className="w-3.5 h-3.5" />
                           </button>
                         </div>
 
@@ -1301,7 +1301,7 @@ export default function Memberships() {
                                   {service.price && service.price !== "Consultar precio" ? (
                                     <p className="text-[#C5A55A] font-black text-sm mb-2">{formatServicePrice(service.price)}</p>
                                   ) : (
-                                    <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
+                                    <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
                                   )}
                                   <button
 onClick={() => {
@@ -1313,7 +1313,7 @@ onClick={() => {
                                      className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95"
                                      style={{ border: "1px solid rgba(197,165,90,0.35)", color: "#C5A55A", background: "rgba(197,165,90,0.05)" }}
                                    >
-                                     <Info className="w-3 h-3" /> Más información
+                                     <Info className="w-3 h-3" /> {t("seeDetails", lang)}
                                    </button>
                                    <div className="flex gap-1.5">
                                      <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
@@ -1322,7 +1322,7 @@ onClick={() => {
                                      </button>
                                     <button onClick={() => openCheckout({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), qty: 1, imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                       className="flex-1 flex items-center justify-center gap-0.5 bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95">
-                                      <Zap className="w-3 h-3" /> Comprar
+                                      <Zap className="w-3 h-3" /> {t("buy", lang)}
                                     </button>
                                   </div>
                                 </div>
@@ -1348,7 +1348,7 @@ onClick={() => {
                     {filteredServices.length === 0 ? (
                       <div className="text-center py-16">
                         <Package className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                        <p className="text-gray-400 font-medium">No se encontraron servicios</p>
+                        <p className="text-gray-400 font-medium">{t("noServicesFound", lang)}</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
@@ -1377,14 +1377,14 @@ onClick={() => {
                                   {service.price && service.price !== "Consultar precio" ? (
                                     <p className="text-[#C5A55A] font-black text-sm mb-2">{formatServicePrice(service.price)}</p>
                                   ) : (
-                                    <p className="text-gray-400 text-xs mb-2 italic">Consultar precio</p>
+                                    <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
                                   )}
                                   <button
                                     onClick={() => { track("service", `svc-${service.id}`, service.name, "info"); setDetailItem({ id: `svc-${service.id}`, name: service.name, description: service.description, price: service.price, priceNum, category: service.category, imageUrl: service.imageUrl, itemType: "service" }); }}
                                     className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95"
                                     style={{ border: "1px solid rgba(197,165,90,0.35)", color: "#C5A55A", background: "rgba(197,165,90,0.05)" }}
                                   >
-                                    <Info className="w-3 h-3" /> Más información
+                                    <Info className="w-3 h-3" /> {t("seeDetails", lang)}
                                   </button>
                                   <div className="flex gap-1.5">
                                     <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
@@ -1393,7 +1393,7 @@ onClick={() => {
                                     </button>
                                     <button onClick={() => openCheckout({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), qty: 1, imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                       className="flex-1 flex items-center justify-center gap-0.5 bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95">
-                                      <Zap className="w-3 h-3" /> Comprar
+                                      <Zap className="w-3 h-3" /> {t("buy", lang)}
                                     </button>
                                   </div>
                                 </div>
@@ -1436,7 +1436,7 @@ onClick={() => {
                   <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                     <FlaskConical className="w-10 h-10 text-gray-300" />
                   </div>
-                  <h3 className="font-bold text-gray-400 text-xl mb-2">Próximamente</h3>
+                  <h3 className="font-bold text-gray-400 text-xl mb-2">{t("comingSoon", lang)}</h3>
                   <p className="text-gray-300 text-sm max-w-xs mx-auto">Estamos preparando nuestros productos nutricionales y cosméticos de alta calidad.</p>
                 </div>
               ) : (
@@ -1478,7 +1478,7 @@ onClick={() => {
                               </button>
                               <button onClick={() => openCheckout({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: product.price ?? "Consultar", qty: 1, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
                                 className="flex-1 flex items-center justify-center bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95">
-                                <Zap className="w-3 h-3" /> Comprar
+                                <Zap className="w-3 h-3" /> {t("buy", lang)}
                               </button>
                             </div>
                           </div>
@@ -1516,7 +1516,7 @@ onClick={() => {
                   <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                     <BookOpen className="w-10 h-10 text-gray-300" />
                   </div>
-                  <h3 className="font-bold text-gray-400 text-xl mb-2">Próximamente</h3>
+                  <h3 className="font-bold text-gray-400 text-xl mb-2">{t("comingSoon", lang)}</h3>
                   <p className="text-gray-300 text-sm max-w-xs mx-auto">Estamos preparando libros y recursos digitales exclusivos para ti.</p>
                 </div>
               ) : (
@@ -1577,7 +1577,7 @@ onClick={() => {
                         })}
                           className="w-full flex items-center justify-center gap-2 bg-[#C5A55A] text-white font-bold py-3.5 rounded-xl hover:bg-[#B8963E] transition-all active:scale-95 shadow-md">
                           <Zap className="w-4 h-4" />
-                          {(ebook as any).presalePrice ? "Pre-comprar ahora" : "Comprar ahora"}
+                          {(ebook as any).presalePrice ? "Pre-comprar ahora" : t("buyNow", lang)}
                         </button>
                       )}
                     </div>
@@ -1756,7 +1756,7 @@ onClick={() => {
                               onClick={() => addToCart({ id: item.id, name: item.name, price: item.price, priceLabel: item.priceLabel, imageUrl: item.imageUrl, category: item.category ?? "general", itemType: item.itemType, productId: item.productId, ebookId: item.ebookId })}
                               className="flex-1 flex items-center justify-center gap-1 border border-gray-200 text-gray-600 font-bold text-[10px] py-1.5 rounded-lg hover:bg-gray-50 transition-all active:scale-95"
                             >
-                              <ShoppingCart className="w-3 h-3" /> Agregar
+                              <ShoppingCart className="w-3 h-3" /> {t("add", lang)}
                             </button>
                             <button
                               onClick={() => removeFromWishlist(item.id)}
@@ -1794,7 +1794,7 @@ onClick={() => {
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-[#C5A55A]" />
-                <h2 className="font-bold text-gray-900">Mi Carrito</h2>
+                <h2 className="font-bold text-gray-900">{t("myCart", lang)}</h2>
                 <span className="bg-[#C5A55A] text-white text-xs font-black px-2 py-0.5 rounded-full">{cartCount}</span>
               </div>
               <button onClick={() => setCartOpen(false)} className="p-2 rounded-full hover:bg-gray-100 transition-colors"><X className="w-5 h-5 text-gray-500" /></button>
@@ -1803,8 +1803,8 @@ onClick={() => {
             {cart.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                 <ShoppingCart className="w-16 h-16 text-gray-200 mb-4" />
-                <p className="text-gray-400 font-medium">Tu carrito está vacío</p>
-                <p className="text-gray-300 text-sm mt-1">Agrega tratamientos, productos o libros</p>
+                <p className="text-gray-400 font-medium">{t("cartEmpty", lang)}</p>
+                <p className="text-gray-300 text-sm mt-1">{t("cartEmptyDesc", lang)}</p>
               </div>
             ) : (
               <>
@@ -1828,12 +1828,12 @@ onClick={() => {
                 {/* Footer fijo */}
                 <div className="p-4 border-t border-gray-100 space-y-3 bg-white">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-900">Total</span>
+                    <span className="font-bold text-gray-900">{t("total", lang)}</span>
                     <span className="text-xl font-black text-[#C5A55A]">${cartTotal.toLocaleString("es-MX")} MXN</span>
                   </div>
                   <button onClick={() => { setCartOpen(false); openCheckout(); }}
                     className="w-full bg-[#C5A55A] text-white font-black py-4 rounded-xl hover:bg-[#B8963E] transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg text-base">
-                    <Zap className="w-5 h-5" /> Proceder al pago
+                    <Zap className="w-5 h-5" /> {t("proceedToCheckout", lang)}
                   </button>
                 </div>
               </>
@@ -1850,7 +1850,7 @@ onClick={() => {
           <div className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h2 className="font-bold text-gray-900 text-base">
-                {successCode ? "¡Pedido Enviado!" : "Finalizar Compra"}
+                {successCode ? t("orderSent", lang) : t("finalizeOrder", lang)}
               </h2>
               <button onClick={() => setCheckoutOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100"><X className="w-5 h-5 text-gray-400" /></button>
             </div>
@@ -1905,20 +1905,20 @@ onClick={() => {
                     </div>
                   ))}
                   <div className="border-t border-gray-200 pt-2 flex items-center justify-between font-bold">
-                    <span className="text-gray-900">Total</span>
-                    <span className="text-[#C5A55A]">{hasValidPrice ? `$${checkoutTotal.toLocaleString("es-MX")} MXN` : "Consultar precio"}</span>
+                    <span className="text-gray-900">{t("total", lang)}</span>
+                    <span className="text-[#C5A55A]">{hasValidPrice ? `$${checkoutTotal.toLocaleString("es-MX")} MXN` : t("consultPrice", lang)}</span>
                   </div>
                 </div>
                 {/* Código de descuento */}
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Código de descuento</p>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{t("discountCode", lang)}</p>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                      <Input value={discountCode} onChange={e => setDiscountCode(e.target.value)} placeholder="Ingresa tu código de descuento" className="pl-9" />
+                      <Input value={discountCode} onChange={e => setDiscountCode(e.target.value)} placeholder={t("enterDiscountCode", lang)} className="pl-9" />
                     </div>
                     <Button type="button" onClick={handleValidateDiscount} disabled={discountValidating} className="bg-[#C5A55A] hover:bg-[#B8963E] text-white px-3 text-sm">
-                      {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Aplicar"}
+                      {discountValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : t("apply", lang)}
                     </Button>
                   </div>
                   {discountInfo?.valid && (
@@ -2020,7 +2020,7 @@ onClick={() => {
                 {/* — Selector de método de pago — */}
                 {!fullyCoveredByWallet && (
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Método de pago</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{t("paymentMethod", lang)}</p>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
@@ -2032,8 +2032,8 @@ onClick={() => {
                         }`}
                       >
                         <span className="text-xl">🏦</span>
-                        <span className="text-xs font-bold">Transferencia</span>
-                        <span className="text-[10px] text-center leading-tight opacity-70">Sube tu comprobante</span>
+                        <span className="text-xs font-bold">{t("transfer", lang)}</span>
+                        <span className="text-[10px] text-center leading-tight opacity-70">{t("uploadReceipt", lang)}</span>
                       </button>
                       <button
                         type="button"
@@ -2045,8 +2045,8 @@ onClick={() => {
                         }`}
                       >
                         <span className="text-xl">💵</span>
-                        <span className="text-xs font-bold">Efectivo</span>
-                        <span className="text-[10px] text-center leading-tight opacity-70">Paga en clínica</span>
+                        <span className="text-xs font-bold">{t("cash", lang)}</span>
+                        <span className="text-[10px] text-center leading-tight opacity-70">{t("payAtClinic", lang)}</span>
                       </button>
                     </div>
                     {paymentMethod === 'cash' && !walletData?.id && (
@@ -2124,9 +2124,9 @@ onClick={() => {
                     : 'bg-[#C5A55A] hover:bg-[#B8963E]'
                 }`}>
                   {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                    fullyCoveredByWallet ? "Confirmar compra con monedero" :
-                    paymentMethod === 'cash' ? "💵 Registrar pago en efectivo" :
-                    "Enviar comprobante y confirmar pedido"
+                    fullyCoveredByWallet ? t("confirmWithWallet", lang) :
+                    paymentMethod === 'cash' ? `💵 ${t("registerCashPayment", lang)}` :
+                    t("sendReceiptAndConfirm", lang)
                   )}
                 </Button>
               </form>
@@ -2150,7 +2150,7 @@ onClick={() => {
                 }`}
               >
                 <Sparkles className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Servicios</span>
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">{t("tabServices", lang)}</span>
               </button>
 
               {/* Library */}
@@ -2161,7 +2161,7 @@ onClick={() => {
                 }`}
               >
                 <BookOpen className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Librería</span>
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">{t("tabLibrary", lang)}</span>
               </button>
 
               {/* Farmacy */}
@@ -2172,7 +2172,7 @@ onClick={() => {
                 }`}
               >
                 <FlaskConical className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Productos</span>
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">{t("tabProducts", lang)}</span>
               </button>
 
               {/* Monedero — Botón central flotante */}
@@ -2190,7 +2190,7 @@ onClick={() => {
                     <img src={LOGO_URL} alt="Monedero" className="w-8 h-8 lg:w-11 lg:h-11 rounded-full object-contain" />
                   </div>
                 </div>
-                <span className="text-[9px] lg:text-xs font-bold text-[#C5A55A] mt-0.5 leading-tight">Monedero</span>
+                <span className="text-[9px] lg:text-xs font-bold text-[#C5A55A] mt-0.5 leading-tight">{t("tabWallet", lang)}</span>
               </button>
 
               {/* Lista de Deseos */}
@@ -2204,7 +2204,7 @@ onClick={() => {
                 {wishlistCount > 0 && (
                   <span className="absolute -top-0.5 right-0 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center">{wishlistCount > 9 ? "9+" : wishlistCount}</span>
                 )}
-                <span className="text-[8px] lg:text-xs font-semibold leading-tight">Deseos</span>
+                <span className="text-[8px] lg:text-xs font-semibold leading-tight">{t("tabWishlist", lang)}</span>
               </button>
 
 
@@ -2218,7 +2218,7 @@ onClick={() => {
                 className="flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors text-gray-400"
               >
                 <User className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">Cuenta</span>
+                <span className="text-[9px] lg:text-xs font-semibold leading-tight">{t("tabAccount", lang)}</span>
               </button>
             </div>
           </div>

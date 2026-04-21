@@ -3,77 +3,171 @@ export const translations = {
     // Header
     aestheticNutrition: "Aesthetic & Nutrition",
     nutriserShop: "Tienda Nutriser",
-    searchPlaceholder: "¿Qué estás buscando?",
-    closeSession: "Cerrar sesión",
+    searchPlaceholder: "Buscar tratamientos, productos, libros\u2026",
+    closeSession: "Cerrar sesi\u00f3n",
     back: "Regresar",
-    
+    signIn: "Iniciar sesi\u00f3n",
+
     // Tabs
     tabTreatments: "Tratamientos",
+    tabServices: "Servicios",
     tabFarmacy: "Farmacy",
+    tabProducts: "Productos",
     tabWallet: "Monedero",
     tabLibrary: "Librería",
     tabWishlist: "Deseos",
     tabAccount: "Cuenta",
-    
+
     // Categories
     catAll: "Todos",
     catPackages: "Paquetes",
-    catNutricion: "Nutrición",
+    catNutricion: "Nutrici\u00f3n",
     catCorporales: "Corporales",
     catFaciales: "Faciales",
     catMedicina: "Medicina",
     catOtros: "Otros",
     catProductos: "Productos",
     catGeneral: "General",
-    
+    categories: "Categor\u00edas",
+
+    // Sections
+    specialPackages: "Paquetes Especiales",
+    services: "Servicios",
+    pharmacy: "Farmacia",
+    library: "Librer\u00eda",
+    wishlist: "Lista de Deseos",
+    wallet: "Monedero",
+    myTreatments: "Mis Tratamientos",
+
     // Buttons
     viewAll: "Ver todo",
     buy: "Comprar",
     buyNow: "Comprar ahora",
+    buyBook: "Comprar libro",
+    schedule: "Agendar",
     addToCart: "Al carrito",
     add: "Agregar",
     proceedToPayment: "Proceder al pago",
     done: "Listo",
     apply: "Aplicar",
-    
+    clear: "Limpiar",
+    close: "Cerrar",
+    cancel: "Cancelar",
+    confirm: "Confirmar",
+    copy: "Copiar",
+    copied: "Copiado",
+
+    // Search results
+    resultsFor: "resultado(s) para",
+    noResultsFor: "Sin resultados para",
+    searchAllTypes: "Servicios, productos y libros",
+    noResults: "Sin resultados",
+    noResultsDesc: "No encontramos nada para",
+    tryOtherWord: "Intenta con otra palabra.",
+
+    // Item types
+    typeService: "Servicio",
+    typeProduct: "Producto",
+    typeBook: "Libro",
+
     // Messages
     noServicesFound: "No se encontraron servicios",
     consultPrice: "Consultar precio",
-    comingSoon: "Próximamente",
-    lastUnits: "Últimas",
+    comingSoon: "Pr\u00f3ximamente",
+    lastUnits: "\u00daltimas",
     addedToCart: "agregado al carrito",
-    enterCode: "Ingresa un código",
-    twoForOneToast: "¡Código 2x1 aplicado!",
-    giftCodeToast: "¡Código de regalo aplicado!",
+    enterCode: "Ingresa un c\u00f3digo",
+    twoForOneToast: "\u00a1C\u00f3digo 2x1 aplicado!",
+    giftCodeToast: "\u00a1C\u00f3digo de regalo aplicado!",
     discountToast: "de descuento aplicado",
-    invalidCode: "Código inválido o no está activo",
-    codeValidationError: "Error al validar el código",
+    invalidCode: "C\u00f3digo inv\u00e1lido o no est\u00e1 activo",
+    codeValidationError: "Error al validar el c\u00f3digo",
     enterName: "Ingresa tu nombre",
     enterEmail: "Ingresa tu correo",
-    enterPhone: "Ingresa tu teléfono",
+    enterPhone: "Ingresa tu tel\u00e9fono",
     uploadProof: "Sube el comprobante de pago",
     walletPayError: "Error al procesar pago con monedero",
     tryAgain: "Intenta de nuevo",
     walletDeductError: "Error al descontar monedero",
-    maxFileSize: "Máximo 5MB",
-    numberCopied: "Número copiado",
+    maxFileSize: "M\u00e1ximo 5MB",
+    numberCopied: "N\u00famero copiado",
+
+    // Checkout
+    checkoutTitle: "Confirmar pedido",
+    finalizeOrder: "Finalizar Compra",
+    orderSent: "¡Pedido Enviado!",
+    yourOrder: "Tu pedido",
+    paymentMethod: "Método de pago",
+    bankTransfer: "Transferencia bancaria",
+    transfer: "Transferencia",
+    uploadReceipt: "Sube tu comprobante",
+    cash: "Efectivo",
+    payAtClinic: "Paga en clínica",
+    discountCode: "Código de descuento",
+    enterDiscountCode: "Ingresa tu código de descuento",
+    confirmWithWallet: "Confirmar compra con monedero",
+    registerCashPayment: "Registrar pago en efectivo",
+    sendReceiptAndConfirm: "Enviar comprobante y confirmar pedido",
+    walletBalance: "Saldo Monedero",
+    couponCode: "Código de cupón",
+    total: "Total",
+    subtotal: "Subtotal",
+    discount: "Descuento",
+    name: "Nombre",
+    email: "Correo electrónico",
+    phone: "Teléfono",
+    paymentProof: "Comprobante de pago",
+    orderSentDesc: "Nos pondremos en contacto contigo pronto.",
+    insufficientBalance: "Saldo insuficiente",
+    available: "Disponible",
+    useWallet: "Usar monedero",
+
+    // Cart
+    myCart: "Mi Carrito",
+    cartEmpty: "Tu carrito está vacío",
+    cartEmptyDesc: "Agrega tratamientos, productos o libros",
+    emptyCart: "Tu carrito está vacío",
+    emptyCartDesc: "Agrega tratamientos o productos para comenzar",
+    removeItem: "Eliminar",
+    quantity: "Cantidad",
+    checkout: "Ir al pago",
+    proceedToCheckout: "Proceder al pago",
+
+    // Wishlist
+    emptyWishlist: "Tu lista de deseos est\u00e1 vac\u00eda",
+    emptyWishlistDesc: "Guarda tus tratamientos favoritos aqu\u00ed",
+    removeFromWishlist: "Quitar de deseos",
+
+    // Packages
+    mostPopular: "M\u00e1s popular",
+    maxSavings: "Ahorro m\u00e1ximo",
+    includes: "Incluye",
+    savings: "Ahorras",
+    regularPrice: "Precio regular",
+
+    // Misc
+    loading: "Cargando...",
+    seeDetails: "Ver detalles",
   },
   EN: {
     // Header
     aestheticNutrition: "Aesthetic & Nutrition",
-    nutriserShop: "Tienda Nutriser",
-    searchPlaceholder: "What are you looking for?",
-    closeSession: "Close session",
+    nutriserShop: "Nutriser Store",
+    searchPlaceholder: "Search treatments, products, books\u2026",
+    closeSession: "Sign out",
     back: "Back",
-    
+    signIn: "Sign in",
+
     // Tabs
     tabTreatments: "Treatments",
+    tabServices: "Services",
     tabFarmacy: "Pharmacy",
+    tabProducts: "Products",
     tabWallet: "Wallet",
-    tabLibrary: "Librería",
+    tabLibrary: "Library",
     tabWishlist: "Wishlist",
     tabAccount: "Account",
-    
+
     // Categories
     catAll: "All",
     catPackages: "Packages",
@@ -84,17 +178,48 @@ export const translations = {
     catOtros: "Others",
     catProductos: "Products",
     catGeneral: "General",
-    
+    categories: "Categories",
+
+    // Sections
+    specialPackages: "Special Packages",
+    services: "Services",
+    pharmacy: "Pharmacy",
+    library: "Library",
+    wishlist: "Wishlist",
+    wallet: "Wallet",
+    myTreatments: "My Treatments",
+
     // Buttons
     viewAll: "View all",
     buy: "Buy",
     buyNow: "Buy now",
+    buyBook: "Buy book",
+    schedule: "Schedule",
     addToCart: "Add to cart",
     add: "Add",
     proceedToPayment: "Proceed to payment",
     done: "Done",
     apply: "Apply",
-    
+    clear: "Clear",
+    close: "Close",
+    cancel: "Cancel",
+    confirm: "Confirm",
+    copy: "Copy",
+    copied: "Copied",
+
+    // Search results
+    resultsFor: "result(s) for",
+    noResultsFor: "No results for",
+    searchAllTypes: "Services, products and books",
+    noResults: "No results",
+    noResultsDesc: "We couldn't find anything for",
+    tryOtherWord: "Try another word.",
+
+    // Item types
+    typeService: "Service",
+    typeProduct: "Product",
+    typeBook: "Book",
+
     // Messages
     noServicesFound: "No services found",
     consultPrice: "Consult price",
@@ -116,6 +241,63 @@ export const translations = {
     walletDeductError: "Error deducting wallet",
     maxFileSize: "Maximum 5MB",
     numberCopied: "Number copied",
+
+    // Checkout
+    checkoutTitle: "Confirm order",
+    finalizeOrder: "Finalize Order",
+    orderSent: "Order Sent!",
+    yourOrder: "Your order",
+    paymentMethod: "Payment method",
+    bankTransfer: "Bank transfer",
+    transfer: "Transfer",
+    uploadReceipt: "Upload your receipt",
+    cash: "Cash",
+    payAtClinic: "Pay at clinic",
+    discountCode: "Discount code",
+    enterDiscountCode: "Enter your discount code",
+    confirmWithWallet: "Confirm purchase with wallet",
+    registerCashPayment: "Register cash payment",
+    sendReceiptAndConfirm: "Send receipt and confirm order",
+    walletBalance: "Wallet balance",
+    couponCode: "Coupon code",
+    total: "Total",
+    subtotal: "Subtotal",
+    discount: "Discount",
+    name: "Name",
+    email: "Email",
+    phone: "Phone",
+    paymentProof: "Payment proof",
+    orderSentDesc: "We will contact you soon.",
+    insufficientBalance: "Insufficient balance",
+    available: "Available",
+    useWallet: "Use wallet",
+
+    // Cart
+    myCart: "My Cart",
+    cartEmpty: "Your cart is empty",
+    cartEmptyDesc: "Add treatments, products or books",
+    emptyCart: "Your cart is empty",
+    emptyCartDesc: "Add treatments or products to get started",
+    removeItem: "Remove",
+    quantity: "Quantity",
+    checkout: "Checkout",
+    proceedToCheckout: "Proceed to payment",
+
+    // Wishlist
+    emptyWishlist: "Your wishlist is empty",
+    emptyWishlistDesc: "Save your favorite treatments here",
+    removeFromWishlist: "Remove from wishlist",
+
+    // Packages
+    mostPopular: "Most popular",
+    maxSavings: "Maximum savings",
+    includes: "Includes",
+    savings: "You save",
+    regularPrice: "Regular price",
+
+    // Misc
+    loading: "Loading...",
+    seeDetails: "See details",
   },
 };
 

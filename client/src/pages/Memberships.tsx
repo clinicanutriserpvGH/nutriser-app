@@ -1034,7 +1034,7 @@ export default function Memberships() {
                 {unifiedSearchResults.map(item => {
                   const catMeta = CATEGORY_META[item.category ?? "general"] ?? CATEGORY_META.general;
                   const CatIcon = catMeta.icon;
-                  const priceNum = item.price ? parseInt(item.price.replace(/[^0-9]/g, "")) : null;
+                  const priceNum = item.price ? Math.round(parseFloat(item.price.replace(/[^0-9.]/g, ""))) : null;
                   const typeLabel = item.itemType === "service" ? "Servicio" : item.itemType === "product" ? "Producto" : "Libro";
                   const typeBg = item.itemType === "service" ? "bg-[#C5A55A]/10 text-[#C5A55A]" : item.itemType === "product" ? "bg-purple-100 text-purple-600" : "bg-blue-100 text-blue-600";
                   return (

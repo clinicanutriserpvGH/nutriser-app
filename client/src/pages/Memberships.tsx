@@ -28,6 +28,7 @@ import { usePatientAuth } from "@/hooks/usePatientAuth";
 import PromoSplash from "@/components/PromoSplash";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { t, type Lang } from "@/lib/i18n";
+import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 
 // ─── Assets ──────────────────────────────────────────────────────────────────
 const LOGO_URL =
@@ -328,7 +329,31 @@ export default function Memberships() {
   // ─── Datos de la DB ─────────────────────────────────────────────────────────
   const { data: services = [], isLoading: loadingServices } = trpc.services.list.useQuery();
   const { data: products = [], isLoading: loadingProducts } = trpc.products.list.useQuery();
-  const { data: ebook, isLoading: loadingEbook } = trpc.ebook.getActive.useQuery();
+   const { data: ebook, isLoading: loadingEbook } = trpc.ebook.getActive.useQuery();
+
+  // ─── Traducción automática con LLM ─────────────────────────────────────────
+  // Recopila todos los textos del backend que necesitan traducción al EN
+  const allTranslatableTexts = useMemo(() => {
+    const texts: string[] = [];
+    services.forEach(s => {
+      if (s.name) texts.push(s.name);
+      if (s.description) texts.push(s.description);
+      if ((s as any).benefits) texts.push((s as any).benefits);
+      if ((s as any).aftercare) texts.push((s as any).aftercare);
+      if ((s as any).includes) texts.push((s as any).includes);
+    });
+    products.forEach(p => {
+      if (p.name) texts.push(p.name);
+      if (p.description) texts.push(p.description);
+    });
+    if (ebook) {
+      if (ebook.title) texts.push(ebook.title);
+      if (ebook.description) texts.push(ebook.description);
+    }
+    return Array.from(new Set(texts.filter(Boolean)));
+  }, [services, products, ebook]);
+
+  const { tx } = useAutoTranslate(allTranslatableTexts, lang);
 
   // ─── Filtros Tratamientos ───────────────────────────────────────────────────
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -776,7 +801,7 @@ export default function Memberships() {
                       style={{ fontFamily: "'Playfair Display', serif", color: "#FAF7F2", fontSize: 22, fontWeight: 700, lineHeight: 1.2 }}
                       className="mb-1"
                     >
-                      {detailItem.name}
+                      {tx(detailItem.name)}
                     </DialogTitle>
                   </DialogHeader>
 
@@ -801,7 +826,7 @@ export default function Memberships() {
                   {/* Descripción */}
                   {detailItem.description && (
                     <div className="mb-4">
-                      <p style={{ color: "#b8b0a0", fontSize: 14, lineHeight: 1.6 }}>{detailItem.description}</p>
+                      <p style={{ color: "#b8b0a0", fontSize: 14, lineHeight: 1.6 }}>{tx(detailItem.description)}</p>
                     </div>
                   )}
 
@@ -824,7 +849,7 @@ export default function Memberships() {
                         {detailItem.benefits.map((b, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#C5A55A" }} />
-                            <span style={{ color: "#FAF7F2", fontSize: 13 }}>{b}</span>
+                            <span style={{ color: "#FAF7F2", fontSize: 13 }}>{tx(b)}</span>
                           </li>
                         ))}
                       </ul>
@@ -839,7 +864,7 @@ export default function Memberships() {
                         {detailItem.features.map((f, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#C5A55A" }} />
-                            <span style={{ color: "#FAF7F2", fontSize: 13 }}>{f}</span>
+                            <span style={{ color: "#FAF7F2", fontSize: 13 }}>{tx(f)}</span>
                           </li>
                         ))}
                       </ul>
@@ -854,7 +879,7 @@ export default function Memberships() {
                         {detailItem.aftercare.map((a, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#8BC4A8" }} />
-                            <span style={{ color: "#b8b0a0", fontSize: 13 }}>{a}</span>
+                            <span style={{ color: "#b8b0a0", fontSize: 13 }}>{tx(a)}</span>
                           </li>
                         ))}
                       </ul>
@@ -1101,8 +1126,8 @@ export default function Memberships() {
                         </button>
                       </div>
                       <div className="p-3 flex-1 flex flex-col">
-                        <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{item.name}</h3>
-                        {item.description && <p className="text-gray-400 text-[10px] line-clamp-2 mb-2">{item.description}</p>}
+                        <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{tx(item.name)}</h3>
+                        {item.description && <p className="text-gray-400 text-[10px] line-clamp-2 mb-2">{tx(item.description)}</p>}
                         <div className="mt-auto">
                           {item.price && priceNum && priceNum > 0 ? (
                             <p className="text-[#C5A55A] font-black text-sm mb-2">
@@ -1323,7 +1348,7 @@ export default function Memberships() {
                                   </button>
                                 </div>
                                 <div className="p-3">
-                                  <h3 className="font-bold text-gray-900 text-xs lg:text-sm leading-snug mb-1 line-clamp-2">{service.name}</h3>
+                                  <h3 className="font-bold text-gray-900 text-xs lg:text-sm leading-snug mb-1 line-clamp-2">{tx(service.name)}</h3>
                                   {service.price && service.price !== "Consultar precio" ? (
                                     <p className="text-[#C5A55A] font-black text-sm mb-2">{formatServicePrice(service.price)}</p>
                                   ) : (
@@ -1397,8 +1422,8 @@ onClick={() => {
                                 </button>
                               </div>
                               <div className="p-3 flex-1 flex flex-col">
-                                <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{service.name}</h3>
-                                {service.description && <p className="text-gray-400 text-[10px] line-clamp-2 mb-2">{service.description}</p>}
+                                <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{tx(service.name)}</h3>
+                                {service.description && <p className="text-gray-400 text-[10px] line-clamp-2 mb-2">{tx(service.description)}</p>}
                                 <div className="mt-auto">
                                   {service.price && service.price !== "Consultar precio" ? (
                                     <p className="text-[#C5A55A] font-black text-sm mb-2">{formatServicePrice(service.price)}</p>
@@ -1490,7 +1515,7 @@ onClick={() => {
                         </div>
                         <div className="p-3 flex-1 flex flex-col">
                           <p className="text-[9px] text-purple-600 font-semibold uppercase tracking-wider mb-0.5">{product.category || t("typeProduct", lang)}</p>
-                          <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{product.name}</h3>
+                          <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{tx(product.name)}</h3>
                           <div className="mt-auto">
                             {product.price ? (
                               <p className="text-[#C5A55A] font-black text-sm mb-2">{product.price}</p>
@@ -1558,8 +1583,8 @@ onClick={() => {
                     )}
                     <div className="p-5">
                       <p className="text-[10px] text-blue-600 font-semibold uppercase tracking-wider mb-1">{t("typeDigitalEbook", lang)}</p>
-                      <h3 className="font-black text-gray-900 text-xl leading-snug mb-2">{ebook.title}</h3>
-                      {ebook.description && <p className="text-gray-500 text-sm leading-relaxed mb-4">{ebook.description}</p>}
+                      <h3 className="font-black text-gray-900 text-xl leading-snug mb-2">{tx(ebook.title)}</h3>
+                      {ebook.description && <p className="text-gray-500 text-sm leading-relaxed mb-4">{tx(ebook.description)}</p>}
                       {(ebook as any).presalePrice ? (
                         <div className="mb-4">
                           <div className="flex items-center gap-2 mb-2">

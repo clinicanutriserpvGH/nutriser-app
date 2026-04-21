@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createMembership, getAllMemberships, getMembershipById, updateMembershipStatus, createPaymentProof, getPaymentProofByMembershipId, createAppointment, getAllAppointments, getAdminByEmail, createAdminCredential, setAdminResetToken, getAdminByResetToken, updateAdminPassword, deleteMembership, getCouponByCode, getAllCoupons, approveCoupon, rejectCoupon, createMembershipCoupon, getAllPromotions, getPromotionsWithCouponCounts, createPromotion, updatePromotion, deletePromotion, getAllPromotionsForAdmin, deleteAppointment, deleteAllAppointments, cancelAppointment, createGiftPurchase, getAllGiftPurchases, getGiftPurchaseById, updateGiftPurchaseStatus, deleteGiftPurchase, getActiveEbook, getAllEbooks, upsertEbook, createEbookPurchase, getAllEbookPurchases, getEbookPurchaseByToken, updateEbookPurchaseStatus, deleteEbookPurchase, getEbookPurchaseByEmail, getAllEbookDiscountCodes, getEbookDiscountCodeByCode, toggleEbookDiscountCode, createServicePurchase, getAllServicePurchases, updateServicePurchaseStatus, deleteServicePurchase, getAllServices, getAllActiveServices, createService, updateService, deleteService, setAdminLoginToken, getAdminByLoginToken, authorizeAdminLogin, checkAdminLoginAuthorized, clearAdminLoginToken, getAdminBySessionToken } from "./db";
 import { notifyOwner } from "./_core/notification";
+import { invokeLLM } from "./_core/llm";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail } from "./_core/email";
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
@@ -3374,6 +3375,56 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await setSplashShowDefault(input.type, input.showDefault);
         return { success: true };
+      }),
+  }),
+
+  // ─── Traducción automática con LLM ─────────────────────────────────────────
+  translate: router({
+    texts: publicProcedure
+      .input(z.object({
+        texts: z.array(z.string()).max(50),
+        targetLang: z.enum(["EN"]),
+      }))
+      .mutation(async ({ input }) => {
+        if (input.texts.length === 0) return { translations: [] };
+        const prompt = `You are a professional medical spa translator. Translate the following Spanish texts to English. These are names and descriptions of aesthetic and nutrition treatments/services from a Mexican clinic. Keep proper nouns (brand names, treatment names like "Cavitación", "Radiofrecuencia", "Mesoterapia") in their commonly used English or Spanish form. Return ONLY a JSON array of strings with the translations in the same order, no extra text.\n\nTexts to translate:\n${JSON.stringify(input.texts)}`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: "You are a professional medical spa translator. Return only valid JSON arrays." },
+            { role: "user", content: prompt },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "translations",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  translations: {
+                    type: "array",
+                    items: { type: "string" },
+                  },
+                },
+                required: ["translations"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const rawContent = response.choices?.[0]?.message?.content;
+        const content = typeof rawContent === "string" ? rawContent : null;
+        if (!content) return { translations: input.texts };
+        try {
+          const parsed = JSON.parse(content);
+          const arr = parsed.translations ?? parsed;
+          if (Array.isArray(arr) && arr.length === input.texts.length) {
+            return { translations: arr as string[] };
+          }
+        } catch {
+          // fallback
+        }
+        return { translations: input.texts };
       }),
   }),
 });

@@ -740,34 +740,44 @@ export default function WalletPage() {
                   position: "relative",
                   borderRadius: 16,
                   overflow: "hidden",
-                  background: "linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 40%, #1A1A1A 100%)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
+                  background: "#1A1A1A",
+                  boxShadow: "0 8px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(197,165,90,0.15)",
                 }}
               >
-                {/* Fondo textura */}
-                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 70% 30%, rgba(197,165,90,0.08) 0%, transparent 60%)", zIndex: 1 }} />
-                {/* Silueta decorativa */}
-                <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "45%", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <img src={LOGO_URL} alt="" style={{ width: "80%", height: "90%", objectFit: "contain", opacity: 0.18, filter: "sepia(1) saturate(3) hue-rotate(10deg)" }} />
-                </div>
-                {/* Contenido principal */}
-                <div style={{ position: "relative", zIndex: 3, padding: "14px 14px 48px 14px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+
+                {/* Silueta dorada grande a la derecha — igual que en el botón flotante */}
+                <img
+                  src="/manus-storage/nutriser-silueta_f6738ee7.png"
+                  alt=""
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    top: 0,
+                    bottom: "13%",
+                    height: "87%",
+                    width: "auto",
+                    objectFit: "contain",
+                    objectPosition: "right center",
+                    opacity: 0.92,
+                    pointerEvents: "none",
+                    zIndex: 1,
+                    filter: "sepia(1) saturate(2.8) hue-rotate(3deg) brightness(1.05)",
+                  }}
+                />
+                {/* Contenido principal — solo 62% izquierdo para dejar la silueta libre */}
+                <div style={{ position: "relative", zIndex: 2, padding: "10px 14px 0 14px", height: "calc(87% - 0px)", width: "62%" }}>
                   {/* Header tarjeta */}
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <img src={LOGO_URL} alt="Nutriser" style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "contain", background: "rgba(255,255,255,0.1)" }} />
-                        <div>
-                          <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 7, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase" }}>MONEDERO</div>
-                          <div style={{ color: "#C5A55A", fontSize: 9, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase" }}>NUTRISER</div>
-                          <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 6, letterSpacing: "0.08em" }}>aesthetic &amp; nutrition</div>
-                        </div>
-                      </div>
+                  {/* Fila superior: Logo + Título + Badge — igual que Memberships */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <img src={LOGO_URL} alt="Nutriser" style={{ width: 30, height: 30, objectFit: "contain", flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", lineHeight: 1.2 }}>Monedero Nutriser</div>
+                      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 8, letterSpacing: "0.1em" }}>aesthetic &amp; nutrition</div>
                     </div>
                     {wallet?.isActive ? (
-                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em" }}>ACTIVA</span>
+                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>ACTIVA</span>
                     ) : (
-                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em" }}>INACTIVA</span>
+                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>INACTIVA</span>
                     )}
                   </div>
                   {/* Fila central: QR + Placa dorada */}

@@ -335,12 +335,18 @@ export default function Memberships() {
   // Recopila todos los textos del backend que necesitan traducción al EN
   const allTranslatableTexts = useMemo(() => {
     const texts: string[] = [];
+    const parseJsonArray = (val: any): string[] => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val.filter(Boolean);
+      try { const parsed = JSON.parse(val); return Array.isArray(parsed) ? parsed.filter(Boolean) : []; } catch { return []; }
+    };
     services.forEach(s => {
       if (s.name) texts.push(s.name);
       if (s.description) texts.push(s.description);
-      if ((s as any).benefits) texts.push((s as any).benefits);
-      if ((s as any).aftercare) texts.push((s as any).aftercare);
-      if ((s as any).includes) texts.push((s as any).includes);
+      if ((s as any).duration) texts.push((s as any).duration);
+      parseJsonArray((s as any).benefits).forEach(b => texts.push(b));
+      parseJsonArray((s as any).aftercare).forEach(a => texts.push(a));
+      parseJsonArray((s as any).includes).forEach(i => texts.push(i));
     });
     products.forEach(p => {
       if (p.name) texts.push(p.name);
@@ -353,7 +359,7 @@ export default function Memberships() {
     return Array.from(new Set(texts.filter(Boolean)));
   }, [services, products, ebook]);
 
-  const { tx } = useAutoTranslate(allTranslatableTexts, lang);
+  const { tx, isTranslating } = useAutoTranslate(allTranslatableTexts, lang);
 
   // ─── Filtros Tratamientos ───────────────────────────────────────────────────
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -796,6 +802,13 @@ export default function Memberships() {
 
                 {/* Contenido */}
                 <div className="px-5 pt-4 pb-4">
+                  {/* Indicador de traducción en progreso */}
+                  {isTranslating && lang === "EN" && (
+                    <div className="flex items-center gap-1.5 mb-2 px-2 py-1 rounded-lg" style={{ background: "rgba(197,165,90,0.08)", border: "1px solid rgba(197,165,90,0.15)" }}>
+                      <div className="w-2 h-2 rounded-full bg-[#C5A55A] animate-pulse" />
+                      <span style={{ color: "#C5A55A", fontSize: 10, fontWeight: 600, letterSpacing: "0.05em" }}>Translating...</span>
+                    </div>
+                  )}
                   <DialogHeader>
                     <DialogTitle
                       style={{ fontFamily: "'Playfair Display', serif", color: "#FAF7F2", fontSize: 22, fontWeight: 700, lineHeight: 1.2 }}

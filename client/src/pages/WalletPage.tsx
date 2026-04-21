@@ -14,6 +14,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useRoute } from "wouter";
 import { WalletCard as WalletCardCR80, WalletCardPrintSheet } from "@/components/WalletCardPrint";
 import { toast } from "sonner";
+import { t, type Lang } from "@/lib/i18n";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -55,58 +56,70 @@ function LoyaltyProgressBar({ current, required, rewardLabel }: { current: numbe
   return <div className="flex items-start w-full">{steps}</div>;
 }
 
-function LoyaltyPlanCard({ planName, productName, current, required, rewardLabel, rewardsAvailable, expiresAt }: { planName: string; productName: string; current: number; required: number; rewardLabel: string; rewardsAvailable: number; expiresAt?: string | Date | null }) {
+function LoyaltyPlanCard({ planName, productName, current, required, rewardLabel, rewardsAvailable, expiresAt, lang }: { planName: string; productName: string; current: number; required: number; rewardLabel: string; rewardsAvailable: number; expiresAt?: string | Date | null; lang: Lang }) {
   const remaining = required - current;
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-4 mb-4">
       <div className="flex justify-between items-start mb-1">
         <p className="text-[#C5A55A] font-bold text-sm">{planName}</p>
-        {expiresAt && <p className="text-gray-400 text-xs">Vigencia {formatDate(expiresAt)}</p>}
+        {expiresAt && <p className="text-gray-400 text-xs">{lang === 'EN' ? 'Valid until' : 'Vigencia'} {formatDate(expiresAt)}</p>}
       </div>
-      <p className="text-gray-600 text-xs mb-3">Cada compra cuenta</p>
+      <p className="text-gray-600 text-xs mb-3">{lang === 'EN' ? 'Every purchase counts' : 'Cada compra cuenta'}</p>
       <LoyaltyProgressBar current={current} required={required} rewardLabel={rewardLabel} />
       <p className="text-gray-700 text-sm mt-3">
-        Ya llevas <strong>{current}</strong> compra{current !== 1 ? "s" : ""} de <strong>{productName}</strong> acumulada{current !== 1 ? "s" : ""}.
-        {remaining > 0 ? <> ¡Solo te faltan <strong>{remaining}</strong> para tu recompensa!</> : <span className="text-green-600 font-bold"> ¡Tienes una recompensa disponible!</span>}
+        {lang === 'EN'
+          ? <>{`You have `}<strong>{current}</strong>{` purchase${current !== 1 ? 's' : ''} of `}<strong>{productName}</strong>{` accumulated.`}
+              {remaining > 0 ? <> Only <strong>{remaining}</strong> more to go for your reward!</> : <span className="text-green-600 font-bold"> You have a reward available!</span>}
+            </>
+          : <>Ya llevas <strong>{current}</strong> compra{current !== 1 ? 's' : ''} de <strong>{productName}</strong> acumulada{current !== 1 ? 's' : ''}.
+              {remaining > 0 ? <> ¡Solo te faltan <strong>{remaining}</strong> para tu recompensa!</> : <span className="text-green-600 font-bold"> ¡Tienes una recompensa disponible!</span>}
+            </>
+        }
       </p>
       {rewardsAvailable > 0 && (
         <div className="mt-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-green-700 text-xs font-semibold flex items-center gap-2">
           <span className="text-lg">🎁</span>
-          {rewardsAvailable} recompensa{rewardsAvailable > 1 ? "s" : ""} disponible{rewardsAvailable > 1 ? "s" : ""}
+          {lang === 'EN' ? `${rewardsAvailable} reward${rewardsAvailable > 1 ? 's' : ''} available` : `${rewardsAvailable} recompensa${rewardsAvailable > 1 ? 's' : ''} disponible${rewardsAvailable > 1 ? 's' : ''}`}
         </div>
       )}
     </div>
   );
 }
 
-function ConsultationCard({ totalConsultations, freeAvailable }: { totalConsultations: number; freeAvailable: number }) {
+function ConsultationCard({ totalConsultations, freeAvailable, lang }: { totalConsultations: number; freeAvailable: number; lang: Lang }) {
   const cyclePosition = totalConsultations % 3;
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-4 mb-4">
       <div className="flex justify-between items-start mb-1">
-        <p className="text-[#C5A55A] font-bold text-sm">Acumula 3 y la 4ta es GRATIS</p>
-        <p className="text-gray-400 text-xs">Consultas nutricionales</p>
+        <p className="text-[#C5A55A] font-bold text-sm">{lang === 'EN' ? 'Accumulate 3 and the 4th is FREE' : 'Acumula 3 y la 4ta es GRATIS'}</p>
+        <p className="text-gray-400 text-xs">{t('nutritionConsultations', lang)}</p>
       </div>
-      <p className="text-gray-600 text-xs mb-3">Cada consulta cuenta</p>
+      <p className="text-gray-600 text-xs mb-3">{lang === 'EN' ? 'Every consultation counts' : 'Cada consulta cuenta'}</p>
       <LoyaltyProgressBar current={cyclePosition} required={3} rewardLabel="1 GRATIS" />
       <p className="text-gray-700 text-sm mt-3">
-        Ya llevas <strong>{cyclePosition}</strong> consulta{cyclePosition !== 1 ? "s" : ""} en este ciclo.
-        {cyclePosition < 3 ? <> ¡Solo te faltan <strong>{3 - cyclePosition}</strong> para tu consulta GRATIS!</> : <span className="text-green-600 font-bold"> ¡Tienes una consulta GRATIS disponible!</span>}
+        {lang === 'EN'
+          ? <>{`You have `}<strong>{cyclePosition}</strong>{` consultation${cyclePosition !== 1 ? 's' : ''} in this cycle.`}
+              {cyclePosition < 3 ? <> Only <strong>{3 - cyclePosition}</strong> more for your FREE consultation!</> : <span className="text-green-600 font-bold"> You have a FREE consultation available!</span>}
+            </>
+          : <>Ya llevas <strong>{cyclePosition}</strong> consulta{cyclePosition !== 1 ? 's' : ''} en este ciclo.
+              {cyclePosition < 3 ? <> ¡Solo te faltan <strong>{3 - cyclePosition}</strong> para tu consulta GRATIS!</> : <span className="text-green-600 font-bold"> ¡Tienes una consulta GRATIS disponible!</span>}
+            </>
+        }
       </p>
       {freeAvailable > 0 && (
         <div className="mt-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-green-700 text-xs font-semibold flex items-center gap-2">
           <span className="text-lg">🎁</span>
-          {freeAvailable} consulta{freeAvailable > 1 ? "s" : ""} GRATIS disponible{freeAvailable > 1 ? "s" : ""}
+          {lang === 'EN' ? `${freeAvailable} FREE consultation${freeAvailable > 1 ? 's' : ''} available` : `${freeAvailable} consulta${freeAvailable > 1 ? 's' : ''} GRATIS disponible${freeAvailable > 1 ? 's' : ''}`}
         </div>
       )}
-      <p className="text-gray-400 text-[10px] mt-2">Total histórico: {totalConsultations} consultas nutricionales</p>
+      <p className="text-gray-400 text-[10px] mt-2">{t('totalHistoric', lang)} {totalConsultations} {t('nutritionConsultations', lang)}</p>
     </div>
   );
 }
 
-function TransactionRow({ txn }: { txn: any }) {
+function TransactionRow({ txn, lang }: { txn: any; lang: Lang }) {
   const isPositive = txn.amount >= 0;
-  const typeLabels: Record<string, string> = { cashback: "Cashback", redeem: "Canje", bonus: "Bonificación", adjustment: "Ajuste", free_consultation: "Consulta gratis" };
+  const typeLabels: Record<string, string> = { cashback: t('txnCashback', lang), redeem: t('txnRedeem', lang), bonus: t('txnBonus', lang), adjustment: t('txnAdjustment', lang), free_consultation: t('txnFreeConsultation', lang) };
   return (
     <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
       <div className="flex-1 min-w-0">
@@ -124,6 +137,10 @@ export default function WalletPage() {
   const { patient, isLoggedIn } = usePatientAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history">("card");
+  const lang: Lang = (() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem("nutriser-lang") : null;
+    return (saved === "EN" || saved === "ES") ? saved as Lang : "ES";
+  })();
 
   const purchasesQuery = trpc.patients.getMyPurchases.useQuery(
     { email: patient?.email ?? 'x@x.com' },
@@ -173,9 +190,9 @@ export default function WalletPage() {
   const hasExistingRequest = physicalCardStatusQuery.data?.hasRequest === true;
   const physicalCardStatusLabel = (() => {
     const s = physicalCardStatusQuery.data?.status;
-    if (s === 'pending') return 'Solicitud enviada';
-    if (s === 'printed') return 'En preparación';
-    if (s === 'delivered') return 'Tarjeta entregada';
+    if (s === 'pending') return t('requestSent', lang);
+    if (s === 'printed') return t('inPreparation', lang);
+    if (s === 'delivered') return t('cardDelivered', lang);
     return null;
   })();
 
@@ -193,15 +210,15 @@ export default function WalletPage() {
       <div className="min-h-screen bg-[#1A1A1A] flex flex-col">
         <div className="pt-12 px-4" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}>
           <button onClick={() => setLocation("/memberships")} className="inline-flex items-center gap-1 text-white/70 hover:text-white text-sm font-medium bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
-            <ChevronLeft className="w-4 h-4" /> REGRESAR
+            <ChevronLeft className="w-4 h-4" /> {t('back', lang).toUpperCase()}
           </button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center px-6">
           <img src={LOGO_URL} alt="Nutriser" className="w-24 h-24 object-contain mb-6" />
-          <h1 className="text-2xl font-bold text-[#C5A55A] mb-2 text-center">Monedero Nutriser</h1>
-          <p className="text-gray-400 text-center mb-8 max-w-sm">Inicia sesión para ver tu tarjeta digital, saldo y beneficios exclusivos.</p>
+          <h1 className="text-2xl font-bold text-[#C5A55A] mb-2 text-center">{t('walletNutriser', lang)}</h1>
+          <p className="text-gray-400 text-center mb-8 max-w-sm">{t('walletLoginDesc', lang)}</p>
           <button onClick={() => setLocation("/mis-tratamientos?returnTo=/monedero")} className="bg-[#C5A55A] text-white font-bold py-3 px-8 rounded-xl text-lg hover:bg-[#b8963f] transition-all">
-            Iniciar Sesión
+            {t('signIn', lang)}
           </button>
         </div>
       </div>
@@ -216,7 +233,7 @@ export default function WalletPage() {
         <div className="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden">
           <div className="h-full bg-[#C5A55A] rounded-full animate-[loading_1.5s_ease-in-out_infinite]" />
         </div>
-        <p className="text-gray-500 text-sm mt-3">Cargando tu monedero...</p>
+        <p className="text-gray-500 text-sm mt-3">{t('walletLoading', lang)}</p>
         <style>{`@keyframes loading { 0% { width: 0%; } 50% { width: 80%; } 100% { width: 100%; } }`}</style>
       </div>
     );
@@ -229,7 +246,7 @@ export default function WalletPage() {
         <button onClick={() => setLocation("/memberships")} className="text-gray-600 hover:text-gray-800 mr-3">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-base font-bold text-[#1A1A1A]">Monedero Nutriser</h1>
+        <h1 className="text-base font-bold text-[#1A1A1A]">{t('walletNutriser', lang)}</h1>
       </div>
 
       {/* ── Tarjeta CR-80 (formato tarjeta de crédito 85.5×54mm) ── */}
@@ -257,7 +274,7 @@ export default function WalletPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mt-3 px-5 py-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Saldo disponible</p>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">{t('availableBalance', lang)}</p>
                 <p className="text-[#C5A55A] font-black text-2xl">{formatMoney(wallet?.balance || 0)}</p>
               </div>
               <div className="flex flex-col items-end gap-1.5">
@@ -265,7 +282,7 @@ export default function WalletPage() {
                   onClick={() => setActiveTab("history")}
                   className="text-[#C5A55A] text-xs font-semibold hover:underline"
                 >
-                  Ver Estado de Cuenta
+                  {t('viewStatement', lang)}
                 </button>
                 {hasExistingRequest ? (
                   <span className="flex items-center gap-1 text-[10px] font-semibold" style={{ color: physicalCardStatusQuery.data?.status === 'delivered' ? '#34d399' : '#C5A55A' }}>
@@ -279,7 +296,7 @@ export default function WalletPage() {
                     title="Solicitar tarjeta física"
                   >
                     <Download className="w-3 h-3" />
-                    Solicitar tarjeta física
+                    {t('requestPhysicalCard', lang)}
                   </button>
                 )}
               </div>
@@ -298,8 +315,8 @@ export default function WalletPage() {
                 }`}>
                   <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   {isExpiringSoon
-                    ? `¡Tu saldo vence en ${daysLeft} día${daysLeft !== 1 ? 's' : ''}!`
-                    : `Válido hasta ${expiry.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                    ? `${t('balanceExpiresSoon', lang)} ${daysLeft} ${daysLeft !== 1 ? t('balanceDays', lang) : t('balanceExpiresDay', lang)}!`
+                    : `${t('validUntil', lang)} ${expiry.toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}`
                   }
                 </div>
               );
@@ -324,10 +341,10 @@ export default function WalletPage() {
       <div className="max-w-md mx-auto px-4 mt-3">
         <div className="flex bg-white rounded-xl shadow-sm border border-gray-100 p-1">
           {[
-            { key: "card" as const, label: "Mi Tarjeta" },
-            { key: "loyalty" as const, label: "Mis Planes" },
-            { key: "purchases" as const, label: "Mis Compras" },
-            { key: "history" as const, label: "Movimientos" },
+            { key: "card" as const, label: lang === 'EN' ? 'My Card' : 'Mi Tarjeta' },
+            { key: "loyalty" as const, label: lang === 'EN' ? 'My Plans' : 'Mis Planes' },
+            { key: "purchases" as const, label: lang === 'EN' ? 'My Purchases' : 'Mis Compras' },
+            { key: "history" as const, label: lang === 'EN' ? 'Movements' : 'Movimientos' },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -351,7 +368,7 @@ export default function WalletPage() {
               <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-4">
                 <h3 className="text-orange-800 font-bold text-sm mb-3 flex items-center gap-2">
                   <span className="text-lg">💵</span>
-                  Pagos en Efectivo Pendientes
+                  {t('cashPendingSection', lang)}
                 </h3>
                 <div className="space-y-2">
                   {cashPendingList.map((p: any) => (
@@ -364,14 +381,14 @@ export default function WalletPage() {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-orange-700 font-black text-base">${(p.amountCents / 100).toFixed(2)}</p>
-                          <span className="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">PENDIENTE</span>
+                          <span className="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">{t('statusPending', lang).toUpperCase()}</span>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
                 <p className="text-xs text-orange-600 mt-3 text-center">
-                  Presenta tu monedero en clínica para confirmar el pago
+                  {t('presentWallet', lang)}
                 </p>
               </div>
             )}
@@ -379,16 +396,16 @@ export default function WalletPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
               <h3 className="text-[#1A1A1A] font-bold text-sm mb-3 flex items-center gap-2">
                 <span className="w-6 h-6 bg-[#C5A55A]/10 rounded-full flex items-center justify-center text-[#C5A55A] text-xs">★</span>
-                Beneficios de tu Monedero
+                {t('walletBenefits', lang)}
               </h3>
               <div className="space-y-2">
                 {[
-                  "2% de cashback en cada compra verificada",
-                  "Dinero electrónico para usar en Tienda Nutriser y Cupones",
-                  "3 consultas nutricionales → la 4ta es GRATIS",
-                  "Planes de lealtad por productos: acumula y gana GRATIS",
-                  "Historial completo de movimientos",
-                  "QR único para acceder desde cualquier dispositivo",
+                  t('benefit1', lang),
+                  t('benefit2', lang),
+                  t('benefit3', lang),
+                  t('benefit4', lang),
+                  t('benefit5', lang),
+                  t('benefit6', lang),
                 ].map((benefit, i) => (
                   <div key={i} className="flex items-start gap-2">
                     <svg className="w-4 h-4 text-[#C5A55A] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -401,11 +418,11 @@ export default function WalletPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-center">
-                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Total acumulado</p>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-1">{t('totalAccumulated', lang)}</p>
                 <p className="text-[#C5A55A] font-bold text-lg">{formatMoney(wallet?.totalCashback || 0)}</p>
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-center">
-                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Total canjeado</p>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-1">{t('totalRedeemed', lang)}</p>
                 <p className="text-gray-700 font-bold text-lg">{formatMoney(wallet?.totalRedeemed || 0)}</p>
               </div>
             </div>
@@ -416,25 +433,25 @@ export default function WalletPage() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <img src={LOGO_URL} alt="Nutriser" className="w-6 h-6 object-contain" />
-              <h2 className="text-[#1A1A1A] font-bold text-base">Mis Planes de Lealtad</h2>
+              <h2 className="text-[#1A1A1A] font-bold text-base">{t('myLoyaltyPlans', lang)}</h2>
             </div>
-            <p className="text-gray-500 text-xs mb-4">Compra productos elegibles y consigue recompensas</p>
+            <p className="text-gray-500 text-xs mb-4">{t('loyaltySubtitle', lang)}</p>
             {tracker && (
-              <ConsultationCard totalConsultations={tracker.nutritionConsultations} freeAvailable={tracker.freeConsultationsEarned - tracker.freeConsultationsUsed} />
+              <ConsultationCard totalConsultations={tracker.nutritionConsultations} freeAvailable={tracker.freeConsultationsEarned - tracker.freeConsultationsUsed} lang={lang} />
             )}
             {progressList.length > 0 ? (
               progressList.map((p: any) => (
-                <LoyaltyPlanCard key={p.id} planName={p.plan.name} productName={p.plan.productName} current={p.currentCount} required={p.plan.requiredPurchases} rewardLabel={p.plan.rewardDescription || "1 GRATIS"} rewardsAvailable={p.rewardsEarned - p.rewardsUsed} expiresAt={p.plan.expiresAt} />
+                <LoyaltyPlanCard key={p.id} planName={p.plan.name} productName={p.plan.productName} current={p.currentCount} required={p.plan.requiredPurchases} rewardLabel={p.plan.rewardDescription || "1 GRATIS"} rewardsAvailable={p.rewardsEarned - p.rewardsUsed} expiresAt={p.plan.expiresAt} lang={lang} />
               ))
             ) : plans.length > 0 ? (
               plans.map((plan: any) => (
-                <LoyaltyPlanCard key={plan.id} planName={plan.name} productName={plan.productName} current={0} required={plan.requiredPurchases} rewardLabel={plan.rewardDescription || "1 GRATIS"} rewardsAvailable={0} expiresAt={plan.expiresAt} />
+                <LoyaltyPlanCard key={plan.id} planName={plan.name} productName={plan.productName} current={0} required={plan.requiredPurchases} rewardLabel={plan.rewardDescription || "1 GRATIS"} rewardsAvailable={0} expiresAt={plan.expiresAt} lang={lang} />
               ))
             ) : (
               !tracker && (
                 <div className="text-center py-8">
-                  <p className="text-gray-400 text-sm">Aún no tienes planes de lealtad activos.</p>
-                  <p className="text-gray-300 text-xs mt-1">Compra en Tienda Nutriser para comenzar a acumular.</p>
+                  <p className="text-gray-400 text-sm">{t('noLoyaltyPlans', lang)}</p>
+                  <p className="text-gray-300 text-xs mt-1">{t('noLoyaltyPlansDesc', lang)}</p>
                 </div>
               )
             )}
@@ -446,22 +463,22 @@ export default function WalletPage() {
             <div className="bg-[#C5A55A]/5 border border-[#C5A55A]/20 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-1">
                 <svg className="w-5 h-5 text-[#C5A55A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                <h3 className="text-[#1A1A1A] font-bold text-sm">Mis Compras</h3>
+                <h3 className="text-[#1A1A1A] font-bold text-sm">{t('myPurchases', lang)}</h3>
               </div>
-              <p className="text-gray-500 text-xs">Todo lo que has adquirido en Nutriser, vinculado a tu cuenta.</p>
+              <p className="text-gray-500 text-xs">{t('myPurchasesDesc', lang)}</p>
             </div>
 
             {purchasesQuery.isLoading ? (
               <div className="text-center py-10">
                 <div className="w-8 h-8 border-2 border-[#C5A55A] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                <p className="text-gray-400 text-xs">Cargando tus compras...</p>
+                <p className="text-gray-400 text-xs">{t('loadingPurchases', lang)}</p>
               </div>
             ) : (
               <>
                 {/* Paquetes */}
                 {(myPurchases?.packages?.length ?? 0) > 0 && (
                   <div>
-                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">Paquetes</p>
+                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">{t('packagesSection', lang)}</p>
                     <div className="space-y-3">
                       {myPurchases!.packages.map((pkg: any) => (
                         <div key={pkg.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
@@ -472,22 +489,22 @@ export default function WalletPage() {
                             <div>
                               <p className="text-[#1A1A1A] font-bold text-sm">{pkg.programName || pkg.programType}</p>
                               <p className="text-gray-500 text-xs mt-0.5">${pkg.price} MXN</p>
-                              {pkg.verifiedAt && <p className="text-gray-400 text-xs mt-0.5">Verificado: {new Date(pkg.verifiedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                              {pkg.verifiedAt && <p className="text-gray-400 text-xs mt-0.5">{t('verifiedAt', lang)} {new Date(pkg.verifiedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
                             </div>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
                               pkg.status === 'verified' ? 'bg-green-50 text-green-700' :
                               pkg.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
                             }`}>
-                              {pkg.status === 'verified' ? 'Activo' : pkg.status === 'pending' ? 'Pendiente' : 'Rechazado'}
+                              {pkg.status === 'verified' ? t('statusActive', lang) : pkg.status === 'pending' ? t('statusPending', lang) : t('statusRejected', lang)}
                             </span>
                           </div>
                           {pkg.status === 'verified' && pkg.accessCode && (
                             <div className="mt-2 bg-gray-50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                              <span className="text-gray-400 text-xs">Código:</span>
+                              <span className="text-gray-400 text-xs">{t('codeLabel', lang)}</span>
                               <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{pkg.accessCode}</span>
                             </div>
                           )}
-                          {pkg.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">Tu paquete está siendo revisado. Recibirás confirmación por correo.</p>}
+                          {pkg.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">{t('pendingReview', lang)}</p>}
                         </div>
                       ))}
                     </div>
@@ -497,7 +514,7 @@ export default function WalletPage() {
                 {/* Servicios */}
                 {(myPurchases?.services?.length ?? 0) > 0 && (
                   <div>
-                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">Servicios</p>
+                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">{t('servicesSection', lang)}</p>
                     <div className="space-y-3">
                       {myPurchases!.services.map((svc: any) => (
                         <div key={svc.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
@@ -508,22 +525,22 @@ export default function WalletPage() {
                             <div>
                               <p className="text-[#1A1A1A] font-bold text-sm">{svc.serviceName}</p>
                               {svc.originalPrice && <p className="text-gray-500 text-xs mt-0.5">{svc.originalPrice.replace(/^\$+/, '$').replace(/\s*MXN\s*MXN/i, ' MXN').replace(/\s*MXN$/i, ' MXN').trim()}</p>}
-                              {svc.approvedAt && <p className="text-gray-400 text-xs mt-0.5">Autorizado: {new Date(svc.approvedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                              {svc.approvedAt && <p className="text-gray-400 text-xs mt-0.5">{t('authorizedAt', lang)} {new Date(svc.approvedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
                             </div>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
                               svc.status === 'approved' ? 'bg-green-50 text-green-700' :
                               svc.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
                             }`}>
-                              {svc.status === 'approved' ? 'Activo' : svc.status === 'pending' ? 'Pendiente' : 'Rechazado'}
+                              {svc.status === 'approved' ? t('statusActive', lang) : svc.status === 'pending' ? t('statusPending', lang) : t('statusRejected', lang)}
                             </span>
                           </div>
                           {svc.status === 'approved' && svc.serviceCode && (
                             <div className="mt-2 bg-gray-50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                              <span className="text-gray-400 text-xs">Código:</span>
+                              <span className="text-gray-400 text-xs">{t('codeLabel', lang)}</span>
                               <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{svc.serviceCode}</span>
                             </div>
                           )}
-                          {svc.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">Tu servicio está siendo revisado. Recibirás confirmación por correo.</p>}
+                          {svc.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">{t('pendingServiceReview', lang)}</p>}
                         </div>
                       ))}
                     </div>
@@ -533,7 +550,7 @@ export default function WalletPage() {
                 {/* Cupones */}
                 {(myPurchases?.coupons?.length ?? 0) > 0 && (
                   <div>
-                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">Cupones</p>
+                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">{t('couponsSection', lang)}</p>
                     <div className="space-y-3">
                       {myPurchases!.coupons.map((c: any) => (
                         <div key={c.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
@@ -546,7 +563,7 @@ export default function WalletPage() {
                             <div>
                               <p className="text-[#1A1A1A] font-bold text-sm">{c.promotionTitle}</p>
                               {c.expiresAt && c.status === 'approved' && (
-                                <p className="text-gray-500 text-xs mt-0.5">Válido hasta: {new Date(c.expiresAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                                <p className="text-gray-500 text-xs mt-0.5">{t('validUntilLabel', lang)} {new Date(c.expiresAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                               )}
                             </div>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
@@ -555,16 +572,16 @@ export default function WalletPage() {
                               c.status === 'used' ? 'bg-gray-100 text-gray-500' :
                               c.status === 'expired' ? 'bg-orange-50 text-orange-700' : 'bg-red-50 text-red-700'
                             }`}>
-                              {c.status === 'approved' ? 'Activo' : c.status === 'pending' ? 'Pendiente' : c.status === 'used' ? 'Usado' : c.status === 'expired' ? 'Vencido' : 'Rechazado'}
+                              {c.status === 'approved' ? t('statusActive', lang) : c.status === 'pending' ? t('statusPending', lang) : c.status === 'used' ? t('statusUsed', lang) : c.status === 'expired' ? t('statusExpired', lang) : t('statusRejected', lang)}
                             </span>
                           </div>
                           {c.couponCode && c.status === 'approved' && (
                             <div className="mt-2 bg-gray-50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                              <span className="text-gray-400 text-xs">Código:</span>
+                              <span className="text-gray-400 text-xs">{t('codeLabel', lang)}</span>
                               <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{c.couponCode}</span>
                             </div>
                           )}
-                          {c.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">Tu cupón está siendo revisado. Recibirás confirmación por correo.</p>}
+                          {c.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">{t('pendingCouponReview', lang)}</p>}
                         </div>
                       ))}
                     </div>
@@ -577,13 +594,13 @@ export default function WalletPage() {
                  (myPurchases?.coupons?.length ?? 0) === 0 && (
                   <div className="text-center py-12">
                     <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                    <p className="text-gray-500 text-sm">Aún no tienes compras registradas.</p>
-                    <p className="text-gray-400 text-xs mt-1">Tus paquetes, servicios y cupones aparecerán aquí automáticamente.</p>
+                    <p className="text-gray-500 text-sm">{t('noPurchases', lang)}</p>
+                    <p className="text-gray-400 text-xs mt-1">{t('noPurchasesDesc', lang)}</p>
                     {patient?.email && (
                       <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 inline-block text-left">
-                        <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold mb-1">Cuenta vinculada</p>
+                        <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold mb-1">{t('linkedAccount', lang)}</p>
                         <p className="text-gray-700 text-xs font-mono">{patient.email}</p>
-                        <p className="text-gray-400 text-[10px] mt-1">Asegúrate de haber comprado con este mismo correo.</p>
+                        <p className="text-gray-400 text-[10px] mt-1">{t('sameEmailNote', lang)}</p>
                       </div>
                     )}
                   </div>
@@ -595,17 +612,17 @@ export default function WalletPage() {
 
         {activeTab === "history" && (
           <div>
-            <h2 className="text-[#1A1A1A] font-bold text-base mb-4">Historial de Movimientos</h2>
+            <h2 className="text-[#1A1A1A] font-bold text-base mb-4">{t('movementsTitle', lang)}</h2>
             {transactions.length > 0 ? (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                 {transactions.map((txn: any) => (
-                  <TransactionRow key={txn.id} txn={txn} />
+                  <TransactionRow key={txn.id} txn={txn} lang={lang} />
                 ))}
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-400 text-sm">No hay movimientos aún.</p>
-                <p className="text-gray-300 text-xs mt-1">Tu cashback y canjes aparecerán aquí.</p>
+                <p className="text-gray-400 text-sm">{t('noMovements', lang)}</p>
+                <p className="text-gray-300 text-xs mt-1">{t('noMovementsDesc', lang)}</p>
               </div>
             )}
           </div>
@@ -618,25 +635,25 @@ export default function WalletPage() {
           <div className="max-w-md mx-auto flex items-end justify-around px-2 pt-1 pb-2">
             <button onClick={() => setLocation("/memberships")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
               <Home className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Inicio</span>
+              <span className="text-[10px] font-medium text-gray-400">{t('navHome', lang)}</span>
             </button>
             <button onClick={() => setLocation("/memberships")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
               <Sparkles className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Tienda</span>
+              <span className="text-[10px] font-medium text-gray-400">{t('navStore', lang)}</span>
             </button>
             <div className="flex flex-col items-center -mt-5">
               <div className="w-14 h-14 rounded-full bg-white border-4 border-[#C5A55A] shadow-lg flex items-center justify-center mb-0.5">
                 <img src={LOGO_URL} alt="Monedero" className="w-8 h-8 object-contain" />
               </div>
-              <span className="text-[10px] font-bold text-[#C5A55A]">Monedero</span>
+              <span className="text-[10px] font-bold text-[#C5A55A]">{t('navWallet', lang)}</span>
             </div>
             <button onClick={() => setLocation("/memberships")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
               <BookOpen className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Librería</span>
+              <span className="text-[10px] font-medium text-gray-400">{t('navLibrary', lang)}</span>
             </button>
             <button onClick={() => setLocation("/memberships")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
               <User className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Cuenta</span>
+              <span className="text-[10px] font-medium text-gray-400">{t('navAccount', lang)}</span>
             </button>
           </div>
         </div>
@@ -659,12 +676,12 @@ export default function WalletPage() {
                 <Download className="w-6 h-6 text-[#C5A55A]" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#1A1A1A]">Solicitar tarjeta física</h3>
-                <p className="text-xs text-gray-400">Tarjeta Monedero Nutriser</p>
+                <h3 className="text-base font-bold text-[#1A1A1A]">{t('physicalCardTitle', lang)}</h3>
+                <p className="text-xs text-gray-400">{t('physicalCardSubtitle', lang)}</p>
               </div>
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              Solicita tu tarjeta física del Monedero Nutriser. El equipo Nutriser la preparará e imprimirá para ti. Puedes recogerla en clínica.
+              {t('physicalCardDesc', lang)}
             </p>
             <div className="bg-[#FAF7F2] rounded-xl p-3 mb-5 flex items-center gap-3">
               <div className="w-8 h-8 bg-[#C5A55A]/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -688,13 +705,13 @@ export default function WalletPage() {
               disabled={requestPhysicalCard.isPending}
               className="w-full bg-[#C5A55A] text-white font-bold py-3.5 rounded-2xl text-sm hover:bg-[#b8963f] transition-all disabled:opacity-60"
             >
-              {requestPhysicalCard.isPending ? "Enviando solicitud..." : "Confirmar solicitud"}
+              {requestPhysicalCard.isPending ? t('sendingRequest', lang) : t('confirmRequest', lang)}
             </button>
             <button
               onClick={() => setShowPhysicalCardDialog(false)}
               className="w-full mt-3 text-gray-400 text-sm py-2"
             >
-              Cancelar
+              {t('cancel', lang)}
             </button>
           </div>
         </div>
@@ -703,7 +720,7 @@ export default function WalletPage() {
       {/* Toast de éxito */}
       {physicalCardRequested && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] bg-green-600 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-lg flex items-center gap-2">
-          <span>&#10003;</span> ¡Solicitud enviada! Te avisaremos cuando esté lista.
+          <span>&#10003;</span> {t('requestSuccess', lang)}
           <button onClick={() => setPhysicalCardRequested(false)} className="ml-2 text-white/70 hover:text-white">×</button>
         </div>
       )}
@@ -726,7 +743,7 @@ export default function WalletPage() {
             </div>
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-[#1A1A1A]">Tu Monedero Nutriser</h2>
+              <h2 className="text-lg font-bold text-[#1A1A1A]">{t('walletNutriser', lang)}</h2>
               <button onClick={() => setShowCardSheet(false)} className="text-gray-400 hover:text-gray-600 p-1">
                 <X className="w-5 h-5" />
               </button>
@@ -842,12 +859,12 @@ export default function WalletPage() {
             <div className="px-5 pb-2">
               <div className="bg-[#FAF7F2] rounded-xl p-3 flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Saldo disponible</p>
+                  <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">{t('availableBalance', lang)}</p>
                   <p className="text-[#C5A55A] font-black text-2xl">{formatMoney(wallet?.balance || 0)}</p>
                 </div>
                 {wallet?.balanceExpiresAt && wallet.balance > 0 && (
                   <div className="bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-semibold rounded-full px-2.5 py-1">
-                    Válido hasta {new Date(wallet.balanceExpiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {t('validUntil', lang)} {new Date(wallet.balanceExpiresAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </div>
                 )}
               </div>
@@ -858,7 +875,7 @@ export default function WalletPage() {
                 onClick={() => setShowCardSheet(false)}
                 className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-2xl text-base hover:bg-[#2D2D2D] active:scale-[0.98] transition-all shadow-lg"
               >
-                Cerrar
+                {t('close', lang)}
               </button>
             </div>
           </div>

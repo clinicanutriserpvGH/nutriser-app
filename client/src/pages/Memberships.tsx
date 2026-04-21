@@ -53,51 +53,70 @@ interface CartItem {
 const BANK_INFO = { bank: "Banamex", account: "002470701448743487" };
 
 // ─── Paquetes destacados ─────────────────────────────────────────────────────
-const PACKAGES = [
-  {
-    id: "pkg-nutricion",
-    name: "Paquete Nutrición",
-    price: 2500,
-    regularPrice: 3200,
-    badge: "Más popular",
-    description: "Programa completo de asesoría nutricional personalizada con seguimiento y escaneos corporales.",
-    features: [
-      "4 asesorías nutricionales personalizadas",
-      "4 escaneos corporales",
-      "10% de descuento en tratamientos corporales",
-      "Acceso a seguimiento online",
-    ],
-    imageUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/paquete-nutricion-iZYFQemGqyUBv8zktgvgAM.webp",
-    category: "nutricion",
-  },
-  {
-    id: "pkg-reductor",
-    name: "Paquete Reductor Nutriser",
-    price: 4500,
-    regularPrice: 6500,
-    badge: "Ahorro máximo",
-    description: "Paquete integral de reducción corporal: cavitaciones, radiofrecuencias y mesoterapia reductora.",
-    features: [
-      "4 asesorías nutricionales personalizadas",
-      "4 sesiones de Cavitación corporal",
-      "4 sesiones de Radiofrecuencia corporal",
-      "4 sesiones de Mesoterapia reductora",
-      "10% de descuento en tratamientos faciales",
-      "10% de descuento en compra de productos",
-    ],
-    imageUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/paquete-reductor-ZsAtHwV2VSTjMf52QKYuRC.webp",
-    category: "corporales",
-  },
-];
+function getPackages(lang: Lang) {
+  return [
+    {
+      id: "pkg-nutricion",
+      name: lang === "EN" ? "Nutrition Package" : "Paquete Nutrición",
+      price: 2500,
+      regularPrice: 3200,
+      badge: "mostPopular",
+      description: lang === "EN"
+        ? "Complete personalized nutritional counseling program with follow-up and body scans."
+        : "Programa completo de asesoría nutricional personalizada con seguimiento y escaneos corporales.",
+      features: lang === "EN" ? [
+        "4 personalized nutritional consultations",
+        "4 body scans",
+        "10% discount on body treatments",
+        "Access to online follow-up",
+      ] : [
+        "4 asesorías nutricionales personalizadas",
+        "4 escaneos corporales",
+        "10% de descuento en tratamientos corporales",
+        "Acceso a seguimiento online",
+      ],
+      imageUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/paquete-nutricion-iZYFQemGqyUBv8zktgvgAM.webp",
+      category: "nutricion",
+    },
+    {
+      id: "pkg-reductor",
+      name: lang === "EN" ? "Nutriser Slimming Package" : "Paquete Reductor Nutriser",
+      price: 4500,
+      regularPrice: 6500,
+      badge: "maxSavings",
+      description: lang === "EN"
+        ? "Comprehensive body slimming package: cavitation, radiofrequency and reducing mesotherapy."
+        : "Paquete integral de reducción corporal: cavitaciones, radiofrecuencias y mesoterapia reductora.",
+      features: lang === "EN" ? [
+        "4 personalized nutritional consultations",
+        "4 body cavitation sessions",
+        "4 body radiofrequency sessions",
+        "4 reducing mesotherapy sessions",
+        "10% discount on facial treatments",
+        "10% discount on product purchases",
+      ] : [
+        "4 asesorías nutricionales personalizadas",
+        "4 sesiones de Cavitación corporal",
+        "4 sesiones de Radiofrecuencia corporal",
+        "4 sesiones de Mesoterapia reductora",
+        "10% de descuento en tratamientos faciales",
+        "10% de descuento en compra de productos",
+      ],
+      imageUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/paquete-reductor-ZsAtHwV2VSTjMf52QKYuRC.webp",
+      category: "corporales",
+    },
+  ];
+}
+const PACKAGES = getPackages("ES"); // fallback estático para PromoBanner
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
-  nutricion: { label: "Nutrición", icon: Apple, color: "#16a34a", bg: "#dcfce7" },
-  corporales: { label: "Corporales", icon: PersonStanding, color: "#C5A55A", bg: "#fef3c7" },
-  faciales: { label: "Faciales", icon: ScanFace, color: "#ec4899", bg: "#fce7f3" },
-  medicina: { label: "Medicina", icon: Syringe, color: "#7c3aed", bg: "#ede9fe" },
-  otros: { label: "Otros", icon: Smile, color: "#0891b2", bg: "#cffafe" },
-  productos: { label: "Productos", icon: ShoppingBag, color: "#ea580c", bg: "#ffedd5" },
-  general: { label: "General", icon: Package, color: "#6b7280", bg: "#f3f4f6" },
+  nutricion: { label: "catNutricion", icon: Apple, color: "#16a34a", bg: "#dcfce7" },
+  corporales: { label: "catCorporales", icon: PersonStanding, color: "#C5A55A", bg: "#fef3c7" },
+  faciales: { label: "catFaciales", icon: ScanFace, color: "#ec4899", bg: "#fce7f3" },
+  medicina: { label: "catMedicina", icon: Syringe, color: "#7c3aed", bg: "#ede9fe" },
+  otros: { label: "catOtros", icon: Smile, color: "#0891b2", bg: "#cffafe" },
+  productos: { label: "catProductos", icon: ShoppingBag, color: "#ea580c", bg: "#ffedd5" },
+  general: { label: "catGeneral", icon: Package, color: "#6b7280", bg: "#f3f4f6" },
 };
 
 const CATEGORY_ORDER = ["nutricion", "corporales", "faciales", "medicina", "otros", "productos", "general"];
@@ -147,7 +166,7 @@ function HScrollRail({ children, className = "" }: { children: React.ReactNode; 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 /** Formatea precio de servicio: "$3500" → "$3,500 MXN", "$700" → "$700 MXN" */
 function formatServicePrice(raw: string | null | undefined): string {
-  if (!raw) return "Consultar precio";
+  if (!raw) return "consultPrice";
   const num = parseInt(raw.replace(/[^0-9]/g, ""), 10);
   if (isNaN(num)) return raw; // "Consultar precio" etc.
   return `$${num.toLocaleString("es-MX")} MXN`;
@@ -174,20 +193,20 @@ function CopyButton({ text }: { text: string }) {
 }
 
 // ─── Banner Carousel ─────────────────────────────────────────────────────────
-function PromoBanner({ onBannerClick }: { onBannerClick?: (pkgIndex: number) => void }) {
+function PromoBanner({ onBannerClick, lang }: { onBannerClick?: (pkgIndex: number) => void; lang: Lang }) {
   const [idx, setIdx] = useState(0);
   const banners = [
     {
-      title: "Paquete Nutrición",
-      subtitle: "Ahorra $700 MXN",
+      title: "pkgNutricionTitle",
+      subtitle: "pkgNutricionSubtitle",
       badge: "-22%",
       bg: "from-amber-500 to-amber-700",
       img: PACKAGES[0].imageUrl,
       pkgIndex: 0,
     },
     {
-      title: "Paquete Reductor",
-      subtitle: "Ahorra $2,000 MXN",
+      title: "pkgReductorTitle",
+      subtitle: "pkgReductorSubtitle",
       badge: "-31%",
       bg: "from-emerald-500 to-emerald-700",
       img: PACKAGES[1].imageUrl,
@@ -211,12 +230,12 @@ function PromoBanner({ onBannerClick }: { onBannerClick?: (pkgIndex: number) => 
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all" />
       <div className="relative z-10 h-full flex flex-col justify-center px-6">
         <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-black px-3 py-1 rounded-full w-fit mb-2">
-          {b.badge} DESCUENTO
+          {t(b.badge as any, lang)} {t("discount3", lang)}
         </span>
-        <h3 className="text-white text-xl sm:text-2xl font-black leading-tight">{b.title}</h3>
-        <p className="text-white/80 text-sm font-medium mt-1">{b.subtitle}</p>
+        <h3 className="text-white text-xl sm:text-2xl font-black leading-tight">{t(b.title as any, lang)}</h3>
+        <p className="text-white/80 text-sm font-medium mt-1">{t(b.subtitle as any, lang)}</p>
         <span className="mt-2 inline-flex items-center gap-1 text-white/90 text-xs font-bold bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full w-fit group-hover:bg-white/30 transition-all">
-          <ShoppingCart className="w-3.5 h-3.5" /> Comprar ahora
+          <ShoppingCart className="w-3.5 h-3.5" /> {t("buyNow", lang)}
         </span>
       </div>
       {/* Dots */}
@@ -235,8 +254,15 @@ function PromoBanner({ onBannerClick }: { onBannerClick?: (pkgIndex: number) => 
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Memberships() {
   const [, navigate] = useLocation();
-  const [lang, setLang] = useState<Lang>("ES");
-  const toggleLang = () => setLang(prev => prev === "ES" ? "EN" : "ES");
+  const [lang, setLang] = useState<Lang>(() => {
+    const saved = localStorage.getItem("nutriser-lang");
+    return (saved === "EN" || saved === "ES") ? saved as Lang : "ES";
+  });
+  const toggleLang = () => setLang(prev => {
+    const next = prev === "ES" ? "EN" : "ES";
+    localStorage.setItem("nutriser-lang", next);
+    return next;
+  });
   const [activeTab, setActiveTab] = useState<StoreTab>("tratamientos");
 
   // ─── Sesión unificada ────────────────────────────────────────────────
@@ -645,10 +671,10 @@ export default function Memberships() {
           <button
             onClick={() => setActiveTab("tratamientos")}
             className="flex items-center gap-1 bg-black/60 backdrop-blur-sm border border-white/15 text-white/80 px-2.5 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase hover:bg-white/20 hover:text-white transition-all duration-300 shadow-md"
-            aria-label="Regresar a la tienda"
+            aria-label={t('back', lang)}
           >
             <ChevronLeft className="w-3.5 h-3.5" />
-            Regresar
+            {t('back', lang)}
           </button>
         </div>
       ) : (activeTab === "tratamientos" && activeCategory !== "all") ? (
@@ -659,10 +685,10 @@ export default function Memberships() {
           <button
             onClick={() => setActiveCategory("all")}
             className="flex items-center gap-1 bg-black/60 backdrop-blur-sm border border-white/15 text-white/80 px-2.5 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase hover:bg-white/20 hover:text-white transition-all duration-300 shadow-md"
-            aria-label="Regresar a la tienda"
+            aria-label={t('back', lang)}
           >
             <ChevronLeft className="w-3.5 h-3.5" />
-            Regresar
+            {t('back', lang)}
           </button>
         </div>
       ) : (activeTab !== "tratamientos") ? (
@@ -673,14 +699,14 @@ export default function Memberships() {
           <button
             onClick={() => setActiveTab("tratamientos")}
             className="flex items-center gap-1 bg-black/60 backdrop-blur-sm border border-white/15 text-white/80 px-2.5 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase hover:bg-white/20 hover:text-white transition-all duration-300 shadow-md"
-            aria-label="Regresar a la tienda"
+            aria-label={t('back', lang)}
           >
             <ChevronLeft className="w-3.5 h-3.5" />
-            Regresar
+            {t('back', lang)}
           </button>
         </div>
       ) : (
-        <BackToSplash hideHome desktopBackTo="/" desktopBackLabel="Regresar" />
+        <BackToSplash hideHome desktopBackTo="/" desktopBackLabel={t('back', lang)} />
       )}
 
       {/* ── Pop-up de cupones/promociones ── */}
@@ -732,7 +758,7 @@ export default function Memberships() {
                     {detailItem.category && (
                       <div className="absolute bottom-3 left-3">
                         <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#C5A55A" }}>
-                          {(CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label}
+                          {t((CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label as any, lang)}
                         </span>
                       </div>
                     )}
@@ -784,7 +810,7 @@ export default function Memberships() {
                     <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{ background: "rgba(197,165,90,0.08)", border: "1px solid rgba(197,165,90,0.2)" }}>
                       <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "#C5A55A" }} />
                       <div>
-                        <span style={{ color: "#C5A55A", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Duración</span>
+                        <span style={{ color: "#C5A55A", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>{t('duration', lang)}</span>
                         <p style={{ color: "#FAF7F2", fontSize: 13, fontWeight: 600, marginTop: 1 }}>{detailItem.duration}</p>
                       </div>
                     </div>
@@ -793,7 +819,7 @@ export default function Memberships() {
                   {/* Beneficios (servicios) */}
                   {detailItem.benefits && detailItem.benefits.length > 0 && (
                     <div className="mb-5">
-                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Beneficios</p>
+                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>{t('benefits', lang)}</p>
                       <ul className="space-y-2">
                         {detailItem.benefits.map((b, i) => (
                           <li key={i} className="flex items-start gap-2">
@@ -808,7 +834,7 @@ export default function Memberships() {
                   {/* Incluye (paquetes) */}
                   {detailItem.features && detailItem.features.length > 0 && (
                     <div className="mb-5">
-                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Incluye</p>
+                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>{t('includes', lang)}</p>
                       <ul className="space-y-2">
                         {detailItem.features.map((f, i) => (
                           <li key={i} className="flex items-start gap-2">
@@ -823,7 +849,7 @@ export default function Memberships() {
                   {/* Cuidados post-tratamiento (servicios) */}
                   {detailItem.aftercare && detailItem.aftercare.length > 0 && (
                     <div className="mb-4">
-                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Cuidados post-tratamiento</p>
+                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>{t('aftercare', lang)}</p>
                       <ul className="space-y-2">
                         {detailItem.aftercare.map((a, i) => (
                           <li key={i} className="flex items-start gap-2">
@@ -841,7 +867,7 @@ export default function Memberships() {
                       <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).bg }}>
                         {(() => { const Icon = (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).icon; return <Icon className="w-3.5 h-3.5" style={{ color: (CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).color }} />; })()}
                       </div>
-                      <span style={{ color: "#888", fontSize: 12 }}>{(CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label}</span>
+                      <span style={{ color: "#888", fontSize: 12 }}>{t((CATEGORY_META[detailItem.category] ?? CATEGORY_META.general).label as any, lang)}</span>
                     </div>
                   )}
                 </div>
@@ -907,7 +933,7 @@ export default function Memberships() {
                     </span>
                     <div className="flex items-center gap-1 mt-0.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.6)]" />
-                      <span className="text-green-600 text-[8px] font-semibold leading-tight">Activa</span>
+                      <span className="text-green-600 text-[8px] font-semibold leading-tight">{t("active", lang)}</span>
                     </div>
                   </div>
                   <div className="relative w-8 h-8 rounded-full bg-[#C5A55A]/10 flex items-center justify-center">
@@ -973,8 +999,8 @@ export default function Memberships() {
 
       {/* ── Banner Carrusel de Ofertas (clickeable → comprar paquete) ── */}
       {/* Ocultar banner cuando hay búsqueda activa */}
-      {!searchQuery && <PromoBanner onBannerClick={(pkgIndex) => {
-        const pkg = PACKAGES[pkgIndex];
+      {!searchQuery && <PromoBanner lang={lang} onBannerClick={(pkgIndex) => {
+        const pkg = getPackages(lang)[pkgIndex];
         if (pkg) {
           openCheckout({
             id: pkg.id,
@@ -1158,7 +1184,7 @@ export default function Memberships() {
                       }`} style={{ backgroundColor: isActive ? meta.color : meta.bg }}>
                         <Icon className="w-6 h-6" style={{ color: isActive ? "#fff" : meta.color }} />
                       </div>
-                      <span className={`text-[10px] font-semibold ${isActive ? "text-gray-900" : "text-gray-500"}`}>{meta.label}</span>
+                      <span className={`text-[10px] font-semibold ${isActive ? "text-gray-900" : "text-gray-500"}`}>{t(meta.label as any, lang)}</span>
                     </button>
                   );
                 })}
@@ -1173,7 +1199,7 @@ export default function Memberships() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="font-black text-gray-900 text-lg">{t("specialPackages", lang)}</h2>
-                    <p className="text-gray-400 text-xs">Los mejores precios en tratamientos combinados</p>
+                    <p className="text-gray-400 text-xs">{t("specialPackagesSubtitle", lang)}</p>
                   </div>
                   <span className="text-[#C5A55A] text-xs font-bold flex items-center gap-0.5">
                     {t("viewAll", lang)} <ChevronRight className="w-3.5 h-3.5" />
@@ -1181,7 +1207,7 @@ export default function Memberships() {
                 </div>
 
                 <HScrollRail className="lg:!flex lg:!gap-6">
-                  {PACKAGES.map(pkg => {
+                  {getPackages(lang).map(pkg => {
                     const savings = pkg.regularPrice - pkg.price;
                     const savingsPct = Math.round((savings / pkg.regularPrice) * 100);
                     return (
@@ -1191,7 +1217,7 @@ export default function Memberships() {
                           <img src={pkg.imageUrl} alt={pkg.name} className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           <div className="absolute top-2 left-2 bg-[#C5A55A] text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-current" /> {pkg.badge}
+                            <Star className="w-3 h-3 fill-current" /> {t(pkg.badge as any, lang)}
                           </div>
                           <div className="absolute top-2 right-2 flex items-center gap-1">
                             <button onClick={(e) => { e.stopPropagation(); track("package", pkg.id, pkg.name, "wishlist"); toggleWishlist({ id: pkg.id, name: pkg.name, price: pkg.price, priceLabel: `$${pkg.price.toLocaleString("es-MX")} MXN`, imageUrl: pkg.imageUrl, category: pkg.category, itemType: "package" }); }} className="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
@@ -1223,7 +1249,7 @@ export default function Memberships() {
                               </li>
                             ))}
                             {pkg.features.length > 2 && (
-                              <li className="text-[11px] text-[#C5A55A] font-semibold pl-4">+{pkg.features.length - 2} más</li>
+                              <li className="text-[11px] text-[#C5A55A] font-semibold pl-4">+{pkg.features.length - 2} {lang === "EN" ? "more" : "más"}</li>
                             )}
                           </ul>
 
@@ -1271,7 +1297,7 @@ export default function Memberships() {
                             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: meta.bg }}>
                               <Icon className="w-4 h-4" style={{ color: meta.color }} />
                             </div>
-                            <h2 className="font-bold text-gray-900 text-base">{meta.label}</h2>
+                            <h2 className="font-bold text-gray-900 text-base">{t(meta.label as any, lang)}</h2>
                             <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{catServices.length}</span>
                           </div>
                           <button onClick={() => setActiveCategory(cat)} className="text-[#C5A55A] text-xs font-bold flex items-center gap-0.5">
@@ -1342,7 +1368,7 @@ onClick={() => {
                       <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: (CATEGORY_META[activeCategory] ?? CATEGORY_META.general).bg }}>
                         {(() => { const Icon = (CATEGORY_META[activeCategory] ?? CATEGORY_META.general).icon; return <Icon className="w-4 h-4" style={{ color: (CATEGORY_META[activeCategory] ?? CATEGORY_META.general).color }} />; })()}
                       </div>
-                      <h2 className="font-bold text-gray-900 text-lg">{(CATEGORY_META[activeCategory] ?? CATEGORY_META.general).label}</h2>
+                      <h2 className="font-bold text-gray-900 text-lg">{t((CATEGORY_META[activeCategory] ?? CATEGORY_META.general).label as any, lang)}</h2>
                       <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{filteredServices.length}</span>
                     </div>
                     {filteredServices.length === 0 ? (
@@ -1424,8 +1450,8 @@ onClick={() => {
                     <FlaskConical className="w-4 h-4 text-purple-600" />
                   </div>
                   <div>
-                    <h2 className="font-black text-gray-900 text-lg">Productos Nutriser</h2>
-                    <p className="text-gray-400 text-xs">Productos nutricionales y cosméticos premium</p>
+                    <h2 className="font-black text-gray-900 text-lg">{t("pharmacyTitle", lang)}</h2>
+                    <p className="text-gray-400 text-xs">{t("pharmacySubtitle", lang)}</p>
                   </div>
                 </div>
               </div>
@@ -1437,7 +1463,7 @@ onClick={() => {
                     <FlaskConical className="w-10 h-10 text-gray-300" />
                   </div>
                   <h3 className="font-bold text-gray-400 text-xl mb-2">{t("comingSoon", lang)}</h3>
-                  <p className="text-gray-300 text-sm max-w-xs mx-auto">Estamos preparando nuestros productos nutricionales y cosméticos de alta calidad.</p>
+                  <p className="text-gray-300 text-sm max-w-xs mx-auto">{t("pharmacyEmpty", lang)}</p>
                 </div>
               ) : (
                 <HScrollRail>
@@ -1458,18 +1484,18 @@ onClick={() => {
                           </button>
                           {product.stock !== null && product.stock !== undefined && product.stock <= 5 && product.stock > 0 && (
                             <div className="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
-                              Últimas {product.stock}
+                              {t("lastUnits", lang)} {product.stock}
                             </div>
                           )}
                         </div>
                         <div className="p-3 flex-1 flex flex-col">
-                          <p className="text-[9px] text-purple-600 font-semibold uppercase tracking-wider mb-0.5">{product.category || "Producto"}</p>
+                          <p className="text-[9px] text-purple-600 font-semibold uppercase tracking-wider mb-0.5">{product.category || t("typeProduct", lang)}</p>
                           <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{product.name}</h3>
                           <div className="mt-auto">
                             {product.price ? (
                               <p className="text-[#C5A55A] font-black text-sm mb-2">{product.price}</p>
                             ) : (
-                              <p className="text-gray-400 text-xs mb-2 italic">Consultar</p>
+                              <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
                             )}
                             <div className="flex gap-1.5">
                               <button onClick={() => addToCart({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
@@ -1505,8 +1531,8 @@ onClick={() => {
                   <BookOpen className="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="font-black text-gray-900 text-lg">Librería Nutriser</h2>
-                  <p className="text-gray-400 text-xs">Recursos digitales exclusivos para tu bienestar</p>
+                  <h2 className="font-black text-gray-900 text-lg">{lang === "EN" ? "Nutriser Library" : "Librería Nutriser"}</h2>
+                  <p className="text-gray-400 text-xs">{lang === "EN" ? "Exclusive digital resources for your well-being" : "Recursos digitales exclusivos para tu bienestar"}</p>
                 </div>
               </div>
               {loadingEbook ? (
@@ -1517,7 +1543,7 @@ onClick={() => {
                     <BookOpen className="w-10 h-10 text-gray-300" />
                   </div>
                   <h3 className="font-bold text-gray-400 text-xl mb-2">{t("comingSoon", lang)}</h3>
-                  <p className="text-gray-300 text-sm max-w-xs mx-auto">Estamos preparando libros y recursos digitales exclusivos para ti.</p>
+                  <p className="text-gray-300 text-sm max-w-xs mx-auto">{t("libraryEmpty", lang)}</p>
                 </div>
               ) : (
                 <div className="max-w-md mx-auto">
@@ -1531,20 +1557,20 @@ onClick={() => {
                       </div>
                     )}
                     <div className="p-5">
-                      <p className="text-[10px] text-blue-600 font-semibold uppercase tracking-wider mb-1">eBook Digital</p>
+                      <p className="text-[10px] text-blue-600 font-semibold uppercase tracking-wider mb-1">{t("typeDigitalEbook", lang)}</p>
                       <h3 className="font-black text-gray-900 text-xl leading-snug mb-2">{ebook.title}</h3>
                       {ebook.description && <p className="text-gray-500 text-sm leading-relaxed mb-4">{ebook.description}</p>}
                       {(ebook as any).presalePrice ? (
                         <div className="mb-4">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="bg-green-50 text-green-600 text-xs font-bold px-2.5 py-1 rounded-full border border-green-200">Pre-compra</span>
-                            <span className="bg-amber-50 text-amber-600 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-200">Precio especial</span>
+                            <span className="bg-amber-50 text-amber-600 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-200">{t("specialPrice", lang)}</span>
                           </div>
                           <div className="flex items-end gap-2">
                             <span className="text-3xl font-black text-[#C5A55A]">${parseFloat(String((ebook as any).presalePrice)).toLocaleString("es-MX", { minimumFractionDigits: 0 })}</span>
                             <span className="text-sm text-gray-400 mb-1">MXN</span>
                           </div>
-                          <p className="text-xs text-gray-400 mt-0.5">Precio regular: <span className="line-through">${parseFloat(String(ebook.price)).toLocaleString("es-MX", { minimumFractionDigits: 0 })} MXN</span></p>
+                          <p className="text-xs text-gray-400 mt-0.5">{t("regularPrice", lang)}: <span className="line-through">${parseFloat(String(ebook.price)).toLocaleString("es-MX", { minimumFractionDigits: 0 })} MXN</span></p>
                         </div>
                       ) : (
                         <div className="flex items-end gap-2 mb-4">
@@ -1557,15 +1583,15 @@ onClick={() => {
                         <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 mb-3 flex items-start gap-2">
                           <span className="text-lg">⏳</span>
                           <div>
-                            <p className="text-amber-800 font-bold text-xs mb-0.5">Pre-venta disponible</p>
-                            <p className="text-amber-700 text-xs leading-relaxed">Compra ahora al precio especial. El acceso para leer se activa automáticamente cuando el libro sea publicado.</p>
+                            <p className="text-amber-800 font-bold text-xs mb-0.5">{lang === "EN" ? "Presale available" : "Pre-venta disponible"}</p>
+                            <p className="text-amber-700 text-xs leading-relaxed">{lang === "EN" ? "Buy now at the special price. Reading access activates automatically when the book is published." : "Compra ahora al precio especial. El acceso para leer se activa automáticamente cuando el libro sea publicado."}</p>
                           </div>
                         </div>
                       )}
                       {ebook.comingSoon && !(ebook as any).presalePrice ? (
                         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-                          <p className="text-amber-700 font-bold text-sm">Próximamente disponible</p>
-                          <p className="text-gray-400 text-xs mt-1">Suscríbete para recibir notificación</p>
+                          <p className="text-amber-700 font-bold text-sm">{t("comingSoonAvailable", lang)}</p>
+                          <p className="text-gray-400 text-xs mt-1">{lang === "EN" ? "Subscribe to receive notification" : "Suscríbete para recibir notificación"}</p>
                         </div>
                       ) : (
                         <button onClick={() => openCheckout({
@@ -1577,7 +1603,7 @@ onClick={() => {
                         })}
                           className="w-full flex items-center justify-center gap-2 bg-[#C5A55A] text-white font-bold py-3.5 rounded-xl hover:bg-[#B8963E] transition-all active:scale-95 shadow-md">
                           <Zap className="w-4 h-4" />
-                          {(ebook as any).presalePrice ? "Pre-comprar ahora" : t("buyNow", lang)}
+                          {(ebook as any).presalePrice ? (lang === "EN" ? "Pre-purchase now" : "Pre-comprar ahora") : t("buyNow", lang)}
                         </button>
                       )}
                     </div>
@@ -1597,13 +1623,13 @@ onClick={() => {
             <div className="w-20 h-20 rounded-full bg-[#FAF7F2] flex items-center justify-center mx-auto mb-4">
               <ClipboardList className="w-10 h-10 text-[#C5A55A]" />
             </div>
-            <h2 className="font-black text-gray-900 text-xl mb-2">Mis Tratamientos</h2>
-            <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">Accede a tu seguimiento de tratamientos, fotos y contrato de consentimiento desde el inicio de la app.</p>
+            <h2 className="font-black text-gray-900 text-xl mb-2">{t("myTreatments", lang)}</h2>
+            <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">{lang === "EN" ? "Access your treatment tracking, photos and consent form from the app home." : "Accede a tu seguimiento de tratamientos, fotos y contrato de consentimiento desde el inicio de la app."}</p>
             <button
               onClick={() => navigate("/mis-tratamientos")}
               className="bg-[#C5A55A] text-white font-bold px-8 py-3 rounded-xl hover:bg-[#B8963E] transition-all active:scale-95 shadow-md"
             >
-              Ir a Mis Tratamientos
+              {t("goToMyTreatments", lang)}
             </button>
           </div>
         </div>
@@ -1716,8 +1742,8 @@ onClick={() => {
                   <Heart className="w-4 h-4 text-red-500" />
                 </div>
                 <div>
-                  <h2 className="font-black text-gray-900 text-lg">Lista de Deseos</h2>
-                  <p className="text-gray-400 text-xs">{wishlistCount} {wishlistCount === 1 ? "artículo guardado" : "artículos guardados"}</p>
+                  <h2 className="font-black text-gray-900 text-lg">{t("wishlist", lang)}</h2>
+                  <p className="text-gray-400 text-xs">{wishlistCount} {wishlistCount === 1 ? (lang === "EN" ? "saved item" : "artículo guardado") : (lang === "EN" ? "saved items" : "artículos guardados")}</p>
                 </div>
               </div>
 
@@ -1726,14 +1752,14 @@ onClick={() => {
                   <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                     <Heart className="w-10 h-10 text-gray-300" />
                   </div>
-                  <h3 className="font-bold text-gray-400 text-xl mb-2">Tu lista está vacía</h3>
-                  <p className="text-gray-300 text-sm max-w-xs mx-auto">Toca el corazón en cualquier artículo para guardarlo aquí.</p>
-                  <button onClick={() => setActiveTab("tratamientos")} className="mt-4 text-[#C5A55A] font-bold text-sm hover:underline">Explorar tratamientos</button>
+                  <h3 className="font-bold text-gray-400 text-xl mb-2">{t("emptyWishlist", lang)}</h3>
+                  <p className="text-gray-300 text-sm max-w-xs mx-auto">{t("wishlistEmpty", lang)}</p>
+                  <button onClick={() => setActiveTab("tratamientos")} className="mt-4 text-[#C5A55A] font-bold text-sm hover:underline">{lang === "EN" ? "Explore treatments" : "Explorar tratamientos"}</button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {wishlist.map(item => {
-                    const typeLabels: Record<string, string> = { service: "Tratamiento", package: "Paquete", product: "Producto", ebook: "eBook" };
+                    const typeLabels: Record<string, string> = { service: t("typeTreatment", lang), package: t("typePackage", lang), product: t("typeProduct", lang), ebook: t("typeEbook", lang) };
                     return (
                       <div key={item.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex">
                         {/* Image */}
@@ -1748,7 +1774,7 @@ onClick={() => {
                         </div>
                         {/* Info */}
                         <div className="flex-1 p-3 flex flex-col min-w-0">
-                          <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">{typeLabels[item.itemType] || "Artículo"}</p>
+                          <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">{typeLabels[item.itemType] || (lang === "EN" ? "Item" : "Artículo")}</p>
                           <h3 className="font-bold text-gray-900 text-xs leading-snug line-clamp-2 mt-0.5">{item.name}</h3>
                           <p className="text-[#C5A55A] font-black text-sm mt-auto">{item.priceLabel}</p>
                           <div className="flex gap-1.5 mt-2">
@@ -1862,17 +1888,17 @@ onClick={() => {
                     <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-orange-200">
                       <span className="text-3xl">💵</span>
                     </div>
-                    <h3 className="font-bold text-gray-900 text-xl mb-2">¡Pendiente de pago registrado!</h3>
-                    <p className="text-gray-500 text-sm mb-4">Tu pedido quedó guardado como <strong>pago en efectivo pendiente</strong> en tu monedero.</p>
+                    <h3 className="font-bold text-gray-900 text-xl mb-2">{t("cashPendingRegistered", lang)}</h3>
+                    <p className="text-gray-500 text-sm mb-4">{lang === "EN" ? <>Your order was saved as a <strong>pending cash payment</strong> in your wallet.</> : <>Tu pedido quedó guardado como <strong>pago en efectivo pendiente</strong> en tu monedero.</>}</p>
                     <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4 text-left space-y-2">
-                      <p className="text-xs font-bold text-orange-700 uppercase tracking-wider">¿Qué sigue?</p>
-                      <p className="text-sm text-orange-800">1. Acude a la clínica con el monto en efectivo.</p>
-                      <p className="text-sm text-orange-800">2. El administrador escaneará tu monedero y verá el pendiente.</p>
-                      <p className="text-sm text-orange-800">3. Al confirmar el pago, se acreditará tu cashback automáticamente.</p>
+                      <p className="text-xs font-bold text-orange-700 uppercase tracking-wider">{lang === "EN" ? "What's next?" : "¿Qué sigue?"}</p>
+                      <p className="text-sm text-orange-800">1. {lang === "EN" ? "Go to the clinic with the cash amount." : "Acude a la clínica con el monto en efectivo."}</p>
+                      <p className="text-sm text-orange-800">2. {t("cashStep2", lang)}</p>
+                      <p className="text-sm text-orange-800">3. {t("cashStep3", lang)}</p>
                     </div>
                     <button onClick={() => { setCheckoutOpen(false); setCart([]); }}
                       className="w-full bg-[#C5A55A] text-white font-bold py-3 rounded-xl hover:bg-[#B8963E] transition-all">
-                      Entendido
+                      {lang === "EN" ? "Got it" : "Entendido"}
                     </button>
                   </>
                 ) : (
@@ -1880,15 +1906,15 @@ onClick={() => {
                     <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-200">
                       <CheckCircle2 className="w-8 h-8 text-green-500" />
                     </div>
-                    <h3 className="font-bold text-gray-900 text-xl mb-2">¡Comprobante recibido!</h3>
-                    <p className="text-gray-500 text-sm mb-4">Tu pedido está en revisión. Te contactaremos pronto para confirmar.</p>
+                    <h3 className="font-bold text-gray-900 text-xl mb-2">{t("receiptReceived", lang)}</h3>
+                    <p className="text-gray-500 text-sm mb-4">{lang === "EN" ? "Your order is under review. We will contact you soon to confirm." : "Tu pedido está en revisión. Te contactaremos pronto para confirmar."}</p>
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-                      <p className="text-xs text-gray-400 mb-1">Código de seguimiento</p>
+                      <p className="text-xs text-gray-400 mb-1">{lang === "EN" ? "Tracking code" : "Código de seguimiento"}</p>
                       <p className="font-black text-[#C5A55A] text-lg font-mono">{successCode}</p>
                     </div>
                     <button onClick={() => { setCheckoutOpen(false); setCart([]); }}
                       className="w-full bg-[#C5A55A] text-white font-bold py-3 rounded-xl hover:bg-[#B8963E] transition-all">
-                      Listo
+                      {t("done", lang)}
                     </button>
                   </>
                 )}
@@ -1897,7 +1923,7 @@ onClick={() => {
               <form onSubmit={handleSubmitCheckout} className="p-4 space-y-5">
                 {/* Resumen */}
                 <div className="bg-gray-50 rounded-xl p-3 space-y-2">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Tu pedido</p>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t("yourOrder", lang)}</p>
                   {checkoutItems.map(item => (
                     <div key={item.id} className="flex items-center justify-between text-sm">
                       <span className="text-gray-700 font-medium line-clamp-1 flex-1 mr-2">{item.qty}x {item.name}</span>
@@ -1924,14 +1950,14 @@ onClick={() => {
                   {discountInfo?.valid && (
                     <div className="mt-2 flex items-center gap-2 text-green-600 text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-2">
                       <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                      <span>{discountInfo.isGift ? "¡Regalo aplicado! Tu compra es gratis." : discountInfo.isTwoForOne ? "¡2x1 aplicado!" : `${discountInfo.discount}% de descuento — Total: $${discountedTotal.toLocaleString("es-MX")} MXN`}</span>
+                      <span>{discountInfo.isGift ? (lang === "EN" ? "Gift applied! Your purchase is free." : "¡Regalo aplicado! Tu compra es gratis.") : discountInfo.isTwoForOne ? (lang === "EN" ? "2x1 applied!" : "¡2x1 aplicado!") : `${discountInfo.discount}% ${t("discountToast", lang)} — Total: $${discountedTotal.toLocaleString("es-MX")} MXN`}</span>
                     </div>
                   )}
                 </div>
                 {/* Datos del comprador */}
                 {isLoggedIn && patient ? (
                   <div className="space-y-2">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Tus datos</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t("yourData", lang)}</p>
                     <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
@@ -1943,17 +1969,17 @@ onClick={() => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Tus datos</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t("yourData", lang)}</p>
                     <div>
-                      <Label htmlFor="co-name" className="text-sm text-gray-600">Nombre completo *</Label>
-                      <Input id="co-name" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="Tu nombre completo" required className="mt-1" />
+                      <Label htmlFor="co-name" className="text-sm text-gray-600">{t("fullName", lang)}</Label>
+                      <Input id="co-name" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder={lang === "EN" ? "Your full name" : "Tu nombre completo"} required className="mt-1" />
                     </div>
                     <div>
-                      <Label htmlFor="co-email" className="text-sm text-gray-600">Correo electrónico *</Label>
+                      <Label htmlFor="co-email" className="text-sm text-gray-600">{t("emailLabel", lang)}</Label>
                       <Input id="co-email" type="email" value={buyerEmail} onChange={e => setBuyerEmail(e.target.value)} placeholder="tu@email.com" required className="mt-1" />
                     </div>
                     <div>
-                      <Label htmlFor="co-phone" className="text-sm text-gray-600">Teléfono *</Label>
+                      <Label htmlFor="co-phone" className="text-sm text-gray-600">{t("phoneLabel", lang)}</Label>
                       <Input id="co-phone" value={buyerPhone} onChange={e => setBuyerPhone(e.target.value)} placeholder="+52 322..." required className="mt-1" />
                     </div>
                   </div>
@@ -1961,14 +1987,14 @@ onClick={() => {
                 {/* Monedero Nutriser */}
                 {isLoggedIn && hasValidPrice && (
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Monedero Nutriser</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{lang === "EN" ? "Nutriser Wallet" : "Monedero Nutriser"}</p>
                     {/* Saldo y opción de usar */}
                     <div className={`border rounded-xl p-3 transition-all ${useWallet ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
                       <div className="flex items-center gap-3">
                         <Wallet className="w-5 h-5 text-[#C5A55A] flex-shrink-0" />
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-800">Tu saldo</p>
-                          <p className="text-xs text-gray-500">Disponible: <span className="font-bold text-[#C5A55A]">${(walletBalance / 100).toFixed(2)} MXN</span></p>
+                          <p className="text-sm font-semibold text-gray-800">{t("yourSaldo", lang)}</p>
+                          <p className="text-xs text-gray-500">{t("available", lang)}: <span className="font-bold text-[#C5A55A]">${(walletBalance / 100).toFixed(2)} MXN</span></p>
                         </div>
                       </div>
                       {walletBalance > 0 && (
@@ -1987,17 +2013,17 @@ onClick={() => {
                             }}
                             className="w-4 h-4 accent-[#C5A55A]"
                           />
-                          <span className="text-sm text-gray-700">Usar saldo para pagar</span>
+                          <span className="text-sm text-gray-700">{t("useSaldoToPay", lang)}</span>
                         </label>
                       )}
                       {useWallet && (
                         <div className="mt-2 pt-2 border-t border-gray-200">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">Descuento monedero:</span>
+                            <span className="text-gray-600">{t("walletDiscount", lang)}</span>
                             <span className="font-bold text-green-600">-${(walletAmount / 100).toFixed(2)} MXN</span>
                           </div>
                           <div className="flex items-center justify-between text-sm mt-1">
-                            <span className="text-gray-600">{fullyCoveredByWallet ? "Cubierto con monedero" : "Restante a transferir:"}:</span>
+                            <span className="text-gray-600">{fullyCoveredByWallet ? t("coveredByWallet", lang) : t("remainingToTransfer", lang)}</span>
                             <span className={`font-bold ${fullyCoveredByWallet ? 'text-green-600' : 'text-[#C5A55A]'}`}>
                               {fullyCoveredByWallet ? "$0.00 MXN" : `$${transferAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN`}
                             </span>
@@ -2010,8 +2036,8 @@ onClick={() => {
                       <div className="mt-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
                         <Gift className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                         <p className="text-xs text-emerald-700">
-                          Con esta compra ganarás <span className="font-bold">${cashbackAmount.toLocaleString("es-MX")} MXN</span> de cashback en tu monedero
-                          <span className="text-emerald-500 block text-[10px] mt-0.5">(disponible para tu próxima compra)</span>
+                          {t("cashbackEarn", lang)} <span className="font-bold">${cashbackAmount.toLocaleString("es-MX")} MXN</span> {t("cashbackOf", lang)}
+                          <span className="text-emerald-500 block text-[10px] mt-0.5">{t("cashbackNextPurchase", lang)}</span>
                         </p>
                       </div>
                     )}
@@ -2051,7 +2077,7 @@ onClick={() => {
                     </div>
                     {paymentMethod === 'cash' && !walletData?.id && (
                       <p className="text-xs text-orange-600 mt-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
-                        ⚠️ Necesitas una cuenta registrada con monedero para usar pago en efectivo.
+                        ⚠️ {t("needWalletAccount", lang)}
                       </p>
                     )}
                     {paymentMethod === 'cash' && walletData?.id && (() => {
@@ -2060,18 +2086,18 @@ onClick={() => {
                       const cashCents = totalCents - walletUsedCents;
                       return (
                         <div className="mt-2 bg-green-50 border border-green-200 rounded-xl p-3 space-y-2">
-                          <p className="text-xs font-bold text-green-700">✅ Pendiente de pago en efectivo</p>
+                          <p className="text-xs font-bold text-green-700">{t("cashPendingTitle", lang)}</p>
                           {walletUsedCents > 0 && (
                             <div className="flex justify-between text-xs">
-                              <span className="text-gray-600">Saldo monedero:</span>
+                              <span className="text-gray-600">{t("walletBalance2", lang)}</span>
                               <span className="font-bold text-[#C5A55A]">-${(walletUsedCents / 100).toFixed(2)} MXN</span>
                             </div>
                           )}
                           <div className="flex justify-between text-xs">
-                            <span className="text-gray-600">A pagar en efectivo:</span>
+                            <span className="text-gray-600">{t("cashToPay", lang)}</span>
                             <span className="font-bold text-green-700">${(cashCents / 100).toFixed(2)} MXN</span>
                           </div>
-                          <p className="text-xs text-green-600">El admin verá este desglose al escanear tu QR y confirmará el cobro en clínica.</p>
+                          <p className="text-xs text-green-600">{t("adminWillConfirm", lang)}</p>
                         </div>
                       );
                     })()}
@@ -2080,39 +2106,39 @@ onClick={() => {
                 {/* Datos bancarios — solo si es transferencia y no cubre monedero */}
                 {!fullyCoveredByWallet && paymentMethod === 'transfer' && (
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
-                    <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Datos para transferencia</p>
+                    <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">{t("transferDataTitle", lang)}</p>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-gray-500">Banco: <span className="font-bold text-gray-700">{BANK_INFO.bank}</span></p>
-                        <p className="text-xs text-gray-500">CLABE: <span className="font-bold font-mono text-gray-700">{BANK_INFO.account}</span></p>
+                        <p className="text-xs text-gray-500">{t("bankLabel", lang)} <span className="font-bold text-gray-700">{BANK_INFO.bank}</span></p>
+                        <p className="text-xs text-gray-500">{t("clabeLabel", lang)} <span className="font-bold font-mono text-gray-700">{BANK_INFO.account}</span></p>
                       </div>
                       <CopyButton text={BANK_INFO.account} />
                     </div>
-                    <p className="text-xs text-gray-500">Monto: <span className="font-black text-[#C5A55A]">{hasValidPrice ? `$${transferAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN` : "Consultar precio"}</span>{useWallet && walletAmount > 0 && <span className="text-green-600 text-[10px] ml-1">(monedero: -${(walletAmount / 100).toFixed(2)})</span>}</p>
+                    <p className="text-xs text-gray-500">{t("amountLabel", lang)} <span className="font-black text-[#C5A55A]">{hasValidPrice ? `$${transferAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN` : t("consultPrice", lang)}</span>{useWallet && walletAmount > 0 && <span className="text-green-600 text-[10px] ml-1">({lang === "EN" ? "wallet" : "monedero"}: -${(walletAmount / 100).toFixed(2)})</span>}</p>
                   </div>
                 )}
                 {/* Comprobante — solo si es transferencia */}
                 {!fullyCoveredByWallet && paymentMethod === 'transfer' && (
                   <div>
-                    <Label className="text-sm text-gray-600">Comprobante de pago *</Label>
+                    <Label className="text-sm text-gray-600">{t("proofLabel", lang)}</Label>
                     <label className="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-5 cursor-pointer hover:border-[#C5A55A] hover:bg-amber-50/50 transition-all">
                       {proofFile ? (
                         <div className="text-center">
                           <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-1" />
                           <p className="text-sm font-semibold text-green-700">{proofFile.name}</p>
-                          <p className="text-xs text-gray-400">Toca para cambiar</p>
+                          <p className="text-xs text-gray-400">{t("tapToChange", lang)}</p>
                         </div>
                       ) : (
                         <div className="text-center">
                           <Upload className="w-8 h-8 text-gray-300 mx-auto mb-1" />
-                          <p className="text-sm font-semibold text-gray-600">Subir comprobante</p>
-                          <p className="text-xs text-gray-400">JPG, PNG o PDF — máx. 5MB</p>
+                          <p className="text-sm font-semibold text-gray-600">{t("uploadReceipt2", lang)}</p>
+                          <p className="text-xs text-gray-400">{t("fileFormats", lang)}</p>
                         </div>
                       )}
                       <input type="file" accept="image/jpeg,image/png,application/pdf" className="hidden" onChange={e => {
                         const file = e.target.files?.[0];
                         if (!file) return;
-                        if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
+                        if (file.size > 5 * 1024 * 1024) { toast.error(t("maxFileSize", lang)); return; }
                         setProofFile(file);
                       }} />
                     </label>

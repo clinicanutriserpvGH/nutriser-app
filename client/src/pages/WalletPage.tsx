@@ -6,13 +6,14 @@
  */
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Home, Sparkles, BookOpen, User, ChevronLeft, Download } from "lucide-react";
+import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, Copy, X } from "lucide-react";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 // NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import { trpc } from "@/lib/trpc";
 import { QRCodeSVG } from "qrcode.react";
 import { useRoute } from "wouter";
 import { WalletCard as WalletCardCR80, WalletCardPrintSheet } from "@/components/WalletCardPrint";
+import { toast } from "sonner";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -130,6 +131,7 @@ export default function WalletPage() {
   );
   const myPurchases = purchasesQuery.data;
   const [copied, setCopied] = useState(false);
+  const [showCardSheet, setShowCardSheet] = useState(false);
   const [showPhysicalCardDialog, setShowPhysicalCardDialog] = useState(false);
   const [physicalCardRequested, setPhysicalCardRequested] = useState(false);
 
@@ -233,8 +235,13 @@ export default function WalletPage() {
       {/* ── Tarjeta CR-80 (formato tarjeta de crédito 85.5×54mm) ── */}
       <div className="px-4 pt-4 pb-2">
         <div className="max-w-md mx-auto">
-          {/* Tarjeta CR-80 escalada para pantalla móvil */}
-          <div style={{ width: 323 * 0.88, height: 204 * 0.88, position: "relative" }}>
+          {/* Tarjeta CR-80 escalada para pantalla móvil — clickeable para abrir sheet */}
+          <button
+            onClick={() => setShowCardSheet(true)}
+            className="block cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all"
+            style={{ width: 323 * 0.88, height: 204 * 0.88, position: "relative", background: "none", border: "none", padding: 0 }}
+            title="Ver tarjeta completa"
+          >
             <WalletCardCR80
               card={{
                 patientName: patient?.name || "Usuario",
@@ -244,7 +251,7 @@ export default function WalletPage() {
               }}
               scale={0.88}
             />
-          </div>
+          </button>
 
           {/* Saldo + acciones debajo de la tarjeta */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mt-3 px-5 py-3">
@@ -698,6 +705,157 @@ export default function WalletPage() {
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] bg-green-600 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-lg flex items-center gap-2">
           <span>&#10003;</span> ¡Solicitud enviada! Te avisaremos cuando esté lista.
           <button onClick={() => setPhysicalCardRequested(false)} className="ml-2 text-white/70 hover:text-white">×</button>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          SHEET — TARJETA ELEGANTE (al hacer clic en la tarjeta)
+      ══════════════════════════════════════════════════════════════════════ */}
+      {showCardSheet && (
+        <div className="fixed inset-0 z-[70] flex items-end md:items-center md:justify-center">
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowCardSheet(false)} />
+          {/* Sheet */}
+          <div
+            className="relative w-full md:max-w-[420px] md:rounded-3xl md:mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto"
+            style={{ animation: typeof window !== 'undefined' && window.innerWidth >= 768 ? 'fadeInScale 0.25s ease-out' : 'slideUp 0.3s ease-out' }}
+          >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-gray-300" />
+            </div>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-[#1A1A1A]">Tu Monedero Nutriser</h2>
+              <button onClick={() => setShowCardSheet(false)} className="text-gray-400 hover:text-gray-600 p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {/* Tarjeta grande */}
+            <div className="px-5 pt-5 pb-3">
+              <div
+                style={{
+                  width: "100%",
+                  aspectRatio: "85.5 / 54",
+                  position: "relative",
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  background: "linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 40%, #1A1A1A 100%)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
+                }}
+              >
+                {/* Fondo textura */}
+                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 70% 30%, rgba(197,165,90,0.08) 0%, transparent 60%)", zIndex: 1 }} />
+                {/* Silueta decorativa */}
+                <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "45%", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <img src={LOGO_URL} alt="" style={{ width: "80%", height: "90%", objectFit: "contain", opacity: 0.18, filter: "sepia(1) saturate(3) hue-rotate(10deg)" }} />
+                </div>
+                {/* Contenido principal */}
+                <div style={{ position: "relative", zIndex: 3, padding: "14px 14px 48px 14px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  {/* Header tarjeta */}
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <img src={LOGO_URL} alt="Nutriser" style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "contain", background: "rgba(255,255,255,0.1)" }} />
+                        <div>
+                          <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 7, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase" }}>MONEDERO</div>
+                          <div style={{ color: "#C5A55A", fontSize: 9, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase" }}>NUTRISER</div>
+                          <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 6, letterSpacing: "0.08em" }}>aesthetic &amp; nutrition</div>
+                        </div>
+                      </div>
+                    </div>
+                    {wallet?.isActive ? (
+                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em" }}>ACTIVA</span>
+                    ) : (
+                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em" }}>INACTIVA</span>
+                    )}
+                  </div>
+                  {/* Fila central: QR + Placa dorada */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ background: "#FFFFFF", borderRadius: 6, padding: 5, flexShrink: 0 }}>
+                      <QRCodeSVG
+                        value={qrUrl || "https://nutriserpv.com/monedero"}
+                        size={62}
+                        level="H"
+                        includeMargin={false}
+                        bgColor="#FFFFFF"
+                        fgColor="#000000"
+                      />
+                    </div>
+                    <div style={{
+                      background: "linear-gradient(135deg, #E8C97A 0%, #C5A55A 50%, #d4af60 100%)",
+                      borderRadius: 6,
+                      padding: "7px 10px",
+                      flex: 1,
+                      minWidth: 0,
+                      boxShadow: "0 2px 8px rgba(197,165,90,0.3)",
+                    }}>
+                      <div style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 13, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>
+                        {patient?.name || '---'}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3 }}>
+                        <span style={{ color: "#5a3e00", fontFamily: "monospace", fontSize: 9, letterSpacing: "0.12em", fontWeight: 700 }}>
+                          {wallet?.walletNumber || '---'}
+                        </span>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(wallet?.walletNumber || ""); toast.success("Número copiado"); }}
+                          style={{ color: "#5a3e00", flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, opacity: 0.7 }}
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Banda dorada inferior */}
+                <div style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: "linear-gradient(90deg, #8B6914 0%, #C5A55A 25%, #E8C97A 50%, #C5A55A 75%, #8B6914 100%)",
+                  padding: "5px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  zIndex: 3,
+                }}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span style={{ color: "rgba(0,0,0,0.55)", fontSize: 6, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>NUTRISERPV.COM/MONEDERO</span>
+                    <span style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 14, lineHeight: 1 }}>{formatMoney(wallet?.balance || 0)}</span>
+                  </div>
+                  <span style={{ color: "rgba(0,0,0,0.55)", fontSize: 9, fontWeight: 700, letterSpacing: "0.02em" }}>Válido solo en Nutriser PV</span>
+                </div>
+              </div>
+            </div>
+            {/* Saldo y validez */}
+            <div className="px-5 pb-2">
+              <div className="bg-[#FAF7F2] rounded-xl p-3 flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Saldo disponible</p>
+                  <p className="text-[#C5A55A] font-black text-2xl">{formatMoney(wallet?.balance || 0)}</p>
+                </div>
+                {wallet?.balanceExpiresAt && wallet.balance > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-semibold rounded-full px-2.5 py-1">
+                    Válido hasta {new Date(wallet.balanceExpiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Botón cerrar / ir al monedero */}
+            <div className="px-5 pb-8 pt-2">
+              <button
+                onClick={() => setShowCardSheet(false)}
+                className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-2xl text-base hover:bg-[#2D2D2D] active:scale-[0.98] transition-all shadow-lg"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+          <style>{`
+            @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+            @keyframes fadeInScale { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+          `}</style>
         </div>
       )}
 

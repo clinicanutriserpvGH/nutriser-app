@@ -488,7 +488,16 @@ async function startServer() {
     await sendBirthdayGreetings();
   }, { timezone: 'America/Mexico_City' });
 
-  console.log('[Cron] Jobs programados: cumpleaños (9:00 AM) y recordatorio de citas (10:00 AM)');
+   // Auto-desactivar promociones vencidas: cada hora en punto
+  cron.default.schedule('0 0 * * * *', async () => {
+    try {
+      const { autoDeactivateExpiredPromotions } = await import('../db');
+      const count = await autoDeactivateExpiredPromotions();
+      if (count > 0) console.log(`[Cron] ${count} promoción(es) vencida(s) desactivada(s) automáticamente`);
+    } catch (e) {
+      console.error('[Cron] Error al desactivar promociones vencidas:', e);
+    }
+  }, { timezone: 'America/Mexico_City' });
+  console.log('[Cron] Jobs programados: cumpleaños (9:00 AM), recordatorio de citas (10:00 AM), auto-desactivar promociones (cada hora)');
 }
-
 startServer().catch(console.error);

@@ -8,16 +8,24 @@ import { checkIOSPushReadiness, isPushSupported, subscribeToPush, isNativeApp as
 type Step = "form" | "type" | "payment" | "success";
 
 // Contador regresivo hasta el vencimiento de la promo
-function CountdownTimer({ expiresAt }: { expiresAt: Date | string }) {
+function CountdownTimer({ expiresAt, onExpired }: { expiresAt: Date | string; onExpired?: () => void }) {
   const [timeLeft, setTimeLeft] = useState('');
   const [isUrgent, setIsUrgent] = useState(false);
+  const expiredRef = useRef(false);
 
   useEffect(() => {
     const calc = () => {
       const now = Date.now();
       const end = new Date(expiresAt).getTime();
       const diff = end - now;
-      if (diff <= 0) { setTimeLeft('¡Expirado!'); return; }
+      if (diff <= 0) {
+        setTimeLeft('¡Expirado!');
+        if (!expiredRef.current) {
+          expiredRef.current = true;
+          onExpired?.();
+        }
+        return;
+      }
       const days = Math.floor(diff / 86400000);
       const hours = Math.floor((diff % 86400000) / 3600000);
       const mins = Math.floor((diff % 3600000) / 60000);
@@ -29,7 +37,7 @@ function CountdownTimer({ expiresAt }: { expiresAt: Date | string }) {
     calc();
     const id = setInterval(calc, 1000);
     return () => clearInterval(id);
-  }, [expiresAt]);
+  }, [expiresAt, onExpired]);
 
   return (
     <div className={`flex items-center gap-2 mb-3 text-xs font-bold px-3 py-2 rounded-lg ${
@@ -42,6 +50,7 @@ function CountdownTimer({ expiresAt }: { expiresAt: Date | string }) {
 }
 
 export default function PromotionsSection() {
+  const utils = trpc.useUtils();
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<number | null>(null);
@@ -423,7 +432,10 @@ export default function PromotionsSection() {
 
                       {/* Contador regresivo */}
                       {promo.expiresAt && (
-                        <CountdownTimer expiresAt={promo.expiresAt} />
+                        <CountdownTimer
+                          expiresAt={promo.expiresAt}
+                          onExpired={() => utils.promotions.list.invalidate()}
+                        />
                       )}
 
                       {/* Contador de cupones con barra de progreso */}

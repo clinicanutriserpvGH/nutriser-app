@@ -66,3 +66,13 @@ describe("promotions.list", () => {
     }
   });
 });
+
+describe("autoDeactivateExpiredPromotions", () => {
+  it("returns a number (count of deactivated promotions)", async () => {
+    const { autoDeactivateExpiredPromotions } = await import("./db");
+    const count = await autoDeactivateExpiredPromotions();
+    // Should return a non-negative number
+    expect(typeof count).toBe("number");
+    expect(count).toBeGreaterThanOrEqual(0);
+  });
+});

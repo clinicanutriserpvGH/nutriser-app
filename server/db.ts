@@ -1960,3 +1960,20 @@ export async function setSplashShowDefault(type: 'inicio' | 'tienda', showDefaul
   if (!db) return;
   await db.update(splashConfig).set({ showDefault }).where(eq(splashConfig.type, type));
 }
+
+// ─── Auto-desactivación de promociones vencidas ──────────────────────────────
+/** Desactiva automáticamente todas las promociones cuyo expiresAt ya pasó. Retorna el número de filas afectadas. */
+export async function autoDeactivateExpiredPromotions(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const now = new Date();
+  const result = await db.update(promotions)
+    .set({ isActive: false })
+    .where(
+      and(
+        eq(promotions.isActive, true),
+        lt(promotions.expiresAt, now)
+      )
+    );
+  return (result as any)?.[0]?.affectedRows ?? 0;
+}

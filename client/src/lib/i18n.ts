@@ -10,7 +10,7 @@ export const translations = {
 
     // Tabs (bottom nav)
     tabTreatments: "Tratamientos",
-    tabServices: "Servicios",
+    tabServices: "Tratamientos",
     tabFarmacy: "Farmacy",
     tabProducts: "Productos",
     tabWallet: "Monedero",
@@ -24,7 +24,7 @@ export const translations = {
     catNutricion: "Nutrición",
     catCorporales: "Corporales",
     catFaciales: "Faciales",
-    catMedicina: "Medicina",
+    catMedicina: "Medicina Estética",
     catOtros: "Otros",
     catProductos: "Productos",
     catGeneral: "General",
@@ -295,7 +295,7 @@ export const translations = {
 
     // Tabs (bottom nav)
     tabTreatments: "Treatments",
-    tabServices: "Services",
+    tabServices: "Treatments",
     tabFarmacy: "Pharmacy",
     tabProducts: "Products",
     tabWallet: "Wallet",
@@ -309,7 +309,7 @@ export const translations = {
     catNutricion: "Nutrition",
     catCorporales: "Body",
     catFaciales: "Facials",
-    catMedicina: "Medicine",
+    catMedicina: "Aesthetic Medicine",
     catOtros: "Others",
     catProductos: "Products",
     catGeneral: "General",

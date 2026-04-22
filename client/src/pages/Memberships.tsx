@@ -2308,6 +2308,19 @@ onClick={() => {
                 <span className="text-[9px] lg:text-xs font-semibold leading-tight">{t("tabLibrary", lang)}</span>
               </button>
 
+              {/* Deseos */}
+              <button
+                onClick={() => setActiveTab("wishlist")}
+                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors relative ${
+                  activeTab === "wishlist" ? "text-red-500" : "text-gray-400"
+                }`}
+              >
+                <Heart className="w-5 h-5 lg:w-7 lg:h-7" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 right-0 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center">{wishlistCount > 9 ? "9+" : wishlistCount}</span>
+                )}
+                <span className="text-[8px] lg:text-xs font-semibold leading-tight">{t("tabWishlist", lang)}</span>
+              </button>
               {/* Cuenta */}
               <button
                 onClick={() => {

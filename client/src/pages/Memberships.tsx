@@ -702,7 +702,22 @@ export default function Memberships() {
           - Pestaña distinta a tratamientos (farmacy, library, cuenta) → vuelve a tratamientos
           - Vista principal (tratamientos + all) → BackToSplash (sale al splash)
       */}
-      {activeTab === "wishlist" ? (
+      {/* Cuando el checkout está abierto, Regresar cierra el checkout */}
+      {checkoutOpen ? (
+        <div
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 10px)" }}
+          className="fixed left-3 z-[60] flex items-center gap-1.5"
+        >
+          <button
+            onClick={() => setCheckoutOpen(false)}
+            className="flex items-center gap-1 bg-black/60 backdrop-blur-sm border border-white/15 text-white/80 px-2.5 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase hover:bg-white/20 hover:text-white transition-all duration-300 shadow-md"
+            aria-label={t('back', lang)}
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            {t('back', lang)}
+          </button>
+        </div>
+      ) : activeTab === "wishlist" ? (
         <div
           style={{ top: "calc(env(safe-area-inset-top, 0px) + 10px)" }}
           className="fixed left-3 z-[60] flex items-center gap-1.5"
@@ -1157,24 +1172,52 @@ export default function Memberships() {
                           ) : (
                             <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
                           )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (item.itemType === "service") {
-                                const svc = services.find(s => s.id === item.originalId);
-                                if (svc) openCheckout({ id: item.id, name: svc.name, price: priceNum ?? 0, priceLabel: formatServicePrice(svc.price), qty: 1, imageUrl: svc.imageUrl, category: svc.category ?? "general", itemType: "service" });
-                              } else if (item.itemType === "product") {
-                                openCheckout({ id: item.id, name: item.name, price: priceNum ?? 0, priceLabel: item.price ?? "Consultar", qty: 1, imageUrl: item.imageUrl, category: item.category ?? "general", itemType: "product", productId: item.originalId });
-                              } else {
-                                openCheckout({ id: item.id, name: item.name, price: priceNum ?? 0, priceLabel: `$${(priceNum ?? 0).toLocaleString("es-MX")} MXN`, qty: 1, imageUrl: item.imageUrl, category: "ebook", itemType: "ebook", ebookId: item.originalId });
-                              }
-                            }}
-                            className="w-full flex items-center justify-center gap-1 font-bold text-[10px] py-2 rounded-xl transition-all active:scale-95 text-white"
-                            style={{ background: "#C5A55A" }}
-                          >
-                            <Zap className="w-3 h-3" />
-                            {item.itemType === "service" ? t("schedule", lang) : item.itemType === "ebook" ? t("buyBook", lang) : t("buy", lang)}
-                          </button>
+                          {/* Servicios: Ver detalles + Al carrito + Comprar */}
+                          {item.itemType === "service" ? (
+                            <>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); const svc = services.find(s => s.id === item.originalId); if (svc) { const pn = parseInt((svc.price ?? "").replace(/[^0-9]/g, ""), 10); const b = (() => { try { return JSON.parse(svc.benefits ?? "[]"); } catch { return []; } })(); const a = (() => { try { return JSON.parse(svc.aftercare ?? "[]"); } catch { return []; } })(); setDetailItem({ id: `svc-${svc.id}`, name: svc.name, description: svc.description, price: svc.price, priceNum: isNaN(pn) ? null : pn, category: svc.category, imageUrl: svc.imageUrl, itemType: "service", benefits: b, duration: svc.duration, aftercare: a }); } }}
+                                className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-2 rounded-xl border mb-1.5 transition-all active:scale-95"
+                                style={{ borderColor: "#C5A55A", color: "#C5A55A", background: "transparent" }}
+                              >
+                                <Info className="w-3 h-3" />
+                                {t("seeDetails", lang)}
+                              </button>
+                              <div className="flex gap-1.5">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); const svc = services.find(s => s.id === item.originalId); if (svc) addToCart({ id: item.id, name: svc.name, price: priceNum ?? 0, priceLabel: formatServicePrice(svc.price), imageUrl: svc.imageUrl, category: svc.category ?? "general", itemType: "service" }); }}
+                                  className="flex-1 flex items-center justify-center py-2 rounded-xl border transition-all active:scale-95"
+                                  style={{ borderColor: "#C5A55A", color: "#C5A55A", background: "transparent" }}
+                                >
+                                  <ShoppingCart className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); const svc = services.find(s => s.id === item.originalId); if (svc) openCheckout({ id: item.id, name: svc.name, price: priceNum ?? 0, priceLabel: formatServicePrice(svc.price), qty: 1, imageUrl: svc.imageUrl, category: svc.category ?? "general", itemType: "service", productId: undefined, ebookId: undefined }); }}
+                                  className="flex-1 flex items-center justify-center gap-1 font-bold text-[10px] py-2 rounded-xl transition-all active:scale-95 text-white"
+                                  style={{ background: "#C5A55A" }}
+                                >
+                                  <Zap className="w-3 h-3" />
+                                  {t("buy", lang)}
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (item.itemType === "product") {
+                                  openCheckout({ id: item.id, name: item.name, price: priceNum ?? 0, priceLabel: item.price ?? "Consultar", qty: 1, imageUrl: item.imageUrl, category: item.category ?? "general", itemType: "product", productId: item.originalId });
+                                } else {
+                                  openCheckout({ id: item.id, name: item.name, price: priceNum ?? 0, priceLabel: `$${(priceNum ?? 0).toLocaleString("es-MX")} MXN`, qty: 1, imageUrl: item.imageUrl, category: "ebook", itemType: "ebook", ebookId: item.originalId });
+                                }
+                              }}
+                              className="w-full flex items-center justify-center gap-1 font-bold text-[10px] py-2 rounded-xl transition-all active:scale-95 text-white"
+                              style={{ background: "#C5A55A" }}
+                            >
+                              <Zap className="w-3 h-3" />
+                              {item.itemType === "ebook" ? t("buyBook", lang) : t("buy", lang)}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

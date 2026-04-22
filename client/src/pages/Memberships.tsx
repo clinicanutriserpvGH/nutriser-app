@@ -302,6 +302,14 @@ export default function Memberships() {
       }
     } catch { /* ignore */ }
   }, [cart]);
+
+  // Limpiar carrito cuando el usuario cierra sesión
+  useEffect(() => {
+    if (!isLoggedIn && cart.length > 0) {
+      setCart([]);
+      localStorage.removeItem("nutriser-cart");
+    }
+  }, [isLoggedIn]);
   const [cartOpen, setCartOpen] = useState(false);
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);

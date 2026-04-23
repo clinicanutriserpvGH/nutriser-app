@@ -30,6 +30,7 @@ export interface NutriserWalletCardProps {
   onQRClick?: () => void;
   scale?: number;
   compact?: boolean;
+  discountPercent?: number | null; // Descuento activo (10, 15, 20, 25, 30) o null
 }
 
 export function NutriserWalletCard({
@@ -42,6 +43,7 @@ export function NutriserWalletCard({
   onQRClick,
   scale = 1,
   compact = false,
+  discountPercent,
 }: NutriserWalletCardProps) {
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -102,6 +104,15 @@ export function NutriserWalletCard({
           filter: "sepia(1) saturate(3) hue-rotate(2deg) brightness(0.85)",
         }}
       />
+
+      {/* ── BADGE DESCUENTO (esquina superior izquierda, solo digital cuando hay descuento) ── */}
+      {onQRClick && discountPercent && (
+        <div style={{ position: "absolute", top: compact ? 5 : 7, left: compact ? 7 : 10, zIndex: 5 }}>
+          <span style={{ background: "rgba(197,165,90,0.92)", color: "#fff", fontSize: compact ? 5 : 6.5, fontWeight: 900, padding: "2px 6px", borderRadius: 20, letterSpacing: "0.08em", boxShadow: "0 1px 4px rgba(197,165,90,0.4)" }}>
+            {discountPercent}% DESC
+          </span>
+        </div>
+      )}
 
       {/* ── BADGE ACTIVA/INACTIVA (esquina superior derecha, solo digital) ── */}
       {onQRClick && (

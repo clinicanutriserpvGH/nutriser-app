@@ -309,6 +309,14 @@ export default function WalletPage() {
                 )}
               </div>
             </div>
+            {/* Badge de descuento activo */}
+            {wallet?.discountPercent && (
+              <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold rounded-full px-2.5 py-1 w-fit bg-[#C5A55A]/10 text-[#8B6914] border border-[#C5A55A]/40">
+                <span>🏷️</span>
+                <span>Tienes {wallet.discountPercent}% de descuento activo en tus compras</span>
+              </div>
+            )}
+
             {/* Fecha de caducidad bimestral */}
             {wallet?.balanceExpiresAt && wallet.balance > 0 && (() => {
               const expiry = new Date(wallet.balanceExpiresAt);
@@ -813,6 +821,7 @@ export default function WalletPage() {
                 balance={wallet?.balance ?? 0}
                 showBalance={true}
                 onQRClick={() => setShowQRFullscreen(true)}
+                discountPercent={wallet?.discountPercent ?? null}
               />
             </div>
             {/* Saldo y validez */}

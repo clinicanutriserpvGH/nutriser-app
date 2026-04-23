@@ -14,7 +14,7 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
-import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions } from './db';
+import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest } from './db';
@@ -3060,8 +3060,31 @@ export const appRouter = router({
           patientPhone: patient?.phone || '',
           balance: wallet.balance,
           isActive: wallet.isActive,
+          discountPercent: wallet.discountPercent ?? null,
+          discountActivatedAt: wallet.discountActivatedAt ?? null,
           recentTransactions: transactions,
         };
+      }),
+    // Activar descuento en monedero (solo admin)
+    adminSetDiscount: publicProcedure
+      .input(z.object({
+        walletNumber: z.string(),
+        discountPercent: z.union([z.literal(10), z.literal(15), z.literal(20), z.literal(25), z.literal(30)]),
+      }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        await setWalletDiscount(wallet.id, input.discountPercent);
+        return { ok: true, discountPercent: input.discountPercent };
+      }),
+    // Desactivar descuento en monedero (solo admin)
+    adminRemoveDiscount: publicProcedure
+      .input(z.object({ walletNumber: z.string() }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        await removeWalletDiscount(wallet.id);
+        return { ok: true };
       }),
   }),
 

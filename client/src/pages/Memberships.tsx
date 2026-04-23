@@ -2527,6 +2527,7 @@ onClick={() => {
                   balance={walletBalance}
                   showBalance={true}
                   onQRClick={() => setShowQRFullscreen(true)}
+                  discountPercent={walletData.discountPercent ?? null}
                 />
               ) : (
                 <div style={{ aspectRatio: "85.5/54", background: "#f9f6f0", borderRadius: 14, border: "1.5px solid #D4AF60", display: "flex", alignItems: "center", justifyContent: "center" }}>

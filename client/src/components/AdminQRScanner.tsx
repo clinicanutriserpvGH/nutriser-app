@@ -93,6 +93,28 @@ export default function AdminQRScanner() {
   const servicesQuery = trpc.services.list.useQuery();
   const productsQuery = trpc.products.list.useQuery();
 
+  // Estado para el selector de descuento
+  const [selectedDiscount, setSelectedDiscount] = useState<10 | 15 | 20 | 25 | 30 | null>(null);
+
+  // Mutation para activar descuento
+  const setDiscountMutation = trpc.wallet.adminSetDiscount.useMutation({
+    onSuccess: (data) => {
+      toast.success(`✅ Descuento del ${data.discountPercent}% activado correctamente.`);
+      utils.wallet.adminLookupByNumber.invalidate();
+      setSelectedDiscount(null);
+    },
+    onError: (e) => toast.error('Error al activar descuento: ' + e.message),
+  });
+
+  // Mutation para quitar descuento
+  const removeDiscountMutation = trpc.wallet.adminRemoveDiscount.useMutation({
+    onSuccess: () => {
+      toast.success('Descuento eliminado del monedero.');
+      utils.wallet.adminLookupByNumber.invalidate();
+    },
+    onError: (e) => toast.error('Error al quitar descuento: ' + e.message),
+  });
+
   // Mutation para registrar compra presencial
   const registerMutation = trpc.wallet.adminRegisterPresentialPurchase.useMutation({
     onSuccess: (data) => {
@@ -542,6 +564,78 @@ export default function AdminQRScanner() {
                 ) : (
                   <p className="text-xs text-center text-gray-400 mt-1">Sin solicitudes de promoción pendientes</p>
                 )}
+
+                {/* ─── Gestión de Descuento del Monedero ─── */}
+                <div className="mt-3 border border-[#C5A55A]/30 rounded-xl p-3 bg-gradient-to-br from-amber-50/60 to-white space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">🏷️</span>
+                      <span className="text-sm font-bold text-gray-800">Descuento del Monedero</span>
+                    </div>
+                    {patientQuery.data?.discountPercent ? (
+                      <span className="bg-[#C5A55A] text-white text-xs font-black px-2.5 py-1 rounded-full">
+                        {patientQuery.data.discountPercent}% ACTIVO
+                      </span>
+                    ) : (
+                      <span className="bg-gray-100 text-gray-500 text-xs font-semibold px-2.5 py-1 rounded-full">
+                        Sin descuento
+                      </span>
+                    )}
+                  </div>
+
+                  {patientQuery.data?.discountPercent ? (
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-500">
+                        Activado el {patientQuery.data.discountActivatedAt
+                          ? new Date(patientQuery.data.discountActivatedAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
+                          : '—'}
+                      </p>
+                      <button
+                        onClick={() => removeDiscountMutation.mutate({ walletNumber })}
+                        disabled={removeDiscountMutation.isPending}
+                        className="w-full py-2 rounded-lg bg-red-100 text-red-700 text-xs font-bold hover:bg-red-200 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                      >
+                        {removeDiscountMutation.isPending ? (
+                          <><Loader2 className="w-3 h-3 animate-spin" /> Quitando...</>
+                        ) : (
+                          <><X className="w-3 h-3" /> Quitar descuento</>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">Seleccionar descuento</p>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {([10, 15, 20, 25, 30] as const).map((pct) => (
+                          <button
+                            key={pct}
+                            onClick={() => setSelectedDiscount(selectedDiscount === pct ? null : pct)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                              selectedDiscount === pct
+                                ? 'bg-[#C5A55A] text-white border-[#C5A55A]'
+                                : 'bg-white text-gray-700 border-gray-300 hover:border-[#C5A55A]'
+                            }`}
+                          >
+                            {pct}%
+                          </button>
+                        ))}
+                      </div>
+                      {selectedDiscount && (
+                        <button
+                          onClick={() => setDiscountMutation.mutate({ walletNumber, discountPercent: selectedDiscount })}
+                          disabled={setDiscountMutation.isPending}
+                          className="w-full py-2 rounded-lg bg-[#C5A55A] text-white text-xs font-bold hover:bg-[#b8963f] disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                        >
+                          {setDiscountMutation.isPending ? (
+                            <><Loader2 className="w-3 h-3 animate-spin" /> Activando...</>
+                          ) : (
+                            <><Check className="w-3 h-3" /> Activar {selectedDiscount}% de descuento</>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
 
               </CardContent>
             </Card>

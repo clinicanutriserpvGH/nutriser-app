@@ -689,6 +689,8 @@ export const wallets = mysqlTable("wallets", {
   totalRedeemed: int("totalRedeemed").default(0).notNull(), // Total canjeado histórico en centavos
   isActive: boolean("isActive").default(true).notNull(),
   balanceExpiresAt: timestamp("balanceExpiresAt"), // Fecha de caducidad del saldo (bimestral)
+  discountPercent: int("discountPercent"), // Descuento activo en %: 10, 15, 20, 25 o 30 (null = sin descuento)
+  discountActivatedAt: timestamp("discountActivatedAt"), // Cuándo se activó el descuento
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

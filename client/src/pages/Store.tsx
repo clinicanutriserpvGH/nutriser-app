@@ -725,6 +725,7 @@ export default function Store() {
                   balance={walletBalance}
                   showBalance={true}
                   onQRClick={() => setShowQRFullscreen(true)}
+                  discountPercent={walletData.wallet.discountPercent ?? null}
                 />
               ) : (
                 <div className="py-6 text-center">

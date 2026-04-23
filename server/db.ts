@@ -1735,6 +1735,24 @@ export async function toggleWalletActive(walletId: number): Promise<boolean> {
   return newStatus;
 }
 
+/** Activar un descuento en el monedero (10, 15, 20, 25 o 30%) */
+export async function setWalletDiscount(walletId: number, discountPercent: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(wallets)
+    .set({ discountPercent, discountActivatedAt: new Date() })
+    .where(eq(wallets.id, walletId));
+}
+
+/** Desactivar el descuento del monedero (pone null) */
+export async function removeWalletDiscount(walletId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(wallets)
+    .set({ discountPercent: null, discountActivatedAt: null })
+    .where(eq(wallets.id, walletId));
+}
+
 // ─── Analítica de Comportamiento ──────────────────────────────────────────────
 import { userBehaviorEvents, InsertUserBehaviorEvent } from '../drizzle/schema';
 

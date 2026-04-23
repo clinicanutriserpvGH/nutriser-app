@@ -278,6 +278,18 @@ export default function WalletPage() {
             />
           </button>
 
+          {/* Banner de monedero suspendido */}
+          {wallet && !wallet.isActive && (
+            <div className="mt-3 bg-red-50 border border-red-300 rounded-2xl px-4 py-3 flex items-start gap-3">
+              <span className="text-xl mt-0.5">🚫</span>
+              <div>
+                <p className="text-red-700 font-bold text-sm">Monedero Suspendido</p>
+                <p className="text-red-600 text-xs mt-0.5">
+                  Tu monedero ha sido dado de baja temporalmente. Para reactivarlo, comunícate con Nutriser.
+                </p>
+              </div>
+            </div>
+          )}
           {/* Saldo + acciones debajo de la tarjeta */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mt-3 px-5 py-3">
             <div className="flex items-center justify-between">

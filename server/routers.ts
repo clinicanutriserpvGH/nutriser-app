@@ -14,7 +14,7 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
-import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment } from './db';
+import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest, deleteBannerInterest } from './db';
@@ -3148,6 +3148,33 @@ export const appRouter = router({
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await removeWalletDiscount(wallet.id);
+        return { ok: true };
+      }),
+    // Reiniciar monedero (solo admin) — pone balance, cashback y canjeado en 0
+    adminResetWallet: publicProcedure
+      .input(z.object({ walletNumber: z.string(), adminEmail: z.string() }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        await adminResetWallet(wallet.id, input.adminEmail);
+        return { ok: true };
+      }),
+    // Dar de baja monedero (solo admin) — suspende sin borrar datos
+    adminSuspendWallet: publicProcedure
+      .input(z.object({ walletNumber: z.string() }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        await adminSuspendWallet(wallet.id);
+        return { ok: true };
+      }),
+    // Dar de alta monedero (solo admin) — reactiva un monedero suspendido
+    adminUnsuspendWallet: publicProcedure
+      .input(z.object({ walletNumber: z.string() }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        await adminUnsuspendWallet(wallet.id);
         return { ok: true };
       }),
   }),

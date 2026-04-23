@@ -2148,3 +2148,54 @@ export async function setSystemConfig(key: string, value: string): Promise<void>
         ON DUPLICATE KEY UPDATE value = ${value}`
   );
 }
+
+// ─── Administración del Monedero ──────────────────────────────────────────────
+
+/**
+ * Reinicia el monedero de un paciente: pone balance, totalCashback y totalRedeemed en 0.
+ * También elimina el descuento activo y registra un movimiento de auditoría.
+ */
+export async function adminResetWallet(walletId: number, adminEmail: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(wallets)
+    .set({
+      balance: 0,
+      totalCashback: 0,
+      totalRedeemed: 0,
+      discountPercent: null,
+      discountActivatedAt: null,
+    })
+    .where(eq(wallets.id, walletId));
+  // Registrar movimiento de auditoría
+  await db.insert(walletTransactions).values({
+    walletId,
+    type: "adjustment",
+    amount: 0,
+    balanceAfter: 0,
+    description: `Monedero reiniciado por admin (${adminEmail})`,
+    createdBy: `admin:${adminEmail}`,
+  }).catch(() => {});
+}
+
+/**
+ * Suspende (da de baja) el monedero de un paciente sin borrar datos.
+ */
+export async function adminSuspendWallet(walletId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(wallets)
+    .set({ isActive: false })
+    .where(eq(wallets.id, walletId));
+}
+
+/**
+ * Reactiva (da de alta) el monedero de un paciente suspendido.
+ */
+export async function adminUnsuspendWallet(walletId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(wallets)
+    .set({ isActive: true })
+    .where(eq(wallets.id, walletId));
+}

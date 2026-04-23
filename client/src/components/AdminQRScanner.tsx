@@ -124,6 +124,34 @@ export default function AdminQRScanner() {
     onError: (e) => toast.error('Error al quitar descuento: ' + e.message),
   });
 
+  // Mutation para reiniciar monedero (poner todo en cero)
+  const resetWalletMutation = trpc.wallet.adminResetWallet.useMutation({
+    onSuccess: () => {
+      toast.success('✅ Monedero reiniciado. Saldo, cashback y canjeado en $0.00');
+      utils.wallet.adminLookupByNumber.invalidate();
+      setConfirmReset(false);
+    },
+    onError: (e) => toast.error('Error al reiniciar monedero: ' + e.message),
+  });
+  // Mutation para suspender monedero (dar de baja)
+  const suspendWalletMutation = trpc.wallet.adminSuspendWallet.useMutation({
+    onSuccess: () => {
+      toast.success('Monedero dado de baja. El paciente no podrá usarlo hasta ser reactivado.');
+      utils.wallet.adminLookupByNumber.invalidate();
+    },
+    onError: (e) => toast.error('Error al dar de baja: ' + e.message),
+  });
+  // Mutation para reactivar monedero (dar de alta)
+  const unsuspendWalletMutation = trpc.wallet.adminUnsuspendWallet.useMutation({
+    onSuccess: () => {
+      toast.success('✅ Monedero reactivado. El paciente puede usarlo nuevamente.');
+      utils.wallet.adminLookupByNumber.invalidate();
+    },
+    onError: (e) => toast.error('Error al reactivar: ' + e.message),
+  });
+  // Estado para confirmar reinicio (doble confirmación)
+  const [confirmReset, setConfirmReset] = useState(false);
+
   // Query para historial de compras del paciente (para que el admin pueda borrarlas)
   const [patientIdForHistory, setPatientIdForHistory] = useState<number | null>(null);
   const patientPurchaseHistoryQuery = trpc.cashPayments.getPatientHistory.useQuery(
@@ -727,14 +755,90 @@ export default function AdminQRScanner() {
                       )}
                     </div>
                   )}
-                </div>
+                 </div>
 
+                {/* ─── Administración del Monedero (Reiniciar / Dar de Baja / Alta) ─── */}
+                <div className="mt-3 border border-red-200 rounded-xl p-3 bg-gradient-to-br from-red-50/60 to-white space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-base">⚠️</span>
+                    <span className="text-sm font-bold text-gray-800">Administración del Monedero</span>
+                  </div>
+
+                  {/* Dar de Baja / Alta */}
+                  {patientQuery.data?.isActive ? (
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`¿Dar de BAJA el monedero de ${patientQuery.data?.patientName}?\n\nEl paciente no podrá usar su monedero hasta que lo reactives. Sus datos y saldo se conservan.`))
+                          suspendWalletMutation.mutate({ walletNumber });
+                      }}
+                      disabled={suspendWalletMutation.isPending}
+                      className="w-full py-2 rounded-lg bg-orange-100 text-orange-700 text-xs font-bold hover:bg-orange-200 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                    >
+                      {suspendWalletMutation.isPending ? (
+                        <><Loader2 className="w-3 h-3 animate-spin" /> Procesando...</>
+                      ) : (
+                        <><X className="w-3 h-3" /> Dar de Baja (Suspender Monedero)</>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => unsuspendWalletMutation.mutate({ walletNumber })}
+                      disabled={unsuspendWalletMutation.isPending}
+                      className="w-full py-2 rounded-lg bg-green-100 text-green-700 text-xs font-bold hover:bg-green-200 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                    >
+                      {unsuspendWalletMutation.isPending ? (
+                        <><Loader2 className="w-3 h-3 animate-spin" /> Reactivando...</>
+                      ) : (
+                        <><Check className="w-3 h-3" /> Dar de Alta (Reactivar Monedero)</>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Reiniciar Monedero */}
+                  {!confirmReset ? (
+                    <button
+                      onClick={() => setConfirmReset(true)}
+                      className="w-full py-2 rounded-lg bg-red-100 text-red-700 text-xs font-bold hover:bg-red-200 transition-all flex items-center justify-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" /> Reiniciar Monedero (Poner en Cero)
+                    </button>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-red-600 font-bold text-center">
+                        ⚠️ CONFIRMAR: Esto pondrá saldo, cashback y canjeado en $0.00. No se puede deshacer.
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setConfirmReset(false)}
+                          className="flex-1 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold hover:bg-gray-200 transition-all"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          onClick={() => {
+                            const session = sessionStorage.getItem('adminSession');
+                            let adminEmail = 'admin';
+                            try { adminEmail = JSON.parse(session || '{}').email || 'admin'; } catch {}
+                            resetWalletMutation.mutate({ walletNumber, adminEmail });
+                          }}
+                          disabled={resetWalletMutation.isPending}
+                          className="flex-1 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                        >
+                          {resetWalletMutation.isPending ? (
+                            <><Loader2 className="w-3 h-3 animate-spin" /> Reiniciando...</>
+                          ) : (
+                            'Sí, Reiniciar'
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ) : null}
         </div>
       )}
-
       {/* ═══ STEP 3: Seleccionar Servicio/Producto ═══ */}
       {step === "select" && (
         <div className="space-y-4">

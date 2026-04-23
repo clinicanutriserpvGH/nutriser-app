@@ -807,7 +807,8 @@ export default function WalletPage() {
                 }}
               >
 
-                {/* Silueta dorada grande a la derecha — igual que en el botón flotante */}
+                {/* ── ZONA SUPERIOR: Silueta + Info del titular (70% altura) ── */}
+                {/* Silueta dorada — derecha, libre de superposición */}
                 <img
                   src="/manus-storage/nutriser-silueta_f6738ee7.png"
                   alt=""
@@ -815,88 +816,88 @@ export default function WalletPage() {
                     position: "absolute",
                     right: 0,
                     top: 0,
-                    bottom: "13%",
-                    height: "87%",
+                    height: "68%",
                     width: "auto",
                     objectFit: "contain",
-                    objectPosition: "right center",
+                    objectPosition: "right top",
                     opacity: 0.92,
                     pointerEvents: "none",
                     zIndex: 1,
                     filter: "sepia(1) saturate(2.8) hue-rotate(3deg) brightness(1.05)",
                   }}
                 />
-                {/* Contenido principal — solo 62% izquierdo para dejar la silueta libre */}
-                <div style={{ position: "relative", zIndex: 2, padding: "10px 14px 0 14px", height: "calc(87% - 0px)", width: "62%" }}>
-                  {/* Header tarjeta */}
-                  {/* Fila superior: Logo + Título + Badge — igual que Memberships */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                    <img src={LOGO_URL} alt="Nutriser" style={{ width: 30, height: 30, objectFit: "contain", flexShrink: 0 }} />
+                {/* Contenido superior — 60% izquierdo para no tapar silueta */}
+                <div style={{ position: "relative", zIndex: 2, padding: "10px 14px 0 14px", width: "60%" }}>
+                  {/* Logo + Título + Badge */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <img src={LOGO_URL} alt="Nutriser" style={{ width: 28, height: 28, objectFit: "contain", flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", lineHeight: 1.2 }}>Monedero Nutriser</div>
-                      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 8, letterSpacing: "0.1em" }}>aesthetic &amp; nutrition</div>
+                      <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", lineHeight: 1.2 }}>Monedero Nutriser</div>
+                      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 7, letterSpacing: "0.1em" }}>aesthetic &amp; nutrition</div>
                     </div>
                     {wallet?.isActive ? (
-                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>ACTIVA</span>
+                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 7, fontWeight: 800, padding: "2px 6px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>ACTIVA</span>
                     ) : (
-                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 8, fontWeight: 800, padding: "2px 7px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>INACTIVA</span>
+                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 7, fontWeight: 800, padding: "2px 6px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>INACTIVA</span>
                     )}
                   </div>
-                  {/* Fila central: QR + Placa dorada */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ background: "#FFFFFF", borderRadius: 6, padding: 5, flexShrink: 0 }}>
-                      <QRCodeSVG
-                        value={qrUrl || "https://nutriserpv.com/monedero"}
-                        size={62}
-                        level="H"
-                        includeMargin={false}
-                        bgColor="#FFFFFF"
-                        fgColor="#000000"
-                      />
+                  {/* Placa dorada con nombre y número — sin QR aquí */}
+                  <div style={{
+                    background: "linear-gradient(135deg, #E8C97A 0%, #C5A55A 50%, #d4af60 100%)",
+                    borderRadius: 6,
+                    padding: "6px 10px",
+                    boxShadow: "0 2px 8px rgba(197,165,90,0.3)",
+                    display: "inline-block",
+                    maxWidth: "100%",
+                  }}>
+                    <div style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 12, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>
+                      {patient?.name || '---'}
                     </div>
-                    <div style={{
-                      background: "linear-gradient(135deg, #E8C97A 0%, #C5A55A 50%, #d4af60 100%)",
-                      borderRadius: 6,
-                      padding: "7px 10px",
-                      flex: 1,
-                      minWidth: 0,
-                      boxShadow: "0 2px 8px rgba(197,165,90,0.3)",
-                    }}>
-                      <div style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 13, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>
-                        {patient?.name || '---'}
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3 }}>
-                        <span style={{ color: "#5a3e00", fontFamily: "monospace", fontSize: 9, letterSpacing: "0.12em", fontWeight: 700 }}>
-                          {wallet?.walletNumber || '---'}
-                        </span>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(wallet?.walletNumber || ""); toast.success("Número copiado"); }}
-                          style={{ color: "#5a3e00", flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, opacity: 0.7 }}
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
-                      </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                      <span style={{ color: "#5a3e00", fontFamily: "monospace", fontSize: 8, letterSpacing: "0.12em", fontWeight: 700 }}>
+                        {wallet?.walletNumber || '---'}
+                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(wallet?.walletNumber || ""); toast.success("Número copiado"); }}
+                        style={{ color: "#5a3e00", flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, opacity: 0.7 }}
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
                     </div>
                   </div>
                 </div>
-                {/* Banda dorada inferior */}
+
+                {/* ── ZONA INFERIOR: Banda dorada con QR grande + saldo (32% altura) ── */}
                 <div style={{
                   position: "absolute",
                   bottom: 0,
                   left: 0,
                   right: 0,
+                  height: "32%",
                   background: "linear-gradient(90deg, #8B6914 0%, #C5A55A 25%, #E8C97A 50%, #C5A55A 75%, #8B6914 100%)",
-                  padding: "5px 14px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
+                  padding: "0 14px",
                   zIndex: 3,
                 }}>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span style={{ color: "rgba(0,0,0,0.55)", fontSize: 6, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>NUTRISERPV.COM/MONEDERO</span>
-                    <span style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 14, lineHeight: 1 }}>{formatMoney(wallet?.balance || 0)}</span>
+                  {/* QR grande a la izquierda — fondo blanco limpio para escanear */}
+                  <div style={{ background: "#FFFFFF", borderRadius: 5, padding: 4, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <QRCodeSVG
+                      value={qrUrl || "https://nutriserpv.com/monedero"}
+                      size={52}
+                      level="H"
+                      includeMargin={false}
+                      bgColor="#FFFFFF"
+                      fgColor="#000000"
+                    />
                   </div>
-                  <span style={{ color: "rgba(0,0,0,0.55)", fontSize: 9, fontWeight: 700, letterSpacing: "0.02em" }}>Válido solo en Nutriser PV</span>
+                  {/* Saldo + URL al centro-derecha */}
+                  <div style={{ flex: 1, paddingLeft: 12 }}>
+                    <span style={{ color: "rgba(0,0,0,0.55)", fontSize: 6, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "block" }}>NUTRISERPV.COM/MONEDERO</span>
+                    <span style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 16, lineHeight: 1, display: "block" }}>{formatMoney(wallet?.balance || 0)}</span>
+                    <span style={{ color: "rgba(0,0,0,0.5)", fontSize: 7, fontWeight: 700 }}>Válido solo en Nutriser PV</span>
+                  </div>
                 </div>
               </div>
             </div>

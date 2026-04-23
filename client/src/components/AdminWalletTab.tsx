@@ -414,7 +414,7 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
                   ) : (
                     <div className="space-y-1 max-h-48 overflow-y-auto">
                       {(transactionsQuery.data || []).map((tx: any) => (
-                        <div key={tx.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5 group">
+                        <div key={tx.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
                           <div className="flex-1 min-w-0">
                             <p className="text-[10px] font-semibold text-gray-800 truncate">{tx.description}</p>
                             <p className="text-[9px] text-gray-400">{new Date(tx.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
@@ -426,10 +426,10 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
                             <button
                               onClick={() => deleteTransactionMutation.mutate({ transactionId: tx.id })}
                               disabled={deleteTransactionMutation.isPending}
-                              className="opacity-0 group-hover:opacity-100 transition p-1 rounded hover:bg-red-100 text-red-500 hover:text-red-700"
+                              className="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 active:bg-red-200 transition flex-shrink-0"
                               title="Eliminar este movimiento"
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>

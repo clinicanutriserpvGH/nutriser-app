@@ -42,6 +42,31 @@ export default function AdminQRScanner() {
     { walletId: walletIdForCash! },
     { enabled: !!walletIdForCash }
   );
+
+  // Query para solicitudes de interés en banners del paciente escaneado
+  const bannerInterestsAdminQuery = trpc.bannerInterests.getPending.useQuery(
+    undefined,
+    { enabled: !!walletIdForCash }
+  );
+  // Filtrar solo los del paciente actual (por walletId/patientId)
+  // El endpoint getPending devuelve todos, filtraremos por patientEmail
+  const [patientEmailForFilter, setPatientEmailForFilter] = useState<string | null>(null);
+  const patientBannerInterests = (bannerInterestsAdminQuery.data || []).filter(
+    (i: any) => patientEmailForFilter && i.patientEmail === patientEmailForFilter
+  );
+
+  // Estado de monto por solicitud de banner (id -> string)
+  const [bannerAmounts, setBannerAmounts] = useState<Record<number, string>>({});
+
+  // Mutation para atender solicitud de banner
+  const attendBannerMutation = trpc.bannerInterests.attend.useMutation({
+    onSuccess: () => {
+      toast.success('✅ Promoción acreditada al monedero del paciente.');
+      bannerInterestsAdminQuery.refetch();
+      utils.wallet.adminLookupByNumber.invalidate();
+    },
+    onError: (e) => toast.error('Error al acreditar: ' + e.message),
+  });
   const confirmCashMutation = trpc.cashPayments.confirm.useMutation({
     onSuccess: (data) => {
       toast.success(`✅ Pago confirmado. Cashback acreditado a ${patientQuery.data?.patientName ?? 'paciente'}.`);
@@ -155,12 +180,15 @@ export default function AdminQRScanner() {
     };
   }, [stopScanner]);
 
-  // Cuando se obtiene el paciente, cargar sus pagos pendientes
+  // Cuando se obtiene el paciente, cargar sus pagos pendientes y solicitudes de banner
   useEffect(() => {
     if (patientQuery.data?.walletId) {
       setWalletIdForCash(patientQuery.data.walletId);
     }
-  }, [patientQuery.data?.walletId]);
+    if (patientQuery.data?.patientEmail) {
+      setPatientEmailForFilter(patientQuery.data.patientEmail);
+    }
+  }, [patientQuery.data?.walletId, patientQuery.data?.patientEmail]);
 
   // ─── Handlers ─────────────────────────────────────────────────
   const handleManualSearch = () => {
@@ -440,6 +468,81 @@ export default function AdminQRScanner() {
                 ) : (
                   <p className="text-xs text-center text-gray-400 mt-1">Sin pagos en efectivo pendientes</p>
                 )}
+
+                {/* ─── Solicitudes de Promoción (Banner Interests) ─── */}
+                {bannerInterestsAdminQuery.isLoading ? (
+                  <div className="flex justify-center py-2"><Loader2 className="w-4 h-4 animate-spin text-amber-500" /></div>
+                ) : patientBannerInterests.length > 0 ? (
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">🏷️</span>
+                      <span className="text-sm font-bold text-[#C5A55A]">Solicitudes de Promoción ({patientBannerInterests.length})</span>
+                    </div>
+                    {patientBannerInterests.map((interest: any) => (
+                      <div key={interest.id} className="bg-amber-50 border border-[#C5A55A]/40 rounded-xl p-3 space-y-2">
+                        <div className="flex items-start gap-2">
+                          {interest.bannerImageUrl && (
+                            <div className="w-14 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-black">
+                              <img src={interest.bannerImageUrl} alt={interest.bannerTitle || 'Promo'} className="w-full h-full object-contain" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-900 truncate">{interest.bannerTitle || 'Promoción Nutriser'}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(interest.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </p>
+                          </div>
+                          <span className="flex-shrink-0 bg-[#C5A55A]/20 text-[#C5A55A] text-[10px] font-bold px-2 py-0.5 rounded-full">Pendiente</span>
+                        </div>
+                        {/* Campo de monto */}
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1">
+                            <label className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">Monto a acreditar (MXN)</label>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-sm font-bold text-gray-500">$</span>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                                value={bannerAmounts[interest.id] || ''}
+                                onChange={(e) => setBannerAmounts(prev => ({ ...prev, [interest.id]: e.target.value }))}
+                                className="flex-1 border border-[#C5A55A]/40 rounded-lg px-2 py-1.5 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/50 bg-white"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const amountPesos = parseFloat(bannerAmounts[interest.id] || '0');
+                            if (!amountPesos || amountPesos <= 0) {
+                              toast.error('Ingresa un monto válido para acreditar.');
+                              return;
+                            }
+                            attendBannerMutation.mutate({
+                              interestId: interest.id,
+                              walletId: walletIdForCash!,
+                              amount: Math.round(amountPesos * 100), // centavos
+                              concept: `Promoción: ${interest.bannerTitle || 'Banner Nutriser'}`,
+                              adminNotes: 'Acreditado en clínica',
+                            });
+                          }}
+                          disabled={attendBannerMutation.isPending}
+                          className="w-full py-2 rounded-lg bg-[#C5A55A] text-white text-xs font-bold hover:bg-[#b8963f] disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                        >
+                          {attendBannerMutation.isPending ? (
+                            <><Loader2 className="w-3 h-3 animate-spin" /> Acreditando...</>
+                          ) : (
+                            <><Check className="w-3 h-3" /> Acreditar al monedero</>
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-center text-gray-400 mt-1">Sin solicitudes de promoción pendientes</p>
+                )}
+
               </CardContent>
             </Card>
           ) : null}

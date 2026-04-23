@@ -325,23 +325,45 @@ export default function Memberships() {
     banner: { id: number; imageUrl?: string | null; title?: string | null } | null;
   }>({ open: false, banner: null });
 
+  // Diálogo de confirmación antes de guardar el interés
+  const [bannerConfirmDialog, setBannerConfirmDialog] = useState<{
+    open: boolean;
+    banner: { id: number; imageUrl?: string | null; title?: string | null } | null;
+  }>({ open: false, banner: null });
+
+  // Mutation tRPC para registrar interés en banner
+  const createBannerInterestMutation = trpc.bannerInterests.create.useMutation({
+    onSuccess: () => {
+      setBannerConfirmDialog({ open: false, banner: null });
+      toast.success('¡Interés registrado! Preséntate en la clínica con tu Monedero Nutriser.', { duration: 4000 });
+      navigate('/monedero');
+    },
+    onError: (err) => {
+      toast.error('No se pudo registrar tu interés. Intenta de nuevo.');
+      console.error('[BannerInterest]', err);
+    },
+  });
+
   const handleBannerClick = (banner: { id: number; imageUrl?: string | null; title?: string | null }) => {
     setBannerActionModal({ open: true, banner });
   };
 
   const handleBannerBuyInClinic = () => {
     const banner = bannerActionModal.banner;
+    if (!requireAuth('registrar tu interés en esta promoción')) return;
+    // Cerrar el modal de acción y abrir el diálogo de confirmación
     setBannerActionModal({ open: false, banner: null });
-    const promoTitle = banner?.title || 'Promoción Nutriser';
-    // Guardar en sessionStorage para que WalletPage lo muestre
-    sessionStorage.setItem('nutriser_banner_promo', JSON.stringify({
-      title: promoTitle,
-      imageUrl: banner?.imageUrl || null,
-      bannerId: banner?.id || null,
-      ts: Date.now(),
-    }));
-    if (!requireAuth('ver tu Monedero Nutriser')) return;
-    navigate('/monedero');
+    setBannerConfirmDialog({ open: true, banner });
+  };
+
+  const handleConfirmBannerInterest = () => {
+    const banner = bannerConfirmDialog.banner;
+    if (!banner) return;
+    createBannerInterestMutation.mutate({
+      bannerId: banner.id,
+      bannerTitle: banner.title ?? undefined,
+      bannerImageUrl: banner.imageUrl ?? undefined,
+    });
   };
 
   const handleBannerWhatsApp = () => {
@@ -2697,6 +2719,56 @@ onClick={() => {
             <div className="px-5 pb-8">
               <button
                 onClick={() => setBannerActionModal({ open: false, banner: null })}
+                className="w-full text-gray-400 font-semibold py-2 text-sm hover:text-gray-600 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Diálogo de confirmación de interés en banner ─────────────────────── */}
+      {bannerConfirmDialog.open && bannerConfirmDialog.banner && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeInScale_0.2s_ease-out]">
+            {/* Imagen miniatura */}
+            {bannerConfirmDialog.banner.imageUrl && (
+              <div className="w-full h-36 bg-black">
+                <img
+                  src={bannerConfirmDialog.banner.imageUrl}
+                  alt={bannerConfirmDialog.banner.title || 'Promo'}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+            <div className="px-6 pt-5 pb-2 text-center">
+              <div className="w-12 h-12 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mx-auto mb-3">
+                <Wallet className="w-6 h-6 text-[#C5A55A]" />
+              </div>
+              <h3 className="text-[#1A1A1A] font-black text-lg leading-tight">¿Confirmas tu interés?</h3>
+              {bannerConfirmDialog.banner.title && (
+                <p className="text-[#C5A55A] font-bold text-sm mt-1">{bannerConfirmDialog.banner.title}</p>
+              )}
+              <p className="text-gray-500 text-sm mt-2 leading-snug">
+                Se registrará en tu Monedero Nutriser. Preséntate en la clínica y el equipo te dará el precio y lo acreditará a tu saldo.
+              </p>
+            </div>
+            <div className="px-6 pb-6 pt-3 flex flex-col gap-3">
+              <button
+                onClick={handleConfirmBannerInterest}
+                disabled={createBannerInterestMutation.isPending}
+                className="w-full bg-[#C5A55A] text-white font-bold py-4 rounded-2xl text-base flex items-center justify-center gap-2 hover:bg-[#b8944d] active:scale-[0.98] transition-all shadow-md disabled:opacity-60"
+              >
+                {createBannerInterestMutation.isPending ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" /> Registrando...</>
+                ) : (
+                  <><Check className="w-5 h-5" /> Confirmar interés</>
+                )}
+              </button>
+              <button
+                onClick={() => setBannerConfirmDialog({ open: false, banner: null })}
+                disabled={createBannerInterestMutation.isPending}
                 className="w-full text-gray-400 font-semibold py-2 text-sm hover:text-gray-600 transition-colors"
               >
                 Cancelar

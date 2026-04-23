@@ -54,6 +54,10 @@ export default function AdminDashboard() {
   const [promotionImage, setPromotionImage] = useState<File | null>(null);
   const [promotionImagePreview, setPromotionImagePreview] = useState<string | null>(null);
   const [promotionMaxCoupons, setPromotionMaxCoupons] = useState("");
+  // Estado para reactivar cupón (modal)
+  const [reactivatingPromoId, setReactivatingPromoId] = useState<number | null>(null);
+  const [reactivatingPromoTitle, setReactivatingPromoTitle] = useState("");
+  const [reactivateExpiresAt, setReactivateExpiresAt] = useState("");
   // Estado para edición de promoción
   const [editingPromoId, setEditingPromoId] = useState<number | null>(null);
   const [editPromoTitle, setEditPromoTitle] = useState("");
@@ -827,6 +831,19 @@ export default function AdminDashboard() {
     },
     onError: (error) => {
       toast.error("Error al actualizar promoción: " + error.message);
+    },
+  });
+
+  const reactivatePromotionMutation = trpc.promotions.update.useMutation({
+    onSuccess: () => {
+      toast.success("✅ Cupón reactivado exitosamente.");
+      setReactivatingPromoId(null);
+      setReactivateExpiresAt("");
+      utils.promotions.listForAdmin.invalidate();
+      utils.promotions.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error al reactivar cupón: " + error.message);
     },
   });
 
@@ -1893,33 +1910,89 @@ export default function AdminDashboard() {
                               ) : (
                                 <p className="text-xs text-[#999] mt-2">Sin fecha límite</p>
                               )}
-                              <div className="flex gap-2 mt-4">
-                                <button
-                                  onClick={() => {
-                                    setEditingPromoId(promo.id);
-                                    setEditPromoTitle(promo.title || '');
-                                    setEditPromoDescription(promo.description || '');
-                                    setEditPromoPrice(promo.price || '');
-                                    setEditPromoRegularPrice(promo.regularPrice || '');
-                                    setEditPromoExpiresAt(promo.expiresAt ? new Date(promo.expiresAt).toISOString().split('T')[0] : '');
-                                    setEditPromoImage(null);
-                                    setEditPromoImagePreview(null);
-                                    setEditPromoMaxCoupons(promo.maxCoupons ? String(promo.maxCoupons) : '');
-                                  }}
-                                  className="flex-1 px-3 py-2 bg-[#C5A55A]/20 text-[#C5A55A] border border-[#C5A55A]/40 rounded hover:bg-[#C5A55A]/30 transition text-sm font-medium"
-                                >
-                                  ✏️ Editar
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (confirm(`¿Estás seguro de que deseas eliminar la promoción "${promo.title}"?`)) {
-                                      deletePromotionMutation.mutate({ id: promo.id });
-                                    }
-                                  }}
-                                  className="flex-1 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm font-medium"
-                                >
-                                  Eliminar
-                                </button>
+                              <div className="flex flex-col gap-2 mt-4">
+                                {/* Botón Reactivar: solo si está vencido o inactivo */}
+                                {(!promo.isActive || (promo.expiresAt && new Date(promo.expiresAt) < new Date())) && (
+                                  reactivatingPromoId === promo.id ? (
+                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
+                                      <p className="text-xs font-bold text-green-700">♻️ Reactivar cupón</p>
+                                      <div>
+                                        <label className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">Nueva fecha de vencimiento</label>
+                                        <input
+                                          type="date"
+                                          value={reactivateExpiresAt}
+                                          min={new Date().toISOString().split('T')[0]}
+                                          onChange={(e) => setReactivateExpiresAt(e.target.value)}
+                                          className="w-full mt-1 border border-green-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                                        />
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() => {
+                                            if (!reactivateExpiresAt) {
+                                              toast.error('Selecciona una fecha de vencimiento.');
+                                              return;
+                                            }
+                                            reactivatePromotionMutation.mutate({
+                                              id: promo.id,
+                                              isActive: true,
+                                              expiresAt: new Date(reactivateExpiresAt + 'T23:59:59').toISOString(),
+                                            });
+                                          }}
+                                          disabled={reactivatePromotionMutation.isPending}
+                                          className="flex-1 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 disabled:opacity-50 transition"
+                                        >
+                                          {reactivatePromotionMutation.isPending ? 'Activando...' : '✅ Confirmar'}
+                                        </button>
+                                        <button
+                                          onClick={() => { setReactivatingPromoId(null); setReactivateExpiresAt(''); }}
+                                          className="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-bold rounded hover:bg-gray-200 transition"
+                                        >
+                                          Cancelar
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={() => {
+                                        setReactivatingPromoId(promo.id);
+                                        setReactivatingPromoTitle(promo.title || '');
+                                        setReactivateExpiresAt('');
+                                      }}
+                                      className="w-full px-3 py-2 bg-green-50 text-green-700 border border-green-300 rounded hover:bg-green-100 transition text-sm font-bold"
+                                    >
+                                      ♻️ Reactivar cupón
+                                    </button>
+                                  )
+                                )}
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => {
+                                      setEditingPromoId(promo.id);
+                                      setEditPromoTitle(promo.title || '');
+                                      setEditPromoDescription(promo.description || '');
+                                      setEditPromoPrice(promo.price || '');
+                                      setEditPromoRegularPrice(promo.regularPrice || '');
+                                      setEditPromoExpiresAt(promo.expiresAt ? new Date(promo.expiresAt).toISOString().split('T')[0] : '');
+                                      setEditPromoImage(null);
+                                      setEditPromoImagePreview(null);
+                                      setEditPromoMaxCoupons(promo.maxCoupons ? String(promo.maxCoupons) : '');
+                                    }}
+                                    className="flex-1 px-3 py-2 bg-[#C5A55A]/20 text-[#C5A55A] border border-[#C5A55A]/40 rounded hover:bg-[#C5A55A]/30 transition text-sm font-medium"
+                                  >
+                                    ✏️ Editar
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      if (confirm(`¿Estás seguro de que deseas eliminar la promoción "${promo.title}"?`)) {
+                                        deletePromotionMutation.mutate({ id: promo.id });
+                                      }
+                                    }}
+                                    className="flex-1 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm font-medium"
+                                  >
+                                    Eliminar
+                                  </button>
+                                </div>
                               </div>
                             </>
                           )}

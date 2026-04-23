@@ -58,6 +58,15 @@ export default function AdminQRScanner() {
   // Estado de monto por solicitud de banner (id -> string)
   const [bannerAmounts, setBannerAmounts] = useState<Record<number, string>>({});
 
+  // Mutation para eliminar solicitud de banner
+  const deleteBannerMutation = trpc.bannerInterests.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Solicitud de promoción eliminada.');
+      bannerInterestsAdminQuery.refetch();
+    },
+    onError: (e) => toast.error('Error al eliminar: ' + e.message),
+  });
+
   // Mutation para atender solicitud de banner
   const attendBannerMutation = trpc.bannerInterests.attend.useMutation({
     onSuccess: () => {
@@ -534,30 +543,48 @@ export default function AdminQRScanner() {
                             </div>
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            const amountPesos = parseFloat(bannerAmounts[interest.id] || '0');
-                            if (!amountPesos || amountPesos <= 0) {
-                              toast.error('Ingresa un monto válido para acreditar.');
-                              return;
-                            }
-                            attendBannerMutation.mutate({
-                              interestId: interest.id,
-                              walletId: walletIdForCash!,
-                              amount: Math.round(amountPesos * 100), // centavos
-                              concept: `Promoción: ${interest.bannerTitle || 'Banner Nutriser'}`,
-                              adminNotes: 'Acreditado en clínica',
-                            });
-                          }}
-                          disabled={attendBannerMutation.isPending}
-                          className="w-full py-2 rounded-lg bg-[#C5A55A] text-white text-xs font-bold hover:bg-[#b8963f] disabled:opacity-50 transition-all flex items-center justify-center gap-1"
-                        >
-                          {attendBannerMutation.isPending ? (
-                            <><Loader2 className="w-3 h-3 animate-spin" /> Acreditando...</>
-                          ) : (
-                            <><Check className="w-3 h-3" /> Acreditar al monedero</>
-                          )}
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              const amountPesos = parseFloat(bannerAmounts[interest.id] || '0');
+                              if (!amountPesos || amountPesos <= 0) {
+                                toast.error('Ingresa un monto válido para acreditar.');
+                                return;
+                              }
+                              attendBannerMutation.mutate({
+                                interestId: interest.id,
+                                walletId: walletIdForCash!,
+                                amount: Math.round(amountPesos * 100),
+                                concept: `Promoción: ${interest.bannerTitle || 'Banner Nutriser'}`,
+                                adminNotes: 'Acreditado en clínica',
+                              });
+                            }}
+                            disabled={attendBannerMutation.isPending || deleteBannerMutation.isPending}
+                            className="flex-1 py-2 rounded-lg bg-[#C5A55A] text-white text-xs font-bold hover:bg-[#b8963f] disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                          >
+                            {attendBannerMutation.isPending ? (
+                              <><Loader2 className="w-3 h-3 animate-spin" /> Acreditando...</>
+                            ) : (
+                              <><Check className="w-3 h-3" /> Acreditar</>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm('¿Eliminar esta solicitud de promoción? Esta acción no se puede deshacer.')) {
+                                deleteBannerMutation.mutate({ interestId: interest.id });
+                              }
+                            }}
+                            disabled={deleteBannerMutation.isPending || attendBannerMutation.isPending}
+                            className="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 border border-red-200 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                            title="Eliminar solicitud"
+                          >
+                            {deleteBannerMutation.isPending ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <X className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

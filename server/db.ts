@@ -2091,6 +2091,12 @@ export async function attendBannerInterest(id: number, adminNotes?: string) {
     .where(eq(bannerInterests.id, id));
 }
 
+export async function deleteBannerInterest(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(bannerInterests).where(eq(bannerInterests.id, id));
+}
+
 /** Desactiva automáticamente todas las promociones cuyo expiresAt ya pasó. Retorna el número de filas afectadas. */
 export async function autoDeactivateExpiredPromotions(): Promise<number> {
   const db = await getDb();

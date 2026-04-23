@@ -197,11 +197,11 @@ export function NutriserWalletCard({
         >
           <QRCodeSVG
             value={qrUrl || "https://nutriserpv.com/monedero"}
-            size={compact ? 52 : 64}
-            level="M"
-            includeMargin={false}
+            size={compact ? 68 : 88}
+            level="H"
+            includeMargin={true}
             bgColor="#FFFFFF"
-            fgColor="#1A1A1A"
+            fgColor="#000000"
           />
         </button>
 
@@ -329,11 +329,11 @@ export function QRFullscreenModal({
       }}>
         <QRCodeSVG
           value={qrUrl || "https://nutriserpv.com/monedero"}
-          size={280}
-          level="M"
-          includeMargin={false}
+          size={320}
+          level="H"
+          includeMargin={true}
           bgColor="#FFFFFF"
-          fgColor="#1A1A1A"
+          fgColor="#000000"
         />
       </div>
 

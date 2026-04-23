@@ -569,7 +569,20 @@ export default function Store() {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-[#1A1A1A] text-sm line-clamp-2">{selectedProduct.name}</p>
-                    {selectedProduct.price && <p className="text-[#C5A55A] font-bold mt-1">{selectedProduct.price}</p>}
+                    {selectedProduct.price && (() => {
+                      const walletDisc = walletData?.wallet?.discountPercent ?? 0;
+                      const numP = parseFloat(selectedProduct.price!.replace(/[^0-9.]/g, ''));
+                      if (walletDisc > 0 && !isNaN(numP) && !discountInfo?.isGift) {
+                        const discountedP = Math.round(numP * (1 - walletDisc / 100));
+                        return (
+                          <div className="mt-1">
+                            <p className="text-xs text-gray-400 line-through">{selectedProduct.price}</p>
+                            <p className="text-[#C5A55A] font-bold">${discountedP.toLocaleString('es-MX')} MXN <span className="text-green-600 text-xs font-semibold">(-{walletDisc}%)</span></p>
+                          </div>
+                        );
+                      }
+                      return <p className="text-[#C5A55A] font-bold mt-1">{selectedProduct.price}</p>;
+                    })()}
                   </div>
                 </div>
 

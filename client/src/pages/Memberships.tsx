@@ -663,9 +663,16 @@ export default function Memberships() {
   const checkoutItems = buyNowItem ? [buyNowItem] : cart;
   const checkoutTotal = checkoutItems.reduce((s, i) => s + (isNaN(i.price) ? 0 : i.price) * i.qty, 0);
   const hasValidPrice = checkoutItems.every(i => !isNaN(i.price) && i.price > 0);
-  const discountedTotal = discountInfo?.valid && discountInfo.discount
+  // Descuento del monedero: se aplica automáticamente si el paciente tiene uno activo
+  const walletDiscountPercent = walletData?.discountPercent ?? 0;
+  // Primero aplicar cupón de descuento (si hay), luego el descuento del monedero
+  const afterCouponTotal = discountInfo?.valid && discountInfo.discount
     ? Math.round(checkoutTotal * (1 - discountInfo.discount / 100))
     : discountInfo?.isGift ? 0 : checkoutTotal;
+  const discountedTotal = walletDiscountPercent > 0 && !discountInfo?.isGift
+    ? Math.round(afterCouponTotal * (1 - walletDiscountPercent / 100))
+    : afterCouponTotal;
+  const walletDiscountAmount = checkoutTotal - discountedTotal; // ahorro total
   // Cashback: 2% de la compra
   const cashbackAmount = hasValidPrice ? Math.round(discountedTotal * 0.02) : 0;
   // Monto final a transferir (considerando monedero)
@@ -2162,9 +2169,21 @@ onClick={() => {
                       <span className="text-[#C5A55A] font-bold flex-shrink-0">{item.priceLabel}</span>
                     </div>
                   ))}
+                  {/* Descuento del monedero aplicado automáticamente */}
+                  {walletDiscountPercent > 0 && hasValidPrice && !discountInfo?.isGift && (
+                    <div className="flex items-center justify-between text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-2 py-1.5">
+                      <span className="font-semibold">🏷️ Descuento Monedero ({walletDiscountPercent}%)</span>
+                      <span className="font-bold">-${walletDiscountAmount.toLocaleString("es-MX")} MXN</span>
+                    </div>
+                  )}
                   <div className="border-t border-gray-200 pt-2 flex items-center justify-between font-bold">
                     <span className="text-gray-900">{t("total", lang)}</span>
-                    <span className="text-[#C5A55A]">{hasValidPrice ? `$${checkoutTotal.toLocaleString("es-MX")} MXN` : t("consultPrice", lang)}</span>
+                    <div className="text-right">
+                      {walletDiscountPercent > 0 && hasValidPrice && !discountInfo?.isGift && (
+                        <div className="text-xs text-gray-400 line-through">${checkoutTotal.toLocaleString("es-MX")} MXN</div>
+                      )}
+                      <span className="text-[#C5A55A]">{hasValidPrice ? `$${discountedTotal.toLocaleString("es-MX")} MXN` : t("consultPrice", lang)}</span>
+                    </div>
                   </div>
                 </div>
                 {/* Código de descuento */}

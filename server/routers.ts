@@ -17,7 +17,7 @@ import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
-import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest } from './db';
+import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest, deleteBannerInterest } from './db';
 import { getSystemConfig, setSystemConfig } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
@@ -3610,6 +3610,13 @@ export const appRouter = router({
     getAll: publicProcedure.query(async () => {
       return await getAllBannerInterests();
     }),
+    // Admin: eliminar solicitud de promoción
+    delete: publicProcedure
+      .input(z.object({ interestId: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteBannerInterest(input.interestId);
+        return { success: true };
+      }),
     // Admin: atender solicitud + acreditar al monedero
     attend: publicProcedure
       .input(z.object({

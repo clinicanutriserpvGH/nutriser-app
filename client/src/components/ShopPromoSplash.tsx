@@ -265,18 +265,13 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
                 className="relative w-full overflow-hidden rounded-2xl"
                 style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
               >
-                <button
-                  onClick={handleGoToShop}
-                  className="relative w-full block transition-opacity hover:opacity-95 active:opacity-80"
-                  style={{ padding: 0 }}
-                >
-                  <img
-                    src={adminAds[currentIndex]?.imageUrl}
-                    alt={adminAds[currentIndex]?.title || 'Publicidad Nutriser'}
-                    className="w-full h-auto block"
-                    style={{ display: 'block' }}
-                  />
-                </button>
+                {/* Imagen decorativa — no tiene acción al tocar */}
+                <img
+                  src={adminAds[currentIndex]?.imageUrl}
+                  alt={adminAds[currentIndex]?.title || 'Publicidad Nutriser'}
+                  className="w-full h-auto block"
+                  style={{ display: 'block' }}
+                />
               </div>
             </div>
           ) : isShopSlide ? (

@@ -21,9 +21,9 @@ export interface WalletPdfCardData {
   qrUrl: string;
 }
 
-// Dimensiones CR-80 en mm
-const W = 85.5;
-const H = 54;
+// Dimensiones CR-80 exactas ISO/IEC 7810 ID-1
+const W = 85.60;
+const H = 54.00;
 
 /**
  * Genera un QR como data URL PNG
@@ -93,10 +93,11 @@ async function drawCard(
   const midH = H - topH - 10;
 
   // Silueta dorada a la derecha
-  const silW = 20;
-  const silH = midH + 4;
+  // Silueta es 1024x1024 (cuadrada) — mantener proporción 1:1
+  const silW = 28; // mm
+  const silH = 28; // igual al ancho para no deformar
   const silX = x + W - silW - 1;
-  const silY = midY - 1;
+  const silY = midY - 2;
   try {
     pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
   } catch (_) {

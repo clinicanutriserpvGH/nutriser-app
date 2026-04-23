@@ -26,8 +26,9 @@ const LOGO_B64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAYAAAB/
 
 // ── Dimensiones CR-80 en píxeles a 96dpi (85.5mm x 54mm) ──
 // 1mm = 3.7795px @ 96dpi
-const CR80_W_PX = Math.round(85.5 * 3.7795); // 323px
-const CR80_H_PX = Math.round(54 * 3.7795);   // 204px
+// ISO/IEC 7810 ID-1 (CR-80): exactamente 85.60mm x 54.00mm
+const CR80_W_PX = Math.round(85.60 * 3.7795); // 324px
+const CR80_H_PX = Math.round(54.00 * 3.7795); // 204px
 
 interface CardData {
   patientName: string;
@@ -57,14 +58,13 @@ function buildCardHtml(card: CardData): string {
         <path d="M200,140 Q180,80 140,100 Q100,120 60,92 Q30,74 0,108 L0,140 Z" fill="#F0D890" opacity="0.4"/>
       </svg>
 
-      <!-- Silueta dorada HD (esquina superior derecha) -->
+      <!-- Silueta dorada HD (esquina superior derecha) - proporción 1:1 natural -->
       <img src="${SILUETA_B64}" style="
         position:absolute;
-        right:4px; top:22px;
-        width:${Math.round(W * 0.28)}px;
-        height:${Math.round(H * 0.72)}px;
-        object-fit:contain;
-        opacity:0.92;
+        right:2px; top:18px;
+        width:${Math.round(W * 0.33)}px;
+        height:auto;
+        opacity:0.9;
         z-index:1;
         pointer-events:none;
       "/>
@@ -118,7 +118,7 @@ function buildCardHtml(card: CardData): string {
           <div style="width:1px;height:${Math.round(H * 0.45)}px;background:linear-gradient(to bottom,transparent,#C5A55A,transparent);flex-shrink:0;"></div>
 
           <!-- Nombre + código -->
-          <div style="flex:1;min-width:0;padding-right:${Math.round(W * 0.28) + 6}px;">
+          <div style="flex:1;min-width:0;padding-right:${Math.round(W * 0.34) + 4}px;">
             <div style="
               font-size:9px; font-weight:bold; color:#5A3A0A;
               letter-spacing:0.5px; white-space:nowrap; overflow:hidden;
@@ -253,8 +253,8 @@ export async function generateWalletCardPdf(
       );
     } else {
       // Individual: one page per card, CR-80 size
-      const W_MM = 85.5;
-      const H_MM = 54;
+      const W_MM = 85.60; // CR-80 ISO/IEC 7810 ID-1 exacto
+      const H_MM = 54.00;
       const allPdfs: Buffer[] = [];
 
       for (const card of cardsWithQR) {

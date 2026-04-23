@@ -48,120 +48,83 @@ async function drawCard(
 ): Promise<void> {
   const qrImg = await makeQRDataUrl(card.qrUrl);
 
-  // ── Fondo blanco perla ──
+  // ── Fondo blanco perla con gradiente suave ──
   pdf.setFillColor(253, 252, 248);
   pdf.roundedRect(x, y, W, H, 3, 3, "F");
 
-  // ── Borde dorado exterior ──
+  // ── Borde dorado exterior (único borde de la tarjeta) ──
   pdf.setDrawColor(197, 165, 90);
   pdf.setLineWidth(0.5);
   pdf.roundedRect(x, y, W, H, 3, 3, "S");
 
-  // ── Cabecera blanca con logo + título ──
-  const topH = 14;
-
-  // Logo centrado
-  const logoSize = 7;
-  const logoX = x + (W - logoSize) / 2;
+  // ── Silueta dorada (esquina derecha, proporción 1:1) ──
+  const silW = 26;
+  const silH = 26;
+  const silX = x + W - silW - 2;
+  const silY = y + 10;
   try {
-    pdf.addImage(LOGO_B64, "PNG", logoX, y + 1.5, logoSize, logoSize);
+    pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
   } catch (_) {}
 
-  // Título "MONEDERO NUTRISER"
+  // ── Logo centrado arriba ──
+  const logoSize = 6;
+  const logoX = x + (W - logoSize) / 2;
+  try {
+    pdf.addImage(LOGO_B64, "PNG", logoX, y + 3, logoSize, logoSize);
+  } catch (_) {}
+
+  // ── Título "MONEDERO NUTRISER" ──
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(6.5);
   pdf.setTextColor(122, 92, 30);
-  pdf.text("MONEDERO NUTRISER", x + W / 2, y + 10.5, { align: "center" });
+  pdf.text("MONEDERO NUTRISER", x + W / 2, y + 11, { align: "center" });
 
-  // Líneas decorativas + subtítulo
+  // ── Subtítulo "aesthetic & nutrition" con líneas decorativas cortas ──
   pdf.setDrawColor(197, 165, 90);
   pdf.setLineWidth(0.2);
-  pdf.line(x + 10, y + 12.5, x + 30, y + 12.5);
-  pdf.line(x + W - 30, y + 12.5, x + W - 10, y + 12.5);
+  pdf.line(x + 12, y + 13.2, x + 26, y + 13.2);
+  pdf.line(x + W - 26, y + 13.2, x + W - 12, y + 13.2);
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(4);
   pdf.setTextColor(160, 120, 48);
-  pdf.text("aesthetic & nutrition", x + W / 2, y + 13, { align: "center" });
+  pdf.text("aesthetic & nutrition", x + W / 2, y + 13.5, { align: "center" });
 
-  // Línea separadora bajo cabecera
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.3);
-  pdf.line(x + 5, y + topH, x + W - 5, y + topH);
-
-  // ── Zona central (QR + separador + nombre/código) ──
-  const midY = y + topH + 1;
-  const midH = H - topH - 10;
-
-  // Silueta dorada a la derecha
-  // Silueta es 1024x1024 (cuadrada) — mantener proporción 1:1
-  const silW = 28; // mm
-  const silH = 28; // igual al ancho para no deformar
-  const silX = x + W - silW - 1;
-  const silY = midY - 2;
-  try {
-    pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
-  } catch (_) {
-    pdf.setFillColor(197, 165, 90);
-    pdf.rect(silX + silW * 0.3, silY, silW * 0.4, silH, "F");
-  }
-
-  // QR (izquierda)
+  // ── QR con borde dorado suave ──
   const qrSize = 22;
-  const qrX = x + 3;
-  const qrY = midY + (midH - qrSize) / 2;
-
-  // Marco dorado del QR
+  const qrX = x + 4;
+  const qrY = y + 17;
   pdf.setDrawColor(197, 165, 90);
   pdf.setLineWidth(0.4);
   pdf.setFillColor(255, 255, 255);
   pdf.roundedRect(qrX - 1, qrY - 1, qrSize + 2, qrSize + 2, 1, 1, "FD");
   pdf.addImage(qrImg, "PNG", qrX, qrY, qrSize, qrSize);
 
-  // Separador vertical dorado
-  const sepX = x + 31;
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.3);
-  pdf.line(sepX, midY + 2, sepX, midY + midH - 2);
-
-  // Nombre del paciente
-  const nameX = sepX + 3;
-  const nameY = midY + 7;
+  // ── Nombre del paciente ──
+  const nameX = x + 31;
+  const nameY = y + 24;
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7);
   pdf.setTextColor(58, 34, 0);
-  const maxName = 15;
-  const displayName =
-    card.patientName.length > maxName
-      ? card.patientName.substring(0, maxName - 1) + "…"
-      : card.patientName;
+  const maxName = 16;
+  const displayName = card.patientName.length > maxName
+    ? card.patientName.substring(0, maxName - 1) + "…"
+    : card.patientName;
   pdf.text(displayName.toUpperCase(), nameX, nameY);
 
-  // Línea bajo el nombre
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.2);
-  pdf.line(nameX, nameY + 1.5, nameX + 34, nameY + 1.5);
-
-  // Label "CÓDIGO"
+  // ── Label "CÓDIGO" ──
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(4.5);
   pdf.setTextColor(139, 105, 20);
-  pdf.text("CÓDIGO", nameX, nameY + 5.5);
+  pdf.text("CÓDIGO", nameX, nameY + 5);
 
-  // Número de monedero
+  // ── Número de monedero ──
   pdf.setFont("courier", "bold");
   pdf.setFontSize(7);
   pdf.setTextColor(58, 34, 0);
-  pdf.text(card.walletNumber, nameX, nameY + 10);
+  pdf.text(card.walletNumber, nameX, nameY + 9.5);
 
-  // ── Línea separadora inferior ──
-  const botLineY = y + H - 10;
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.3);
-  pdf.line(x + 5, botLineY, x + W - 5, botLineY);
-
-  // URL con ícono de globo (simulado con círculo)
-  const urlY = y + H - 5.5;
-  // Círculo pequeño como "globo"
+  // ── URL con ícono globo (sin línea encima) ──
+  const urlY = y + H - 5;
   pdf.setDrawColor(197, 165, 90);
   pdf.setLineWidth(0.2);
   pdf.circle(x + W / 2 - 18, urlY - 0.5, 1.2, "S");

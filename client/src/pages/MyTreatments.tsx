@@ -675,6 +675,16 @@ export default function MyTreatments() {
     return (
       <div className="min-h-screen bg-[#f5f5f5] flex flex-col items-center justify-start px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: '24px' }}>
         <div className="w-full max-w-lg">
+          {/* Botón Regresar — siempre lleva al splash en móvil/tableta, nunca al sitio web */}
+          <div className="flex justify-start mb-4">
+            <button
+              onClick={goBackToStore}
+              className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-full text-sm font-bold shadow-sm hover:bg-gray-50 active:scale-95 transition-all duration-200"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Regresar
+            </button>
+          </div>
           <div className="flex flex-col items-center mb-6">
             <ShieldCheck className="w-12 h-12 text-[#C5A55A] mb-2" />
             <h1 className="text-2xl font-bold text-gray-900">Consentimiento Informado</h1>

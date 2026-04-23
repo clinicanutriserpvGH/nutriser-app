@@ -69,14 +69,13 @@ function buildCardHtml(card: CardData): string {
       "/>
       <!-- Contenido principal -->
       <div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;padding:8px 8px 6px 8px;box-sizing:border-box;">
-        <!-- Cabecera: logo + título + subtítulo (sin líneas) -->
+        <!-- Cabecera: solo texto, sin logo -->
         <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:6px;">
-          <img src="${LOGO_B64}" style="width:20px;height:20px;object-fit:contain;margin-bottom:2px;"/>
-          <div style="font-size:10.5px;font-weight:bold;letter-spacing:2.5px;color:#7A5C1E;text-transform:uppercase;line-height:1;">MONEDERO NUTRISER</div>
+          <div style="font-size:13px;font-weight:bold;letter-spacing:2.5px;color:#7A5C1E;text-transform:uppercase;line-height:1;">MONEDERO NUTRISER</div>
           <div style="display:flex;align-items:center;gap:5px;margin-top:2px;">
-            <div style="width:18px;height:0.5px;background:#C5A55A;"></div>
+            <div style="width:22px;height:0.5px;background:#C5A55A;"></div>
             <div style="font-size:5px;color:#A07830;letter-spacing:1.5px;font-style:italic;">aesthetic &amp; nutrition</div>
-            <div style="width:18px;height:0.5px;background:#C5A55A;"></div>
+            <div style="width:22px;height:0.5px;background:#C5A55A;"></div>
           </div>
         </div>
         <!-- Zona central: QR + nombre/código (sin separador vertical ni líneas) -->

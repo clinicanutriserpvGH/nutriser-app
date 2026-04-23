@@ -118,57 +118,54 @@ export function NutriserWalletCard({
         </div>
       )}
 
-      {/* ── CABECERA: logo + título centrado ── */}
+      {/* ── CABECERA: solo texto, sin logo ── */}
       <div style={{
         position: "absolute",
         top: 0, left: 0, right: 0,
-        height: "34%",
+        height: "30%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 3,
-        paddingTop: compact ? 4 : 6,
+        paddingTop: compact ? 3 : 5,
         gap: 1,
       }}>
-        {/* Logo */}
-        <img src={LOGO_URL} alt="Nutriser" style={{ width: compact ? 22 : 28, height: compact ? 22 : 28, objectFit: "contain" }} />
-
-        {/* MONEDERO NUTRISER */}
+        {/* MONEDERO NUTRISER — más grande, sin logo */}
         <div style={{
           color: "#8B6914",
           fontWeight: 900,
-          fontSize: compact ? 9 : 11.5,
-          letterSpacing: "0.22em",
+          fontSize: compact ? 10 : 13,
+          letterSpacing: "0.20em",
           textTransform: "uppercase",
           lineHeight: 1.1,
-          marginTop: 2,
         }}>
           MONEDERO NUTRISER
         </div>
 
         {/* Líneas decorativas + aesthetic & nutrition */}
         <div style={{ display: "flex", alignItems: "center", gap: compact ? 5 : 7, marginTop: 1 }}>
-          <div style={{ height: 0.8, width: compact ? 18 : 24, background: "linear-gradient(90deg, transparent, #C5A55A)" }} />
+          <div style={{ height: 0.8, width: compact ? 18 : 26, background: "linear-gradient(90deg, transparent, #C5A55A)" }} />
           <span style={{ color: "#B8963E", fontSize: compact ? 5.5 : 7, letterSpacing: "0.18em", fontStyle: "italic" }}>
             aesthetic &amp; nutrition
           </span>
-          <div style={{ height: 0.8, width: compact ? 18 : 24, background: "linear-gradient(90deg, #C5A55A, transparent)" }} />
+          <div style={{ height: 0.8, width: compact ? 18 : 26, background: "linear-gradient(90deg, #C5A55A, transparent)" }} />
         </div>
       </div>
 
       {/* ── ZONA CENTRAL: QR | separador | Nombre + Código ── */}
       <div style={{
         position: "absolute",
-        top: "34%",
+        top: "30%",
         bottom: "18%",
         left: 0,
-        right: "38%", // dejar espacio para la silueta
+        right: "30%", // dejar espacio para la silueta
         display: "flex",
         alignItems: "center",
         padding: compact ? "0 6px" : "0 10px",
         gap: compact ? 6 : 9,
         zIndex: 3,
+        overflow: "hidden",
       }}>
         {/* QR con borde dorado */}
         <button
@@ -205,12 +202,12 @@ export function NutriserWalletCard({
           <div style={{
             color: "#3a2200",
             fontWeight: 900,
-            fontSize: compact ? 9.5 : 12,
+            fontSize: compact ? 9 : 11,
             textTransform: "uppercase",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            letterSpacing: "0.04em",
+            letterSpacing: "0.03em",
             lineHeight: 1.1,
           }}>
             {patientName || "---"}
@@ -221,7 +218,7 @@ export function NutriserWalletCard({
               CÓDIGO
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ color: "#3a2200", fontFamily: "monospace", fontSize: compact ? 7.5 : 9.5, letterSpacing: "0.14em", fontWeight: 700 }}>
+              <span style={{ color: "#3a2200", fontFamily: "monospace", fontSize: compact ? 7 : 9, letterSpacing: "0.08em", fontWeight: 700, whiteSpace: "nowrap" }}>
                 {walletNumber || "---"}
               </span>
               {onQRClick && (

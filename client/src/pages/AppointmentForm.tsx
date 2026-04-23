@@ -8,6 +8,8 @@ import { Calendar, Clock, Mail, Phone, User, ArrowLeft, ChevronDown } from "luci
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { SimpleCaptcha } from "@/components/SimpleCaptcha";
+import { useSplash } from "@/contexts/SplashContext";
+import { useDeviceType } from "@/hooks/useDeviceType";
 
 const SERVICES = [
   "Asesoría Nutricional Personalizada",
@@ -45,9 +47,8 @@ const CLINIC_HOURS = [
 
 export default function AppointmentForm() {
   const [, navigate] = useLocation();
-
-  // Detectar si es móvil o tablet (ancho < 1024px)
-  const isMobileOrTablet = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const { showSplash } = useSplash();
+  const { isDesktop } = useDeviceType();
 
   // Leer el servicio preseleccionado desde el query param ?service=...
   const searchParams = new URLSearchParams(window.location.search);
@@ -122,12 +123,13 @@ export default function AppointmentForm() {
           <Button
             variant="ghost"
             onClick={() => {
-              if (isMobileOrTablet) {
-                // En móvil/tablet: regresar al splash 0 (app principal)
-                navigate("/");
+              if (!isDesktop) {
+                // En móvil/tablet: regresar al Splash 0 (app principal)
+                sessionStorage.removeItem("nutriser_splash_seen");
+                showSplash();
               } else {
                 // En desktop: regresar al sitio web principal
-                window.location.href = "/";
+                navigate("/");
               }
             }}
             className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E]"

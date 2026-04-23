@@ -235,6 +235,30 @@ function PromoBanner({ lang, storeBanners: rawBanners = [], onBannerClick, onSys
             }
           }}
         />
+
+        {/* Overlay con nombre para banners del sistema */}
+        {banner.isSystem && banner.title && (
+          <div
+            className="absolute inset-0 flex flex-col justify-end cursor-pointer"
+            onClick={() => {
+              if (banner.linkTarget && banner.linkTarget !== 'none') {
+                onSystemBannerClick?.(banner.linkTarget);
+              }
+            }}
+          >
+            {/* Gradiente inferior */}
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 40%, transparent 70%)' }} />
+            <div className="relative z-10 px-4 pb-4">
+              <p className="text-[#C5A55A] text-[10px] font-bold uppercase tracking-widest mb-0.5">Paquete Especial</p>
+              <h3 className="text-white font-black text-xl leading-tight drop-shadow-lg">{banner.title}</h3>
+              <div className="mt-2 inline-flex items-center gap-1.5 bg-[#C5A55A] text-[#1A1A1A] font-bold text-xs px-3 py-1.5 rounded-full">
+                Ver paquete
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Flechas de navegación */}
         {totalSlides > 1 && (
           <>
@@ -1124,15 +1148,10 @@ export default function Memberships() {
         storeBanners={storeBannersData}
         onBannerClick={handleBannerClick}
         onSystemBannerClick={(linkTarget) => {
-          // Navegar a la categoría del paquete correspondiente
-          if (linkTarget === 'paquete-nutricion') {
+          // Ambos paquetes están en la categoría "paquetes"
+          if (linkTarget === 'paquete-nutricion' || linkTarget === 'paquete-reductor') {
             setActiveTab('tratamientos');
-            setActiveCategory('nutricion');
-            // Scroll suave al inicio de la lista
-            setTimeout(() => window.scrollTo({ top: 200, behavior: 'smooth' }), 100);
-          } else if (linkTarget === 'paquete-reductor') {
-            setActiveTab('tratamientos');
-            setActiveCategory('paquetes');
+            setActiveCategory('packages'); // valor correcto para la categoría Paquetes
             setTimeout(() => window.scrollTo({ top: 200, behavior: 'smooth' }), 100);
           }
         }}

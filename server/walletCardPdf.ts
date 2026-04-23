@@ -8,7 +8,7 @@
  * - Fondo BLANCO (ahorra tinta, estilo tarjeta PVC de clínica)
  * - Borde dorado sutil
  * - Franja dorada superior: logo + "MONEDERO NUTRISER / aesthetic & nutrition" (SIN badge)
- * - Zona central: QR grande a la izquierda + silueta dorada a la derecha
+ * - Zona central: QR a la izquierda + silueta dorada a la derecha (todo dentro de los límites)
  * - Franja dorada inferior: nombre + número + "nutriserpv.com/monedero" (SIN saldo)
  */
 
@@ -112,9 +112,9 @@ export async function generateWalletCardPdf(cards: WalletPdfCard[]): Promise<Buf
       cards.slice(0, 8).forEach((card, i) => {
         const col = i % 2;
         const row = Math.floor(i / 2);
-        const x = MARGIN + col * (cw + GAP);
-        const y = MARGIN + row * (ch + GAP);
-        drawCard(doc, card, qrBuffers[i], logoBuffer, siluetaBuffer, x, y, cw, ch);
+        const cx = MARGIN + col * (cw + GAP);
+        const cy = MARGIN + row * (ch + GAP);
+        drawCard(doc, card, qrBuffers[i], logoBuffer, siluetaBuffer, cx, cy, cw, ch);
       });
     }
 
@@ -138,28 +138,34 @@ function drawCard(
   doc.save();
 
   // ── Fondo BLANCO con borde dorado ──────────────────────────────────────────
-  doc.roundedRect(x, y, w, h, 7 * s).fill(WHITE);
-  doc.roundedRect(x + 0.5, y + 0.5, w - 1, h - 1, 7 * s)
+  doc.roundedRect(x, y, w, h, 6 * s).fill(WHITE);
+  doc.roundedRect(x + 0.5 * s, y + 0.5 * s, w - 1 * s, h - 1 * s, 6 * s)
     .lineWidth(1 * s)
     .stroke(GOLD);
 
-  // ── Proporciones de las franjas ────────────────────────────────────────────
-  const topBarH  = h * 0.24;  // 24% superior
-  const botBarH  = h * 0.28;  // 28% inferior
-  const midTop   = y + topBarH;
-  const midBot   = y + h - botBarH;
-  const midH     = midBot - midTop; // zona central
+  // ── Proporciones estrictas (deben sumar exactamente h) ────────────────────
+  // Franja superior: 22% de h
+  // Zona central:   50% de h
+  // Franja inferior: 28% de h
+  const topBarH = Math.round(h * 0.22);
+  const botBarH = Math.round(h * 0.28);
+  const midH    = h - topBarH - botBarH;
+
+  const topBarY = y;
+  const midY    = y + topBarH;
+  const botBarY = y + topBarH + midH;
 
   // ── Franja dorada SUPERIOR ─────────────────────────────────────────────────
+  // Clip para que respete las esquinas redondeadas arriba
   doc.save();
-  doc.roundedRect(x, y, w, topBarH + 7 * s, 7 * s).clip();
-  doc.rect(x, y, w, topBarH).fill(GOLD);
+  doc.roundedRect(x, topBarY, w, topBarH + 6 * s, 6 * s).clip();
+  doc.rect(x, topBarY, w, topBarH).fill(GOLD);
   doc.restore();
 
   // Logo en la franja superior
-  const logoSize = topBarH * 0.65;
-  const logoX = x + 6 * s;
-  const logoY = y + (topBarH - logoSize) / 2;
+  const logoSize = topBarH * 0.62;
+  const logoX    = x + 6 * s;
+  const logoY    = topBarY + (topBarH - logoSize) / 2;
   if (logoBuf) {
     doc.image(logoBuf, logoX, logoY, { width: logoSize, height: logoSize });
   } else {
@@ -167,38 +173,35 @@ function drawCard(
   }
 
   // Texto "MONEDERO NUTRISER" en la franja superior
-  const titleX = logoX + logoSize + 4 * s;
-  const titleMaxW = w * 0.65;
+  const titleX    = logoX + logoSize + 4 * s;
+  const titleMaxW = w - titleX - 6 * s;
   doc.fillColor(DARK_BROWN)
     .fontSize(6.5 * s)
     .font("Helvetica-Bold")
-    .text("MONEDERO NUTRISER", titleX, y + topBarH * 0.18, { width: titleMaxW, lineBreak: false });
+    .text("MONEDERO NUTRISER", titleX, topBarY + topBarH * 0.15, {
+      width: titleMaxW,
+      lineBreak: false,
+    });
 
-  doc.fillColor("rgba(58,34,0,0.6)")
-    .fontSize(4.8 * s)
+  doc.fillColor(DARK_BROWN)
+    .fontSize(4.5 * s)
     .font("Helvetica")
-    .text("aesthetic & nutrition", titleX, y + topBarH * 0.58, { width: titleMaxW, lineBreak: false });
+    .text("aesthetic & nutrition", titleX, topBarY + topBarH * 0.58, {
+      width: titleMaxW,
+      lineBreak: false,
+    });
 
-  // ── Silueta dorada — zona central derecha (46% del ancho) ─────────────────
-  if (siluetaBuf) {
-    const silW = w * 0.44;
-    const silH = midH * 0.92;
-    const silX = x + w - silW - 2 * s;
-    const silY = midTop + (midH - silH) / 2;
-    doc.save();
-    doc.opacity(0.88);
-    doc.image(siluetaBuf, silX, silY, { width: silW, height: silH });
-    doc.restore();
-  }
+  // ── Zona central: QR izquierda + Silueta derecha ──────────────────────────
+  const pad = 4 * s; // padding interior de la zona central
 
-  // ── QR — zona central izquierda (54% del ancho) ───────────────────────────
-  const qrMaxSize = Math.min(w * 0.46, midH * 0.88);
-  const qrSize = qrMaxSize;
-  const qrX = x + (w * 0.54 - qrSize) / 2 + 4 * s;
-  const qrY = midTop + (midH - qrSize) / 2;
+  // QR: ocupa el 50% izquierdo de la zona central, cuadrado
+  const qrAreaW  = w * 0.50;
+  const qrSize   = Math.min(qrAreaW - pad * 2, midH - pad * 2); // cuadrado, sin salirse
+  const qrX      = x + pad + (qrAreaW - pad * 2 - qrSize) / 2;
+  const qrY      = midY + (midH - qrSize) / 2;
+  const qrPad    = 2.5 * s;
 
-  // Marco blanco con borde dorado
-  const qrPad = 3 * s;
+  // Marco blanco con borde dorado para el QR
   doc.roundedRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad * 2, qrSize + qrPad * 2, 3 * s)
     .fill(WHITE);
   doc.roundedRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad * 2, qrSize + qrPad * 2, 3 * s)
@@ -209,38 +212,52 @@ function drawCard(
     doc.image(qrBuf, qrX, qrY, { width: qrSize, height: qrSize });
   }
 
+  // Silueta: ocupa el 50% derecho de la zona central
+  if (siluetaBuf) {
+    const silAreaX = x + w * 0.50;
+    const silAreaW = w * 0.50;
+    const silSize  = Math.min(silAreaW - pad * 2, midH - pad * 2);
+    const silX     = silAreaX + (silAreaW - silSize) / 2;
+    const silY     = midY + (midH - silSize) / 2;
+    doc.save();
+    doc.opacity(0.88);
+    doc.image(siluetaBuf, silX, silY, { width: silSize, height: silSize });
+    doc.restore();
+  }
+
   // ── Franja dorada INFERIOR ─────────────────────────────────────────────────
+  // Clip para que respete las esquinas redondeadas abajo
   doc.save();
-  doc.roundedRect(x, midBot - 7 * s, w, botBarH + 7 * s, 7 * s).clip();
-  doc.rect(x, midBot, w, botBarH).fill(GOLD_LIGHT);
+  doc.roundedRect(x, botBarY - 6 * s, w, botBarH + 6 * s, 6 * s).clip();
+  doc.rect(x, botBarY, w, botBarH).fill(GOLD_LIGHT);
   doc.restore();
 
-  // Nombre del paciente (izquierda)
+  // Nombre del paciente (izquierda, arriba en la franja)
   const nameStr = card.patientName.toUpperCase();
   doc.fillColor(NEAR_BLACK)
-    .fontSize(8 * s)
+    .fontSize(7.5 * s)
     .font("Helvetica-Bold")
-    .text(nameStr, x + 8 * s, midBot + botBarH * 0.1, {
-      width: w * 0.62,
+    .text(nameStr, x + 7 * s, botBarY + botBarH * 0.08, {
+      width: w * 0.60,
       lineBreak: false,
       ellipsis: true,
     });
 
-  // Número de monedero (izquierda, debajo del nombre)
+  // Número de monedero (izquierda, abajo en la franja)
   doc.fillColor(DARK_BROWN)
-    .fontSize(5.5 * s)
+    .fontSize(5 * s)
     .font("Courier-Bold")
-    .text(card.walletNumber, x + 8 * s, midBot + botBarH * 0.52, {
+    .text(card.walletNumber, x + 7 * s, botBarY + botBarH * 0.52, {
       width: w * 0.55,
       lineBreak: false,
     });
 
-  // URL (derecha)
-  doc.fillColor("rgba(58,34,0,0.65)")
-    .fontSize(4.5 * s)
+  // URL (derecha, centrada verticalmente en la franja)
+  doc.fillColor(DARK_BROWN)
+    .fontSize(4.2 * s)
     .font("Helvetica-Bold")
-    .text("nutriserpv.com/monedero", x + w * 0.52, midBot + botBarH * 0.35, {
-      width: w * 0.46,
+    .text("nutriserpv.com/monedero", x + w * 0.50, botBarY + botBarH * 0.35, {
+      width: w * 0.48,
       align: "right",
       lineBreak: false,
     });

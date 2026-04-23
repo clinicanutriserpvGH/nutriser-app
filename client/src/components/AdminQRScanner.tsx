@@ -460,7 +460,7 @@ export default function AdminQRScanner() {
                   <div className="mt-2 space-y-2">
                     <div className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4 text-red-500" />
-                      <span className="text-sm font-bold text-red-700">Pagos en Efectivo Pendientes ({cashPendingQuery.data.length})</span>
+                      <span className="text-sm font-bold text-red-700">Pagos en Clínica Pendientes ({cashPendingQuery.data.length})</span>
                     </div>
                     {cashPendingQuery.data.map((p: any) => (
                       <div key={p.id} className="bg-red-50 border border-red-200 rounded-xl p-3 space-y-2">
@@ -516,7 +516,7 @@ export default function AdminQRScanner() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-center text-gray-400 mt-1">Sin pagos en efectivo pendientes</p>
+                  <p className="text-xs text-center text-gray-400 mt-1">Sin pagos en clínica pendientes</p>
                 )}
 
                 {/* ─── Solicitudes de Promoción (Banner Interests) ─── */}

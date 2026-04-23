@@ -219,7 +219,7 @@ export const translations = {
     balanceExpiresDay: "día",
     balanceDays: "días",
     validUntil: "Válido hasta",
-    cashPendingSection: "Pagos en Efectivo Pendientes",
+    cashPendingSection: "Pagos en Clínica Pendientes",
     presentWallet: "Presenta tu monedero en clínica para confirmar el pago",
     walletBenefits: "Beneficios de tu Monedero",
     benefit1: "2% de cashback en cada compra verificada",

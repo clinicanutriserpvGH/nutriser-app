@@ -2183,9 +2183,15 @@ export async function adminResetWallet(walletId: number, adminEmail: string): Pr
       eq(cashPendingPayments.walletId, walletId),
       eq(cashPendingPayments.status, 'pending')
     ));
-  // 3. Borrar todo el historial de movimientos del monedero
+  // 3. Resetear el tracker de consultas de lealtad (consultas acumuladas, gratis ganadas/usadas)
+  await db.update(loyaltyTracker)
+    .set({ nutritionConsultations: 0, freeConsultationsEarned: 0, freeConsultationsUsed: 0 })
+    .where(eq(loyaltyTracker.walletId, walletId));
+  // 4. Borrar el progreso en todos los planes de lealtad por producto
+  await db.delete(loyaltyProgress).where(eq(loyaltyProgress.walletId, walletId));
+  // 5. Borrar todo el historial de movimientos del monedero
   await db.delete(walletTransactions).where(eq(walletTransactions.walletId, walletId));
-  // 4. Registrar un único movimiento de auditoría post-reinicio
+  // 6. Registrar un único movimiento de auditoría post-reinicio
   await db.insert(walletTransactions).values({
     walletId,
     type: "adjustment",

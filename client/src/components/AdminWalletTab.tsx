@@ -17,7 +17,7 @@ import {
 
 import AdminQRScanner from "./AdminQRScanner";
 import { WalletCard as WalletCardPrint, WalletCardPrintSheet } from "./WalletCardPrint";
-import { generateWalletPdfFromElements } from "@/lib/generateWalletPdfClient";
+import { generateWalletPdf } from "@/lib/generateWalletPdfClient";
 
 type SubTab = "wallets" | "loyalty" | "plans" | "qrscan" | "printCards" | "requests";
 
@@ -797,55 +797,27 @@ function PrintCardsTab({
   // Escala para preview en pantalla (la tarjeta CR-80 mide 323×204px a 96dpi)
   const previewScale = 0.72;
 
-  // Genera el PDF directamente en el cliente (html2canvas + jsPDF)
-  // No requiere servidor ni Puppeteer — funciona en iOS/Safari/iPad
+  // Genera el PDF en el cliente (jsPDF + QRCode puro) — sin html2canvas, funciona en Safari/iPad
   const handlePrint = useCallback(async () => {
     if (selectedWallets.length === 0) {
       toast.error("Selecciona al menos una tarjeta para imprimir");
       return;
     }
     setIsPrinting(true);
+    toast.info("Generando PDF...");
     try {
-      const container = printContainerRef.current;
-      if (!container) throw new Error("No se encontró el contenedor de impresión");
-
-      // Hacer visible el contenedor fuera de pantalla para que html2canvas pueda renderizarlo
-      container.style.display = "block";
-      container.style.position = "fixed";
-      container.style.top = "-9999px";
-      container.style.left = "-9999px";
-      container.style.zIndex = "-1";
-      container.style.background = "white";
-      container.style.width = "400px";
-
-      // Esperar a que el DOM se actualice y las imágenes carguen
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // Recopilar los elementos de tarjeta individuales
-      const cardEls = Array.from(
-        container.querySelectorAll<HTMLElement>(".wallet-card-print-item")
-      );
-
-      if (cardEls.length === 0) throw new Error("No se encontraron tarjetas para imprimir");
-
-      toast.info("Generando PDF... puede tardar unos segundos");
-
+      const cards = selectedWallets.map((w: any) => ({
+        patientName: w.patientName || "Sin nombre",
+        walletNumber: w.walletNumber || "",
+        qrUrl: `https://nutriserpv.com/c/${w.walletNumber || ""}`,
+      }));
       const mode = printMode === "sheet" && selectedWallets.length > 1 ? "a4" : "individual";
-      await generateWalletPdfFromElements(cardEls, mode);
-
-      toast.success(`✅ PDF descargado. Ábrelo e imprime a tu impresora de tarjetas.`);
+      await generateWalletPdf(cards, mode);
+      toast.success("✅ PDF descargado. Imprímelo en tu impresora de tarjetas.");
     } catch (err) {
-      console.error("[Print] PDF error:", err);
-      toast.error("Error al generar el PDF. Intenta de nuevo.");
+      console.error("[Print]", err);
+      toast.error("Error al generar el PDF.");
     } finally {
-      if (printContainerRef.current) {
-        printContainerRef.current.style.display = "none";
-        printContainerRef.current.style.position = "";
-        printContainerRef.current.style.top = "";
-        printContainerRef.current.style.left = "";
-        printContainerRef.current.style.zIndex = "";
-        printContainerRef.current.style.width = "";
-      }
       setIsPrinting(false);
     }
   }, [selectedWallets, printMode]);

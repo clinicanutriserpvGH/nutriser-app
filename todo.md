@@ -2017,3 +2017,4 @@
 - [x] Componente AdminStoreBannersTab.tsx con upload, activar/desactivar, reordenar y eliminar
 - [x] Pestaña "Aparador Tienda Principal" agregada en AdminDashboard.tsx
 - [x] Carrusel de Memberships conectado a storeBanners de BD (si hay banners activos, los usa; si no, usa los estáticos)
+- [x] Banners automáticos de paquetes aparecen en el aparador admin como entradas gestionables (activar/desactivar)

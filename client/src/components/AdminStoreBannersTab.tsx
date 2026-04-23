@@ -13,7 +13,7 @@
 import { useState, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Upload, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, ImageIcon, Info } from "lucide-react";
+import { Upload, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, ImageIcon, Info, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -105,7 +105,7 @@ export default function AdminStoreBannersTab() {
         <h2 className="text-2xl font-black text-[#1A1A1A]">🛍️ Aparador — Tienda Principal</h2>
         <p className="text-sm text-[#1A1A1A]/60 mt-1">
           Gestiona las imágenes del carrusel principal que aparece en la Tienda Nutriser.
-          Si hay banners activos, reemplazarán los banners automáticos de paquetes.
+          Los banners marcados como <strong>Sistema</strong> son automáticos (no se pueden eliminar, solo activar/desactivar).
         </p>
       </div>
 
@@ -255,6 +255,11 @@ export default function AdminStoreBannersTab() {
                       >
                         {banner.isActive ? "Activo" : "Inactivo"}
                       </Badge>
+                      {banner.isSystem && (
+                        <Badge variant="outline" className="text-xs border-[#C5A55A]/50 text-[#C5A55A] flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> Sistema
+                        </Badge>
+                      )}
                     </div>
                     {banner.linkUrl && (
                       <p className="text-xs text-[#1A1A1A]/40 truncate mt-0.5">{banner.linkUrl}</p>
@@ -292,18 +297,20 @@ export default function AdminStoreBannersTab() {
                         : <EyeOff className="w-4 h-4 text-gray-400" />
                       }
                     </button>
-                    {/* Eliminar */}
-                    <button
-                      onClick={() => {
-                        if (confirm("¿Eliminar este banner?")) {
-                          deleteMutation.mutate({ id: banner.id });
-                        }
-                      }}
-                      className="p-1.5 rounded-lg hover:bg-red-50 transition-all"
-                      title="Eliminar"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-400" />
-                    </button>
+                    {/* Eliminar — solo para banners no-sistema */}
+                    {!banner.isSystem && (
+                      <button
+                        onClick={() => {
+                          if (confirm("¿Eliminar este banner?")) {
+                            deleteMutation.mutate({ id: banner.id });
+                          }
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-red-50 transition-all"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

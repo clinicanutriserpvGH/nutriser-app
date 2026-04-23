@@ -3512,10 +3512,15 @@ export const appRouter = router({
         await toggleStoreBanner(input.id, input.isActive);
         return { success: true };
       }),
-    // Admin: eliminar
+    // Admin: eliminar (no se pueden eliminar banners del sistema)
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
+        const allBanners = await getAllStoreBanners();
+        const banner = allBanners.find((b: any) => b.id === input.id);
+        if (banner?.isSystem) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Los banners del sistema no se pueden eliminar. Solo puedes activarlos o desactivarlos.' });
+        }
         await deleteStoreBanner(input.id);
         return { success: true };
       }),

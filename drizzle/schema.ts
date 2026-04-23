@@ -915,11 +915,12 @@ export type InsertPhysicalCardRequest = typeof physicalCardRequests.$inferInsert
  */
 export const storeBanners = mysqlTable("storeBanners", {
   id: int("id").autoincrement().primaryKey(),
-  imageUrl: text("imageUrl").notNull(),              // URL en S3
+  imageUrl: text("imageUrl").notNull(),              // URL en S3 o URL de imagen estática
   title: varchar("title", { length: 255 }),          // Título interno (referencia)
   linkTarget: varchar("linkTarget", { length: 50 }), // "none" | "paquete-N" | "url"
   linkUrl: varchar("linkUrl", { length: 500 }),      // URL opcional al hacer clic
   isActive: boolean("isActive").notNull().default(true),
+  isSystem: boolean("isSystem").notNull().default(false), // true = banner automático del sistema (no se puede eliminar)
   sortOrder: int("sortOrder").notNull().default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

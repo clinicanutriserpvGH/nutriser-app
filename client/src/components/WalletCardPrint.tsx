@@ -1,8 +1,11 @@
 /**
  * WalletCardPrint -- Tarjeta física del Monedero Nutriser
  *
- * Formato CR-80 estándar: 85.5 x 54 mm
- * Diseño: fondo blanco, franjas doradas arriba y abajo, QR + silueta en zona central
+ * Formato CR-80: 85.5 × 54 mm
+ * Diseño: fondo BLANCO (ahorra tinta), franjas doradas arriba y abajo
+ *  - Franja superior: logo + "MONEDERO NUTRISER" (SIN badge activa/inactiva)
+ *  - Zona central: QR a la izquierda + silueta dorada a la derecha
+ *  - Franja inferior: nombre + número + "NUTRISERPV.COM/MONEDERO" (SIN saldo)
  */
 import React from "react";
 import { QRCodeSVG } from "qrcode.react";
@@ -34,7 +37,7 @@ export function WalletCard({ card, scale = 1 }: { card: WalletCardData; scale?: 
   );
 }
 
-// -- Hoja A4 con 8 tarjetas para imprimir ------------------------------------
+// -- Hoja A4 con hasta 8 tarjetas para imprimir ------------------------------
 export function WalletCardPrintSheet({ cards }: { cards: WalletCardData[] }) {
   return (
     <div
@@ -71,7 +74,7 @@ export function WalletCardPrintSheet({ cards }: { cards: WalletCardData[] }) {
   );
 }
 
-// -- Versión en mm para impresión exacta (fondo blanco, franjas doradas) ------
+// -- Versión en mm para impresión exacta (fondo blanco, SIN badge, SIN saldo) -
 function WalletCardMM({ card }: { card: WalletCardData }) {
   const GOLD = "linear-gradient(90deg, #8B6914 0%, #C5A55A 25%, #E8C97A 50%, #C5A55A 75%, #8B6914 100%)";
   const GOLD_DIAG = "linear-gradient(135deg, #8B6914 0%, #C5A55A 30%, #E8C97A 55%, #C5A55A 80%, #8B6914 100%)";
@@ -91,7 +94,7 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
       printColorAdjust: "exact",
     } as React.CSSProperties}>
 
-      {/* Franja dorada superior */}
+      {/* ── Franja dorada superior: logo + título (SIN badge) ── */}
       <div style={{
         position: "absolute",
         top: 0, left: 0, right: 0,
@@ -112,9 +115,10 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
             aesthetic &amp; nutrition
           </div>
         </div>
+        {/* Sin badge activa/inactiva — es tarjeta física */}
       </div>
 
-      {/* Silueta dorada — zona central derecha */}
+      {/* ── Silueta dorada — zona central derecha ── */}
       <img
         src={SILUETA_URL}
         alt=""
@@ -135,7 +139,7 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
         }}
       />
 
-      {/* QR — zona central izquierda */}
+      {/* ── QR — zona central izquierda ── */}
       <div style={{
         position: "absolute",
         top: "24%",
@@ -166,7 +170,7 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
         </div>
       </div>
 
-      {/* Franja dorada inferior: nombre + número + URL */}
+      {/* ── Franja dorada inferior: nombre + número + URL (SIN saldo) ── */}
       <div style={{
         position: "absolute",
         bottom: 0, left: 0, right: 0,
@@ -202,8 +206,15 @@ function WalletCardMM({ card }: { card: WalletCardData }) {
             {card.walletNumber}
           </div>
         </div>
-        <span style={{ color: "rgba(58,34,0,0.5)", fontSize: "1.5mm", letterSpacing: "0.08em", flexShrink: 0 }}>
-          nutriserpv.com
+        {/* URL visible y legible — sin saldo */}
+        <span style={{
+          color: "rgba(58,34,0,0.65)",
+          fontSize: "1.6mm",
+          letterSpacing: "0.06em",
+          flexShrink: 0,
+          fontWeight: 700,
+        }}>
+          nutriserpv.com/monedero
         </span>
       </div>
     </div>

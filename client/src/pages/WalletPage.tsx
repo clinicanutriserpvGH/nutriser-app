@@ -142,6 +142,26 @@ export default function WalletPage() {
     return (saved === "EN" || saved === "ES") ? saved as Lang : "ES";
   })();
 
+  // ─── Promo desde banner del carrusel ─────────────────────────────────────────────────────
+  const [bannerPromo, setBannerPromo] = useState<{ title: string; imageUrl?: string | null; bannerId?: number | null } | null>(() => {
+    try {
+      const raw = sessionStorage.getItem('nutriser_banner_promo');
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      // Solo válido por 10 minutos
+      if (Date.now() - (data.ts || 0) > 10 * 60 * 1000) {
+        sessionStorage.removeItem('nutriser_banner_promo');
+        return null;
+      }
+      return data;
+    } catch { return null; }
+  });
+
+  const dismissBannerPromo = () => {
+    sessionStorage.removeItem('nutriser_banner_promo');
+    setBannerPromo(null);
+  };
+
   const purchasesQuery = trpc.patients.getMyPurchases.useQuery(
     { email: patient?.email ?? 'x@x.com' },
     { enabled: isLoggedIn && !!patient?.email && activeTab === 'purchases' }
@@ -363,6 +383,33 @@ export default function WalletPage() {
       <div className="max-w-md mx-auto px-4 mt-4 pb-32">
         {activeTab === "card" && (
           <div>
+            {/* ─── Aviso de interés desde banner del carrusel ─── */}
+            {bannerPromo && (
+              <div className="bg-[#1A1A1A] rounded-2xl p-4 mb-4 relative overflow-hidden">
+                {/* Franja dorada decorativa */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C5A55A] via-[#E8D5A3] to-[#C5A55A]" />
+                <button
+                  onClick={dismissBannerPromo}
+                  className="absolute top-3 right-3 text-white/40 hover:text-white/80 transition-colors"
+                  aria-label="Cerrar"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div className="flex items-start gap-3">
+                  {bannerPromo.imageUrl && (
+                    <div className="w-16 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-black">
+                      <img src={bannerPromo.imageUrl} alt={bannerPromo.title} className="w-full h-full object-contain" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[#C5A55A] text-[10px] font-bold uppercase tracking-wider mb-0.5">Interés registrado</p>
+                    <p className="text-white font-bold text-sm leading-tight">{bannerPromo.title}</p>
+                    <p className="text-white/50 text-[11px] mt-1">Presenta tu monedero en clínica para obtener este paquete</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Pagos en Efectivo Pendientes */}
             {cashPendingList.length > 0 && (
               <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-4">

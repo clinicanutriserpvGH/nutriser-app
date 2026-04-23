@@ -195,113 +195,68 @@ function CopyButton({ text }: { text: string }) {
 
 // ─── Banner Carousel ─────────────────────────────────────────────────────────
 // ─── PromoBanner: carrusel de ancho completo estilo Farmacias del Ahorro ────
-function PromoBanner({ onBannerClick, lang, storeBanners: adminBanners = [] }: {
-  onBannerClick?: (pkgIndex: number) => void;
+const WA_NUMBER = "523221007799";
+
+function PromoBanner({ lang, storeBanners: rawBanners = [], onBannerClick, onSystemBannerClick }: {
   lang: Lang;
-  storeBanners?: Array<{ id: number; imageUrl: string; title?: string | null; linkUrl?: string | null }>;
+  storeBanners?: Array<{ id: number; imageUrl?: string | null; title?: string | null; linkUrl?: string | null; isSystem?: boolean; linkTarget?: string | null }>;
+  onBannerClick?: (banner: { id: number; imageUrl?: string | null; title?: string | null }) => void;
+  onSystemBannerClick?: (linkTarget: string) => void;
 }) {
+  // Filtrar banners que no tienen imagen asignada
+  const activeBanners = rawBanners.filter(b => b.imageUrl);
   const [idx, setIdx] = useState(0);
-
-  // Si hay banners del admin, usarlos; si no, usar los estáticos de paquetes
-  const hasAdminBanners = adminBanners.length > 0;
-
-  const staticBanners = [
-    {
-      title: "pkgNutricionTitle",
-      subtitle: "pkgNutricionSubtitle",
-      badge: "-22%",
-      bg: "from-amber-500 to-amber-700",
-      img: PACKAGES[0].imageUrl,
-      pkgIndex: 0,
-    },
-    {
-      title: "pkgReductorTitle",
-      subtitle: "pkgReductorSubtitle",
-      badge: "-31%",
-      bg: "from-emerald-500 to-emerald-700",
-      img: PACKAGES[1].imageUrl,
-      pkgIndex: 1,
-    },
-  ];
-
-  const totalSlides = hasAdminBanners ? adminBanners.length : staticBanners.length;
+  const totalSlides = activeBanners.length;
 
   useEffect(() => {
+    if (totalSlides === 0) return;
     const timer = setInterval(() => setIdx(i => (i + 1) % totalSlides), 5000);
     return () => clearInterval(timer);
   }, [totalSlides]);
 
-  // Renderizar banner del admin (imagen pura)
-  if (hasAdminBanners) {
-    const banner = adminBanners[idx];
-    return (
-      <div className="relative w-full mt-3 overflow-hidden">
-        {/* Aspecto 16:9 — igual que Farmacias del Ahorro */}
-        <div className="relative w-full" style={{ paddingBottom: '42%' }}>
-          <img
-            src={banner.imageUrl}
-            alt={banner.title || 'Promo Nutriser'}
-            className="absolute inset-0 w-full h-full object-cover cursor-pointer"
-            onClick={() => {
-              if (banner.linkUrl) window.open(banner.linkUrl, '_blank');
-            }}
-          />
-          {/* Overlay hover */}
-          <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-all pointer-events-none" />
-        </div>
-        {/* Dots */}
+  // Si no hay banners activos, no mostrar nada
+  if (totalSlides === 0) return null;
+
+  const banner = activeBanners[idx];
+  return (
+    <div className="relative w-full overflow-hidden" style={{ margin: '0 -0px' }}>
+      {/* Aspecto 16:9 edge-to-edge — object-contain para ver imagen completa sin recortar */}
+      <div className="relative w-full bg-black" style={{ paddingBottom: '56.25%' }}>
+        <img
+          src={banner.imageUrl!}
+          alt={banner.title || 'Promo Nutriser'}
+          className="absolute inset-0 w-full h-full object-contain cursor-pointer select-none"
+          draggable={false}
+          onClick={() => {
+            if (banner.isSystem && banner.linkTarget && banner.linkTarget !== 'none') {
+              onSystemBannerClick?.(banner.linkTarget);
+            } else {
+              onBannerClick?.(banner);
+            }
+          }}
+        />
+        {/* Flechas de navegación */}
         {totalSlides > 1 && (
-          <div className="flex items-center justify-center gap-2 py-2 bg-white">
-            {adminBanners.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setIdx(i)}
-                className={`h-2 rounded-full transition-all ${
-                  i === idx ? 'bg-[#C5A55A] w-8' : 'bg-gray-300 w-2 hover:bg-gray-400'
-                }`}
-              />
-            ))}
-          </div>
+          <>
+            <button
+              onClick={(e) => { e.stopPropagation(); setIdx(i => (i - 1 + totalSlides) % totalSlides); }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all z-10"
+            >
+              &#8249;
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); setIdx(i => (i + 1) % totalSlides); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all z-10"
+            >
+              &#8250;
+            </button>
+          </>
         )}
       </div>
-    );
-  }
-
-  // Fallback: banners estáticos de paquetes (diseño mejorado, 16:9)
-  const b = staticBanners[idx];
-  return (
-    <div className="relative w-full mt-3 overflow-hidden">
-      <button
-        onClick={() => onBannerClick?.(b.pkgIndex)}
-        className="relative w-full block group"
-        style={{ paddingBottom: '42%' }}
-      >
-        <div className={`absolute inset-0 bg-gradient-to-r ${b.bg} transition-all duration-700`} />
-        <img
-          src={b.img}
-          alt={t(b.title as any, lang)}
-          className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-50 mix-blend-overlay group-hover:opacity-60 transition-opacity"
-        />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all" />
-        <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
-          <span className="inline-block bg-white/25 backdrop-blur-sm text-white text-xs sm:text-sm font-black px-3 py-1 rounded-full w-fit mb-2">
-            {t(b.badge as any, lang)} {t('discount3', lang)}
-          </span>
-          <h3 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight drop-shadow-lg">
-            {t(b.title as any, lang)}
-          </h3>
-          <p className="text-white/85 text-sm sm:text-base font-medium mt-1 drop-shadow">
-            {t(b.subtitle as any, lang)}
-          </p>
-          <span className="mt-3 inline-flex items-center gap-1.5 text-white/90 text-xs sm:text-sm font-bold bg-white/25 backdrop-blur-sm px-4 py-2 rounded-full w-fit group-hover:bg-white/35 transition-all">
-            <ShoppingCart className="w-4 h-4" /> {t('buyNow', lang)}
-          </span>
-        </div>
-      </button>
       {/* Dots */}
       {totalSlides > 1 && (
         <div className="flex items-center justify-center gap-2 py-2 bg-white">
-          {staticBanners.map((_, i) => (
+          {activeBanners.map((_, i) => (
             <button
               key={i}
               onClick={() => setIdx(i)}
@@ -339,6 +294,39 @@ export default function Memberships() {
     () => !sessionStorage.getItem("nutriser_tienda_promo_dismissed")
   );
   const [pendingCartItem] = useState<Omit<CartItem, "qty"> | null>(null); // reservado para uso futuro
+
+  // ─── Modal de acción al hacer clic en banner ──────────────────────────────────────
+  const [bannerActionModal, setBannerActionModal] = useState<{
+    open: boolean;
+    banner: { id: number; imageUrl?: string | null; title?: string | null } | null;
+  }>({ open: false, banner: null });
+
+  const handleBannerClick = (banner: { id: number; imageUrl?: string | null; title?: string | null }) => {
+    setBannerActionModal({ open: true, banner });
+  };
+
+  const handleBannerBuyInClinic = () => {
+    const banner = bannerActionModal.banner;
+    setBannerActionModal({ open: false, banner: null });
+    const promoTitle = banner?.title || 'Promoción Nutriser';
+    // Guardar en sessionStorage para que WalletPage lo muestre
+    sessionStorage.setItem('nutriser_banner_promo', JSON.stringify({
+      title: promoTitle,
+      imageUrl: banner?.imageUrl || null,
+      bannerId: banner?.id || null,
+      ts: Date.now(),
+    }));
+    if (!requireAuth('ver tu Monedero Nutriser')) return;
+    navigate('/monedero');
+  };
+
+  const handleBannerWhatsApp = () => {
+    const banner = bannerActionModal.banner;
+    setBannerActionModal({ open: false, banner: null });
+    const promoTitle = banner?.title || 'una promoción';
+    const msg = encodeURIComponent(`Hola Nutriser, me interesa obtener informes sobre: ${promoTitle}. ¿Me pueden dar más información?`);
+    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+  };
 
   // ─── Guard móvil ───────────────────────────────────────────────────────────────────────
   const [mobileGuardOpen, setMobileGuardOpen] = useState(false);
@@ -666,7 +654,7 @@ export default function Memberships() {
     // — Pago en Efectivo: crear pendiente en monedero —
     if (paymentMethod === 'cash' && !fullyCoveredByWallet) {
       if (!walletData?.id || !patient?.id) {
-        toast.error("Necesitas tener un monedero activo para pagar en efectivo.");
+        toast.error("Necesitas tener un monedero activo para usar pago en clínica.");
         return;
       }
       setIsSubmitting(true);
@@ -683,7 +671,7 @@ export default function Memberships() {
         amountCents: Math.round(discountedTotal * 100),
         walletAmountUsedCents: walletUsedCents,
         cashbackPercent: 2,
-        notes: `Pago en efectivo solicitado por ${buyerName}`,
+        notes: `Pago en clínica solicitado por ${buyerName}`,
       });
       return;
     }
@@ -1131,21 +1119,24 @@ export default function Memberships() {
 
       {/* ── Banner Carrusel de Ofertas (clickeable → comprar paquete) ── */}
       {/* Ocultar banner cuando hay búsqueda activa */}
-      {!searchQuery && <PromoBanner lang={lang} storeBanners={storeBannersData} onBannerClick={(pkgIndex) => {
-        const pkg = getPackages(lang)[pkgIndex];
-        if (pkg) {
-          openCheckout({
-            id: pkg.id,
-            name: pkg.name,
-            price: pkg.price,
-            priceLabel: `$${pkg.price.toLocaleString("es-MX")} MXN`,
-            qty: 1,
-            imageUrl: pkg.imageUrl,
-            category: pkg.category,
-            itemType: "package",
-          });
-        }
-      }} />}
+      {!searchQuery && <PromoBanner
+        lang={lang}
+        storeBanners={storeBannersData}
+        onBannerClick={handleBannerClick}
+        onSystemBannerClick={(linkTarget) => {
+          // Navegar a la categoría del paquete correspondiente
+          if (linkTarget === 'paquete-nutricion') {
+            setActiveTab('tratamientos');
+            setActiveCategory('nutricion');
+            // Scroll suave al inicio de la lista
+            setTimeout(() => window.scrollTo({ top: 200, behavior: 'smooth' }), 100);
+          } else if (linkTarget === 'paquete-reductor') {
+            setActiveTab('tratamientos');
+            setActiveCategory('paquetes');
+            setTimeout(() => window.scrollTo({ top: 200, behavior: 'smooth' }), 100);
+          }
+        }}
+      />}
 
       {/* ════════════════════════════════════════════════════════════════════
           VISTA DE RESULTADOS DE BÚSqueda UNIFICADA
@@ -2049,10 +2040,10 @@ onClick={() => {
                       <span className="text-3xl">💵</span>
                     </div>
                     <h3 className="font-bold text-gray-900 text-xl mb-2">{t("cashPendingRegistered", lang)}</h3>
-                    <p className="text-gray-500 text-sm mb-4">{lang === "EN" ? <>Your order was saved as a <strong>pending cash payment</strong> in your wallet.</> : <>Tu pedido quedó guardado como <strong>pago en efectivo pendiente</strong> en tu monedero.</>}</p>
+                    <p className="text-gray-500 text-sm mb-4">{lang === "EN" ? <>Your order was saved as a <strong>pending clinic payment</strong> in your wallet.</> : <>Tu pedido quedó guardado como <strong>pago en clínica pendiente</strong> en tu monedero.</>}</p>
                     <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4 text-left space-y-2">
                       <p className="text-xs font-bold text-orange-700 uppercase tracking-wider">{lang === "EN" ? "What's next?" : "¿Qué sigue?"}</p>
-                      <p className="text-sm text-orange-800">1. {lang === "EN" ? "Go to the clinic with the cash amount." : "Acude a la clínica con el monto en efectivo."}</p>
+                      <p className="text-sm text-orange-800">1. {lang === "EN" ? "Go to the clinic to complete your payment." : "Acúde a la clínica para realizar tu pago."}</p>
                       <p className="text-sm text-orange-800">2. {t("cashStep2", lang)}</p>
                       <p className="text-sm text-orange-800">3. {t("cashStep3", lang)}</p>
                     </div>
@@ -2350,20 +2341,35 @@ onClick={() => {
                 <span className="text-[11px] lg:text-xs font-semibold leading-tight mt-0.5">{t("tabProducts", lang)}</span>
               </button>
 
-              {/* Monedero — Botón central flotante */}
+              {/* Monedero — Mini tarjeta Nutriser flotante */}
               <button
                 onClick={() => {
                   if (!requireAuth("ver tu Monedero Nutriser")) return;
                   if (!walletData && patient?.id) walletQuery.refetch();
                   setWalletSheetOpen(true);
                 }}
-                className="flex flex-col items-center -mt-6 lg:-mt-8 relative"
+                className="flex flex-col items-center -mt-5 lg:-mt-7 relative"
                 aria-label="Mi Monedero Nutriser"
               >
-                <div className="w-[58px] h-[58px] lg:w-[76px] lg:h-[76px] rounded-full bg-gradient-to-br from-[#C5A55A] via-[#D4B86A] to-[#B8963E] shadow-[0_4px_16px_rgba(197,165,90,0.5)] flex items-center justify-center border-[3px] lg:border-4 border-white hover:scale-105 active:scale-95 transition-all">
-                  <div className="w-[44px] h-[44px] lg:w-[58px] lg:h-[58px] rounded-full bg-white flex items-center justify-center">
-                    <img src={LOGO_URL} alt="Monedero" className="w-8 h-8 lg:w-11 lg:h-11 rounded-full object-contain" />
+                {/* Mini tarjeta CR-80 estilo Nutriser */}
+                <div
+                  className="relative overflow-hidden hover:scale-105 active:scale-95 transition-all"
+                  style={{
+                    width: 62,
+                    height: 40,
+                    borderRadius: 7,
+                    background: '#1A1A1A',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.45), 0 0 0 2px #C5A55A',
+                  }}
+                >
+                  {/* Franja dorada superior */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 5, background: 'linear-gradient(90deg, #C5A55A, #E8D5A3, #C5A55A)' }} />
+                  {/* Logo centrado */}
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 4 }}>
+                    <img src={LOGO_URL} alt="Monedero" style={{ width: 36, height: 22, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
                   </div>
+                  {/* Franja dorada inferior */}
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #C5A55A, #E8D5A3, #C5A55A)' }} />
                 </div>
                 <span className="text-[11px] lg:text-xs font-bold text-[#C5A55A] mt-1 leading-tight">{t("tabWallet", lang)}</span>
               </button>
@@ -2562,6 +2568,84 @@ onClick={() => {
                 className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-2xl text-base hover:bg-[#2D2D2D] active:scale-[0.98] transition-all shadow-lg"
               >
                 {t("goToMyWallet", lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════════
+          MODAL DE ACCIÓN AL HACER CLIC EN BANNER
+      ══════════════════════════════════════════════════════════════════ */}
+      {bannerActionModal.open && (
+        <div className="fixed inset-0 z-[90] flex items-end md:items-center md:justify-center">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setBannerActionModal({ open: false, banner: null })}
+          />
+          {/* Sheet */}
+          <div className="relative w-full md:max-w-sm md:mx-auto bg-white rounded-t-3xl md:rounded-3xl shadow-2xl overflow-hidden" style={{ animation: 'slideUp 0.28s ease-out' }}>
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1 md:hidden">
+              <div className="w-10 h-1 rounded-full bg-gray-300" />
+            </div>
+
+            {/* Imagen del banner en miniatura */}
+            {bannerActionModal.banner?.imageUrl && (
+              <div className="mx-4 mt-3 mb-0 rounded-2xl overflow-hidden" style={{ aspectRatio: '16/5' }}>
+                <img
+                  src={bannerActionModal.banner.imageUrl}
+                  alt={bannerActionModal.banner.title || 'Promo'}
+                  className="w-full h-full object-contain bg-black"
+                />
+              </div>
+            )}
+
+            <div className="px-5 pt-4 pb-2">
+              <h2 className="text-[#1A1A1A] font-black text-lg text-center leading-tight">
+                {bannerActionModal.banner?.title
+                  ? `¿Qué deseas hacer con esta promoción?`
+                  : '¿Qué deseas hacer?'}
+              </h2>
+              {bannerActionModal.banner?.title && (
+                <p className="text-[#C5A55A] text-sm font-semibold text-center mt-1">{bannerActionModal.banner.title}</p>
+              )}
+            </div>
+
+            {/* Botón 1: Comprar en clínica */}
+            <div className="px-5 pt-3 pb-2">
+              <button
+                onClick={handleBannerBuyInClinic}
+                className="w-full bg-[#1A1A1A] text-white font-bold py-4 rounded-2xl text-base flex items-center justify-center gap-2 hover:bg-[#2D2D2D] active:scale-[0.98] transition-all shadow-md"
+              >
+                <Wallet className="w-5 h-5 text-[#C5A55A]" />
+                Comprar en clínica
+              </button>
+              <p className="text-gray-400 text-[11px] text-center mt-1.5">Registra tu interés en el monedero y págalo en la clínica</p>
+            </div>
+
+            {/* Botón 2: Pedir informes por WhatsApp */}
+            <div className="px-5 pb-6">
+              <button
+                onClick={handleBannerWhatsApp}
+                className="w-full bg-[#25D366] text-white font-bold py-4 rounded-2xl text-base flex items-center justify-center gap-2 hover:bg-[#1ebe5d] active:scale-[0.98] transition-all shadow-md"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                Pedir informes por WhatsApp
+              </button>
+              <p className="text-gray-400 text-[11px] text-center mt-1.5">Chatea con nosotros y te damos precio y detalles</p>
+            </div>
+
+            {/* Cancelar */}
+            <div className="px-5 pb-8">
+              <button
+                onClick={() => setBannerActionModal({ open: false, banner: null })}
+                className="w-full text-gray-400 font-semibold py-2 text-sm hover:text-gray-600 transition-colors"
+              >
+                Cancelar
               </button>
             </div>
           </div>

@@ -17,6 +17,7 @@ import {
 
 import AdminQRScanner from "./AdminQRScanner";
 import { WalletCard as WalletCardPrint, WalletCardPrintSheet } from "./WalletCardPrint";
+import { generateWalletPdfFromElements } from "@/lib/generateWalletPdfClient";
 
 type SubTab = "wallets" | "loyalty" | "plans" | "qrscan" | "printCards" | "requests";
 
@@ -796,8 +797,8 @@ function PrintCardsTab({
   // Escala para preview en pantalla (la tarjeta CR-80 mide 323×204px a 96dpi)
   const previewScale = 0.72;
 
-  // Genera el PDF de la tarjeta en el servidor y lo abre en una nueva pestaña.
-  // El servidor usa PDFKit + qrcode (sin CORS), funciona en iOS/Safari.
+  // Genera el PDF directamente en el cliente (html2canvas + jsPDF)
+  // No requiere servidor ni Puppeteer — funciona en iOS/Safari/iPad
   const handlePrint = useCallback(async () => {
     if (selectedWallets.length === 0) {
       toast.error("Selecciona al menos una tarjeta para imprimir");
@@ -805,25 +806,49 @@ function PrintCardsTab({
     }
     setIsPrinting(true);
     try {
-      const cards = selectedWallets.map((w: any) => ({
-        patientName: w.patientName || "Sin nombre",
-        walletNumber: w.walletNumber || "",
-        qrUrl: `https://nutriserpv.com/c/${w.walletNumber || ""}`,
-      }));
+      const container = printContainerRef.current;
+      if (!container) throw new Error("No se encontró el contenedor de impresión");
 
-      const params = encodeURIComponent(JSON.stringify(cards));
-      const pdfUrl = `/api/wallet/card-pdf?wallets=${params}`;
+      // Hacer visible el contenedor fuera de pantalla para que html2canvas pueda renderizarlo
+      container.style.display = "block";
+      container.style.position = "fixed";
+      container.style.top = "-9999px";
+      container.style.left = "-9999px";
+      container.style.zIndex = "-1";
+      container.style.background = "white";
+      container.style.width = "400px";
 
-      // Abrir el PDF directamente en el navegador (iOS lo muestra en visor nativo)
-      window.open(pdfUrl, "_blank");
-      toast.success(`✅ PDF generado. Usa el botón de compartir → Imprimir en el visor.`);
+      // Esperar a que el DOM se actualice y las imágenes carguen
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Recopilar los elementos de tarjeta individuales
+      const cardEls = Array.from(
+        container.querySelectorAll<HTMLElement>(".wallet-card-print-item")
+      );
+
+      if (cardEls.length === 0) throw new Error("No se encontraron tarjetas para imprimir");
+
+      toast.info("Generando PDF... puede tardar unos segundos");
+
+      const mode = printMode === "sheet" && selectedWallets.length > 1 ? "a4" : "individual";
+      await generateWalletPdfFromElements(cardEls, mode);
+
+      toast.success(`✅ PDF descargado. Ábrelo e imprime a tu impresora de tarjetas.`);
     } catch (err) {
       console.error("[Print] PDF error:", err);
       toast.error("Error al generar el PDF. Intenta de nuevo.");
     } finally {
+      if (printContainerRef.current) {
+        printContainerRef.current.style.display = "none";
+        printContainerRef.current.style.position = "";
+        printContainerRef.current.style.top = "";
+        printContainerRef.current.style.left = "";
+        printContainerRef.current.style.zIndex = "";
+        printContainerRef.current.style.width = "";
+      }
       setIsPrinting(false);
     }
-  }, [selectedWallets]);
+  }, [selectedWallets, printMode]);
 
   return (
     <div className="space-y-4">
@@ -945,34 +970,17 @@ function PrintCardsTab({
         </div>
       )}
 
-      {/* Contenedor oculto para html2canvas — se muestra temporalmente al imprimir */}
-      <div ref={printContainerRef} style={{ display: "none", background: "white", padding: "10mm" }}>
-        {printMode === "sheet" ? (
-          // Hoja A4 con hasta 8 tarjetas
-          <WalletCardPrintSheet cards={selectedWallets.map(toCardData)} />
-        ) : (
-          // Una tarjeta por página
-          selectedWallets.map((w: any, i: number) => (
-            <div
-              key={w.id}
-              style={{
-                pageBreakAfter: i < selectedWallets.length - 1 ? "always" : "auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "210mm",
-                height: "297mm",
-                padding: "20mm",
-                boxSizing: "border-box",
-              }}
-            >
-              <div style={{ width: "85.5mm", height: "54mm", overflow: "hidden", borderRadius: "3.5mm" }}>
-                {/* Importamos WalletCardPrintSheet con una sola tarjeta */}
-                <WalletCardPrintSheet cards={[toCardData(w)]} />
-              </div>
-            </div>
-          ))
-        )}
+      {/* Contenedor oculto para html2canvas — cada tarjeta tiene clase wallet-card-print-item */}
+      <div ref={printContainerRef} style={{ display: "none", background: "white" }}>
+        {selectedWallets.map((w: any) => (
+          <div
+            key={w.id}
+            className="wallet-card-print-item"
+            style={{ width: "323px", height: "204px", overflow: "hidden", borderRadius: "13px", flexShrink: 0 }}
+          >
+            <WalletCardPrint card={toCardData(w)} scale={1} />
+          </div>
+        ))}
       </div>
     </div>
   );

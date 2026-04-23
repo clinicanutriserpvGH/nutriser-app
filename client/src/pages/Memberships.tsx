@@ -12,7 +12,7 @@ import {
   ShoppingCart, X, Plus, Minus, Trash2, Tag, CheckCircle2,
   Loader2, Copy, CheckCheck, Apple, Sparkles, Scan, Syringe,
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
-  Search, ArrowLeft, Upload, BookOpen, FlaskConical, User, LogOut,
+  Search, ArrowLeft, Upload, BookOpen, User, LogOut,
   Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList, Globe,
   Info, Clock, Tag as TagIcon, DollarSign, PersonStanding, ScanFace, Smile,
 } from "lucide-react";
@@ -1686,7 +1686,7 @@ onClick={() => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center">
-                    <FlaskConical className="w-4 h-4 text-purple-600" />
+                    <Droplets className="w-4 h-4 text-[#C5A55A]" />
                   </div>
                   <div>
                     <h2 className="font-black text-gray-900 text-lg">{t("pharmacyTitle", lang)}</h2>
@@ -1699,7 +1699,7 @@ onClick={() => {
               ) : products.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                    <FlaskConical className="w-10 h-10 text-gray-300" />
+                    <Droplets className="w-10 h-10 text-gray-300" />
                   </div>
                   <h3 className="font-bold text-gray-400 text-xl mb-2">{t("comingSoon", lang)}</h3>
                   <p className="text-gray-300 text-sm max-w-xs mx-auto">{t("pharmacyEmpty", lang)}</p>
@@ -1715,7 +1715,7 @@ onClick={() => {
                             <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                              <FlaskConical className="w-10 h-10 text-gray-200" />
+                              <Droplets className="w-10 h-10 text-gray-200" />
                             </div>
                           )}
                           <button onClick={(e) => { e.stopPropagation(); track("product", `prd-${product.id}`, product.name, "wishlist"); toggleWishlist({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product" }); }} className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
@@ -2437,7 +2437,7 @@ onClick={() => {
                   activeTab === "farmacy" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
-                <FlaskConical className="w-7 h-7 lg:w-8 lg:h-8" />
+                <Droplets className="w-7 h-7 lg:w-8 lg:h-8" />
                 <span className="text-[11px] lg:text-xs font-semibold leading-tight mt-0.5">{t("tabProducts", lang)}</span>
               </button>
 

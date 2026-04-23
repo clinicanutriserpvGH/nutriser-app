@@ -212,6 +212,10 @@ export default function MyTreatments() {
   const [view, setView] = useState<"auth" | "consent" | "portal">("auth");
   const [authMode, setAuthMode] = useState<"login" | "register" | "register-form" | "forgot">("login");
   const [showPassword, setShowPassword] = useState(false);
+  // Selectores de fecha de nacimiento
+  const [birthDay, setBirthDay] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const [birthYear, setBirthYear] = useState("");
   const [activeTab, setActiveTab] = useState<"tracking" | "photos" | "consent">("tracking");
 
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
@@ -387,12 +391,19 @@ export default function MyTreatments() {
   const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    // Construir fecha de nacimiento desde los 3 selectores
+    let birthday: string | undefined;
+    if (birthDay && birthMonth && birthYear) {
+      const dd = birthDay.padStart(2, "0");
+      const mm = birthMonth.padStart(2, "0");
+      birthday = `${birthYear}-${mm}-${dd}`;
+    }
     registerMutation.mutate({
       name: fd.get("name") as string,
       email: fd.get("email") as string,
       password: fd.get("password") as string,
       phone: fd.get("phone") as string,
-      birthday: fd.get("birthday") as string || undefined,
+      birthday,
     });
   };
 
@@ -583,11 +594,42 @@ export default function MyTreatments() {
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input name="phone" type="tel" placeholder="Teléfono / Celular" required minLength={8} className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
                 </div>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <div className="pl-10 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center">
-                    <label className="text-gray-400 text-sm mr-2 whitespace-nowrap">Fecha de nacimiento:</label>
-                    <input name="birthday" type="date" className="bg-transparent text-gray-900 text-sm flex-1 outline-none" />
+                {/* Fecha de nacimiento — 3 selectores para fácil uso en móvil */}
+                <div>
+                  <label className="flex items-center gap-2 text-gray-500 text-xs mb-1.5">
+                    <Calendar className="w-3.5 h-3.5" /> Fecha de nacimiento (opcional)
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <select
+                      value={birthDay}
+                      onChange={e => setBirthDay(e.target.value)}
+                      className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-md px-2 py-2.5 outline-none focus:border-[#C5A55A]/60 appearance-none text-center"
+                    >
+                      <option value="">Día</option>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                        <option key={d} value={String(d)}>{d}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={birthMonth}
+                      onChange={e => setBirthMonth(e.target.value)}
+                      className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-md px-2 py-2.5 outline-none focus:border-[#C5A55A]/60 appearance-none text-center"
+                    >
+                      <option value="">Mes</option>
+                      {["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].map((m, i) => (
+                        <option key={i} value={String(i + 1)}>{m}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={birthYear}
+                      onChange={e => setBirthYear(e.target.value)}
+                      className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-md px-2 py-2.5 outline-none focus:border-[#C5A55A]/60 appearance-none text-center"
+                    >
+                      <option value="">Año</option>
+                      {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 10 - i).map(y => (
+                        <option key={y} value={String(y)}>{y}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="relative">

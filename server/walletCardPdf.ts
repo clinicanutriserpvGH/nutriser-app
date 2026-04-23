@@ -57,11 +57,11 @@ function buildCardHtml(card: CardData): string {
         <path d="M220,150 Q180,95 135,112 Q90,129 45,100 Q15,80 0,125 L0,150 Z" fill="#E8C97A" opacity="0.7"/>
         <path d="M220,150 Q190,85 145,105 Q100,125 55,95 Q25,76 0,115 L0,150 Z" fill="#F0D890" opacity="0.4"/>
       </svg>
-      <!-- Silueta dorada HD (esquina derecha, proporción 1:1 natural) -->
+      <!-- Silueta dorada HD (zona derecha, centrada verticalmente en zona media) -->
       <img src="${SILUETA_B64}" style="
         position:absolute;
-        right:4px; top:18px;
-        width:${Math.round(W * 0.38)}px;
+        right:3px; top:30px;
+        width:${Math.round(W * 0.42)}px;
         height:auto;
         opacity:0.88;
         z-index:1;

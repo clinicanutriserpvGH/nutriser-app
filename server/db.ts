@@ -5,6 +5,7 @@ import { ENV } from './_core/env';
 import { products, InsertProduct, productPurchases, InsertProductPurchase, discountCodes, InsertDiscountCode, DiscountCode } from '../drizzle/schema';
 import { patientAccounts, InsertPatientAccount, PatientAccount, patientTreatments, InsertPatientTreatment, patientAppointments, InsertPatientAppointment, patientPhotos, InsertPatientPhoto } from '../drizzle/schema';
 import { storeBanners, type InsertStoreBanner, bannerInterests, type InsertBannerInterest, systemConfig } from '../drizzle/schema';
+import { installmentPlans, installmentPayments, adminNotifications, type InstallmentPlan, type InstallmentPayment, type AdminNotification } from '../drizzle/schema';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -2222,4 +2223,282 @@ export async function adminUnsuspendWallet(walletId: number): Promise<void> {
   await db.update(wallets)
     .set({ isActive: true })
     .where(eq(wallets.id, walletId));
+}
+
+// ============================================================
+// HELPERS: PAGOS A PLAZOS
+// ============================================================
+
+/**
+ * Avanza una fecha saltando domingos (día 0).
+ * Si la fecha resultante cae en domingo, se mueve al lunes siguiente.
+ */
+function skipSunday(date: Date): Date {
+  const d = new Date(date);
+  if (d.getDay() === 0) {
+    d.setDate(d.getDate() + 1); // mover al lunes
+  }
+  return d;
+}
+
+/**
+ * Calcula las fechas de vencimiento de los plazos a partir de la fecha de inicio.
+ * - quincenal: cada 15 días hábiles (sin domingos)
+ * - semanal: cada 7 días hábiles (sin domingos)
+ */
+function calcInstallmentDueDates(startDate: Date, modalidad: 'quincenal' | 'semanal', count: number): Date[] {
+  const intervalDays = modalidad === 'quincenal' ? 15 : 7;
+  const dates: Date[] = [];
+  for (let i = 1; i <= count; i++) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + intervalDays * i);
+    dates.push(skipSunday(d));
+  }
+  return dates;
+}
+
+/**
+ * Crea un plan de pago a plazos y sus cuotas individuales.
+ */
+export async function createInstallmentPlan(data: {
+  walletId: number;
+  patientId: number;
+  concept: string;
+  originalAmountCents: number;
+  modalidad: 'quincenal' | 'semanal';
+  createdBy: string;
+}): Promise<InstallmentPlan & { payments: InstallmentPayment[] }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const surchargePercent = data.modalidad === 'quincenal' ? 10 : 15;
+  const totalInstallments = data.modalidad === 'quincenal' ? 2 : 4;
+  const totalAmountCents = Math.round(data.originalAmountCents * (1 + surchargePercent / 100));
+  const perInstallmentCents = Math.round(totalAmountCents / totalInstallments);
+
+  // Crear el plan
+  await db.insert(installmentPlans).values({
+    walletId: data.walletId,
+    patientId: data.patientId,
+    concept: data.concept,
+    originalAmountCents: data.originalAmountCents,
+    totalAmountCents,
+    surchargePercent,
+    modalidad: data.modalidad,
+    totalInstallments,
+    paidInstallments: 0,
+    status: 'active',
+    createdBy: data.createdBy,
+  });
+
+  const [plan] = await db.select().from(installmentPlans)
+    .orderBy(desc(installmentPlans.id)).limit(1);
+
+  // Calcular fechas de vencimiento (sin domingos)
+  const dueDates = calcInstallmentDueDates(new Date(), data.modalidad, totalInstallments);
+
+  // Crear los pagos individuales
+  const paymentRows = dueDates.map((dueDate, idx) => ({
+    planId: plan.id,
+    walletId: data.walletId,
+    installmentNumber: idx + 1,
+    amountCents: perInstallmentCents,
+    dueDate,
+    status: 'pending' as const,
+  }));
+
+  await db.insert(installmentPayments).values(paymentRows);
+
+  const payments = await db.select().from(installmentPayments)
+    .where(eq(installmentPayments.planId, plan.id))
+    .orderBy(asc(installmentPayments.installmentNumber));
+
+  return { ...plan, payments };
+}
+
+/**
+ * Confirma el pago de una cuota específica.
+ */
+export async function confirmInstallmentPayment(paymentId: number, confirmedBy: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [payment] = await db.select().from(installmentPayments)
+    .where(eq(installmentPayments.id, paymentId)).limit(1);
+  if (!payment) throw new Error("Cuota no encontrada");
+  if (payment.status === 'paid') throw new Error("Esta cuota ya fue pagada");
+
+  await db.update(installmentPayments)
+    .set({ status: 'paid', paidAt: new Date(), confirmedBy })
+    .where(eq(installmentPayments.id, paymentId));
+
+  // Contar cuotas pagadas del plan
+  const allPayments = await db.select().from(installmentPayments)
+    .where(eq(installmentPayments.planId, payment.planId));
+  const paidCount = allPayments.filter(p => p.status === 'paid' || p.id === paymentId).length;
+  const [plan] = await db.select().from(installmentPlans)
+    .where(eq(installmentPlans.id, payment.planId)).limit(1);
+
+  const newStatus = paidCount >= (plan?.totalInstallments ?? 0) ? 'completed' : 'active';
+  await db.update(installmentPlans)
+    .set({ paidInstallments: paidCount, status: newStatus })
+    .where(eq(installmentPlans.id, payment.planId));
+}
+
+/**
+ * Obtiene todos los planes de plazos activos de un monedero.
+ */
+export async function getInstallmentPlansByWallet(walletId: number): Promise<(InstallmentPlan & { payments: InstallmentPayment[] })[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const plans = await db.select().from(installmentPlans)
+    .where(and(eq(installmentPlans.walletId, walletId), eq(installmentPlans.status, 'active')))
+    .orderBy(desc(installmentPlans.createdAt));
+
+  return await Promise.all(plans.map(async (plan) => {
+    const payments = await db.select().from(installmentPayments)
+      .where(eq(installmentPayments.planId, plan.id))
+      .orderBy(asc(installmentPayments.installmentNumber));
+    return { ...plan, payments };
+  }));
+}
+
+/**
+ * Obtiene todos los planes de plazos (admin: todos los monederos).
+ */
+export async function getAllInstallmentPlans(): Promise<(InstallmentPlan & { payments: InstallmentPayment[] })[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const plans = await db.select().from(installmentPlans)
+    .orderBy(desc(installmentPlans.createdAt));
+
+  return await Promise.all(plans.map(async (plan) => {
+    const payments = await db.select().from(installmentPayments)
+      .where(eq(installmentPayments.planId, plan.id))
+      .orderBy(asc(installmentPayments.installmentNumber));
+    return { ...plan, payments };
+  }));
+}
+
+// ============================================================
+// HELPERS: NOTIFICACIONES ADMIN → PACIENTE
+// ============================================================
+
+/**
+ * Envía una notificación personalizada del admin a un paciente.
+ */
+export async function sendAdminNotification(data: {
+  walletId: number;
+  patientId: number;
+  title: string;
+  message: string;
+  imageUrl?: string;
+  type: 'cobro' | 'promocion' | 'felicitacion' | 'general';
+  sentBy: string;
+}): Promise<AdminNotification> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(adminNotifications).values({
+    walletId: data.walletId,
+    patientId: data.patientId,
+    title: data.title,
+    message: data.message,
+    imageUrl: data.imageUrl ?? null,
+    type: data.type,
+    isRead: false,
+    sentBy: data.sentBy,
+  });
+
+  const [notif] = await db.select().from(adminNotifications)
+    .orderBy(desc(adminNotifications.id)).limit(1);
+  return notif;
+}
+
+/**
+ * Obtiene las notificaciones de un monedero (para el paciente).
+ */
+export async function getAdminNotificationsByWallet(walletId: number): Promise<AdminNotification[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(adminNotifications)
+    .where(eq(adminNotifications.walletId, walletId))
+    .orderBy(desc(adminNotifications.createdAt));
+}
+
+/**
+ * Cuenta las notificaciones no leídas de un monedero.
+ */
+export async function countUnreadAdminNotifications(walletId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db.select().from(adminNotifications)
+    .where(and(eq(adminNotifications.walletId, walletId), eq(adminNotifications.isRead, false)));
+  return rows.length;
+}
+
+/**
+ * Marca una notificación como leída.
+ */
+export async function markAdminNotificationRead(notifId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(adminNotifications)
+    .set({ isRead: true, readAt: new Date() })
+    .where(eq(adminNotifications.id, notifId));
+}
+
+/**
+ * Marca todas las notificaciones de un monedero como leídas.
+ */
+export async function markAllAdminNotificationsRead(walletId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(adminNotifications)
+    .set({ isRead: true, readAt: new Date() })
+    .where(and(eq(adminNotifications.walletId, walletId), eq(adminNotifications.isRead, false)));
+}
+
+/**
+ * Elimina una notificación admin por id.
+ */
+export async function deleteAdminNotification(notifId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(adminNotifications).where(eq(adminNotifications.id, notifId));
+}
+
+/**
+ * Elimina todas las notificaciones de un monedero.
+ */
+export async function deleteAllAdminNotifications(walletId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(adminNotifications).where(eq(adminNotifications.walletId, walletId));
+}
+
+/**
+ * Crea una notificación automática de cashback acreditado.
+ * amountCents: monto en centavos (igual que el saldo del monedero).
+ */
+export async function sendCashbackNotification(walletId: number, amountCents: number, description: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Obtener patientId del wallet
+  const walletRows = await db.select({ patientId: wallets.patientId }).from(wallets).where(eq(wallets.id, walletId)).limit(1);
+  if (!walletRows.length) return;
+  const patientId = walletRows[0].patientId;
+  const amountFormatted = `$${(amountCents / 100).toFixed(2)}`;
+  await db.insert(adminNotifications).values({
+    walletId,
+    patientId,
+    title: `💰 ¡Cashback acreditado: ${amountFormatted}!`,
+    message: `Se acreditaron ${amountFormatted} a tu Monedero Nutriser. ${description}`,
+    type: 'general',
+    sentBy: 'sistema',
+    isRead: false,
+    createdAt: new Date(),
+  });
 }

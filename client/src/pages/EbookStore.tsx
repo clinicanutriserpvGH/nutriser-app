@@ -37,6 +37,7 @@ export default function EbookStore() {
     { enabled: isLoggedIn && !!patient?.id }
   );
   const walletBalanceEbook = walletQueryEbook.data?.wallet?.balance ?? 0;
+  const walletDataEbook = walletQueryEbook.data?.wallet ?? null;
 
   // Capturar el parámetro de referido desde la URL (?ref=NombreDelReferido)
   const [referredBy, setReferredBy] = useState<string | null>(null);
@@ -152,6 +153,17 @@ export default function EbookStore() {
     setTimeRemaining(900);
   };
 
+  // Mutation para pago completo con monedero
+  const cashPendingMutationEbook = trpcClient.cashPayments.createPending.useMutation({
+    onSuccess: () => {
+      setStep('success');
+    },
+    onError: (err) => {
+      toast.error('Error al registrar: ' + err.message);
+      setIsSubmitting(false);
+    },
+  });
+
   const handleFreeEbookPurchase = async () => {
     if (!ebook) return;
     setIsSubmitting(true);
@@ -175,15 +187,37 @@ export default function EbookStore() {
 
   const handleProofSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!ebook) return;
+
+    // Calcular si el monedero cubre el total
+    const finalPriceCents = Math.round(finalPrice * 100);
+    const walletCoversEbook = useWalletEbook && walletBalanceEbook >= finalPriceCents && finalPriceCents > 0;
+
+    // — Pago completo con Monedero (sin comprobante) —
+    if (walletCoversEbook && walletDataEbook?.id && patient?.id) {
+      setIsSubmitting(true);
+      cashPendingMutationEbook.mutate({
+        walletId: walletDataEbook.id,
+        patientId: patient.id,
+        concept: ebook.title,
+        itemType: 'ebook',
+        itemId: String(ebook.id),
+        amountCents: finalPriceCents,
+        walletAmountUsedCents: finalPriceCents,
+        cashbackPercent: 2,
+        notes: `eBook: ${ebook.title}. Pago completo con saldo del monedero por ${formData.buyerName}. Pendiente de autorización.`,
+      });
+      return;
+    }
+
     if (!selectedFile || !filePreview) {
       toast.error("Por favor sube el comprobante de pago");
       return;
     }
-    if (!ebook) return;
 
     setIsSubmitting(true);
     try {
-      const walletDiscountPesos = useWalletEbook && walletBalanceEbook > 0 ? walletBalanceEbook / 100 : 0;
+      const walletDiscountPesos = useWalletEbook && walletBalanceEbook > 0 ? Math.min(walletBalanceEbook, finalPriceCents) / 100 : 0;
       const result = await purchaseMutation.mutateAsync({
         ebookId: ebook.id,
         buyerName: formData.buyerName,
@@ -646,66 +680,104 @@ export default function EbookStore() {
                 </div>
 
                 {/* Monedero Nutriser */}
-                {isLoggedIn && walletBalanceEbook > 0 && (
-                  <div className={`border rounded-xl p-3 mb-4 transition-all ${useWalletEbook ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={useWalletEbook}
-                        onChange={(e) => setUseWalletEbook(e.target.checked)}
-                        className="w-4 h-4 accent-[#C5A55A]"
-                      />
-                      <Wallet className="w-5 h-5 text-[#C5A55A]" />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
-                        <p className="text-xs text-gray-500">Saldo: <span className="font-bold text-[#C5A55A]">${(walletBalanceEbook / 100).toFixed(2)} MXN</span></p>
-                      </div>
-                    </label>
-                    {useWalletEbook && (
-                      <div className="mt-2 pt-2 border-t border-gray-200">
-                        <p className="text-xs text-green-600 font-semibold">Se descontarán ${(walletBalanceEbook / 100).toFixed(2)} MXN de tu monedero al enviar</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* File Upload */}
-                <form onSubmit={handleProofSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Comprobante de pago *</label>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="cursor-pointer border-2 border-dashed border-[#C5A55A]/30 rounded-xl p-6 text-center hover:border-[#C5A55A] transition"
-                    >
-                      {filePreview ? (
-                        <div>
-                          <img src={filePreview} alt="Preview" className="max-h-48 mx-auto rounded-lg mb-2 object-contain" />
-                          <p className="text-sm text-[#C5A55A] font-medium">Cambiar imagen</p>
+                {isLoggedIn && walletBalanceEbook > 0 && (() => {
+                  const finalPriceCentsUI = Math.round(finalPrice * 100);
+                  const walletCoversUI = useWalletEbook && walletBalanceEbook >= finalPriceCentsUI && finalPriceCentsUI > 0;
+                  return (
+                    <div className={`border rounded-xl p-3 mb-4 transition-all ${useWalletEbook ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={useWalletEbook}
+                          onChange={(e) => setUseWalletEbook(e.target.checked)}
+                          className="w-4 h-4 accent-[#C5A55A]"
+                        />
+                        <Wallet className="w-5 h-5 text-[#C5A55A]" />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
+                          <p className="text-xs text-gray-500">Saldo disponible: <span className="font-bold text-[#C5A55A]">${(walletBalanceEbook / 100).toFixed(2)} MXN</span></p>
                         </div>
-                      ) : (
-                        <div>
-                          <Upload className="w-10 h-10 text-[#C5A55A] mx-auto mb-3" />
-                          <p className="font-semibold text-[#1A1A1A]">Sube la foto del comprobante</p>
-                          <p className="text-sm text-[#999] mt-1">PNG, JPG o WEBP (máx 10MB)</p>
+                      </label>
+                      {useWalletEbook && (
+                        <div className="mt-2 pt-2 border-t border-gray-200 space-y-1">
+                          {walletCoversUI ? (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                              <p className="text-xs text-green-700 font-bold">💰 Tu saldo cubre el total — ¡Sin comprobante!</p>
+                              <p className="text-[10px] text-green-600 mt-0.5">La compra quedará pendiente de autorización del administrador.</p>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-green-600 font-semibold">Se descontarán ${(Math.min(walletBalanceEbook, finalPriceCentsUI) / 100).toFixed(2)} MXN de tu monedero al enviar</p>
+                          )}
                         </div>
                       )}
                     </div>
-                  </div>
+                  );
+                })()}
 
-                  <button
-                    type="submit"
-                    disabled={!selectedFile || isSubmitting}
-                    className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-4 rounded-xl font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? "Enviando..." : "Enviar comprobante"}
-                  </button>
+                {/* File Upload — solo si el monedero no cubre el total */}
+                <form onSubmit={handleProofSubmit} className="space-y-4">
+                  {(() => {
+                    const finalPriceCentsBtn = Math.round(finalPrice * 100);
+                    const walletCoversBtn = useWalletEbook && walletBalanceEbook >= finalPriceCentsBtn && finalPriceCentsBtn > 0;
+                    if (walletCoversBtn) return null;
+                    return (
+                      <div>
+                        <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Comprobante de pago *</label>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                        <div
+                          onClick={() => fileInputRef.current?.click()}
+                          className="cursor-pointer border-2 border-dashed border-[#C5A55A]/30 rounded-xl p-6 text-center hover:border-[#C5A55A] transition"
+                        >
+                          {filePreview ? (
+                            <div>
+                              <img src={filePreview} alt="Preview" className="max-h-48 mx-auto rounded-lg mb-2 object-contain" />
+                              <p className="text-sm text-[#C5A55A] font-medium">Cambiar imagen</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <Upload className="w-10 h-10 text-[#C5A55A] mx-auto mb-3" />
+                              <p className="font-semibold text-[#1A1A1A]">Sube la foto del comprobante</p>
+                              <p className="text-sm text-[#999] mt-1">PNG, JPG o WEBP (áx 10MB)</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {(() => {
+                    const finalPriceCentsSubmit = Math.round(finalPrice * 100);
+                    const walletCoversSubmit = useWalletEbook && walletBalanceEbook >= finalPriceCentsSubmit && finalPriceCentsSubmit > 0;
+                    return (
+                      <button
+                        type="submit"
+                        disabled={(!walletCoversSubmit && !selectedFile) || isSubmitting}
+                        className={`w-full text-white py-4 rounded-xl font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          walletCoversSubmit ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#C5A55A] hover:bg-[#B8963E]'
+                        }`}
+                      >
+                        {isSubmitting
+                          ? 'Enviando...'
+                          : walletCoversSubmit
+                            ? '💰 Solicitar compra con saldo del monedero'
+                            : 'Enviar comprobante'
+                        }
+                      </button>
+                    );
+                  })()}
+                  {(() => {
+                    const finalPriceCentsNote = Math.round(finalPrice * 100);
+                    const walletCoversNote = useWalletEbook && walletBalanceEbook >= finalPriceCentsNote && finalPriceCentsNote > 0;
+                    return walletCoversNote ? (
+                      <p className="text-xs text-gray-400 text-center">El administrador autorizará el descuento de tu saldo y confirmará la compra</p>
+                    ) : null;
+                  })()}
                 </form>
               </div>
             </div>

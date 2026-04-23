@@ -46,6 +46,7 @@ export default function CouponPage() {
   // Monedero Nutriser
   const [useWallet, setUseWallet] = useState(false);
   const [walletAmount, setWalletAmount] = useState(0);
+  const [walletUsedForFull, setWalletUsedForFull] = useState(false); // true cuando el monedero cubre el total
   const walletQuery = trpc.wallet.getMyWallet.useQuery(
     { patientId: patient?.id || 0 },
     { enabled: isLoggedIn && !!patient?.id && showPaymentFlow }
@@ -68,9 +69,14 @@ export default function CouponPage() {
     },
   });
   const cashPendingMutation = trpc.cashPayments.createPending.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       setPayStep('done');
-      toast.success('¡Pendiente de pago en efectivo registrado en tu monedero!');
+      const isFullWallet = vars.walletAmountUsedCents && vars.walletAmountUsedCents >= vars.amountCents;
+      if (isFullWallet) {
+        toast.success('✅ Solicitud registrada. El administrador autorizará tu compra con saldo del monedero.');
+      } else {
+        toast.success('¡Pendiente de pago en efectivo registrado en tu monedero!');
+      }
     },
     onError: (e) => {
       setPayStep('form');
@@ -117,17 +123,38 @@ export default function CouponPage() {
     }
     if (!promo) return;
 
-    // — Pago en Efectivo —
+    // Calcular precio numérico del cupón
+    const rawPrice = promo.price || '';
+    const numericPricePesos = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
+    const numericPriceCents = Math.round(numericPricePesos * 100);
+    const walletUsedCents = useWallet && walletAmount > 0 ? Math.min(walletAmount, numericPriceCents) : 0;
+    const remainingCents = Math.max(0, numericPriceCents - walletUsedCents);
+
+    // — Pago completo con Monedero (sin comprobante) —
+    if (walletUsedCents >= numericPriceCents && numericPriceCents > 0 && walletData?.id && patient?.id) {
+      setWalletUsedForFull(true);
+      setPayStep('uploading');
+      cashPendingMutation.mutate({
+        walletId: walletData.id,
+        patientId: patient.id,
+        concept: promo.title,
+        itemType: 'promotion',
+        itemId: String(promo.id),
+        amountCents: numericPriceCents,
+        walletAmountUsedCents: numericPriceCents,
+        cashbackPercent: 2,
+        notes: `Cupón: ${promo.title}. Pago completo con saldo del monedero solicitado por ${payName}. Pendiente de autorización del administrador.`,
+      });
+      return;
+    }
+
+    // — Pago en Efectivo (con o sin descuento de monedero) —
     if (paymentMethod === 'cash') {
       if (!walletData?.id || !patient?.id) {
         toast.error('Necesitas un monedero activo para pagar en efectivo.');
         return;
       }
-      const rawPrice = promo.price || '';
-      const numericPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
-      const walletDeductPesos = useWallet && walletAmount > 0 ? walletAmount / 100 : 0;
-      const finalAmount = Math.max(0, numericPrice - walletDeductPesos);
-      if (finalAmount <= 0) {
+      if (remainingCents <= 0) {
         toast.error('El monedero ya cubre el total. No es necesario pago en efectivo.');
         return;
       }
@@ -138,7 +165,8 @@ export default function CouponPage() {
         concept: promo.title,
         itemType: 'promotion',
         itemId: String(promo.id),
-        amountCents: Math.round(finalAmount * 100),
+        amountCents: remainingCents,
+        walletAmountUsedCents: walletUsedCents,
         cashbackPercent: 2,
         notes: `Cupón: ${promo.title}. Pago en efectivo solicitado por ${payName}.`,
       });
@@ -382,10 +410,22 @@ export default function CouponPage() {
                       {payStep === 'done' ? (
                         <div className="text-center py-6">
                           <CheckCircle className="w-14 h-14 text-green-500 mx-auto mb-3" />
-                          <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">¡Comprobante enviado!</h3>
-                          <p className="text-gray-500 text-sm mb-2">El equipo Nutriser verificará tu pago y te confirmará por WhatsApp.</p>
+                          {useWallet && walletUsedForFull ? (
+                            <>
+                              <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">¡Solicitud registrada!</h3>
+                              <p className="text-gray-500 text-sm mb-2">Tu solicitud de pago con saldo del monedero fue registrada. El administrador la autorizará y recibirás confirmación por WhatsApp.</p>
+                              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-3">
+                                <p className="text-amber-700 text-xs font-semibold">💰 Saldo a descontar: ${(walletAmount / 100).toFixed(2)} MXN</p>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">¡Comprobante enviado!</h3>
+                              <p className="text-gray-500 text-sm mb-2">El equipo Nutriser verificará tu pago y te confirmará por WhatsApp.</p>
+                            </>
+                          )}
                           <p className="text-[#C5A55A] font-semibold text-sm">📞 322 450 3257</p>
-                          <Button className="mt-5 bg-[#C5A55A] hover:bg-[#B8963E] text-white" onClick={() => { setShowPaymentFlow(false); setPayStep('form'); }}>
+                          <Button className="mt-5 bg-[#C5A55A] hover:bg-[#B8963E] text-white" onClick={() => { setShowPaymentFlow(false); setPayStep('form'); setWalletUsedForFull(false); }}>
                             Cerrar
                           </Button>
                         </div>
@@ -417,37 +457,50 @@ export default function CouponPage() {
                           </div>
 
                           {/* Monedero Nutriser */}
-                          {isLoggedIn && walletBalance > 0 && (
-                            <div className="mb-4">
-                              <div className={`border rounded-xl p-3 transition-all ${useWallet ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                  <input
-                                    type="checkbox"
-                                    checked={useWallet}
-                                    onChange={(e) => {
-                                      setUseWallet(e.target.checked);
-                                      if (e.target.checked) {
-                                        setWalletAmount(walletBalance);
-                                      } else {
-                                        setWalletAmount(0);
-                                      }
-                                    }}
-                                    className="w-4 h-4 accent-[#C5A55A]"
-                                  />
-                                  <Wallet className="w-5 h-5 text-[#C5A55A]" />
-                                  <div className="flex-1">
-                                    <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
-                                    <p className="text-xs text-gray-500">Saldo: <span className="font-bold text-[#C5A55A]">${(walletBalance / 100).toFixed(2)} MXN</span></p>
-                                  </div>
-                                </label>
-                                {useWallet && (
-                                  <div className="mt-2 pt-2 border-t border-gray-200">
-                                    <p className="text-xs text-green-600 font-semibold">Se aplicará descuento de ${(walletAmount / 100).toFixed(2)} MXN de tu monedero</p>
-                                  </div>
-                                )}
+                          {(() => {
+                            const rawPriceForWallet = promo.price || '';
+                            const numericPriceForWallet = parseFloat(rawPriceForWallet.replace(/[^0-9.]/g, '')) || 0;
+                            const numericPriceCentsForWallet = Math.round(numericPriceForWallet * 100);
+                            const walletCoversTotal = useWallet && walletBalance >= numericPriceCentsForWallet && numericPriceCentsForWallet > 0;
+                            return isLoggedIn && walletBalance > 0 ? (
+                              <div className="mb-4">
+                                <div className={`border rounded-xl p-3 transition-all ${useWallet ? 'border-[#C5A55A] bg-amber-50/50' : 'border-gray-200 bg-gray-50'}`}>
+                                  <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={useWallet}
+                                      onChange={(e) => {
+                                        setUseWallet(e.target.checked);
+                                        if (e.target.checked) {
+                                          setWalletAmount(walletBalance);
+                                        } else {
+                                          setWalletAmount(0);
+                                        }
+                                      }}
+                                      className="w-4 h-4 accent-[#C5A55A]"
+                                    />
+                                    <Wallet className="w-5 h-5 text-[#C5A55A]" />
+                                    <div className="flex-1">
+                                      <p className="text-sm font-semibold text-gray-800">Usar saldo del monedero</p>
+                                      <p className="text-xs text-gray-500">Saldo disponible: <span className="font-bold text-[#C5A55A]">${(walletBalance / 100).toFixed(2)} MXN</span></p>
+                                    </div>
+                                  </label>
+                                  {useWallet && (
+                                    <div className="mt-2 pt-2 border-t border-gray-200 space-y-1">
+                                      {walletCoversTotal ? (
+                                        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                                          <p className="text-xs text-green-700 font-bold">💰 Tu saldo cubre el total — ¡Sin comprobante!</p>
+                                          <p className="text-[10px] text-green-600 mt-0.5">La compra quedará pendiente de autorización del administrador.</p>
+                                        </div>
+                                      ) : (
+                                        <p className="text-xs text-green-600 font-semibold">Se aplicará descuento de ${(Math.min(walletBalance, numericPriceCentsForWallet) / 100).toFixed(2)} MXN de tu monedero</p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            ) : null;
+                          })()}
 
                           {/* Selector de método de pago */}
                           <div className="mb-4">
@@ -517,8 +570,14 @@ export default function CouponPage() {
                             );
                           })()}
 
-                          {/* Subir comprobante — solo si es transferencia */}
-                          {paymentMethod === 'transfer' && <div className="mb-4">
+                          {/* Subir comprobante — solo si es transferencia Y el monedero no cubre el total */}
+                          {paymentMethod === 'transfer' && (() => {
+                            const rawPriceBtn = promo.price || '';
+                            const numericPriceBtn = parseFloat(rawPriceBtn.replace(/[^0-9.]/g, '')) || 0;
+                            const numericPriceCentsBtn = Math.round(numericPriceBtn * 100);
+                            const walletCoversBtn = useWallet && walletBalance >= numericPriceCentsBtn && numericPriceCentsBtn > 0;
+                            return !walletCoversBtn;
+                          })() && <div className="mb-4">
                             <p className="text-sm font-semibold text-[#1A1A1A] mb-2">Comprobante de pago *</p>
                             <button
                               onClick={() => payProofRef.current?.click()}
@@ -545,29 +604,47 @@ export default function CouponPage() {
                             />
                           </div>}
 
-                          <Button
-                            onClick={handleSubmitPayment}
-                            disabled={payStep === 'uploading' || !payName || !payPhone || (paymentMethod === 'transfer' && !payProofFile)}
-                            className={`w-full text-white font-bold py-3 ${
-                              paymentMethod === 'cash'
-                                ? 'bg-green-600 hover:bg-green-700'
-                                : 'bg-[#C5A55A] hover:bg-[#B8963E]'
-                            }`}
-                          >
-                            {payStep === 'uploading' ? (
-                              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Procesando...</>
-                            ) : paymentMethod === 'cash' ? (
-                              '💵 Registrar pago en efectivo'
-                            ) : (
-                              '📤 Enviar comprobante de pago'
-                            )}
-                          </Button>
-                          <p className="text-xs text-gray-400 text-center mt-2">
-                            {paymentMethod === 'cash'
-                              ? 'El admin confirmará tu pago al escanear tu monedero en clínica'
-                              : 'El equipo Nutriser verificará tu pago y te confirmará por WhatsApp'
-                            }
-                          </p>
+                          {/* Botón de envío — adaptado al método de pago */}
+                          {(() => {
+                            const rawPriceSubmit = promo.price || '';
+                            const numericPriceSubmit = parseFloat(rawPriceSubmit.replace(/[^0-9.]/g, '')) || 0;
+                            const numericPriceCentsSubmit = Math.round(numericPriceSubmit * 100);
+                            const walletCoversSubmit = useWallet && walletBalance >= numericPriceCentsSubmit && numericPriceCentsSubmit > 0;
+                            const needsProof = paymentMethod === 'transfer' && !walletCoversSubmit && !payProofFile;
+                            return (
+                              <>
+                                <Button
+                                  onClick={handleSubmitPayment}
+                                  disabled={payStep === 'uploading' || !payName || !payPhone || needsProof}
+                                  className={`w-full text-white font-bold py-3 ${
+                                    walletCoversSubmit
+                                      ? 'bg-amber-600 hover:bg-amber-700'
+                                      : paymentMethod === 'cash'
+                                        ? 'bg-green-600 hover:bg-green-700'
+                                        : 'bg-[#C5A55A] hover:bg-[#B8963E]'
+                                  }`}
+                                >
+                                  {payStep === 'uploading' ? (
+                                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Procesando...</>
+                                  ) : walletCoversSubmit ? (
+                                    '💰 Solicitar compra con saldo del monedero'
+                                  ) : paymentMethod === 'cash' ? (
+                                    '💵 Registrar pago en efectivo'
+                                  ) : (
+                                    '📤 Enviar comprobante de pago'
+                                  )}
+                                </Button>
+                                <p className="text-xs text-gray-400 text-center mt-2">
+                                  {walletCoversSubmit
+                                    ? 'El administrador autorizará el descuento de tu saldo y confirmará la compra'
+                                    : paymentMethod === 'cash'
+                                      ? 'El admin confirmará tu pago al escanear tu monedero en clínica'
+                                      : 'El equipo Nutriser verificará tu pago y te confirmará por WhatsApp'
+                                  }
+                                </p>
+                              </>
+                            );
+                          })()}
                         </>
                       )}
                     </div>

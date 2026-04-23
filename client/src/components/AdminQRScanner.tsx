@@ -11,8 +11,9 @@ import { toast } from "sonner";
 import {
   QrCode, Camera, User, Wallet, ShoppingBag,
   Package, Sparkles, Check, ArrowLeft, Loader2,
-  Search, CreditCard, DollarSign, X, Trash2,
+  Search, CreditCard, DollarSign, X, Trash2, AlertTriangle,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 type Step = "scan" | "patient" | "select" | "confirm" | "done";
 type ItemType = "service" | "package" | "product";
@@ -151,6 +152,19 @@ export default function AdminQRScanner() {
   });
   // Estado para confirmar reinicio (doble confirmación)
   const [confirmReset, setConfirmReset] = useState(false);
+
+  // ─── Modal de contraseña de seguridad ─────────────────────────────
+  const [securityModal, setSecurityModal] = useState<{
+    open: boolean;
+    title: string;
+    description?: string;
+    onConfirm: (password: string) => void;
+  }>({ open: false, title: '', onConfirm: () => {} });
+
+  const openSecurityModal = (title: string, description: string, onConfirm: (password: string) => void) => {
+    setSecurityModal({ open: true, title, description, onConfirm });
+  };
+  const closeSecurityModal = () => setSecurityModal(prev => ({ ...prev, open: false }));
 
   // Query para historial de compras del paciente (para que el admin pueda borrarlas)
   const [patientIdForHistory, setPatientIdForHistory] = useState<number | null>(null);
@@ -321,6 +335,23 @@ export default function AdminQRScanner() {
   // ─── Render ───────────────────────────────────────────────────
   return (
     <div className="space-y-4">
+      {/* Modal de contraseña de seguridad */}
+      <Dialog open={securityModal.open} onOpenChange={(o) => { if (!o) closeSecurityModal(); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="w-5 h-5" />
+              {securityModal.title}
+            </DialogTitle>
+          </DialogHeader>
+          {securityModal.description && <p className="text-sm text-gray-600">{securityModal.description}</p>}
+          <SecurityPasswordInputInline
+            onConfirm={(pw: string) => { securityModal.onConfirm(pw); closeSecurityModal(); }}
+            onCancel={closeSecurityModal}
+          />
+        </DialogContent>
+      </Dialog>
+
       {/* Step indicator */}
       <div className="flex items-center gap-2 text-xs text-gray-500">
         {(["Escanear", "Paciente", "Seleccionar", "Confirmar"] as const).map((label, i) => {
@@ -711,7 +742,11 @@ export default function AdminQRScanner() {
                           : '—'}
                       </p>
                       <button
-                        onClick={() => removeDiscountMutation.mutate({ walletNumber })}
+                        onClick={() => openSecurityModal(
+                          'Quitar Descuento',
+                          `¿Quitar el descuento del ${patientQuery.data?.discountPercent}% del monedero de ${patientQuery.data?.patientName}?`,
+                          (pw) => removeDiscountMutation.mutate({ walletNumber, adminPassword: pw })
+                        )}
                         disabled={removeDiscountMutation.isPending}
                         className="w-full py-2 rounded-lg bg-red-100 text-red-700 text-xs font-bold hover:bg-red-200 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
                       >
@@ -742,7 +777,11 @@ export default function AdminQRScanner() {
                       </div>
                       {selectedDiscount && (
                         <button
-                          onClick={() => setDiscountMutation.mutate({ walletNumber, discountPercent: selectedDiscount })}
+                          onClick={() => openSecurityModal(
+                            'Activar Descuento',
+                            `¿Activar un descuento del ${selectedDiscount}% al monedero de ${patientQuery.data?.patientName}?`,
+                            (pw) => setDiscountMutation.mutate({ walletNumber, discountPercent: selectedDiscount!, adminPassword: pw })
+                          )}
                           disabled={setDiscountMutation.isPending}
                           className="w-full py-2 rounded-lg bg-[#C5A55A] text-white text-xs font-bold hover:bg-[#b8963f] disabled:opacity-50 transition-all flex items-center justify-center gap-1"
                         >
@@ -767,10 +806,11 @@ export default function AdminQRScanner() {
                   {/* Dar de Baja / Alta */}
                   {patientQuery.data?.isActive ? (
                     <button
-                      onClick={() => {
-                        if (window.confirm(`¿Dar de BAJA el monedero de ${patientQuery.data?.patientName}?\n\nEl paciente no podrá usar su monedero hasta que lo reactives. Sus datos y saldo se conservan.`))
-                          suspendWalletMutation.mutate({ walletNumber });
-                      }}
+                      onClick={() => openSecurityModal(
+                        'Dar de Baja',
+                        `¿Suspender el monedero de ${patientQuery.data?.patientName}? El paciente no podrá usarlo hasta que lo reactives.`,
+                        (pw) => suspendWalletMutation.mutate({ walletNumber, adminPassword: pw })
+                      )}
                       disabled={suspendWalletMutation.isPending}
                       className="w-full py-2 rounded-lg bg-orange-100 text-orange-700 text-xs font-bold hover:bg-orange-200 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
                     >
@@ -782,7 +822,11 @@ export default function AdminQRScanner() {
                     </button>
                   ) : (
                     <button
-                      onClick={() => unsuspendWalletMutation.mutate({ walletNumber })}
+                      onClick={() => openSecurityModal(
+                        'Dar de Alta',
+                        `¿Reactivar el monedero de ${patientQuery.data?.patientName}?`,
+                        (pw) => unsuspendWalletMutation.mutate({ walletNumber, adminPassword: pw })
+                      )}
                       disabled={unsuspendWalletMutation.isPending}
                       className="w-full py-2 rounded-lg bg-green-100 text-green-700 text-xs font-bold hover:bg-green-200 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
                     >
@@ -819,7 +863,11 @@ export default function AdminQRScanner() {
                             const session = sessionStorage.getItem('adminSession');
                             let adminEmail = 'admin';
                             try { adminEmail = JSON.parse(session || '{}').email || 'admin'; } catch {}
-                            resetWalletMutation.mutate({ walletNumber, adminEmail });
+                            openSecurityModal(
+                              '⚠️ Reiniciar Monedero',
+                              `ADVERTENCIA: Esto pondrá saldo, cashback y canjeado en $0.00 del monedero de ${patientQuery.data?.patientName}. No se puede deshacer.`,
+                              (pw) => resetWalletMutation.mutate({ walletNumber, adminEmail, adminPassword: pw })
+                            );
                           }}
                           disabled={resetWalletMutation.isPending}
                           className="flex-1 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
@@ -1133,6 +1181,37 @@ export default function AdminQRScanner() {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+// Componente interno para ingresar la contraseña de seguridad
+function SecurityPasswordInputInline({ onConfirm, onCancel }: { onConfirm: (pw: string) => void; onCancel: () => void }) {
+  const [password, setPassword] = useState("");
+  return (
+    <div className="space-y-3">
+      <div>
+        <label className="text-xs font-semibold text-gray-600 mb-1 block">Contraseña de seguridad</label>
+        <Input
+          type="password"
+          placeholder="Ingresa la contraseña..."
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && password.trim() && onConfirm(password.trim())}
+          autoFocus
+        />
+      </div>
+      <DialogFooter className="gap-2">
+        <Button variant="outline" size="sm" onClick={onCancel}>Cancelar</Button>
+        <Button
+          size="sm"
+          disabled={!password.trim()}
+          onClick={() => { if (password.trim()) onConfirm(password.trim()); }}
+          className="bg-red-600 hover:bg-red-700 text-white"
+        >
+          Confirmar
+        </Button>
+      </DialogFooter>
     </div>
   );
 }

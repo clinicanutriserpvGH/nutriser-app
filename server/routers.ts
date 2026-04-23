@@ -16,6 +16,7 @@ import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, creat
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet, getCashPendingPaymentById } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
+import { createInstallmentPlan, confirmInstallmentPayment, getInstallmentPlansByWallet, getAllInstallmentPlans, sendAdminNotification, getAdminNotificationsByWallet, countUnreadAdminNotifications, markAdminNotificationRead, markAllAdminNotificationsRead, deleteAdminNotification, deleteAllAdminNotifications, sendCashbackNotification } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest, deleteBannerInterest } from './db';
 import { getSystemConfig, setSystemConfig } from './db';
@@ -2881,8 +2882,11 @@ export const appRouter = router({
         description: z.string(),
         referenceType: z.string().optional(),
         referenceId: z.number().optional(),
+        adminPassword: z.string(),
       }))
       .mutation(async ({ input }) => {
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const walletCheck = await getWalletById(input.walletId);
         if (!walletCheck) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         if (!walletCheck.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de operar.' });
@@ -2904,8 +2908,11 @@ export const appRouter = router({
         walletId: z.number(),
         amount: z.number(), // puede ser positivo o negativo
         description: z.string(),
+        adminPassword: z.string(),
       }))
       .mutation(async ({ input }) => {
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const walletCheck = await getWalletById(input.walletId);
         if (!walletCheck) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         if (!walletCheck.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de operar.' });
@@ -3148,8 +3155,11 @@ export const appRouter = router({
       .input(z.object({
         walletNumber: z.string(),
         discountPercent: z.union([z.literal(10), z.literal(15), z.literal(20), z.literal(25), z.literal(30)]),
+        adminPassword: z.string(),
       }))
       .mutation(async ({ input }) => {
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await setWalletDiscount(wallet.id, input.discountPercent);
@@ -3157,8 +3167,10 @@ export const appRouter = router({
       }),
     // Desactivar descuento en monedero (solo admin)
     adminRemoveDiscount: publicProcedure
-      .input(z.object({ walletNumber: z.string() }))
+      .input(z.object({ walletNumber: z.string(), adminPassword: z.string() }))
       .mutation(async ({ input }) => {
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await removeWalletDiscount(wallet.id);
@@ -3166,8 +3178,10 @@ export const appRouter = router({
       }),
     // Reiniciar monedero (solo admin) — pone balance, cashback y canjeado en 0
     adminResetWallet: publicProcedure
-      .input(z.object({ walletNumber: z.string(), adminEmail: z.string() }))
+      .input(z.object({ walletNumber: z.string(), adminEmail: z.string(), adminPassword: z.string() }))
       .mutation(async ({ input }) => {
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await adminResetWallet(wallet.id, input.adminEmail);
@@ -3175,8 +3189,10 @@ export const appRouter = router({
       }),
     // Dar de baja monedero (solo admin) — suspende sin borrar datos
     adminSuspendWallet: publicProcedure
-      .input(z.object({ walletNumber: z.string() }))
+      .input(z.object({ walletNumber: z.string(), adminPassword: z.string() }))
       .mutation(async ({ input }) => {
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await adminSuspendWallet(wallet.id);
@@ -3184,8 +3200,10 @@ export const appRouter = router({
       }),
     // Dar de alta monedero (solo admin) — reactiva un monedero suspendido
     adminUnsuspendWallet: publicProcedure
-      .input(z.object({ walletNumber: z.string() }))
+      .input(z.object({ walletNumber: z.string(), adminPassword: z.string() }))
       .mutation(async ({ input }) => {
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await adminUnsuspendWallet(wallet.id);
@@ -3793,6 +3811,171 @@ export const appRouter = router({
         // Marcar solicitud como atendida
         await attendBannerInterest(input.interestId, input.adminNotes);
         return { success: true };
+      }),
+  }),
+
+  // ============================================================
+  // ROUTER: PAGOS A PLAZOS
+  // ============================================================
+  installments: router({
+    create: publicProcedure
+      .input(z.object({
+        walletNumber: z.string(),
+        concept: z.string().min(1),
+        originalAmount: z.number().positive(),
+        modalidad: z.enum(['quincenal', 'semanal']),
+        adminEmail: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        if (!wallet.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja' });
+        const originalAmountCents = Math.round(input.originalAmount * 100);
+        const plan = await createInstallmentPlan({
+          walletId: wallet.id,
+          patientId: wallet.patientId,
+          concept: input.concept,
+          originalAmountCents,
+          modalidad: input.modalidad,
+          createdBy: input.adminEmail,
+        });
+        // SIN cashback — los pagos a plazos no acumulan
+        return { success: true, plan };
+      }),
+
+    confirmPayment: publicProcedure
+      .input(z.object({
+        paymentId: z.number(),
+        adminEmail: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        await confirmInstallmentPayment(input.paymentId, input.adminEmail);
+        return { success: true };
+      }),
+
+    adminListAll: publicProcedure
+      .query(async () => {
+        return await getAllInstallmentPlans();
+      }),
+
+    getMyPlans: publicProcedure
+      .input(z.object({ walletNumber: z.string() }))
+      .query(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) return [];
+        return await getInstallmentPlansByWallet(wallet.id);
+      }),
+  }),
+
+  // ============================================================
+  // ROUTER: NOTIFICACIONES ADMIN → PACIENTE
+  // ============================================================
+  adminNotifs: router({
+    send: publicProcedure
+      .input(z.object({
+        walletNumber: z.string(),
+        title: z.string().min(1).max(255),
+        message: z.string().min(1),
+        imageUrl: z.string().url().optional(),
+        type: z.enum(['cobro', 'promocion', 'felicitacion', 'general']),
+        adminEmail: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        const notif = await sendAdminNotification({
+          walletId: wallet.id,
+          patientId: wallet.patientId,
+          title: input.title,
+          message: input.message,
+          imageUrl: input.imageUrl,
+          type: input.type,
+          sentBy: input.adminEmail,
+        });
+        try {
+          // sendPushToPatient requiere pushSubscriptionJson, no patientId
+          // Se omite push aquí — se puede implementar con lookup de suscripción si se necesita
+        } catch (_) { /* push es opcional */ }
+        return { success: true, notif };
+      }),
+
+    sendByWalletId: publicProcedure
+      .input(z.object({
+        walletId: z.number(),
+        title: z.string().min(1).max(255),
+        message: z.string().min(1),
+        imageUrl: z.string().url().optional(),
+        type: z.enum(['cobro', 'promocion', 'felicitacion', 'general']),
+        adminEmail: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletById(input.walletId);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        const notif = await sendAdminNotification({
+          walletId: wallet.id,
+          patientId: wallet.patientId,
+          title: input.title,
+          message: input.message,
+          imageUrl: input.imageUrl,
+          type: input.type,
+          sentBy: input.adminEmail,
+        });
+        try {
+          // sendPushToPatient requiere pushSubscriptionJson — se puede implementar con lookup
+        } catch (_) { /* push es opcional */ }
+        return { success: true, notif };
+      }),
+
+    getMyNotifs: publicProcedure
+      .input(z.object({ walletNumber: z.string() }))
+      .query(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) return [];
+        return await getAdminNotificationsByWallet(wallet.id);
+      }),
+
+    countUnread: publicProcedure
+      .input(z.object({ walletNumber: z.string() }))
+      .query(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) return 0;
+        return await countUnreadAdminNotifications(wallet.id);
+      }),
+
+    markRead: publicProcedure
+      .input(z.object({ notifId: z.number() }))
+      .mutation(async ({ input }) => {
+        await markAdminNotificationRead(input.notifId);
+        return { success: true };
+      }),
+
+    markAllRead: publicProcedure
+      .input(z.object({ walletNumber: z.string() }))
+      .mutation(async ({ input }) => {
+        const wallet = await getWalletByNumber(input.walletNumber);
+        if (!wallet) return { success: false };
+        await markAllAdminNotificationsRead(wallet.id);
+        return { success: true };
+      }),
+
+    deleteNotif: publicProcedure
+      .input(z.object({ notifId: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteAdminNotification(input.notifId);
+        return { success: true };
+      }),
+
+    deleteAllNotifs: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteAllAdminNotifications(input.walletId);
+        return { success: true };
+      }),
+
+    getByWalletId: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .query(async ({ input }) => {
+        return await getAdminNotificationsByWallet(input.walletId);
       }),
   }),
 });

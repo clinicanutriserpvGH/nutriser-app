@@ -2018,3 +2018,16 @@
 - [x] Pestaña "Aparador Tienda Principal" agregada en AdminDashboard.tsx
 - [x] Carrusel de Memberships conectado a storeBanners de BD (si hay banners activos, los usa; si no, usa los estáticos)
 - [x] Banners automáticos de paquetes aparecen en el aparador admin como entradas gestionables (activar/desactivar)
+
+## Sesión 27 - Pago Completo con Monedero (Sin Comprobante)
+
+- [x] CouponPage.tsx: cuando el saldo del monedero cubre el total, no se pide comprobante
+- [x] CouponPage.tsx: la compra queda como cashPayment pendiente con walletAmountUsedCents = total
+- [x] CouponPage.tsx: UI muestra "Tu saldo cubre el total — ¡Sin comprobante!" al activar monedero
+- [x] CouponPage.tsx: botón cambia a "Solicitar compra con saldo del monedero" cuando aplica
+- [x] CouponPage.tsx: pantalla de éxito diferenciada para pago con monedero vs comprobante
+- [x] EbookStore.tsx: misma lógica de pago completo con monedero sin comprobante
+- [x] EbookStore.tsx: UI actualizada con indicador de cobertura total del monedero
+- [x] Memberships.tsx: ya tenía fullyCoveredByWallet implementado (verificado)
+- [x] Flujo: pago con monedero crea cashPayment pendiente → admin autoriza → saldo se descuenta
+- [x] 0 errores TypeScript en todo el proyecto

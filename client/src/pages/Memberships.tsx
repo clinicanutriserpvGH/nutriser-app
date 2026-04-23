@@ -14,7 +14,7 @@ import {
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
   Search, ArrowLeft, Upload, BookOpen, User, LogOut,
   Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList, Globe,
-  Info, Clock, Tag as TagIcon, DollarSign, PersonStanding, ScanFace, Smile,
+  Info, Clock, Tag as TagIcon, DollarSign, PersonStanding, ScanFace, Smile, Bell,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useWishlist } from "@/hooks/useWishlist";

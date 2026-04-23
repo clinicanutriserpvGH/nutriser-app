@@ -964,3 +964,72 @@ export const systemConfig = mysqlTable("systemConfig", {
 });
 export type SystemConfig = typeof systemConfig.$inferSelect;
 export type InsertSystemConfig = typeof systemConfig.$inferInsert;
+
+// ============================================================
+// PAGOS A PLAZOS (INSTALLMENT PLANS)
+// ============================================================
+/**
+ * Plan de pago a plazos creado por el admin al registrar una venta.
+ * Modalidades: 2 pagos quincenales (+10%) o 4 pagos semanales (+15%).
+ */
+export const installmentPlans = mysqlTable("installmentPlans", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("walletId").notNull(),
+  patientId: int("patientId").notNull(),
+  concept: varchar("concept", { length: 255 }).notNull(),
+  originalAmountCents: int("originalAmountCents").notNull(),
+  totalAmountCents: int("totalAmountCents").notNull(),
+  surchargePercent: int("surchargePercent").notNull(),
+  modalidad: mysqlEnum("modalidad", ["quincenal", "semanal"]).notNull(),
+  totalInstallments: int("totalInstallments").notNull(),
+  paidInstallments: int("paidInstallments").default(0).notNull(),
+  status: mysqlEnum("status", ["active", "completed", "cancelled"]).default("active").notNull(),
+  createdBy: varchar("createdBy", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type InstallmentPlan = typeof installmentPlans.$inferSelect;
+export type InsertInstallmentPlan = typeof installmentPlans.$inferInsert;
+
+/**
+ * Pagos individuales dentro de un plan a plazos.
+ */
+export const installmentPayments = mysqlTable("installmentPayments", {
+  id: int("id").autoincrement().primaryKey(),
+  planId: int("planId").notNull(),
+  walletId: int("walletId").notNull(),
+  installmentNumber: int("installmentNumber").notNull(),
+  amountCents: int("amountCents").notNull(),
+  dueDate: timestamp("dueDate").notNull(),
+  status: mysqlEnum("status", ["pending", "paid", "overdue"]).default("pending").notNull(),
+  paidAt: timestamp("paidAt"),
+  confirmedBy: varchar("confirmedBy", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type InstallmentPayment = typeof installmentPayments.$inferSelect;
+export type InsertInstallmentPayment = typeof installmentPayments.$inferInsert;
+
+// ============================================================
+// NOTIFICACIONES PERSONALIZADAS DEL ADMIN AL PACIENTE
+// ============================================================
+/**
+ * Notificaciones enviadas por el admin directamente al monedero de un paciente.
+ * Pueden ser de cobro, felicitación, promoción, o cualquier mensaje libre.
+ * Incluyen texto y opcionalmente una imagen.
+ */
+export const adminNotifications = mysqlTable("adminNotifications", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("walletId").notNull(),                          // FK a wallets.id
+  patientId: int("patientId").notNull(),                        // FK a patientAccounts.id
+  title: varchar("title", { length: 255 }).notNull(),           // Título de la notificación
+  message: text("message").notNull(),                           // Cuerpo del mensaje
+  imageUrl: text("imageUrl"),                                   // URL imagen opcional (S3)
+  type: mysqlEnum("type", ["cobro", "promocion", "felicitacion", "general"]).default("general").notNull(),
+  isRead: boolean("isRead").default(false).notNull(),           // Si el paciente la leyó
+  readAt: timestamp("readAt"),
+  sentBy: varchar("sentBy", { length: 255 }),                   // Email del admin
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AdminNotification = typeof adminNotifications.$inferSelect;
+export type InsertAdminNotification = typeof adminNotifications.$inferInsert;

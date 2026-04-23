@@ -1,18 +1,20 @@
 /**
  * AdminWalletTab — Panel de administración del Monedero Nutriser
  * Permite: ver todas las tarjetas, acreditar saldo, ver movimientos,
- * gestionar planes de lealtad por producto, y registrar consultas.
+ * gestionar planes de lealtad por producto, registrar consultas,
+ * enviar notificaciones admin→paciente, y gestión avanzada del monedero.
  */
 import { useState, useMemo, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   Search, Plus, Minus, CreditCard,
   Gift, Star, ChevronDown, ChevronUp, Loader2,
-  DollarSign, Users, Award, Trash2, Calendar, QrCode, Printer, CheckSquare, Square, PrinterCheck, History, AlertTriangle,
+  DollarSign, Users, Award, Trash2, Calendar, QrCode, Printer, CheckSquare, Square, PrinterCheck, History, AlertTriangle, Bell, Send, Image, X,
 } from "lucide-react";
 
 import AdminQRScanner from "./AdminQRScanner";
@@ -20,6 +22,65 @@ import { WalletCard as WalletCardPrint, WalletCardPrintSheet } from "./WalletCar
 import { generateWalletPdf } from "@/lib/generateWalletPdfClient";
 
 type SubTab = "wallets" | "loyalty" | "plans" | "qrscan" | "printCards" | "requests";
+
+// ─── Modal de contraseña de seguridad ────────────────────────────────────────
+function SecurityModal({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  isPending,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: (password: string) => void;
+  title: string;
+  description?: string;
+  isPending?: boolean;
+}) {
+  const [password, setPassword] = useState("");
+  const handleSubmit = () => {
+    if (!password.trim()) { toast.error("Ingresa la contraseña de seguridad"); return; }
+    onConfirm(password.trim());
+    setPassword("");
+  };
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) { setPassword(""); onClose(); } }}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-red-700">
+            <AlertTriangle className="w-5 h-5" />
+            {title}
+          </DialogTitle>
+        </DialogHeader>
+        {description && <p className="text-sm text-gray-600">{description}</p>}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-600">Contraseña de seguridad</label>
+          <Input
+            type="password"
+            placeholder="Ingresa la contraseña..."
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            autoFocus
+          />
+        </div>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" size="sm" onClick={() => { setPassword(""); onClose(); }}>Cancelar</Button>
+          <Button
+            size="sm"
+            disabled={!password.trim() || isPending}
+            onClick={handleSubmit}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : "Confirmar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function AdminWalletTab() {
   const [subTab, setSubTab] = useState<SubTab>("wallets");
@@ -82,8 +143,32 @@ export default function AdminWalletTab() {
   const totalBalance = wallets.reduce((s: number, w: any) => s + (w.balance || 0), 0);
   const activeWallets = wallets.filter((w: any) => w.status === "active").length;
 
+  // ─── Pending security action state ───────────────────────────────
+  const [securityModal, setSecurityModal] = useState<{
+    open: boolean;
+    title: string;
+    description?: string;
+    onConfirm: (password: string) => void;
+    isPending?: boolean;
+  }>({ open: false, title: "", onConfirm: () => {} });
+
+  const openSecurityModal = (title: string, description: string, onConfirm: (password: string) => void, isPending?: boolean) => {
+    setSecurityModal({ open: true, title, description, onConfirm, isPending });
+  };
+  const closeSecurityModal = () => setSecurityModal(prev => ({ ...prev, open: false }));
+
   return (
     <div className="space-y-4">
+      {/* Security Modal */}
+      <SecurityModal
+        open={securityModal.open}
+        onClose={closeSecurityModal}
+        onConfirm={(pw) => { securityModal.onConfirm(pw); closeSecurityModal(); }}
+        title={securityModal.title}
+        description={securityModal.description}
+        isPending={securityModal.isPending}
+      />
+
       {/* Header Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
@@ -186,13 +271,14 @@ export default function AdminWalletTab() {
                 <WalletCard
                   key={w.id}
                   wallet={w}
-                  onCredit={(amount, desc) => cashbackMutation.mutate({
-                    walletId: w.id, amount, description: desc,
+                  onCredit={(amount, desc, password) => cashbackMutation.mutate({
+                    walletId: w.id, amount, description: desc, adminPassword: password,
                   })}
-                  onDebit={(amount, desc) => bonusMutation.mutate({
-                    walletId: w.id, amount: -amount, description: desc,
+                  onDebit={(amount, desc, password) => bonusMutation.mutate({
+                    walletId: w.id, amount: -amount, description: desc, adminPassword: password,
                   })}
                   isLoading={cashbackMutation.isPending || bonusMutation.isPending}
+                  openSecurityModal={openSecurityModal}
                 />
               ))}
             </div>
@@ -225,11 +311,12 @@ export default function AdminWalletTab() {
 }
 
 // ─── Wallet Card ─────────────────────────────────────────────────────────────
-function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
+function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }: {
   wallet: any;
-  onCredit: (amount: number, desc: string) => void;
-  onDebit: (amount: number, desc: string) => void;
+  onCredit: (amount: number, desc: string, password: string) => void;
+  onDebit: (amount: number, desc: string, password: string) => void;
   isLoading: boolean;
+  openSecurityModal: (title: string, description: string, onConfirm: (password: string) => void, isPending?: boolean) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [creditAmount, setCreditAmount] = useState("");
@@ -238,7 +325,10 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
   const [debitDesc, setDebitDesc] = useState("");
   const [showTransactions, setShowTransactions] = useState(false);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
+  const [discountValue, setDiscountValue] = useState<10|15|20|25|30>(10);
+  const [showNotifModal, setShowNotifModal] = useState(false);
   const utils = trpc.useUtils();
+
   const transactionsQuery = trpc.wallet.adminGetTransactions.useQuery(
     { walletId: wallet.id },
     { enabled: showTransactions }
@@ -253,8 +343,6 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
   });
 
   // ── Administración del monedero ──
-  const [confirmReset, setConfirmReset] = useState(false);
-  const [discountValue, setDiscountValue] = useState<10|15|20|25|30>(10);
   const suspendMutation = trpc.wallet.adminSuspendWallet.useMutation({
     onSuccess: () => { toast.success('Monedero dado de baja.'); utils.wallet.adminListAll.invalidate(); },
     onError: (e) => toast.error('Error: ' + e.message),
@@ -264,8 +352,8 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
     onError: (e) => toast.error('Error: ' + e.message),
   });
   const resetMutation = trpc.wallet.adminResetWallet.useMutation({
-    onSuccess: () => { toast.success('Monedero reiniciado. Saldo en $0.00.'); setConfirmReset(false); utils.wallet.adminListAll.invalidate(); },
-    onError: (e) => { toast.error('Error: ' + e.message); setConfirmReset(false); },
+    onSuccess: () => { toast.success('Monedero reiniciado. Saldo en $0.00.'); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => { toast.error('Error: ' + e.message); },
   });
   const setDiscountMutation = trpc.wallet.adminSetDiscount.useMutation({
     onSuccess: (d) => { toast.success(`Descuento del ${d.discountPercent}% aplicado.`); utils.wallet.adminListAll.invalidate(); },
@@ -277,297 +365,491 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
   });
 
   return (
-    <Card className="border-gray-200 hover:border-[#C5A55A]/50 transition">
-      <CardContent className="p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#1A1A1A] to-[#333] rounded-lg flex items-center justify-center flex-shrink-0">
-              <CreditCard className="w-5 h-5 text-[#C5A55A]" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-bold text-sm text-gray-900 truncate">{wallet.patientName || "Sin nombre"}</p>
-              <p className="text-[10px] text-gray-400 font-mono">{wallet.walletNumber}</p>
-              {wallet.patientEmail && <p className="text-[10px] text-gray-400 truncate">{wallet.patientEmail}</p>}
-            </div>
-          </div>
-          <div className="text-right flex-shrink-0 ml-2">
-            <p className="font-black text-lg text-[#C5A55A]">${(wallet.balance / 100).toFixed(2)}</p>
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-              wallet.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-            }`}>
-              {wallet.status === "active" ? "Activa" : "Suspendida"}
-            </span>
-          </div>
-          <button onClick={() => setExpanded(!expanded)} className="ml-2 p-1 hover:bg-gray-100 rounded">
-            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-        </div>
+    <>
+      {/* Modal de notificación */}
+      {showNotifModal && (
+        <NotifModal
+          walletId={wallet.id}
+          patientName={wallet.patientName}
+          onClose={() => setShowNotifModal(false)}
+        />
+      )}
 
-        {/* Loyalty info */}
-        <div className="flex flex-wrap gap-3 mt-2 text-[10px] text-gray-500">
-          <span>Consultas ciclo: <b className="text-gray-700">{wallet.consultationsInCycle || 0}/3</b></span>
-          <span>Total consultas: <b className="text-gray-700">{wallet.totalConsultations || 0}</b></span>
-          {(wallet.freeConsultationsAvailable || 0) > 0 && (
-            <span className="text-green-700 font-bold">🎁 {wallet.freeConsultationsAvailable} consulta{wallet.freeConsultationsAvailable > 1 ? 's' : ''} GRATIS disponible{wallet.freeConsultationsAvailable > 1 ? 's' : ''}</span>
-          )}
-          <span>Acumulado: <b className="text-[#C5A55A]">${((wallet.totalCredited || 0) / 100).toFixed(2)}</b></span>
-        </div>
-        {/* Planes de lealtad por producto */}
-        {(wallet.loyaltyProgress || []).length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-1">
-            {(wallet.loyaltyProgress || []).map((p: any) => (
-              <span key={p.id} className="text-[10px] bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 text-amber-800">
-                {p.plan?.productName || 'Producto'}: <b>{p.currentCount}/{p.plan?.requiredPurchases || '?'}</b>
-                {(p.rewardsEarned - p.rewardsUsed) > 0 && <span className="ml-1 text-green-700 font-bold">🎁 {p.rewardsEarned - p.rewardsUsed} GRATIS</span>}
+      <Card className="border-gray-200 hover:border-[#C5A55A]/50 transition">
+        <CardContent className="p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#1A1A1A] to-[#333] rounded-lg flex items-center justify-center flex-shrink-0">
+                <CreditCard className="w-5 h-5 text-[#C5A55A]" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-sm text-gray-900 truncate">{wallet.patientName || "Sin nombre"}</p>
+                <p className="text-[10px] text-gray-400 font-mono">{wallet.walletNumber}</p>
+                {wallet.patientEmail && <p className="text-[10px] text-gray-400 truncate">{wallet.patientEmail}</p>}
+              </div>
+            </div>
+            <div className="text-right flex-shrink-0 ml-2">
+              <p className="font-black text-lg text-[#C5A55A]">${(wallet.balance / 100).toFixed(2)}</p>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                wallet.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+              }`}>
+                {wallet.status === "active" ? "Activa" : "Suspendida"}
               </span>
-            ))}
+            </div>
+            <button onClick={() => setExpanded(!expanded)} className="ml-2 p-1 hover:bg-gray-100 rounded">
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
           </div>
-        )}
 
-        {expanded && (
-          <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
-            {/* Acreditar */}
-            <div className="bg-green-50 rounded-lg p-3 space-y-2">
-              <p className="text-xs font-bold text-green-700 flex items-center gap-1"><Plus className="w-3 h-3" /> Acreditar saldo (cashback)</p>
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  placeholder="Monto (MXN)"
-                  value={creditAmount}
-                  onChange={(e) => setCreditAmount(e.target.value)}
-                  className="flex-1 text-sm"
-                />
-                <Input
-                  placeholder="Descripción"
-                  value={creditDesc}
-                  onChange={(e) => setCreditDesc(e.target.value)}
-                  className="flex-1 text-sm"
-                />
-              </div>
-              <Button
-                size="sm"
-                disabled={isLoading || !creditAmount}
-                onClick={() => {
-                  const amt = Math.round(parseFloat(creditAmount) * 100);
-                  if (amt <= 0) { toast.error("Monto inválido"); return; }
-                  onCredit(amt, creditDesc || "Cashback admin");
-                  setCreditAmount(""); setCreditDesc("");
-                }}
-                className="w-full bg-green-600 hover:bg-green-700 text-white text-xs"
-              >
-                {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Acreditar"}
-              </Button>
+          {/* Loyalty info */}
+          <div className="flex flex-wrap gap-3 mt-2 text-[10px] text-gray-500">
+            <span>Consultas ciclo: <b className="text-gray-700">{wallet.consultationsInCycle || 0}/3</b></span>
+            <span>Total consultas: <b className="text-gray-700">{wallet.totalConsultations || 0}</b></span>
+            {(wallet.freeConsultationsAvailable || 0) > 0 && (
+              <span className="text-green-700 font-bold">🎁 {wallet.freeConsultationsAvailable} consulta{wallet.freeConsultationsAvailable > 1 ? 's' : ''} GRATIS disponible{wallet.freeConsultationsAvailable > 1 ? 's' : ''}</span>
+            )}
+            <span>Acumulado: <b className="text-[#C5A55A]">${((wallet.totalCredited || 0) / 100).toFixed(2)}</b></span>
+          </div>
+          {/* Planes de lealtad por producto */}
+          {(wallet.loyaltyProgress || []).length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-1">
+              {(wallet.loyaltyProgress || []).map((p: any) => (
+                <span key={p.id} className="text-[10px] bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 text-amber-800">
+                  {p.plan?.productName || 'Producto'}: <b>{p.currentCount}/{p.plan?.requiredPurchases || '?'}</b>
+                  {(p.rewardsEarned - p.rewardsUsed) > 0 && <span className="ml-1 text-green-700 font-bold">🎁 {p.rewardsEarned - p.rewardsUsed} GRATIS</span>}
+                </span>
+              ))}
             </div>
+          )}
 
-            {/* Descontar */}
-            <div className="bg-red-50 rounded-lg p-3 space-y-2">
-              <p className="text-xs font-bold text-red-700 flex items-center gap-1"><Minus className="w-3 h-3" /> Descontar saldo</p>
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  placeholder="Monto (MXN)"
-                  value={debitAmount}
-                  onChange={(e) => setDebitAmount(e.target.value)}
-                  className="flex-1 text-sm"
-                />
-                <Input
-                  placeholder="Descripción"
-                  value={debitDesc}
-                  onChange={(e) => setDebitDesc(e.target.value)}
-                  className="flex-1 text-sm"
-                />
-              </div>
-              <Button
-                size="sm"
-                disabled={isLoading || !debitAmount}
-                onClick={() => {
-                  const amt = Math.round(parseFloat(debitAmount) * 100);
-                  if (amt <= 0) { toast.error("Monto inválido"); return; }
-                  onDebit(amt, debitDesc || "Cargo admin");
-                  setDebitAmount(""); setDebitDesc("");
-                }}
-                className="w-full bg-red-600 hover:bg-red-700 text-white text-xs"
-              >
-                {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Descontar"}
-              </Button>
-            </div>
-            {/* ── Administración del Monedero ── */}
-            <div className="bg-gray-900 rounded-xl p-3 space-y-3 border border-gray-700">
-              <p className="text-xs font-bold text-white flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                Administración del Monedero
-              </p>
-
-              {/* Baja / Alta */}
-              <div className="flex gap-2">
-                {wallet.status === 'active' ? (
-                  <Button
-                    size="sm"
-                    disabled={suspendMutation.isPending}
-                    onClick={() => suspendMutation.mutate({ walletNumber: wallet.walletNumber })}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs"
-                  >
-                    {suspendMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Dar de Baja'}
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    disabled={unsuspendMutation.isPending}
-                    onClick={() => unsuspendMutation.mutate({ walletNumber: wallet.walletNumber })}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs"
-                  >
-                    {unsuspendMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Dar de Alta'}
-                  </Button>
-                )}
+          {expanded && (
+            <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
+              {/* Acreditar */}
+              <div className="bg-green-50 rounded-lg p-3 space-y-2">
+                <p className="text-xs font-bold text-green-700 flex items-center gap-1"><Plus className="w-3 h-3" /> Acreditar saldo (cashback)</p>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Monto (MXN)"
+                    value={creditAmount}
+                    onChange={(e) => setCreditAmount(e.target.value)}
+                    className="flex-1 text-sm"
+                  />
+                  <Input
+                    placeholder="Descripción"
+                    value={creditDesc}
+                    onChange={(e) => setCreditDesc(e.target.value)}
+                    className="flex-1 text-sm"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  disabled={isLoading || !creditAmount}
+                  onClick={() => {
+                    const amt = Math.round(parseFloat(creditAmount) * 100);
+                    if (amt <= 0) { toast.error("Monto inválido"); return; }
+                    const desc = creditDesc || "Cashback admin";
+                    openSecurityModal(
+                      "Acreditar Cashback",
+                      `¿Acreditar $${(amt/100).toFixed(2)} MXN al monedero de ${wallet.patientName}?`,
+                      (pw) => { onCredit(amt, desc, pw); setCreditAmount(""); setCreditDesc(""); }
+                    );
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white text-xs"
+                >
+                  {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Acreditar"}
+                </Button>
               </div>
 
-              {/* Descuento */}
-              <div className="space-y-1.5">
-                <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-wide">Descuento en consultas</p>
-                {wallet.discountPercent ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-amber-400">{wallet.discountPercent}% activo</span>
+              {/* Descontar */}
+              <div className="bg-red-50 rounded-lg p-3 space-y-2">
+                <p className="text-xs font-bold text-red-700 flex items-center gap-1"><Minus className="w-3 h-3" /> Descontar saldo</p>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Monto (MXN)"
+                    value={debitAmount}
+                    onChange={(e) => setDebitAmount(e.target.value)}
+                    className="flex-1 text-sm"
+                  />
+                  <Input
+                    placeholder="Descripción"
+                    value={debitDesc}
+                    onChange={(e) => setDebitDesc(e.target.value)}
+                    className="flex-1 text-sm"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  disabled={isLoading || !debitAmount}
+                  onClick={() => {
+                    const amt = Math.round(parseFloat(debitAmount) * 100);
+                    if (amt <= 0) { toast.error("Monto inválido"); return; }
+                    const desc = debitDesc || "Cargo admin";
+                    openSecurityModal(
+                      "Descontar Saldo",
+                      `¿Descontar $${(amt/100).toFixed(2)} MXN del monedero de ${wallet.patientName}?`,
+                      (pw) => { onDebit(amt, desc, pw); setDebitAmount(""); setDebitDesc(""); }
+                    );
+                  }}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white text-xs"
+                >
+                  {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Descontar"}
+                </Button>
+              </div>
+
+              {/* ── Administración del Monedero ── */}
+              <div className="bg-gray-900 rounded-xl p-3 space-y-3 border border-gray-700">
+                <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+                  Administración del Monedero
+                </p>
+
+                {/* Baja / Alta */}
+                <div className="flex gap-2">
+                  {wallet.status === 'active' ? (
                     <Button
                       size="sm"
-                      disabled={removeDiscountMutation.isPending}
-                      onClick={() => removeDiscountMutation.mutate({ walletNumber: wallet.walletNumber })}
-                      className="flex-1 bg-gray-600 hover:bg-gray-500 text-white text-xs"
+                      disabled={suspendMutation.isPending}
+                      onClick={() => openSecurityModal(
+                        "Dar de Baja",
+                        `¿Suspender el monedero de ${wallet.patientName}? El paciente no podrá usarlo hasta que lo reactives.`,
+                        (pw) => suspendMutation.mutate({ walletNumber: wallet.walletNumber, adminPassword: pw })
+                      )}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs"
                     >
-                      {removeDiscountMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Quitar descuento'}
+                      {suspendMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Dar de Baja'}
                     </Button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <select
-                      value={discountValue}
-                      onChange={(e) => setDiscountValue(Number(e.target.value) as 10|15|20|25|30)}
-                      className="flex-1 text-xs bg-gray-800 text-white border border-gray-600 rounded-lg px-2 py-1"
-                    >
-                      {[10,15,20,25,30].map(v => <option key={v} value={v}>{v}%</option>)}
-                    </select>
+                  ) : (
                     <Button
                       size="sm"
-                      disabled={setDiscountMutation.isPending}
-                      onClick={() => setDiscountMutation.mutate({ walletNumber: wallet.walletNumber, discountPercent: discountValue })}
-                      className="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-xs"
+                      disabled={unsuspendMutation.isPending}
+                      onClick={() => openSecurityModal(
+                        "Dar de Alta",
+                        `¿Reactivar el monedero de ${wallet.patientName}?`,
+                        (pw) => unsuspendMutation.mutate({ walletNumber: wallet.walletNumber, adminPassword: pw })
+                      )}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs"
                     >
-                      {setDiscountMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Aplicar descuento'}
+                      {unsuspendMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Dar de Alta'}
                     </Button>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* Reiniciar */}
-              <div className="space-y-1.5">
-                <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-wide">Reiniciar monedero</p>
-                {!confirmReset ? (
-                  <Button
-                    size="sm"
-                    onClick={() => setConfirmReset(true)}
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white text-xs"
-                  >
-                    Reiniciar (poner en $0.00)
-                  </Button>
-                ) : (
-                  <div className="bg-red-900/60 border border-red-500 rounded-lg p-2 space-y-2">
-                    <p className="text-[10px] text-red-300 font-semibold text-center">¿Seguro? Esto borra saldo, cashback y canjeado.</p>
-                    <div className="flex gap-2">
+                {/* Descuento */}
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-wide">Descuento en consultas</p>
+                  {wallet.discountPercent ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-amber-400">{wallet.discountPercent}% activo</span>
                       <Button
                         size="sm"
-                        disabled={resetMutation.isPending}
-                        onClick={() => resetMutation.mutate({ walletNumber: wallet.walletNumber, adminEmail: 'admin' })}
-                        className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs"
+                        disabled={removeDiscountMutation.isPending}
+                        onClick={() => openSecurityModal(
+                          "Quitar Descuento",
+                          `¿Quitar el descuento del ${wallet.discountPercent}% del monedero de ${wallet.patientName}?`,
+                          (pw) => removeDiscountMutation.mutate({ walletNumber: wallet.walletNumber, adminPassword: pw })
+                        )}
+                        className="flex-1 bg-gray-600 hover:bg-gray-500 text-white text-xs"
                       >
-                        {resetMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Sí, reiniciar'}
-                      </Button>
-                      <Button size="sm" onClick={() => setConfirmReset(false)} className="flex-1 bg-gray-600 hover:bg-gray-500 text-white text-xs">
-                        Cancelar
+                        {removeDiscountMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Quitar descuento'}
                       </Button>
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Historial de Movimientos (Admin) */}
-            <div className="mt-2">
-              <button
-                onClick={() => setShowTransactions(!showTransactions)}
-                className="flex items-center gap-2 text-xs font-semibold text-gray-600 hover:text-[#C5A55A] transition"
-              >
-                <History className="w-3.5 h-3.5" />
-                {showTransactions ? "Ocultar movimientos" : "Ver movimientos"}
-              </button>
-              {showTransactions && (
-                <div className="mt-2 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">Historial de transacciones</p>
-                    {!confirmClearAll ? (
-                      <button
-                        onClick={() => setConfirmClearAll(true)}
-                        className="flex items-center gap-1 text-[10px] text-red-600 hover:text-red-800 font-semibold transition"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        Limpiar todo
-                      </button>
-                    ) : (
-                      <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-2 py-1">
-                        <AlertTriangle className="w-3 h-3 text-red-600" />
-                        <span className="text-[10px] text-red-700 font-semibold">Eliminar todos?</span>
-                        <button
-                          onClick={() => clearAllTransactionsMutation.mutate({ walletId: wallet.id })}
-                          disabled={clearAllTransactionsMutation.isPending}
-                          className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold hover:bg-red-700 disabled:opacity-50"
-                        >
-                          {clearAllTransactionsMutation.isPending ? "..." : "Si"}
-                        </button>
-                        <button
-                          onClick={() => setConfirmClearAll(false)}
-                          className="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold hover:bg-gray-300"
-                        >
-                          No
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  {transactionsQuery.isLoading ? (
-                    <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-[#C5A55A]" /></div>
-                  ) : (transactionsQuery.data || []).length === 0 ? (
-                    <p className="text-[10px] text-gray-400 text-center py-3">No hay movimientos</p>
                   ) : (
-                    <div className="space-y-1 max-h-48 overflow-y-auto">
-                      {(transactionsQuery.data || []).map((tx: any) => (
-                        <div key={tx.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-semibold text-gray-800 truncate">{tx.description}</p>
-                            <p className="text-[9px] text-gray-400">{new Date(tx.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-                          </div>
-                          <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                            <span className={`text-xs font-black ${tx.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {tx.amount >= 0 ? '+' : ''}${(tx.amount / 100).toFixed(2)}
-                            </span>
-                            <button
-                              onClick={() => deleteTransactionMutation.mutate({ transactionId: tx.id })}
-                              disabled={deleteTransactionMutation.isPending}
-                              className="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 active:bg-red-200 transition flex-shrink-0"
-                              title="Eliminar este movimiento"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="flex gap-2">
+                      <select
+                        value={discountValue}
+                        onChange={(e) => setDiscountValue(Number(e.target.value) as 10|15|20|25|30)}
+                        className="flex-1 text-xs bg-gray-800 text-white border border-gray-600 rounded-lg px-2 py-1"
+                      >
+                        {[10,15,20,25,30].map(v => <option key={v} value={v}>{v}%</option>)}
+                      </select>
+                      <Button
+                        size="sm"
+                        disabled={setDiscountMutation.isPending}
+                        onClick={() => openSecurityModal(
+                          "Aplicar Descuento",
+                          `¿Aplicar un descuento del ${discountValue}% al monedero de ${wallet.patientName}?`,
+                          (pw) => setDiscountMutation.mutate({ walletNumber: wallet.walletNumber, discountPercent: discountValue, adminPassword: pw })
+                        )}
+                        className="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-xs"
+                      >
+                        {setDiscountMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Aplicar descuento'}
+                      </Button>
                     </div>
                   )}
                 </div>
-              )}
+
+                {/* Reiniciar */}
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-wide">Reiniciar monedero</p>
+                  <Button
+                    size="sm"
+                    disabled={resetMutation.isPending}
+                    onClick={() => openSecurityModal(
+                      "⚠️ Reiniciar Monedero",
+                      `ADVERTENCIA: Esto pondrá saldo, cashback y canjeado en $0.00, borrará el historial de movimientos y cancelará pagos pendientes del monedero de ${wallet.patientName}. Esta acción NO se puede deshacer.`,
+                      (pw) => resetMutation.mutate({ walletNumber: wallet.walletNumber, adminEmail: 'admin', adminPassword: pw })
+                    )}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white text-xs"
+                  >
+                    {resetMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Reiniciar (poner en $0.00)'}
+                  </Button>
+                </div>
+
+                {/* Enviar Notificación */}
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-wide">Notificaciones</p>
+                  <Button
+                    size="sm"
+                    onClick={() => setShowNotifModal(true)}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs flex items-center gap-1"
+                  >
+                    <Bell className="w-3 h-3" />
+                    Enviar Notificación al Paciente
+                  </Button>
+                </div>
+              </div>
+
+              {/* Historial de Movimientos (Admin) */}
+              <div className="mt-2">
+                <button
+                  onClick={() => setShowTransactions(!showTransactions)}
+                  className="flex items-center gap-2 text-xs font-semibold text-gray-600 hover:text-[#C5A55A] transition"
+                >
+                  <History className="w-3.5 h-3.5" />
+                  {showTransactions ? "Ocultar movimientos" : "Ver movimientos"}
+                </button>
+                {showTransactions && (
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">Historial de transacciones</p>
+                      {!confirmClearAll ? (
+                        <button
+                          onClick={() => setConfirmClearAll(true)}
+                          className="flex items-center gap-1 text-[10px] text-red-600 hover:text-red-800 font-semibold transition"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Limpiar todo
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-2 py-1">
+                          <AlertTriangle className="w-3 h-3 text-red-600" />
+                          <span className="text-[10px] text-red-700 font-semibold">Eliminar todos?</span>
+                          <button
+                            onClick={() => clearAllTransactionsMutation.mutate({ walletId: wallet.id })}
+                            disabled={clearAllTransactionsMutation.isPending}
+                            className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold hover:bg-red-700 disabled:opacity-50"
+                          >
+                            {clearAllTransactionsMutation.isPending ? "..." : "Si"}
+                          </button>
+                          <button
+                            onClick={() => setConfirmClearAll(false)}
+                            className="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold hover:bg-gray-300"
+                          >
+                            No
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {transactionsQuery.isLoading ? (
+                      <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-[#C5A55A]" /></div>
+                    ) : (transactionsQuery.data || []).length === 0 ? (
+                      <p className="text-[10px] text-gray-400 text-center py-3">No hay movimientos</p>
+                    ) : (
+                      <div className="space-y-1 max-h-48 overflow-y-auto">
+                        {(transactionsQuery.data || []).map((tx: any) => (
+                          <div key={tx.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] font-semibold text-gray-800 truncate">{tx.description}</p>
+                              <p className="text-[9px] text-gray-400">{new Date(tx.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                            </div>
+                            <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                              <span className={`text-xs font-black ${tx.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {tx.amount >= 0 ? '+' : ''}${(tx.amount / 100).toFixed(2)}
+                              </span>
+                              <button
+                                onClick={() => deleteTransactionMutation.mutate({ transactionId: tx.id })}
+                                disabled={deleteTransactionMutation.isPending}
+                                className="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 active:bg-red-200 transition flex-shrink-0"
+                                title="Eliminar este movimiento"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 }
+
+// ─── Modal de Notificación Admin → Paciente ──────────────────────────────────
+function NotifModal({ walletId, patientName, onClose }: { walletId: number; patientName: string; onClose: () => void }) {
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const [type, setType] = useState<'cobro'|'promocion'|'felicitacion'|'general'>('general');
+  const [imageUrl, setImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const utils = trpc.useUtils();
+
+  const sendMutation = trpc.adminNotifs.sendByWalletId.useMutation({
+    onSuccess: () => {
+      toast.success("✅ Notificación enviada al paciente");
+      utils.adminNotifs.getByWalletId.invalidate({ walletId });
+      onClose();
+    },
+    onError: (e) => toast.error("Error: " + e.message),
+  });
+
+  const handleImageUpload = async (file: File) => {
+    if (file.size > 2 * 1024 * 1024) { toast.error("La imagen no debe superar 2MB"); return; }
+    if (!['image/jpeg', 'image/png'].includes(file.type)) { toast.error("Solo se permiten imágenes JPG o PNG"); return; }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload-notif-image', { method: 'POST', body: formData, credentials: 'include' });
+      if (!res.ok) throw new Error('Error al subir imagen');
+      const data = await res.json();
+      setImageUrl(data.url);
+      toast.success("Imagen subida correctamente");
+    } catch (e: any) {
+      toast.error("Error al subir imagen: " + e.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const typeColors: Record<string, string> = {
+    cobro: 'bg-red-100 text-red-700',
+    promocion: 'bg-amber-100 text-amber-700',
+    felicitacion: 'bg-green-100 text-green-700',
+    general: 'bg-blue-100 text-blue-700',
+  };
+  const typeLabels: Record<string, string> = {
+    cobro: '💳 Cobro',
+    promocion: '🎁 Promoción',
+    felicitacion: '🎉 Felicitación',
+    general: '📢 General',
+  };
+
+  return (
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5 text-blue-600" />
+            Enviar Notificación a {patientName}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          {/* Tipo */}
+          <div>
+            <label className="text-xs font-semibold text-gray-600 mb-1 block">Tipo de notificación</label>
+            <div className="flex gap-2 flex-wrap">
+              {(['cobro','promocion','felicitacion','general'] as const).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setType(t)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${type === t ? typeColors[t] + ' border-current' : 'bg-gray-100 text-gray-500 border-gray-200'}`}
+                >
+                  {typeLabels[t]}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Título */}
+          <div>
+            <label className="text-xs font-semibold text-gray-600 mb-1 block">Título *</label>
+            <Input
+              placeholder="Ej: ¡Tienes una promoción especial!"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={255}
+            />
+          </div>
+          {/* Mensaje */}
+          <div>
+            <label className="text-xs font-semibold text-gray-600 mb-1 block">Mensaje *</label>
+            <textarea
+              placeholder="Escribe el mensaje para el paciente..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={3}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          {/* Imagen opcional */}
+          <div>
+            <label className="text-xs font-semibold text-gray-600 mb-1 block flex items-center gap-1">
+              <Image className="w-3 h-3" /> Imagen (opcional)
+              <span className="text-gray-400 font-normal ml-1">JPG/PNG, máx. 800×600px, 2MB</span>
+            </label>
+            {imageUrl ? (
+              <div className="relative">
+                <img src={imageUrl} alt="Preview" className="w-full max-h-32 object-cover rounded-lg border" />
+                <button
+                  onClick={() => setImageUrl("")}
+                  className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <div>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  className="hidden"
+                  onChange={(e) => { if (e.target.files?.[0]) handleImageUpload(e.target.files[0]); }}
+                />
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-xs text-gray-500 hover:border-blue-400 hover:text-blue-600 transition flex items-center justify-center gap-2"
+                >
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Image className="w-4 h-4" />}
+                  {uploading ? "Subiendo..." : "Clic para subir imagen"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" size="sm" onClick={onClose}>Cancelar</Button>
+          <Button
+            size="sm"
+            disabled={!title.trim() || !message.trim() || sendMutation.isPending}
+            onClick={() => sendMutation.mutate({
+              walletId,
+              title: title.trim(),
+              message: message.trim(),
+              imageUrl: imageUrl || undefined,
+              type,
+              adminEmail: 'admin',
+            })}
+            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1"
+          >
+            {sendMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+            Enviar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ─── Loyalty Registration ────────────────────────────────────────────────────
 function LoyaltyRegistration({ wallets, plans, onRegisterConsultation, onRegisterProductPurchase, isLoading }: {
   wallets: any[];
@@ -1064,7 +1346,7 @@ function PrintCardsTab({
         </div>
       )}
 
-      {/* Contenedor oculto para html2canvas — cada tarjeta tiene clase wallet-card-print-item */}
+      {/* Contenedor oculto para html2canvas */}
       <div ref={printContainerRef} style={{ display: "none", background: "white" }}>
         {selectedWallets.map((w: any) => (
           <div
@@ -1097,7 +1379,6 @@ function PhysicalCardRequestsTab() {
 
   const handlePrint = (req: any) => {
     setPrintingId(req.id);
-    // Abrir ventana de impresión con la tarjeta
     const printWin = window.open("", "_blank", "width=900,height=700");
     if (!printWin) { toast.error("Activa las ventanas emergentes"); return; }
     const logoUrl = "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -1112,7 +1393,6 @@ function PhysicalCardRequestsTab() {
   .logo { width: 7mm; height: 7mm; object-fit: contain; }
   .title { color: #C5A55A; font-weight: 900; font-size: 2.2mm; letter-spacing: 0.18em; text-transform: uppercase; }
   .subtitle { color: rgba(255,255,255,0.45); font-size: 1.7mm; letter-spacing: 0.12em; }
-  .badge { font-size: 1.7mm; font-weight: 800; padding: 0.5mm 1.8mm; border-radius: 5mm; border: 0.3mm solid rgba(52,211,153,0.5); color: #34d399; background: rgba(52,211,153,0.12); }
   .body { display: flex; align-items: center; gap: 2.5mm; padding: 1mm 3mm; }
   .qr-wrap { background: #fff; border-radius: 1.5mm; padding: 1.2mm; }
   .name { color: #fff; font-weight: 700; font-size: 2.8mm; text-transform: uppercase; }

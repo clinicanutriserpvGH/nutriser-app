@@ -8,11 +8,11 @@ import { toast } from "sonner";
 import {
   ShoppingBag, X, Upload, Loader2, Package, Search,
   User, LogOut, MessageCircle,
-  Wallet, Copy, BookOpen, Scissors, Tag,
+  Wallet, BookOpen, Scissors, Tag,
 } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
 import { useLocation } from "wouter";
 import BackToSplash from "@/components/BackToSplash";
+import { NutriserWalletCard, QRFullscreenModal } from "@/components/NutriserWalletCard";
 import PromoSplash from "@/components/PromoSplash";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 
@@ -54,6 +54,7 @@ export default function Store() {
     () => !sessionStorage.getItem("nutriser_store_promo_dismissed")
   );
   const [walletSheetOpen, setWalletSheetOpen] = useState(false);
+  const [showQRFullscreen, setShowQRFullscreen] = useState(false);
   const [, navigate] = useLocation();
 
   // Wallet data for floating button & bottom sheet
@@ -715,64 +716,22 @@ export default function Store() {
             <div className="border-t border-gray-100" />
 
             <div className="p-5">
-              <div className="bg-gradient-to-br from-[#FAF7F2] to-[#F5EFE3] rounded-2xl shadow-lg border border-[#E8DCC8] overflow-hidden">
-                <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2D2D2D] px-5 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#C5A55A] font-black text-xs tracking-widest uppercase">Monedero Nutriser</span>
-                    <img src={LOGO_URL} alt="" className="w-6 h-6 rounded-full" />
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded-full bg-[#C5A55A] flex items-center justify-center">
-                      <span className="text-white text-[9px] font-black">e$</span>
-                    </div>
-                    <span className="text-white font-black text-sm">{(walletBalance / 100).toFixed(0)}</span>
-                  </div>
+              {walletData ? (
+                <NutriserWalletCard
+                  patientName={patient?.name || '---'}
+                  walletNumber={walletData.wallet.walletNumber || '---'}
+                  qrUrl={`${window.location.origin}/monedero?id=${walletData.wallet.walletNumber}`}
+                  isActive={walletData.wallet.isActive ?? true}
+                  balance={walletBalance}
+                  showBalance={true}
+                  onQRClick={() => setShowQRFullscreen(true)}
+                />
+              ) : (
+                <div className="py-6 text-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#C5A55A] mx-auto mb-2" />
+                  <p className="text-gray-400 text-sm">Cargando tu monedero...</p>
                 </div>
-
-                <div className="px-5 py-4 flex flex-col items-center">
-                  {walletData ? (
-                    <>
-                      <QRCodeSVG
-                        value={`${window.location.origin}/monedero`}
-                        size={120}
-                        level="M"
-                        bgColor="transparent"
-                        fgColor="#1A1A1A"
-                        className="mb-3"
-                      />
-                      <p className="font-bold text-gray-900 text-base tracking-wide">{patient?.name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-gray-500 text-sm font-mono tracking-wider">{walletData.wallet.walletNumber}</p>
-                        <button
-                          onClick={() => { navigator.clipboard.writeText(walletData.wallet.walletNumber || ""); toast.success("Número copiado"); }}
-                          className="p-1 rounded hover:bg-gray-100 transition-colors"
-                        >
-                          <Copy className="w-3.5 h-3.5 text-gray-400" />
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="py-6 text-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-[#C5A55A] mx-auto mb-2" />
-                      <p className="text-gray-400 text-sm">Cargando tu monedero...</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="px-5 pb-4 flex items-center justify-between">
-                  <img src={LOGO_URL} alt="Nutriser" className="h-8 object-contain opacity-60" />
-                  <p className="text-[10px] text-gray-400 font-medium">AESTHETIC & NUTRITION</p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center gap-6 mt-4">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-6 h-6 rounded-full bg-[#C5A55A] flex items-center justify-center">
-                    <span className="text-white text-[9px] font-black">e$</span>
-                  </div>
-                  <span className="font-black text-[#C5A55A] text-lg">{(walletBalance / 100).toFixed(0)}</span>
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="px-5 pb-8">
@@ -786,6 +745,14 @@ export default function Store() {
           </div>
         </div>
       )}
+
+      <QRFullscreenModal
+        open={showQRFullscreen}
+        onClose={() => setShowQRFullscreen(false)}
+        qrUrl={walletData ? `${window.location.origin}/monedero?id=${walletData.wallet.walletNumber}` : 'https://nutriserpv.com/monedero'}
+        patientName={patient?.name || '---'}
+        walletNumber={walletData?.wallet?.walletNumber || '---'}
+      />
 
       <style>{`
         @keyframes slideUp {

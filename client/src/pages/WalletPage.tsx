@@ -6,13 +6,13 @@
  */
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, Copy, X } from "lucide-react";
+import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, X } from "lucide-react";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 // NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import { trpc } from "@/lib/trpc";
-import { QRCodeSVG } from "qrcode.react";
 import { useRoute } from "wouter";
 import { WalletCard as WalletCardCR80, WalletCardPrintSheet } from "@/components/WalletCardPrint";
+import { NutriserWalletCard, QRFullscreenModal } from "@/components/NutriserWalletCard";
 import { toast } from "sonner";
 import { t, type Lang } from "@/lib/i18n";
 
@@ -775,55 +775,13 @@ export default function WalletPage() {
           SHEET — TARJETA ELEGANTE (al hacer clic en la tarjeta)
       ══════════════════════════════════════════════════════════════════════ */}
       {/* ── MODAL QR PANTALLA COMPLETA ── */}
-      {showQRFullscreen && (
-        <div
-          onClick={() => setShowQRFullscreen(false)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            background: "#FFFFFF",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 24,
-          }}
-        >
-          {/* Logo pequeño arriba */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <img src={LOGO_URL} alt="Nutriser" style={{ width: 36, height: 36, objectFit: "contain" }} />
-            <div>
-              <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: 13, letterSpacing: "0.15em", textTransform: "uppercase" }}>Monedero Nutriser</div>
-              <div style={{ color: "#888", fontSize: 11 }}>aesthetic &amp; nutrition</div>
-            </div>
-          </div>
-
-          {/* QR gigante — nivel M para máxima legibilidad */}
-          <div style={{ background: "#FFFFFF", padding: 16, borderRadius: 12, boxShadow: "0 4px 24px rgba(0,0,0,0.12)", border: "2px solid #f0f0f0" }}>
-            <QRCodeSVG
-              value={qrUrl || "https://nutriserpv.com/monedero"}
-              size={260}
-              level="M"
-              includeMargin={false}
-              bgColor="#FFFFFF"
-              fgColor="#000000"
-            />
-          </div>
-
-          {/* Nombre y número */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontWeight: 900, fontSize: 18, color: "#1A1A1A", textTransform: "uppercase", letterSpacing: "0.05em" }}>{patient?.name || '---'}</div>
-            <div style={{ fontFamily: "monospace", fontSize: 14, color: "#C5A55A", fontWeight: 700, letterSpacing: "0.15em", marginTop: 4 }}>{wallet?.walletNumber || '---'}</div>
-          </div>
-
-          {/* Instrucción */}
-          <div style={{ color: "#aaa", fontSize: 13, textAlign: "center", maxWidth: 260 }}>Muestra este código al escáner de la clínica</div>
-
-          {/* Toca para cerrar */}
-          <div style={{ color: "#ccc", fontSize: 12, marginTop: 8 }}>Toca en cualquier lugar para cerrar</div>
-        </div>
-      )}
+      <QRFullscreenModal
+        open={showQRFullscreen}
+        onClose={() => setShowQRFullscreen(false)}
+        qrUrl={qrUrl || 'https://nutriserpv.com/monedero'}
+        patientName={patient?.name || '---'}
+        walletNumber={wallet?.walletNumber || '---'}
+      />
 
       {showCardSheet && (
         <div className="fixed inset-0 z-[70] flex items-end md:items-center md:justify-center">
@@ -845,119 +803,17 @@ export default function WalletPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            {/* Tarjeta grande */}
+            {/* Tarjeta grande — NutriserWalletCard unificado */}
             <div className="px-5 pt-5 pb-3">
-              <div
-                style={{
-                  width: "100%",
-                  aspectRatio: "85.5 / 54",
-                  position: "relative",
-                  borderRadius: 16,
-                  overflow: "hidden",
-                  background: "#1A1A1A",
-                  boxShadow: "0 8px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(197,165,90,0.15)",
-                }}
-              >
-
-                {/* ── ZONA SUPERIOR: Silueta + Info del titular (70% altura) ── */}
-                {/* Silueta dorada — derecha, libre de superposición */}
-                <img
-                  src="/manus-storage/nutriser-silueta_f6738ee7.png"
-                  alt=""
-                  style={{
-                    position: "absolute",
-                    right: 0,
-                    top: 0,
-                    height: "68%",
-                    width: "auto",
-                    objectFit: "contain",
-                    objectPosition: "right top",
-                    opacity: 0.92,
-                    pointerEvents: "none",
-                    zIndex: 1,
-                    filter: "sepia(1) saturate(2.8) hue-rotate(3deg) brightness(1.05)",
-                  }}
-                />
-                {/* Contenido superior — 60% izquierdo para no tapar silueta */}
-                <div style={{ position: "relative", zIndex: 2, padding: "10px 14px 0 14px", width: "60%" }}>
-                  {/* Logo + Título + Badge */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                    <img src={LOGO_URL} alt="Nutriser" style={{ width: 28, height: 28, objectFit: "contain", flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ color: "#C5A55A", fontWeight: 900, fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", lineHeight: 1.2 }}>Monedero Nutriser</div>
-                      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 7, letterSpacing: "0.1em" }}>aesthetic &amp; nutrition</div>
-                    </div>
-                    {wallet?.isActive ? (
-                      <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", fontSize: 7, fontWeight: 800, padding: "2px 6px", borderRadius: 20, border: "1px solid rgba(52,211,153,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>ACTIVA</span>
-                    ) : (
-                      <span style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 7, fontWeight: 800, padding: "2px 6px", borderRadius: 20, border: "1px solid rgba(239,68,68,0.4)", letterSpacing: "0.1em", flexShrink: 0 }}>INACTIVA</span>
-                    )}
-                  </div>
-                  {/* Placa dorada con nombre y número — sin QR aquí */}
-                  <div style={{
-                    background: "linear-gradient(135deg, #E8C97A 0%, #C5A55A 50%, #d4af60 100%)",
-                    borderRadius: 6,
-                    padding: "6px 10px",
-                    boxShadow: "0 2px 8px rgba(197,165,90,0.3)",
-                    display: "inline-block",
-                    maxWidth: "100%",
-                  }}>
-                    <div style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 12, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>
-                      {patient?.name || '---'}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
-                      <span style={{ color: "#5a3e00", fontFamily: "monospace", fontSize: 8, letterSpacing: "0.12em", fontWeight: 700 }}>
-                        {wallet?.walletNumber || '---'}
-                      </span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(wallet?.walletNumber || ""); toast.success("Número copiado"); }}
-                        style={{ color: "#5a3e00", flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, opacity: 0.7 }}
-                      >
-                        <Copy className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── ZONA INFERIOR: Banda dorada con QR grande + saldo (32% altura) ── */}
-                <div style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: "32%",
-                  background: "linear-gradient(90deg, #8B6914 0%, #C5A55A 25%, #E8C97A 50%, #C5A55A 75%, #8B6914 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "0 14px",
-                  zIndex: 3,
-                }}>
-                  {/* QR — toca para abrir a pantalla completa */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setShowQRFullscreen(true); }}
-                    style={{ background: "#FFFFFF", borderRadius: 5, padding: 4, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", border: "none", cursor: "pointer", position: "relative" }}
-                    title="Toca para ampliar el QR"
-                  >
-                    <QRCodeSVG
-                      value={qrUrl || "https://nutriserpv.com/monedero"}
-                      size={52}
-                      level="M"
-                      includeMargin={false}
-                      bgColor="#FFFFFF"
-                      fgColor="#000000"
-                    />
-                    {/* Hint de tap */}
-                    <span style={{ position: "absolute", bottom: -14, left: "50%", transform: "translateX(-50%)", fontSize: 6, color: "rgba(0,0,0,0.5)", whiteSpace: "nowrap", fontWeight: 700 }}>AMPLIAR</span>
-                  </button>
-                  {/* Saldo + URL al centro-derecha */}
-                  <div style={{ flex: 1, paddingLeft: 12 }}>
-                    <span style={{ color: "rgba(0,0,0,0.55)", fontSize: 6, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "block" }}>NUTRISERPV.COM/MONEDERO</span>
-                    <span style={{ color: "#1A1A1A", fontWeight: 900, fontSize: 16, lineHeight: 1, display: "block" }}>{formatMoney(wallet?.balance || 0)}</span>
-                    <span style={{ color: "rgba(0,0,0,0.5)", fontSize: 7, fontWeight: 700 }}>Válido solo en Nutriser PV</span>
-                  </div>
-                </div>
-              </div>
+              <NutriserWalletCard
+                patientName={patient?.name || '---'}
+                walletNumber={wallet?.walletNumber || '---'}
+                qrUrl={qrUrl || 'https://nutriserpv.com/monedero'}
+                isActive={wallet?.isActive ?? true}
+                balance={wallet?.balance ?? 0}
+                showBalance={true}
+                onQRClick={() => setShowQRFullscreen(true)}
+              />
             </div>
             {/* Saldo y validez */}
             <div className="px-5 pb-2">

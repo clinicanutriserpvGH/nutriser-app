@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Upload, Eye, Trash2, ToggleLeft, ToggleRight, ImageIcon,
-  Info, Smartphone, Store, Home, CheckCircle2, X, Plus, RotateCcw
+  Info, Smartphone, Store, Home, CheckCircle2, X, Plus, RotateCcw, Pencil
 } from "lucide-react";
 
 const SPECS = {
@@ -67,6 +67,47 @@ export default function AdminSplashAdsTab() {
     onError: (e) => toast.error("Error: " + e.message),
   });
 
+  // Estado para modificar imagen de slide fija
+  const [modifyingType, setModifyingType] = useState<AdType | null>(null);
+  const [modifyPreviewUrl, setModifyPreviewUrl] = useState<string | null>(null);
+  const [modifyImageBase64, setModifyImageBase64] = useState<string | null>(null);
+  const [modifyImageMime, setModifyImageMime] = useState("image/jpeg");
+  const modifyFileInputRef = useRef<HTMLInputElement>(null);
+
+  const setCustomImageMutation = trpc.splashAds.setCustomImage.useMutation({
+    onSuccess: (_data, vars) => {
+      toast.success(_data.imageUrl
+        ? `✅ Imagen personalizada guardada para el pop-up de ${vars.type}`
+        : `✅ Imagen restaurada al diseño original`
+      );
+      if (vars.type === "inicio") refetchConfigInicio();
+      else refetchConfigTienda();
+      setModifyingType(null);
+      setModifyPreviewUrl(null);
+      setModifyImageBase64(null);
+    },
+    onError: (e) => toast.error("Error: " + e.message),
+  });
+
+  const handleModifyFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+      toast.error("Solo se aceptan JPG o PNG."); return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("El archivo no debe superar 2 MB."); return;
+    }
+    setModifyImageMime(file.type);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result = ev.target?.result as string;
+      setModifyImageBase64(result.split(",")[1]);
+      setModifyPreviewUrl(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const resetForm = () => {
     setPreviewUrl(null);
     setImageBase64(null);
@@ -115,6 +156,8 @@ export default function AdminSplashAdsTab() {
   const tiendaAds = allAds?.filter((a) => a.type === "tienda") ?? [];
   const inicioShowDefault = configInicio?.showDefault ?? false;
   const tiendaShowDefault = configTienda?.showDefault ?? false;
+  const inicioCustomImage = (configInicio as any)?.customImageUrl ?? null;
+  const tiendaCustomImage = (configTienda as any)?.customImageUrl ?? null;
 
   const sections = [
     {
@@ -124,6 +167,7 @@ export default function AdminSplashAdsTab() {
       ads: inicioAds,
       type: "inicio" as AdType,
       showDefault: inicioShowDefault,
+      customImageUrl: inicioCustomImage,
     },
     {
       label: "Pop-ups de Tienda",
@@ -132,6 +176,7 @@ export default function AdminSplashAdsTab() {
       ads: tiendaAds,
       type: "tienda" as AdType,
       showDefault: tiendaShowDefault,
+      customImageUrl: tiendaCustomImage,
     },
   ];
 
@@ -320,7 +365,7 @@ export default function AdminSplashAdsTab() {
       )}
 
       {/* Listado de publicidades existentes con botón Restaurar */}
-      {sections.map(({ label, sublabel, icon: Icon, ads, type, showDefault }) => (
+      {sections.map(({ label, sublabel, icon: Icon, ads, type, showDefault, customImageUrl }) => (
         <div key={type} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           {/* Header de la sección */}
           <div className="flex items-start justify-between mb-4">
@@ -333,33 +378,119 @@ export default function AdminSplashAdsTab() {
               <p className="text-xs text-gray-400 mt-0.5">{sublabel}</p>
             </div>
 
-            {/* Botón Restaurar / Ocultar slide original */}
+            {/* Botones Restaurar + Modificar */}
             <div className="flex flex-col items-end gap-1">
-              <button
-                onClick={() => setShowDefaultMutation.mutate({ type, showDefault: !showDefault })}
-                disabled={setShowDefaultMutation.isPending}
-                className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all ${
-                  showDefault
-                    ? "border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                    : "border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100"
-                }`}
-              >
-                <RotateCcw className="w-3 h-3" />
-                {showDefault
-                  ? type === "inicio" ? "✅ Tienda visible" : "✅ Monedero visible"
-                  : type === "inicio" ? "Restaurar Tienda" : "Restaurar Monedero"
-                }
-              </button>
+              <div className="flex gap-2">
+                {/* Botón Modificar */}
+                <button
+                  onClick={() => {
+                    setModifyingType(modifyingType === type ? null : type);
+                    setModifyPreviewUrl(null);
+                    setModifyImageBase64(null);
+                    if (modifyFileInputRef.current) modifyFileInputRef.current.value = "";
+                  }}
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all"
+                >
+                  <Pencil className="w-3 h-3" />
+                  Modificar
+                </button>
+                {/* Botón Restaurar / Ocultar slide original */}
+                <button
+                  onClick={() => setShowDefaultMutation.mutate({ type, showDefault: !showDefault })}
+                  disabled={setShowDefaultMutation.isPending}
+                  className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all ${
+                    showDefault
+                      ? "border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                      : "border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100"
+                  }`}
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  {showDefault
+                    ? type === "inicio" ? "✅ Tienda visible" : "✅ Monedero visible"
+                    : type === "inicio" ? "Restaurar Tienda" : "Restaurar Monedero"
+                  }
+                </button>
+              </div>
               <p className="text-xs text-gray-400">
-                {showDefault
-                  ? "La slide original aparece junto a tus imágenes"
-                  : ads.length > 0
-                    ? "Tus imágenes reemplazan la slide original"
-                    : "Sin imágenes: se muestra la slide original"
+                {customImageUrl
+                  ? "Imagen personalizada activa"
+                  : showDefault
+                    ? "La slide original aparece junto a tus imágenes"
+                    : ads.length > 0
+                      ? "Tus imágenes reemplazan la slide original"
+                      : "Sin imágenes: se muestra la slide original"
                 }
               </p>
             </div>
           </div>
+
+          {/* Panel de modificación de imagen fija */}
+          {modifyingType === type && (
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+              <p className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                <Pencil className="w-4 h-4" />
+                Modificar imagen de la slide {type === "inicio" ? "Tienda" : "Monedero"}
+              </p>
+              {customImageUrl && (
+                <div className="mb-3 flex items-center gap-3">
+                  <img src={customImageUrl} alt="Imagen personalizada" className="w-16 h-28 object-cover rounded-lg border border-blue-300" />
+                  <div>
+                    <p className="text-xs text-blue-700 font-medium">Imagen personalizada actual</p>
+                    <button
+                      onClick={() => setCustomImageMutation.mutate({ type, imageBase64: null })}
+                      disabled={setCustomImageMutation.isPending}
+                      className="mt-1 text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" /> Eliminar y volver al diseño original
+                    </button>
+                  </div>
+                </div>
+              )}
+              <input
+                ref={modifyFileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png"
+                onChange={handleModifyFileChange}
+                className="hidden"
+              />
+              {modifyPreviewUrl ? (
+                <div className="flex items-center gap-3 mb-3">
+                  <img src={modifyPreviewUrl} alt="Vista previa" className="w-16 h-28 object-cover rounded-lg border border-blue-300" />
+                  <div>
+                    <p className="text-xs text-blue-700 font-medium">Nueva imagen seleccionada</p>
+                    <button onClick={() => { setModifyPreviewUrl(null); setModifyImageBase64(null); if (modifyFileInputRef.current) modifyFileInputRef.current.value = ""; }} className="text-xs text-gray-500 hover:text-gray-700">
+                      Cambiar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => modifyFileInputRef.current?.click()}
+                  className="w-full py-3 border-2 border-dashed border-blue-300 rounded-xl text-sm text-blue-600 hover:bg-blue-100 transition flex items-center justify-center gap-2"
+                >
+                  <Upload className="w-4 h-4" /> Seleccionar nueva imagen (JPG/PNG, máx. 2 MB)
+                </button>
+              )}
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={() => {
+                    if (!modifyImageBase64) return;
+                    setCustomImageMutation.mutate({ type, imageBase64: modifyImageBase64, imageMime: modifyImageMime });
+                  }}
+                  disabled={!modifyImageBase64 || setCustomImageMutation.isPending}
+                  className="flex-1 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {setCustomImageMutation.isPending ? "Guardando..." : "Guardar imagen"}
+                </button>
+                <button
+                  onClick={() => { setModifyingType(null); setModifyPreviewUrl(null); setModifyImageBase64(null); }}
+                  className="px-4 py-2 border border-gray-200 text-gray-500 text-sm rounded-lg hover:bg-gray-50 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Grid de imágenes */}
           {ads.length === 0 ? (

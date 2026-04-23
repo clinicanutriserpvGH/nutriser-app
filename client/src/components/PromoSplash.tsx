@@ -212,6 +212,7 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
   // Si no hay nada activo → totalSlides=0 → shouldShow=false → no aparece nada.
   const adminTiendaAds = tiendaAds as Array<{ id: number; imageUrl: string; title: string }>;
   const showDefaultSlide = !!(splashConfigData?.showDefault); // Solo si el admin lo activó — NUNCA por defecto
+  const customImageUrl: string | null = (splashConfigData as any)?.customImageUrl ?? null;
   const adminAdsCount = adminTiendaAds.length;
   const defaultSlideCount = showDefaultSlide ? 1 : 0;
   const totalSlides = adminAdsCount + defaultSlideCount + activePromos.length;
@@ -329,7 +330,25 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
               </div>
             </div>
           ) : isMonederoSlide ? (
-            <MonederoPromoCard onAction={handleMonederoAction} />
+            customImageUrl ? (
+              // Imagen personalizada del admin para la slide del Monedero
+              <div className="relative w-full flex-shrink-0">
+                <div
+                  className="relative w-full overflow-hidden rounded-2xl"
+                  style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
+                >
+                  <img
+                    src={customImageUrl}
+                    alt="Monedero Nutriser"
+                    className="w-full h-auto block"
+                    style={{ display: 'block', cursor: 'pointer' }}
+                    onClick={handleMonederoAction}
+                  />
+                </div>
+              </div>
+            ) : (
+              <MonederoPromoCard onAction={handleMonederoAction} />
+            )
           ) : (
             activePromos[promoIndex] && (
               <PromoCard

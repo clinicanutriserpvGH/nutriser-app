@@ -883,6 +883,7 @@ export const splashConfig = mysqlTable("splashConfig", {
   id: int("id").autoincrement().primaryKey(),
   type: mysqlEnum("type", ["inicio", "tienda"]).notNull().unique(),
   showDefault: boolean("showDefault").notNull().default(false),
+  customImageUrl: varchar("customImageUrl", { length: 1024 }), // Imagen personalizada del admin para la slide fija
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type SplashConfig = typeof splashConfig.$inferSelect;

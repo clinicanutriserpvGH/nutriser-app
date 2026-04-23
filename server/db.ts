@@ -1977,6 +1977,18 @@ export async function setSplashShowDefault(type: 'inicio' | 'tienda', showDefaul
   await db.update(splashConfig).set({ showDefault }).where(eq(splashConfig.type, type));
 }
 
+/** Actualiza la imagen personalizada de la slide fija (null = usar diseño automático) */
+export async function setSplashCustomImage(type: 'inicio' | 'tienda', customImageUrl: string | null) {
+  const db = await getDb();
+  if (!db) return;
+  const [existing] = await db.select().from(splashConfig).where(eq(splashConfig.type, type)).limit(1);
+  if (existing) {
+    await db.update(splashConfig).set({ customImageUrl }).where(eq(splashConfig.type, type));
+  } else {
+    await db.insert(splashConfig).values({ type, showDefault: false, customImageUrl });
+  }
+}
+
 // ─── Auto-desactivación de promociones vencidas ──────────────────────────────
 /** Desactiva automáticamente todas las promociones cuyo expiresAt ya pasó. Retorna el número de filas afectadas. */
 export async function autoDeactivateExpiredPromotions(): Promise<number> {

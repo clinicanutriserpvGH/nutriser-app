@@ -15,7 +15,7 @@ import { getAllCourses, getPublishedCourses, getCourseById, createCourse, update
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions } from './db';
-import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault } from './db';
+import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -3399,6 +3399,25 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await setSplashShowDefault(input.type, input.showDefault);
         return { success: true };
+      }),
+    // Admin: subir imagen personalizada para la slide fija (null = restaurar diseño automático)
+    setCustomImage: publicProcedure
+      .input(z.object({
+        type: z.enum(['inicio', 'tienda']),
+        imageBase64: z.string().nullable(),
+        imageMime: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        if (input.imageBase64 === null) {
+          await setSplashCustomImage(input.type, null);
+          return { success: true, imageUrl: null };
+        }
+        const buffer = Buffer.from(input.imageBase64, 'base64');
+        const ext = (input.imageMime ?? 'image/jpeg').includes('png') ? 'png' : 'jpg';
+        const key = `splash-custom/${input.type}-${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buffer, input.imageMime ?? 'image/jpeg');
+        await setSplashCustomImage(input.type, url);
+        return { success: true, imageUrl: url };
       }),
   }),
 

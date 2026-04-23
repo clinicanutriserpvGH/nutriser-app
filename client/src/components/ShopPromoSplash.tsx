@@ -175,6 +175,7 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   // Si no hay imágenes del admin → se usa la ShopCard fija siempre
   const adminAds = splashAds as Array<{ id: number; imageUrl: string; title: string }>;
   const showDefaultSlide = !!(splashConfigData?.showDefault); // Solo si el admin lo activó — NUNCA por defecto
+  const customImageUrl: string | null = (splashConfigData as any)?.customImageUrl ?? null;
   const hasAdminAds = adminAds.length > 0;
   // Orden: [imágenes admin] + [ShopCard si showDefault] + [cupones activos]
   const adminAdsCount = adminAds.length;
@@ -275,7 +276,25 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
               </div>
             </div>
           ) : isShopSlide ? (
-            <ShopCard onAction={handleGoToShop} />
+            customImageUrl ? (
+              // Imagen personalizada del admin para la slide fija de Tienda
+              <div className="relative w-full flex-shrink-0">
+                <div
+                  className="relative w-full overflow-hidden rounded-2xl"
+                  style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
+                >
+                  <img
+                    src={customImageUrl}
+                    alt="Tienda Nutriser"
+                    className="w-full h-auto block"
+                    style={{ display: 'block', cursor: 'pointer' }}
+                    onClick={handleGoToShop}
+                  />
+                </div>
+              </div>
+            ) : (
+              <ShopCard onAction={handleGoToShop} />
+            )
           ) : (
             activePromos[promoIndex] && (
               <PromoCard

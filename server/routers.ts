@@ -3537,33 +3537,44 @@ export const appRouter = router({
   // ─── Banner Interests - Solicitudes de interés en promociones ───────────────
   bannerInterests: router({
     // Usuario: registrar interés en una promoción del banner
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         bannerId: z.number().optional(),
         bannerTitle: z.string().optional(),
         bannerImageUrl: z.string().optional(),
+        patientId: z.number().optional(),
+        patientName: z.string().optional(),
+        patientEmail: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        // Soporta tanto pacientes (sistema propio) como usuarios Manus OAuth
+        const userId = input.patientId ?? ctx.user?.id ?? 0;
+        const patientName = input.patientName ?? ctx.user?.name ?? null;
+        const patientEmail = input.patientEmail ?? ctx.user?.email ?? null;
         const interest = await createBannerInterest({
-          userId: ctx.user.id,
+          userId,
           bannerId: input.bannerId ?? null,
           bannerTitle: input.bannerTitle ?? null,
           bannerImageUrl: input.bannerImageUrl ?? null,
-          patientName: ctx.user.name ?? null,
-          patientEmail: ctx.user.email ?? null,
+          patientName,
+          patientEmail,
           status: 'pending',
         });
         // Notificar al admin
         await notifyOwner({
           title: `🏷️ Nueva solicitud de promoción: ${input.bannerTitle ?? 'Sin título'}`,
-          content: `El paciente ${ctx.user.name ?? ctx.user.email ?? 'desconocido'} quiere comprar en clínica la promoción: "${input.bannerTitle ?? 'Sin título'}". Revisa la sección Solicitudes del Monedero.`,
+          content: `El paciente ${patientName ?? patientEmail ?? 'desconocido'} quiere comprar en clínica la promoción: "${input.bannerTitle ?? 'Sin título'}". Revisa la sección Solicitudes del Monedero.`,
         });
         return { success: true, interest };
       }),
-    // Usuario: ver sus propias solicitudes
-    myInterests: protectedProcedure.query(async ({ ctx }) => {
-      return await getBannerInterestsByUser(ctx.user.id);
-    }),
+    // Usuario: ver sus propias solicitudes (soporta sistema propio de pacientes y Manus OAuth)
+    myInterests: publicProcedure
+      .input(z.object({ patientId: z.number().optional() }).optional())
+      .query(async ({ ctx, input }) => {
+        const userId = input?.patientId ?? ctx.user?.id;
+        if (!userId) return [];
+        return await getBannerInterestsByUser(userId);
+      }),
     // Admin: ver todas las solicitudes pendientes
     getPending: publicProcedure.query(async () => {
       return await getPendingBannerInterests();

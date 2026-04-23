@@ -142,10 +142,10 @@ export default function WalletPage() {
     return (saved === "EN" || saved === "ES") ? saved as Lang : "ES";
   })();
 
-  // ─── Solicitudes de interés en banners (desde DB) ───────────────────────────────────────────────────────────────────────────────────────
+  // Solicitudes de interés en banners (desde DB)
   const bannerInterestsQuery = trpc.bannerInterests.myInterests.useQuery(
-    undefined,
-    { enabled: isLoggedIn }
+    { patientId: patient?.id },
+    { enabled: isLoggedIn && !!patient?.id }
   );
   const myBannerInterests = (bannerInterestsQuery.data || []).filter((i: any) => i.status === 'pending');
 

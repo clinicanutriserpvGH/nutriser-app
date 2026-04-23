@@ -363,6 +363,9 @@ export default function Memberships() {
       bannerId: banner.id,
       bannerTitle: banner.title ?? undefined,
       bannerImageUrl: banner.imageUrl ?? undefined,
+      patientId: patient?.id ?? undefined,
+      patientName: patient?.name ?? undefined,
+      patientEmail: patient?.email ?? undefined,
     });
   };
 

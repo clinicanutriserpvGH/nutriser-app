@@ -58,10 +58,10 @@ async function drawCard(
   pdf.roundedRect(x, y, W, H, 3, 3, "S");
 
   // ── Silueta dorada (esquina derecha, proporción 1:1) ──
-  const silW = 26;
-  const silH = 26;
+  const silW = 30;
+  const silH = 30;
   const silX = x + W - silW - 2;
-  const silY = y + 10;
+  const silY = y + 15;
   try {
     pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
   } catch (_) {}

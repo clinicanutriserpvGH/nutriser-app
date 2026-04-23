@@ -60,8 +60,8 @@ function buildCardHtml(card: CardData): string {
       <!-- Silueta dorada HD (esquina derecha, proporción 1:1 natural) -->
       <img src="${SILUETA_B64}" style="
         position:absolute;
-        right:3px; top:14px;
-        width:${Math.round(W * 0.33)}px;
+        right:4px; top:18px;
+        width:${Math.round(W * 0.38)}px;
         height:auto;
         opacity:0.88;
         z-index:1;

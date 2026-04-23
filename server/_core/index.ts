@@ -426,8 +426,9 @@ async function startServer() {
       if (!Array.isArray(cards) || cards.length === 0) {
         return res.status(400).json({ error: "Invalid wallets param" });
       }
+      const mode = (req.query.mode as string) === "a4" ? "a4" : "individual";
       const { generateWalletCardPdf } = await import("../walletCardPdf");
-      const pdfBuffer = await generateWalletCardPdf(cards);
+      const pdfBuffer = await generateWalletCardPdf(cards, mode);
       const filename = cards.length === 1
         ? `tarjeta-${cards[0].walletNumber || "nutriser"}.pdf`
         : `tarjetas-nutriser-${cards.length}.pdf`;

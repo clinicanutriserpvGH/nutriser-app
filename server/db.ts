@@ -1505,6 +1505,22 @@ export async function getWalletTransactions(walletId: number, limit = 50): Promi
     .limit(limit);
 }
 
+/** Admin: eliminar una transacción específica del historial */
+export async function deleteWalletTransaction(transactionId: number): Promise<{ deleted: number }> {
+  const db = await getDb();
+  if (!db) return { deleted: 0 };
+  const result = await db.delete(walletTransactions).where(eq(walletTransactions.id, transactionId));
+  return { deleted: (result as any).affectedRows ?? 0 };
+}
+
+/** Admin: eliminar todos los movimientos del historial de un monedero */
+export async function clearAllWalletTransactions(walletId: number): Promise<{ deleted: number }> {
+  const db = await getDb();
+  if (!db) return { deleted: 0 };
+  const result = await db.delete(walletTransactions).where(eq(walletTransactions.walletId, walletId));
+  return { deleted: (result as any).affectedRows ?? 0 };
+}
+
 /** Get loyalty tracker for a wallet */
 export async function getLoyaltyTracker(walletId: number): Promise<LoyaltyTracker | undefined> {
   const db = await getDb();

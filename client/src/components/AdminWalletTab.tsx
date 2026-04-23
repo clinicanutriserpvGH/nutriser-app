@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Search, Plus, Minus, CreditCard,
   Gift, Star, ChevronDown, ChevronUp, Loader2,
-  DollarSign, Users, Award, Trash2, Calendar, QrCode, Printer, CheckSquare, Square, PrinterCheck,
+  DollarSign, Users, Award, Trash2, Calendar, QrCode, Printer, CheckSquare, Square, PrinterCheck, History, AlertTriangle,
 } from "lucide-react";
 
 import AdminQRScanner from "./AdminQRScanner";
@@ -235,6 +235,21 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
   const [creditDesc, setCreditDesc] = useState("");
   const [debitAmount, setDebitAmount] = useState("");
   const [debitDesc, setDebitDesc] = useState("");
+  const [showTransactions, setShowTransactions] = useState(false);
+  const [confirmClearAll, setConfirmClearAll] = useState(false);
+  const utils = trpc.useUtils();
+  const transactionsQuery = trpc.wallet.adminGetTransactions.useQuery(
+    { walletId: wallet.id },
+    { enabled: showTransactions }
+  );
+  const deleteTransactionMutation = trpc.wallet.adminDeleteTransaction.useMutation({
+    onSuccess: () => { toast.success("Movimiento eliminado"); transactionsQuery.refetch(); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const clearAllTransactionsMutation = trpc.wallet.adminClearAllTransactions.useMutation({
+    onSuccess: (data) => { toast.success(`Historial limpiado (${data.deleted} movimientos)`); setConfirmClearAll(false); transactionsQuery.refetch(); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
 
   return (
     <Card className="border-gray-200 hover:border-[#C5A55A]/50 transition">
@@ -351,13 +366,85 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
                 {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Descontar"}
               </Button>
             </div>
+            {/* Historial de Movimientos (Admin) */}
+            <div className="mt-2">
+              <button
+                onClick={() => setShowTransactions(!showTransactions)}
+                className="flex items-center gap-2 text-xs font-semibold text-gray-600 hover:text-[#C5A55A] transition"
+              >
+                <History className="w-3.5 h-3.5" />
+                {showTransactions ? "Ocultar movimientos" : "Ver movimientos"}
+              </button>
+              {showTransactions && (
+                <div className="mt-2 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">Historial de transacciones</p>
+                    {!confirmClearAll ? (
+                      <button
+                        onClick={() => setConfirmClearAll(true)}
+                        className="flex items-center gap-1 text-[10px] text-red-600 hover:text-red-800 font-semibold transition"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Limpiar todo
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-2 py-1">
+                        <AlertTriangle className="w-3 h-3 text-red-600" />
+                        <span className="text-[10px] text-red-700 font-semibold">Eliminar todos?</span>
+                        <button
+                          onClick={() => clearAllTransactionsMutation.mutate({ walletId: wallet.id })}
+                          disabled={clearAllTransactionsMutation.isPending}
+                          className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold hover:bg-red-700 disabled:opacity-50"
+                        >
+                          {clearAllTransactionsMutation.isPending ? "..." : "Si"}
+                        </button>
+                        <button
+                          onClick={() => setConfirmClearAll(false)}
+                          className="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold hover:bg-gray-300"
+                        >
+                          No
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {transactionsQuery.isLoading ? (
+                    <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-[#C5A55A]" /></div>
+                  ) : (transactionsQuery.data || []).length === 0 ? (
+                    <p className="text-[10px] text-gray-400 text-center py-3">No hay movimientos</p>
+                  ) : (
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {(transactionsQuery.data || []).map((tx: any) => (
+                        <div key={tx.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5 group">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-semibold text-gray-800 truncate">{tx.description}</p>
+                            <p className="text-[9px] text-gray-400">{new Date(tx.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                          </div>
+                          <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                            <span className={`text-xs font-black ${tx.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {tx.amount >= 0 ? '+' : ''}${(tx.amount / 100).toFixed(2)}
+                            </span>
+                            <button
+                              onClick={() => deleteTransactionMutation.mutate({ transactionId: tx.id })}
+                              disabled={deleteTransactionMutation.isPending}
+                              className="opacity-0 group-hover:opacity-100 transition p-1 rounded hover:bg-red-100 text-red-500 hover:text-red-700"
+                              title="Eliminar este movimiento"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
     </Card>
   );
 }
-
 // ─── Loyalty Registration ────────────────────────────────────────────────────
 function LoyaltyRegistration({ wallets, plans, onRegisterConsultation, onRegisterProductPurchase, isLoading }: {
   wallets: any[];

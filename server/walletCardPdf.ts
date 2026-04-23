@@ -86,8 +86,13 @@ export async function generateWalletCardPdf(cards: WalletPdfCard[]): Promise<Buf
   return new Promise((resolve, reject) => {
     const isSingle = cards.length === 1;
 
+    // Siempre usar A4 para que el visor del iPad muestre la tarjeta al tamaño correcto
+    // A4: 595.28 x 841.89 pt
+    const PAGE_W = 595.28;
+    const PAGE_H = 841.89;
+
     const doc = new PDFDocument({
-      size: isSingle ? [CARD_W, CARD_H] : "A4",
+      size: "A4",
       margin: 0,
       compress: true,
     });
@@ -98,7 +103,10 @@ export async function generateWalletCardPdf(cards: WalletPdfCard[]): Promise<Buf
     doc.on("error", reject);
 
     if (isSingle) {
-      drawCard(doc, cards[0], qrBuffers[0], logoBuffer, siluetaBuffer, 0, 0, CARD_W, CARD_H);
+      // Centrar la tarjeta CR-80 en la página A4
+      const cx = (PAGE_W - CARD_W) / 2;
+      const cy = (PAGE_H - CARD_H) / 2;
+      drawCard(doc, cards[0], qrBuffers[0], logoBuffer, siluetaBuffer, cx, cy, CARD_W, CARD_H);
     } else {
       const PAGE_W = 595.28;
       const MARGIN = 20;

@@ -2,7 +2,8 @@
  * generateWalletPdfClient.ts
  *
  * Genera un PDF de tarjetas del Monedero Nutriser directamente en el navegador
- * usando jsPDF + QRCode puro. NO usa html2canvas (incompatible con Safari/iPad).
+ * usando jsPDF + QRCode puro + silueta embebida en base64.
+ * NO usa html2canvas — compatible con Safari/iPad.
  *
  * Formato CR-80: 85.5mm x 54mm (tarjeta de crédito estándar).
  * - Modo individual (1 tarjeta): página exacta CR-80
@@ -11,6 +12,7 @@
 
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
+import { SILUETA_B64 } from "./siluetaB64";
 
 export interface WalletPdfCardData {
   patientName: string;
@@ -22,14 +24,8 @@ export interface WalletPdfCardData {
 const W = 85.5;
 const H = 54;
 
-// Colores
-const GOLD = "#C5A55A";
-const DARK_GOLD = "#8B6914";
-const TEXT_DARK = "#3a2200";
-const TEXT_LIGHT = "#6b4c1e";
-
 /**
- * Genera un QR como data URL PNG usando la librería qrcode
+ * Genera un QR como data URL PNG
  */
 async function makeQRDataUrl(text: string): Promise<string> {
   return QRCode.toDataURL(text, {
@@ -60,7 +56,7 @@ async function drawCard(
   pdf.setLineWidth(0.4);
   pdf.roundedRect(x, y, W, H, 3, 3, "S");
 
-  // ── Franja dorada superior (logo + título) ──
+  // ── Franja dorada superior ──
   const topH = 13;
   pdf.setFillColor(197, 165, 90);
   pdf.rect(x, y, W, topH, "F");
@@ -79,7 +75,20 @@ async function drawCard(
 
   // ── Zona central (QR + nombre/código + silueta) ──
   const midY = y + topH;
-  const midH = H - topH - 12; // 12mm para franja inferior
+  const midH = H - topH - 12;
+
+  // Silueta dorada a la derecha (imagen PNG con transparencia)
+  const silW = 18;
+  const silH = midH * 0.95;
+  const silX = x + W - silW - 2;
+  const silY = midY + (midH - silH) / 2;
+  try {
+    pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
+  } catch (_) {
+    // fallback: rectángulo dorado si falla la imagen
+    pdf.setFillColor(197, 165, 90);
+    pdf.rect(silX + silW * 0.3, silY, silW * 0.4, silH, "F");
+  }
 
   // QR (izquierda)
   const qrSize = 20;
@@ -105,17 +114,17 @@ async function drawCard(
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7);
   pdf.setTextColor(58, 34, 0);
-  // Truncar nombre si es muy largo
-  const maxName = 18;
-  const displayName = card.patientName.length > maxName
-    ? card.patientName.substring(0, maxName - 1) + "…"
-    : card.patientName;
+  const maxName = 16;
+  const displayName =
+    card.patientName.length > maxName
+      ? card.patientName.substring(0, maxName - 1) + "…"
+      : card.patientName;
   pdf.text(displayName.toUpperCase(), nameX, nameY);
 
   // Línea bajo el nombre
   pdf.setDrawColor(197, 165, 90);
   pdf.setLineWidth(0.2);
-  pdf.line(nameX, nameY + 1.5, nameX + 46, nameY + 1.5);
+  pdf.line(nameX, nameY + 1.5, nameX + 38, nameY + 1.5);
 
   // Label "CÓDIGO"
   pdf.setFont("helvetica", "normal");
@@ -164,7 +173,11 @@ export async function generateWalletPdf(
       await drawCard(pdf, cards[i], 0, 0);
     }
 
-    pdf.save(cards.length === 1 ? "tarjeta-nutriser.pdf" : `tarjetas-nutriser-${cards.length}.pdf`);
+    pdf.save(
+      cards.length === 1
+        ? "tarjeta-nutriser.pdf"
+        : `tarjetas-nutriser-${cards.length}.pdf`
+    );
   } else {
     // Modo A4: grilla 2×4
     const A4_W = 210;
@@ -195,11 +208,10 @@ export async function generateWalletPdf(
   }
 }
 
-// Alias para compatibilidad con AdminWalletTab
+// Alias legacy — no se usa
 export async function generateWalletPdfFromElements(
   _elements: HTMLElement[],
   _mode: "individual" | "a4"
 ): Promise<void> {
-  // Esta función ya no se usa — usar generateWalletPdf directamente
   throw new Error("Usa generateWalletPdf en lugar de generateWalletPdfFromElements");
 }

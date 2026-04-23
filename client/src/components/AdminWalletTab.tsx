@@ -252,6 +252,30 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
     onError: (e) => toast.error(e.message),
   });
 
+  // ── Administración del monedero ──
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [discountValue, setDiscountValue] = useState<10|15|20|25|30>(10);
+  const suspendMutation = trpc.wallet.adminSuspendWallet.useMutation({
+    onSuccess: () => { toast.success('Monedero dado de baja.'); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => toast.error('Error: ' + e.message),
+  });
+  const unsuspendMutation = trpc.wallet.adminUnsuspendWallet.useMutation({
+    onSuccess: () => { toast.success('Monedero reactivado.'); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => toast.error('Error: ' + e.message),
+  });
+  const resetMutation = trpc.wallet.adminResetWallet.useMutation({
+    onSuccess: () => { toast.success('Monedero reiniciado. Saldo en $0.00.'); setConfirmReset(false); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => { toast.error('Error: ' + e.message); setConfirmReset(false); },
+  });
+  const setDiscountMutation = trpc.wallet.adminSetDiscount.useMutation({
+    onSuccess: (d) => { toast.success(`Descuento del ${d.discountPercent}% aplicado.`); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => toast.error('Error: ' + e.message),
+  });
+  const removeDiscountMutation = trpc.wallet.adminRemoveDiscount.useMutation({
+    onSuccess: () => { toast.success('Descuento eliminado.'); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => toast.error('Error: ' + e.message),
+  });
+
   return (
     <Card className="border-gray-200 hover:border-[#C5A55A]/50 transition">
       <CardContent className="p-3">
@@ -367,6 +391,104 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading }: {
                 {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Descontar"}
               </Button>
             </div>
+            {/* ── Administración del Monedero ── */}
+            <div className="bg-gray-900 rounded-xl p-3 space-y-3 border border-gray-700">
+              <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+                Administración del Monedero
+              </p>
+
+              {/* Baja / Alta */}
+              <div className="flex gap-2">
+                {wallet.status === 'active' ? (
+                  <Button
+                    size="sm"
+                    disabled={suspendMutation.isPending}
+                    onClick={() => suspendMutation.mutate({ walletNumber: wallet.walletNumber })}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs"
+                  >
+                    {suspendMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Dar de Baja'}
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    disabled={unsuspendMutation.isPending}
+                    onClick={() => unsuspendMutation.mutate({ walletNumber: wallet.walletNumber })}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs"
+                  >
+                    {unsuspendMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Dar de Alta'}
+                  </Button>
+                )}
+              </div>
+
+              {/* Descuento */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-wide">Descuento en consultas</p>
+                {wallet.discountPercent ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-amber-400">{wallet.discountPercent}% activo</span>
+                    <Button
+                      size="sm"
+                      disabled={removeDiscountMutation.isPending}
+                      onClick={() => removeDiscountMutation.mutate({ walletNumber: wallet.walletNumber })}
+                      className="flex-1 bg-gray-600 hover:bg-gray-500 text-white text-xs"
+                    >
+                      {removeDiscountMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Quitar descuento'}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <select
+                      value={discountValue}
+                      onChange={(e) => setDiscountValue(Number(e.target.value) as 10|15|20|25|30)}
+                      className="flex-1 text-xs bg-gray-800 text-white border border-gray-600 rounded-lg px-2 py-1"
+                    >
+                      {[10,15,20,25,30].map(v => <option key={v} value={v}>{v}%</option>)}
+                    </select>
+                    <Button
+                      size="sm"
+                      disabled={setDiscountMutation.isPending}
+                      onClick={() => setDiscountMutation.mutate({ walletNumber: wallet.walletNumber, discountPercent: discountValue })}
+                      className="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-xs"
+                    >
+                      {setDiscountMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Aplicar descuento'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Reiniciar */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-wide">Reiniciar monedero</p>
+                {!confirmReset ? (
+                  <Button
+                    size="sm"
+                    onClick={() => setConfirmReset(true)}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white text-xs"
+                  >
+                    Reiniciar (poner en $0.00)
+                  </Button>
+                ) : (
+                  <div className="bg-red-900/60 border border-red-500 rounded-lg p-2 space-y-2">
+                    <p className="text-[10px] text-red-300 font-semibold text-center">¿Seguro? Esto borra saldo, cashback y canjeado.</p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        disabled={resetMutation.isPending}
+                        onClick={() => resetMutation.mutate({ walletNumber: wallet.walletNumber, adminEmail: 'admin' })}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs"
+                      >
+                        {resetMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Sí, reiniciar'}
+                      </Button>
+                      <Button size="sm" onClick={() => setConfirmReset(false)} className="flex-1 bg-gray-600 hover:bg-gray-500 text-white text-xs">
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Historial de Movimientos (Admin) */}
             <div className="mt-2">
               <button

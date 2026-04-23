@@ -14,7 +14,7 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
-import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet } from './db';
+import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet, getCashPendingPaymentById } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest, deleteBannerInterest } from './db';
@@ -2869,6 +2869,7 @@ export const appRouter = router({
           freeConsultationsAvailable: (t.freeConsultationsEarned ?? 0) - (t.freeConsultationsUsed ?? 0),
           totalCredited: w.totalCashback ?? 0,
           loyaltyProgress: prog, // progreso en planes de lealtad por producto
+          discountPercent: w.discountPercent ?? null,
         };
       });
     }),
@@ -2882,6 +2883,9 @@ export const appRouter = router({
         referenceId: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
+        const walletCheck = await getWalletById(input.walletId);
+        if (!walletCheck) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        if (!walletCheck.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de operar.' });
         const txn = await addWalletTransaction({
           walletId: input.walletId,
           type: 'cashback',
@@ -2902,6 +2906,9 @@ export const appRouter = router({
         description: z.string(),
       }))
       .mutation(async ({ input }) => {
+        const walletCheck = await getWalletById(input.walletId);
+        if (!walletCheck) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        if (!walletCheck.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de operar.' });
         const txn = await addWalletTransaction({
           walletId: input.walletId,
           type: input.amount >= 0 ? 'bonus' : 'adjustment',
@@ -2952,29 +2959,36 @@ export const appRouter = router({
         const result = await clearAllWalletTransactions(input.walletId);
         return { success: true, deleted: result.deleted };
       }),
-    // Registrar consulta nutricional (admin)
+     // Registrar consulta nutricional (admin)
     adminRecordConsultation: publicProcedure
       .input(z.object({ walletId: z.number() }))
       .mutation(async ({ input }) => {
+        const walletCheck = await getWalletById(input.walletId);
+        if (!walletCheck) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        if (!walletCheck.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de operar.' });
         return recordConsultation(input.walletId);
       }),
-
     // Usar consulta gratis (admin)
     adminUseFreeConsultation: publicProcedure
       .input(z.object({ walletId: z.number() }))
       .mutation(async ({ input }) => {
+        const walletCheck = await getWalletById(input.walletId);
+        if (!walletCheck) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        if (!walletCheck.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de operar.' });
         const used = await useFreeConsultation(input.walletId);
         if (!used) throw new TRPCError({ code: 'BAD_REQUEST', message: 'No hay consultas gratis disponibles' });
         return { success: true };
       }),
 
-    // Registrar compra para plan de lealtad (admin)
+     // Registrar compra para plan de lealtad (admin)
     adminRecordLoyaltyPurchase: publicProcedure
       .input(z.object({ walletId: z.number(), planId: z.number() }))
       .mutation(async ({ input }) => {
+        const walletCheck = await getWalletById(input.walletId);
+        if (!walletCheck) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        if (!walletCheck.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de operar.' });
         return recordLoyaltyPurchase(input.walletId, input.planId);
       }),
-
     // Usar recompensa de lealtad (admin)
     adminUseLoyaltyReward: publicProcedure
       .input(z.object({ walletId: z.number(), planId: z.number() }))
@@ -3308,6 +3322,14 @@ export const appRouter = router({
     confirm: publicProcedure
       .input(z.object({ id: z.number(), adminEmail: z.string().optional() }))
       .mutation(async ({ input }) => {
+        // Verificar que el monedero no esté suspendido antes de confirmar el pago
+        const pendingPayment = await getCashPendingPaymentById(input.id);
+        if (pendingPayment) {
+          const walletForCheck = await getWalletById(pendingPayment.walletId);
+          if (walletForCheck && !walletForCheck.isActive) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de confirmar el pago.' });
+          }
+        }
         const payment = await confirmCashPayment(input.id, input.adminEmail ?? 'admin');
         // 1. Descontar saldo del monedero si el paciente eligió usar parte de su saldo
         if (payment.walletAmountUsedCents > 0) {

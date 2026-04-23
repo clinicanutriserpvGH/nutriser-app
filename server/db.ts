@@ -1883,6 +1883,14 @@ export async function getAllCashPendingPayments(): Promise<CashPendingPayment[]>
     .orderBy(cashPendingPayments.createdAt);
 }
 
+/** Obtener un pago pendiente por ID */
+export async function getCashPendingPaymentById(id: number): Promise<CashPendingPayment | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [row] = await db.select().from(cashPendingPayments).where(eq(cashPendingPayments.id, id)).limit(1);
+  return row;
+}
+
 /** Confirmar un pago en efectivo (admin) */
 export async function confirmCashPayment(id: number, confirmedBy: string): Promise<CashPendingPayment> {
   const db = await getDb();

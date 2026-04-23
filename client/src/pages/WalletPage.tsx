@@ -150,7 +150,7 @@ export default function WalletPage() {
   const myBannerInterests = (bannerInterestsQuery.data || []).filter((i: any) => i.status === 'pending');
 
   const purchasesQuery = trpc.patients.getMyPurchases.useQuery(
-    { email: patient?.email ?? 'x@x.com' },
+    { email: patient?.email ?? 'x@x.com', patientId: patient?.id },
     { enabled: isLoggedIn && !!patient?.email && activeTab === 'purchases' }
   );
   const myPurchases = purchasesQuery.data;
@@ -642,10 +642,113 @@ export default function WalletPage() {
                   </div>
                 )}
 
+                {/* Productos */}
+                {(myPurchases?.products?.length ?? 0) > 0 && (
+                  <div>
+                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">{lang === 'EN' ? 'Products' : 'Productos'}</p>
+                    <div className="space-y-3">
+                      {myPurchases!.products.map((prod: any) => (
+                        <div key={prod.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
+                          prod.status === 'verified' ? 'border-green-200' :
+                          prod.status === 'rejected' ? 'border-red-200' : 'border-yellow-200'
+                        }`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-[#1A1A1A] font-bold text-sm">{prod.productName}</p>
+                              {prod.originalPrice && <p className="text-gray-500 text-xs mt-0.5 line-through">{prod.originalPrice}</p>}
+                              <p className="text-gray-400 text-xs mt-0.5">{new Date(prod.createdAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                            </div>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                              prod.status === 'verified' ? 'bg-green-50 text-green-700' :
+                              prod.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
+                            }`}>
+                              {prod.status === 'verified' ? (lang === 'EN' ? 'Verified' : 'Verificado') : prod.status === 'pending' ? (lang === 'EN' ? 'Pending' : 'Pendiente') : (lang === 'EN' ? 'Rejected' : 'Rechazado')}
+                            </span>
+                          </div>
+                          {prod.purchaseCode && (
+                            <div className="mt-2 bg-gray-50 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                              <span className="text-gray-400 text-xs">{t('codeLabel', lang)}</span>
+                              <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{prod.purchaseCode}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Ebooks / Academia */}
+                {(myPurchases?.ebooks?.length ?? 0) > 0 && (
+                  <div>
+                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">{lang === 'EN' ? 'Library / Academy' : 'Librería / Academia'}</p>
+                    <div className="space-y-3">
+                      {myPurchases!.ebooks.map((eb: any) => (
+                        <div key={eb.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
+                          eb.status === 'approved' ? 'border-green-200' :
+                          eb.status === 'rejected' ? 'border-red-200' : 'border-yellow-200'
+                        }`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-3">
+                              {eb.ebookImageUrl && (
+                                <img src={eb.ebookImageUrl} alt={eb.ebookTitle} className="w-12 h-16 object-cover rounded-lg flex-shrink-0" />
+                              )}
+                              <div>
+                                <p className="text-[#1A1A1A] font-bold text-sm">{eb.ebookTitle ?? 'eBook'}</p>
+                                {eb.ebookPrice && <p className="text-gray-500 text-xs mt-0.5">${eb.ebookPrice} MXN</p>}
+                                <p className="text-gray-400 text-xs mt-0.5">{new Date(eb.createdAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                              </div>
+                            </div>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                              eb.status === 'approved' ? 'bg-green-50 text-green-700' :
+                              eb.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
+                            }`}>
+                              {eb.status === 'approved' ? (lang === 'EN' ? 'Active' : 'Activo') : eb.status === 'pending' ? (lang === 'EN' ? 'Pending' : 'Pendiente') : (lang === 'EN' ? 'Rejected' : 'Rechazado')}
+                            </span>
+                          </div>
+                          {eb.status === 'approved' && eb.accessToken && (
+                            <div className="mt-2">
+                              <a href={`/ebook/${eb.accessToken}`} className="inline-flex items-center gap-1 text-[#C5A55A] text-xs font-bold hover:underline">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                                {lang === 'EN' ? 'Read eBook' : 'Leer eBook'}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Pagos en clínica confirmados */}
+                {(myPurchases?.cashPayments?.length ?? 0) > 0 && (
+                  <div>
+                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">{lang === 'EN' ? 'Clinic Payments' : 'Pagos en Clínica'}</p>
+                    <div className="space-y-3">
+                      {myPurchases!.cashPayments.map((cp: any) => (
+                        <div key={cp.id} className="bg-white rounded-2xl p-4 border border-green-200 shadow-sm">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-[#1A1A1A] font-bold text-sm">{cp.concept}</p>
+                              <p className="text-gray-500 text-xs mt-0.5">${(cp.amountCents / 100).toFixed(2)} MXN</p>
+                              {cp.confirmedAt && <p className="text-gray-400 text-xs mt-0.5">{lang === 'EN' ? 'Paid on' : 'Pagado el'} {new Date(cp.confirmedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                            </div>
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 bg-green-50 text-green-700">
+                              {lang === 'EN' ? 'Confirmed' : 'Confirmado'}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Estado vacío */}
                 {(myPurchases?.packages?.length ?? 0) === 0 &&
                  (myPurchases?.services?.length ?? 0) === 0 &&
-                 (myPurchases?.coupons?.length ?? 0) === 0 && (
+                 (myPurchases?.coupons?.length ?? 0) === 0 &&
+                 (myPurchases?.products?.length ?? 0) === 0 &&
+                 (myPurchases?.ebooks?.length ?? 0) === 0 &&
+                 (myPurchases?.cashPayments?.length ?? 0) === 0 && (
                   <div className="text-center py-12">
                     <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     <p className="text-gray-500 text-sm">{t('noPurchases', lang)}</p>

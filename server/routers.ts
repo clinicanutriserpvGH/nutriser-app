@@ -2605,24 +2605,87 @@ export const appRouter = router({
         const { lookupServiceByEmailAndCode } = await import('./db');
         return await lookupServiceByEmailAndCode(input.email, input.code);
       }),
-    // Obtener TODAS las compras del paciente por email (servicios + cupones + paquetes) - sin código
+    // Obtener TODAS las compras del paciente por email (servicios + cupones + paquetes + productos + ebooks + pagos en clínica)
     getMyPurchases: publicProcedure
-      .input(z.object({ email: z.string().email() }))
+      .input(z.object({ email: z.string().email(), patientId: z.number().optional() }))
       .query(async ({ input }) => {
-        const { getMembershipsByEmail, getGiftPurchasesByEmail, getServicePurchasesByEmail, getAllPromotionsForAdmin } = await import('./db');
-        const [memberships, giftPurchases, servicePurchases, promos] = await Promise.all([
-          getMembershipsByEmail(input.email),
-          getGiftPurchasesByEmail(input.email),
-          getServicePurchasesByEmail(input.email),
+        const {
+          getMembershipsByEmail,
+          getGiftPurchasesByEmail,
+          getServicePurchasesByEmail,
+          getAllPromotionsForAdmin,
+          getConfirmedCashPaymentsByPatient,
+        } = await import('./db');
+
+        // Helpers inline para productPurchases y ebookPurchases por email
+        const { getDb } = await import('./db');
+        const { productPurchases, ebookPurchases, ebooks } = await import('../drizzle/schema');
+        const { eq, or, desc } = await import('drizzle-orm');
+        const db = await getDb();
+
+        const emailLower = input.email.toLowerCase().trim();
+
+        const [membershipsData, giftPurchasesData, servicePurchasesData, promos, cashPayments] = await Promise.all([
+          getMembershipsByEmail(emailLower),
+          getGiftPurchasesByEmail(emailLower),
+          getServicePurchasesByEmail(emailLower),
           getAllPromotionsForAdmin(),
+          input.patientId ? getConfirmedCashPaymentsByPatient(input.patientId) : Promise.resolve([]),
         ]);
+
+        // Productos comprados (por buyerEmail o patientEmail)
+        const productsData = db ? await db.select().from(productPurchases)
+          .where(or(eq(productPurchases.buyerEmail, emailLower), eq(productPurchases.patientEmail, emailLower)))
+          .orderBy(desc(productPurchases.createdAt)) : [];
+
+        // Ebooks comprados (por buyerEmail o patientEmail)
+        const ebooksData = db ? await db.select({
+          id: ebookPurchases.id,
+          ebookId: ebookPurchases.ebookId,
+          buyerName: ebookPurchases.buyerName,
+          buyerEmail: ebookPurchases.buyerEmail,
+          patientEmail: ebookPurchases.patientEmail,
+          status: ebookPurchases.status,
+          accessToken: ebookPurchases.accessToken,
+          walletDiscount: ebookPurchases.walletDiscount,
+          createdAt: ebookPurchases.createdAt,
+          ebookTitle: ebooks.title,
+          ebookPrice: ebooks.price,
+          ebookImageUrl: ebooks.coverUrl,
+        }).from(ebookPurchases)
+          .leftJoin(ebooks, eq(ebookPurchases.ebookId, ebooks.id))
+          .where(or(eq(ebookPurchases.buyerEmail, emailLower), eq(ebookPurchases.patientEmail, emailLower)))
+          .orderBy(desc(ebookPurchases.createdAt)) : [];
+
+        // Memberships también por patientEmail (para pagos en clínica registrados por admin)
+        const membershipsByPatientEmail = db ? await db.select().from(
+          (await import('../drizzle/schema')).memberships
+        ).where(eq((await import('../drizzle/schema')).memberships.patientEmail, emailLower))
+          .orderBy(desc((await import('../drizzle/schema')).memberships.createdAt)) : [];
+
+        // Combinar memberships evitando duplicados por id
+        const allMembershipsMap = new Map();
+        [...membershipsData, ...membershipsByPatientEmail].forEach((m: any) => allMembershipsMap.set(m.id, m));
+        const allMemberships = Array.from(allMembershipsMap.values());
+
         return {
-          packages: memberships,
-          coupons: giftPurchases.map((p: any) => ({
+          packages: allMemberships,
+          coupons: giftPurchasesData.map((p: any) => ({
             ...p,
             promotionTitle: (promos as any[]).find((pr: any) => pr.id === p.promotionId)?.title ?? 'Promoción',
           })),
-          services: servicePurchases,
+          services: servicePurchasesData,
+          products: productsData,
+          ebooks: ebooksData,
+          cashPayments: cashPayments.map((cp: any) => ({
+            id: cp.id,
+            concept: cp.concept,
+            itemType: cp.itemType,
+            amountCents: cp.amountCents,
+            status: cp.status,
+            confirmedAt: cp.confirmedAt,
+            createdAt: cp.createdAt,
+          })),
         };
       }),
   }),

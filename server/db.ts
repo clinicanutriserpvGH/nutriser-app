@@ -1914,6 +1914,17 @@ export async function getCashPaymentHistoryByWallet(walletId: number): Promise<C
     .orderBy(cashPendingPayments.createdAt);
 }
 
+/** Obtener pagos en clínica confirmados de un paciente (por patientId) — para Mis Compras */
+export async function getConfirmedCashPaymentsByPatient(patientId: number): Promise<CashPendingPayment[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(cashPendingPayments)
+    .where(and(eq(cashPendingPayments.patientId, patientId), eq(cashPendingPayments.status, 'confirmed')))
+    .orderBy(desc(cashPendingPayments.createdAt));
+}
+
 // ─── Splash Ads ────────────────────────────────────────────────────────────────
 
 /** Obtener todos los splash ads activos de un tipo (para mostrar al paciente) */

@@ -1911,6 +1911,20 @@ export default function AdminDashboard() {
                                 <p className="text-xs text-[#999] mt-2">Sin fecha límite</p>
                               )}
                               <div className="flex flex-col gap-2 mt-4">
+                                {/* Botón Desactivar: solo si está activo y no vencido */}
+                                {promo.isActive && (!promo.expiresAt || new Date(promo.expiresAt) >= new Date()) && (
+                                  <button
+                                    onClick={() => {
+                                      if (confirm(`¿Desactivar el cupón "${promo.title}"? No se eliminará, podrás reactivarlo después.`)) {
+                                        reactivatePromotionMutation.mutate({ id: promo.id, isActive: false });
+                                      }
+                                    }}
+                                    disabled={reactivatePromotionMutation.isPending}
+                                    className="w-full px-3 py-2 bg-gray-100 text-gray-600 border border-gray-300 rounded hover:bg-gray-200 transition text-sm font-bold disabled:opacity-50"
+                                  >
+                                    ⏸️ Desactivar cupón
+                                  </button>
+                                )}
                                 {/* Botón Reactivar: solo si está vencido o inactivo */}
                                 {(!promo.isActive || (promo.expiresAt && new Date(promo.expiresAt) < new Date())) && (
                                   reactivatingPromoId === promo.id ? (

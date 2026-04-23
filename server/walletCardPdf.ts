@@ -4,13 +4,12 @@
  * Genera un PDF con la tarjeta del Monedero Nutriser usando PDFKit.
  * Formato CR-80: 85.5mm x 54mm (tarjeta de crédito estándar).
  *
- * Diseño de referencia:
- * - Fondo negro brillante con esquinas redondeadas
- * - Logo Nutriser + "MONEDERO NUTRISER / aesthetic & nutrition" arriba izquierda
- * - Silueta dorada grande a la derecha (marca de agua visible)
- * - QR blanco a la izquierda centro
- * - Placa dorada (rectángulo) con nombre del paciente y número de monedero
- * - Banda dorada inferior con URL y "Valida solo en Nutriser PV"
+ * Diseño (igual que NutriserWalletCard en React):
+ * - Fondo BLANCO (ahorra tinta, estilo tarjeta PVC de clínica)
+ * - Borde dorado sutil
+ * - Franja dorada superior: logo + "MONEDERO NUTRISER / aesthetic & nutrition" (SIN badge)
+ * - Zona central: QR grande a la izquierda + silueta dorada a la derecha
+ * - Franja dorada inferior: nombre + número + "nutriserpv.com/monedero" (SIN saldo)
  */
 
 import PDFDocument from "pdfkit";
@@ -27,9 +26,9 @@ const CARD_H = 54 * MM;   // ~153pt
 const GOLD        = "#C5A55A";
 const GOLD_LIGHT  = "#E8C97A";
 const GOLD_DARK   = "#8B6914";
-const BLACK       = "#1A1A1A";
 const WHITE       = "#FFFFFF";
-const GRAY_DIM    = "#888888";
+const DARK_BROWN  = "#3a2200";
+const NEAR_BLACK  = "#1A1A1A";
 
 // Descarga una imagen remota como Buffer
 function fetchImage(url: string): Promise<Buffer> {
@@ -62,8 +61,8 @@ export async function generateWalletCardPdf(cards: WalletPdfCard[]): Promise<Buf
     cards.map(async (card) => {
       try {
         return await QRCode.toBuffer(card.qrUrl || `https://nutriserpv.com/c/${card.walletNumber}`, {
-          type: "png", width: 220, margin: 1,
-          errorCorrectionLevel: "H",
+          type: "png", width: 240, margin: 1,
+          errorCorrectionLevel: "M",
           color: { dark: "#000000", light: "#FFFFFF" },
         });
       } catch { return null; }
@@ -138,113 +137,111 @@ function drawCard(
 
   doc.save();
 
-  // ── Fondo negro ────────────────────────────────────────────────────────────
-  doc.roundedRect(x, y, w, h, 7 * s).fill(BLACK);
+  // ── Fondo BLANCO con borde dorado ──────────────────────────────────────────
+  doc.roundedRect(x, y, w, h, 7 * s).fill(WHITE);
+  doc.roundedRect(x + 0.5, y + 0.5, w - 1, h - 1, 7 * s)
+    .lineWidth(1 * s)
+    .stroke(GOLD);
 
-  // ── Banda dorada inferior ──────────────────────────────────────────────────
-  const bandH = 13 * s;
-  const bandY = y + h - bandH;
-  doc.rect(x, bandY, w, bandH).fill(GOLD);
+  // ── Proporciones de las franjas ────────────────────────────────────────────
+  const topBarH  = h * 0.24;  // 24% superior
+  const botBarH  = h * 0.28;  // 28% inferior
+  const midTop   = y + topBarH;
+  const midBot   = y + h - botBarH;
+  const midH     = midBot - midTop; // zona central
 
-  // Texto izquierdo en la banda
-  doc.fillColor(BLACK)
-    .fontSize(4.8 * s)
-    .font("Helvetica-Bold")
-    .text("NUTRISERPV.COM/MONEDERO", x + 7 * s, bandY + bandH / 2 - 3 * s, {
-      width: w * 0.52,
-      lineBreak: false,
-    });
+  // ── Franja dorada SUPERIOR ─────────────────────────────────────────────────
+  doc.save();
+  doc.roundedRect(x, y, w, topBarH + 7 * s, 7 * s).clip();
+  doc.rect(x, y, w, topBarH).fill(GOLD);
+  doc.restore();
 
-  // Texto derecho en la banda
-  doc.fillColor("#3a2800")
-    .fontSize(4.2 * s)
-    .font("Helvetica")
-    .text("Valida solo en Nutriser PV", x + w * 0.54, bandY + bandH / 2 - 2.5 * s, {
-      width: w * 0.44,
-      align: "right",
-      lineBreak: false,
-    });
-
-  // ── Silueta dorada grande a la derecha ─────────────────────────────────────
-  // La imagen es 1024×1024 cuadrada; la dibujamos como cuadrado para no estirar
-  if (siluetaBuf) {
-    const silSize = (h - bandH) * 0.88; // cuadrado que cabe en la altura disponible
-    const silX = x + w - silSize - 2 * s;
-    const silY = y + (h - bandH - silSize) / 2; // centrada verticalmente
-    doc.save();
-    doc.opacity(0.85); // visible, no solo marca de agua
-    doc.image(siluetaBuf, silX, silY, { width: silSize, height: silSize });
-    doc.restore();
-  }
-
-  // ── Logo Nutriser arriba izquierda ─────────────────────────────────────────
-  const logoSize = 18 * s;
-  const logoX = x + 8 * s;
-  const logoY = y + 7 * s;
+  // Logo en la franja superior
+  const logoSize = topBarH * 0.65;
+  const logoX = x + 6 * s;
+  const logoY = y + (topBarH - logoSize) / 2;
   if (logoBuf) {
     doc.image(logoBuf, logoX, logoY, { width: logoSize, height: logoSize });
   } else {
-    doc.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2).fill(GOLD);
-    doc.fillColor(BLACK).fontSize(9 * s).font("Helvetica-Bold")
-      .text("N", logoX, logoY + logoSize * 0.2, { width: logoSize, align: "center" });
+    doc.circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2).fill(GOLD_DARK);
   }
 
-  // ── Título "MONEDERO NUTRISER" ─────────────────────────────────────────────
-  const titleX = logoX + logoSize + 5 * s;
-  const titleMaxW = w * 0.52; // no solapar con la silueta
-  doc.fillColor(GOLD)
-    .fontSize(7 * s)
+  // Texto "MONEDERO NUTRISER" en la franja superior
+  const titleX = logoX + logoSize + 4 * s;
+  const titleMaxW = w * 0.65;
+  doc.fillColor(DARK_BROWN)
+    .fontSize(6.5 * s)
     .font("Helvetica-Bold")
-    .text("MONEDERO NUTRISER", titleX, y + 8 * s, { width: titleMaxW, lineBreak: false });
+    .text("MONEDERO NUTRISER", titleX, y + topBarH * 0.18, { width: titleMaxW, lineBreak: false });
 
-  doc.fillColor(GRAY_DIM)
-    .fontSize(5 * s)
+  doc.fillColor("rgba(58,34,0,0.6)")
+    .fontSize(4.8 * s)
     .font("Helvetica")
-    .text("aesthetic & nutrition", titleX, y + 17 * s, { width: titleMaxW, lineBreak: false });
+    .text("aesthetic & nutrition", titleX, y + topBarH * 0.58, { width: titleMaxW, lineBreak: false });
 
-   // ── QR Code ────────────────────────────────────────────────────────────
-  const qrPad   = 3 * s;
-  const qrSize  = 52 * s;
-  const qrX     = x + 8 * s;
-  // Posicionar el QR en la mitad inferior: centrado entre el header (y+28*s) y la banda inferior
-  const contentTop = y + 28 * s;   // justo debajo del header
-  const contentBot = bandY - 4 * s; // justo encima de la banda dorada
-  const qrY = contentTop + (contentBot - contentTop - qrSize) / 2;
+  // ── Silueta dorada — zona central derecha (46% del ancho) ─────────────────
+  if (siluetaBuf) {
+    const silW = w * 0.44;
+    const silH = midH * 0.92;
+    const silX = x + w - silW - 2 * s;
+    const silY = midTop + (midH - silH) / 2;
+    doc.save();
+    doc.opacity(0.88);
+    doc.image(siluetaBuf, silX, silY, { width: silW, height: silH });
+    doc.restore();
+  }
 
-  // Fondo blanco del QR con borde redondeado
+  // ── QR — zona central izquierda (54% del ancho) ───────────────────────────
+  const qrMaxSize = Math.min(w * 0.46, midH * 0.88);
+  const qrSize = qrMaxSize;
+  const qrX = x + (w * 0.54 - qrSize) / 2 + 4 * s;
+  const qrY = midTop + (midH - qrSize) / 2;
+
+  // Marco blanco con borde dorado
+  const qrPad = 3 * s;
   doc.roundedRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad * 2, qrSize + qrPad * 2, 3 * s)
     .fill(WHITE);
+  doc.roundedRect(qrX - qrPad, qrY - qrPad, qrSize + qrPad * 2, qrSize + qrPad * 2, 3 * s)
+    .lineWidth(0.8 * s)
+    .stroke(GOLD);
 
   if (qrBuf) {
     doc.image(qrBuf, qrX, qrY, { width: qrSize, height: qrSize });
   }
 
-  // ── Placa dorada con nombre y número ──────────────────────────────────────
-  const plateX  = qrX + qrSize + qrPad * 2 + 5 * s;
-  const plateW  = w * 0.34;
-  const plateH  = 24 * s;
-  const plateY  = qrY + (qrSize - plateH) / 2;
+  // ── Franja dorada INFERIOR ─────────────────────────────────────────────────
+  doc.save();
+  doc.roundedRect(x, midBot - 7 * s, w, botBarH + 7 * s, 7 * s).clip();
+  doc.rect(x, midBot, w, botBarH).fill(GOLD_LIGHT);
+  doc.restore();
 
-  // Rectángulo dorado (placa)
-  doc.roundedRect(plateX, plateY, plateW, plateH, 3 * s).fill(GOLD_LIGHT);
-
-  // Nombre del paciente en la placa (texto oscuro sobre dorado)
+  // Nombre del paciente (izquierda)
   const nameStr = card.patientName.toUpperCase();
-  doc.fillColor(BLACK)
-    .fontSize(7.5 * s)
+  doc.fillColor(NEAR_BLACK)
+    .fontSize(8 * s)
     .font("Helvetica-Bold")
-    .text(nameStr, plateX + 4 * s, plateY + 4 * s, {
-      width: plateW - 8 * s,
+    .text(nameStr, x + 8 * s, midBot + botBarH * 0.1, {
+      width: w * 0.62,
       lineBreak: false,
       ellipsis: true,
     });
 
-  // Número de monedero en la placa
-  doc.fillColor(GOLD_DARK)
+  // Número de monedero (izquierda, debajo del nombre)
+  doc.fillColor(DARK_BROWN)
     .fontSize(5.5 * s)
     .font("Courier-Bold")
-    .text(card.walletNumber, plateX + 4 * s, plateY + 14 * s, {
-      width: plateW - 8 * s,
+    .text(card.walletNumber, x + 8 * s, midBot + botBarH * 0.52, {
+      width: w * 0.55,
+      lineBreak: false,
+    });
+
+  // URL (derecha)
+  doc.fillColor("rgba(58,34,0,0.65)")
+    .fontSize(4.5 * s)
+    .font("Helvetica-Bold")
+    .text("nutriserpv.com/monedero", x + w * 0.52, midBot + botBarH * 0.35, {
+      width: w * 0.46,
+      align: "right",
       lineBreak: false,
     });
 

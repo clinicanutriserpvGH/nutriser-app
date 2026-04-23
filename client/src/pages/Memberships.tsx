@@ -881,7 +881,7 @@ export default function Memberships() {
       <Dialog open={!!detailItem} onOpenChange={(open) => { if (!open) setDetailItem(null); }}>
         <DialogContent
           className="max-w-sm w-full p-0 rounded-2xl border-0 flex flex-col"
-          style={{ background: "#1A1A1A", maxHeight: "85dvh", overflow: "hidden" }}
+          style={{ background: "#1A1A1A", maxHeight: "min(85dvh, 600px)", overflow: "hidden" }}
         >
           {detailItem && (
             <>
@@ -889,7 +889,7 @@ export default function Memberships() {
               <div className="flex-1 overflow-y-auto" style={{ overscrollBehavior: "contain" }}>
                 {/* Imagen */}
                 {detailItem.imageUrl ? (
-                  <div className="relative w-full" style={{ height: 220 }}>
+                  <div className="relative w-full" style={{ height: "clamp(120px, 25dvh, 220px)" }}>
                     <img src={detailItem.imageUrl} alt={detailItem.name} className="w-full h-full object-cover" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(26,26,26,0.9) 0%, transparent 60%)" }} />
                     {detailItem.badge && (

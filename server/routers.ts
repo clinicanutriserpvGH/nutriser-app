@@ -3098,9 +3098,13 @@ export const appRouter = router({
       }),
 
     // Admin: reiniciar todos los eventos de comportamiento
-    resetAll: protectedProcedure
-      .mutation(async ({ ctx }) => {
-        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN', message: 'Solo administradores pueden reiniciar la analítica.' });
+    resetAll: publicProcedure
+      .input(z.object({ adminPassword: z.string() }))
+      .mutation(async ({ input }) => {
+        const ADMIN_PASSWORD = 'nutriser2024';
+        if (input.adminPassword !== ADMIN_PASSWORD) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Contraseña incorrecta' });
+        }
         const result = await resetAllBehaviorEvents();
         return { success: true, deleted: result.deleted };
       }),

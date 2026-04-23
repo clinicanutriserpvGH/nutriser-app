@@ -3655,7 +3655,7 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-2 bg-red-50 border border-red-300 rounded-lg px-3 py-1.5">
                         <span className="text-xs text-red-700 font-semibold">¿Borrar todos los datos?</span>
                         <button
-                          onClick={() => resetAnalyticsMutation.mutate()}
+                          onClick={() => resetAnalyticsMutation.mutate({ adminPassword: 'nutriser2024' })}
                           disabled={resetAnalyticsMutation.isPending}
                           className="px-2 py-0.5 rounded bg-red-600 text-white text-xs font-bold hover:bg-red-700 disabled:opacity-50 transition-all"
                         >

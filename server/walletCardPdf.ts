@@ -42,7 +42,7 @@ function buildCardHtml(card: CardData): string {
   return `
     <div style="
       width:${W}px; height:${H}px;
-      background: linear-gradient(135deg, #FDFCF8 0%, #F8F5EE 100%);
+      background: linear-gradient(160deg, #FDFCF8 0%, #F5F0E8 100%);
       border: 1.5px solid #C5A55A;
       border-radius: 12px;
       position: relative;
@@ -51,104 +51,56 @@ function buildCardHtml(card: CardData): string {
       box-sizing: border-box;
     ">
       <!-- Ondas decorativas fondo inferior derecho -->
-      <svg style="position:absolute;right:0;bottom:0;width:55%;height:70%;opacity:0.18;pointer-events:none;z-index:0;"
-           viewBox="0 0 200 140" preserveAspectRatio="xMaxYMax meet">
-        <path d="M200,140 Q160,100 120,115 Q80,130 40,100 Q0,70 0,140 Z" fill="#C5A55A"/>
-        <path d="M200,140 Q170,90 130,108 Q90,126 50,96 Q20,76 0,116 L0,140 Z" fill="#E8C97A" opacity="0.7"/>
-        <path d="M200,140 Q180,80 140,100 Q100,120 60,92 Q30,74 0,108 L0,140 Z" fill="#F0D890" opacity="0.4"/>
+      <svg style="position:absolute;right:0;bottom:0;width:60%;height:65%;opacity:0.15;pointer-events:none;z-index:0;"
+           viewBox="0 0 220 150" preserveAspectRatio="xMaxYMax meet">
+        <path d="M220,150 Q170,105 120,120 Q70,135 30,105 Q0,82 0,150 Z" fill="#C5A55A"/>
+        <path d="M220,150 Q180,95 135,112 Q90,129 45,100 Q15,80 0,125 L0,150 Z" fill="#E8C97A" opacity="0.7"/>
+        <path d="M220,150 Q190,85 145,105 Q100,125 55,95 Q25,76 0,115 L0,150 Z" fill="#F0D890" opacity="0.4"/>
       </svg>
-
-      <!-- Silueta dorada HD (esquina superior derecha) - proporción 1:1 natural -->
+      <!-- Silueta dorada HD (esquina derecha, proporción 1:1 natural) -->
       <img src="${SILUETA_B64}" style="
         position:absolute;
-        right:2px; top:18px;
+        right:3px; top:14px;
         width:${Math.round(W * 0.33)}px;
         height:auto;
-        opacity:0.9;
+        opacity:0.88;
         z-index:1;
         pointer-events:none;
       "/>
-
-      <!-- Contenido principal (z-index alto) -->
-      <div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;">
-
-        <!-- Cabecera: logo + título + subtítulo -->
-        <div style="
-          display:flex; flex-direction:column; align-items:center;
-          padding-top:7px; padding-bottom:3px;
-          border-bottom: 1px solid rgba(197,165,90,0.3);
-          margin: 0 10px;
-        ">
-          <img src="${LOGO_B64}" style="width:22px;height:22px;object-fit:contain;margin-bottom:2px;"/>
-          <div style="
-            font-size:11px; font-weight:bold; letter-spacing:2px;
-            color:#7A5C1E; text-transform:uppercase; line-height:1;
-          ">MONEDERO NUTRISER</div>
-          <div style="
-            display:flex;align-items:center;gap:4px;margin-top:2px;
-          ">
-            <div style="width:20px;height:0.5px;background:#C5A55A;"></div>
-            <div style="font-size:5.5px;color:#A07830;letter-spacing:1.5px;font-style:italic;">aesthetic &amp; nutrition</div>
-            <div style="width:20px;height:0.5px;background:#C5A55A;"></div>
+      <!-- Contenido principal -->
+      <div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;padding:8px 8px 6px 8px;box-sizing:border-box;">
+        <!-- Cabecera: logo + título + subtítulo (sin líneas) -->
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:6px;">
+          <img src="${LOGO_B64}" style="width:20px;height:20px;object-fit:contain;margin-bottom:2px;"/>
+          <div style="font-size:10.5px;font-weight:bold;letter-spacing:2.5px;color:#7A5C1E;text-transform:uppercase;line-height:1;">MONEDERO NUTRISER</div>
+          <div style="display:flex;align-items:center;gap:5px;margin-top:2px;">
+            <div style="width:18px;height:0.5px;background:#C5A55A;"></div>
+            <div style="font-size:5px;color:#A07830;letter-spacing:1.5px;font-style:italic;">aesthetic &amp; nutrition</div>
+            <div style="width:18px;height:0.5px;background:#C5A55A;"></div>
           </div>
         </div>
-
-        <!-- Zona central: QR + separador + nombre/código -->
-        <div style="
-          flex:1; display:flex; align-items:center;
-          padding: 4px 8px 2px 8px;
-          gap:8px;
-        ">
-          <!-- QR con borde dorado -->
-          <div style="
-            border:1.5px solid #C5A55A;
-            border-radius:4px;
-            padding:2px;
-            background:white;
-            flex-shrink:0;
-          ">
-            <img src="${card.qrDataUrl}" style="
-              width:${Math.round(H * 0.42)}px;
-              height:${Math.round(H * 0.42)}px;
-              display:block;
-            "/>
+        <!-- Zona central: QR + nombre/código (sin separador vertical ni líneas) -->
+        <div style="flex:1;display:flex;align-items:center;gap:7px;">
+          <!-- QR con borde dorado suave -->
+          <div style="border:1.5px solid #C5A55A;border-radius:4px;padding:2px;background:white;flex-shrink:0;">
+            <img src="${card.qrDataUrl}" style="width:${Math.round(H * 0.43)}px;height:${Math.round(H * 0.43)}px;display:block;"/>
           </div>
-
-          <!-- Separador vertical dorado -->
-          <div style="width:1px;height:${Math.round(H * 0.45)}px;background:linear-gradient(to bottom,transparent,#C5A55A,transparent);flex-shrink:0;"></div>
-
           <!-- Nombre + código -->
-          <div style="flex:1;min-width:0;padding-right:${Math.round(W * 0.34) + 4}px;">
-            <div style="
-              font-size:9px; font-weight:bold; color:#5A3A0A;
-              letter-spacing:0.5px; white-space:nowrap; overflow:hidden;
-              text-overflow:ellipsis; margin-bottom:3px;
-            ">${card.patientName.toUpperCase()}</div>
-            <div style="width:100%;height:0.5px;background:#C5A55A;margin-bottom:4px;"></div>
-            <div style="font-size:5px;color:#A07830;letter-spacing:1px;margin-bottom:2px;">CÓDIGO</div>
-            <div style="
-              font-family:'Courier New',monospace;
-              font-size:8px; font-weight:bold; color:#3A2200;
-              letter-spacing:0.5px; white-space:nowrap;
-            ">${card.walletNumber}</div>
+          <div style="flex:1;min-width:0;padding-right:${Math.round(W * 0.34)}px;">
+            <div style="font-size:9px;font-weight:bold;color:#5A3A0A;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px;">${card.patientName.toUpperCase()}</div>
+            <div style="font-size:4.5px;color:#A07830;letter-spacing:1px;margin-bottom:1px;">CÓDIGO</div>
+            <div style="font-family:'Courier New',monospace;font-size:7.5px;font-weight:bold;color:#3A2200;letter-spacing:0.5px;white-space:nowrap;">${card.walletNumber}</div>
           </div>
         </div>
-
-        <!-- URL inferior -->
-        <div style="
-          display:flex; align-items:center; justify-content:center; gap:3px;
-          padding-bottom:5px; padding-top:1px;
-          border-top:1px solid rgba(197,165,90,0.3);
-          margin:0 10px;
-        ">
+        <!-- URL inferior (sin línea encima) -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:3px;margin-top:5px;">
           <svg width="7" height="7" viewBox="0 0 16 16" fill="none">
             <circle cx="8" cy="8" r="7" stroke="#C5A55A" stroke-width="1.2"/>
             <ellipse cx="8" cy="8" rx="3" ry="7" stroke="#C5A55A" stroke-width="1"/>
             <line x1="1" y1="8" x2="15" y2="8" stroke="#C5A55A" stroke-width="1"/>
           </svg>
-          <span style="font-size:6px;color:#7A5C1E;letter-spacing:0.5px;">nutriserpv.com/monedero</span>
+          <span style="font-size:5.5px;color:#7A5C1E;letter-spacing:0.5px;">nutriserpv.com/monedero</span>
         </div>
-
       </div>
     </div>
   `;

@@ -10,7 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
   ShoppingCart, X, Plus, Minus, Trash2, Tag, CheckCircle2,
-  Loader2, Copy, CheckCheck, Apple, Sparkles, Scan, Syringe,
+  Loader2, Copy, CheckCheck, Apple, Wand2, Scan, Syringe,
   Droplets, ShoppingBag, Package, Star, Zap, Check, ChevronRight,
   Search, ArrowLeft, Upload, BookOpen, User, LogOut,
   Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList, Globe,
@@ -2426,7 +2426,7 @@ onClick={() => {
                   activeTab === "tratamientos" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
-                <Sparkles className="w-7 h-7 lg:w-8 lg:h-8" />
+                <Wand2 className="w-7 h-7 lg:w-8 lg:h-8" />
                 <span className="text-[11px] lg:text-xs font-semibold leading-tight mt-0.5">{t("tabServices", lang)}</span>
               </button>
 

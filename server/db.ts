@@ -2183,13 +2183,15 @@ export async function adminResetWallet(walletId: number, adminEmail: string): Pr
       eq(cashPendingPayments.walletId, walletId),
       eq(cashPendingPayments.status, 'pending')
     ));
-  // 3. Registrar movimiento de auditoría
+  // 3. Borrar todo el historial de movimientos del monedero
+  await db.delete(walletTransactions).where(eq(walletTransactions.walletId, walletId));
+  // 4. Registrar un único movimiento de auditoría post-reinicio
   await db.insert(walletTransactions).values({
     walletId,
     type: "adjustment",
     amount: 0,
     balanceAfter: 0,
-    description: `Monedero reiniciado por admin (${adminEmail}) — pagos pendientes cancelados`,
+    description: `Monedero reiniciado por admin (${adminEmail})`,
     createdBy: `admin:${adminEmail}`,
   }).catch(() => {});
 }

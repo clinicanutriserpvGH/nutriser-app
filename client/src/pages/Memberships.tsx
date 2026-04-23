@@ -2260,27 +2260,27 @@ onClick={() => {
       {!walletSheetOpen && !checkoutOpen && !cartOpen && (
         <div className="fixed bottom-0 left-0 right-0 z-[60]">
           <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
-            <div className="max-w-lg lg:max-w-2xl mx-auto flex items-end justify-around px-1 lg:px-4 pt-1 lg:pt-2">
+            <div className="max-w-lg lg:max-w-2xl mx-auto flex items-end justify-around px-2 lg:px-4 pt-2 lg:pt-3 pb-1">
               {/* Tratamientos */}
               <button
                 onClick={() => setActiveTab("tratamientos")}
-                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors ${
+                className={`flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors ${
                   activeTab === "tratamientos" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
-                <Sparkles className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">{t("tabServices", lang)}</span>
+                <Sparkles className="w-6 h-6 lg:w-7 lg:h-7" />
+                <span className="text-[10px] lg:text-xs font-semibold leading-tight">{t("tabServices", lang)}</span>
               </button>
 
               {/* Productos */}
               <button
                 onClick={() => setActiveTab("farmacy")}
-                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors ${
+                className={`flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors ${
                   activeTab === "farmacy" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
-                <FlaskConical className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">{t("tabProducts", lang)}</span>
+                <FlaskConical className="w-6 h-6 lg:w-7 lg:h-7" />
+                <span className="text-[10px] lg:text-xs font-semibold leading-tight">{t("tabProducts", lang)}</span>
               </button>
 
               {/* Monedero — Botón central flotante */}
@@ -2298,32 +2298,32 @@ onClick={() => {
                     <img src={LOGO_URL} alt="Monedero" className="w-8 h-8 lg:w-11 lg:h-11 rounded-full object-contain" />
                   </div>
                 </div>
-                <span className="text-[9px] lg:text-xs font-bold text-[#C5A55A] mt-0.5 leading-tight">{t("tabWallet", lang)}</span>
+                <span className="text-[10px] lg:text-xs font-bold text-[#C5A55A] mt-1 leading-tight">{t("tabWallet", lang)}</span>
               </button>
 
               {/* Librería */}
               <button
                 onClick={() => setActiveTab("library")}
-                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors ${
+                className={`flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors ${
                   activeTab === "library" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
-                <BookOpen className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">{t("tabLibrary", lang)}</span>
+                <BookOpen className="w-6 h-6 lg:w-7 lg:h-7" />
+                <span className="text-[10px] lg:text-xs font-semibold leading-tight">{t("tabLibrary", lang)}</span>
               </button>
 
               {/* Deseos */}
               <button
                 onClick={() => setActiveTab("wishlist")}
-                className={`flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors relative ${
+                className={`flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors relative ${
                   activeTab === "wishlist" ? "text-red-500" : "text-gray-400"
                 }`}
               >
-                <Heart className="w-5 h-5 lg:w-7 lg:h-7" />
+                <Heart className="w-6 h-6 lg:w-7 lg:h-7" />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-0.5 right-0 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center">{wishlistCount > 9 ? "9+" : wishlistCount}</span>
                 )}
-                <span className="text-[8px] lg:text-xs font-semibold leading-tight">{t("tabWishlist", lang)}</span>
+                <span className="text-[10px] lg:text-xs font-semibold leading-tight">{t("tabWishlist", lang)}</span>
               </button>
               {/* Cuenta */}
               <button
@@ -2331,10 +2331,10 @@ onClick={() => {
                   if (!requireAuth("ver tu cuenta y estado de monedero")) return;
                   navigate("/monedero");
                 }}
-                className="flex flex-col items-center gap-0.5 lg:gap-1 py-1.5 lg:py-2 px-1 lg:px-2 min-w-[44px] lg:min-w-[60px] transition-colors text-gray-400"
+                className="flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors text-gray-400"
               >
-                <User className="w-5 h-5 lg:w-7 lg:h-7" />
-                <span className="text-[9px] lg:text-xs font-semibold leading-tight">{t("tabAccount", lang)}</span>
+                <User className="w-6 h-6 lg:w-7 lg:h-7" />
+                <span className="text-[10px] lg:text-xs font-semibold leading-tight">{t("tabAccount", lang)}</span>
               </button>
             </div>
           </div>

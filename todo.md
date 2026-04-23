@@ -1994,3 +1994,26 @@
 - [x] Cada resultado muestra badge de tipo (Servicio/Producto/Libro) + categoría + precio
 - [x] Botón de acción contextual: "Agendar" para servicios, "Ver libro" para ebooks, "Comprar" para productos
 - [x] Buscador filtra en tiempo real por nombre, descripción y categoría
+
+## Sesión Actual - Aparador Tienda Principal + Splash Desktop
+
+- [ ] Arreglar splash en escritorio: imagen se corta, debe verse completa con scroll interno
+- [ ] Hacer carrusel de tienda de ancho completo y más alto (estilo Farmacias del Ahorro, 16:9)
+- [ ] Agregar tabla storeBanners en BD para imágenes del carrusel de tienda
+- [ ] Crear procedimiento tRPC storeBanners (getActive, getAll, create, toggle, delete, reorder)
+- [ ] Crear pestaña "Aparador - Tienda Principal" en panel admin con upload de imágenes
+- [ ] Conectar carrusel de Memberships con imágenes de BD (fallback a banners estáticos si no hay)
+- [ ] Especificar medidas recomendadas en el panel admin (1200×450px, JPG/PNG, máx 2MB, 16:9)
+- [ ] Botón "Volver" en Agenda tu Cita: en móvil/tablet regresa al splash 0 (/), en desktop regresa al sitio web
+
+## Sesión Actual - Aparador Tienda Principal y Correcciones
+- [x] Botón "Volver" en Agenda tu Cita: en móvil/tablet regresa al splash 0 (/), en desktop regresa al sitio web
+- [x] Arreglar splash en escritorio: overflow-y-auto para que la imagen no se corte
+- [x] ShopPromoSplash en escritorio: mismo fix de overflow
+- [x] Carrusel PromoBanner en tienda: ancho completo, relación 16:9 estilo Farmacias del Ahorro
+- [x] Tabla storeBanners creada en BD (migración SQL aplicada)
+- [x] Helpers de storeBanners en server/db.ts
+- [x] Procedimientos tRPC storeBanners (getActive, getAll, create, toggle, delete, updateOrder)
+- [x] Componente AdminStoreBannersTab.tsx con upload, activar/desactivar, reordenar y eliminar
+- [x] Pestaña "Aparador Tienda Principal" agregada en AdminDashboard.tsx
+- [x] Carrusel de Memberships conectado a storeBanners de BD (si hay banners activos, los usa; si no, usa los estáticos)

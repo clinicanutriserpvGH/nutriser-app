@@ -227,7 +227,7 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   return (
     <>
       <div
-        className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4"
+        className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto"
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)", pointerEvents: isClosing ? 'none' : 'auto' }}
       >
         {/* Close button */}
@@ -240,7 +240,7 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
         </button>
 
         {/* Content */}
-        <div className="w-full max-w-sm md:max-w-md relative">
+        <div className="w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl relative my-auto">
           {/* Header */}
           <div className="text-center mb-3">
             <div className="inline-flex items-center gap-2 bg-[#C5A55A]/20 backdrop-blur-sm rounded-full px-4 py-2 mb-1">

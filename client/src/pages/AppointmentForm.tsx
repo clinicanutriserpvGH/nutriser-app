@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Calendar, Clock, Mail, Phone, User, ArrowLeft, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { SimpleCaptcha } from "@/components/SimpleCaptcha";
 
@@ -45,6 +45,9 @@ const CLINIC_HOURS = [
 
 export default function AppointmentForm() {
   const [, navigate] = useLocation();
+
+  // Detectar si es móvil o tablet (ancho < 1024px)
+  const isMobileOrTablet = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   // Leer el servicio preseleccionado desde el query param ?service=...
   const searchParams = new URLSearchParams(window.location.search);
@@ -119,7 +122,13 @@ export default function AppointmentForm() {
           <Button
             variant="ghost"
             onClick={() => {
-              window.location.href = "/";
+              if (isMobileOrTablet) {
+                // En móvil/tablet: regresar al splash 0 (app principal)
+                navigate("/");
+              } else {
+                // En desktop: regresar al sitio web principal
+                window.location.href = "/";
+              }
             }}
             className="flex items-center gap-2 text-[#C5A55A] hover:text-[#B8963E]"
           >

@@ -285,7 +285,7 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
   return (
     <>
       <div
-        className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+        className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-start md:items-center justify-center p-4 overflow-y-auto"
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
       >
         {/* Close button */}
@@ -298,7 +298,7 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
         </button>
 
         {/* Content */}
-        <div className="w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl relative">
+        <div className="w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl relative my-auto">
           {/* Header */}
           <div className="text-center mb-3">
             <div className="inline-flex items-center gap-2 bg-[#C5A55A]/20 backdrop-blur-sm rounded-full px-4 py-2 mb-1">

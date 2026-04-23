@@ -907,3 +907,22 @@ export const physicalCardRequests = mysqlTable("physicalCardRequests", {
 });
 export type PhysicalCardRequest = typeof physicalCardRequests.$inferSelect;
 export type InsertPhysicalCardRequest = typeof physicalCardRequests.$inferInsert;
+
+/**
+ * Banners del carrusel principal de la Tienda Nutriser (/memberships)
+ * El admin puede subir, reordenar y activar/desactivar imágenes que reemplazan
+ * el carrusel estático de paquetes.
+ */
+export const storeBanners = mysqlTable("storeBanners", {
+  id: int("id").autoincrement().primaryKey(),
+  imageUrl: text("imageUrl").notNull(),              // URL en S3
+  title: varchar("title", { length: 255 }),          // Título interno (referencia)
+  linkTarget: varchar("linkTarget", { length: 50 }), // "none" | "paquete-N" | "url"
+  linkUrl: varchar("linkUrl", { length: 500 }),      // URL opcional al hacer clic
+  isActive: boolean("isActive").notNull().default(true),
+  sortOrder: int("sortOrder").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type StoreBanner = typeof storeBanners.$inferSelect;
+export type InsertStoreBanner = typeof storeBanners.$inferInsert;

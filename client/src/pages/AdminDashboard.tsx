@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import AdminBeforeAfterTab from "@/components/AdminBeforeAfterTab";
 import AdminSplashAdsTab from "@/components/AdminSplashAdsTab";
+import AdminStoreBannersTab from "@/components/AdminStoreBannersTab";
 import AdminPatientsTab from "@/components/AdminPatientsTab";
 import AdminWalletTab from "@/components/AdminWalletTab";
 import { trpc } from "@/lib/trpc";
@@ -30,6 +31,7 @@ const ADMIN_TABS = [
   { value: 'wallet', label: 'Monedero Nutriser', emoji: '💳' },
   { value: 'analytics', label: 'Analítica de Comportamiento', emoji: '📊' },
   { value: 'splashAds', label: 'Aparador de Publicidad', emoji: '📸' },
+  { value: 'storeBanners', label: 'Aparador Tienda Principal', emoji: '🛍️' },
 ] as const;
 
 type AdminTabValue = typeof ADMIN_TABS[number]['value'];
@@ -3790,6 +3792,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="splashAds" className="space-y-4">
             <AdminSplashAdsTab />
+          </TabsContent>
+
+          <TabsContent value="storeBanners" className="space-y-4">
+            <AdminStoreBannersTab />
           </TabsContent>
 
         </Tabs>

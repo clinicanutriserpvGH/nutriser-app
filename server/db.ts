@@ -4,6 +4,7 @@ import { InsertUser, users, memberships, paymentProofs, InsertMembership, Insert
 import { ENV } from './_core/env';
 import { products, InsertProduct, productPurchases, InsertProductPurchase, discountCodes, InsertDiscountCode, DiscountCode } from '../drizzle/schema';
 import { patientAccounts, InsertPatientAccount, PatientAccount, patientTreatments, InsertPatientTreatment, patientAppointments, InsertPatientAppointment, patientPhotos, InsertPatientPhoto } from '../drizzle/schema';
+import { storeBanners, type InsertStoreBanner } from '../drizzle/schema';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -1990,6 +1991,48 @@ export async function setSplashCustomImage(type: 'inicio' | 'tienda', customImag
 }
 
 // ─── Auto-desactivación de promociones vencidas ──────────────────────────────
+// ─── Aparador - Tienda Principal (storeBanners) ──────────────────────────────
+/** Obtiene todos los banners activos ordenados por sortOrder */
+export async function getActiveStoreBanners() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(storeBanners)
+    .where(eq(storeBanners.isActive, true))
+    .orderBy(storeBanners.sortOrder);
+}
+/** Obtiene todos los banners (admin) */
+export async function getAllStoreBanners() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(storeBanners).orderBy(storeBanners.sortOrder);
+}
+/** Crea un banner */
+export async function createStoreBanner(data: Omit<InsertStoreBanner, 'id' | 'createdAt' | 'updatedAt'>) {
+  const db = await getDb();
+  if (!db) throw new Error('DB not available');
+  await db.insert(storeBanners).values(data);
+  const [inserted] = await db.select().from(storeBanners).orderBy(desc(storeBanners.id)).limit(1);
+  return inserted;
+}
+/** Activa/desactiva un banner */
+export async function toggleStoreBanner(id: number, isActive: boolean) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(storeBanners).set({ isActive }).where(eq(storeBanners.id, id));
+}
+/** Elimina un banner */
+export async function deleteStoreBanner(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(storeBanners).where(eq(storeBanners.id, id));
+}
+/** Actualiza el orden de un banner */
+export async function updateStoreBannerOrder(id: number, sortOrder: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(storeBanners).set({ sortOrder }).where(eq(storeBanners.id, id));
+}
+
 /** Desactiva automáticamente todas las promociones cuyo expiresAt ya pasó. Retorna el número de filas afectadas. */
 export async function autoDeactivateExpiredPromotions(): Promise<number> {
   const db = await getDb();

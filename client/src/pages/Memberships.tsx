@@ -194,9 +194,18 @@ function CopyButton({ text }: { text: string }) {
 }
 
 // ─── Banner Carousel ─────────────────────────────────────────────────────────
-function PromoBanner({ onBannerClick, lang }: { onBannerClick?: (pkgIndex: number) => void; lang: Lang }) {
+// ─── PromoBanner: carrusel de ancho completo estilo Farmacias del Ahorro ────
+function PromoBanner({ onBannerClick, lang, storeBanners: adminBanners = [] }: {
+  onBannerClick?: (pkgIndex: number) => void;
+  lang: Lang;
+  storeBanners?: Array<{ id: number; imageUrl: string; title?: string | null; linkUrl?: string | null }>;
+}) {
   const [idx, setIdx] = useState(0);
-  const banners = [
+
+  // Si hay banners del admin, usarlos; si no, usar los estáticos de paquetes
+  const hasAdminBanners = adminBanners.length > 0;
+
+  const staticBanners = [
     {
       title: "pkgNutricionTitle",
       subtitle: "pkgNutricionSubtitle",
@@ -215,38 +224,95 @@ function PromoBanner({ onBannerClick, lang }: { onBannerClick?: (pkgIndex: numbe
     },
   ];
 
-  useEffect(() => {
-    const t = setInterval(() => setIdx(i => (i + 1) % banners.length), 4000);
-    return () => clearInterval(t);
-  }, [banners.length]);
+  const totalSlides = hasAdminBanners ? adminBanners.length : staticBanners.length;
 
-  const b = banners[idx];
+  useEffect(() => {
+    const timer = setInterval(() => setIdx(i => (i + 1) % totalSlides), 5000);
+    return () => clearInterval(timer);
+  }, [totalSlides]);
+
+  // Renderizar banner del admin (imagen pura)
+  if (hasAdminBanners) {
+    const banner = adminBanners[idx];
+    return (
+      <div className="relative w-full mt-3 overflow-hidden">
+        {/* Aspecto 16:9 — igual que Farmacias del Ahorro */}
+        <div className="relative w-full" style={{ paddingBottom: '42%' }}>
+          <img
+            src={banner.imageUrl}
+            alt={banner.title || 'Promo Nutriser'}
+            className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+            onClick={() => {
+              if (banner.linkUrl) window.open(banner.linkUrl, '_blank');
+            }}
+          />
+          {/* Overlay hover */}
+          <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-all pointer-events-none" />
+        </div>
+        {/* Dots */}
+        {totalSlides > 1 && (
+          <div className="flex items-center justify-center gap-2 py-2 bg-white">
+            {adminBanners.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIdx(i)}
+                className={`h-2 rounded-full transition-all ${
+                  i === idx ? 'bg-[#C5A55A] w-8' : 'bg-gray-300 w-2 hover:bg-gray-400'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Fallback: banners estáticos de paquetes (diseño mejorado, 16:9)
+  const b = staticBanners[idx];
   return (
-    <button
-      onClick={() => onBannerClick?.(b.pkgIndex)}
-      className="relative mx-4 mt-3 rounded-2xl overflow-hidden h-44 sm:h-52 lg:h-56 w-[calc(100%-2rem)] text-left cursor-pointer group"
-    >
-      <div className={`absolute inset-0 bg-gradient-to-r ${b.bg} transition-all duration-700`} />
-      <img src={b.img} alt={b.title} className="absolute right-0 top-0 h-full w-2/3 object-cover opacity-40 mix-blend-overlay group-hover:opacity-50 transition-opacity" />
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all" />
-      <div className="relative z-10 h-full flex flex-col justify-center px-6">
-        <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-xs font-black px-3 py-1 rounded-full w-fit mb-2">
-          {t(b.badge as any, lang)} {t("discount3", lang)}
-        </span>
-        <h3 className="text-white text-xl sm:text-2xl font-black leading-tight">{t(b.title as any, lang)}</h3>
-        <p className="text-white/80 text-sm font-medium mt-1">{t(b.subtitle as any, lang)}</p>
-        <span className="mt-2 inline-flex items-center gap-1 text-white/90 text-xs font-bold bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full w-fit group-hover:bg-white/30 transition-all">
-          <ShoppingCart className="w-3.5 h-3.5" /> {t("buyNow", lang)}
-        </span>
-      </div>
+    <div className="relative w-full mt-3 overflow-hidden">
+      <button
+        onClick={() => onBannerClick?.(b.pkgIndex)}
+        className="relative w-full block group"
+        style={{ paddingBottom: '42%' }}
+      >
+        <div className={`absolute inset-0 bg-gradient-to-r ${b.bg} transition-all duration-700`} />
+        <img
+          src={b.img}
+          alt={t(b.title as any, lang)}
+          className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-50 mix-blend-overlay group-hover:opacity-60 transition-opacity"
+        />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all" />
+        <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
+          <span className="inline-block bg-white/25 backdrop-blur-sm text-white text-xs sm:text-sm font-black px-3 py-1 rounded-full w-fit mb-2">
+            {t(b.badge as any, lang)} {t('discount3', lang)}
+          </span>
+          <h3 className="text-white text-2xl sm:text-3xl md:text-4xl font-black leading-tight drop-shadow-lg">
+            {t(b.title as any, lang)}
+          </h3>
+          <p className="text-white/85 text-sm sm:text-base font-medium mt-1 drop-shadow">
+            {t(b.subtitle as any, lang)}
+          </p>
+          <span className="mt-3 inline-flex items-center gap-1.5 text-white/90 text-xs sm:text-sm font-bold bg-white/25 backdrop-blur-sm px-4 py-2 rounded-full w-fit group-hover:bg-white/35 transition-all">
+            <ShoppingCart className="w-4 h-4" /> {t('buyNow', lang)}
+          </span>
+        </div>
+      </button>
       {/* Dots */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-        {banners.map((_, i) => (
-          <span key={i} onClick={(e) => { e.stopPropagation(); setIdx(i); }}
-            className={`w-2 h-2 rounded-full transition-all cursor-pointer ${i === idx ? "bg-white w-5" : "bg-white/40"}`} />
-        ))}
-      </div>
-    </button>
+      {totalSlides > 1 && (
+        <div className="flex items-center justify-center gap-2 py-2 bg-white">
+          {staticBanners.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              className={`h-2 rounded-full transition-all ${
+                i === idx ? 'bg-[#C5A55A] w-8' : 'bg-gray-300 w-2 hover:bg-gray-400'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -339,7 +405,8 @@ export default function Memberships() {
   // ─── Datos de la DB ─────────────────────────────────────────────────────────
   const { data: services = [], isLoading: loadingServices } = trpc.services.list.useQuery();
   const { data: products = [], isLoading: loadingProducts } = trpc.products.list.useQuery();
-   const { data: ebook, isLoading: loadingEbook } = trpc.ebook.getActive.useQuery();
+  const { data: ebook, isLoading: loadingEbook } = trpc.ebook.getActive.useQuery();
+  const { data: storeBannersData = [] } = trpc.storeBanners.getActive.useQuery();
 
   // ─── Traducción automática con LLM ─────────────────────────────────────────
   // Recopila todos los textos del backend que necesitan traducción al EN
@@ -1064,7 +1131,7 @@ export default function Memberships() {
 
       {/* ── Banner Carrusel de Ofertas (clickeable → comprar paquete) ── */}
       {/* Ocultar banner cuando hay búsqueda activa */}
-      {!searchQuery && <PromoBanner lang={lang} onBannerClick={(pkgIndex) => {
+      {!searchQuery && <PromoBanner lang={lang} storeBanners={storeBannersData} onBannerClick={(pkgIndex) => {
         const pkg = getPackages(lang)[pkgIndex];
         if (pkg) {
           openCheckout({

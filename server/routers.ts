@@ -16,6 +16,7 @@ import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, creat
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
+import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -3468,6 +3469,62 @@ export const appRouter = router({
           // fallback
         }
         return { translations: input.texts };
+      }),
+  }),
+
+  // ─── Aparador - Tienda Principal ───────────────────────────────────────────────────
+  storeBanners: router({
+    // Público: banners activos para el carrusel de la tienda
+    getActive: publicProcedure.query(async () => {
+      return await getActiveStoreBanners();
+    }),
+    // Admin: todos los banners
+    getAll: publicProcedure.query(async () => {
+      return await getAllStoreBanners();
+    }),
+    // Admin: crear banner (imagen en base64)
+    create: publicProcedure
+      .input(z.object({
+        imageBase64: z.string(),
+        mimeType: z.string().default('image/jpeg'),
+        title: z.string().optional(),
+        linkUrl: z.string().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const buffer = Buffer.from(input.imageBase64, 'base64');
+        const ext = input.mimeType.includes('png') ? 'png' : 'jpg';
+        const key = `store-banners/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        const banner = await createStoreBanner({
+          imageUrl: url,
+          title: input.title ?? null,
+          linkUrl: input.linkUrl ?? null,
+          sortOrder: input.sortOrder ?? 0,
+          isActive: true,
+        });
+        return { success: true, banner };
+      }),
+    // Admin: activar/desactivar
+    toggle: publicProcedure
+      .input(z.object({ id: z.number(), isActive: z.boolean() }))
+      .mutation(async ({ input }) => {
+        await toggleStoreBanner(input.id, input.isActive);
+        return { success: true };
+      }),
+    // Admin: eliminar
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteStoreBanner(input.id);
+        return { success: true };
+      }),
+    // Admin: actualizar orden
+    updateOrder: publicProcedure
+      .input(z.object({ id: z.number(), sortOrder: z.number() }))
+      .mutation(async ({ input }) => {
+        await updateStoreBannerOrder(input.id, input.sortOrder);
+        return { success: true };
       }),
   }),
 });

@@ -17,6 +17,7 @@ import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
+import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -3529,6 +3530,69 @@ export const appRouter = router({
       .input(z.object({ id: z.number(), sortOrder: z.number() }))
       .mutation(async ({ input }) => {
         await updateStoreBannerOrder(input.id, input.sortOrder);
+        return { success: true };
+      }),
+  }),
+
+  // ─── Banner Interests - Solicitudes de interés en promociones ───────────────
+  bannerInterests: router({
+    // Usuario: registrar interés en una promoción del banner
+    create: protectedProcedure
+      .input(z.object({
+        bannerId: z.number().optional(),
+        bannerTitle: z.string().optional(),
+        bannerImageUrl: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const interest = await createBannerInterest({
+          userId: ctx.user.id,
+          bannerId: input.bannerId ?? null,
+          bannerTitle: input.bannerTitle ?? null,
+          bannerImageUrl: input.bannerImageUrl ?? null,
+          patientName: ctx.user.name ?? null,
+          patientEmail: ctx.user.email ?? null,
+          status: 'pending',
+        });
+        // Notificar al admin
+        await notifyOwner({
+          title: `🏷️ Nueva solicitud de promoción: ${input.bannerTitle ?? 'Sin título'}`,
+          content: `El paciente ${ctx.user.name ?? ctx.user.email ?? 'desconocido'} quiere comprar en clínica la promoción: "${input.bannerTitle ?? 'Sin título'}". Revisa la sección Solicitudes del Monedero.`,
+        });
+        return { success: true, interest };
+      }),
+    // Usuario: ver sus propias solicitudes
+    myInterests: protectedProcedure.query(async ({ ctx }) => {
+      return await getBannerInterestsByUser(ctx.user.id);
+    }),
+    // Admin: ver todas las solicitudes pendientes
+    getPending: publicProcedure.query(async () => {
+      return await getPendingBannerInterests();
+    }),
+    // Admin: ver todas las solicitudes
+    getAll: publicProcedure.query(async () => {
+      return await getAllBannerInterests();
+    }),
+    // Admin: atender solicitud + acreditar al monedero
+    attend: publicProcedure
+      .input(z.object({
+        interestId: z.number(),
+        walletId: z.number(),
+        amount: z.number().positive(),
+        concept: z.string().optional(),
+        adminNotes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Acreditar al monedero del paciente (tipo 'bonus' = acreditación manual del admin)
+        await addWalletTransaction({
+          walletId: input.walletId,
+          type: 'bonus',
+          amount: input.amount,
+          description: input.concept ?? `Pago en clínica - Promoción banner`,
+          referenceType: 'banner_interest',
+          createdBy: 'admin',
+        });
+        // Marcar solicitud como atendida
+        await attendBannerInterest(input.interestId, input.adminNotes);
         return { success: true };
       }),
   }),

@@ -4,7 +4,7 @@ import { InsertUser, users, memberships, paymentProofs, InsertMembership, Insert
 import { ENV } from './_core/env';
 import { products, InsertProduct, productPurchases, InsertProductPurchase, discountCodes, InsertDiscountCode, DiscountCode } from '../drizzle/schema';
 import { patientAccounts, InsertPatientAccount, PatientAccount, patientTreatments, InsertPatientTreatment, patientAppointments, InsertPatientAppointment, patientPhotos, InsertPatientPhoto } from '../drizzle/schema';
-import { storeBanners, type InsertStoreBanner } from '../drizzle/schema';
+import { storeBanners, type InsertStoreBanner, bannerInterests, type InsertBannerInterest } from '../drizzle/schema';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -2031,6 +2031,46 @@ export async function updateStoreBannerOrder(id: number, sortOrder: number) {
   const db = await getDb();
   if (!db) return;
   await db.update(storeBanners).set({ sortOrder }).where(eq(storeBanners.id, id));
+}
+
+// ─── Banner Interests - Solicitudes de interés en promociones ───────────────
+/** Crea una solicitud de interés en una promoción del banner */
+export async function createBannerInterest(data: Omit<InsertBannerInterest, 'id' | 'createdAt' | 'updatedAt'>) {
+  const db = await getDb();
+  if (!db) throw new Error('DB not available');
+  await db.insert(bannerInterests).values(data);
+  const [inserted] = await db.select().from(bannerInterests).orderBy(desc(bannerInterests.id)).limit(1);
+  return inserted;
+}
+/** Obtiene todas las solicitudes pendientes (para el admin) */
+export async function getPendingBannerInterests() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(bannerInterests)
+    .where(eq(bannerInterests.status, 'pending'))
+    .orderBy(desc(bannerInterests.createdAt));
+}
+/** Obtiene todas las solicitudes (para el admin) */
+export async function getAllBannerInterests() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(bannerInterests).orderBy(desc(bannerInterests.createdAt));
+}
+/** Obtiene las solicitudes de un usuario */
+export async function getBannerInterestsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(bannerInterests)
+    .where(eq(bannerInterests.userId, userId))
+    .orderBy(desc(bannerInterests.createdAt));
+}
+/** Marca una solicitud como atendida y acredita al monedero */
+export async function attendBannerInterest(id: number, adminNotes?: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(bannerInterests)
+    .set({ status: 'attended', adminNotes: adminNotes ?? null, attendedAt: new Date() })
+    .where(eq(bannerInterests.id, id));
 }
 
 /** Desactiva automáticamente todas las promociones cuyo expiresAt ya pasó. Retorna el número de filas afectadas. */

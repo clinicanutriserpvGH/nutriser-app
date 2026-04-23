@@ -348,8 +348,13 @@ export default function Memberships() {
     const banner = bannerActionModal.banner;
     setBannerActionModal({ open: false, banner: null });
     const promoTitle = banner?.title || 'una promoción';
-    const msg = encodeURIComponent(`Hola Nutriser, me interesa obtener informes sobre: ${promoTitle}. ¿Me pueden dar más información?`);
-    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+    // Incluir título exacto y URL de la imagen para que el admin sepa qué promoción es
+    let msg = `🏷️ Hola Nutriser! Me interesa la promoción: *${promoTitle}*`;
+    if (banner?.imageUrl) {
+      msg += `\n\n🖼️ Ver imagen de la promoción: ${banner.imageUrl}`;
+    }
+    msg += `\n\n¿Me pueden dar más información y el precio?`;
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   // ─── Guard móvil ───────────────────────────────────────────────────────────────────────
@@ -1148,11 +1153,41 @@ export default function Memberships() {
         storeBanners={storeBannersData}
         onBannerClick={handleBannerClick}
         onSystemBannerClick={(linkTarget) => {
-          // Ambos paquetes están en la categoría "paquetes"
-          if (linkTarget === 'paquete-nutricion' || linkTarget === 'paquete-reductor') {
-            setActiveTab('tratamientos');
-            setActiveCategory('packages'); // valor correcto para la categoría Paquetes
-            setTimeout(() => window.scrollTo({ top: 200, behavior: 'smooth' }), 100);
+          // Abrir directamente el modal de detalles del paquete correspondiente
+          if (linkTarget === 'paquete-nutricion') {
+            const pkg = getPackages(lang).find(p => p.id === 'pkg-nutricion');
+            if (pkg) {
+              setDetailItem({
+                id: pkg.id,
+                name: pkg.name,
+                description: pkg.description,
+                price: `$${pkg.price.toLocaleString('es-MX')} MXN`,
+                priceNum: pkg.price,
+                category: pkg.category,
+                imageUrl: pkg.imageUrl,
+                features: pkg.features,
+                regularPrice: pkg.regularPrice,
+                badge: pkg.badge,
+                itemType: 'package',
+              });
+            }
+          } else if (linkTarget === 'paquete-reductor') {
+            const pkg = getPackages(lang).find(p => p.id === 'pkg-reductor');
+            if (pkg) {
+              setDetailItem({
+                id: pkg.id,
+                name: pkg.name,
+                description: pkg.description,
+                price: `$${pkg.price.toLocaleString('es-MX')} MXN`,
+                priceNum: pkg.price,
+                category: pkg.category,
+                imageUrl: pkg.imageUrl,
+                features: pkg.features,
+                regularPrice: pkg.regularPrice,
+                badge: pkg.badge,
+                itemType: 'package',
+              });
+            }
           }
         }}
       />}

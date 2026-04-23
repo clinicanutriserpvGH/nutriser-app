@@ -927,3 +927,25 @@ export const storeBanners = mysqlTable("storeBanners", {
 });
 export type StoreBanner = typeof storeBanners.$inferSelect;
 export type InsertStoreBanner = typeof storeBanners.$inferInsert;
+
+/**
+ * Solicitudes de interés en promociones del carrusel de banners
+ * Cuando un usuario confirma "Comprar en clínica" desde el banner,
+ * se registra aquí para que el admin lo vea en la sección Solicitudes.
+ */
+export const bannerInterests = mysqlTable("bannerInterests", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),                        // FK a users.id
+  bannerId: int("bannerId"),                              // FK a storeBanners.id (nullable si el banner fue eliminado)
+  bannerTitle: varchar("bannerTitle", { length: 255 }),  // Título del banner al momento de la solicitud
+  bannerImageUrl: text("bannerImageUrl"),                 // URL de la imagen del banner
+  patientName: varchar("patientName", { length: 255 }),  // Nombre del paciente
+  patientEmail: varchar("patientEmail", { length: 320 }),
+  status: mysqlEnum("status", ["pending", "attended", "cancelled"]).default("pending").notNull(),
+  adminNotes: text("adminNotes"),                        // Notas del admin al atender
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  attendedAt: timestamp("attendedAt"),                   // Cuándo el admin lo atendió
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type BannerInterest = typeof bannerInterests.$inferSelect;
+export type InsertBannerInterest = typeof bannerInterests.$inferInsert;

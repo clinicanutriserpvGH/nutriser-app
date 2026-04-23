@@ -9,7 +9,7 @@
  * - Modo hoja A4: 8 tarjetas por página en grilla 2×4
  */
 
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import QRCode from "qrcode";
 
 const LOGO_URL =
@@ -312,7 +312,10 @@ export async function generateWalletCardPdf(cards: WalletPdfCard[]): Promise<Buf
     : buildA4PageHtml(cards, qrDataUrls);
 
   const browser = await puppeteer.launch({
-    executablePath: "/usr/bin/chromium",
+    executablePath: process.env.CHROMIUM_PATH ||
+      ["/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/google-chrome", "/usr/bin/google-chrome-stable"]
+        .find(p => { try { require("fs").accessSync(p); return true; } catch { return false; } }) ||
+      "/usr/bin/chromium",
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",

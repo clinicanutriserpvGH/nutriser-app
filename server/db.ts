@@ -1925,6 +1925,13 @@ export async function getConfirmedCashPaymentsByPatient(patientId: number): Prom
     .orderBy(desc(cashPendingPayments.createdAt));
 }
 
+/** Eliminar un pago en efectivo del historial (admin) — para corregir errores */
+export async function deleteCashPayment(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(cashPendingPayments).where(eq(cashPendingPayments.id, id));
+}
+
 // ─── Splash Ads ────────────────────────────────────────────────────────────────
 
 /** Obtener todos los splash ads activos de un tipo (para mostrar al paciente) */

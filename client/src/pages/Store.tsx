@@ -376,7 +376,7 @@ export default function Store() {
           {[
             { id: "all" as const, label: "Todo", count: tabCounts.all },
             { id: "services" as const, label: "Servicios", count: tabCounts.services },
-            { id: "products" as const, label: "Productos", count: tabCounts.products },
+            { id: "products" as const, label: "Skincare", count: tabCounts.products },
             { id: "ebooks" as const, label: "Libros", count: tabCounts.ebooks },
           ].map((tab) => (
             <button
@@ -415,7 +415,7 @@ export default function Store() {
                   ? `Resultados para "${searchQuery}"`
                   : activeTab === "all" ? "Todo en Nutriser"
                   : activeTab === "services" ? "Servicios"
-                  : activeTab === "products" ? "Productos"
+                  : activeTab === "products" ? "Skincare"
                   : "Libros Digitales"}
               </h2>
               <span className="text-xs lg:text-sm text-gray-400">{filteredItems.length} resultado{filteredItems.length !== 1 ? "s" : ""}</span>

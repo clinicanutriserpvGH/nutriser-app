@@ -602,3 +602,142 @@ export async function sendLoginAuthorizationEmail(
     }
   }
 }
+
+/**
+ * Enviar recibo de compra al paciente cuando se confirma una compra
+ * (en clínica o en línea). Siempre desde clinicanutriserpv@gmail.com
+ */
+export async function sendPurchaseReceiptEmail(params: {
+  clientEmail: string;
+  clientName: string;
+  concept: string;
+  amountCents: number;
+  walletAmountUsedCents?: number;
+  cashbackPercent?: number;
+  itemType?: string;
+  paymentDate?: Date;
+  walletNumber?: string;
+}) {
+  const transporter = getEmailTransporter();
+  const {
+    clientEmail,
+    clientName,
+    concept,
+    amountCents,
+    walletAmountUsedCents = 0,
+    cashbackPercent = 0,
+    itemType,
+    paymentDate = new Date(),
+    walletNumber,
+  } = params;
+
+  const totalMXN = (amountCents / 100).toFixed(2);
+  const walletUsedMXN = walletAmountUsedCents > 0 ? (walletAmountUsedCents / 100).toFixed(2) : null;
+  const cashToPayMXN = walletAmountUsedCents > 0
+    ? ((amountCents - walletAmountUsedCents) / 100).toFixed(2)
+    : null;
+  const cashbackMXN = cashbackPercent > 0
+    ? ((amountCents * cashbackPercent / 100) / 100).toFixed(2)
+    : null;
+  const dateStr = paymentDate.toLocaleDateString('es-MX', {
+    day: '2-digit', month: 'long', year: 'numeric',
+  });
+  const itemTypeLabel: Record<string, string> = {
+    service: 'Servicio',
+    product: 'Producto',
+    ebook: 'Libro / eBook',
+    package: 'Paquete',
+    promotion: 'Promoción',
+    course: 'Curso',
+    other: 'Compra',
+  };
+  const typeLabel = itemType ? (itemTypeLabel[itemType] || 'Compra') : 'Compra';
+
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; background-color: #f9f6f0; margin: 0; padding: 0;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <!-- Header -->
+          <div style="text-align: center; padding: 24px 0 12px; background-color: #1a1a1a; border-radius: 12px; margin-bottom: 20px;">
+            <h1 style="color: #C5A55A; font-size: 26px; margin: 0 0 4px; letter-spacing: 2px;">NUTRISER</h1>
+            <p style="color: #cccccc; font-size: 13px; margin: 0;">Aesthetic &amp; Nutrition</p>
+          </div>
+
+          <!-- Saludo -->
+          <p style="color: #333333; font-size: 15px;">Hola <strong style="color: #1a1a1a;">${clientName}</strong>,</p>
+          <p style="color: #333333;">Tu compra ha sido <strong style="color: #1a7a32;">confirmada y registrada</strong> exitosamente. Aquí está tu recibo:</p>
+
+          <!-- Recibo -->
+          <div style="background-color: #ffffff; border: 1px solid #e8dfc8; border-radius: 12px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <div style="border-bottom: 2px solid #C5A55A; padding-bottom: 12px; margin-bottom: 16px;">
+              <h2 style="margin: 0; color: #C5A55A; font-size: 18px;">🧾 Recibo de Compra</h2>
+              <p style="margin: 4px 0 0; color: #888; font-size: 12px;">Fecha: ${dateStr}</p>
+              ${walletNumber ? `<p style="margin: 2px 0 0; color: #888; font-size: 12px;">Monedero: ${walletNumber}</p>` : ''}
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #555; font-size: 14px;">Tipo</td>
+                <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1a1a1a; font-size: 14px;">${typeLabel}</td>
+              </tr>
+              <tr style="background-color: #faf7f2;">
+                <td style="padding: 8px; color: #555; font-size: 14px; border-radius: 4px;">Concepto</td>
+                <td style="padding: 8px; text-align: right; font-weight: bold; color: #1a1a1a; font-size: 14px; border-radius: 4px;">${concept}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #555; font-size: 14px;">Monto total</td>
+                <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1a1a1a; font-size: 15px;">$${totalMXN} MXN</td>
+              </tr>
+              ${walletUsedMXN ? `
+              <tr style="background-color: #faf7f2;">
+                <td style="padding: 8px; color: #C5A55A; font-size: 13px;">Saldo Monedero Nutriser usado</td>
+                <td style="padding: 8px; text-align: right; color: #C5A55A; font-weight: bold; font-size: 13px;">-$${walletUsedMXN} MXN</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #555; font-size: 13px;">Cobrado en efectivo/transferencia</td>
+                <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1a1a1a; font-size: 13px;">$${cashToPayMXN} MXN</td>
+              </tr>
+              ` : ''}
+              ${cashbackMXN ? `
+              <tr style="background-color: #f0fff4;">
+                <td style="padding: 8px; color: #1a7a32; font-size: 13px; border-radius: 4px;">🎁 Cashback acreditado al Monedero (${cashbackPercent}%)</td>
+                <td style="padding: 8px; text-align: right; color: #1a7a32; font-weight: bold; font-size: 13px; border-radius: 4px;">+$${cashbackMXN} MXN</td>
+              </tr>
+              ` : ''}
+            </table>
+
+            <div style="border-top: 2px solid #C5A55A; margin-top: 16px; padding-top: 12px; text-align: right;">
+              <p style="margin: 0; font-size: 18px; font-weight: bold; color: #1a1a1a;">Total pagado: <span style="color: #C5A55A;">$${totalMXN} MXN</span></p>
+            </div>
+          </div>
+
+          <!-- Mensaje final -->
+          <p style="color: #333333; font-size: 14px;">Gracias por confiar en <strong>Nutriser Aesthetic &amp; Nutrition</strong>. Si tienes alguna pregunta, contáctanos:</p>
+          <ul style="color: #555; font-size: 14px; padding-left: 20px;">
+            <li>WhatsApp: <strong>+52 322 100 7799</strong></li>
+            <li>Correo: <strong>clinicanutriserpv@gmail.com</strong></li>
+            <li>Web: <a href="https://nutriserpv.com" style="color: #C5A55A;">nutriserpv.com</a></li>
+          </ul>
+
+          <hr style="border: none; border-top: 1px solid #dddddd; margin: 20px 0;">
+          <p style="font-size: 11px; color: #999999; text-align: center;">
+            Nutriser - Aesthetic &amp; Nutrition &middot; nutriserpv.com &middot; Puerto Vallarta, Jalisco
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"Nutriser" <${ENV.gmailUser}>`,
+      to: clientEmail,
+      subject: `🧾 Recibo de Compra - ${concept} - Nutriser`,
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error('[Email] Error sending purchase receipt:', error);
+    return false;
+  }
+}

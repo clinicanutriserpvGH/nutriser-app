@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   QrCode, Camera, User, Wallet, ShoppingBag,
   Package, Sparkles, Check, ArrowLeft, Loader2,
-  Search, CreditCard, DollarSign, X,
+  Search, CreditCard, DollarSign, X, Trash2,
 } from "lucide-react";
 
 type Step = "scan" | "patient" | "select" | "confirm" | "done";
@@ -124,6 +124,22 @@ export default function AdminQRScanner() {
     onError: (e) => toast.error('Error al quitar descuento: ' + e.message),
   });
 
+  // Query para historial de compras del paciente (para que el admin pueda borrarlas)
+  const [patientIdForHistory, setPatientIdForHistory] = useState<number | null>(null);
+  const patientPurchaseHistoryQuery = trpc.cashPayments.getPatientHistory.useQuery(
+    { patientId: patientIdForHistory! },
+    { enabled: !!patientIdForHistory }
+  );
+
+  // Mutation para borrar una compra del historial
+  const deletePurchaseMutation = trpc.cashPayments.adminDelete.useMutation({
+    onSuccess: () => {
+      toast.success('Compra eliminada del historial.');
+      patientPurchaseHistoryQuery.refetch();
+    },
+    onError: (e) => toast.error('Error al eliminar: ' + e.message),
+  });
+
   // Mutation para registrar compra presencial
   const registerMutation = trpc.wallet.adminRegisterPresentialPurchase.useMutation({
     onSuccess: (data) => {
@@ -219,7 +235,10 @@ export default function AdminQRScanner() {
     if (patientQuery.data?.patientEmail) {
       setPatientEmailForFilter(patientQuery.data.patientEmail);
     }
-  }, [patientQuery.data?.walletId, patientQuery.data?.patientEmail]);
+    if (patientQuery.data?.patientId) {
+      setPatientIdForHistory(patientQuery.data.patientId);
+    }
+  }, [patientQuery.data?.walletId, patientQuery.data?.patientEmail, patientQuery.data?.patientId]);
 
   // ─── Handlers ─────────────────────────────────────────────────
   const handleManualSearch = () => {
@@ -590,6 +609,52 @@ export default function AdminQRScanner() {
                   </div>
                 ) : (
                   <p className="text-xs text-center text-gray-400 mt-1">Sin solicitudes de promoción pendientes</p>
+                )}
+
+                {/* ─── Historial de Compras del Paciente (Admin puede borrar) ─── */}
+                {patientPurchaseHistoryQuery.data && patientPurchaseHistoryQuery.data.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">🧾</span>
+                      <span className="text-sm font-bold text-gray-800">Historial de Compras ({patientPurchaseHistoryQuery.data.length})</span>
+                    </div>
+                    {patientPurchaseHistoryQuery.data.map((p: any) => (
+                      <div key={p.id} className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-900 truncate">{p.concept}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(p.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </p>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                              p.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                              p.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>{p.status === 'confirmed' ? 'Confirmado' : p.status === 'pending' ? 'Pendiente' : 'Cancelado'}</span>
+                          </div>
+                          <div className="flex items-center gap-2 ml-2">
+                            <p className="text-base font-black text-gray-800">${(p.amountCents / 100).toFixed(2)}</p>
+                            <button
+                              onClick={() => {
+                                if (confirm(`¿Eliminar la compra "${p.concept}" del historial? Esta acción no se puede deshacer.`)) {
+                                  deletePurchaseMutation.mutate({ id: p.id });
+                                }
+                              }}
+                              disabled={deletePurchaseMutation.isPending}
+                              className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 disabled:opacity-50 transition-all"
+                              title="Eliminar compra"
+                            >
+                              {deletePurchaseMutation.isPending ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-3 h-3" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
 
                 {/* ─── Gestión de Descuento del Monedero ─── */}

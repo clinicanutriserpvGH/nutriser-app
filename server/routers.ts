@@ -8,13 +8,13 @@ import { createMembership, getAllMemberships, getMembershipById, updateMembershi
 import { notifyOwner } from "./_core/notification";
 import { invokeLLM } from "./_core/llm";
 import { ENV } from "./_core/env";
-import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail } from "./_core/email";
+import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail, sendPurchaseReceiptEmail } from "./_core/email";
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
 import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
-import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount } from './db';
+import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest, deleteBannerInterest } from './db';
@@ -3118,6 +3118,7 @@ export const appRouter = router({
         return {
           walletId: wallet.id,
           walletNumber: wallet.walletNumber,
+          patientId: wallet.patientId,
           patientName: patient?.name || 'Usuario',
           patientEmail: patient?.email || '',
           patientPhone: patient?.phone || '',
@@ -3313,6 +3314,26 @@ export const appRouter = router({
             });
           }
         }
+        // 3. Enviar recibo de compra al paciente por correo
+        try {
+          const walletRow = await getWalletById(payment.walletId);
+          const patientRow = walletRow?.patientId ? await getPatientById(walletRow.patientId) : null;
+          if (patientRow?.email) {
+            await sendPurchaseReceiptEmail({
+              clientEmail: patientRow.email,
+              clientName: patientRow.name || 'Paciente',
+              concept: payment.concept,
+              amountCents: payment.amountCents,
+              walletAmountUsedCents: payment.walletAmountUsedCents ?? 0,
+              cashbackPercent: payment.cashbackPercent ?? 0,
+              itemType: payment.itemType ?? 'other',
+              paymentDate: new Date(),
+              walletNumber: walletRow?.walletNumber,
+            });
+          }
+        } catch (emailErr) {
+          console.error('[cashPayments.confirm] Error sending receipt email:', emailErr);
+        }
         return { success: true, payment };
       }),
 
@@ -3322,6 +3343,27 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await cancelCashPayment(input.id);
         return { success: true };
+      }),
+
+    // Admin: eliminar permanentemente una compra del historial (para corregir errores)
+    adminDelete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteCashPayment(input.id);
+        return { success: true };
+      }),
+
+    // Admin: obtener historial de compras de un paciente (para ver y borrar)
+    getPatientHistory: publicProcedure
+      .input(z.object({ patientId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        const { cashPendingPayments } = await import('../drizzle/schema');
+        const { eq, desc } = await import('drizzle-orm');
+        return await db.select().from(cashPendingPayments)
+          .where(eq(cashPendingPayments.patientId, input.patientId))
+          .orderBy(desc(cashPendingPayments.createdAt));
       }),
   }),
 

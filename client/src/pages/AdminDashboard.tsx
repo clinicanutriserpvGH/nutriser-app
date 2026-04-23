@@ -2734,7 +2734,7 @@ export default function AdminDashboard() {
                         <option value="faciales">Faciales</option>
                         <option value="medicina">Medicina</option>
                         <option value="otros">Otros</option>
-                        <option value="productos">Productos</option>
+                        <option value="productos">Skincare</option>
                         <option value="general">General</option>
                       </select>
                     </div>
@@ -3722,7 +3722,7 @@ export default function AdminDashboard() {
                       <option value="all">Todos los tipos</option>
                       <option value="service">Servicios</option>
                       <option value="package">Paquetes</option>
-                      <option value="product">Productos</option>
+                      <option value="product">Skincare</option>
                       <option value="ebook">eBook</option>
                     </select>
                     <button

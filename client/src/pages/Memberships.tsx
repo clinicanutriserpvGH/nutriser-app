@@ -117,7 +117,7 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; co
   faciales: { label: "catFaciales", icon: ScanFace, color: "#ec4899", bg: "#fce7f3" },
   medicina: { label: "catMedicina", icon: Syringe, color: "#7c3aed", bg: "#ede9fe" },
   otros: { label: "catOtros", icon: Smile, color: "#0891b2", bg: "#cffafe" },
-  productos: { label: "catProductos", icon: ShoppingBag, color: "#ea580c", bg: "#ffedd5" },
+  productos: { label: "catProductos", icon: Droplets, color: "#C5A55A", bg: "#fef3c7" },
   general: { label: "catGeneral", icon: Package, color: "#6b7280", bg: "#f3f4f6" },
 };
 

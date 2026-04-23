@@ -30,7 +30,7 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; co
   faciales: { label: "Faciales", icon: Scan, color: "#D4A0A0" },
   medicina: { label: "Medicina", icon: Syringe, color: "#8E6B8E" },
   otros: { label: "Otros", icon: Droplets, color: "#5B8E8E" },
-  productos: { label: "Productos", icon: ShoppingBag, color: "#C5855A" },
+  productos: { label: "Skincare", icon: Droplets, color: "#C5A55A" },
   general: { label: "General", icon: Package, color: "#888" },
 };
 

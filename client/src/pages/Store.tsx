@@ -50,7 +50,9 @@ type SearchResult = {
 
 export default function Store() {
   const { patient, isLoggedIn, logout } = usePatientAuth();
-  const [showPromoSplash, setShowPromoSplash] = useState(true);
+  const [showPromoSplash, setShowPromoSplash] = useState(
+    () => !sessionStorage.getItem("nutriser_store_promo_dismissed")
+  );
   const [walletSheetOpen, setWalletSheetOpen] = useState(false);
   const [, navigate] = useLocation();
 
@@ -305,8 +307,8 @@ export default function Store() {
       {/* ─── Promo Splash ──────────────────────────────────────────────── */}
       {showPromoSplash && (
         <PromoSplash
-          onClose={() => setShowPromoSplash(false)}
-          onGoToCoupon={() => setShowPromoSplash(false)}
+          onClose={() => { sessionStorage.setItem("nutriser_store_promo_dismissed", "1"); setShowPromoSplash(false); }}
+          onGoToCoupon={() => { sessionStorage.setItem("nutriser_store_promo_dismissed", "1"); setShowPromoSplash(false); }}
         />
       )}
 

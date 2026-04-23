@@ -269,7 +269,9 @@ export default function Memberships() {
   // ─── Sesión unificada ────────────────────────────────────────────────
   const { patient, isLoggedIn, logout } = usePatientAuth();
   const { isMobile } = useDeviceType();
-  const [showPromoSplash, setShowPromoSplash] = useState(true);
+  const [showPromoSplash, setShowPromoSplash] = useState(
+    () => !sessionStorage.getItem("nutriser_tienda_promo_dismissed")
+  );
   const [pendingCartItem] = useState<Omit<CartItem, "qty"> | null>(null); // reservado para uso futuro
 
   // ─── Guard móvil ───────────────────────────────────────────────────────────────────────
@@ -767,14 +769,16 @@ export default function Memberships() {
       {showPromoSplash && (
         <PromoSplash
           isAuthenticated={isLoggedIn}
-          onClose={() => setShowPromoSplash(false)}
+          onClose={() => { sessionStorage.setItem("nutriser_tienda_promo_dismissed", "1"); setShowPromoSplash(false); }}
           onGoToCoupon={(promoId) => {
             // Solo se llama si isAuthenticated=true (el guard ya intercepta si no hay sesión)
+            sessionStorage.setItem("nutriser_tienda_promo_dismissed", "1");
             setShowPromoSplash(false);
             navigate(`/cupon/${promoId}?from=store`);
           }}
           onOpenWallet={() => {
             // Solo se llama si isAuthenticated=true
+            sessionStorage.setItem("nutriser_tienda_promo_dismissed", "1");
             setShowPromoSplash(false);
             setWalletSheetOpen(true);
           }}

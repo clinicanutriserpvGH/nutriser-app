@@ -195,9 +195,9 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
 }
 
 export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAuthenticated = false }: PromoSplashProps) {
-  const { data: promotions = [] } = trpc.promotions.list.useQuery();
-  const { data: tiendaAds = [] } = (trpc.splashAds.getActive as any).useQuery({ type: 'tienda' });
-  const { data: splashConfigData } = (trpc.splashAds.getConfig as any).useQuery({ type: 'tienda' });
+  const { data: promotions = [], isLoading: loadingPromos } = trpc.promotions.list.useQuery();
+  const { data: tiendaAds = [], isLoading: loadingAds } = (trpc.splashAds.getActive as any).useQuery({ type: 'tienda' });
+  const { data: splashConfigData, isLoading: loadingConfig } = (trpc.splashAds.getConfig as any).useQuery({ type: 'tienda' });
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
@@ -206,9 +206,12 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
   const { isMobile } = useDeviceType();
   const [, navigate] = useLocation();
 
-  // Slides: imágenes admin (tipo tienda) + [Monedero si showDefault o sin imágenes] + promos activas
+  // Slides: imágenes admin (tipo tienda) + [Monedero SOLO si el admin lo activó] + promos activas
+  // REGLA: showDefault=true → mostrar slide del Monedero. showDefault=false → NO mostrar nunca.
+  // Las imágenes admin siempre aparecen si están subidas. Los cupones activos siempre aparecen.
+  // Si no hay nada activo → totalSlides=0 → shouldShow=false → no aparece nada.
   const adminTiendaAds = tiendaAds as Array<{ id: number; imageUrl: string; title: string }>;
-  const showDefaultSlide = !!(splashConfigData?.showDefault) || adminTiendaAds.length === 0;
+  const showDefaultSlide = !!(splashConfigData?.showDefault); // Solo si el admin lo activó — NUNCA por defecto
   const adminAdsCount = adminTiendaAds.length;
   const defaultSlideCount = showDefaultSlide ? 1 : 0;
   const totalSlides = adminAdsCount + defaultSlideCount + activePromos.length;
@@ -217,6 +220,14 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
   const promoIndex = currentIndex - adminAdsCount - defaultSlideCount;
 
   const shouldShow = totalSlides > 0 && !dismissed;
+  const dataLoaded = !loadingPromos && !loadingAds && !loadingConfig;
+
+  // Cuando los datos ya cargaron y no hay nada que mostrar → cerrar automáticamente
+  useEffect(() => {
+    if (dataLoaded && totalSlides === 0) {
+      onClose();
+    }
+  }, [dataLoaded, totalSlides, onClose]);
 
   const handleClose = useCallback(() => {
     setDismissed(true);

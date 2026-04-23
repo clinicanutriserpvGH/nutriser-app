@@ -159,9 +159,9 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
 }
 
 export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated = false }: ShopPromoSplashProps) {
-  const { data: promotions = [] } = trpc.promotions.list.useQuery();
-  const { data: splashAds = [] } = (trpc.splashAds.getActive as any).useQuery({ type: 'inicio' });
-  const { data: splashConfigData } = (trpc.splashAds.getConfig as any).useQuery({ type: 'inicio' });
+  const { data: promotions = [], isLoading: loadingPromos } = trpc.promotions.list.useQuery();
+  const { data: splashAds = [], isLoading: loadingAds } = (trpc.splashAds.getActive as any).useQuery({ type: 'inicio' });
+  const { data: splashConfigData, isLoading: loadingConfig } = (trpc.splashAds.getConfig as any).useQuery({ type: 'inicio' });
   const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAuthGuard, setShowAuthGuard] = useState(false);
@@ -174,7 +174,7 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   // Si showDefault=true → la ShopCard fija aparece junto a las imágenes del admin
   // Si no hay imágenes del admin → se usa la ShopCard fija siempre
   const adminAds = splashAds as Array<{ id: number; imageUrl: string; title: string }>;
-  const showDefaultSlide = !!(splashConfigData?.showDefault) || adminAds.length === 0;
+  const showDefaultSlide = !!(splashConfigData?.showDefault); // Solo si el admin lo activó — NUNCA por defecto
   const hasAdminAds = adminAds.length > 0;
   // Orden: [imágenes admin] + [ShopCard si showDefault] + [cupones activos]
   const adminAdsCount = adminAds.length;
@@ -211,6 +211,17 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   const goPrev = useCallback(() => {
     setCurrentIndex((i) => (i - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
+
+  // Cuando los datos ya cargaron y no hay nada que mostrar → llamar onClose para no bloquear el Splash 0
+  const dataLoaded = !loadingPromos && !loadingAds && !loadingConfig;
+  useEffect(() => {
+    if (dataLoaded && totalSlides === 0) {
+      onClose(); // Liberar el Splash 0 automáticamente
+    }
+  }, [dataLoaded, totalSlides, onClose]);
+
+  // Mientras cargan los datos o si no hay nada → no renderizar el overlay
+  if (!dataLoaded || totalSlides === 0) return null;
 
   return (
     <>

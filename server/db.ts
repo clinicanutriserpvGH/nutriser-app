@@ -2166,6 +2166,7 @@ export async function setSystemConfig(key: string, value: string): Promise<void>
 export async function adminResetWallet(walletId: number, adminEmail: string): Promise<void> {
   const db = await getDb();
   if (!db) return;
+  // 1. Reiniciar saldo y cashback
   await db.update(wallets)
     .set({
       balance: 0,
@@ -2175,13 +2176,20 @@ export async function adminResetWallet(walletId: number, adminEmail: string): Pr
       discountActivatedAt: null,
     })
     .where(eq(wallets.id, walletId));
-  // Registrar movimiento de auditoría
+  // 2. Cancelar todos los pagos en clínica pendientes de este monedero
+  await db.update(cashPendingPayments)
+    .set({ status: 'cancelled', cancelledAt: new Date() })
+    .where(and(
+      eq(cashPendingPayments.walletId, walletId),
+      eq(cashPendingPayments.status, 'pending')
+    ));
+  // 3. Registrar movimiento de auditoría
   await db.insert(walletTransactions).values({
     walletId,
     type: "adjustment",
     amount: 0,
     balanceAfter: 0,
-    description: `Monedero reiniciado por admin (${adminEmail})`,
+    description: `Monedero reiniciado por admin (${adminEmail}) — pagos pendientes cancelados`,
     createdBy: `admin:${adminEmail}`,
   }).catch(() => {});
 }

@@ -1,123 +1,82 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Eye, EyeOff, Mail, CheckCircle2, ArrowLeft, Home, Shield, Loader2, Clock } from "lucide-react";
+import { Lock, Eye, EyeOff, Mail, CheckCircle2, ArrowLeft, Home, Shield, Loader2, KeyRound } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 export default function AdminLogin() {
   const [, navigate] = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Estado 2FA
-  const [awaitingAuth, setAwaitingAuth] = useState(false);
+  // Estado del flujo
+  const [step, setStep] = useState<"credentials" | "passphrase">("credentials");
   const [pendingEmail, setPendingEmail] = useState("");
-  const [countdown, setCountdown] = useState(600); // 10 min en segundos
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Detectar si el usuario viene del Splash 2
-  const fromSplash2 = new URLSearchParams(window.location.search).get("from") === "splash2";
+  const [passphrase, setPassphrase] = useState("");
+  const [showPassphrase, setShowPassphrase] = useState(false);
 
   // Estado para el modal de recuperación
   const [showForgot, setShowForgot] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetSent, setResetSent] = useState(false);
 
+  // Detectar si el usuario viene del Splash 2
+  const fromSplash2 = new URLSearchParams(window.location.search).get("from") === "splash2";
+
   const requestResetMutation = trpc.auth.requestPasswordReset.useMutation({
-    onSuccess: () => {
-      setResetSent(true);
-    },
-    onError: (err: any) => {
-      toast.error(err.message || "Error al enviar el correo");
-    },
+    onSuccess: () => setResetSent(true),
+    onError: (err: any) => toast.error(err.message || "Error al enviar el correo"),
   });
 
+  // Paso 1: Verificar correo + contraseña
   const loginMutation = trpc.auth.adminLogin.useMutation({
     onSuccess: (data) => {
-      if (data.pendingAuthorization) {
+      if (data.requirePassphrase) {
         setPendingEmail(data.email);
-        setAwaitingAuth(true);
-        setCountdown(600);
-        toast.success("Correo de autorización enviado. Revisa tu bandeja.");
+        setStep("passphrase");
+        toast.success("Credenciales correctas. Ingresa la palabra clave.");
       }
     },
-    onError: (err: any) => {
-      toast.error(err.message || "Credenciales inválidas");
-      setIsLoading(false);
-    },
+    onError: (err: any) => toast.error(err.message || "Credenciales inválidas"),
   });
 
-  const authorizeMutation = trpc.auth.authorizeLogin.useMutation();
-
-  // Polling para verificar autorización
-  const checkAuthQuery = trpc.auth.checkLoginAuthorization.useQuery(
-    { email: pendingEmail },
-    {
-      enabled: awaitingAuth && !!pendingEmail,
-      refetchInterval: awaitingAuth ? 3000 : false, // cada 3 segundos
-    }
-  );
-
-  useEffect(() => {
-    if (checkAuthQuery.data?.authorized) {
-      // ¡Autorizado! Guardar sesión y redirigir
-      // sessionStorage: la sesión expira al cerrar el tab/navegador (más seguro que localStorage)
+  // Paso 2: Verificar palabra clave
+  const passphraseLoginMutation = trpc.auth.adminLoginWithPassphrase.useMutation({
+    onSuccess: (data) => {
       sessionStorage.setItem("adminSession", JSON.stringify({
-        email: checkAuthQuery.data.email,
+        email: data.email,
         loggedIn: true,
         timestamp: new Date().toISOString(),
       }));
-      // Limpiar cualquier sesión vieja de localStorage por seguridad
       localStorage.removeItem("adminSession");
       localStorage.removeItem("adminSessionToken");
       toast.success("¡Acceso autorizado! Bienvenido al panel.");
-      setAwaitingAuth(false);
-      setIsLoading(false);
       navigate("/admin/dashboard");
-    }
-  }, [checkAuthQuery.data]);
+    },
+    onError: (err: any) => toast.error(err.message || "Palabra clave incorrecta"),
+  });
 
-  // Countdown timer
-  useEffect(() => {
-    if (awaitingAuth) {
-      countdownRef.current = setInterval(() => {
-        setCountdown(prev => {
-          if (prev <= 1) {
-            // Tiempo expirado
-            setAwaitingAuth(false);
-            setIsLoading(false);
-            toast.error("El tiempo de autorización ha expirado. Intenta de nuevo.");
-            if (countdownRef.current) clearInterval(countdownRef.current);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => {
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
-  }, [awaitingAuth]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitCredentials = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("Ingresa tu correo y contraseña");
       return;
     }
-    setIsLoading(true);
-    loginMutation.mutate({
-      email,
-      password,
-      origin: window.location.origin,
-    });
+    loginMutation.mutate({ email, password });
+  };
+
+  const handleSubmitPassphrase = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passphrase.trim()) {
+      toast.error("Ingresa la palabra clave");
+      return;
+    }
+    passphraseLoginMutation.mutate({ email: pendingEmail, passphrase: passphrase.trim() });
   };
 
   const handleRequestReset = () => {
@@ -125,23 +84,7 @@ export default function AdminLogin() {
       toast.error("Ingresa tu correo de administrador");
       return;
     }
-    requestResetMutation.mutate({
-      email: resetEmail,
-      origin: window.location.origin,
-    });
-  };
-
-  const handleCancelAuth = () => {
-    setAwaitingAuth(false);
-    setIsLoading(false);
-    setPendingEmail("");
-    setCountdown(600);
-  };
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
+    requestResetMutation.mutate({ email: resetEmail, origin: window.location.origin });
   };
 
   return (
@@ -168,69 +111,96 @@ export default function AdminLogin() {
           INICIO
         </button>
       </div>
+
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="font-serif text-4xl text-[#1A1A1A] mb-2">Nutriser</h1>
           <p className="text-[#666]">Panel de Administración</p>
         </div>
 
-        {awaitingAuth ? (
-          /* ── Esperando autorización 2FA ── */
+        {step === "passphrase" ? (
+          /* ── Paso 2: Palabra Clave ── */
           <Card className="border-2 border-[#C5A55A]/20 shadow-lg">
             <CardHeader className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent text-center">
               <div className="mx-auto mb-2">
-                <Shield className="w-12 h-12 text-[#C5A55A] mx-auto" />
+                <KeyRound className="w-12 h-12 text-[#C5A55A] mx-auto" />
               </div>
-              <CardTitle className="text-[#C5A55A]">Verificación de Seguridad</CardTitle>
-              <CardDescription>Esperando autorización por correo</CardDescription>
+              <CardTitle className="text-[#C5A55A]">Palabra Clave</CardTitle>
+              <CardDescription>Ingresa la palabra clave de seguridad</CardDescription>
             </CardHeader>
-            <CardContent className="pt-6 space-y-5">
-              <div className="bg-[#FFF8E1] border border-[#C5A55A]/30 rounded-lg p-4 text-center">
-                <p className="text-sm text-[#856404] mb-2">
-                  Se envió un enlace de autorización a los correos de seguridad de Nutriser.
-                </p>
-                <p className="text-xs text-[#856404]/80">
-                  Un administrador debe hacer clic en el enlace para autorizar tu acceso.
-                </p>
-              </div>
-
-              {/* Animación de espera */}
-              <div className="flex flex-col items-center gap-3 py-4">
-                <div className="relative">
-                  <Loader2 className="w-10 h-10 text-[#C5A55A] animate-spin" />
+            <CardContent className="pt-6">
+              <form onSubmit={handleSubmitPassphrase} className="space-y-5">
+                <div className="bg-[#FFF8E1] border border-[#C5A55A]/30 rounded-lg p-3 text-center">
+                  <p className="text-sm text-[#856404]">
+                    Sesión para: <span className="font-semibold">{pendingEmail}</span>
+                  </p>
                 </div>
-                <p className="text-[#666] text-sm font-medium">Esperando autorización...</p>
-                <div className="flex items-center gap-2 text-[#999] text-xs">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Expira en {formatTime(countdown)}</span>
+
+                <div>
+                  <Label htmlFor="passphrase" className="flex items-center gap-2 mb-2 text-[#666]">
+                    <Shield className="w-4 h-4 text-[#C5A55A]" />
+                    Palabra Clave de Seguridad
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="passphrase"
+                      type={showPassphrase ? "text" : "password"}
+                      value={passphrase}
+                      onChange={(e) => setPassphrase(e.target.value)}
+                      placeholder="Ingresa la palabra clave"
+                      required
+                      autoComplete="off"
+                      autoFocus
+                      className="border-[#C5A55A]/30 focus:border-[#C5A55A] pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassphrase(!showPassphrase)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C5A55A] hover:text-[#B8963E]"
+                    >
+                      {showPassphrase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-[#999] mt-1.5">
+                    El administrador general te proporcionará esta palabra clave.
+                  </p>
                 </div>
-              </div>
 
-              {/* Indicador de correo */}
-              <div className="bg-[#f5f5f5] rounded-lg p-3 text-center">
-                <p className="text-xs text-[#999] mb-1">Sesión solicitada para:</p>
-                <p className="text-sm font-semibold text-[#1A1A1A]">{pendingEmail}</p>
-              </div>
+                <Button
+                  type="submit"
+                  disabled={passphraseLoginMutation.isPending}
+                  className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 text-lg font-bold tracking-wider"
+                >
+                  {passphraseLoginMutation.isPending ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Verificando...
+                    </span>
+                  ) : "Ingresar al Panel"}
+                </Button>
 
-              <Button
-                onClick={handleCancelAuth}
-                variant="outline"
-                className="w-full border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A]/10"
-              >
-                Cancelar e intentar de nuevo
-              </Button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => { setStep("credentials"); setPassphrase(""); }}
+                    className="text-sm text-[#999] hover:text-[#666]"
+                  >
+                    ← Volver a credenciales
+                  </button>
+                </div>
+              </form>
             </CardContent>
           </Card>
         ) : !showForgot ? (
-          /* ── Login normal con campo de correo editable ── */
+          /* ── Paso 1: Correo + Contraseña ── */
           <Card className="border-2 border-[#C5A55A]/20 shadow-lg">
             <CardHeader className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent">
               <CardTitle className="text-[#C5A55A]">Iniciar Sesión</CardTitle>
               <CardDescription>Accede al panel de administración</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
-              <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
-                {/* Correo editable */}
+              <form onSubmit={handleSubmitCredentials} className="space-y-6" autoComplete="off">
+                {/* Correo */}
                 <div>
                   <Label htmlFor="admin-email" className="flex items-center gap-2 mb-2 text-[#666]">
                     <Mail className="w-4 h-4 text-[#C5A55A]" />
@@ -285,21 +255,21 @@ export default function AdminLogin() {
                 <div className="bg-[#f0f7ff] border border-blue-200 rounded-lg p-3 flex items-start gap-2">
                   <Shield className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
                   <p className="text-xs text-blue-700">
-                    Después de verificar tus credenciales, se enviará un enlace de autorización a los correos de seguridad de Nutriser. Solo podrás acceder si se aprueba.
+                    Después de verificar tus credenciales, se te pedirá una palabra clave de seguridad.
                   </p>
                 </div>
 
                 <Button
                   type="submit"
-                  disabled={isLoading || loginMutation.isPending}
+                  disabled={loginMutation.isPending}
                   className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 text-lg font-bold tracking-wider"
                 >
-                  {isLoading || loginMutation.isPending ? (
+                  {loginMutation.isPending ? (
                     <span className="flex items-center gap-2">
                       <Loader2 className="w-5 h-5 animate-spin" />
                       Verificando...
                     </span>
-                  ) : "Iniciar Sesión"}
+                  ) : "Continuar"}
                 </Button>
 
                 {/* Enlace olvidé contraseña */}
@@ -316,7 +286,7 @@ export default function AdminLogin() {
             </CardContent>
           </Card>
         ) : (
-          /* ── Modal de recuperación con campo editable ── */
+          /* ── Recuperar contraseña ── */
           <Card className="border-2 border-[#C5A55A]/20 shadow-lg">
             <CardHeader className="bg-gradient-to-r from-[#C5A55A]/10 to-transparent">
               <CardTitle className="text-[#C5A55A]">Recuperar Contraseña</CardTitle>
@@ -340,11 +310,9 @@ export default function AdminLogin() {
                       className="border-[#C5A55A]/30 focus:border-[#C5A55A]"
                     />
                   </div>
-
                   <p className="text-sm text-[#666]">
                     Se enviará un enlace de restablecimiento al correo ingresado. El enlace es válido por 1 hora.
                   </p>
-
                   <Button
                     onClick={handleRequestReset}
                     disabled={requestResetMutation.isPending}
@@ -352,7 +320,6 @@ export default function AdminLogin() {
                   >
                     {requestResetMutation.isPending ? "Enviando..." : "Enviar enlace de recuperación"}
                   </Button>
-
                   <div className="text-center">
                     <button
                       type="button"
@@ -383,10 +350,6 @@ export default function AdminLogin() {
             </CardContent>
           </Card>
         )}
-
-        <p className="text-center text-[#999] text-sm mt-6">
-          Panel exclusivo para administradores de Nutriser
-        </p>
       </div>
     </div>
   );

@@ -18,6 +18,7 @@ import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, g
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest } from './db';
+import { getSystemConfig, setSystemConfig } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -37,80 +38,50 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
-    // Paso 1: Verifica credenciales y envía correo de autorización 2FA
+    // Paso 1: Verifica correo+contraseña y devuelve que se requiere palabra clave
     adminLogin: publicProcedure
       .input(z.object({
         email: z.string().email(),
         password: z.string(),
-        origin: z.string(),
       }))
       .mutation(async ({ input }) => {
         const admin = await getAdminByEmail(input.email);
-        if (!admin) throw new Error("Credenciales inv\u00e1lidas");
-        
+        if (!admin) throw new Error('Credenciales inválidas');
         const isPasswordValid = await bcrypt.compare(input.password, admin.passwordHash);
-        if (!isPasswordValid) throw new Error("Credenciales inv\u00e1lidas");
-        
-        // Generar token 2FA
-        const crypto = await import('crypto');
-        const token = crypto.randomBytes(32).toString('hex');
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
-        
-        await setAdminLoginToken(input.email, token, expiresAt);
-        
-        // Construir enlace de autorización
-        const authLink = `${input.origin}/admin/authorize?token=${token}`;
-        
-        // Correos de seguridad que reciben la autorización
-        const securityEmails = [
-          'clinicanutriserpv@gmail.com',
-          'nutriologoantoniobustos@gmail.com',
-        ];
-        
-        await sendLoginAuthorizationEmail(input.email, authLink, securityEmails);
-        
+        if (!isPasswordValid) throw new Error('Credenciales inválidas');
+        // Credenciales correctas — el frontend pedirá la palabra clave
         return {
           success: true,
-          pendingAuthorization: true,
+          requirePassphrase: true,
           email: admin.email,
-          message: 'Se envi\u00f3 un enlace de autorizaci\u00f3n a los correos de seguridad. Espera a que sea aprobado.',
         };
       }),
 
-    // Paso 2: El frontend hace polling para verificar si ya se autorizó
-    checkLoginAuthorization: publicProcedure
+    // Paso 2: Verifica la palabra clave e inicia sesión
+    adminLoginWithPassphrase: publicProcedure
       .input(z.object({
         email: z.string().email(),
-      }))
-      .query(async ({ input }) => {
-        const isAuthorized = await checkAdminLoginAuthorized(input.email);
-        if (isAuthorized) {
-          // Limpiar el token después de autorizar
-          const admin = await getAdminByEmail(input.email);
-          await clearAdminLoginToken(input.email);
-          return {
-            authorized: true,
-            adminId: admin?.id,
-            email: admin?.email,
-          };
-        }
-        return { authorized: false };
-      }),
-
-    // Paso 3: El enlace del correo llama esto para autorizar
-    authorizeLogin: publicProcedure
-      .input(z.object({
-        token: z.string(),
+        passphrase: z.string(),
       }))
       .mutation(async ({ input }) => {
-        const admin = await getAdminByLoginToken(input.token);
-        if (!admin) throw new Error('Token inválido o expirado');
-        
-        if (!admin.loginTokenExpiresAt || new Date() > admin.loginTokenExpiresAt) {
-          throw new Error('El enlace ha expirado. Solicita un nuevo inicio de sesión.');
+        const admin = await getAdminByEmail(input.email);
+        if (!admin) throw new Error('Sesión expirada. Vuelve a ingresar tus credenciales.');
+        // Obtener la palabra clave actual de la BD
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase) throw new Error('Palabra clave no configurada. Contacta al administrador general.');
+        if (input.passphrase.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) {
+          throw new Error('Palabra clave incorrecta');
         }
-        
-        const sessionToken = await authorizeAdminLogin(input.token);
+        // Generar session token de 24 horas
+        const crypto = await import('crypto');
+        const sessionToken = crypto.randomBytes(32).toString('hex');
+        const sessionTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const db = await getDb();
+        if (db) {
+          await db.update(adminCredentials)
+            .set({ sessionToken, sessionTokenExpiresAt })
+            .where(eq(adminCredentials.email, input.email));
+        }
         return { success: true, email: admin.email, sessionToken };
       }),
 
@@ -121,6 +92,39 @@ export const appRouter = router({
         const admin = await getAdminBySessionToken(input.sessionToken);
         if (!admin) return { valid: false };
         return { valid: true, email: admin.email, adminId: admin.id };
+      }),
+
+    // Obtener la palabra clave actual (solo para admin general con contraseña especial)
+    getAdminPassphrase: publicProcedure
+      .input(z.object({
+        masterEmail: z.string().email(),
+        masterPassword: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const MASTER_EMAIL = 'clinicanutriserpv@gmail.com';
+        const MASTER_PASSWORD = 'nutriser8055374408';
+        if (input.masterEmail !== MASTER_EMAIL || input.masterPassword !== MASTER_PASSWORD) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciales de administrador general incorrectas' });
+        }
+        const passphrase = await getSystemConfig('adminPassphrase');
+        return { passphrase: passphrase ?? '' };
+      }),
+
+    // Actualizar la palabra clave (solo admin general con contraseña especial)
+    updateAdminPassphrase: publicProcedure
+      .input(z.object({
+        masterEmail: z.string().email(),
+        masterPassword: z.string(),
+        newPassphrase: z.string().min(3, 'La palabra clave debe tener al menos 3 caracteres'),
+      }))
+      .mutation(async ({ input }) => {
+        const MASTER_EMAIL = 'clinicanutriserpv@gmail.com';
+        const MASTER_PASSWORD = 'nutriser8055374408';
+        if (input.masterEmail !== MASTER_EMAIL || input.masterPassword !== MASTER_PASSWORD) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciales de administrador general incorrectas' });
+        }
+        await setSystemConfig('adminPassphrase', input.newPassphrase.trim());
+        return { success: true };
       }),
 
     requestPasswordReset: publicProcedure

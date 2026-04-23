@@ -5,6 +5,7 @@ import AdminSplashAdsTab from "@/components/AdminSplashAdsTab";
 import AdminStoreBannersTab from "@/components/AdminStoreBannersTab";
 import AdminPatientsTab from "@/components/AdminPatientsTab";
 import AdminWalletTab from "@/components/AdminWalletTab";
+import AdminSecurityTab from "@/components/AdminSecurityTab";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,10 +31,10 @@ const ADMIN_TABS = [
   { value: 'beforeAfter', label: 'Transformaciones Pacientes', emoji: '✨' },
   { value: 'wallet', label: 'Monedero Nutriser', emoji: '💳' },
   { value: 'analytics', label: 'Analítica de Comportamiento', emoji: '📊' },
-  { value: 'splashAds', label: 'Aparador de Publicidad', emoji: '📸' },
-  { value: 'storeBanners', label: 'Aparador Tienda Principal', emoji: '🛍️' },
+  { value: 'splashAds', label: 'Aparador de Publicidad', emoji: '\uD83D\uDCF8' },
+  { value: 'storeBanners', label: 'Aparador Tienda Principal', emoji: '\uD83D\uDECD\uFE0F' },
+  { value: 'security', label: 'Seguridad', emoji: '\uD83D\uDD10' },
 ] as const;
-
 type AdminTabValue = typeof ADMIN_TABS[number]['value'];
 
 export default function AdminDashboard() {
@@ -3796,6 +3797,11 @@ export default function AdminDashboard() {
 
           <TabsContent value="storeBanners" className="space-y-4">
             <AdminStoreBannersTab />
+          </TabsContent>
+
+          {/* Seguridad Tab */}
+          <TabsContent value="security" className="space-y-4">
+            <AdminSecurityTab />
           </TabsContent>
 
         </Tabs>

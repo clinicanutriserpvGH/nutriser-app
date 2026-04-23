@@ -949,3 +949,16 @@ export const bannerInterests = mysqlTable("bannerInterests", {
 });
 export type BannerInterest = typeof bannerInterests.$inferSelect;
 export type InsertBannerInterest = typeof bannerInterests.$inferInsert;
+
+/**
+ * Configuración global del sistema
+ * Almacena pares clave-valor para configuraciones como la palabra clave del admin.
+ */
+export const systemConfig = mysqlTable("systemConfig", {
+  id: int("id").autoincrement().primaryKey(),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SystemConfig = typeof systemConfig.$inferSelect;
+export type InsertSystemConfig = typeof systemConfig.$inferInsert;

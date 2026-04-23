@@ -4,7 +4,7 @@ import { InsertUser, users, memberships, paymentProofs, InsertMembership, Insert
 import { ENV } from './_core/env';
 import { products, InsertProduct, productPurchases, InsertProductPurchase, discountCodes, InsertDiscountCode, DiscountCode } from '../drizzle/schema';
 import { patientAccounts, InsertPatientAccount, PatientAccount, patientTreatments, InsertPatientTreatment, patientAppointments, InsertPatientAppointment, patientPhotos, InsertPatientPhoto } from '../drizzle/schema';
-import { storeBanners, type InsertStoreBanner, bannerInterests, type InsertBannerInterest } from '../drizzle/schema';
+import { storeBanners, type InsertStoreBanner, bannerInterests, type InsertBannerInterest, systemConfig } from '../drizzle/schema';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -2087,4 +2087,22 @@ export async function autoDeactivateExpiredPromotions(): Promise<number> {
       )
     );
   return (result as any)?.[0]?.affectedRows ?? 0;
+}
+
+// ─── Configuración del sistema ─────────────────────────────────────────────
+/** Obtiene el valor de una clave de configuración del sistema */
+export async function getSystemConfig(key: string): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(systemConfig).where(eq(systemConfig.key, key)).limit(1);
+  return rows[0]?.value ?? null;
+}
+/** Establece o actualiza el valor de una clave de configuración del sistema */
+export async function setSystemConfig(key: string, value: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.execute(
+    sql`INSERT INTO systemConfig (\`key\`, value) VALUES (${key}, ${value})
+        ON DUPLICATE KEY UPDATE value = ${value}`
+  );
 }

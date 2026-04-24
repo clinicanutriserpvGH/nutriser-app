@@ -184,7 +184,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   style={{ objectPosition: "center center" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/15 to-black/60 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/80 pointer-events-none" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">
                   {/* Fila superior: badge App Pacientes + íconos en md+ */}
                   <div className="flex items-start justify-between gap-2">

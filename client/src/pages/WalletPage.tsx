@@ -4,9 +4,9 @@
  * Logo grande DENTRO de la tarjeta, código de barras/QR, saldo
  * Identidad visual: dorado (#C5A55A), crema (#FAF7F2), negro (#1A1A1A)
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, X } from "lucide-react";
+import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, X, Bell, BellRing, Mail, AlertCircle, Megaphone, PartyPopper, CheckCircle2, Trash2 } from "lucide-react";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 // NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import { trpc } from "@/lib/trpc";
@@ -136,7 +136,10 @@ function TransactionRow({ txn, lang }: { txn: any; lang: Lang }) {
 export default function WalletPage() {
   const { patient, isLoggedIn } = usePatientAuth();
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history">("card");
+  const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history" | "messages">("card");
+  const [showNotifModal, setShowNotifModal] = useState(false);
+  const [currentNotifIndex, setCurrentNotifIndex] = useState(0);
+  const [notifModalShown, setNotifModalShown] = useState(false);
   const lang: Lang = (() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem("nutriser-lang") : null;
     return (saved === "EN" || saved === "ES") ? saved as Lang : "ES";
@@ -182,6 +185,31 @@ export default function WalletPage() {
     { enabled: isLoggedIn && !!walletQuery.data?.wallet?.id }
   );
   const cashPendingList = cashPendingQuery.data || [];
+
+  // ── Notificaciones del Admin ──
+  const adminNotifsQuery = trpc.adminNotifs.getByWalletId.useQuery(
+    { walletId: walletQuery.data?.wallet?.id || 0 },
+    { enabled: isLoggedIn && !!walletQuery.data?.wallet?.id }
+  );
+  const adminNotifs: any[] = adminNotifsQuery.data || [];
+  const unreadNotifs = adminNotifs.filter((n: any) => !n.isRead);
+  const unreadCount = unreadNotifs.length;
+
+  const markReadMutation = trpc.adminNotifs.markRead.useMutation({
+    onSuccess: () => adminNotifsQuery.refetch(),
+  });
+  const markAllReadMutation = trpc.adminNotifs.markAllRead.useMutation({
+    onSuccess: () => adminNotifsQuery.refetch(),
+  });
+
+  // Mostrar modal automático con la notificación más reciente no leída
+  useEffect(() => {
+    if (!notifModalShown && unreadNotifs.length > 0 && !walletQuery.isLoading) {
+      setCurrentNotifIndex(0);
+      setShowNotifModal(true);
+      setNotifModalShown(true);
+    }
+  }, [unreadNotifs.length, walletQuery.isLoading, notifModalShown]);
 
   const wallet = walletQuery.data?.wallet;
   const tracker = walletQuery.data?.tracker;
@@ -367,7 +395,7 @@ export default function WalletPage() {
 
       {/* Tabs */}
       <div className="max-w-md mx-auto px-4 mt-3">
-        <div className="flex bg-white rounded-xl shadow-sm border border-gray-100 p-1">
+        <div className="flex bg-white rounded-xl shadow-sm border border-gray-100 p-1 overflow-x-auto gap-0.5">
           {[
             { key: "card" as const, label: lang === 'EN' ? 'My Card' : 'Mi Tarjeta' },
             { key: "loyalty" as const, label: lang === 'EN' ? 'My Plans' : 'Mis Planes' },
@@ -377,13 +405,33 @@ export default function WalletPage() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex-1 py-2 px-2 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
                 activeTab === tab.key ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {tab.label}
             </button>
           ))}
+          {/* Pestaña Mensajes con contador */}
+          <button
+            onClick={() => {
+              setActiveTab("messages");
+              if (unreadCount > 0 && wallet?.walletNumber) {
+                markAllReadMutation.mutate({ walletNumber: wallet.walletNumber });
+              }
+            }}
+            className={`relative flex-1 py-2 px-2 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-1 ${
+              activeTab === "messages" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <Bell className="w-3 h-3" />
+            {lang === 'EN' ? 'Messages' : 'Mensajes'}
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
@@ -796,6 +844,70 @@ export default function WalletPage() {
             )}
           </div>
         )}
+
+        {/* ── PESTAÑA MENSAJES ── */}
+        {activeTab === "messages" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[#1A1A1A] font-bold text-base flex items-center gap-2">
+                <BellRing className="w-5 h-5 text-[#C5A55A]" />
+                Mensajes de Nutriser
+              </h2>
+              {unreadCount > 0 && (
+                <span className="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full">
+                  {unreadCount} sin leer
+                </span>
+              )}
+            </div>
+            {adminNotifsQuery.isLoading ? (
+              <div className="text-center py-10">
+                <div className="w-8 h-8 border-2 border-[#C5A55A] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-gray-400 text-xs">Cargando mensajes...</p>
+              </div>
+            ) : adminNotifs.length === 0 ? (
+              <div className="text-center py-12">
+                <Bell className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm font-medium">Sin mensajes</p>
+                <p className="text-gray-300 text-xs mt-1">Aquí aparecerán los mensajes de Nutriser</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {adminNotifs.map((notif: any, idx: number) => {
+                  const typeConfig: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string; label: string }> = {
+                    cobro: { icon: <AlertCircle className="w-5 h-5" />, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200', label: 'Cobro' },
+                    promocion: { icon: <Megaphone className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', label: 'Promoción' },
+                    felicitacion: { icon: <PartyPopper className="w-5 h-5" />, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', label: 'Felicitación' },
+                    general: { icon: <Bell className="w-5 h-5" />, color: 'text-[#C5A55A]', bg: 'bg-[#C5A55A]/5', border: 'border-[#C5A55A]/20', label: 'General' },
+                  };
+                  const cfg = typeConfig[notif.type] || typeConfig.general;
+                  return (
+                    <div key={notif.id} className={`rounded-2xl border p-4 ${cfg.bg} ${cfg.border} ${!notif.isRead ? 'ring-2 ring-offset-1 ring-[#C5A55A]/40' : ''}`}>
+                      <div className="flex items-start gap-3">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${cfg.color} bg-white shadow-sm`}>
+                          {cfg.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-0.5">
+                            <span className={`text-[10px] font-bold uppercase tracking-wider ${cfg.color}`}>{cfg.label}</span>
+                            {!notif.isRead && <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />}
+                          </div>
+                          <p className="text-[#1A1A1A] font-bold text-sm">{notif.title}</p>
+                          <p className="text-gray-600 text-xs mt-1 leading-relaxed">{notif.message}</p>
+                          {notif.imageUrl && (
+                            <img src={notif.imageUrl} alt="" className="mt-2 w-full rounded-xl object-cover max-h-40" />
+                          )}
+                          <p className="text-gray-400 text-[10px] mt-2">
+                            {new Date(notif.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Bottom Navigation Bar ── */}
@@ -885,6 +997,89 @@ export default function WalletPage() {
           </div>
         </div>
       )}
+
+      {/* ══ MODAL AUTOMÁTICO DE NOTIFICACIÓN DEL ADMIN ══ */}
+      {showNotifModal && unreadNotifs.length > 0 && (() => {
+        const notif = unreadNotifs[currentNotifIndex];
+        if (!notif) return null;
+        const typeConfig: Record<string, { icon: React.ReactNode; color: string; bg: string; label: string; emoji: string }> = {
+          cobro: { icon: <AlertCircle className="w-7 h-7" />, color: 'text-red-600', bg: 'bg-red-50', label: 'Cobro pendiente', emoji: '💳' },
+          promocion: { icon: <Megaphone className="w-7 h-7" />, color: 'text-blue-600', bg: 'bg-blue-50', label: 'Promoción especial', emoji: '🎁' },
+          felicitacion: { icon: <PartyPopper className="w-7 h-7" />, color: 'text-green-600', bg: 'bg-green-50', label: '¡Felicitaciones!', emoji: '🎉' },
+          general: { icon: <BellRing className="w-7 h-7" />, color: 'text-[#C5A55A]', bg: 'bg-[#C5A55A]/10', label: 'Mensaje de Nutriser', emoji: '🔔' },
+        };
+        const cfg = typeConfig[notif.type] || typeConfig.general;
+        return (
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+            style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }}
+          >
+            <div
+              className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden"
+              style={{ animation: 'fadeInScale 0.3s ease-out' }}
+            >
+              {/* Header de color según tipo */}
+              <div className={`${cfg.bg} px-6 pt-6 pb-4 text-center`}>
+                <div className="text-4xl mb-2">{cfg.emoji}</div>
+                <span className={`text-xs font-bold uppercase tracking-wider ${cfg.color}`}>{cfg.label}</span>
+                {unreadNotifs.length > 1 && (
+                  <div className="mt-1 flex items-center justify-center gap-1">
+                    {unreadNotifs.map((_: any, i: number) => (
+                      <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentNotifIndex ? 'bg-[#C5A55A] w-3' : 'bg-gray-300'}`} />
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* Contenido */}
+              <div className="px-6 py-4">
+                <h3 className="text-[#1A1A1A] font-black text-lg text-center mb-2">{notif.title}</h3>
+                <p className="text-gray-600 text-sm text-center leading-relaxed">{notif.message}</p>
+                {notif.imageUrl && (
+                  <img src={notif.imageUrl} alt="" className="mt-3 w-full rounded-xl object-cover max-h-36" />
+                )}
+                <p className="text-gray-400 text-[10px] text-center mt-3">
+                  {new Date(notif.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+              {/* Botones */}
+              <div className="px-6 pb-6 flex flex-col gap-2">
+                {currentNotifIndex < unreadNotifs.length - 1 ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        markReadMutation.mutate({ notifId: notif.id });
+                        setCurrentNotifIndex(i => i + 1);
+                      }}
+                      className="w-full bg-[#C5A55A] text-white font-bold py-3 rounded-2xl text-sm hover:bg-[#b8963f] transition-all"
+                    >
+                      Ver siguiente ({currentNotifIndex + 1}/{unreadNotifs.length})
+                    </button>
+                    <button
+                      onClick={() => {
+                        markReadMutation.mutate({ notifId: notif.id });
+                        setShowNotifModal(false);
+                      }}
+                      className="w-full text-gray-400 text-sm py-2"
+                    >
+                      Cerrar
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      markReadMutation.mutate({ notifId: notif.id });
+                      setShowNotifModal(false);
+                    }}
+                    className="w-full bg-[#1A1A1A] text-[#C5A55A] font-bold py-3 rounded-2xl text-sm hover:bg-[#2D2D2D] transition-all"
+                  >
+                    Entendido
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Toast de éxito */}
       {physicalCardRequested && (

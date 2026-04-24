@@ -28,6 +28,58 @@ import { eq, desc } from "drizzle-orm";
 import { adminCredentials, pushSubscriptions } from "../drizzle/schema";
 import { getDb } from "./db";
 
+// ── Helper: enviar correo + push al paciente cuando el admin manda notificación ──
+async function sendAdminNotifEmailAndPush(
+  patient: any,
+  title: string,
+  message: string,
+  type: string,
+  imageUrl?: string
+) {
+  const typeEmoji: Record<string, string> = { cobro: '💳', promocion: '🎁', felicitacion: '🎉', general: '🔔' };
+  const emoji = typeEmoji[type] || '🔔';
+  // Correo al paciente
+  if (patient?.email) {
+    try {
+      const nodemailer = await import('nodemailer');
+      const transporter = nodemailer.default.createTransport({
+        service: 'gmail',
+        auth: { user: ENV.gmailUser, pass: ENV.gmailPassword },
+      });
+      await transporter.sendMail({
+        from: `"Nutriser" <${ENV.gmailUser}>`,
+        to: patient.email,
+        subject: `${emoji} ${title} - Nutriser`,
+        html: `
+          <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#FAF7F2;padding:32px;border-radius:8px;border:1px solid #C5A55A">
+            <div style="text-align:center;margin-bottom:24px">
+              <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png" alt="Nutriser" style="height:60px;object-fit:contain" />
+            </div>
+            <h2 style="color:#C5A55A;font-size:22px;margin:0 0 8px">${emoji} ${title}</h2>
+            <p style="color:#1A1A1A;font-size:15px;line-height:1.6;margin:0 0 16px">${message}</p>
+            ${imageUrl ? `<img src="${imageUrl}" alt="" style="width:100%;border-radius:8px;margin-bottom:16px" />` : ''}
+            <div style="background:#1A1A1A;border-radius:8px;padding:16px;text-align:center;margin-top:24px">
+              <a href="https://nutriserpv.com/monedero" style="color:#C5A55A;font-weight:bold;font-size:15px;text-decoration:none">📲 Ver en mi Monedero Nutriser</a>
+            </div>
+            <p style="color:#999;font-size:11px;text-align:center;margin-top:16px">Nutriser Aesthetic &amp; Nutrition &bull; Puerto Vallarta</p>
+          </div>
+        `,
+      });
+    } catch (e) { console.warn('[AdminNotif] Email error:', e); }
+  }
+  // Push notification al paciente
+  if (patient?.pushSubscription) {
+    try {
+      await sendPushToPatient(
+        patient.pushSubscription,
+        title,
+        message,
+        '/monedero'
+      );
+    } catch (_) { /* push es opcional */ }
+  }
+}
+
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -3870,6 +3922,9 @@ export const appRouter = router({
   // ============================================================
   // ROUTER: NOTIFICACIONES ADMIN → PACIENTE
   // ============================================================
+  // ── Helper: enviar correo + push al paciente cuando el admin manda notificación ──
+  // (definido como variable local para reutilizar en send y sendByWalletId)
+
   adminNotifs: router({
     send: publicProcedure
       .input(z.object({
@@ -3892,13 +3947,11 @@ export const appRouter = router({
           type: input.type,
           sentBy: input.adminEmail,
         });
-        try {
-          // sendPushToPatient requiere pushSubscriptionJson, no patientId
-          // Se omite push aquí — se puede implementar con lookup de suscripción si se necesita
-        } catch (_) { /* push es opcional */ }
+        // ── Correo y Push al paciente ──
+        const patient1 = await getPatientById(wallet.patientId);
+        await sendAdminNotifEmailAndPush(patient1, input.title, input.message, input.type, input.imageUrl);
         return { success: true, notif };
       }),
-
     sendByWalletId: publicProcedure
       .input(z.object({
         walletId: z.number(),
@@ -3920,9 +3973,9 @@ export const appRouter = router({
           type: input.type,
           sentBy: input.adminEmail,
         });
-        try {
-          // sendPushToPatient requiere pushSubscriptionJson — se puede implementar con lookup
-        } catch (_) { /* push es opcional */ }
+        // ── Correo y Push al paciente ──
+        const patient2 = await getPatientById(wallet.patientId);
+        await sendAdminNotifEmailAndPush(patient2, input.title, input.message, input.type, input.imageUrl);
         return { success: true, notif };
       }),
 

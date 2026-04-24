@@ -623,6 +623,13 @@ export default function Memberships() {
   const walletData = walletQuery.data?.wallet;
   const walletRedeemMutation = trpc.wallet.redeem.useMutation();
 
+  // ── Notificaciones del Admin (contador en campanita del monedero) ──
+  const adminNotifsQuery = trpc.adminNotifs.getByWalletId.useQuery(
+    { walletId: walletData?.id || 0 },
+    { enabled: isLoggedIn && !!walletData?.id }
+  );
+  const adminUnreadCount = (adminNotifsQuery.data || []).filter((n: any) => !n.isRead).length;
+
   // Refetch wallet data when sheet opens to ensure fresh data
   useEffect(() => {
     if (walletSheetOpen && isLoggedIn && patient?.id) {
@@ -2451,9 +2458,15 @@ onClick={() => {
                 className="flex flex-col items-center -mt-5 lg:-mt-7 relative"
                 aria-label="Mi Monedero Nutriser"
               >
-                {/* Mini tarjeta CR-80 estilo Nutriser — fondo blanco con franjas doradas */}
-                <div
-                  className="relative overflow-hidden hover:scale-105 active:scale-95 transition-all"
+              {/* Contador de notificaciones no leídas */}
+              {adminUnreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 z-10 w-5 h-5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                  {adminUnreadCount > 9 ? '9+' : adminUnreadCount}
+                </span>
+              )}
+              {/* Mini tarjeta CR-80 estilo Nutriser — fondo blanco con franjas doradas */}
+              <div
+                className="relative overflow-hidden hover:scale-105 active:scale-95 transition-all"
                   style={{
                     width: 62,
                     height: 40,

@@ -2039,3 +2039,19 @@
 - [x] Verificado: inserción funciona sin imagen (imageUrl es NULL opcional)
 - [x] Verificado: endpoint tRPC adminNotifs.sendByWalletId responde correctamente
 - [x] Imagen es completamente opcional al enviar notificaciones (solo título y mensaje son requeridos)
+
+## Sesión 29 - Notificaciones del Admin visibles en el Monedero del Paciente
+
+- [ ] Agregar pestaña "Mensajes" en WalletPage para ver notificaciones del admin
+- [ ] Campanita con contador de no leídas en la tarjeta del monedero (Memberships.tsx)
+- [ ] Marcar notificaciones como leídas al abrirlas
+- [ ] Notificación push al celular cuando el admin envía un mensaje
+- [ ] Sonido de campana al recibir notificación push
+
+## Sesión 29 - Notificaciones Admin en Monedero (corrección)
+
+- [ ] Modal emergente automático al abrir el monedero si hay notificaciones no leídas del admin
+- [ ] Pestaña "Mensajes" en WalletPage con lista de notificaciones del admin
+- [ ] Campanita con contador de no leídas en la tarjeta del monedero (Memberships.tsx)
+- [ ] Envío de correo al paciente cuando el admin envía una notificación
+- [ ] Marcar notificaciones como leídas al cerrar el modal o ver la pestaña

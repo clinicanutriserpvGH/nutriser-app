@@ -184,7 +184,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   style={{ objectPosition: "center center" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/25 to-black/85 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/15 to-black/60 pointer-events-none" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">
                   {/* Fila superior: badge App Pacientes + íconos en md+ */}
                   <div className="flex items-start justify-between gap-2">
@@ -199,22 +199,21 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                       <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-[#C5A55A]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
                         App Pacientes
                       </span>
-                    </div>                    {/* Íconos — visibles en celular, tablet y desktop */}
-                    <div className="grid grid-cols-3 gap-x-1 gap-y-1" style={{ maxWidth: '120px' }}>
+                    </div>                    {/* Íconos — 2 columnas × 3 filas, visibles en celular, tablet y desktop */}
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-2">
                       {[
                         { icon: Utensils, label: "Mi Dieta" },
-                        { icon: Camera, label: "Escáner" },
-                        { icon: Ruler, label: "Mediciones" },
+                        { icon: Camera, label: "Escáner de Alimentos" },
+                        { icon: Ruler, label: "Mis Mediciones" },
                         { icon: Image, label: "Mis Fotos" },
-                        { icon: Flame, label: "Detonantes" },
-                        { icon: ChefHat, label: "Recetario" },
+                        { icon: Flame, label: "Lista de Detonantes" },
+                        { icon: ChefHat, label: "Mi Recetario" },
                       ].map(({ icon: Ic, label }) => (
-                        <div key={label} className="flex flex-col items-center gap-0.5">
-                          <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(197,165,90,0.5)', backdropFilter: 'blur(4px)' }}>
-                            <Ic className="w-3 h-3 text-[#C5A55A]" />
+                        <div key={label} className="flex flex-col items-center gap-1">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(197,165,90,0.25)', border: '1.5px solid rgba(197,165,90,0.7)', backdropFilter: 'blur(6px)' }}>
+                            <Ic className="w-5 h-5 text-[#E8C97A]" />
                           </div>
-                       
-   <span className="text-[6.5px] font-medium leading-tight text-center text-white/80 w-full">{label}</span>
+                          <span className="text-[8px] font-semibold leading-tight text-center text-white w-full" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>{label}</span>
                         </div>
                       ))}
                     </div>

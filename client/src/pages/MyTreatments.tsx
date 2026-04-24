@@ -230,7 +230,8 @@ export default function MyTreatments() {
   const verifySession = trpc.patients.getById.useQuery(
     { id: patient?.id ?? 0 },
     {
-      enabled: sessionChecked === false && !!patient && patient.id > 0,
+      // No verificar sesión si hay returnTo (el usuario acaba de hacer login y va a redirigir)
+      enabled: sessionChecked === false && !!patient && patient.id > 0 && !returnTo,
       retry: false,
       refetchOnWindowFocus: false,
     }
@@ -239,13 +240,14 @@ export default function MyTreatments() {
   useEffect(() => {
     if (verifySession.isSuccess) {
       setSessionChecked(true);
-    } else if (verifySession.isError) {
+    } else if (verifySession.isError && !returnTo) {
+      // Solo borrar sesión si NO hay returnTo (evitar borrar sesión recién creada)
       unifiedLogout();
       setView("auth");
       setSessionChecked(true);
       toast.error("Tu cuenta ya no está activa. Por favor crea una nueva cuenta.");
     }
-  }, [verifySession.isSuccess, verifySession.isError]);
+  }, [verifySession.isSuccess, verifySession.isError, returnTo]);
 
   useEffect(() => {
     if (patient) {
@@ -254,10 +256,11 @@ export default function MyTreatments() {
   }, []);
 
   useEffect(() => {
-    if (patient && view === "auth") {
+    // Si hay returnTo, no cambiar la vista aquí — el loginMutation.onSuccess maneja la redirección
+    if (patient && view === "auth" && !returnTo) {
       setView(patient.consentAcceptedAt ? "portal" : "consent");
     }
-  }, [patient]);
+  }, [patient, returnTo]);
 
   const persistPatient = (p: PatientSafe) => {
     unifiedLogin(p as any);

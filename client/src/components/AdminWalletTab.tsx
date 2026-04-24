@@ -327,7 +327,22 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
   const [confirmClearAll, setConfirmClearAll] = useState(false);
   const [discountValue, setDiscountValue] = useState<10|15|20|25|30>(10);
   const [showNotifModal, setShowNotifModal] = useState(false);
+  const [editingNotif, setEditingNotif] = useState<any | null>(null);
+  const [showNotifHistory, setShowNotifHistory] = useState(false);
   const utils = trpc.useUtils();
+
+  const notifsQuery = trpc.adminNotifs.getByWalletId.useQuery(
+    { walletId: wallet.id },
+    { enabled: showNotifHistory }
+  );
+  const deleteNotifMutation = trpc.adminNotifs.deleteNotif.useMutation({
+    onSuccess: () => { notifsQuery.refetch(); toast.success('Notificación eliminada'); },
+    onError: (e) => toast.error('Error: ' + e.message),
+  });
+  const deleteAllNotifsMutation = trpc.adminNotifs.deleteAllNotifs.useMutation({
+    onSuccess: () => { notifsQuery.refetch(); toast.success('Todas las notificaciones eliminadas'); },
+    onError: (e) => toast.error('Error: ' + e.message),
+  });
 
   const transactionsQuery = trpc.wallet.adminGetTransactions.useQuery(
     { walletId: wallet.id },
@@ -608,8 +623,79 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                     <Bell className="w-3 h-3" />
                     Enviar Notificación al Paciente
                   </Button>
+                  <button
+                    onClick={() => { setShowNotifHistory(!showNotifHistory); if (!showNotifHistory) notifsQuery.refetch(); }}
+                    className="w-full text-[10px] text-blue-300 hover:text-blue-100 underline text-left transition"
+                  >
+                    {showNotifHistory ? 'Ocultar historial' : 'Ver historial de notificaciones'}
+                  </button>
                 </div>
               </div>
+
+              {/* Historial de Notificaciones (Admin) */}
+              {showNotifHistory && (
+                <div className="mt-2 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide flex items-center gap-1">
+                      <Bell className="w-3 h-3" /> Notificaciones enviadas
+                    </p>
+                    {(notifsQuery.data || []).length > 0 && (
+                      <button
+                        onClick={() => deleteAllNotifsMutation.mutate({ walletId: wallet.id })}
+                        disabled={deleteAllNotifsMutation.isPending}
+                        className="text-[10px] text-red-500 hover:text-red-700 font-semibold transition"
+                      >
+                        Eliminar todas
+                      </button>
+                    )}
+                  </div>
+                  {notifsQuery.isLoading ? (
+                    <div className="flex justify-center py-3"><Loader2 className="w-4 h-4 animate-spin text-blue-400" /></div>
+                  ) : (notifsQuery.data || []).length === 0 ? (
+                    <p className="text-[10px] text-gray-400 text-center py-2">No hay notificaciones enviadas</p>
+                  ) : (
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                      {(notifsQuery.data || []).map((n: any) => (
+                        <div key={n.id} className="bg-blue-50 border border-blue-100 rounded-lg px-2 py-1.5">
+                          <div className="flex items-start justify-between gap-1">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] font-bold text-blue-800 truncate">{n.title}</p>
+                              <p className="text-[9px] text-blue-600 line-clamp-2">{n.message}</p>
+                              <p className="text-[9px] text-gray-400 mt-0.5">{new Date(n.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })} • {n.isRead ? '✅ Leído' : '🔴 No leído'}</p>
+                            </div>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <button
+                                onClick={() => setEditingNotif(n)}
+                                className="p-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                                title="Editar notificación"
+                              >
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                              </button>
+                              <button
+                                onClick={() => deleteNotifMutation.mutate({ notifId: n.id })}
+                                disabled={deleteNotifMutation.isPending}
+                                className="p-1 rounded bg-red-50 text-red-500 hover:bg-red-100 transition"
+                                title="Eliminar notificación"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Modal de edición de notificación */}
+              {editingNotif && (
+                <EditNotifModal
+                  notif={editingNotif}
+                  onClose={() => setEditingNotif(null)}
+                  onSaved={() => { setEditingNotif(null); notifsQuery.refetch(); }}
+                />
+              )}
 
               {/* Historial de Movimientos (Admin) */}
               <div className="mt-2">
@@ -1516,5 +1602,91 @@ QRCode.toCanvas(document.getElementById('qr'), '${qrUrl}', { width: 85, margin: 
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Modal de Edición de Notificación ────────────────────────────────────────
+function EditNotifModal({ notif, onClose, onSaved }: { notif: any; onClose: () => void; onSaved: () => void }) {
+  const [title, setTitle] = useState(notif.title || "");
+  const [message, setMessage] = useState(notif.message || "");
+  const [type, setType] = useState<'cobro'|'promocion'|'felicitacion'|'general'>(notif.type || 'general');
+
+  const editMutation = trpc.adminNotifs.editNotif.useMutation({
+    onSuccess: () => {
+      toast.success("✅ Notificación actualizada");
+      onSaved();
+    },
+    onError: (e) => toast.error("Error: " + e.message),
+  });
+
+  const typeOptions: { value: 'cobro'|'promocion'|'felicitacion'|'general'; label: string; emoji: string }[] = [
+    { value: 'cobro', label: 'Cobro', emoji: '🧾' },
+    { value: 'promocion', label: 'Promoción', emoji: '🎁' },
+    { value: 'felicitacion', label: 'Felicitación', emoji: '🎉' },
+    { value: 'general', label: 'General', emoji: '📢' },
+  ];
+
+  return (
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-blue-700">
+            <Bell className="w-4 h-4" />
+            Editar Notificación
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          {/* Tipo */}
+          <div>
+            <label className="text-xs font-semibold text-gray-600 block mb-1">Tipo</label>
+            <div className="flex flex-wrap gap-1.5">
+              {typeOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setType(opt.value)}
+                  className={`px-2 py-1 rounded-full text-xs font-semibold border transition ${
+                    type === opt.value ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+                  }`}
+                >
+                  {opt.emoji} {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Título */}
+          <div>
+            <label className="text-xs font-semibold text-gray-600 block mb-1">Título *</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Título de la notificación"
+              className="text-sm"
+            />
+          </div>
+          {/* Mensaje */}
+          <div>
+            <label className="text-xs font-semibold text-gray-600 block mb-1">Mensaje *</label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Escribe el mensaje..."
+              rows={3}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        </div>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" size="sm" onClick={onClose}>Cancelar</Button>
+          <Button
+            size="sm"
+            disabled={!title.trim() || !message.trim() || editMutation.isPending}
+            onClick={() => editMutation.mutate({ notifId: notif.id, title: title.trim(), message: message.trim(), type })}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            {editMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Guardar cambios'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

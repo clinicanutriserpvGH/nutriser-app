@@ -2055,3 +2055,7 @@
 - [ ] Campanita con contador de no leídas en la tarjeta del monedero (Memberships.tsx)
 - [ ] Envío de correo al paciente cuando el admin envía una notificación
 - [ ] Marcar notificaciones como leídas al cerrar el modal o ver la pestaña
+
+## Sesión 30 - Modal persistente y edición de notificaciones
+- [ ] Modal de notificaciones aparece siempre al abrir monedero hasta que admin elimine
+- [ ] Edición de notificaciones en panel admin (editar título, mensaje, tipo)

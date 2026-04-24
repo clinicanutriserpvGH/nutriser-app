@@ -2469,6 +2469,29 @@ export async function deleteAdminNotification(notifId: number): Promise<void> {
   if (!db) return;
   await db.delete(adminNotifications).where(eq(adminNotifications.id, notifId));
 }
+/**
+ * Actualiza el contenido de una notificación (el admin puede editar título, mensaje y tipo).
+ * Resetea isRead para que el paciente vea el mensaje actualizado.
+ */
+export async function updateAdminNotification(notifId: number, data: {
+  title: string;
+  message: string;
+  type: 'cobro' | 'promocion' | 'felicitacion' | 'general';
+  imageUrl?: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(adminNotifications)
+    .set({
+      title: data.title,
+      message: data.message,
+      type: data.type,
+      imageUrl: data.imageUrl ?? null,
+      isRead: false,
+      readAt: null,
+    })
+    .where(eq(adminNotifications.id, notifId));
+}
 
 /**
  * Elimina todas las notificaciones de un monedero.

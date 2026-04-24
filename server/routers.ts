@@ -16,7 +16,7 @@ import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, creat
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet, getCashPendingPaymentById } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
-import { createInstallmentPlan, confirmInstallmentPayment, getInstallmentPlansByWallet, getAllInstallmentPlans, sendAdminNotification, getAdminNotificationsByWallet, countUnreadAdminNotifications, markAdminNotificationRead, markAllAdminNotificationsRead, deleteAdminNotification, deleteAllAdminNotifications, sendCashbackNotification } from './db';
+import { createInstallmentPlan, confirmInstallmentPayment, getInstallmentPlansByWallet, getAllInstallmentPlans, sendAdminNotification, getAdminNotificationsByWallet, countUnreadAdminNotifications, markAdminNotificationRead, markAllAdminNotificationsRead, deleteAdminNotification, deleteAllAdminNotifications, updateAdminNotification, sendCashbackNotification } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest, deleteBannerInterest } from './db';
 import { getSystemConfig, setSystemConfig } from './db';
@@ -3931,25 +3931,34 @@ export const appRouter = router({
         walletNumber: z.string(),
         title: z.string().min(1).max(255),
         message: z.string().min(1),
-        imageUrl: z.string().url().optional(),
-        type: z.enum(['cobro', 'promocion', 'felicitacion', 'general']),
-        adminEmail: z.string(),
+        imageUrl: z.string().url().optional().or(z.literal('')).transform(v => v || undefined),
+        type: z.enum(['cobro', 'promocion', 'felicitacion', 'general']).default('general'),
+        adminEmail: z.string().default('admin'),
       }))
       .mutation(async ({ input }) => {
-        const wallet = await getWalletByNumber(input.walletNumber);
+        // 1. Buscar monedero — si no existe, error claro
+        const wallet = await getWalletByNumber(input.walletNumber).catch(() => undefined);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
-        const notif = await sendAdminNotification({
-          walletId: wallet.id,
-          patientId: wallet.patientId,
-          title: input.title,
-          message: input.message,
-          imageUrl: input.imageUrl,
-          type: input.type,
-          sentBy: input.adminEmail,
-        });
-        // ── Correo y Push al paciente ──
-        const patient1 = await getPatientById(wallet.patientId);
-        await sendAdminNotifEmailAndPush(patient1, input.title, input.message, input.type, input.imageUrl);
+        // 2. Guardar notificación en BD (siempre, sin importar lo que pase después)
+        let notif: any = null;
+        try {
+          notif = await sendAdminNotification({
+            walletId: wallet.id,
+            patientId: wallet.patientId,
+            title: input.title,
+            message: input.message,
+            imageUrl: input.imageUrl,
+            type: input.type,
+            sentBy: input.adminEmail || 'admin',
+          });
+        } catch (dbErr) {
+          console.error('[AdminNotif] DB error:', dbErr);
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Error al guardar la notificación' });
+        }
+        // 3. Correo y Push — nunca bloquean la respuesta
+        getPatientById(wallet.patientId)
+          .then(p => sendAdminNotifEmailAndPush(p, input.title, input.message, input.type, input.imageUrl))
+          .catch(e => console.warn('[AdminNotif] Email/Push error (non-blocking):', e));
         return { success: true, notif };
       }),
     sendByWalletId: publicProcedure
@@ -3957,25 +3966,34 @@ export const appRouter = router({
         walletId: z.number(),
         title: z.string().min(1).max(255),
         message: z.string().min(1),
-        imageUrl: z.string().url().optional(),
-        type: z.enum(['cobro', 'promocion', 'felicitacion', 'general']),
-        adminEmail: z.string(),
+        imageUrl: z.string().url().optional().or(z.literal('')).transform(v => v || undefined),
+        type: z.enum(['cobro', 'promocion', 'felicitacion', 'general']).default('general'),
+        adminEmail: z.string().default('admin'),
       }))
       .mutation(async ({ input }) => {
-        const wallet = await getWalletById(input.walletId);
+        // 1. Buscar monedero — si no existe, error claro
+        const wallet = await getWalletById(input.walletId).catch(() => undefined);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
-        const notif = await sendAdminNotification({
-          walletId: wallet.id,
-          patientId: wallet.patientId,
-          title: input.title,
-          message: input.message,
-          imageUrl: input.imageUrl,
-          type: input.type,
-          sentBy: input.adminEmail,
-        });
-        // ── Correo y Push al paciente ──
-        const patient2 = await getPatientById(wallet.patientId);
-        await sendAdminNotifEmailAndPush(patient2, input.title, input.message, input.type, input.imageUrl);
+        // 2. Guardar notificación en BD (siempre, sin importar lo que pase después)
+        let notif: any = null;
+        try {
+          notif = await sendAdminNotification({
+            walletId: wallet.id,
+            patientId: wallet.patientId,
+            title: input.title,
+            message: input.message,
+            imageUrl: input.imageUrl,
+            type: input.type,
+            sentBy: input.adminEmail || 'admin',
+          });
+        } catch (dbErr) {
+          console.error('[AdminNotif] DB error:', dbErr);
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Error al guardar la notificación' });
+        }
+        // 3. Correo y Push — nunca bloquean la respuesta
+        getPatientById(wallet.patientId)
+          .then(p => sendAdminNotifEmailAndPush(p, input.title, input.message, input.type, input.imageUrl))
+          .catch(e => console.warn('[AdminNotif] Email/Push error (non-blocking):', e));
         return { success: true, notif };
       }),
 
@@ -4029,6 +4047,23 @@ export const appRouter = router({
       .input(z.object({ walletId: z.number() }))
       .query(async ({ input }) => {
         return await getAdminNotificationsByWallet(input.walletId);
+      }),
+    editNotif: publicProcedure
+      .input(z.object({
+        notifId: z.number(),
+        title: z.string().min(1).max(255),
+        message: z.string().min(1),
+        type: z.enum(['cobro', 'promocion', 'felicitacion', 'general']),
+        imageUrl: z.string().url().optional().or(z.literal('')).transform(v => v || undefined),
+      }))
+      .mutation(async ({ input }) => {
+        await updateAdminNotification(input.notifId, {
+          title: input.title,
+          message: input.message,
+          type: input.type,
+          imageUrl: input.imageUrl,
+        });
+        return { success: true };
       }),
   }),
 });

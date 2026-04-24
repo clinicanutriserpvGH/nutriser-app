@@ -202,14 +202,15 @@ export default function WalletPage() {
     onSuccess: () => adminNotifsQuery.refetch(),
   });
 
-  // Mostrar modal automático con la notificación más reciente no leída
+  // Mostrar modal automático SIEMPRE que haya notificaciones (leídas o no)
+  // El modal sigue apareciendo hasta que el admin elimine la notificación
   useEffect(() => {
-    if (!notifModalShown && unreadNotifs.length > 0 && !walletQuery.isLoading) {
+    if (!notifModalShown && adminNotifs.length > 0 && !walletQuery.isLoading && !adminNotifsQuery.isLoading) {
       setCurrentNotifIndex(0);
       setShowNotifModal(true);
       setNotifModalShown(true);
     }
-  }, [unreadNotifs.length, walletQuery.isLoading, notifModalShown]);
+  }, [adminNotifs.length, walletQuery.isLoading, adminNotifsQuery.isLoading, notifModalShown]);
 
   const wallet = walletQuery.data?.wallet;
   const tracker = walletQuery.data?.tracker;
@@ -393,19 +394,22 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs — scroll horizontal para que no se amontonen en pantallas pequeñas */}
       <div className="max-w-md mx-auto px-4 mt-3">
-        <div className="flex bg-white rounded-xl shadow-sm border border-gray-100 p-1 overflow-x-auto gap-0.5">
+        <div
+          className="flex bg-white rounded-xl shadow-sm border border-gray-100 p-1 gap-0.5"
+          style={{ overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        >
           {[
-            { key: "card" as const, label: lang === 'EN' ? 'My Card' : 'Mi Tarjeta' },
-            { key: "loyalty" as const, label: lang === 'EN' ? 'My Plans' : 'Mis Planes' },
-            { key: "purchases" as const, label: lang === 'EN' ? 'My Purchases' : 'Mis Compras' },
-            { key: "history" as const, label: lang === 'EN' ? 'Movements' : 'Movimientos' },
+            { key: "card" as const, label: 'Tarjeta' },
+            { key: "loyalty" as const, label: 'Planes' },
+            { key: "purchases" as const, label: 'Compras' },
+            { key: "history" as const, label: 'Movimientos' },
           ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 py-2 px-2 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+              className={`flex-shrink-0 py-2 px-3 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
                 activeTab === tab.key ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -420,12 +424,12 @@ export default function WalletPage() {
                 markAllReadMutation.mutate({ walletNumber: wallet.walletNumber });
               }
             }}
-            className={`relative flex-1 py-2 px-2 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-1 ${
+            className={`relative flex-shrink-0 py-2 px-3 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-1 ${
               activeTab === "messages" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500 hover:text-gray-700"
             }`}
           >
             <Bell className="w-3 h-3" />
-            {lang === 'EN' ? 'Messages' : 'Mensajes'}
+            Mensajes
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
                 {unreadCount > 9 ? '9+' : unreadCount}
@@ -999,14 +1003,15 @@ export default function WalletPage() {
       )}
 
       {/* ══ MODAL AUTOMÁTICO DE NOTIFICACIÓN DEL ADMIN ══ */}
-      {showNotifModal && unreadNotifs.length > 0 && (() => {
-        const notif = unreadNotifs[currentNotifIndex];
+      {/* Aparece SIEMPRE que haya notificaciones — hasta que el admin las elimine */}
+      {showNotifModal && adminNotifs.length > 0 && (() => {
+        const notif = adminNotifs[currentNotifIndex];
         if (!notif) return null;
-        const typeConfig: Record<string, { icon: React.ReactNode; color: string; bg: string; label: string; emoji: string }> = {
-          cobro: { icon: <AlertCircle className="w-7 h-7" />, color: 'text-red-600', bg: 'bg-red-50', label: 'Cobro pendiente', emoji: '💳' },
-          promocion: { icon: <Megaphone className="w-7 h-7" />, color: 'text-blue-600', bg: 'bg-blue-50', label: 'Promoción especial', emoji: '🎁' },
-          felicitacion: { icon: <PartyPopper className="w-7 h-7" />, color: 'text-green-600', bg: 'bg-green-50', label: '¡Felicitaciones!', emoji: '🎉' },
-          general: { icon: <BellRing className="w-7 h-7" />, color: 'text-[#C5A55A]', bg: 'bg-[#C5A55A]/10', label: 'Mensaje de Nutriser', emoji: '🔔' },
+        const typeConfig: Record<string, { color: string; bg: string; label: string; emoji: string }> = {
+          cobro: { color: 'text-red-600', bg: 'bg-red-50', label: 'Cobro pendiente', emoji: '💳' },
+          promocion: { color: 'text-blue-600', bg: 'bg-blue-50', label: 'Promoción especial', emoji: '🎁' },
+          felicitacion: { color: 'text-green-600', bg: 'bg-green-50', label: '¡Felicitaciones!', emoji: '🎉' },
+          general: { color: 'text-[#C5A55A]', bg: 'bg-[#C5A55A]/10', label: 'Mensaje de Nutriser', emoji: '🔔' },
         };
         const cfg = typeConfig[notif.type] || typeConfig.general;
         return (
@@ -1022,9 +1027,9 @@ export default function WalletPage() {
               <div className={`${cfg.bg} px-6 pt-6 pb-4 text-center`}>
                 <div className="text-4xl mb-2">{cfg.emoji}</div>
                 <span className={`text-xs font-bold uppercase tracking-wider ${cfg.color}`}>{cfg.label}</span>
-                {unreadNotifs.length > 1 && (
+                {adminNotifs.length > 1 && (
                   <div className="mt-1 flex items-center justify-center gap-1">
-                    {unreadNotifs.map((_: any, i: number) => (
+                    {adminNotifs.map((_: any, i: number) => (
                       <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentNotifIndex ? 'bg-[#C5A55A] w-3' : 'bg-gray-300'}`} />
                     ))}
                   </div>
@@ -1041,35 +1046,26 @@ export default function WalletPage() {
                   {new Date(notif.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
-              {/* Botones */}
+              {/* Botones — navegar entre notificaciones o cerrar */}
               <div className="px-6 pb-6 flex flex-col gap-2">
-                {currentNotifIndex < unreadNotifs.length - 1 ? (
+                {currentNotifIndex < adminNotifs.length - 1 ? (
                   <>
                     <button
-                      onClick={() => {
-                        markReadMutation.mutate({ notifId: notif.id });
-                        setCurrentNotifIndex(i => i + 1);
-                      }}
+                      onClick={() => setCurrentNotifIndex(i => i + 1)}
                       className="w-full bg-[#C5A55A] text-white font-bold py-3 rounded-2xl text-sm hover:bg-[#b8963f] transition-all"
                     >
-                      Ver siguiente ({currentNotifIndex + 1}/{unreadNotifs.length})
+                      Ver siguiente ({currentNotifIndex + 1}/{adminNotifs.length})
                     </button>
                     <button
-                      onClick={() => {
-                        markReadMutation.mutate({ notifId: notif.id });
-                        setShowNotifModal(false);
-                      }}
+                      onClick={() => setShowNotifModal(false)}
                       className="w-full text-gray-400 text-sm py-2"
                     >
-                      Cerrar
+                      Cerrar por ahora
                     </button>
                   </>
                 ) : (
                   <button
-                    onClick={() => {
-                      markReadMutation.mutate({ notifId: notif.id });
-                      setShowNotifModal(false);
-                    }}
+                    onClick={() => setShowNotifModal(false)}
                     className="w-full bg-[#1A1A1A] text-[#C5A55A] font-bold py-3 rounded-2xl text-sm hover:bg-[#2D2D2D] transition-all"
                   >
                     Entendido

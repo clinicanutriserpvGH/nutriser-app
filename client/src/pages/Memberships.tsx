@@ -30,6 +30,8 @@ import PromoSplash from "@/components/PromoSplash";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { t, type Lang } from "@/lib/i18n";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import DebtBlockBanner from "@/components/DebtBlockBanner";
+import { useDebtCheck } from "@/hooks/useDebtCheck";
 
 // ─── Assets ──────────────────────────────────────────────────────────────────
 const LOGO_URL =
@@ -315,6 +317,8 @@ export default function Memberships() {
   // ─── Sesión unificada ────────────────────────────────────────────────
   const { patient, isLoggedIn, logout } = usePatientAuth();
   const { isMobile } = useDeviceType();
+  // ─── Verificación de deuda activa ─────────────────────────────────────────────────────────────────────────
+  const { hasDebt: patientHasDebt } = useDebtCheck(patient?.id);
   const [showPromoSplash, setShowPromoSplash] = useState(
     () => !sessionStorage.getItem("nutriser_tienda_promo_dismissed")
   );
@@ -720,6 +724,11 @@ export default function Memberships() {
     if (!buyerName.trim()) { toast.error("Ingresa tu nombre"); return; }
     if (!buyerEmail.trim()) { toast.error("Ingresa tu correo"); return; }
     if (!buyerPhone.trim()) { toast.error("Ingresa tu teléfono"); return; }
+    // ─── Bloqueo por deuda activa ─────────────────────────────────────────────────────────────────────────
+    if (patientHasDebt) {
+      toast.error("⚠️ Tienes una deuda activa. Tus compras están pendientes de autorización por administración. Acércate a la clínica para regularizar tu situación.", { duration: 6000 });
+      return;
+    }
 
     // — Pago en Efectivo: crear pendiente en monedero —
     if (paymentMethod === 'cash' && !fullyCoveredByWallet) {
@@ -2167,6 +2176,14 @@ onClick={() => {
               </div>
             ) : (
               <form onSubmit={handleSubmitCheckout} className="p-4 space-y-5">
+                {/* Banner de deuda activa o monedero suspendido */}
+                {isLoggedIn && (patientHasDebt || walletData?.isActive === false) && (
+                  <DebtBlockBanner
+                    hasDebt={patientHasDebt}
+                    isSuspended={walletData?.isActive === false}
+                    className="mb-2"
+                  />
+                )}
                 {/* Resumen */}
                 <div className="bg-gray-50 rounded-xl p-3 space-y-2">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t("yourOrder", lang)}</p>
@@ -2433,7 +2450,16 @@ onClick={() => {
                   activeTab === "tratamientos" ? "text-[#C5A55A]" : "text-gray-400"
                 }`}
               >
-                <Wand2 className="w-7 h-7 lg:w-8 lg:h-8" />
+                {/* Silueta corporal con cintura marcada — representa tratamientos estéticos */}
+                <svg viewBox="0 0 24 24" className="w-7 h-7 lg:w-8 lg:h-8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="3.5" r="1.8" />
+                  <path d="M8.5 7.5 C9 6 10.5 5.5 12 5.5 C13.5 5.5 15 6 15.5 7.5" />
+                  <path d="M8.5 7.5 L8 11.5 C7.8 13 9.5 13.8 12 13.8 C14.5 13.8 16.2 13 16 11.5 L15.5 7.5" />
+                  <path d="M8 11.5 L7.5 15.5 C7.5 17 9.5 17.8 12 17.8 C14.5 17.8 16.5 17 16.5 15.5 L16 11.5" />
+                  <path d="M9.5 17.8 L9 22 M14.5 17.8 L15 22" />
+                  <path d="M4.5 11 L6.5 12.5 M4.5 14 L6.5 12.5" strokeWidth="1.3" />
+                  <path d="M19.5 11 L17.5 12.5 M19.5 14 L17.5 12.5" strokeWidth="1.3" />
+                </svg>
                 <span className="text-[11px] lg:text-xs font-semibold leading-tight mt-0.5">{t("tabServices", lang)}</span>
               </button>
 

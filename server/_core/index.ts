@@ -475,7 +475,7 @@ async function startServer() {
 
   // ─── Jobs automáticos (cron) ─────────────────────────────────────────────
   const cron = await import('node-cron');
-  const { sendAppointmentReminders, sendBirthdayGreetings } = await import('../jobs');
+  const { sendAppointmentReminders, sendBirthdayGreetings, sendCashbackExpiryReminders } = await import('../jobs');
 
   // Recordatorio de citas: cada día a las 10:00 AM hora de México
   cron.default.schedule('0 0 10 * * *', async () => {
@@ -499,6 +499,11 @@ async function startServer() {
       console.error('[Cron] Error al desactivar promociones vencidas:', e);
     }
   }, { timezone: 'America/Mexico_City' });
-  console.log('[Cron] Jobs programados: cumpleaños (9:00 AM), recordatorio de citas (10:00 AM), auto-desactivar promociones (cada hora)');
+  // Recordatorio semanal de cashback: cada lunes a las 10:00 AM hora de México
+  cron.default.schedule('0 0 10 * * 1', async () => {
+    console.log('[Cron] Ejecutando recordatorio de vencimiento de cashback...');
+    await sendCashbackExpiryReminders();
+  }, { timezone: 'America/Mexico_City' });
+  console.log('[Cron] Jobs programados: cumpleaños (9:00 AM), citas (10:00 AM), cashback semanal (lunes 10:00 AM), auto-desactivar promociones (cada hora)');
 }
 startServer().catch(console.error);

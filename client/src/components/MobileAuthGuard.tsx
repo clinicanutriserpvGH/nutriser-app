@@ -135,7 +135,7 @@ export default function MobileAuthGuard({
 
             {/* Descripción principal */}
             <p className="text-white/65 text-sm text-center leading-relaxed mb-6 px-1">
-              Crea tu cuenta Nutriser para dar seguimiento a tus tratamientos, acceder a descuentos exclusivos en tienda y disfrutar de cursos, contenido especializado y la comunidad de Academia Nutriser.
+              Obtén tu Monedero Nutriser, acumula cashback en cada compra y accede a descuentos exclusivos en tratamientos y productos. Lleva el seguimiento de tus tratamientos en clínica y compra fácilmente en nuestra tienda.
             </p>
 
             {/* Botones */}
@@ -253,7 +253,7 @@ export default function MobileAuthGuard({
 
           {/* Descripción */}
           <p className="text-white/65 text-sm text-center leading-relaxed mb-7 px-2">
-            Crea tu cuenta Nutriser para dar seguimiento a tus tratamientos, acceder a descuentos exclusivos en tienda y disfrutar de cursos, contenido especializado y la comunidad de Academia Nutriser.
+            Obtén tu Monedero Nutriser, acumula cashback en cada compra y accede a descuentos exclusivos en tratamientos y productos. Lleva el seguimiento de tus tratamientos en clínica y compra fácilmente en nuestra tienda.
           </p>
 
           {/* Botones */}

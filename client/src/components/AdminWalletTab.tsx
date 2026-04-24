@@ -401,6 +401,11 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                 <p className="font-bold text-sm text-gray-900 truncate">{wallet.patientName || "Sin nombre"}</p>
                 <p className="text-[10px] text-gray-400 font-mono">{wallet.walletNumber}</p>
                 {wallet.patientEmail && <p className="text-[10px] text-gray-400 truncate">{wallet.patientEmail}</p>}
+                {(wallet as any).patientBirthday && (
+                  <p className="text-[10px] text-pink-500 font-semibold flex items-center gap-1">
+                    🎂 {new Date((wallet as any).patientBirthday + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}
+                  </p>
+                )}
               </div>
             </div>
             <div className="text-right flex-shrink-0 ml-2">

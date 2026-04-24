@@ -499,7 +499,7 @@ export default function MyTreatments() {
             <img src={LOGO_URL} alt="Nutriser" className="h-16 mb-3" />
             <h1 className="text-2xl font-bold text-gray-900">Mi Cuenta Nutriser</h1>
             <p className="text-gray-500 text-sm text-center mt-2 max-w-xs leading-relaxed">
-              Crea tu cuenta y da seguimiento a tus tratamientos adquiridos, compra en tienda con descuentos exclusivos y accede a cursos y foro en la comunidad de la Academia Nutriser.
+              Obtén tu Monedero Nutriser, acumula cashback en cada compra y accede a descuentos exclusivos en tratamientos y productos. Lleva el seguimiento de tus tratamientos en clínica y compra fácilmente en nuestra tienda.
             </p>
           </div>
 
@@ -582,6 +582,13 @@ export default function MyTreatments() {
                 <button type="button" onClick={() => setAuthMode("register")} className="flex items-center gap-1 text-gray-400 text-sm hover:text-gray-600 mb-2">
                   <ChevronLeft className="w-4 h-4" /> Volver
                 </button>
+                {/* Mensaje informativo: usar mismo correo del Portal de Salud */}
+                <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3">
+                  <span className="text-amber-500 text-base mt-0.5 flex-shrink-0">ℹ️</span>
+                  <p className="text-amber-800 text-xs leading-relaxed">
+                    <strong>¿Ya tienes cuenta en el Portal de Salud Nutriser?</strong> Te recomendamos usar el mismo correo electrónico y contraseña para acceder fácilmente desde cualquier parte de la app.
+                  </p>
+                </div>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input name="name" placeholder="Nombre completo" required minLength={2} className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />

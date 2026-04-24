@@ -1430,6 +1430,7 @@ export async function getAllWallets() {
       name: patientAccounts.name,
       email: patientAccounts.email,
       phone: patientAccounts.phone,
+      birthday: patientAccounts.birthday,
     }
   }).from(wallets)
     .innerJoin(patientAccounts, eq(wallets.patientId, patientAccounts.id))
@@ -2524,4 +2525,87 @@ export async function sendCashbackNotification(walletId: number, amountCents: nu
     isRead: false,
     createdAt: new Date(),
   });
+}
+
+// ─── Solicitudes de autorización de compra con deuda ─────────────────────────
+
+export interface DebtAuthRequest {
+  id: number;
+  patientId: number;
+  walletId: number;
+  patientName: string;
+  patientEmail: string | null;
+  purchaseDescription: string;
+  purchaseType: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNote: string | null;
+  requestedAt: Date;
+  resolvedAt: Date | null;
+  resolvedBy: string | null;
+  createdAt: Date;
+}
+
+/** Crear una solicitud de autorización de compra con deuda */
+export async function createDebtAuthRequest(data: {
+  patientId: number;
+  walletId: number;
+  patientName: string;
+  patientEmail?: string | null;
+  purchaseDescription: string;
+  purchaseType?: string;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('DB not available');
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  const [result] = await conn.execute(
+    `INSERT INTO debtAuthRequests (patientId, walletId, patientName, patientEmail, purchaseDescription, purchaseType, status, requestedAt, createdAt)
+     VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())`,
+    [data.patientId, data.walletId, data.patientName, data.patientEmail ?? null, data.purchaseDescription, data.purchaseType ?? 'general']
+  );
+  await conn.end();
+  return (result as any).insertId;
+}
+
+/** Obtener todas las solicitudes pendientes (para el admin) */
+export async function getAllDebtAuthRequests(status?: 'pending' | 'approved' | 'rejected'): Promise<DebtAuthRequest[]> {
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  let query = 'SELECT * FROM debtAuthRequests';
+  const params: any[] = [];
+  if (status) { query += ' WHERE status = ?'; params.push(status); }
+  query += ' ORDER BY requestedAt DESC';
+  const [rows] = await conn.execute(query, params);
+  await conn.end();
+  return rows as DebtAuthRequest[];
+}
+
+/** Resolver una solicitud (aprobar o rechazar) */
+export async function resolveDebtAuthRequest(id: number, status: 'approved' | 'rejected', adminNote?: string, resolvedBy?: string): Promise<void> {
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  await conn.execute(
+    `UPDATE debtAuthRequests SET status = ?, adminNote = ?, resolvedAt = NOW(), resolvedBy = ? WHERE id = ?`,
+    [status, adminNote ?? null, resolvedBy ?? 'admin', id]
+  );
+  await conn.end();
+}
+
+/** Verificar si un paciente tiene deuda activa (notificación de tipo 'cobro' no eliminada) */
+export async function patientHasActiveDebt(patientId: number): Promise<boolean> {
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  const [rows] = await conn.execute(
+    `SELECT id FROM adminNotifications WHERE patientId = ? AND type = 'cobro' LIMIT 1`,
+    [patientId]
+  );
+  await conn.end();
+  return (rows as any[]).length > 0;
+}
+
+/** Verificar si un paciente ya tiene una solicitud pendiente */
+export async function patientHasPendingDebtRequest(patientId: number): Promise<boolean> {
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  const [rows] = await conn.execute(
+    `SELECT id FROM debtAuthRequests WHERE patientId = ? AND status = 'pending' LIMIT 1`,
+    [patientId]
+  );
+  await conn.end();
+  return (rows as any[]).length > 0;
 }

@@ -16,7 +16,7 @@ import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, creat
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet, getCashPendingPaymentById } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
-import { createInstallmentPlan, confirmInstallmentPayment, getInstallmentPlansByWallet, getAllInstallmentPlans, sendAdminNotification, getAdminNotificationsByWallet, countUnreadAdminNotifications, markAdminNotificationRead, markAllAdminNotificationsRead, deleteAdminNotification, deleteAllAdminNotifications, updateAdminNotification, sendCashbackNotification } from './db';
+import { createInstallmentPlan, confirmInstallmentPayment, getInstallmentPlansByWallet, getAllInstallmentPlans, sendAdminNotification, getAdminNotificationsByWallet, countUnreadAdminNotifications, markAdminNotificationRead, markAllAdminNotificationsRead, deleteAdminNotification, deleteAllAdminNotifications, updateAdminNotification, sendCashbackNotification, createDebtAuthRequest, getAllDebtAuthRequests, resolveDebtAuthRequest, patientHasActiveDebt, patientHasPendingDebtRequest } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest, deleteBannerInterest } from './db';
 import { getSystemConfig, setSystemConfig } from './db';
@@ -2915,6 +2915,7 @@ export const appRouter = router({
           patientName: p.name ?? w.patientName ?? null,
           patientEmail: p.email ?? w.patientEmail ?? null,
           patientPhone: p.phone ?? w.patientPhone ?? null,
+          patientBirthday: p.birthday ?? null,
           consultationsInCycle,
           totalConsultations,
           freeConsultationsEarned: t.freeConsultationsEarned ?? 0,
@@ -4093,6 +4094,59 @@ export const appRouter = router({
           type: input.type,
           imageUrl: input.imageUrl,
         });
+        return { success: true };
+      }),
+  }),
+
+  // ─── Solicitudes de autorización de compra con deuda ───────────────────────────────────
+  debtAuth: router({
+    // Verificar si el paciente tiene deuda activa
+    checkDebt: publicProcedure
+      .input(z.object({ patientId: z.number() }))
+      .query(async ({ input }) => {
+        const hasDebt = await patientHasActiveDebt(input.patientId);
+        const hasPending = hasDebt ? await patientHasPendingDebtRequest(input.patientId) : false;
+        return { hasDebt, hasPendingRequest: hasPending };
+      }),
+    // Paciente solicita autorización de compra
+    requestAuth: publicProcedure
+      .input(z.object({
+        patientId: z.number(),
+        walletId: z.number(),
+        patientName: z.string(),
+        patientEmail: z.string().optional(),
+        purchaseDescription: z.string(),
+        purchaseType: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Verificar que realmente tiene deuda
+        const hasDebt = await patientHasActiveDebt(input.patientId);
+        if (!hasDebt) return { success: false, error: 'No tienes deudas activas.' };
+        // Verificar que no tenga ya una solicitud pendiente
+        const hasPending = await patientHasPendingDebtRequest(input.patientId);
+        if (hasPending) return { success: false, error: 'Ya tienes una solicitud pendiente. Espera la respuesta del administrador.' };
+        await createDebtAuthRequest(input);
+        // Notificar al admin
+        try { await notifyOwner({ title: '⚠️ Solicitud de compra con deuda', content: `${input.patientName} tiene una deuda activa y solicita autorización para: ${input.purchaseDescription}` }); } catch {}
+        return { success: true };
+      }),
+    // Admin: obtener todas las solicitudes
+    getAll: publicProcedure
+      .input(z.object({ status: z.enum(['pending', 'approved', 'rejected', 'all']).optional() }))
+      .query(async ({ input }) => {
+        const status = input.status === 'all' || !input.status ? undefined : input.status;
+        return await getAllDebtAuthRequests(status);
+      }),
+    // Admin: resolver una solicitud
+    resolve: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['approved', 'rejected']),
+        adminNote: z.string().optional(),
+        resolvedBy: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await resolveDebtAuthRequest(input.id, input.status, input.adminNote, input.resolvedBy);
         return { success: true };
       }),
   }),

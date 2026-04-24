@@ -127,77 +127,17 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.text("nutriserpv.com/monedero", gx + r + 1.5, gy + 0.2, { charSpace: 0.2 });
 }
 
-function openPdfWithControls(pdfBase64: string): void {
-  const html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monedero Nutriser</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #1a1a1a; font-family: -apple-system, sans-serif; }
-  .toolbar {
-    position: fixed; top: 0; left: 0; right: 0;
-    background: #C5A55A;
-    padding: 52px 16px 12px;
-    display: flex; gap: 10px; justify-content: center; z-index: 100;
-  }
-  .btn {
-    background: #fff; color: #7a5c1e; border: none;
-    padding: 10px 22px; border-radius: 8px;
-    font-size: 16px; font-weight: 700; cursor: pointer;
-  }
-  .btn-dark { background: #7a5c1e; color: #fff; }
-  iframe { position: fixed; top: 110px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 110px); border: none; }
-</style>
-</head>
-<body>
-<div class="toolbar">
-  <button class="btn" onclick="window.print()">Imprimir</button>
-  <a class="btn btn-dark" href="${pdfBase64}" download="monedero-nutriser.pdf">Guardar PDF</a>
-</div>
-<iframe src="${pdfBase64}"></iframe>
-</body>
-</html>`;
-  const blob = new Blob([html], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-  window.open(url, "_blank");
-}
-
 export async function generateWalletPdf(
   cards: WalletPdfCardData[],
   mode: "individual" | "a4" = "individual"
 ): Promise<void> {
   if (cards.length === 0) return;
-
-  if (mode === "individual" || cards.length === 1) {
-    const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: [W, H] });
-    for (let i = 0; i < cards.length; i++) {
-      if (i > 0) pdf.addPage([W, H], "landscape");
-      await drawCard(pdf, cards[i], 0, 0);
-    }
-    const pdfBase64 = pdf.output("datauristring");
-    openPdfWithControls(pdfBase64);
-  } else {
-    const A4_W = 210, A4_H = 297, GAP = 6;
-    const MX = (A4_W - 2 * W - GAP) / 2;
-    const MY = (A4_H - 4 * H - 3 * GAP) / 2;
-    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    pdf.setFillColor(220, 220, 220);
-    pdf.rect(0, 0, A4_W, A4_H, "F");
-    for (let i = 0; i < cards.length; i++) {
-      if (i > 0 && i % 8 === 0) {
-        pdf.addPage("a4", "portrait");
-        pdf.setFillColor(220, 220, 220);
-        pdf.rect(0, 0, A4_W, A4_H, "F");
-      }
-      const p = i % 8;
-      await drawCard(pdf, cards[i], MX + (p % 2) * (W + GAP), MY + Math.floor(p / 2) * (H + GAP));
-    }
-    const pdfBase64 = pdf.output("datauristring");
-    openPdfWithControls(pdfBase64);
-  }
+  const pdfMode = mode === "a4" && cards.length > 1 ? "a4" : "individual";
+  // Usar el endpoint del servidor para generar el PDF con URL real
+  // Esto permite imprimir y guardar correctamente en iOS Safari
+  const params = encodeURIComponent(JSON.stringify(cards));
+  const url = `/api/wallet/card-pdf?wallets=${params}&mode=${pdfMode}`;
+  window.open(url, "_blank");
 }
 
 export async function generateWalletPdfFromElements(_e: HTMLElement[], _m: "individual" | "a4"): Promise<void> {

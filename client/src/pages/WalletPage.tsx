@@ -202,15 +202,20 @@ export default function WalletPage() {
     onSuccess: () => adminNotifsQuery.refetch(),
   });
 
-  // Mostrar modal automático SIEMPRE que haya notificaciones (leídas o no)
-  // El modal sigue apareciendo hasta que el admin elimine la notificación
+  // Lógica del modal automático:
+  // - Mensajes de COBRO: aparecen SIEMPRE al abrir el monedero (hasta que el admin los elimine)
+  // - Otros tipos (promocion, felicitacion, general): solo aparecen si no han sido leídos
+  const cobrosActivos = adminNotifs.filter((n: any) => n.type === 'cobro');
+  const otrosNoLeidos = adminNotifs.filter((n: any) => n.type !== 'cobro' && !n.isRead);
+  const notifsParaModal = [...cobrosActivos, ...otrosNoLeidos];
+
   useEffect(() => {
-    if (!notifModalShown && adminNotifs.length > 0 && !walletQuery.isLoading && !adminNotifsQuery.isLoading) {
+    if (!notifModalShown && notifsParaModal.length > 0 && !walletQuery.isLoading && !adminNotifsQuery.isLoading) {
       setCurrentNotifIndex(0);
       setShowNotifModal(true);
       setNotifModalShown(true);
     }
-  }, [adminNotifs.length, walletQuery.isLoading, adminNotifsQuery.isLoading, notifModalShown]);
+  }, [notifsParaModal.length, walletQuery.isLoading, adminNotifsQuery.isLoading, notifModalShown]);
 
   const wallet = walletQuery.data?.wallet;
   const tracker = walletQuery.data?.tracker;
@@ -1004,8 +1009,8 @@ export default function WalletPage() {
 
       {/* ══ MODAL AUTOMÁTICO DE NOTIFICACIÓN DEL ADMIN ══ */}
       {/* Aparece SIEMPRE que haya notificaciones — hasta que el admin las elimine */}
-      {showNotifModal && adminNotifs.length > 0 && (() => {
-        const notif = adminNotifs[currentNotifIndex];
+      {showNotifModal && notifsParaModal.length > 0 && (() => {
+        const notif = notifsParaModal[currentNotifIndex];
         if (!notif) return null;
         const typeConfig: Record<string, { color: string; bg: string; label: string; emoji: string }> = {
           cobro: { color: 'text-red-600', bg: 'bg-red-50', label: 'Cobro pendiente', emoji: '💳' },
@@ -1027,9 +1032,9 @@ export default function WalletPage() {
               <div className={`${cfg.bg} px-6 pt-6 pb-4 text-center`}>
                 <div className="text-4xl mb-2">{cfg.emoji}</div>
                 <span className={`text-xs font-bold uppercase tracking-wider ${cfg.color}`}>{cfg.label}</span>
-                {adminNotifs.length > 1 && (
+                {notifsParaModal.length > 1 && (
                   <div className="mt-1 flex items-center justify-center gap-1">
-                    {adminNotifs.map((_: any, i: number) => (
+                    {notifsParaModal.map((_: any, i: number) => (
                       <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentNotifIndex ? 'bg-[#C5A55A] w-3' : 'bg-gray-300'}`} />
                     ))}
                   </div>
@@ -1048,13 +1053,13 @@ export default function WalletPage() {
               </div>
               {/* Botones — navegar entre notificaciones o cerrar */}
               <div className="px-6 pb-6 flex flex-col gap-2">
-                {currentNotifIndex < adminNotifs.length - 1 ? (
+                {currentNotifIndex < notifsParaModal.length - 1 ? (
                   <>
                     <button
                       onClick={() => setCurrentNotifIndex(i => i + 1)}
                       className="w-full bg-[#C5A55A] text-white font-bold py-3 rounded-2xl text-sm hover:bg-[#b8963f] transition-all"
                     >
-                      Ver siguiente ({currentNotifIndex + 1}/{adminNotifs.length})
+                      Ver siguiente ({currentNotifIndex + 1}/{notifsParaModal.length})
                     </button>
                     <button
                       onClick={() => setShowNotifModal(false)}

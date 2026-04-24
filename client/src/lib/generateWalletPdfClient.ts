@@ -67,11 +67,13 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.text("aesthetic & nutrition", cx, subY + 0.5, { align: "center", charSpace: 0.6 });
 
   // ── SILUETA ───────────────────────────────────────────────────────────────
-  // Referencia imagen: silueta ocupa ~40% del ancho y ~65% del alto, bien proporcionada
-  const silH = H * 0.62;           // ~33.5mm de alto
-  const silW = silH * 0.60;        // ~20mm de ancho — proporción natural, no estirada
-  const silX = x + W - silW - 2.0; // pegada al borde derecho
-  const silY = y + H * 0.15;       // empieza al 15% del alto
+  // PNG es 1024x1024 (cuadrado). La figura de la mujer ocupa ~40% del ancho del PNG.
+  // Para que se vea igual que en la previsualización: ancha y bien proporcionada.
+  // En la referencia la silueta ocupa ~25% del ancho de la tarjeta y ~65% del alto.
+  const silW = W * 0.25;           // ~21mm de ancho (igual que en la previsualización)
+  const silH = silW;               // 1:1 porque el PNG es cuadrado — la figura se ve natural
+  const silX = x + W - silW - 2.5; // pegada al borde derecho
+  const silY = y + H * 0.10;       // empieza al 10% del alto
   try {
     pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
   } catch (_) {}

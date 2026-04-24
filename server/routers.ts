@@ -1195,8 +1195,8 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         // El admin usa contraseña hardcodeada (igual que el login del admin)
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) {
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Contraseña incorrecta' });
         }
 
@@ -1264,8 +1264,8 @@ export const appRouter = router({
         body: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) {
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Contraseña incorrecta' });
         }
         if (!isAPNsConfigured()) {
@@ -2939,8 +2939,8 @@ export const appRouter = router({
         adminPassword: z.string(),
       }))
       .mutation(async ({ input }) => {
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const walletCheck = await getWalletById(input.walletId);
         if (!walletCheck) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         if (!walletCheck.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de operar.' });
@@ -2965,8 +2965,8 @@ export const appRouter = router({
         adminPassword: z.string(),
       }))
       .mutation(async ({ input }) => {
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const walletCheck = await getWalletById(input.walletId);
         if (!walletCheck) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         if (!walletCheck.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja. Reactívalo antes de operar.' });
@@ -3212,8 +3212,8 @@ export const appRouter = router({
         adminPassword: z.string(),
       }))
       .mutation(async ({ input }) => {
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await setWalletDiscount(wallet.id, input.discountPercent);
@@ -3223,8 +3223,8 @@ export const appRouter = router({
     adminRemoveDiscount: publicProcedure
       .input(z.object({ walletNumber: z.string(), adminPassword: z.string() }))
       .mutation(async ({ input }) => {
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await removeWalletDiscount(wallet.id);
@@ -3234,8 +3234,8 @@ export const appRouter = router({
     adminResetWallet: publicProcedure
       .input(z.object({ walletNumber: z.string(), adminEmail: z.string(), adminPassword: z.string() }))
       .mutation(async ({ input }) => {
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await adminResetWallet(wallet.id, input.adminEmail);
@@ -3245,8 +3245,8 @@ export const appRouter = router({
     adminSuspendWallet: publicProcedure
       .input(z.object({ walletNumber: z.string(), adminPassword: z.string() }))
       .mutation(async ({ input }) => {
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await adminSuspendWallet(wallet.id);
@@ -3256,8 +3256,8 @@ export const appRouter = router({
     adminUnsuspendWallet: publicProcedure
       .input(z.object({ walletNumber: z.string(), adminPassword: z.string() }))
       .mutation(async ({ input }) => {
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         await adminUnsuspendWallet(wallet.id);
@@ -3333,8 +3333,8 @@ export const appRouter = router({
     resetAll: publicProcedure
       .input(z.object({ adminPassword: z.string() }))
       .mutation(async ({ input }) => {
-        const ADMIN_PASSWORD = 'nutriser2024';
-        if (input.adminPassword !== ADMIN_PASSWORD) {
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Contraseña incorrecta' });
         }
         const result = await resetAllBehaviorEvents();

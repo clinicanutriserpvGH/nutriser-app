@@ -12,7 +12,7 @@
 
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
-import { SILUETA_B64 } from "./siluetaB64";
+import { SILUETA_CROPPED_B64 } from "./siluetaCroppedB64";
 
 export interface WalletPdfCardData {
   patientName: string;
@@ -67,15 +67,14 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.text("aesthetic & nutrition", cx, subY + 0.5, { align: "center", charSpace: 0.6 });
 
   // ── SILUETA ───────────────────────────────────────────────────────────────
-  // PNG es 1024x1024 (cuadrado). La figura de la mujer ocupa ~40% del ancho del PNG.
-  // Para que se vea igual que en la previsualización: ancha y bien proporcionada.
-  // En la referencia la silueta ocupa ~25% del ancho de la tarjeta y ~65% del alto.
-  const silW = W * 0.25;           // ~21mm de ancho (igual que en la previsualización)
-  const silH = silW;               // 1:1 porque el PNG es cuadrado — la figura se ve natural
-  const silX = x + W - silW - 2.5; // pegada al borde derecho
+  // Imagen recortada al bounding box de la figura: 233x887px (ratio 0.263)
+  // En la referencia la silueta ocupa ~65% del alto de la tarjeta
+  const silH = H * 0.65;           // ~35mm de alto
+  const silW = silH * 0.263;       // ~9.2mm de ancho (proporción real de la figura)
+  const silX = x + W - silW - 3.0; // pegada al borde derecho
   const silY = y + H * 0.10;       // empieza al 10% del alto
   try {
-    pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
+    pdf.addImage(SILUETA_CROPPED_B64, "PNG", silX, silY, silW, silH);
   } catch (_) {}
 
   // ── ZONA CENTRAL ──────────────────────────────────────────────────────────
@@ -164,7 +163,15 @@ export async function generateWalletPdf(
       if (i > 0) pdf.addPage([W, H], "landscape");
       await drawCard(pdf, cards[i], 0, 0);
     }
-    window.open(pdf.output("bloburl"), "_blank");
+    // Usar descarga directa: en iOS activa el diálogo nativo de compartir/guardar/imprimir
+    const blob = pdf.output("blob");
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "monedero-nutriser.pdf";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
   } else {
     const A4_W = 210, A4_H = 297, GAP = 6;
     const MX = (A4_W - 2 * W - GAP) / 2;
@@ -181,7 +188,14 @@ export async function generateWalletPdf(
       const p = i % 8;
       await drawCard(pdf, cards[i], MX + (p % 2) * (W + GAP), MY + Math.floor(p / 2) * (H + GAP));
     }
-    window.open(pdf.output("bloburl"), "_blank");
+    const blob = pdf.output("blob");
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "monedero-nutriser-a4.pdf";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
   }
 }
 

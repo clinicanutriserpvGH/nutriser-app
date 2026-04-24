@@ -1795,12 +1795,39 @@ export const appRouter = router({
     reject: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
+        // Obtener la compra para saber si estaba aprobada (y así devolver stock)
+        const purchases = await getAllProductPurchases();
+        const purchase = purchases.find((p: any) => p.id === input.id);
         await updateProductPurchaseStatus(input.id, 'rejected');
+        // Si la compra estaba aprobada, devolver el stock al producto
+        if (purchase && purchase.status === 'approved') {
+          try {
+            const product = await getProductById(purchase.productId);
+            if (product && product.stock !== null && product.stock !== undefined) {
+              const restoredStock = (product.stock || 0) + (purchase.quantity || 1);
+              const restoredSold = Math.max(0, (product.soldCount || 0) - (purchase.quantity || 1));
+              await updateProduct(purchase.productId, { stock: restoredStock, soldCount: restoredSold });
+            }
+          } catch (e) { console.warn('Stock restore error (reject):', e); }
+        }
         return { success: true };
       }),
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
+        // Si la compra estaba aprobada, devolver el stock antes de eliminar
+        const purchases = await getAllProductPurchases();
+        const purchase = purchases.find((p: any) => p.id === input.id);
+        if (purchase && purchase.status === 'approved') {
+          try {
+            const product = await getProductById(purchase.productId);
+            if (product && product.stock !== null && product.stock !== undefined) {
+              const restoredStock = (product.stock || 0) + (purchase.quantity || 1);
+              const restoredSold = Math.max(0, (product.soldCount || 0) - (purchase.quantity || 1));
+              await updateProduct(purchase.productId, { stock: restoredStock, soldCount: restoredSold });
+            }
+          } catch (e) { console.warn('Stock restore error (delete):', e); }
+        }
         return await deleteProductPurchase(input.id);
       }),
   }),

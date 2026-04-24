@@ -206,12 +206,15 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
   const { isMobile } = useDeviceType();
   const [, navigate] = useLocation();
 
-  // Slides: imágenes admin (tipo tienda) + [Monedero SOLO si el admin lo activó] + promos activas
-  // REGLA: showDefault=true → mostrar slide del Monedero. showDefault=false → NO mostrar nunca.
-  // Las imágenes admin siempre aparecen si están subidas. Los cupones activos siempre aparecen.
+  // Slides: imágenes admin (tipo tienda) + [Monedero SOLO si el admin lo activó Y usuario NO tiene sesión] + promos activas
+  // REGLA: showDefault=true → mostrar slide del Monedero SOLO si el usuario NO tiene sesión activa.
+  //        Si el usuario ya tiene cuenta/monedero → la slide del Monedero se omite siempre.
+  // Las imágenes admin siempre aparecen si están subidas. Los cupones activos siempre aparecen para todos.
   // Si no hay nada activo → totalSlides=0 → shouldShow=false → no aparece nada.
   const adminTiendaAds = tiendaAds as Array<{ id: number; imageUrl: string; title: string }>;
-  const showDefaultSlide = !!(splashConfigData?.showDefault); // Solo si el admin lo activó — NUNCA por defecto
+  const adminWantsMonederoSlide = !!(splashConfigData?.showDefault); // Admin lo activó
+  // Solo mostrar la slide del monedero si el admin la activó Y el usuario NO tiene sesión
+  const showDefaultSlide = adminWantsMonederoSlide && !isAuthenticated;
   const customImageUrl: string | null = (splashConfigData as any)?.customImageUrl ?? null;
   const adminAdsCount = adminTiendaAds.length;
   const defaultSlideCount = showDefaultSlide ? 1 : 0;

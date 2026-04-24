@@ -310,6 +310,7 @@ export default function Store() {
         <PromoSplash
           onClose={() => { sessionStorage.setItem("nutriser_store_promo_dismissed", "1"); setShowPromoSplash(false); }}
           onGoToCoupon={() => { sessionStorage.setItem("nutriser_store_promo_dismissed", "1"); setShowPromoSplash(false); }}
+          isAuthenticated={isLoggedIn}
         />
       )}
 

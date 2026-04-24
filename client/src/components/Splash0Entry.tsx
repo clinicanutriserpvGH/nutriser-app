@@ -149,12 +149,12 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             </button>
           </div>
 
-          {/* ── Grid principal — 2 tarjetas (Academia eliminada del splash) ── */}
-          {/* Móvil: columna vertical | Tablet/Desktop: 2 columnas iguales */}
-          <div className="flex flex-col md:grid md:grid-cols-2 gap-3 md:gap-4 mb-3 flex-1 min-h-0 md:max-h-[65vh] lg:max-h-none">
+          {/* ── Grid principal — 2 tarjetas siempre en columna vertical ── */}
+          {/* Portal arriba (más pequeño), Tienda abajo (más grande) — igual en móvil, tablet y desktop */}
+          <div className="flex flex-col gap-3 mb-3 flex-1 min-h-0">
 
             {/* ── Tarjeta 3: Portal de Salud Nutriser ── */}
-            <div className="min-h-[220px] md:min-h-[300px] lg:min-h-0">
+            <div className="min-h-[200px] md:min-h-[240px]">
               <button
                 type="button"
                 onClick={handlePortalSalud}
@@ -216,7 +216,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
 
 
             {/* ── Tarjeta 1: Tienda Nutriser ── */}
-            <div className="flex-1 min-h-[150px] md:min-h-[300px] lg:min-h-0">
+            <div className="flex-1 min-h-[280px] md:min-h-[400px]">
               <button
                 type="button"
                 onClick={() => handleNavigate('/memberships')}

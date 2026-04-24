@@ -2064,3 +2064,23 @@
 - [ ] AdminSiteConfigTab: toggle ocultar/mostrar Academia Nutriser
 - [ ] Splash0Entry: mostrar "Próximamente" en tarjeta Academia cuando esté oculta
 - [ ] Página /cursos: mostrar "Próximamente" cuando Academia esté oculta
+
+## Sesión Actual - Inventario y Precio Promocional en Productos
+
+- [x] Agregar campo salePrice (precio promocional) a tabla products en BD
+- [x] Agregar campo soldCount (piezas vendidas) a tabla products en BD
+- [x] Agregar campo lowStockAlert (umbral de alerta) a tabla products en BD
+- [x] Actualizar router products.create y products.update para aceptar salePrice y lowStockAlert
+- [x] Endpoint productPurchases.approve: descuenta stock, suma soldCount, da cashback 2%
+- [x] Panel admin - formulario de productos: campos Precio Regular + Precio Promocional con vista previa del % ahorro
+- [x] Panel admin - formulario de productos: campo Stock + campo Alerta de stock bajo
+- [x] Panel admin - tabla de productos: muestra precio tachado + precio promo + badge -X%
+- [x] Panel admin - tabla de productos: muestra stock con alertas (verde/naranja/rojo RESURTIR)
+- [x] Panel admin - tabla de productos: muestra piezas vendidas acumuladas
+- [x] Panel admin - tabla de compras de productos: columnas Precio, Método (En Clínica / Transferencia)
+- [x] Panel admin - tabla de compras de productos: botón Aprobar usa endpoint approve (descuenta stock)
+- [x] Tienda - tarjeta de producto: muestra precio tachado + precio promo + badge -X% AHORRO
+- [x] Tienda - tarjeta de producto: muestra "Últimas N pzs" cuando stock bajo
+- [x] Tienda - tarjeta de producto: muestra "Agotado" con overlay cuando stock = 0
+- [x] Tienda - tarjeta de producto: botones Carrito y Comprar deshabilitados cuando agotado
+- [x] Flujo de compra de productos: idéntico a servicios (comprobante transferencia O pago en clínica)

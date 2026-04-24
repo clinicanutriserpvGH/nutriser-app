@@ -783,7 +783,7 @@ export async function getAllProductPurchases() {
   if (!db) return [];
   return await db.select().from(productPurchases).orderBy(desc(productPurchases.createdAt));
 }
-export async function updateProductPurchaseStatus(id: number, status: 'pending' | 'verified' | 'rejected') {
+export async function updateProductPurchaseStatus(id: number, status: 'pending' | 'approved' | 'verified' | 'rejected') {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(productPurchases).set({ status }).where(eq(productPurchases.id, id));

@@ -356,8 +356,11 @@ export const products = mysqlTable("products", {
   description: text("description"),
   category: varchar("category", { length: 100 }).notNull().default("general"),
   price: varchar("price", { length: 100 }), // Precio libre: "$1,500 MXN" o "Desde $800"
+  salePrice: varchar("salePrice", { length: 100 }), // Precio promocional — price se muestra tachado cuando hay salePrice
   imageUrl: text("imageUrl"), // URL de la imagen en S3
-  stock: int("stock").default(0), // null = sin límite
+  stock: int("stock").default(0), // Piezas en inventario
+  soldCount: int("soldCount").default(0).notNull(), // Total de piezas vendidas (historial acumulado)
+  lowStockAlert: int("lowStockAlert").default(3), // Alerta cuando stock <= este valor
   isActive: boolean("isActive").default(true).notNull(),
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -377,8 +380,9 @@ export const productPurchases = mysqlTable("productPurchases", {
   buyerEmail: varchar("buyerEmail", { length: 320 }).notNull(),
   buyerPhone: varchar("buyerPhone", { length: 50 }),
   quantity: int("quantity").default(1).notNull(),
-  proofUrl: text("proofUrl"), // URL del comprobante en S3
-  status: mysqlEnum("status", ["pending", "verified", "rejected"]).default("pending").notNull(),
+  proofUrl: text("proofUrl"), // URL del comprobante en S3 (null si pago en clínica)
+  paymentMethod: mysqlEnum("paymentMethod", ["transfer", "cash"]).default("transfer"), // transfer=comprobante, cash=en clínica
+  status: mysqlEnum("status", ["pending", "approved", "verified", "rejected"]).default("pending").notNull(),
   purchaseCode: varchar("purchaseCode", { length: 30 }).notNull(),
   notes: text("notes"),
   discountCode: varchar("discountCode", { length: 50 }), // Código de descuento aplicado

@@ -94,8 +94,10 @@ export default function AdminDashboard() {
     description: '',
     category: 'general',
     price: '',
+    salePrice: '',
     imageUrl: '',
     stock: 0,
+    lowStockAlert: 5,
     isActive: true,
     sortOrder: 0,
   });
@@ -289,7 +291,7 @@ export default function AdminDashboard() {
     onSuccess: () => {
       toast.success('Producto creado exitosamente');
       refetchProducts();
-      setProductForm({ name: '', description: '', category: 'general', price: '', imageUrl: '', stock: 0, isActive: true, sortOrder: 0 });
+      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 5, isActive: true, sortOrder: 0 });
       setProductImage(null);
       setProductImagePreview(null);
       setEditingProductId(null);
@@ -301,7 +303,7 @@ export default function AdminDashboard() {
     onSuccess: () => {
       toast.success('Producto actualizado exitosamente');
       refetchProducts();
-      setProductForm({ name: '', description: '', category: 'general', price: '', imageUrl: '', stock: 0, isActive: true, sortOrder: 0 });
+      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 5, isActive: true, sortOrder: 0 });
       setProductImage(null);
       setProductImagePreview(null);
       setEditingProductId(null);
@@ -322,10 +324,11 @@ export default function AdminDashboard() {
     enabled: isAuthenticated,
   });
 
-  const verifyProductMutation = trpc.productPurchases.verify.useMutation({
-    onSuccess: () => { toast.success('Compra verificada.'); refetchProductPurchases(); },
+  const approveProductMutation = trpc.productPurchases.approve.useMutation({
+    onSuccess: () => { toast.success('✅ Compra aprobada. Stock descontado y cashback acreditado.'); refetchProductPurchases(); },
     onError: (error) => toast.error('Error: ' + error.message),
   });
+  const verifyProductMutation = approveProductMutation; // alias para compatibilidad
 
   const rejectProductMutation = trpc.productPurchases.reject.useMutation({
     onSuccess: () => { toast.success('Compra rechazada.'); refetchProductPurchases(); },
@@ -1083,8 +1086,10 @@ export default function AdminDashboard() {
       description: productForm.description || undefined,
       category: productForm.category,
       price: productForm.price || undefined,
+      salePrice: productForm.salePrice || undefined,
       imageUrl: imageUrl || undefined,
       stock: productForm.stock,
+      lowStockAlert: productForm.lowStockAlert,
       isActive: productForm.isActive,
       sortOrder: productForm.sortOrder,
     };
@@ -1102,8 +1107,10 @@ export default function AdminDashboard() {
       description: product.description || '',
       category: product.category || 'general',
       price: product.price || '',
+      salePrice: product.salePrice || '',
       imageUrl: product.imageUrl || '',
       stock: product.stock || 0,
+      lowStockAlert: product.lowStockAlert ?? 5,
       isActive: product.isActive,
       sortOrder: product.sortOrder || 0,
     });
@@ -3063,12 +3070,30 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-[#666] mb-1 block">Precio</label>
-                      <input type="text" value={productForm.price} onChange={e => setProductForm(f => ({...f, price: e.target.value}))} placeholder="Ej: $299" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Precio Regular</label>
+                      <input type="text" value={productForm.price} onChange={e => setProductForm(f => ({...f, price: e.target.value}))} placeholder="Ej: $500" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-[#666] mb-1 block">Stock</label>
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Precio Promocional <span className="text-[#C5A55A]">(opcional)</span></label>
+                      <input type="text" value={productForm.salePrice} onChange={e => setProductForm(f => ({...f, salePrice: e.target.value}))} placeholder="Ej: $299 (deja vacío si no hay promo)" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                      {productForm.salePrice && productForm.price && (() => {
+                        const reg = parseFloat(productForm.price.replace(/[^0-9.]/g, ''));
+                        const sale = parseFloat(productForm.salePrice.replace(/[^0-9.]/g, ''));
+                        if (reg > 0 && sale > 0 && reg > sale) {
+                          const pct = Math.round((1 - sale / reg) * 100);
+                          return <p className="text-xs text-green-600 mt-1">✅ Ahorro del {pct}% — se mostrará en la tienda</p>;
+                        }
+                        return null;
+                      })()}
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Stock (piezas disponibles)</label>
                       <input type="number" value={productForm.stock} onChange={e => setProductForm(f => ({...f, stock: parseInt(e.target.value) || 0}))} min={0} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Alerta de stock bajo (piezas)</label>
+                      <input type="number" value={productForm.lowStockAlert} onChange={e => setProductForm(f => ({...f, lowStockAlert: parseInt(e.target.value) || 5}))} min={1} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                      <p className="text-xs text-gray-400 mt-1">Se mostrará aviso cuando queden ≤ {productForm.lowStockAlert} piezas</p>
                     </div>
                     <div>
                       <label className="text-xs font-medium text-[#666] mb-1 block">Orden</label>
@@ -3109,7 +3134,7 @@ export default function AdminDashboard() {
                        editingProductId ? 'Actualizar Producto' : 'Agregar Producto'}
                     </button>
                     {editingProductId && (
-                      <button onClick={() => { setEditingProductId(null); setProductForm({ name: '', description: '', category: 'general', price: '', imageUrl: '', stock: 0, isActive: true, sortOrder: 0 }); setProductImage(null); setProductImagePreview(null); }} className="px-4 py-2 border rounded-lg text-sm text-[#666] hover:bg-gray-50 transition">Cancelar</button>
+                      <button onClick={() => { setEditingProductId(null); setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 5, isActive: true, sortOrder: 0 }); setProductImage(null); setProductImagePreview(null); }} className="px-4 py-2 border rounded-lg text-sm text-[#666] hover:bg-gray-50 transition">Cancelar</button>
                     )}
                   </div>
                 </div>
@@ -3140,8 +3165,37 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 px-4 font-medium text-[#1A1A1A]">{prod.name}</td>
                           <td className="py-3 px-4 text-[#666] capitalize">{prod.category}</td>
-                          <td className="py-3 px-4 text-[#C5A55A] font-semibold">{prod.price || 'Sin precio'}</td>
-                          <td className="py-3 px-4 text-[#666]">{prod.stock}</td>
+                          <td className="py-3 px-4">
+                            {prod.salePrice ? (
+                              <div>
+                                <span className="line-through text-gray-400 text-xs">{prod.price}</span>
+                                <span className="ml-1 text-[#C5A55A] font-bold">{prod.salePrice}</span>
+                                {(() => {
+                                  const reg = parseFloat((prod.price || '').replace(/[^0-9.]/g, ''));
+                                  const sale = parseFloat((prod.salePrice || '').replace(/[^0-9.]/g, ''));
+                                  if (reg > 0 && sale > 0 && reg > sale) {
+                                    const pct = Math.round((1 - sale / reg) * 100);
+                                    return <span className="ml-1 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-bold">-{pct}%</span>;
+                                  }
+                                  return null;
+                                })()}
+                              </div>
+                            ) : (
+                              <span className="text-[#C5A55A] font-semibold">{prod.price || 'Sin precio'}</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex flex-col gap-0.5">
+                              {prod.stock === 0 ? (
+                                <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">⚠️ RESURTIR</span>
+                              ) : prod.stock <= (prod.lowStockAlert || 5) ? (
+                                <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">⚠️ Bajo: {prod.stock} pzs</span>
+                              ) : (
+                                <span className="text-sm text-green-700 font-semibold">{prod.stock} pzs</span>
+                              )}
+                              {prod.soldCount > 0 && <span className="text-xs text-gray-400">{prod.soldCount} vendidas</span>}
+                            </div>
+                          </td>
                           <td className="py-3 px-4">
                             <span className={`text-xs px-2 py-1 rounded-full font-semibold ${prod.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                               {prod.isActive ? 'Activo' : 'Inactivo'}
@@ -3180,8 +3234,9 @@ export default function AdminDashboard() {
                         <th className="text-left py-3 px-4 text-[#666] font-medium">Producto</th>
                         <th className="text-left py-3 px-4 text-[#666] font-medium">Comprador</th>
                         <th className="text-left py-3 px-4 text-[#666] font-medium">Correo</th>
-                        <th className="text-left py-3 px-4 text-[#666] font-medium">Teléfono</th>
-                        <th className="text-left py-3 px-4 text-[#666] font-medium">Cantidad</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Cant.</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Precio</th>
+                        <th className="text-left py-3 px-4 text-[#666] font-medium">Método</th>
                         <th className="text-left py-3 px-4 text-[#666] font-medium">Estado</th>
                         <th className="text-left py-3 px-4 text-[#666] font-medium">Comprobante</th>
                         <th className="text-left py-3 px-4 text-[#666] font-medium">Acciones</th>
@@ -3190,28 +3245,43 @@ export default function AdminDashboard() {
                     <tbody>
                       {productPurchases?.map((pp: any) => (
                         <tr key={pp.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-3 px-4 font-medium text-[#1A1A1A]">{pp.productName}</td>
-                          <td className="py-3 px-4">{pp.buyerName}</td>
-                          <td className="py-3 px-4 text-[#666]">{pp.buyerEmail}</td>
-                          <td className="py-3 px-4 text-[#666]">{pp.buyerPhone || '-'}</td>
-                          <td className="py-3 px-4 text-center">{pp.quantity}</td>
-                          <td className="py-3 px-4">
-                            <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                              pp.status === 'approved' ? 'bg-green-100 text-green-700' :
-                              pp.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                              'bg-yellow-100 text-yellow-700'
-                            }`}>{pp.status === 'approved' ? 'Aprobado' : pp.status === 'rejected' ? 'Rechazado' : 'Pendiente'}</span>
+                          <td className="py-3 px-4 font-medium text-[#1A1A1A]">
+                            <div>{pp.productName}</div>
+                            <div className="text-xs text-gray-400 font-mono">{pp.purchaseCode}</div>
                           </td>
                           <td className="py-3 px-4">
-                            {pp.proofUrl && (
+                            <div>{pp.buyerName}</div>
+                            <div className="text-xs text-gray-400">{pp.buyerPhone || ''}</div>
+                          </td>
+                          <td className="py-3 px-4 text-[#666] text-xs">{pp.buyerEmail}</td>
+                          <td className="py-3 px-4 text-center font-semibold">{pp.quantity}</td>
+                          <td className="py-3 px-4 text-[#C5A55A] font-semibold text-sm">{pp.originalPrice || '-'}</td>
+                          <td className="py-3 px-4">
+                            {pp.paymentMethod === 'cash' ? (
+                              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-semibold">🏥 En Clínica</span>
+                            ) : (
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">💳 Transferencia</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                              pp.status === 'approved' || pp.status === 'verified' ? 'bg-green-100 text-green-700' :
+                              pp.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>{pp.status === 'approved' || pp.status === 'verified' ? 'Aprobado' : pp.status === 'rejected' ? 'Rechazado' : 'Pendiente'}</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {pp.proofUrl ? (
                               <button onClick={() => window.open(pp.proofUrl, '_blank')} className="flex items-center gap-1 text-[#C5A55A] hover:underline text-xs"><Eye className="w-3.5 h-3.5" />Ver</button>
+                            ) : (
+                              <span className="text-xs text-gray-400">Pago en clínica</span>
                             )}
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex gap-1">
                               {pp.status === 'pending' && (
                                 <>
-                                  <button onClick={() => verifyProductMutation.mutate({ id: pp.id })} className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded transition"><CheckCircle className="w-3.5 h-3.5" />Aprobar</button>
+                                  <button onClick={() => approveProductMutation.mutate({ id: pp.id })} className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded transition"><CheckCircle className="w-3.5 h-3.5" />Aprobar</button>
                                   <button onClick={() => rejectProductMutation.mutate({ id: pp.id })} className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded transition"><XCircle className="w-3.5 h-3.5" />Rechazar</button>
                                 </>
                               )}
@@ -3221,7 +3291,7 @@ export default function AdminDashboard() {
                         </tr>
                       ))}
                       {(!productPurchases || productPurchases.length === 0) && (
-                        <tr><td colSpan={8} className="py-8 text-center text-[#999]">No hay compras de productos</td></tr>
+                        <tr><td colSpan={9} className="py-8 text-center text-[#999]">No hay compras de productos</td></tr>
                       )}
                     </tbody>
                   </table>

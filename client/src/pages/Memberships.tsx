@@ -1722,9 +1722,19 @@ onClick={() => {
               ) : (
                 <HScrollRail>
                   {products.map(product => {
-                    const priceNum = product.price ? parseInt(product.price.replace(/[^0-9]/g, "")) : null;
+                    const salePrice = (product as any).salePrice;
+                    const priceNum = salePrice
+                      ? parseInt(String(salePrice).replace(/[^0-9]/g, ""))
+                      : product.price ? parseInt(product.price.replace(/[^0-9]/g, "")) : null;
+                    const regularPriceNum = product.price ? parseInt(product.price.replace(/[^0-9]/g, "")) : null;
+                    const savingPct = salePrice && regularPriceNum && priceNum && regularPriceNum > priceNum
+                      ? Math.round((1 - priceNum / regularPriceNum) * 100) : 0;
+                    const lowStockThreshold = (product as any).lowStockAlert ?? 5;
+                    const stockLeft = product.stock ?? null;
+                    const isLowStock = stockLeft !== null && stockLeft > 0 && stockLeft <= lowStockThreshold;
+                    const isOutOfStock = stockLeft !== null && stockLeft === 0;
                     return (
-                      <div key={product.id} className="flex-shrink-0 w-48 sm:w-52 lg:w-56 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+                      <div key={product.id} className={`flex-shrink-0 w-48 sm:w-52 lg:w-56 bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col ${isOutOfStock ? 'opacity-60 border-gray-200' : 'border-gray-100'}`}>
                         <div className="relative h-40 lg:h-48 overflow-hidden">
                           {product.imageUrl ? (
                             <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
@@ -1733,12 +1743,22 @@ onClick={() => {
                               <Droplets className="w-10 h-10 text-gray-200" />
                             </div>
                           )}
-                          <button onClick={(e) => { e.stopPropagation(); track("product", `prd-${product.id}`, product.name, "wishlist"); toggleWishlist({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product" }); }} className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
+                          <button onClick={(e) => { e.stopPropagation(); track("product", `prd-${product.id}`, product.name, "wishlist"); toggleWishlist({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ?? product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product" }); }} className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 active:scale-90 transition-all">
                             <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`prd-${product.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
                           </button>
-                          {product.stock !== null && product.stock !== undefined && product.stock <= 5 && product.stock > 0 && (
+                          {savingPct > 0 && (
+                            <div className="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow">
+                              -{savingPct}% AHORRO
+                            </div>
+                          )}
+                          {!savingPct && isLowStock && (
                             <div className="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
-                              {t("lastUnits", lang)} {product.stock}
+                              Últimas {stockLeft} pzs
+                            </div>
+                          )}
+                          {isOutOfStock && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <span className="bg-white text-gray-800 font-black text-xs px-3 py-1 rounded-full">Agotado</span>
                             </div>
                           )}
                         </div>
@@ -1746,19 +1766,33 @@ onClick={() => {
                           <p className="text-[9px] text-purple-600 font-semibold uppercase tracking-wider mb-0.5">{product.category || t("typeProduct", lang)}</p>
                           <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{tx(product.name)}</h3>
                           <div className="mt-auto">
-                            {product.price ? (
+                            {salePrice ? (
+                              <div className="mb-2">
+                                <div className="flex items-baseline gap-1.5">
+                                  <span className="text-[#C5A55A] font-black text-sm">{salePrice}</span>
+                                  <span className="line-through text-gray-400 text-[10px]">{product.price}</span>
+                                </div>
+                                {savingPct > 0 && (
+                                  <p className="text-green-600 text-[9px] font-bold">Ahorras {savingPct}% hoy</p>
+                                )}
+                              </div>
+                            ) : product.price ? (
                               <p className="text-[#C5A55A] font-black text-sm mb-2">{product.price}</p>
                             ) : (
                               <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
                             )}
                             <div className="flex gap-1.5">
-                              <button onClick={() => addToCart({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
-                                className="flex-1 flex items-center justify-center border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95">
+                              <button
+                                disabled={isOutOfStock}
+                                onClick={() => !isOutOfStock && addToCart({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ?? product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
+                                className="flex-1 flex items-center justify-center border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
                                 <ShoppingCart className="w-3 h-3" />
                               </button>
-                              <button onClick={() => openCheckout({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: product.price ?? "Consultar", qty: 1, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
-                                className="flex-1 flex items-center justify-center bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95">
-                                <Zap className="w-3 h-3" /> {t("buy", lang)}
+                              <button
+                                disabled={isOutOfStock}
+                                onClick={() => !isOutOfStock && openCheckout({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ?? product.price ?? "Consultar", qty: 1, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
+                                className="flex-1 flex items-center justify-center bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
+                                <Zap className="w-3 h-3" /> {isOutOfStock ? "Agotado" : t("buy", lang)}
                               </button>
                             </div>
                           </div>

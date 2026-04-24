@@ -10,7 +10,7 @@ import { invokeLLM } from "./_core/llm";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail, sendPurchaseReceiptEmail } from "./_core/email";
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
-import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
+import { getAllProducts, getAllActiveProducts, getProductById, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
@@ -1586,8 +1586,10 @@ export const appRouter = router({
         description: z.string().optional(),
         category: z.string().min(1).default('general'),
         price: z.string().optional(),
+        salePrice: z.string().optional(),
         imageUrl: z.string().optional(),
         stock: z.number().int().optional(),
+        lowStockAlert: z.number().int().optional(),
         isActive: z.boolean().default(true),
         sortOrder: z.number().int().default(0),
       }))
@@ -1601,8 +1603,10 @@ export const appRouter = router({
         description: z.string().optional(),
         category: z.string().optional(),
         price: z.string().optional(),
+        salePrice: z.string().optional(),
         imageUrl: z.string().optional(),
         stock: z.number().int().optional(),
+        lowStockAlert: z.number().int().optional(),
         isActive: z.boolean().optional(),
         sortOrder: z.number().int().optional(),
       }))
@@ -1628,6 +1632,7 @@ export const appRouter = router({
 
   // ─── Product purchases ─────────────────────────────────────────────────────
   productPurchases: router({
+    // Compra con comprobante (transfer) o registro de pago en clínica (cash)
     create: publicProcedure
       .input(z.object({
         productId: z.number(),
@@ -1636,24 +1641,32 @@ export const appRouter = router({
         buyerEmail: z.string().email(),
         buyerPhone: z.string().optional(),
         quantity: z.number().int().min(1).default(1),
-        proofData: z.string(),
-        proofMimeType: z.string(),
+        proofData: z.string().optional(), // base64, null si es pago en clínica
+        proofMimeType: z.string().optional(),
+        paymentMethod: z.enum(['transfer', 'cash']).default('transfer'),
         walletDiscount: z.number().optional(),
         patientEmail: z.string().email().optional(),
         originalPrice: z.string().optional(),
+        discountCode: z.string().optional(),
+        discountPercent: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         const part = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
         const purchaseCode = `NUT-PRD-${part}`;
-        const buffer = Buffer.from(input.proofData, 'base64');
-        const ext = input.proofMimeType.split('/')[1] || 'jpg';
-        const fileName = `product-proof-${Date.now()}.${ext}`;
-        const { url: proofUrl } = await storagePut(`product-proofs/${fileName}`, buffer, input.proofMimeType);
 
-        // ── Descontar saldo del monedero INMEDIATAMENTE ──
+        let proofUrl: string | undefined;
+        if (input.paymentMethod === 'transfer' && input.proofData && input.proofMimeType) {
+          const buffer = Buffer.from(input.proofData, 'base64');
+          const ext = input.proofMimeType.split('/')[1] || 'jpg';
+          const fileName = `product-proof-${Date.now()}.${ext}`;
+          const { url } = await storagePut(`product-proofs/${fileName}`, buffer, input.proofMimeType);
+          proofUrl = url;
+        }
+
+        // ── Descontar saldo del monedero INMEDIATAMENTE (solo si hay comprobante) ──
         const walletDiscountAmt = input.walletDiscount || 0;
-        if (walletDiscountAmt > 0 && input.patientEmail) {
+        if (walletDiscountAmt > 0 && input.patientEmail && input.paymentMethod === 'transfer') {
           try {
             const patient = await getPatientByEmail(input.patientEmail);
             if (patient) {
@@ -1682,21 +1695,101 @@ export const appRouter = router({
           buyerEmail: input.buyerEmail,
           buyerPhone: input.buyerPhone,
           quantity: input.quantity,
-          proofUrl,
+          proofUrl: proofUrl || null,
+          paymentMethod: input.paymentMethod,
           purchaseCode,
           status: 'pending',
           walletDiscount: walletDiscountAmt > 0 ? String(walletDiscountAmt) : undefined,
           patientEmail: input.patientEmail,
+          originalPrice: input.originalPrice,
+          discountCode: input.discountCode,
+          discountPercent: input.discountPercent,
         });
+
+        // Notificar al admin
+        try {
+          const payLabel = input.paymentMethod === 'cash' ? 'PAGO EN CLÍNICA' : 'COMPROBANTE ENVIADO';
+          await notifyOwner({
+            title: `📦 Nueva compra de producto: ${input.productName}`,
+            content: `${input.buyerName} (${input.buyerEmail}) solicitó ${input.quantity}x ${input.productName}. Método: ${payLabel}. Código: ${purchaseCode}`,
+          });
+        } catch (e) { console.warn('Notify error (product purchase):', e); }
+
         return { purchaseCode, id: purchase.id };
       }),
     listAll: publicProcedure.query(async () => {
       return await getAllProductPurchases();
     }),
+    // Aprobar compra: descuenta stock, da cashback, envía email
+    approve: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const purchases = await getAllProductPurchases();
+        const purchase = purchases.find((p: any) => p.id === input.id);
+        if (!purchase) throw new Error('Compra no encontrada');
+        // Actualizar estado
+        await updateProductPurchaseStatus(input.id, 'approved');
+        // Descontar stock del producto
+        try {
+          const product = await getProductById(purchase.productId);
+          if (product && product.stock !== null && product.stock !== undefined) {
+            const newStock = Math.max(0, (product.stock || 0) - (purchase.quantity || 1));
+            const newSold = (product.soldCount || 0) + (purchase.quantity || 1);
+            await updateProduct(purchase.productId, { stock: newStock, soldCount: newSold });
+          }
+        } catch (e) { console.warn('Stock update error:', e); }
+        // Cashback 2% al monedero del paciente
+        try {
+          const patientEmail = purchase.patientEmail || purchase.buyerEmail;
+          const patient = await getPatientByEmail(patientEmail);
+          if (patient) {
+            let wallet = await getWalletByPatientId(patient.id);
+            if (!wallet) wallet = await createWallet(patient.id);
+            const rawPrice = String(purchase.originalPrice || '0');
+            const cleanedPrice = rawPrice.replace(/[^0-9.]/g, '');
+            const finalPrice = parseFloat(cleanedPrice) || 0;
+            const cashbackAmount = Math.round(finalPrice * 0.02 * 100);
+            if (cashbackAmount > 0) {
+              await addWalletTransaction({
+                walletId: wallet.id,
+                type: 'cashback',
+                amount: cashbackAmount,
+                description: `Cashback 2% por compra de ${purchase.productName}`,
+                referenceType: 'product_purchase',
+                referenceId: input.id,
+              });
+            }
+          }
+        } catch (e) { console.warn('Cashback error (product):', e); }
+        // Si es pago en clínica, descontar monedero ahora
+        if (purchase.paymentMethod === 'cash' && purchase.walletDiscount && Number(purchase.walletDiscount) > 0 && purchase.patientEmail) {
+          try {
+            const patient = await getPatientByEmail(purchase.patientEmail);
+            if (patient) {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet && wallet.isActive) {
+                const toDeduct = Math.min(Math.round(Number(purchase.walletDiscount) * 100), wallet.balance);
+                if (toDeduct > 0) {
+                  await addWalletTransaction({
+                    walletId: wallet.id,
+                    type: 'redeem',
+                    amount: -toDeduct,
+                    description: `Pago en clínica: ${purchase.productName}`,
+                    referenceType: 'product_purchase',
+                    referenceId: input.id,
+                    createdBy: 'admin',
+                  });
+                }
+              }
+            }
+          } catch (e) { console.warn('Wallet deduct (clinic) error:', e); }
+        }
+        return { success: true };
+      }),
     verify: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await updateProductPurchaseStatus(input.id, 'verified');
+        await updateProductPurchaseStatus(input.id, 'approved');
         return { success: true };
       }),
     reject: publicProcedure

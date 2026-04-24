@@ -351,6 +351,13 @@
       "when": 1777006360729,
       "tag": "0049_fine_whiplash",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "5",
+      "when": 1777062764440,
+      "tag": "0050_nifty_the_captain",
+      "breakpoints": true
     }
   ]
 }

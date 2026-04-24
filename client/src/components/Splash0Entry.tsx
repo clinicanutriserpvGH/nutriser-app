@@ -252,7 +252,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                     <div className="w-9 h-9 md:w-11 md:h-11 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
                       <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black" />
                     </div>
-                    <span className="text-[10px] md:text-xs font-semibold tracking-wide uppercase drop-shadow text-white/90">Tienda en Línea</span>
+                    <span className="text-[10px] md:text-xs font-semibold tracking-wide uppercase drop-shadow text-white/90">Tienda Nutriser</span>
                   </div>
                   <div>
                     <h2 className="text-2xl sm:text-3xl md:text-3xl font-bold leading-tight mb-0.5 md:mb-1 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>

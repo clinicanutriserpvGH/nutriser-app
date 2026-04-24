@@ -2685,9 +2685,9 @@ export async function createMembershipPackage(data: {
 }
 
 export async function updateMembershipPackage(id: number, data: {
-  name?: string; nameEn?: string; price?: number; regularPrice?: number;
+  name?: string; nameEn?: string; price?: number; regularPrice?: number | null;
   description?: string; descriptionEn?: string; features?: string; featuresEn?: string;
-  imageUrl?: string; category?: string; badge?: string; isActive?: boolean; sortOrder?: number;
+  imageUrl?: string; category?: string; badge?: string | null; isActive?: boolean; sortOrder?: number;
 }) {
   const fields = Object.entries(data).filter(([, v]) => v !== undefined).map(([k]) => `\`${k}\` = ?`).join(', ');
   const values = Object.entries(data).filter(([, v]) => v !== undefined).map(([, v]) => v);

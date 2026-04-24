@@ -10,7 +10,7 @@
  * Nota: la misma cuenta de paciente funciona para Shop y Academy.
  */
 import { useState, useEffect } from "react";
-import { ShoppingBag, CalendarCheck, Moon, Sun, Utensils, Camera, ClipboardList, PauseCircle, BookOpen, Ruler, Repeat2, User, LogIn } from "lucide-react";
+import { ShoppingBag, CalendarCheck, Moon, Sun, Utensils, Camera, ClipboardList, BookOpen, Ruler, Image, Flame, ChefHat, User, LogIn } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 
@@ -171,7 +171,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
           >
 
             {/* ── Tarjeta 3: Portal de Salud Nutriser ── */}
-            <div style={{ flex: '5', minHeight: isLandscape ? '0' : '180px' }}>
+            <div style={{ flex: '6', minHeight: isLandscape ? '0' : '200px' }}>
               <button
                 type="button"
                 onClick={handlePortalSalud}
@@ -199,24 +199,22 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                       <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-[#C5A55A]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
                         App Pacientes
                       </span>
-                    </div>
-                    {/* Íconos — visibles en iPad y desktop (md+), ocultos en celular */}
-                    <div className="hidden md:grid grid-cols-4 gap-x-1.5 gap-y-1.5" style={{ maxWidth: '160px' }}>
+                    </div>                    {/* Íconos — visibles en celular, tablet y desktop */}
+                    <div className="grid grid-cols-3 gap-x-1 gap-y-1" style={{ maxWidth: '120px' }}>
                       {[
                         { icon: Utensils, label: "Mi Dieta" },
-                        { icon: Camera, label: "Scan Food" },
-                        { icon: ClipboardList, label: "Detonantes" },
-                        { icon: PauseCircle, label: "Pausa" },
-                        { icon: ShoppingBag, label: "Lista Súper" },
-                        { icon: BookOpen, label: "Recetario" },
+                        { icon: Camera, label: "Escáner" },
                         { icon: Ruler, label: "Mediciones" },
-                        { icon: Repeat2, label: "Hábitos" },
+                        { icon: Image, label: "Mis Fotos" },
+                        { icon: Flame, label: "Detonantes" },
+                        { icon: ChefHat, label: "Recetario" },
                       ].map(({ icon: Ic, label }) => (
                         <div key={label} className="flex flex-col items-center gap-0.5">
-                          <div className="w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(197,165,90,0.5)', backdropFilter: 'blur(4px)' }}>
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(197,165,90,0.5)', backdropFilter: 'blur(4px)' }}>
                             <Ic className="w-3 h-3 text-[#C5A55A]" />
                           </div>
-                          <span className="text-[6.5px] font-medium leading-tight text-center text-white/80 w-full">{label}</span>
+                       
+   <span className="text-[6.5px] font-medium leading-tight text-center text-white/80 w-full">{label}</span>
                         </div>
                       ))}
                     </div>
@@ -236,7 +234,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
 
 
             {/* ── Tarjeta 1: Tienda Nutriser ── */}
-            <div style={{ flex: '7', minHeight: isLandscape ? '0' : '220px' }}>
+            <div style={{ flex: '6', minHeight: isLandscape ? '0' : '200px' }}>
               <button
                 type="button"
                 onClick={() => handleNavigate('/memberships')}

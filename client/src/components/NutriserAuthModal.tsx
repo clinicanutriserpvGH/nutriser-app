@@ -11,7 +11,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { X, Eye, EyeOff, Loader2, User, Mail, Phone, Lock, LogIn, UserPlus } from "lucide-react";
+import { X, Eye, EyeOff, Loader2, User, Mail, Phone, Lock, LogIn, UserPlus, Calendar } from "lucide-react";
 import { usePatientAuth, PatientSession } from "@/hooks/usePatientAuth";
 
 interface NutriserAuthModalProps {
@@ -27,6 +27,9 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
   const [mode, setMode] = useState<"login" | "register">("login");
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [birthDay, setBirthDay] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const [birthYear, setBirthYear] = useState("");
 
   const loginMutation = trpc.patients.login.useMutation({
     onSuccess: (data) => {
@@ -68,11 +71,19 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
       toast.error("Las contraseñas no coinciden");
       return;
     }
+    if (!birthDay || !birthMonth || !birthYear) {
+      toast.error("La fecha de nacimiento es obligatoria");
+      return;
+    }
+    const dd = birthDay.padStart(2, "0");
+    const mm = birthMonth.padStart(2, "0");
+    const birthday = `${birthYear}-${mm}-${dd}`;
     registerMutation.mutate({
       name: fd.get("name") as string,
       email: fd.get("email") as string,
       password,
       phone: fd.get("phone") as string,
+      birthday,
     });
   };
 
@@ -204,6 +215,35 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
                 placeholder="Teléfono / WhatsApp"
                 className="w-full bg-white/5 border border-white/10 text-white placeholder-white/30 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:border-[#C5A55A]/50"
               />
+            </div>
+            {/* Fecha de nacimiento — obligatoria */}
+            <div>
+              <label className="flex items-center gap-2 text-white/50 text-xs mb-1.5">
+                <Calendar className="w-3.5 h-3.5" /> Fecha de nacimiento <span className="text-red-400 ml-0.5">*</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <select value={birthDay} onChange={e => setBirthDay(e.target.value)}
+                  className="bg-white/5 border border-white/10 text-white text-sm rounded-xl px-2 py-3 outline-none focus:border-[#C5A55A]/50 appearance-none text-center">
+                  <option value="" className="bg-[#1a1a1a]">Día</option>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                    <option key={d} value={String(d)} className="bg-[#1a1a1a]">{d}</option>
+                  ))}
+                </select>
+                <select value={birthMonth} onChange={e => setBirthMonth(e.target.value)}
+                  className="bg-white/5 border border-white/10 text-white text-sm rounded-xl px-2 py-3 outline-none focus:border-[#C5A55A]/50 appearance-none text-center">
+                  <option value="" className="bg-[#1a1a1a]">Mes</option>
+                  {["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"].map((m, i) => (
+                    <option key={i} value={String(i + 1)} className="bg-[#1a1a1a]">{m}</option>
+                  ))}
+                </select>
+                <select value={birthYear} onChange={e => setBirthYear(e.target.value)}
+                  className="bg-white/5 border border-white/10 text-white text-sm rounded-xl px-2 py-3 outline-none focus:border-[#C5A55A]/50 appearance-none text-center">
+                  <option value="" className="bg-[#1a1a1a]">Año</option>
+                  {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 10 - i).map(y => (
+                    <option key={y} value={String(y)} className="bg-[#1a1a1a]">{y}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />

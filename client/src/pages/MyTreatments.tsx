@@ -391,13 +391,15 @@ export default function MyTreatments() {
   const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    // Construir fecha de nacimiento desde los 3 selectores
-    let birthday: string | undefined;
-    if (birthDay && birthMonth && birthYear) {
-      const dd = birthDay.padStart(2, "0");
-      const mm = birthMonth.padStart(2, "0");
-      birthday = `${birthYear}-${mm}-${dd}`;
+    // Validar que la fecha de nacimiento sea obligatoria
+    if (!birthDay || !birthMonth || !birthYear) {
+      toast.error("La fecha de nacimiento es obligatoria");
+      return;
     }
+    // Construir fecha de nacimiento desde los 3 selectores
+    const dd = birthDay.padStart(2, "0");
+    const mm = birthMonth.padStart(2, "0");
+    const birthday = `${birthYear}-${mm}-${dd}`;
     registerMutation.mutate({
       name: fd.get("name") as string,
       email: fd.get("email") as string,
@@ -604,7 +606,7 @@ export default function MyTreatments() {
                 {/* Fecha de nacimiento — 3 selectores para fácil uso en móvil */}
                 <div>
                   <label className="flex items-center gap-2 text-gray-500 text-xs mb-1.5">
-                    <Calendar className="w-3.5 h-3.5" /> Fecha de nacimiento (opcional)
+                    <Calendar className="w-3.5 h-3.5" /> Fecha de nacimiento <span className="text-red-500 ml-0.5">*</span>
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     <select

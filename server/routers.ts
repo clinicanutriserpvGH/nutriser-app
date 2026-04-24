@@ -2130,7 +2130,7 @@ export const appRouter = router({
         email: z.string().email(),
         password: z.string().min(6),
         phone: z.string().min(8),
-        birthday: z.string().optional(),
+        birthday: z.string().min(1, 'La fecha de nacimiento es obligatoria'),
       }))
       .mutation(async ({ input }) => {
         const existing = await getPatientByEmail(input.email);

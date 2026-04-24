@@ -252,12 +252,13 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                     <div className="w-9 h-9 md:w-11 md:h-11 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-[#C5A55A]">
                       <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-black" />
                     </div>
-                    <span className="text-[10px] md:text-xs font-semibold tracking-wide uppercase drop-shadow text-white/90">Tienda</span>
+                    <span className="text-[10px] md:text-xs font-semibold tracking-wide uppercase drop-shadow text-white/90">Tienda en Línea</span>
                   </div>
                   <div>
-                    <h2 className="text-2xl sm:text-3xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
-                      Tienda Nutriser
+                    <h2 className="text-2xl sm:text-3xl md:text-3xl font-bold leading-tight mb-0.5 md:mb-1 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
+                      Tienda en Línea
                     </h2>
+                    <p className="text-base sm:text-lg md:text-xl font-semibold text-[#C5A55A] mb-2 md:mb-3" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>Nutriser</p>
                     <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-[#C5A55A] text-black">
                       <ShoppingBag className="w-3.5 h-3.5" /> Visitar
                     </span>

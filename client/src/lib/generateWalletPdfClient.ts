@@ -157,11 +157,8 @@ export async function generateWalletPdf(
       await drawCard(pdf, cards[i], 0, 0);
     }
 
-    pdf.save(
-      cards.length === 1
-        ? "tarjeta-nutriser.pdf"
-        : `tarjetas-nutriser-${cards.length}.pdf`
-    );
+    const url = pdf.output("bloburl");
+    window.open(url, "_blank");
   } else {
     // Modo A4: grilla 2×4
     const A4_W = 210;
@@ -188,7 +185,8 @@ export async function generateWalletPdf(
       await drawCard(pdf, cards[i], cx, cy);
     }
 
-    pdf.save(`tarjetas-nutriser-${cards.length}.pdf`);
+    const url = pdf.output("bloburl");
+    window.open(url, "_blank");
   }
 }
 

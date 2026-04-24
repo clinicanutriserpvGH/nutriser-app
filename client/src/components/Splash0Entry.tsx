@@ -9,7 +9,7 @@
  * En tablet/desktop: 3 columnas iguales
  * Nota: la misma cuenta de paciente funciona para Shop y Academy.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShoppingBag, CalendarCheck, Moon, Sun, Utensils, Camera, ClipboardList, PauseCircle, BookOpen, Ruler, Repeat2, User, LogIn } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
@@ -33,6 +33,21 @@ interface Splash0EntryProps {
 
 export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavigate }: Splash0EntryProps) {
   const [leaving, setLeaving] = useState(false);
+  // Detectar orientación: landscape = tarjetas lado a lado, portrait = apiladas
+  const [isLandscape, setIsLandscape] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth > window.innerHeight
+  );
+  useEffect(() => {
+    const checkOrientation = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
   const { isLight, isAuto, toggleSplashTheme, resetToAuto } = useSplashTheme();
   const { patient, isLoggedIn } = usePatientAuth();
   const bg = isLight
@@ -149,12 +164,14 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             </button>
           </div>
 
-          {/* ── Grid principal — 2 tarjetas siempre en columna vertical ── */}
-          {/* Portal arriba (visible), Tienda abajo (más grande) — igual en móvil, tablet y desktop */}
-          <div className="flex flex-col gap-3 mb-3 flex-1 min-h-0">
+          {/* ── Grid principal — portrait: columna vertical | landscape: fila horizontal ── */}
+          <div
+            className="gap-3 mb-3 flex-1 min-h-0"
+            style={{ display: 'flex', flexDirection: isLandscape ? 'row' : 'column' }}
+          >
 
             {/* ── Tarjeta 3: Portal de Salud Nutriser ── */}
-            <div style={{ flex: '5', minHeight: '180px' }}>
+            <div style={{ flex: '5', minHeight: isLandscape ? '0' : '180px' }}>
               <button
                 type="button"
                 onClick={handlePortalSalud}
@@ -216,7 +233,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
 
 
             {/* ── Tarjeta 1: Tienda Nutriser ── */}
-            <div style={{ flex: '7', minHeight: '220px' }}>
+            <div style={{ flex: '7', minHeight: isLandscape ? '0' : '220px' }}>
               <button
                 type="button"
                 onClick={() => handleNavigate('/memberships')}

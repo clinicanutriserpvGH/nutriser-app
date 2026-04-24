@@ -97,7 +97,7 @@ export default function AdminDashboard() {
     salePrice: '',
     imageUrl: '',
     stock: 0,
-    lowStockAlert: 5,
+    lowStockAlert: 0,
     isActive: true,
     sortOrder: 0,
   });
@@ -291,7 +291,7 @@ export default function AdminDashboard() {
     onSuccess: () => {
       toast.success('Producto creado exitosamente');
       refetchProducts();
-      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 5, isActive: true, sortOrder: 0 });
+      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 0, isActive: true, sortOrder: 0 });
       setProductImage(null);
       setProductImagePreview(null);
       setEditingProductId(null);
@@ -303,7 +303,7 @@ export default function AdminDashboard() {
     onSuccess: () => {
       toast.success('Producto actualizado exitosamente');
       refetchProducts();
-      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 5, isActive: true, sortOrder: 0 });
+      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 0, isActive: true, sortOrder: 0 });
       setProductImage(null);
       setProductImagePreview(null);
       setEditingProductId(null);
@@ -3102,19 +3102,23 @@ export default function AdminDashboard() {
                       <p className="text-xs text-gray-400 mt-1">Deja en 0 si aún no tienes piezas (aparecerá como agotado)</p>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-[#666] mb-1 block">Avisar cuando queden ≤ piezas</label>
+                      <label className="text-xs font-medium text-[#666] mb-1 block">
+                        Mostrar “Últimas piezas” cuando queden ≤
+                        <span className="text-[#C5A55A] font-bold"> {productForm.lowStockAlert || '?'} pzs</span>
+                      </label>
                       <input
                         type="number"
                         value={productForm.lowStockAlert === 0 ? '' : productForm.lowStockAlert}
                         onChange={e => {
                           const raw = e.target.value.replace(/^0+(?=\d)/, '');
-                          setProductForm(f => ({...f, lowStockAlert: raw === '' ? 5 : parseInt(raw, 10) || 5}));
+                          const val = raw === '' ? 0 : parseInt(raw, 10) || 0;
+                          setProductForm(f => ({...f, lowStockAlert: val}));
                         }}
-                        placeholder="5"
+                        placeholder="Ej: 1, 2, 3..."
                         min={1}
                         className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
                       />
-                      <p className="text-xs text-gray-400 mt-1">Aparecerá "Últimas N pzs" en la tienda cuando el stock baje de este número</p>
+                      <p className="text-xs text-gray-400 mt-1">El cliente verá "Últimas {productForm.lowStockAlert || 'N'} pzs" para crear urgencia de compra</p>
                     </div>
                     <div className="flex items-center gap-2 mt-5">
                       <input type="checkbox" id="productActive" checked={productForm.isActive} onChange={e => setProductForm(f => ({...f, isActive: e.target.checked}))} className="w-4 h-4 accent-[#C5A55A]" />
@@ -3151,7 +3155,7 @@ export default function AdminDashboard() {
                        editingProductId ? 'Actualizar Producto' : 'Agregar Producto'}
                     </button>
                     {editingProductId && (
-                      <button onClick={() => { setEditingProductId(null); setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 5, isActive: true, sortOrder: 0 }); setProductImage(null); setProductImagePreview(null); }} className="px-4 py-2 border rounded-lg text-sm text-[#666] hover:bg-gray-50 transition">Cancelar</button>
+                      <button onClick={() => { setEditingProductId(null); setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 0, isActive: true, sortOrder: 0 }); setProductImage(null); setProductImagePreview(null); }} className="px-4 py-2 border rounded-lg text-sm text-[#666] hover:bg-gray-50 transition">Cancelar</button>
                     )}
                   </div>
                 </div>

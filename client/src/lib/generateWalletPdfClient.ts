@@ -133,11 +133,28 @@ export async function generateWalletPdf(
 ): Promise<void> {
   if (cards.length === 0) return;
   const pdfMode = mode === "a4" && cards.length > 1 ? "a4" : "individual";
-  // Usar el endpoint del servidor para generar el PDF con URL real
-  // Esto permite imprimir y guardar correctamente en iOS Safari
   const params = encodeURIComponent(JSON.stringify(cards));
   const url = `/api/wallet/card-pdf?wallets=${params}&mode=${pdfMode}`;
-  window.open(url, "_blank");
+  // Usar fetch + blob para compatibilidad con WebView de iOS (app Manus)
+  // window.open no funciona en WebView, pero <a download> sí
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Error generating PDF");
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = cards.length === 1
+      ? `tarjeta-${cards[0].walletNumber}.pdf`
+      : `tarjetas-nutriser-${cards.length}.pdf`;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(blobUrl); a.remove(); }, 2000);
+  } catch (err) {
+    // Fallback: abrir en nueva pestaña
+    window.open(url, "_blank");
+  }
 }
 
 export async function generateWalletPdfFromElements(_e: HTMLElement[], _m: "individual" | "a4"): Promise<void> {

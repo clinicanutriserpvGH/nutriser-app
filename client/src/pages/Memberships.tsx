@@ -1800,7 +1800,7 @@ onClick={() => {
                           )}
                           {isLowStock && !savingPct && (
                             <div className="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
-                              Últimas {lowStockThreshold} pzs
+                              Últimas {stockLeft} pzs
                             </div>
                           )}
                           {isOutOfStock && (

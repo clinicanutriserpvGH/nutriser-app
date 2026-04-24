@@ -2031,3 +2031,11 @@
 - [x] Memberships.tsx: ya tenía fullyCoveredByWallet implementado (verificado)
 - [x] Flujo: pago con monedero crea cashPayment pendiente → admin autoriza → saldo se descuenta
 - [x] 0 errores TypeScript en todo el proyecto
+
+## Sesión 28 - Corrección tabla adminNotifications
+
+- [x] Diagnóstico: tabla adminNotifications no existía en la BD (schema definido pero no migrado)
+- [x] Creación manual de la tabla adminNotifications con todos los campos correctos
+- [x] Verificado: inserción funciona sin imagen (imageUrl es NULL opcional)
+- [x] Verificado: endpoint tRPC adminNotifs.sendByWalletId responde correctamente
+- [x] Imagen es completamente opcional al enviar notificaciones (solo título y mensaje son requeridos)

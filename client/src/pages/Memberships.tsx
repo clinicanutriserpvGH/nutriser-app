@@ -391,11 +391,10 @@ export default function Memberships() {
   const [mobileGuardOpen, setMobileGuardOpen] = useState(false);
   const [mobileGuardFeature, setMobileGuardFeature] = useState("acceder a esta función");
 
-  /** Muestra el modal de auth (funciona en móvil, tableta y desktop) */
+  /** Redirige a /mis-tratamientos para crear cuenta o iniciar sesión */
   const requireAuth = (featureDescription: string): boolean => {
     if (isLoggedIn) return true;
-    setMobileGuardFeature(featureDescription);
-    setMobileGuardOpen(true);
+    navigate("/mis-tratamientos?returnTo=/memberships");
     return false;
   };
 
@@ -2442,7 +2441,7 @@ onClick={() => {
       {!walletSheetOpen && !checkoutOpen && !cartOpen && (
         <div className="fixed bottom-0 left-0 right-0 z-[60]">
           <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
-            <div className="max-w-lg lg:max-w-2xl mx-auto flex items-end justify-around px-2 lg:px-4 pt-2 lg:pt-3 pb-1">
+            <div className="w-full max-w-screen-lg mx-auto flex items-end justify-around px-2 md:px-8 lg:px-16 pt-2 lg:pt-3 pb-1">
               {/* Tratamientos */}
               <button
                 onClick={() => setActiveTab("tratamientos")}

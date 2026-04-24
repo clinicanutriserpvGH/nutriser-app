@@ -197,8 +197,9 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
 
   const handlePromoAction = useCallback((promoId: number) => {
     if (!isAuthenticated) {
-      // Mostrar modal de login integrado (funciona en móvil y desktop)
-      setShowAuthGuard(true);
+      // Redirigir al formulario principal de registro/login
+      navigate("/mis-tratamientos?returnTo=/memberships");
+      onClose();
       return;
     }
     // Usuario autenticado: navegar al cupón

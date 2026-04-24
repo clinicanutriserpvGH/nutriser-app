@@ -240,14 +240,9 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
 
   const handleAction = useCallback((promoId: number) => {
     if (!isAuthenticated) {
-      if (isMobile) {
-        setGuardFeature("comprar cupones y acceder a ofertas exclusivas");
-        setShowAuthGuard(true);
-      } else {
-        // Desktop: redirigir al formulario completo de registro/login con firma
-        navigate("/mis-tratamientos?returnTo=/memberships");
-        handleClose();
-      }
+      // Siempre redirigir al formulario principal de registro/login
+      navigate("/mis-tratamientos?returnTo=/memberships");
+      handleClose();
       return;
     }
     if (onGoToCoupon) {
@@ -259,14 +254,9 @@ export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAut
 
   const handleMonederoAction = useCallback(() => {
     if (!isAuthenticated) {
-      if (isMobile) {
-        setGuardFeature("crear tu Monedero Nutriser y acceder a beneficios exclusivos");
-        setShowAuthGuard(true);
-      } else {
-        // Desktop: redirigir al formulario completo de registro/login con firma
-        navigate("/mis-tratamientos?returnTo=/memberships");
-        handleClose();
-      }
+      // Siempre redirigir al formulario principal de registro/login
+      navigate("/mis-tratamientos?returnTo=/memberships");
+      handleClose();
       return;
     }
     if (onOpenWallet) {

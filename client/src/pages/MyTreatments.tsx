@@ -302,8 +302,8 @@ export default function MyTreatments() {
     onSuccess: (data) => {
       const p = data as PatientSafe;
       persistPatient(p);
-      if (returnTo && p.consentAcceptedAt) {
-        // Desktop con returnTo: redirigir al destino
+      if (returnTo) {
+        // Si vino desde otra sección (tienda, monedero, etc.), regresar ahí siempre
         window.location.href = returnTo;
       } else {
         setView(p.consentAcceptedAt ? "portal" : "consent");

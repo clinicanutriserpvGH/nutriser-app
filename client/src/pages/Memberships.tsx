@@ -943,7 +943,7 @@ export default function Memberships() {
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(26,26,26,0.9) 0%, transparent 60%)" }} />
                     {detailItem.badge && (
                       <div className="absolute top-3 left-3 flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black" style={{ background: "#C5A55A", color: "#1A1A1A" }}>
-                        <Star className="w-3 h-3 fill-current" /> {detailItem.badge}
+                        <Star className="w-3 h-3 fill-current" /> {t(detailItem.badge as any, lang)}
                       </div>
                     )}
                     {detailItem.category && (

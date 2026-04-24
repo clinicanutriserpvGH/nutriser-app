@@ -24,12 +24,12 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
 
   // Fondo blanco perla
   pdf.setFillColor(254, 254, 252);
-  pdf.roundedRect(x, y, W, H, 3, 3, "F");
+  pdf.rect(x, y, W, H, "F");
 
-  // Borde dorado
+  // Borde dorado recto (para impresión correcta en impresora de tarjetas)
   pdf.setDrawColor(212, 175, 96);
   pdf.setLineWidth(0.35);
-  pdf.roundedRect(x, y, W, H, 3, 3, "S");
+  pdf.rect(x, y, W, H, "S");
 
   // ── CABECERA ──────────────────────────────────────────────────────────────
   const cx = x + W / 2;
@@ -71,7 +71,7 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.setFillColor(255, 255, 255);
   pdf.setDrawColor(197, 165, 90);
   pdf.setLineWidth(0.4);
-  pdf.roundedRect(qrX - 1.2, qrY - 1.2, qrSize + 2.4, qrSize + 2.4, 1.2, 1.2, "FD");
+  pdf.rect(qrX - 1.2, qrY - 1.2, qrSize + 2.4, qrSize + 2.4, "FD");
   pdf.addImage(qrImg, "PNG", qrX, qrY, qrSize, qrSize);
 
   // Separador vertical
@@ -139,14 +139,9 @@ export async function generateWalletPdf(
       if (i > 0) pdf.addPage([W, H], "landscape");
       await drawCard(pdf, cards[i], 0, 0);
     }
-    const blob = pdf.output("blob");
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "monedero-nutriser.pdf";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+    // Abrir en nueva pestaña para poder imprimir directamente desde el visor
+    const blobUrl = pdf.output("bloburl");
+    window.open(blobUrl as unknown as string, "_blank");
   } else {
     const A4_W = 210, A4_H = 297, GAP = 6;
     const MX = (A4_W - 2 * W - GAP) / 2;
@@ -163,14 +158,8 @@ export async function generateWalletPdf(
       const p = i % 8;
       await drawCard(pdf, cards[i], MX + (p % 2) * (W + GAP), MY + Math.floor(p / 2) * (H + GAP));
     }
-    const blob = pdf.output("blob");
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "monedero-nutriser-a4.pdf";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+    const blobUrl = pdf.output("bloburl");
+    window.open(blobUrl as unknown as string, "_blank");
   }
 }
 

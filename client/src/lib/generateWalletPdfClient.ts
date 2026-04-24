@@ -75,24 +75,24 @@ async function drawCard(
     charSpace: 1.0,
   });
 
-  // Líneas decorativas CORTAS (8mm cada una) + "aesthetic & nutrition"
-  // Las líneas están a los lados del texto, sin tocarlo
-  const subtitleY = y + 11.0;
+  // "aesthetic & nutrition" — debajo del título, SIN líneas encima
+  const subtitleY = y + 11.8;
   const cx = x + W / 2;
 
-  pdf.setDrawColor(...GOLD_MID);
-  pdf.setLineWidth(0.25);
-  pdf.line(cx - 28, subtitleY, cx - 14, subtitleY); // línea izquierda
-  pdf.line(cx + 14, subtitleY, cx + 28, subtitleY); // línea derecha
-
-  // "aesthetic & nutrition" — entre las dos líneas, sin solaparse
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(4.2);
   pdf.setTextColor(...BROWN_MID);
-  pdf.text("aesthetic & nutrition", cx, subtitleY + 0.6, {
+  pdf.text("aesthetic & nutrition", cx, subtitleY, {
     align: "center",
     charSpace: 0.6,
   });
+
+  // Líneas decorativas — DEBAJO del texto aesthetic, a los lados
+  const lineY = subtitleY + 1.8;
+  pdf.setDrawColor(...GOLD_MID);
+  pdf.setLineWidth(0.25);
+  pdf.line(cx - 28, lineY, cx - 2, lineY); // línea izquierda
+  pdf.line(cx + 2,  lineY, cx + 28, lineY); // línea derecha
 
   // ── ZONA CENTRAL (30% → 82% del alto) ───────────────────────────────────────
   const zoneTop    = y + H * 0.30; // y + 16.2
@@ -100,12 +100,11 @@ async function drawCard(
   const zoneH      = zoneBottom - zoneTop; // 28.08mm
   const zoneMidY   = zoneTop + zoneH / 2;
 
-  // SILUETA — contenida dentro de la zona central, no sobrepasa el pie
-  // Altura máxima = zoneH * 0.90 para dejar margen
-  const silH = zoneH * 0.88;        // ~24.7mm
-  const silW = silH * 0.50;         // proporción silueta ≈ 0.50
-  const silX = x + W - silW - 2.5;  // pegada al borde derecho con margen
-  const silY = zoneTop + (zoneH - silH) / 2; // centrada verticalmente en la zona
+  // SILUETA — grande, ocupa casi toda la zona central (igual que la previsualización)
+  const silH = zoneH * 1.10;        // ligeramente más alta que la zona para verse grande
+  const silW = silH * 0.52;         // proporción silueta ≈ 0.52
+  const silX = x + W - silW - 1.5;  // pegada al borde derecho
+  const silY = zoneTop - zoneH * 0.05; // arranca un poco antes del inicio de la zona
   try {
     pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
   } catch (_) {}

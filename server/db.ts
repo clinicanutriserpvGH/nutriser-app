@@ -2533,6 +2533,22 @@ export async function deleteAllAdminNotifications(walletId: number): Promise<voi
 }
 
 /**
+ * Elimina todas las notificaciones de tipo 'cobro' (deuda) de un monedero.
+ * Esto quita el bloqueo de compras del paciente.
+ */
+export async function deleteDebtNotifications(walletId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const existing = await db.select({ id: adminNotifications.id })
+    .from(adminNotifications)
+    .where(and(eq(adminNotifications.walletId, walletId), eq(adminNotifications.type, 'cobro')));
+  if (existing.length === 0) return 0;
+  await db.delete(adminNotifications)
+    .where(and(eq(adminNotifications.walletId, walletId), eq(adminNotifications.type, 'cobro')));
+  return existing.length;
+}
+
+/**
  * Crea una notificación automática de cashback acreditado.
  * amountCents: monto en centavos (igual que el saldo del monedero).
  */

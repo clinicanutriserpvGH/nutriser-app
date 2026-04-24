@@ -150,6 +150,24 @@ export default function AdminQRScanner() {
     },
     onError: (e) => toast.error('Error al reactivar: ' + e.message),
   });
+  // Mutation para quitar deuda activa (eliminar notificaciones de cobro)
+  const clearDebtMutation = trpc.adminNotifs.clearDebt.useMutation({
+    onSuccess: (data) => {
+      if (data.deleted > 0) {
+        toast.success(`✅ Deuda eliminada. El paciente ya puede comprar normalmente.`);
+      } else {
+        toast.info('Este paciente no tiene deuda activa registrada.');
+      }
+      notifsForPatientQuery.refetch();
+    },
+    onError: (e) => toast.error('Error al eliminar deuda: ' + e.message),
+  });
+  // Query para notificaciones activas del paciente (para mostrar deudas en el escáner)
+  const notifsForPatientQuery = trpc.adminNotifs.getByWalletId.useQuery(
+    { walletId: walletIdForCash! },
+    { enabled: !!walletIdForCash }
+  );
+  const activeDebtNotifs = (notifsForPatientQuery.data || []).filter((n: any) => n.type === 'cobro');
   // Estado para confirmar reinicio (doble confirmación)
   const [confirmReset, setConfirmReset] = useState(false);
 
@@ -836,6 +854,37 @@ export default function AdminQRScanner() {
                         <><Check className="w-3 h-3" /> Dar de Alta (Reactivar Monedero)</>
                       )}
                     </button>
+                  )}
+
+                  {/* ─── Deuda activa ─── */}
+                  {activeDebtNotifs.length > 0 && (
+                    <div className="bg-red-50 border border-red-300 rounded-lg p-2 space-y-1.5">
+                      <p className="text-[10px] font-bold text-red-700 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" />
+                        Deuda activa ({activeDebtNotifs.length} notificación{activeDebtNotifs.length > 1 ? 'es' : ''} de cobro)
+                      </p>
+                      {activeDebtNotifs.map((n: any) => (
+                        <p key={n.id} className="text-[9px] text-red-600 truncate">• {n.title}: {n.message}</p>
+                      ))}
+                      <button
+                        onClick={() => openSecurityModal(
+                          '❌ Quitar Deuda Activa',
+                          `¿Eliminar la deuda de ${patientQuery.data?.patientName}? Esto borrará las notificaciones de cobro y el paciente podrá comprar normalmente.`,
+                          (pw) => {
+                            // Verificar la contraseña en el servidor (el modal ya la valida)
+                            if (walletIdForCash) clearDebtMutation.mutate({ walletId: walletIdForCash });
+                          }
+                        )}
+                        disabled={clearDebtMutation.isPending}
+                        className="w-full py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                      >
+                        {clearDebtMutation.isPending ? (
+                          <><Loader2 className="w-3 h-3 animate-spin" /> Eliminando...</>
+                        ) : (
+                          <>❌ Quitar Deuda Activa</>
+                        )}
+                      </button>
+                    </div>
                   )}
 
                   {/* Reiniciar Monedero */}

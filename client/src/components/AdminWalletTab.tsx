@@ -343,6 +343,21 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
     onSuccess: () => { notifsQuery.refetch(); toast.success('Todas las notificaciones eliminadas'); },
     onError: (e) => toast.error('Error: ' + e.message),
   });
+  // Query siempre activa para detectar deudas del monedero
+  const activeNotifsQuery = trpc.adminNotifs.getByWalletId.useQuery({ walletId: wallet.id });
+  const activeDebtNotifs = (activeNotifsQuery.data || []).filter((n: any) => n.type === 'cobro');
+  const clearDebtMutation = trpc.adminNotifs.clearDebt.useMutation({
+    onSuccess: (data) => {
+      if (data.deleted > 0) {
+        toast.success(`✅ Deuda eliminada. El paciente ya puede comprar normalmente.`);
+      } else {
+        toast.info('Este paciente no tiene deuda activa.');
+      }
+      activeNotifsQuery.refetch();
+      notifsQuery.refetch();
+    },
+    onError: (e) => toast.error('Error al eliminar deuda: ' + e.message),
+  });
 
   const transactionsQuery = trpc.wallet.adminGetTransactions.useQuery(
     { walletId: wallet.id },
@@ -599,6 +614,30 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                     </div>
                   )}
                 </div>
+
+                {/* Deuda activa */}
+                {activeDebtNotifs.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] text-red-400 font-semibold uppercase tracking-wide flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" /> Deuda activa ({activeDebtNotifs.length})
+                    </p>
+                    {activeDebtNotifs.map((n: any) => (
+                      <p key={n.id} className="text-[9px] text-red-300 truncate">• {n.title}</p>
+                    ))}
+                    <Button
+                      size="sm"
+                      disabled={clearDebtMutation.isPending}
+                      onClick={() => openSecurityModal(
+                        '❌ Quitar Deuda Activa',
+                        `¿Eliminar la deuda de ${wallet.patientName}? Esto borrará las notificaciones de cobro y el paciente podrá comprar normalmente.`,
+                        (pw) => clearDebtMutation.mutate({ walletId: wallet.id })
+                      )}
+                      className="w-full bg-red-700 hover:bg-red-800 text-white text-xs"
+                    >
+                      {clearDebtMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : '❌ Quitar Deuda Activa'}
+                    </Button>
+                  </div>
+                )}
 
                 {/* Reiniciar */}
                 <div className="space-y-1.5">

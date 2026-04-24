@@ -332,8 +332,7 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
   const utils = trpc.useUtils();
 
   const notifsQuery = trpc.adminNotifs.getByWalletId.useQuery(
-    { walletId: wallet.id },
-    { enabled: showNotifHistory }
+    { walletId: wallet.id }
   );
   const deleteNotifMutation = trpc.adminNotifs.deleteNotif.useMutation({
     onSuccess: () => { notifsQuery.refetch(); toast.success('Notificación eliminada'); },
@@ -667,18 +666,12 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                     <Bell className="w-3 h-3" />
                     Enviar Notificación al Paciente
                   </Button>
-                  <button
-                    onClick={() => { setShowNotifHistory(!showNotifHistory); if (!showNotifHistory) notifsQuery.refetch(); }}
-                    className="w-full text-[10px] text-blue-300 hover:text-blue-100 underline text-left transition"
-                  >
-                    {showNotifHistory ? 'Ocultar historial' : 'Ver historial de notificaciones'}
-                  </button>
+
                 </div>
               </div>
 
               {/* Historial de Notificaciones (Admin) */}
-              {showNotifHistory && (
-                <div className="mt-2 space-y-2">
+              <div className="mt-2 space-y-2">
                   <div className="flex items-center justify-between">
                     <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide flex items-center gap-1">
                       <Bell className="w-3 h-3" /> Notificaciones enviadas
@@ -729,8 +722,7 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                       ))}
                     </div>
                   )}
-                </div>
-              )}
+              </div>
 
               {/* Modal de edición de notificación */}
               {editingNotif && (

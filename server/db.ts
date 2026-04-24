@@ -1835,6 +1835,35 @@ export async function getBehaviorTrend(days = 7) {
   }));
 }
 
+/** Desglose de usuarios por ítem: qué pacientes interactuaron con cada producto/paquete */
+export async function getItemUserBreakdown(opts: { days?: number } = {}) {
+  const db = await getDb();
+  if (!db) return [];
+  const { days = 90 } = opts;
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  // Join userBehaviorEvents con patientAccounts para obtener nombre y correo
+  const rows = await db.execute(
+    sql`SELECT 
+      ube.itemId, ube.itemName, ube.itemType, ube.eventType,
+      ube.createdAt,
+      pa.id AS patientId, pa.name AS patientName, pa.email AS patientEmail
+    FROM userBehaviorEvents ube
+    LEFT JOIN patientAccounts pa ON ube.patientId = pa.id
+    WHERE ube.createdAt >= ${since}
+    ORDER BY ube.itemName ASC, ube.createdAt DESC`
+  );
+  return (rows[0] as unknown as any[]).map((r: any) => ({
+    itemId: r.itemId as string,
+    itemName: r.itemName as string,
+    itemType: r.itemType as string,
+    eventType: r.eventType as string,
+    createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
+    patientId: r.patientId ? Number(r.patientId) : null,
+    patientName: r.patientName as string | null,
+    patientEmail: r.patientEmail as string | null,
+  }));
+}
+
 /** Reiniciar todos los eventos de comportamiento (borrar todos los registros) */
 export async function resetAllBehaviorEvents(): Promise<{ deleted: number }> {
   const db = await getDb();

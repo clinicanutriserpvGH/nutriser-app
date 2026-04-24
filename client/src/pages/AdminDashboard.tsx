@@ -872,6 +872,12 @@ export default function AdminDashboard() {
     { enabled: isAuthenticated }
   );
 
+  const { data: itemUserBreakdown, isLoading: loadingBreakdown } = trpc.analytics.getItemUserBreakdown.useQuery(
+    { days: analyticsDays },
+    { enabled: isAuthenticated }
+  );
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
   const refetchAnalytics = () => { refetchSummary(); refetchTrend(); refetchTopItems(); };
 
   const [showResetAnalyticsConfirm, setShowResetAnalyticsConfirm] = useState(false);
@@ -3876,6 +3882,95 @@ export default function AdminDashboard() {
                     </table>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* ── Desglose de usuarios por ítem ── */}
+            <Card className="border border-gray-100 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <span>👤</span> Usuarios por Ítem
+                </CardTitle>
+                <CardDescription>Qué pacientes interactuaron con cada producto/paquete (solo usuarios identificados)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingBreakdown ? (
+                  <div className="text-center py-6 text-gray-400 text-sm">Cargando...</div>
+                ) : !itemUserBreakdown || itemUserBreakdown.length === 0 ? (
+                  <div className="text-center py-6 text-gray-400 text-sm">Sin datos de usuarios identificados.</div>
+                ) : (() => {
+                  // Agrupar por ítem
+                  const byItem: Record<string, { itemName: string; itemType: string; events: typeof itemUserBreakdown }> = {};
+                  for (const ev of itemUserBreakdown) {
+                    if (!ev.patientEmail) continue; // solo usuarios identificados
+                    if (!byItem[ev.itemId]) byItem[ev.itemId] = { itemName: ev.itemName, itemType: ev.itemType, events: [] };
+                    byItem[ev.itemId].events.push(ev);
+                  }
+                  const items = Object.entries(byItem);
+                  if (items.length === 0) return <div className="text-center py-6 text-gray-400 text-sm">Sin usuarios identificados aún. Los eventos se vincularán cuando los pacientes inicien sesión.</div>;
+                  return (
+                    <div className="space-y-4">
+                      {items.map(([itemId, { itemName, itemType, events }]) => {
+                        // Agrupar por usuario
+                        const byUser: Record<string, { name: string; email: string; actions: string[] }> = {};
+                        for (const ev of events) {
+                          if (!ev.patientEmail) continue;
+                          if (!byUser[ev.patientEmail]) byUser[ev.patientEmail] = { name: ev.patientName || 'Sin nombre', email: ev.patientEmail, actions: [] };
+                          if (!byUser[ev.patientEmail].actions.includes(ev.eventType)) byUser[ev.patientEmail].actions.push(ev.eventType);
+                        }
+                        const users = Object.values(byUser);
+                        const isOpen = selectedItemId === itemId;
+                        return (
+                          <div key={itemId} className="border border-gray-100 rounded-xl overflow-hidden">
+                            <button
+                              onClick={() => setSelectedItemId(isOpen ? null : itemId)}
+                              className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  itemType === 'service' ? 'bg-blue-50 text-blue-700' :
+                                  itemType === 'package' ? 'bg-amber-50 text-amber-700' :
+                                  itemType === 'product' ? 'bg-purple-50 text-purple-700' :
+                                  'bg-green-50 text-green-700'
+                                }`}>{itemType === 'service' ? 'Servicio' : itemType === 'package' ? 'Paquete' : itemType === 'product' ? 'Producto' : 'eBook'}</span>
+                                <span className="font-semibold text-gray-800 text-sm">{itemName}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[#C5A55A] font-black text-sm">{users.length} usuario{users.length !== 1 ? 's' : ''}</span>
+                                <span className="text-gray-400 text-xs">{isOpen ? '▲' : '▼'}</span>
+                              </div>
+                            </button>
+                            {isOpen && (
+                              <div className="divide-y divide-gray-50">
+                                {users.map(u => (
+                                  <div key={u.email} className="px-4 py-3 flex items-start justify-between gap-3">
+                                    <div>
+                                      <p className="text-sm font-semibold text-gray-800">{u.name}</p>
+                                      <p className="text-xs text-gray-500">{u.email}</p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 justify-end">
+                                      {u.actions.map(action => (
+                                        <span key={action} className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                          action === 'purchase' ? 'bg-green-100 text-green-700' :
+                                          action === 'cart' ? 'bg-blue-100 text-blue-700' :
+                                          action === 'wishlist' ? 'bg-red-100 text-red-700' :
+                                          action === 'info' ? 'bg-yellow-100 text-yellow-700' :
+                                          'bg-gray-100 text-gray-600'
+                                        }`}>
+                                          {action === 'purchase' ? '✓ Compra' : action === 'cart' ? '🛒 Carrito' : action === 'wishlist' ? '♥ Deseos' : action === 'info' ? 'ℹ Info' : '👁 Vista'}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           </TabsContent>

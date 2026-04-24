@@ -650,7 +650,7 @@ export default function Memberships() {
     return sid;
   }, []);
   const track = (itemType: "service" | "product" | "ebook" | "package" | "promotion", itemId: string, itemName: string, eventType: "view" | "wishlist" | "cart" | "info" | "purchase") => {
-    trackMutation.mutate({ itemType, itemId, itemName, eventType, sessionId });
+    trackMutation.mutate({ itemType, itemId, itemName, eventType, sessionId, patientId: patient?.id ?? undefined });
   };
 
   const servicePurchaseMutation = trpc.servicePurchases.create.useMutation({

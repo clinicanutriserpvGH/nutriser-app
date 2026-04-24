@@ -14,7 +14,8 @@ import { getAllProducts, getAllActiveProducts, createProduct, updateProduct, del
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
-import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet, getCashPendingPaymentById } from './db';
+import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet, getCashPendingPaymentById } from './db';
+import { trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, getItemUserBreakdown } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { createInstallmentPlan, confirmInstallmentPayment, getInstallmentPlansByWallet, getAllInstallmentPlans, sendAdminNotification, getAdminNotificationsByWallet, countUnreadAdminNotifications, markAdminNotificationRead, markAllAdminNotificationsRead, deleteAdminNotification, deleteAllAdminNotifications, updateAdminNotification, sendCashbackNotification, createDebtAuthRequest, getAllDebtAuthRequests, resolveDebtAuthRequest, patientHasActiveDebt, patientHasPendingDebtRequest } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
@@ -3274,6 +3275,7 @@ export const appRouter = router({
         itemName: z.string(),
         eventType: z.enum(["view", "wishlist", "cart", "info", "purchase"]),
         sessionId: z.string().optional(),
+        patientId: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
         await trackBehaviorEvent({
@@ -3282,7 +3284,7 @@ export const appRouter = router({
           itemName: input.itemName,
           eventType: input.eventType,
           sessionId: input.sessionId ?? null,
-          patientId: null,
+          patientId: input.patientId ?? null,
         });
         return { ok: true };
       }),
@@ -3321,6 +3323,11 @@ export const appRouter = router({
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([date, counts]) => ({ date, ...counts }));
       }),
+
+    // Admin: desglose de usuarios por ítem
+    getItemUserBreakdown: publicProcedure
+      .input(z.object({ days: z.number().default(90) }))
+      .query(async ({ input }) => getItemUserBreakdown({ days: input.days })),
 
     // Admin: reiniciar todos los eventos de comportamiento
     resetAll: publicProcedure

@@ -1054,7 +1054,7 @@ export default function Memberships() {
                   {detailItem.itemType === "product" && detailItem.isLoadingAI && (
                     <div className="flex items-center gap-2 mb-4 px-3 py-3 rounded-xl" style={{ background: "rgba(197,165,90,0.08)", border: "1px solid rgba(197,165,90,0.2)" }}>
                       <div className="w-4 h-4 rounded-full border-2 border-[#C5A55A] border-t-transparent animate-spin flex-shrink-0" />
-                      <span style={{ color: "#C5A55A", fontSize: 12, fontWeight: 600 }}>Generando información con IA...</span>
+                      <span style={{ color: "#C5A55A", fontSize: 12, fontWeight: 600 }}>Nutriser generando información...</span>
                     </div>
                   )}
 

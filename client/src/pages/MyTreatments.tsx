@@ -448,11 +448,14 @@ export default function MyTreatments() {
 
   const { showSplash } = useSplash();
   const goBackToStore = () => {
-    if (isDesktop) {
-      // Desktop: siempre regresa al sitio web, nunca a splashes
+    if (returnTo) {
+      // Vino desde la tienda u otra sección → regresar ahí (aplica a todos los dispositivos)
+      navigate(returnTo);
+    } else if (isDesktop) {
+      // PC sin returnTo → regresa al sitio web
       navigate('/');
     } else {
-      // Móvil/tableta: regresa al splash hub
+      // Móvil/tableta sin returnTo → regresa al splash hub
       showSplash();
     }
   };

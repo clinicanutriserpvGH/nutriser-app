@@ -3088,16 +3088,33 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="text-xs font-medium text-[#666] mb-1 block">Stock (piezas disponibles)</label>
-                      <input type="number" value={productForm.stock} onChange={e => setProductForm(f => ({...f, stock: parseInt(e.target.value) || 0}))} min={0} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                      <input
+                        type="number"
+                        value={productForm.stock === 0 ? '' : productForm.stock}
+                        onChange={e => {
+                          const raw = e.target.value.replace(/^0+(?=\d)/, '');
+                          setProductForm(f => ({...f, stock: raw === '' ? 0 : parseInt(raw, 10) || 0}));
+                        }}
+                        placeholder="0"
+                        min={0}
+                        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">Deja en 0 si aún no tienes piezas (aparecerá como agotado)</p>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-[#666] mb-1 block">Alerta de stock bajo (piezas)</label>
-                      <input type="number" value={productForm.lowStockAlert} onChange={e => setProductForm(f => ({...f, lowStockAlert: parseInt(e.target.value) || 5}))} min={1} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
-                      <p className="text-xs text-gray-400 mt-1">Se mostrará aviso cuando queden ≤ {productForm.lowStockAlert} piezas</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-[#666] mb-1 block">Orden</label>
-                      <input type="number" value={productForm.sortOrder} onChange={e => setProductForm(f => ({...f, sortOrder: parseInt(e.target.value) || 0}))} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]" />
+                      <label className="text-xs font-medium text-[#666] mb-1 block">Avisar cuando queden ≤ piezas</label>
+                      <input
+                        type="number"
+                        value={productForm.lowStockAlert === 0 ? '' : productForm.lowStockAlert}
+                        onChange={e => {
+                          const raw = e.target.value.replace(/^0+(?=\d)/, '');
+                          setProductForm(f => ({...f, lowStockAlert: raw === '' ? 5 : parseInt(raw, 10) || 5}));
+                        }}
+                        placeholder="5"
+                        min={1}
+                        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5A55A]"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">Aparecerá "Últimas N pzs" en la tienda cuando el stock baje de este número</p>
                     </div>
                     <div className="flex items-center gap-2 mt-5">
                       <input type="checkbox" id="productActive" checked={productForm.isActive} onChange={e => setProductForm(f => ({...f, isActive: e.target.checked}))} className="w-4 h-4 accent-[#C5A55A]" />

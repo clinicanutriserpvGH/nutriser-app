@@ -53,11 +53,7 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.setTextColor(184, 150, 62);
   pdf.text("aesthetic & nutrition", cx, y + 11.5, { align: "center", charSpace: 0.6 });
 
-  // Líneas decorativas DEBAJO del texto aesthetic (no encima)
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.22);
-  pdf.line(cx - 26, y + 13.2, cx - 2,  y + 13.2);
-  pdf.line(cx + 2,  y + 13.2, cx + 26, y + 13.2);
+  // Sin líneas horizontales — igual que la previsualización en pantalla
 
   // ── ZONA CENTRAL (30% → 82%) ──────────────────────────────────────────────
   const zTop    = y + H * 0.30;  // 16.2
@@ -67,8 +63,8 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
 
   // SILUETA — grande, igual que en la previsualización (74% del alto total de la tarjeta)
   // En NutriserWalletCard: top=8%, bottom=18%, height=74%, maxWidth=38%
-  const silH = H * 0.74;           // 39.96mm — igual que en el componente React
-  const silW = silH * 0.48;        // proporción correcta de la silueta
+  const silH = H * 0.60;           // 32.4mm — silueta bien proporcionada, no estirada
+  const silW = silH * 0.55;        // proporción ancho/alto correcta de la silueta
   const silX = x + W - silW - 1.5; // pegada al borde derecho
   const silY = y + H * 0.08;       // empieza al 8% del alto, igual que React
   try {

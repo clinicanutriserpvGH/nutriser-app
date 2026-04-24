@@ -28,6 +28,10 @@ export const translations = {
     catOtros: "Otros",
     catProductos: "Skincare",
     catGeneral: "General",
+    catNutricionales: "Nutricionales",
+    catCosmeticos: "Cosméticos",
+    catSuplementos: "Suplementos",
+    catCuidadoPiel: "Cuidado de Piel",
     categories: "Categorías",
 
     // Sections
@@ -313,6 +317,10 @@ export const translations = {
     catOtros: "Others",
     catProductos: "Products",
     catGeneral: "General",
+    catNutricionales: "Nutritional",
+    catCosmeticos: "Cosmetics",
+    catSuplementos: "Supplements",
+    catCuidadoPiel: "Skin Care",
     categories: "Categories",
 
     // Sections

@@ -15,6 +15,7 @@ import {
   Search, ArrowLeft, Upload, BookOpen, User, LogOut,
   Crown, Heart, Shield, Award, ChevronLeft, Gift, Percent, Wallet, Home, MapPin, ClipboardList, Globe,
   Info, Clock, Tag as TagIcon, DollarSign, PersonStanding, ScanFace, Smile, Bell,
+  Leaf, Sparkles, Pill,
 } from "lucide-react";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -124,6 +125,15 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; co
 };
 
 const CATEGORY_ORDER = ["nutricion", "corporales", "faciales", "medicina", "otros", "productos", "general"];
+
+const PRODUCT_CATEGORY_META: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
+  nutricionales: { label: "catNutricionales", icon: Leaf,     color: "#16a34a", bg: "#dcfce7" },
+  cosmeticos:    { label: "catCosmeticos",    icon: Sparkles, color: "#db2777", bg: "#fce7f3" },
+  suplementos:   { label: "catSuplementos",   icon: Pill,     color: "#7c3aed", bg: "#ede9fe" },
+  cuidado_piel:  { label: "catCuidadoPiel",   icon: Heart,    color: "#C5A55A", bg: "#fef3c7" },
+  otros:         { label: "catOtros",         icon: Smile,    color: "#0891b2", bg: "#cffafe" },
+  general:       { label: "catGeneral",       icon: Package,  color: "#6b7280", bg: "#f3f4f6" },
+};
 
 // ─── Horizontal Scroll Rail ──────────────────────────────────────────────────
 function HScrollRail({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -487,6 +497,8 @@ export default function Memberships() {
   // ─── Filtros Tratamientos ───────────────────────────────────────────────────
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  // ─── Filtros Skincare (productos) ──────────────────────────────────────────
+  const [activeProdCategory, setActiveProdCategory] = useState<string>("all");
 
   // ─── Normalización de texto (quita tildes, minúsculas) ─────────────────────
   const normalize = (text: string) =>
@@ -562,8 +574,18 @@ export default function Memberships() {
     });
     return map;
   }, [filteredServices]);
-
-  // ─── Modal de detalle ─────────────────────────────────────────────────────────
+  // ─── Filtros de categoría para productos ──────────────────────────────────
+  const prodCategories = useMemo(() => {
+    if (!products || products.length === 0) return [];
+    const cats = [...new Set(products.map((p: any) => p.category).filter(Boolean))] as string[];
+    return cats;
+  }, [products]);
+  const filteredProducts = useMemo(() => {
+    if (!products || products.length === 0) return [];
+    if (activeProdCategory === "all") return products;
+    return products.filter((p: any) => p.category === activeProdCategory);
+  }, [products, activeProdCategory]);
+  // ─── Modal de detalle ──────────────────────────────────────────────────────────
   type DetailItem = {
     name: string;
     description?: string | null;
@@ -1765,8 +1787,41 @@ onClick={() => {
                   <p className="text-gray-300 text-sm max-w-xs mx-auto">{t("pharmacyEmpty", lang)}</p>
                 </div>
               ) : (
-                <HScrollRail>
-                  {products.map(product => {
+                <>
+                  {/* ── Barra de filtros de categoría Skincare ── */}
+                  {prodCategories.length > 0 && (
+                    <div className="mb-4">
+                      <h3 className="text-gray-900 font-bold text-base mb-3">{t("categories", lang)}</h3>
+                      <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-1 lg:justify-start" style={{ scrollbarWidth: "none" }}>
+                        {/* Todos */}
+                        <button onClick={() => setActiveProdCategory("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                          <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                            activeProdCategory === "all" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-gray-100"
+                          }`}>
+                            <Package className={`w-6 h-6 ${activeProdCategory === "all" ? "text-white" : "text-gray-500"}`} />
+                          </div>
+                          <span className={`text-[10px] font-semibold ${activeProdCategory === "all" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catAll", lang)}</span>
+                        </button>
+                        {prodCategories.map(cat => {
+                          const meta = PRODUCT_CATEGORY_META[cat] ?? { label: cat, icon: Package, color: "#888", bg: "#f3f4f6" };
+                          const Icon = meta.icon;
+                          const isActive = activeProdCategory === cat;
+                          return (
+                            <button key={cat} onClick={() => setActiveProdCategory(cat)} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                              <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                                isActive ? "shadow-lg" : ""
+                              }`} style={{ backgroundColor: isActive ? meta.color : meta.bg }}>
+                                <Icon className="w-6 h-6" style={{ color: isActive ? "#fff" : meta.color }} />
+                              </div>
+                              <span className={`text-[10px] font-semibold ${isActive ? "text-gray-900" : "text-gray-500"}`}>{t(meta.label as any, lang)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  <HScrollRail>
+                  {filteredProducts.map(product => {
                     const salePrice = (product as any).salePrice;
                     const priceNum = salePrice
                       ? parseInt(String(salePrice).replace(/[^0-9]/g, ""))
@@ -1892,14 +1947,14 @@ onClick={() => {
                     );
                   })}
                 </HScrollRail>
+                </>
               )}
             </div>
           </div>
         </div>
       )}
-
       {/* ══════════════════════════════════════════════════════════════════════
-          TAB: LIBRARY
+          TAB: LIBRARYY
       ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === "library" && !searchQuery && (
         <div className="pb-28 mt-2">

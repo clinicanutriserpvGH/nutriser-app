@@ -1,0 +1,2 @@
+ALTER TABLE `productPurchases` MODIFY COLUMN `status` enum('pending','approved','verified','rejected') NOT NULL DEFAULT 'pending';--> statement-breakpoint
+ALTER TABLE `productPurchases` ADD `paymentMethod` enum('transfer','cash') DEFAULT 'transfer';

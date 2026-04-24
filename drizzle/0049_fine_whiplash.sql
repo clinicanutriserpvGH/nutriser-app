@@ -1,0 +1,21 @@
+CREATE TABLE `membershipPackages` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`slug` varchar(100) NOT NULL,
+	`name` varchar(255) NOT NULL,
+	`nameEn` varchar(255),
+	`price` int NOT NULL,
+	`regularPrice` int,
+	`description` text,
+	`descriptionEn` text,
+	`features` text,
+	`featuresEn` text,
+	`imageUrl` text,
+	`category` varchar(50) NOT NULL DEFAULT 'nutricion',
+	`badge` varchar(50),
+	`isActive` boolean NOT NULL DEFAULT true,
+	`sortOrder` int NOT NULL DEFAULT 0,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `membershipPackages_id` PRIMARY KEY(`id`),
+	CONSTRAINT `membershipPackages_slug_unique` UNIQUE(`slug`)
+);

@@ -1033,3 +1033,32 @@ export const adminNotifications = mysqlTable("adminNotifications", {
 });
 export type AdminNotification = typeof adminNotifications.$inferSelect;
 export type InsertAdminNotification = typeof adminNotifications.$inferInsert;
+
+// ============================================================
+// PAQUETES DE MEMBRESÍA (GESTIONABLES POR EL ADMIN)
+// ============================================================
+/**
+ * Paquetes de membresía configurables por el admin.
+ * Reemplaza los paquetes hardcodeados en el frontend.
+ */
+export const membershipPackages = mysqlTable("membershipPackages", {
+  id: int("id").autoincrement().primaryKey(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  nameEn: varchar("nameEn", { length: 255 }),
+  price: int("price").notNull(),
+  regularPrice: int("regularPrice"),
+  description: text("description"),
+  descriptionEn: text("descriptionEn"),
+  features: text("features"),
+  featuresEn: text("featuresEn"),
+  imageUrl: text("imageUrl"),
+  category: varchar("category", { length: 50 }).default("nutricion").notNull(),
+  badge: varchar("badge", { length: 50 }),
+  isActive: boolean("isActive").default(true).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type MembershipPackage = typeof membershipPackages.$inferSelect;
+export type InsertMembershipPackage = typeof membershipPackages.$inferInsert;

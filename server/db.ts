@@ -2654,3 +2654,51 @@ export async function patientHasPendingDebtRequest(patientId: number): Promise<b
   await conn.end();
   return (rows as any[]).length > 0;
 }
+
+// ─── Membership Packages (Admin CRUD) ────────────────────────────────────────
+export async function listMembershipPackages() {
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  const [rows] = await conn.execute(`SELECT * FROM membershipPackages ORDER BY sortOrder ASC, id ASC`);
+  await conn.end();
+  return rows as any[];
+}
+
+export async function getMembershipPackageBySlug(slug: string) {
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  const [rows] = await conn.execute(`SELECT * FROM membershipPackages WHERE slug = ? LIMIT 1`, [slug]);
+  await conn.end();
+  return (rows as any[])[0] ?? null;
+}
+
+export async function createMembershipPackage(data: {
+  slug: string; name: string; nameEn?: string; price: number; regularPrice?: number;
+  description?: string; descriptionEn?: string; features?: string; featuresEn?: string;
+  imageUrl?: string; category: string; badge?: string; isActive: boolean; sortOrder: number;
+}) {
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  const [result] = await conn.execute(
+    `INSERT INTO membershipPackages (slug, name, nameEn, price, regularPrice, description, descriptionEn, features, featuresEn, imageUrl, category, badge, isActive, sortOrder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [data.slug, data.name, data.nameEn ?? null, data.price, data.regularPrice ?? null, data.description ?? null, data.descriptionEn ?? null, data.features ?? null, data.featuresEn ?? null, data.imageUrl ?? null, data.category, data.badge ?? null, data.isActive, data.sortOrder]
+  );
+  await conn.end();
+  return (result as any).insertId as number;
+}
+
+export async function updateMembershipPackage(id: number, data: {
+  name?: string; nameEn?: string; price?: number; regularPrice?: number;
+  description?: string; descriptionEn?: string; features?: string; featuresEn?: string;
+  imageUrl?: string; category?: string; badge?: string; isActive?: boolean; sortOrder?: number;
+}) {
+  const fields = Object.entries(data).filter(([, v]) => v !== undefined).map(([k]) => `\`${k}\` = ?`).join(', ');
+  const values = Object.entries(data).filter(([, v]) => v !== undefined).map(([, v]) => v);
+  if (!fields) return;
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  await conn.execute(`UPDATE membershipPackages SET ${fields} WHERE id = ?`, [...values, id]);
+  await conn.end();
+}
+
+export async function deleteMembershipPackage(id: number) {
+  const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
+  await conn.execute(`DELETE FROM membershipPackages WHERE id = ?`, [id]);
+  await conn.end();
+}

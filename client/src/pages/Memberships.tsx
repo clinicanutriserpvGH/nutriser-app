@@ -62,7 +62,7 @@ function getPackages(lang: Lang) {
     {
       id: "pkg-nutricion",
       name: lang === "EN" ? "Nutrition Package" : "Paquete Nutrición",
-      price: 2500,
+      price: 2000,
       regularPrice: 3200,
       badge: "mostPopular",
       description: lang === "EN"
@@ -86,7 +86,7 @@ function getPackages(lang: Lang) {
       id: "pkg-reductor",
       name: lang === "EN" ? "Nutriser Slimming Package" : "Paquete Reductor Nutriser",
       price: 4500,
-      regularPrice: 6500,
+      regularPrice: 7500,
       badge: "maxSavings",
       description: lang === "EN"
         ? "Comprehensive body slimming package: cavitation, radiofrequency and reducing mesotherapy."

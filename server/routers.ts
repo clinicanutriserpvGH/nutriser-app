@@ -21,6 +21,7 @@ import { createInstallmentPlan, confirmInstallmentPayment, getInstallmentPlansBy
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest, deleteBannerInterest } from './db';
 import { getSystemConfig, setSystemConfig } from './db';
+import { listMembershipPackages, getMembershipPackageBySlug, createMembershipPackage, updateMembershipPackage, deleteMembershipPackage } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
 import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsService";
 import { storagePut } from "./storage";
@@ -4161,6 +4162,93 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         await resolveDebtAuthRequest(input.id, input.status, input.adminNote, input.resolvedBy);
+        return { success: true };
+      }),
+  }),
+
+  // ─── Membership Packages (Admin CRUD + Public list) ────────────────────────
+  packages: router({
+    // Public: listar paquetes activos para el sitio
+    list: publicProcedure.query(async () => {
+      const pkgs = await listMembershipPackages();
+      return pkgs.filter((p: any) => p.isActive);
+    }),
+    // Admin: listar todos (activos e inactivos)
+    listAll: publicProcedure.query(async () => {
+      return await listMembershipPackages();
+    }),
+    // Admin: crear paquete
+    create: publicProcedure
+      .input(z.object({
+        slug: z.string().min(1),
+        name: z.string().min(1),
+        nameEn: z.string().optional(),
+        price: z.number().int().positive(),
+        regularPrice: z.number().int().positive().optional(),
+        description: z.string().optional(),
+        descriptionEn: z.string().optional(),
+        features: z.array(z.string()).optional(),
+        featuresEn: z.array(z.string()).optional(),
+        imageUrl: z.string().optional(),
+        category: z.string().default('nutricion'),
+        badge: z.string().optional(),
+        isActive: z.boolean().default(true),
+        sortOrder: z.number().int().default(0),
+        passphrase: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.passphrase.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        }
+        const id = await createMembershipPackage({
+          ...input,
+          features: input.features ? JSON.stringify(input.features) : undefined,
+          featuresEn: input.featuresEn ? JSON.stringify(input.featuresEn) : undefined,
+        });
+        return { success: true, id };
+      }),
+    // Admin: editar paquete
+    update: publicProcedure
+      .input(z.object({
+        id: z.number().int(),
+        name: z.string().optional(),
+        nameEn: z.string().optional(),
+        price: z.number().int().positive().optional(),
+        regularPrice: z.number().int().positive().optional().nullable(),
+        description: z.string().optional(),
+        descriptionEn: z.string().optional(),
+        features: z.array(z.string()).optional(),
+        featuresEn: z.array(z.string()).optional(),
+        imageUrl: z.string().optional(),
+        category: z.string().optional(),
+        badge: z.string().optional().nullable(),
+        isActive: z.boolean().optional(),
+        sortOrder: z.number().int().optional(),
+        passphrase: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.passphrase.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        }
+        const { id, passphrase, features, featuresEn, ...rest } = input;
+        await updateMembershipPackage(id, {
+          ...rest,
+          features: features ? JSON.stringify(features) : undefined,
+          featuresEn: featuresEn ? JSON.stringify(featuresEn) : undefined,
+        });
+        return { success: true };
+      }),
+    // Admin: eliminar paquete
+    delete: publicProcedure
+      .input(z.object({ id: z.number().int(), passphrase: z.string() }))
+      .mutation(async ({ input }) => {
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.passphrase.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        }
+        await deleteMembershipPackage(input.id);
         return { success: true };
       }),
   }),

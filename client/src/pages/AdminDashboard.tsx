@@ -5,6 +5,7 @@ import AdminSplashAdsTab from "@/components/AdminSplashAdsTab";
 import AdminStoreBannersTab from "@/components/AdminStoreBannersTab";
 import AdminPatientsTab from "@/components/AdminPatientsTab";
 import AdminWalletTab from "@/components/AdminWalletTab";
+import AdminPackages from "@/pages/AdminPackages";
 import AdminSecurityTab from "@/components/AdminSecurityTab";
 import AdminSiteConfigTab from "@/components/AdminSiteConfigTab";
 import { trpc } from "@/lib/trpc";
@@ -22,6 +23,7 @@ const ADMIN_TABS = [
   { value: 'memberships', label: 'Paquetes Comprados', emoji: '📦' },
   { value: 'servicePurchases', label: 'Servicios Comprados', emoji: '💉' },
   { value: 'services', label: 'Gestión de Servicios', emoji: '📋' },
+  { value: 'packages', label: 'Gestión de Paquetes', emoji: '🎁' },
   { value: 'productPurchases', label: 'Productos Comprados', emoji: '🛒' },
   { value: 'products', label: 'Gestión de Productos', emoji: '🧴' },
   { value: 'discountCodes', label: 'Códigos de Descuento', emoji: '🏷️%' },
@@ -3696,6 +3698,10 @@ export default function AdminDashboard() {
           </TabsContent>
           <TabsContent value="wallet" className="space-y-4">
             <AdminWalletTab />
+          </TabsContent>
+          {/* ─── TAB: GESTIÓN DE PAQUETES ──────────────────────────────────── */}
+          <TabsContent value="packages" className="space-y-4">
+            <AdminPackages />
           </TabsContent>
 
           {/* ─── TAB: ANALÍTICA ─────────────────────────────────────────────────────────────── */}

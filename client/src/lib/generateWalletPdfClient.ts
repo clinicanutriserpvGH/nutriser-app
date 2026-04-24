@@ -1,15 +1,3 @@
-/**
- * generateWalletPdfClient.ts
- * PDF idéntico a la imagen de referencia aprobada:
- *  - "MONEDERO NUTRISER" centrado arriba
- *  - Líneas cortas decorativas A LOS LADOS de "aesthetic & nutrition" (no encima)
- *  - Silueta dorada grande y bien proporcionada (ancha, no estirada) a la derecha
- *  - QR con borde dorado a la izquierda
- *  - Separador vertical | Nombre + CÓDIGO + número
- *  - Pie: globo + nutriserpv.com/monedero
- *  - Sin líneas horizontales largas que crucen la tarjeta
- */
-
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import { SILUETA_CROPPED_B64 } from "./siluetaCroppedB64";
@@ -52,27 +40,28 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.setTextColor(139, 105, 20);
   pdf.text("MONEDERO NUTRISER", cx, y + 7.5, { align: "center", charSpace: 1.0 });
 
-  // Líneas cortas A LOS LADOS del texto "aesthetic & nutrition"
-  // Las líneas miden ~8mm y están separadas del texto por un espacio
-  const subY = y + 11.8;
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.22);
-  pdf.line(cx - 28, subY, cx - 15, subY); // izquierda: 8mm, termina antes del texto
-  pdf.line(cx + 15, subY, cx + 28, subY); // derecha: 8mm, empieza después del texto
-
-  // "aesthetic & nutrition" — entre las dos líneas cortas
+  // "aesthetic & nutrition" primero, LUEGO las líneas a los lados (no encima)
+  // El texto mide aprox 22mm de ancho a 4.2pt. Las líneas empiezan después del texto.
+  const subTextY = y + 12.5;
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(4.2);
   pdf.setTextColor(184, 150, 62);
-  pdf.text("aesthetic & nutrition", cx, subY + 0.5, { align: "center", charSpace: 0.6 });
+  pdf.text("aesthetic & nutrition", cx, subTextY, { align: "center", charSpace: 0.6 });
+
+  // Líneas cortas a los lados — en la misma Y que el texto, pero separadas
+  // El texto "aesthetic & nutrition" mide ~24mm. Dejamos 3mm de espacio a cada lado.
+  pdf.setDrawColor(197, 165, 90);
+  pdf.setLineWidth(0.22);
+  pdf.line(cx - 26, subTextY - 0.8, cx - 14, subTextY - 0.8); // izquierda
+  pdf.line(cx + 14, subTextY - 0.8, cx + 26, subTextY - 0.8); // derecha
 
   // ── SILUETA ───────────────────────────────────────────────────────────────
-  // Imagen recortada al bounding box de la figura: 233x887px (ratio 0.263)
-  // En la referencia la silueta ocupa ~65% del alto de la tarjeta
-  const silH = H * 0.65;           // ~35mm de alto
-  const silW = silH * 0.263;       // ~9.2mm de ancho (proporción real de la figura)
-  const silX = x + W - silW - 3.0; // pegada al borde derecho
-  const silY = y + H * 0.10;       // empieza al 10% del alto
+  // Imagen recortada 233x887px (ratio ancho/alto = 0.263)
+  // En la referencia ocupa ~65% del alto, posicionada en zona derecha
+  const silH = H * 0.65;
+  const silW = silH * 0.263;
+  const silX = x + W - silW - 3.5;
+  const silY = y + H * 0.12;
   try {
     pdf.addImage(SILUETA_CROPPED_B64, "PNG", silX, silY, silW, silH);
   } catch (_) {}
@@ -99,7 +88,7 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.setLineWidth(0.25);
   pdf.line(sepX, zTop + 3, sepX, zBottom - 3);
 
-  // Nombre
+  // Nombre — SIN línea debajo
   const nameX = sepX + 3;
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7.5);
@@ -109,29 +98,24 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
     : card.patientName;
   pdf.text(name.toUpperCase(), nameX, zMid - 5, { charSpace: 0.2 });
 
-  // Línea bajo nombre
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.22);
-  pdf.line(nameX, zMid - 3.5, nameX + 26, zMid - 3.5);
-
   // "CÓDIGO"
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(4.5);
   pdf.setTextColor(184, 150, 62);
-  pdf.text("CÓDIGO", nameX, zMid + 1.5, { charSpace: 0.5 });
+  pdf.text("CÓDIGO", nameX, zMid + 2, { charSpace: 0.5 });
 
   // Número
   pdf.setFont("courier", "bold");
   pdf.setFontSize(7);
   pdf.setTextColor(58, 34, 0);
-  pdf.text(card.walletNumber, nameX, zMid + 6, { charSpace: 0.3 });
+  pdf.text(card.walletNumber, nameX, zMid + 7, { charSpace: 0.3 });
 
   // ── PIE ───────────────────────────────────────────────────────────────────
   pdf.setDrawColor(197, 165, 90);
   pdf.setLineWidth(0.18);
   pdf.line(x + 3, zBottom, x + W - 3, zBottom);
 
-  // Globo
+  // Ícono globo
   const gx = x + W / 2 - 17;
   const gy = y + H - 4.5;
   const r  = 2.0;
@@ -163,7 +147,6 @@ export async function generateWalletPdf(
       if (i > 0) pdf.addPage([W, H], "landscape");
       await drawCard(pdf, cards[i], 0, 0);
     }
-    // Usar descarga directa: en iOS activa el diálogo nativo de compartir/guardar/imprimir
     const blob = pdf.output("blob");
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

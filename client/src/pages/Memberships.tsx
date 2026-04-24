@@ -572,15 +572,21 @@ export default function Memberships() {
     category?: string | null;
     imageUrl?: string | null;
     features?: string[];       // paquetes: lista de lo que incluye
-    benefits?: string[];       // servicios: beneficios del tratamiento
+    benefits?: string[];       // servicios/productos: beneficios
+    howToUse?: string[];       // productos: modo de uso
+    ingredients?: string | null; // productos: ingredientes
+    disclaimer?: string | null;  // productos: nota de precaución
     duration?: string | null;  // servicios: duración del tratamiento
     aftercare?: string[];      // servicios: cuidados post-tratamiento
     regularPrice?: number | null;
     badge?: string | null;
-    itemType: "service" | "package";
+    itemType: "service" | "package" | "product";
     id: string;
+    productId?: number;
+    isLoadingAI?: boolean;
   };
   const [detailItem, setDetailItem] = useState<DetailItem | null>(null);
+  const generateProductInfoMutation = trpc.products.generateInfo.useMutation();
 
   // ─── Checkout ───────────────────────────────────────────────────────────────
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -1041,6 +1047,45 @@ export default function Memberships() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+
+                  {/* Cargando IA (productos) */}
+                  {detailItem.itemType === "product" && detailItem.isLoadingAI && (
+                    <div className="flex items-center gap-2 mb-4 px-3 py-3 rounded-xl" style={{ background: "rgba(197,165,90,0.08)", border: "1px solid rgba(197,165,90,0.2)" }}>
+                      <div className="w-4 h-4 rounded-full border-2 border-[#C5A55A] border-t-transparent animate-spin flex-shrink-0" />
+                      <span style={{ color: "#C5A55A", fontSize: 12, fontWeight: 600 }}>Generando información con IA...</span>
+                    </div>
+                  )}
+
+                  {/* Modo de uso (productos) */}
+                  {detailItem.itemType === "product" && detailItem.howToUse && detailItem.howToUse.length > 0 && (
+                    <div className="mb-5">
+                      <p style={{ color: "#C5A55A", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Modo de uso</p>
+                      <ol className="space-y-2">
+                        {detailItem.howToUse.map((step, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span style={{ color: "#C5A55A", fontSize: 11, fontWeight: 900, minWidth: 18, marginTop: 1 }}>{i + 1}.</span>
+                            <span style={{ color: "#FAF7F2", fontSize: 13 }}>{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+
+                  {/* Ingredientes (productos) */}
+                  {detailItem.itemType === "product" && detailItem.ingredients && (
+                    <div className="mb-4 px-3 py-2 rounded-xl" style={{ background: "rgba(197,165,90,0.05)", border: "1px solid rgba(197,165,90,0.15)" }}>
+                      <p style={{ color: "#C5A55A", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>Ingredientes principales</p>
+                      <p style={{ color: "#b8b0a0", fontSize: 12, lineHeight: 1.5 }}>{detailItem.ingredients}</p>
+                    </div>
+                  )}
+
+                  {/* Disclaimer (productos) */}
+                  {detailItem.itemType === "product" && detailItem.disclaimer && (
+                    <div className="mb-4 flex items-start gap-2">
+                      <Shield className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "#8BC4A8" }} />
+                      <p style={{ color: "#888", fontSize: 11, fontStyle: "italic" }}>{detailItem.disclaimer}</p>
                     </div>
                   )}
 
@@ -1771,28 +1816,72 @@ onClick={() => {
                             {salePrice ? (
                               <div className="mb-2">
                                 <div className="flex items-baseline gap-1.5">
-                                  <span className="text-[#C5A55A] font-black text-sm">{salePrice}</span>
-                                  <span className="line-through text-gray-400 text-[10px]">{product.price}</span>
+                                  <span className="text-[#C5A55A] font-black text-sm">${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")}</span>
+                                  <span className="line-through text-gray-400 text-[10px]">${parseInt((product.price||"").replace(/[^0-9]/g,"")).toLocaleString("es-MX")}</span>
                                 </div>
                                 {savingPct > 0 && (
                                   <p className="text-green-600 text-[9px] font-bold">Ahorras {savingPct}% hoy</p>
                                 )}
                               </div>
                             ) : product.price ? (
-                              <p className="text-[#C5A55A] font-black text-sm mb-2">{product.price}</p>
+                              <p className="text-[#C5A55A] font-black text-sm mb-2">${parseInt((product.price||"").replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN</p>
                             ) : (
                               <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
                             )}
+                            {/* Botón Más información */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const salePriceLabel = salePrice ? `$${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : null;
+                                const regularPriceLabel = product.price ? `$${parseInt((product.price||"").replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : null;
+                                const item: DetailItem = {
+                                  id: `prd-${product.id}`,
+                                  productId: product.id,
+                                  name: product.name,
+                                  description: product.description,
+                                  price: salePriceLabel ?? regularPriceLabel,
+                                  priceNum: priceNum,
+                                  regularPrice: salePrice && regularPriceNum ? regularPriceNum : null,
+                                  category: product.category,
+                                  imageUrl: product.imageUrl,
+                                  itemType: "product",
+                                  isLoadingAI: true,
+                                };
+                                setDetailItem(item);
+                                generateProductInfoMutation.mutate(
+                                  { name: product.name, description: product.description ?? undefined, category: product.category ?? undefined },
+                                  {
+                                    onSuccess: (data) => {
+                                      setDetailItem(prev => prev && prev.id === `prd-${product.id}` ? {
+                                        ...prev,
+                                        benefits: data.benefits,
+                                        howToUse: data.howToUse,
+                                        ingredients: data.ingredients,
+                                        disclaimer: data.disclaimer,
+                                        isLoadingAI: false,
+                                      } : prev);
+                                    },
+                                    onError: () => {
+                                      setDetailItem(prev => prev ? { ...prev, isLoadingAI: false } : prev);
+                                    },
+                                  }
+                                );
+                              }}
+                              className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95"
+                              style={{ border: "1px solid rgba(197,165,90,0.35)", color: "#C5A55A", background: "rgba(197,165,90,0.05)" }}
+                            >
+                              <Info className="w-3 h-3" /> Más información
+                            </button>
                             <div className="flex gap-1.5">
                               <button
                                 disabled={isOutOfStock}
-                                onClick={() => !isOutOfStock && addToCart({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ?? product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
+                                onClick={() => !isOutOfStock && addToCart({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ? `$${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
                                 className="flex-1 flex items-center justify-center border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
                                 <ShoppingCart className="w-3 h-3" />
                               </button>
                               <button
                                 disabled={isOutOfStock}
-                                onClick={() => !isOutOfStock && openCheckout({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ?? product.price ?? "Consultar", qty: 1, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
+                                onClick={() => !isOutOfStock && openCheckout({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ? `$${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : product.price ?? "Consultar", qty: 1, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })}
                                 className="flex-1 flex items-center justify-center bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
                                 <Zap className="w-3 h-3" /> {isOutOfStock ? "Agotado" : t("buy", lang)}
                               </button>

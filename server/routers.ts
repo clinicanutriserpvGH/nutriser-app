@@ -1628,6 +1628,63 @@ export const appRouter = router({
         const { url } = await storagePut(`products/${fileName}`, buffer, input.mimeType);
         return { url };
       }),
+
+    // Generar más información del producto con IA
+    generateInfo: publicProcedure
+      .input(z.object({
+        name: z.string(),
+        description: z.string().optional(),
+        category: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const descContext = input.description
+          ? `La descripción actual del producto es: "${input.description}". NO repitas esta información, complementa y expande.`
+          : 'No hay descripción previa.';
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: 'system',
+              content: 'Eres un experto en productos de nutrición, estética y cuidado personal para una clínica mexicana llamada Nutriser Aesthetic & Nutrition. Generas información útil, precisa y atractiva para los clientes. Siempre en español.',
+            },
+            {
+              role: 'user',
+              content: `Genera información detallada para el producto "${input.name}" de la categoría "${input.category || 'general'}". ${descContext}
+
+Devuelve un JSON con estos campos:
+- benefits: array de 4-6 strings con los beneficios principales del producto
+- howToUse: array de 3-5 strings con instrucciones de uso/aplicación
+- ingredients: string con los ingredientes o componentes principales (si aplica, si no escribe null)
+- disclaimer: string con una nota breve de precaución o recomendación (máx 1 oración)`,
+            },
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'product_info',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  benefits: { type: 'array', items: { type: 'string' } },
+                  howToUse: { type: 'array', items: { type: 'string' } },
+                  ingredients: { type: ['string', 'null'] },
+                  disclaimer: { type: 'string' },
+                },
+                required: ['benefits', 'howToUse', 'ingredients', 'disclaimer'],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const rawContent = response.choices?.[0]?.message?.content;
+        const raw = typeof rawContent === 'string' ? rawContent : null;
+        if (!raw) throw new Error('No response from LLM');
+        try {
+          return JSON.parse(raw) as { benefits: string[]; howToUse: string[]; ingredients: string | null; disclaimer: string };
+        } catch {
+          return { benefits: [], howToUse: [], ingredients: null, disclaimer: '' };
+        }
+      }),
   }),
 
   // ─── Product purchases ─────────────────────────────────────────────────────

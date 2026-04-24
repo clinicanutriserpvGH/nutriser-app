@@ -3674,6 +3674,36 @@ export const appRouter = router({
       }),
   }),
 
+  // ─── Visibilidad de secciones del Splash (Academia, etc.) ─────────────────
+  siteVisibility: router({
+    // Público: obtener si la Academia está visible
+    getAcademiaVisible: publicProcedure
+      .query(async () => {
+        const val = await getSystemConfig('academiaVisible');
+        return { visible: val !== 'false' }; // default true si no existe
+      }),
+    // Admin: toggle visibilidad de Academia
+    setAcademiaVisible: publicProcedure
+      .input(z.object({ visible: z.boolean() }))
+      .mutation(async ({ input }) => {
+        await setSystemConfig('academiaVisible', input.visible ? 'true' : 'false');
+        return { success: true, visible: input.visible };
+      }),
+    // Público: obtener si la Tienda está visible
+    getTiendaVisible: publicProcedure
+      .query(async () => {
+        const val = await getSystemConfig('tiendaVisible');
+        return { visible: val !== 'false' }; // default true si no existe
+      }),
+    // Admin: toggle visibilidad de Tienda
+    setTiendaVisible: publicProcedure
+      .input(z.object({ visible: z.boolean() }))
+      .mutation(async ({ input }) => {
+        await setSystemConfig('tiendaVisible', input.visible ? 'true' : 'false');
+        return { success: true, visible: input.visible };
+      }),
+  }),
+
   // ─── Traducción automática con LLM ─────────────────────────────────────────
   translate: router({
     texts: publicProcedure

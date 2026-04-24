@@ -6,6 +6,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, CalendarCheck, Store, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
+import { trpc } from "@/lib/trpc";
 
 
 const HERO_IMAGES = [
@@ -27,6 +28,10 @@ export default function HeroSection() {
   // Navegación directa sin guard — el login se pide solo al intentar comprar/agregar al carrito
   const handleTienda = () => { window.location.href = "/memberships"; };
   const handleAcademia = () => { window.location.href = "/cursos"; };
+
+  // Visibilidad de Academia (controlada por el admin)
+  const { data: academiaConfig } = trpc.siteVisibility.getAcademiaVisible.useQuery();
+  const academiaVisible = academiaConfig?.visible ?? false;
 
   return (
     <section
@@ -143,16 +148,18 @@ export default function HeroSection() {
                 <Store className="relative w-5 h-5 flex-shrink-0" />
                 <span className="relative">Tienda Nutriser</span>
               </motion.a>
-              {/* 2. Academia Nutriser */}
-              <a
-                href="/cursos"
-                onClick={handleAcademia}
-                className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg flex-1"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <BookOpen className="relative w-5 h-5 flex-shrink-0" />
-                <span className="relative">Academia Nutriser</span>
-              </a>
+              {/* 2. Academia Nutriser — solo visible cuando el admin la activa */}
+              {academiaVisible && (
+                <a
+                  href="/cursos"
+                  onClick={handleAcademia}
+                  className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg flex-1"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <BookOpen className="relative w-5 h-5 flex-shrink-0" />
+                  <span className="relative">Academia Nutriser</span>
+                </a>
+              )}
             </div>
             {/* 3. Agenda tu Cita */}
             <a

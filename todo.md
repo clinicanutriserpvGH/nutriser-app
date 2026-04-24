@@ -2059,3 +2059,8 @@
 ## Sesión 30 - Modal persistente y edición de notificaciones
 - [ ] Modal de notificaciones aparece siempre al abrir monedero hasta que admin elimine
 - [ ] Edición de notificaciones en panel admin (editar título, mensaje, tipo)
+
+## Sesión 32 - Control Visibilidad Academia
+- [ ] AdminSiteConfigTab: toggle ocultar/mostrar Academia Nutriser
+- [ ] Splash0Entry: mostrar "Próximamente" en tarjeta Academia cuando esté oculta
+- [ ] Página /cursos: mostrar "Próximamente" cuando Academia esté oculta

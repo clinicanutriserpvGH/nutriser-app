@@ -10,7 +10,7 @@
  * Nota: la misma cuenta de paciente funciona para Shop y Academy.
  */
 import { useState } from "react";
-import { ShoppingBag, GraduationCap, CalendarCheck, Moon, Sun, Utensils, Camera, ClipboardList, PauseCircle, BookOpen, Ruler, Repeat2, User, LogIn } from "lucide-react";
+import { ShoppingBag, CalendarCheck, Moon, Sun, Utensils, Camera, ClipboardList, PauseCircle, BookOpen, Ruler, Repeat2, User, LogIn } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 
@@ -35,7 +35,6 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
   const [leaving, setLeaving] = useState(false);
   const { isLight, isAuto, toggleSplashTheme, resetToAuto } = useSplashTheme();
   const { patient, isLoggedIn } = usePatientAuth();
-
   const bg = isLight
     ? "linear-gradient(160deg, #FAF7F2 0%, #F5EFE4 50%, #FAF7F2 100%)"
     : "linear-gradient(160deg, #0f0f0f 0%, #1a1208 50%, #0f0f0f 100%)";
@@ -248,39 +247,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             </div>
 
 
-            {/* ── Tarjeta 2: Academia Nutriser ── */}
-            <div className="flex-1 min-h-[150px] md:min-h-[300px] lg:min-h-0">
-              <button
-                type="button"
-                onClick={() => handleNavigate('/cursos')}
-                className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full cursor-pointer"
-                style={{ minHeight: "150px", WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
-              >
-                <img
-                  src={IMG_ACADEMY}
-                  alt="Academia Nutriser"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                  style={{ objectPosition: "center center" }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/80 pointer-events-none" />
-                <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-9 h-9 md:w-11 md:h-11 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-white/20 backdrop-blur-sm">
-                      <GraduationCap className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                    </div>
-                    <span className="text-[10px] md:text-xs font-semibold tracking-wide uppercase drop-shadow text-white/90">Educación</span>
-                  </div>
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
-                      Academia Nutriser
-                    </h2>
-                    <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
-                      <GraduationCap className="w-3.5 h-3.5" /> Ver cursos
-                    </span>
-                  </div>
-                </div>
-              </button>
-            </div>
+            {/* Academia Nutriser: eliminada del splash. Solo aparece en PC vía menú de navegación */}
 
 
           </div>{/* fin grid principal */}

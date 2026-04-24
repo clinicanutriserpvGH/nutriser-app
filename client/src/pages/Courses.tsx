@@ -63,6 +63,10 @@ export default function Courses() {
   const { isMobile } = useDeviceType();
   const [, navigate] = useLocation();
 
+  // Configuración de visibilidad de Academia (controlada por el admin)
+  const { data: academiaConfig, isLoading: academiaLoading } = trpc.siteVisibility.getAcademiaVisible.useQuery();
+  const academiaVisible = academiaConfig?.visible ?? true;
+
   // Guard móvil
   const [mobileGuardOpen, setMobileGuardOpen] = useState(false);
   const [mobileGuardFeature, setMobileGuardFeature] = useState("acceder a esta función");
@@ -340,6 +344,51 @@ export default function Courses() {
     estetica: "bg-pink-100 text-pink-800",
     general: "bg-gray-100 text-gray-800",
   };
+
+  // Pantalla de Próximamente cuando el admin tiene la Academia oculta
+  if (!academiaLoading && !academiaVisible) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
+        <BackToSplash hideHome />
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 text-center">
+          <div className="max-w-md mx-auto">
+            {/* Icono */}
+            <div className="w-24 h-24 rounded-full bg-[#C5A55A]/10 flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-[#C5A55A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            {/* Texto */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C5A55A]/10 text-[#C5A55A] text-xs font-semibold tracking-widest uppercase mb-4">
+              Muy pronto
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Academia Nutriser
+            </h1>
+            <p className="text-gray-500 text-base leading-relaxed mb-8">
+              Estamos preparando contenido exclusivo de nutrición, bienestar y estética para ti.
+              Muy pronto podrás acceder a cursos, videos y material educativo de nuestra clínica.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href="/"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#C5A55A] text-white font-semibold hover:bg-[#b8944a] transition-colors"
+              >
+                Ir al inicio
+              </a>
+              <a
+                href="/memberships"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[#C5A55A] text-[#C5A55A] font-semibold hover:bg-[#C5A55A]/5 transition-colors"
+              >
+                Ver Tienda Nutriser
+              </a>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">

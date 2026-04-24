@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { useSplash } from "@/contexts/SplashContext";
+import { trpc } from "@/lib/trpc";
 
 /* ─── Assets ────────────────────────────────────────────────────────────── */
 const LOGO_URL =
@@ -67,6 +68,10 @@ function CardHalf({
 export default function NutriserHomePage() {
   const { isLight } = useSplashTheme();
   const { showSplash1 } = useSplash();
+
+  // Visibilidad de Academia (controlada por el admin)
+  const { data: academiaConfig } = trpc.siteVisibility.getAcademiaVisible.useQuery();
+  const academiaVisible = academiaConfig?.visible ?? false;
 
   const goTo = (path: string) => { window.location.href = path; };
   const goBack = () => {
@@ -169,16 +174,18 @@ export default function NutriserHomePage() {
               imgPosition="center 50%"
               isLight={isLight}
             />
-            <CardHalf
-              img={IMG_ACADEMY}
-              icon={GraduationCap}
-              label="Educación"
-              title="Academia Nutriser"
-              cta="Ver Cursos"
-              onClick={() => goTo("/cursos")}
-              imgPosition="center 30%"
-              isLight={isLight}
-            />
+            {academiaVisible && (
+              <CardHalf
+                img={IMG_ACADEMY}
+                icon={GraduationCap}
+                label="Educación"
+                title="Academia Nutriser"
+                cta="Ver Cursos"
+                onClick={() => goTo("/cursos")}
+                imgPosition="center 30%"
+                isLight={isLight}
+              />
+            )}
             <CardHalf
               img={IMG_EBOOK}
               icon={BookOpen}

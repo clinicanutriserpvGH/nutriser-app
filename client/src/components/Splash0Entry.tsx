@@ -186,24 +186,22 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/25 to-black/85 pointer-events-none" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">
-                  <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.45)', border: '1.5px solid rgba(197,165,90,0.6)', backdropFilter: 'blur(4px)' }}>
-                      <img
-                        src={NUTRISER_ICON}
-                        alt="Nutriser"
-                        className="w-5 h-5 md:w-6 md:h-6 object-contain"
-                      />
+                  {/* Fila superior: badge App Pacientes + íconos en md+ */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.45)', border: '1.5px solid rgba(197,165,90,0.6)', backdropFilter: 'blur(4px)' }}>
+                        <img
+                          src={NUTRISER_ICON}
+                          alt="Nutriser"
+                          className="w-5 h-5 md:w-6 md:h-6 object-contain"
+                        />
+                      </div>
+                      <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-[#C5A55A]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+                        App Pacientes
+                      </span>
                     </div>
-                    <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-[#C5A55A]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
-                      App Pacientes
-                    </span>
-                  </div>
-                  <div>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
-                      Portal de Salud<br />Nutriser
-                    </h2>
-                    {/* Íconos — solo visibles en pantallas grandes (lg+) */}
-                    <div className="hidden lg:grid grid-cols-4 gap-x-2 gap-y-1.5 mb-4 w-full max-w-xs">
+                    {/* Íconos — visibles en iPad y desktop (md+), ocultos en celular */}
+                    <div className="hidden md:grid grid-cols-4 gap-x-1.5 gap-y-1.5" style={{ maxWidth: '160px' }}>
                       {[
                         { icon: Utensils, label: "Mi Dieta" },
                         { icon: Camera, label: "Scan Food" },
@@ -215,13 +213,18 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                         { icon: Repeat2, label: "Hábitos" },
                       ].map(({ icon: Ic, label }) => (
                         <div key={label} className="flex flex-col items-center gap-0.5">
-                          <div className="w-8 h-8 rounded-full border flex items-center justify-center bg-black/40 backdrop-blur-sm border-white/30">
-                            <Ic className="w-3.5 h-3.5 text-[#C5A55A]" />
+                          <div className="w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(197,165,90,0.5)', backdropFilter: 'blur(4px)' }}>
+                            <Ic className="w-3 h-3 text-[#C5A55A]" />
                           </div>
-                          <span className="text-[7px] font-medium leading-tight text-center w-full text-white/80">{label}</span>
+                          <span className="text-[6.5px] font-medium leading-tight text-center text-white/80 w-full">{label}</span>
                         </div>
                       ))}
                     </div>
+                  </div>
+                  <div>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
+                      Portal de Salud<br />Nutriser
+                    </h2>
                     <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
                       Acceder / Crear Cuenta
                     </span>

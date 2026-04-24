@@ -40,20 +40,12 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.setTextColor(139, 105, 20);
   pdf.text("MONEDERO NUTRISER", cx, y + 7.5, { align: "center", charSpace: 1.0 });
 
-  // "aesthetic & nutrition" primero, LUEGO las líneas a los lados (no encima)
-  // El texto mide aprox 22mm de ancho a 4.2pt. Las líneas empiezan después del texto.
+  // "aesthetic & nutrition" — solo el texto, sin líneas que lo tapen
   const subTextY = y + 12.5;
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(4.2);
   pdf.setTextColor(184, 150, 62);
   pdf.text("aesthetic & nutrition", cx, subTextY, { align: "center", charSpace: 0.6 });
-
-  // Líneas cortas a los lados — en la misma Y que el texto, pero separadas
-  // El texto "aesthetic & nutrition" mide ~24mm. Dejamos 3mm de espacio a cada lado.
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.22);
-  pdf.line(cx - 26, subTextY - 0.8, cx - 14, subTextY - 0.8); // izquierda
-  pdf.line(cx + 14, subTextY - 0.8, cx + 26, subTextY - 0.8); // derecha
 
   // ── SILUETA ───────────────────────────────────────────────────────────────
   // Imagen recortada 233x887px (ratio ancho/alto = 0.263)

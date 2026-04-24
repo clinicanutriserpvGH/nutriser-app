@@ -1,19 +1,21 @@
 /**
  * generateWalletPdfClient.ts
  *
- * Genera un PDF de tarjetas del Monedero Nutriser directamente en el navegador
- * usando jsPDF + QRCode puro + silueta y logo embebidos en base64.
- * NO usa html2canvas — compatible con Safari/iPad.
+ * Genera un PDF de tarjetas del Monedero Nutriser directamente en el navegador.
+ * El diseño es IDÉNTICO a la previsualización en pantalla (NutriserWalletCard):
+ *  - Fondo blanco perla con borde dorado
+ *  - CABECERA: "MONEDERO NUTRISER" grande + líneas + "aesthetic & nutrition" (SIN logo)
+ *  - ZONA CENTRAL: QR con borde dorado izquierda | separador vertical | Nombre + CÓDIGO + número
+ *  - SILUETA dorada grande a la derecha
+ *  - PIE: ícono globo + "nutriserpv.com/monedero"
  *
- * Formato CR-80: 85.5mm x 54mm (tarjeta de crédito estándar).
- * - Modo individual (1 tarjeta): página exacta CR-80
- * - Modo A4 (2+ tarjetas): página A4 con grilla 2×4
+ * Formato CR-80: 85.6mm × 54mm
+ * NO usa html2canvas — compatible con Safari/iPad/iPhone.
  */
 
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import { SILUETA_B64 } from "./siluetaB64";
-import { LOGO_B64 } from "./logoB64";
 
 export interface WalletPdfCardData {
   patientName: string;
@@ -25,6 +27,14 @@ export interface WalletPdfCardData {
 const W = 85.60;
 const H = 54.00;
 
+// Colores
+const GOLD_DARK  = [139, 105, 20]  as const; // #8B6914
+const GOLD_MID   = [197, 165, 90]  as const; // #C5A55A
+const GOLD_LIGHT = [232, 201, 122] as const; // #E8C97A
+const BROWN_DARK = [58,  34,  0]   as const; // #3a2200
+const BROWN_MID  = [184, 150, 62]  as const; // #B8963E
+const CREAM      = [254, 254, 252] as const; // fondo blanco perla
+
 /**
  * Genera un QR como data URL PNG
  */
@@ -32,13 +42,14 @@ async function makeQRDataUrl(text: string): Promise<string> {
   return QRCode.toDataURL(text, {
     width: 300,
     margin: 1,
-    color: { dark: "#1A1A1A", light: "#FFFFFF" },
-    errorCorrectionLevel: "M",
+    color: { dark: "#000000", light: "#FFFFFF" },
+    errorCorrectionLevel: "H",
   });
 }
 
 /**
  * Dibuja una tarjeta CR-80 en el PDF en la posición (x, y)
+ * Diseño idéntico a NutriserWalletCard / WalletCardMM
  */
 async function drawCard(
   pdf: jsPDF,
@@ -48,94 +59,133 @@ async function drawCard(
 ): Promise<void> {
   const qrImg = await makeQRDataUrl(card.qrUrl);
 
-  // ── Fondo blanco perla con gradiente suave ──
-  pdf.setFillColor(253, 252, 248);
+  // ── Fondo blanco perla ──
+  pdf.setFillColor(...CREAM);
   pdf.roundedRect(x, y, W, H, 3, 3, "F");
 
-  // ── Borde dorado exterior (único borde de la tarjeta) ──
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.5);
+  // ── Borde dorado ──
+  pdf.setDrawColor(212, 175, 96); // #D4AF60
+  pdf.setLineWidth(0.4);
   pdf.roundedRect(x, y, W, H, 3, 3, "S");
 
-  // ── Silueta dorada (esquina derecha, proporción 1:1) ──
-  const silW = 30;
-  const silH = 30;
-  const silX = x + W - silW - 2;
-  const silY = y + 15;
-  try {
-    pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
-  } catch (_) {}
+  // ── CABECERA (30% superior = 16.2mm) — SIN logo ──
+  const headerH = H * 0.30; // 16.2mm
 
-  // ── Logo centrado arriba ──
-  const logoSize = 6;
-  const logoX = x + (W - logoSize) / 2;
-  try {
-    pdf.addImage(LOGO_B64, "PNG", logoX, y + 3, logoSize, logoSize);
-  } catch (_) {}
-
-  // ── Título "MONEDERO NUTRISER" ──
+  // Título "MONEDERO NUTRISER" centrado
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(6.5);
-  pdf.setTextColor(122, 92, 30);
-  pdf.text("MONEDERO NUTRISER", x + W / 2, y + 11, { align: "center" });
+  pdf.setFontSize(7.5);
+  pdf.setTextColor(...GOLD_DARK);
+  pdf.text("MONEDERO NUTRISER", x + W / 2, y + 8, { align: "center", charSpace: 1.2 });
 
-  // ── Subtítulo "aesthetic & nutrition" con líneas decorativas cortas ──
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.2);
-  pdf.line(x + 12, y + 13.2, x + 26, y + 13.2);
-  pdf.line(x + W - 26, y + 13.2, x + W - 12, y + 13.2);
+  // Líneas decorativas + "aesthetic & nutrition"
+  const lineW = 18;
+  const lineY = y + 11.5;
+  const textCenterX = x + W / 2;
+  // Línea izquierda (de transparente a dorado)
+  pdf.setDrawColor(...GOLD_MID);
+  pdf.setLineWidth(0.3);
+  pdf.line(textCenterX - 30, lineY, textCenterX - 13, lineY);
+  // Línea derecha (de dorado a transparente)
+  pdf.line(textCenterX + 13, lineY, textCenterX + 30, lineY);
+
   pdf.setFont("helvetica", "italic");
-  pdf.setFontSize(4);
-  pdf.setTextColor(160, 120, 48);
-  pdf.text("aesthetic & nutrition", x + W / 2, y + 13.5, { align: "center" });
+  pdf.setFontSize(4.5);
+  pdf.setTextColor(...BROWN_MID);
+  pdf.text("aesthetic & nutrition", textCenterX, lineY + 0.5, { align: "center", charSpace: 0.8 });
 
-  // ── QR con borde dorado suave ──
-  const qrSize = 22;
-  const qrX = x + 4;
-  const qrY = y + 17;
-  pdf.setDrawColor(197, 165, 90);
-  pdf.setLineWidth(0.4);
+  // ── SILUETA dorada (derecha, desde 8% hasta 82% del alto) ──
+  const silTop    = y + H * 0.08;   // 4.32mm desde arriba
+  const silBottom = y + H * 0.82;   // hasta 44.28mm
+  const silH      = silBottom - silTop; // 39.96mm
+  const silW      = silH * 0.55;    // proporción silueta ~0.55
+  const silX      = x + W - silW - 1.5;
+  try {
+    pdf.addImage(SILUETA_B64, "PNG", silX, silTop, silW, silH);
+  } catch (_) {}
+
+  // ── ZONA CENTRAL (desde 30% hasta 82% = 28.08mm de alto) ──
+  const zoneTop    = y + headerH;      // y + 16.2
+  const zoneBottom = y + H * 0.82;     // y + 44.28
+  const zoneH      = zoneBottom - zoneTop; // 28.08mm
+  const zoneMidY   = zoneTop + zoneH / 2;
+
+  // QR con borde dorado (izquierda, 54% del ancho = 46.2mm)
+  const qrSize   = 22;
+  const qrX      = x + 5;
+  const qrY      = zoneMidY - qrSize / 2;
+  // Fondo blanco + borde dorado para el QR
   pdf.setFillColor(255, 255, 255);
-  pdf.roundedRect(qrX - 1, qrY - 1, qrSize + 2, qrSize + 2, 1, 1, "FD");
+  pdf.setDrawColor(...GOLD_MID);
+  pdf.setLineWidth(0.4);
+  pdf.roundedRect(qrX - 1.2, qrY - 1.2, qrSize + 2.4, qrSize + 2.4, 1.2, 1.2, "FD");
   pdf.addImage(qrImg, "PNG", qrX, qrY, qrSize, qrSize);
 
-  // ── Nombre del paciente ──
-  const nameX = x + 31;
-  const nameY = y + 24;
+  // Separador vertical dorado
+  const sepX = x + 34;
+  pdf.setDrawColor(...GOLD_MID);
+  pdf.setLineWidth(0.3);
+  pdf.line(sepX, zoneTop + 3, sepX, zoneBottom - 3);
+
+  // Nombre del paciente
+  const nameX = sepX + 3;
+  const nameY = zoneMidY - 5;
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(7);
-  pdf.setTextColor(58, 34, 0);
-  const maxName = 16;
-  const displayName = card.patientName.length > maxName
-    ? card.patientName.substring(0, maxName - 1) + "…"
+  pdf.setFontSize(7.5);
+  pdf.setTextColor(...BROWN_DARK);
+  const maxChars = 14;
+  const displayName = card.patientName.length > maxChars
+    ? card.patientName.substring(0, maxChars - 1) + "…"
     : card.patientName;
-  pdf.text(displayName.toUpperCase(), nameX, nameY);
+  pdf.text(displayName.toUpperCase(), nameX, nameY, { charSpace: 0.2 });
 
-  // ── Label "CÓDIGO" ──
-  pdf.setFont("helvetica", "normal");
+  // Línea dorada bajo el nombre
+  pdf.setDrawColor(...GOLD_MID);
+  pdf.setLineWidth(0.25);
+  pdf.line(nameX, nameY + 1.5, nameX + 28, nameY + 1.5);
+
+  // Label "CÓDIGO"
+  pdf.setFont("helvetica", "bold");
   pdf.setFontSize(4.5);
-  pdf.setTextColor(139, 105, 20);
-  pdf.text("CÓDIGO", nameX, nameY + 5);
+  pdf.setTextColor(...BROWN_MID);
+  pdf.text("CÓDIGO", nameX, nameY + 5, { charSpace: 0.6 });
 
-  // ── Número de monedero ──
+  // Número de monedero
   pdf.setFont("courier", "bold");
   pdf.setFontSize(7);
-  pdf.setTextColor(58, 34, 0);
-  pdf.text(card.walletNumber, nameX, nameY + 9.5);
+  pdf.setTextColor(...BROWN_DARK);
+  pdf.text(card.walletNumber, nameX, nameY + 9.5, { charSpace: 0.4 });
 
-  // ── URL con ícono globo (sin línea encima) ──
-  const urlY = y + H - 5;
-  pdf.setDrawColor(197, 165, 90);
+  // ── PIE (18% inferior = 9.72mm) — ícono globo + URL ──
+  const footerY = y + H * 0.82; // línea separadora
+  // Línea separadora sutil
+  pdf.setDrawColor(197, 165, 90, 0.35);
   pdf.setLineWidth(0.2);
-  pdf.circle(x + W / 2 - 18, urlY - 0.5, 1.2, "S");
+  pdf.line(x + 3, footerY, x + W - 3, footerY);
+
+  // Ícono globo (círculo + elipse + líneas horizontales)
+  const globeX = x + W / 2 - 16;
+  const globeY = y + H - 5;
+  const r = 2.2;
+  pdf.setDrawColor(...GOLD_MID);
+  pdf.setLineWidth(0.4);
+  pdf.circle(globeX, globeY - 0.5, r, "S");
+  // Ecuador horizontal
+  pdf.setLineWidth(0.3);
+  pdf.line(globeX - r, globeY - 0.5, globeX + r, globeY - 0.5);
+  // Líneas de latitud
+  pdf.setLineWidth(0.2);
+  pdf.line(globeX - r * 0.85, globeY - 1.8, globeX + r * 0.85, globeY - 1.8);
+  pdf.line(globeX - r * 0.85, globeY + 0.8, globeX + r * 0.85, globeY + 0.8);
+
+  // URL
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(5.5);
-  pdf.setTextColor(122, 92, 30);
-  pdf.text("nutriserpv.com/monedero", x + W / 2 - 14, urlY, { align: "left" });
+  pdf.setTextColor(...GOLD_DARK);
+  pdf.text("nutriserpv.com/monedero", globeX + r + 1.5, globeY, { charSpace: 0.3 });
 }
 
 /**
- * Genera y descarga el PDF de tarjetas del monedero.
+ * Genera y abre el PDF de tarjetas del monedero en una nueva pestaña.
  * @param cards Lista de tarjetas
  * @param mode "individual" (CR-80 por página) | "a4" (grilla 2×4 en A4)
  */

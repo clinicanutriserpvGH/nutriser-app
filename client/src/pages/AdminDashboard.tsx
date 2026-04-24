@@ -208,6 +208,7 @@ export default function AdminDashboard() {
   // Notificaciones push de prueba
   const [pushTestTitle, setPushTestTitle] = useState('');
   const [pushTestBody, setPushTestBody] = useState('');
+  const [pushTestPassword, setPushTestPassword] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState<'title' | 'body' | null>(null);
 
   const { data: pushSubscribersCount, refetch: refetchPushCount } = trpc.push.countSubscribers.useQuery(undefined, {
@@ -881,6 +882,7 @@ export default function AdminDashboard() {
   const refetchAnalytics = () => { refetchSummary(); refetchTrend(); refetchTopItems(); };
 
   const [showResetAnalyticsConfirm, setShowResetAnalyticsConfirm] = useState(false);
+  const [resetAnalyticsPassword, setResetAnalyticsPassword] = useState('');
   const resetAnalyticsMutation = trpc.analytics.resetAll.useMutation({
     onSuccess: (data) => {
       toast.success(`✅ Analítica reiniciada. Se eliminaron ${data.deleted} eventos.`);
@@ -2615,11 +2617,22 @@ export default function AdminDashboard() {
                     );
                   })()}
 
+                  <div className="mb-2">
+                    <label className="text-xs font-semibold text-[#666] block mb-1">Palabra clave de seguridad</label>
+                    <input
+                      type="password"
+                      value={pushTestPassword}
+                      onChange={(e) => setPushTestPassword(e.target.value)}
+                      placeholder="Palabra clave del administrador"
+                      className="w-full border border-[#C5A55A]/30 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/40"
+                    />
+                  </div>
                   <Button
                     onClick={() => {
+                      if (!pushTestPassword.trim()) { toast.error('Ingresa la palabra clave de seguridad'); return; }
                       setShowEmojiPicker(null);
                       sendTestPushMutation.mutate({
-                        adminPassword: 'nutriser2024',
+                        adminPassword: pushTestPassword.trim(),
                         title: pushTestTitle || undefined,
                         body: pushTestBody || undefined,
                       });
@@ -3750,21 +3763,33 @@ export default function AdminDashboard() {
                         Reiniciar
                       </button>
                     ) : (
-                      <div className="flex items-center gap-2 bg-red-50 border border-red-300 rounded-lg px-3 py-1.5">
-                        <span className="text-xs text-red-700 font-semibold">¿Borrar todos los datos?</span>
-                        <button
-                          onClick={() => resetAnalyticsMutation.mutate({ adminPassword: 'nutriser2024' })}
-                          disabled={resetAnalyticsMutation.isPending}
-                          className="px-2 py-0.5 rounded bg-red-600 text-white text-xs font-bold hover:bg-red-700 disabled:opacity-50 transition-all"
-                        >
-                          {resetAnalyticsMutation.isPending ? 'Reiniciando...' : 'Sí, reiniciar'}
-                        </button>
-                        <button
-                          onClick={() => setShowResetAnalyticsConfirm(false)}
-                          className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-300 transition-all"
-                        >
-                          Cancelar
-                        </button>
+                      <div className="flex flex-col gap-2 bg-red-50 border border-red-300 rounded-lg px-3 py-2">
+                        <span className="text-xs text-red-700 font-semibold">¿Borrar todos los datos de analítica?</span>
+                        <input
+                          type="password"
+                          value={resetAnalyticsPassword}
+                          onChange={(e) => setResetAnalyticsPassword(e.target.value)}
+                          placeholder="Palabra clave de seguridad"
+                          className="w-full border border-red-300 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-red-400"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              if (!resetAnalyticsPassword.trim()) { toast.error('Ingresa la palabra clave'); return; }
+                              resetAnalyticsMutation.mutate({ adminPassword: resetAnalyticsPassword.trim() });
+                            }}
+                            disabled={resetAnalyticsMutation.isPending}
+                            className="flex-1 px-2 py-1 rounded bg-red-600 text-white text-xs font-bold hover:bg-red-700 disabled:opacity-50 transition-all"
+                          >
+                            {resetAnalyticsMutation.isPending ? 'Reiniciando...' : 'Sí, reiniciar'}
+                          </button>
+                          <button
+                            onClick={() => { setShowResetAnalyticsConfirm(false); setResetAnalyticsPassword(''); }}
+                            className="flex-1 px-2 py-1 rounded bg-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-300 transition-all"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

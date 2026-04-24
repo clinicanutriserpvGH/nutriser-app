@@ -133,14 +133,17 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
               {isLoggedIn ? (
                 <>
                   <User className="w-3.5 h-3.5 text-green-300 flex-shrink-0" />
-                  <span className="text-[9px] font-bold tracking-wide uppercase text-green-200 leading-tight max-w-[60px] truncate">
-                    {patient?.name?.split(' ')[0] ?? 'Mi Cuenta'}
-                  </span>
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-[9px] font-bold tracking-wide uppercase text-green-200 max-w-[70px] truncate">
+                      {patient?.name?.split(' ')[0] ?? 'Mi Cuenta'}
+                    </span>
+                    <span className="text-[7px] text-green-300 max-w-[70px] leading-tight" style={{fontSize:'6.5px'}}>Seguimiento de mis tratamientos</span>
+                  </div>
                 </>
               ) : (
                 <>
                   <LogIn className="w-3.5 h-3.5 text-black flex-shrink-0" />
-                  <span className="text-[9px] font-bold tracking-wide uppercase text-black leading-tight">Crear<br/>Cuenta</span>
+                  <span className="text-[8px] font-bold tracking-wide uppercase text-black leading-tight">Crear Cuenta<br/>Nutriser</span>
                 </>
               )}
             </button>

@@ -128,57 +128,35 @@ export async function generateWalletPdf(
   const fileName = cards.length === 1
     ? "tarjeta-" + cards[0].walletNumber + ".pdf"
     : "tarjetas-nutriser-" + cards.length + ".pdf";
-  const pdfDataUri = pdf.output("datauristring");
-  // Pagina HTML con botones accesibles en iOS WebView
-  // safe-area-inset-top garantiza que los botones no queden detras del Dynamic Island
-  const html = [
-    "<!DOCTYPE html><html lang='es'><head>",
-    "<meta charset='UTF-8'>",
-    "<meta name='viewport' content='width=device-width,initial-scale=1.0,viewport-fit=cover'>",
-    "<title>Monedero Nutriser</title>",
-    "<style>",
-    "*{margin:0;padding:0;box-sizing:border-box}",
-    "body{background:#111;font-family:-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column}",
-    ".bar{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#C5A55A,#A07830);",
-    "padding-top:max(env(safe-area-inset-top),50px);padding-bottom:14px;padding-left:16px;padding-right:16px;",
-    "display:flex;gap:12px;justify-content:center;align-items:center;z-index:999;box-shadow:0 3px 12px rgba(0,0,0,.5)}",
-    ".btn{display:inline-flex;align-items:center;gap:6px;padding:12px 22px;border-radius:10px;",
-    "font-size:15px;font-weight:700;cursor:pointer;border:none;text-decoration:none;-webkit-tap-highlight-color:transparent}",
-    ".save{background:white;color:#7A5C1E}",
-    ".print{background:#1a1a1a;color:#C5A55A;border:2px solid #C5A55A}",
-    ".gap{height:calc(max(env(safe-area-inset-top),50px) + 80px)}",
-    ".body{flex:1;display:flex;flex-direction:column;align-items:center;padding:16px;",
-    "padding-bottom:max(env(safe-area-inset-bottom),20px)}",
-    "embed{width:100%;max-width:600px;height:72vh;border:none;border-radius:8px;background:white}",
-    ".tip{color:#888;font-size:13px;text-align:center;margin-top:14px;line-height:1.6;max-width:340px}",
-    ".tip b{color:#C5A55A}",
-    "</style></head><body>",
-    "<div class='bar'>",
-    "<a class='btn save' href='" + pdfDataUri + "' download='" + fileName + "'>&#11015; Guardar PDF</a>",
-    "<button class='btn print' onclick='window.print()'>&#128424; Imprimir</button>",
-    "</div>",
-    "<div class='gap'></div>",
-    "<div class='body'>",
-    "<embed src='" + pdfDataUri + "' type='application/pdf'/>",
-    "<p class='tip'>Toca <b>Guardar PDF</b> para descargarlo<br>o <b>Imprimir</b> para enviarlo a tu impresora.</p>",
-    "</div></body></html>"
-  ].join("");
-  const blob = new Blob([html], { type: "text/html" });
-  const blobUrl = URL.createObjectURL(blob);
-  const win = window.open(blobUrl, "_blank");
-  if (!win) {
-    // Fallback WebView: descarga directa del PDF
-    const pdfBlob = pdf.output("blob");
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    const a = document.createElement("a");
-    a.href = pdfUrl;
-    a.download = fileName;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { URL.revokeObjectURL(pdfUrl); a.remove(); }, 3000);
-  }
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
+
+  // Subir PDF a S3 via tRPC para obtener URL HTTPS real (funciona en iOS WebView)
+  const pdfBase64 = pdf.output("datauristring").split(",")[1];
+  try {
+    const res = await fetch("/api/trpc/wallet.uploadPdf", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ json: { pdfBase64, fileName } }),
+    });
+    const data = await res.json();
+    const url: string = data?.result?.data?.json?.url;
+    if (url) {
+      // Abrir URL HTTPS real — funciona en Safari, WebView y cualquier navegador
+      window.location.href = url;
+      return;
+    }
+  } catch (_) { /* fallback abajo */ }
+
+  // Fallback: descarga directa con blob (funciona en desktop/Android)
+  const pdfBlob = pdf.output("blob");
+  const pdfUrl = URL.createObjectURL(pdfBlob);
+  const a = document.createElement("a");
+  a.href = pdfUrl;
+  a.download = fileName;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(pdfUrl); a.remove(); }, 3000);
 }
 
 export async function generateWalletPdfFromElements(

@@ -3261,11 +3261,22 @@ export const appRouter = router({
         if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
-        await adminUnsuspendWallet(wallet.id);
+         await adminUnsuspendWallet(wallet.id);
         return { ok: true };
       }),
+    // Subir PDF generado en cliente a S3 y devolver URL pública HTTPS
+    uploadPdf: publicProcedure
+      .input(z.object({
+        pdfBase64: z.string(),
+        fileName: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const buffer = Buffer.from(input.pdfBase64, 'base64');
+        const key = `wallet-pdfs/${Date.now()}-${input.fileName}`;
+        const { url } = await storagePut(key, buffer, 'application/pdf');
+        return { url };
+      }),
   }),
-
   // ─── Analítica de Comportamiento ─────────────────────────────────────────────
   analytics: router({
     // Público: registrar un evento de comportamiento (fire-and-forget)

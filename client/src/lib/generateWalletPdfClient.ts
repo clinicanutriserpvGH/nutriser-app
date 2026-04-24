@@ -1,7 +1,13 @@
 /**
  * generateWalletPdfClient.ts
- * Tarjeta CR-80 idéntica a la previsualización NutriserWalletCard.
- * Se abre en nueva pestaña (bloburl) — compatible con iOS Safari.
+ * PDF idéntico a la imagen de referencia aprobada:
+ *  - "MONEDERO NUTRISER" centrado arriba
+ *  - Líneas cortas decorativas A LOS LADOS de "aesthetic & nutrition" (no encima)
+ *  - Silueta dorada grande y bien proporcionada (ancha, no estirada) a la derecha
+ *  - QR con borde dorado a la izquierda
+ *  - Separador vertical | Nombre + CÓDIGO + número
+ *  - Pie: globo + nutriserpv.com/monedero
+ *  - Sin líneas horizontales largas que crucen la tarjeta
  */
 
 import jsPDF from "jspdf";
@@ -14,9 +20,8 @@ export interface WalletPdfCardData {
   qrUrl: string;
 }
 
-// CR-80: 85.6 × 54 mm
-const W = 85.60;
-const H = 54.00;
+const W = 85.60; // CR-80 ancho mm
+const H = 54.00; // CR-80 alto mm
 
 async function makeQR(text: string): Promise<string> {
   return QRCode.toDataURL(text, {
@@ -38,38 +43,44 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.setLineWidth(0.35);
   pdf.roundedRect(x, y, W, H, 3, 3, "S");
 
-  // ── CABECERA (0 → 30% = 16.2mm) ──────────────────────────────────────────
+  // ── CABECERA ──────────────────────────────────────────────────────────────
   const cx = x + W / 2;
 
-  // Título "MONEDERO NUTRISER"
+  // "MONEDERO NUTRISER"
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7.8);
   pdf.setTextColor(139, 105, 20);
   pdf.text("MONEDERO NUTRISER", cx, y + 7.5, { align: "center", charSpace: 1.0 });
 
-  // "aesthetic & nutrition" — en cursiva, centrado, SIN líneas encima
+  // Líneas cortas A LOS LADOS del texto "aesthetic & nutrition"
+  // Las líneas miden ~8mm y están separadas del texto por un espacio
+  const subY = y + 11.8;
+  pdf.setDrawColor(197, 165, 90);
+  pdf.setLineWidth(0.22);
+  pdf.line(cx - 28, subY, cx - 15, subY); // izquierda: 8mm, termina antes del texto
+  pdf.line(cx + 15, subY, cx + 28, subY); // derecha: 8mm, empieza después del texto
+
+  // "aesthetic & nutrition" — entre las dos líneas cortas
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(4.2);
   pdf.setTextColor(184, 150, 62);
-  pdf.text("aesthetic & nutrition", cx, y + 11.5, { align: "center", charSpace: 0.6 });
+  pdf.text("aesthetic & nutrition", cx, subY + 0.5, { align: "center", charSpace: 0.6 });
 
-  // Sin líneas horizontales — igual que la previsualización en pantalla
-
-  // ── ZONA CENTRAL (30% → 82%) ──────────────────────────────────────────────
-  const zTop    = y + H * 0.30;  // 16.2
-  const zBottom = y + H * 0.82;  // 44.28
-  const zH      = zBottom - zTop; // 28.08
-  const zMid    = zTop + zH / 2;
-
-  // SILUETA — grande, igual que en la previsualización (74% del alto total de la tarjeta)
-  // En NutriserWalletCard: top=8%, bottom=18%, height=74%, maxWidth=38%
-  const silH = H * 0.60;           // 32.4mm — silueta bien proporcionada, no estirada
-  const silW = silH * 0.55;        // proporción ancho/alto correcta de la silueta
-  const silX = x + W - silW - 1.5; // pegada al borde derecho
-  const silY = y + H * 0.08;       // empieza al 8% del alto, igual que React
+  // ── SILUETA ───────────────────────────────────────────────────────────────
+  // Referencia imagen: silueta ocupa ~40% del ancho y ~65% del alto, bien proporcionada
+  const silH = H * 0.62;           // ~33.5mm de alto
+  const silW = silH * 0.60;        // ~20mm de ancho — proporción natural, no estirada
+  const silX = x + W - silW - 2.0; // pegada al borde derecho
+  const silY = y + H * 0.15;       // empieza al 15% del alto
   try {
     pdf.addImage(SILUETA_B64, "PNG", silX, silY, silW, silH);
   } catch (_) {}
+
+  // ── ZONA CENTRAL ──────────────────────────────────────────────────────────
+  const zTop    = y + H * 0.30;
+  const zBottom = y + H * 0.82;
+  const zH      = zBottom - zTop;
+  const zMid    = zTop + zH / 2;
 
   // QR con borde dorado
   const qrSize = 21;
@@ -114,7 +125,7 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   pdf.setTextColor(58, 34, 0);
   pdf.text(card.walletNumber, nameX, zMid + 6, { charSpace: 0.3 });
 
-  // ── PIE (82% → 100%) ──────────────────────────────────────────────────────
+  // ── PIE ───────────────────────────────────────────────────────────────────
   pdf.setDrawColor(197, 165, 90);
   pdf.setLineWidth(0.18);
   pdf.line(x + 3, zBottom, x + W - 3, zBottom);
@@ -153,7 +164,6 @@ export async function generateWalletPdf(
     }
     window.open(pdf.output("bloburl"), "_blank");
   } else {
-    // A4: 2 columnas × 4 filas
     const A4_W = 210, A4_H = 297, GAP = 6;
     const MX = (A4_W - 2 * W - GAP) / 2;
     const MY = (A4_H - 4 * H - 3 * GAP) / 2;

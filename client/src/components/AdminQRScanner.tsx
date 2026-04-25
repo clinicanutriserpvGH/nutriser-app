@@ -1096,6 +1096,9 @@ export default function AdminQRScanner() {
                   })()}
                 </div>
 
+                {/* ─── Planes de Pago Activos del Paciente ─── */}
+                <PatientInstallmentPlans walletNumber={walletNumber} />
+
                 {/* ─── Administración del Monedero (Reiniciar / Dar de Baja / Alta) ─── */}
                 <div className="mt-3 border border-red-200 rounded-xl p-3 bg-gradient-to-br from-red-50/60 to-white space-y-2">
                   <div className="flex items-center gap-2 mb-1">
@@ -1543,6 +1546,182 @@ function SecurityPasswordInputInline({ onConfirm, onCancel }: { onConfirm: (pw: 
           Confirmar
         </Button>
       </DialogFooter>
+    </div>
+  );
+}
+
+// ─── Componente: Planes de Pago Activos del Paciente (vista admin) ─────────
+function PatientInstallmentPlans({ walletNumber }: { walletNumber: string }) {
+  const utils = trpc.useUtils();
+  const plansQuery = trpc.installments.getMyPlans.useQuery(
+    { walletNumber },
+    { enabled: !!walletNumber }
+  );
+
+  const confirmPaymentMutation = trpc.installments.confirmPayment.useMutation({
+    onSuccess: () => {
+      toast.success('✅ Cuota registrada como pagada.');
+      utils.installments.getMyPlans.invalidate({ walletNumber });
+    },
+    onError: (e) => toast.error('Error al registrar cuota: ' + e.message),
+  });
+
+  const plans = plansQuery.data ?? [];
+  const activePlans = plans.filter((p: any) => p.status === 'active');
+
+  if (plansQuery.isLoading) {
+    return (
+      <div className="mt-3 border border-indigo-200 rounded-xl p-3 bg-indigo-50/40">
+        <div className="flex items-center gap-2 text-indigo-600 text-sm">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span>Cargando planes de pago...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (activePlans.length === 0) return null;
+
+  return (
+    <div className="mt-3 border border-indigo-200 rounded-xl p-3 bg-gradient-to-br from-indigo-50/60 to-white space-y-3">
+      <div className="flex items-center gap-2">
+        <CreditCard className="w-4 h-4 text-indigo-600" />
+        <span className="text-sm font-bold text-gray-800">Planes de Pago Activos ({activePlans.length})</span>
+      </div>
+
+      {activePlans.map((plan: any) => {
+        const paidInstallments = plan.paidInstallments ?? 0;
+        const totalInstallments = plan.totalInstallments ?? 0;
+        const totalAmountCents = plan.totalAmountCents ?? 0;
+        const paidAmountCents = totalInstallments > 0
+          ? Math.round((paidInstallments / totalInstallments) * totalAmountCents)
+          : 0;
+        const pendingAmountCents = totalAmountCents - paidAmountCents;
+        const perInstallmentCents = totalInstallments > 0
+          ? Math.round(totalAmountCents / totalInstallments)
+          : 0;
+        const progressPct = totalInstallments > 0
+          ? Math.round((paidInstallments / totalInstallments) * 100)
+          : 0;
+
+        // Artículos del plan
+        let planItems: { name: string; priceCents: number }[] = [];
+        try {
+          if (plan.itemsJson) planItems = JSON.parse(plan.itemsJson);
+        } catch {}
+
+        // Pagos pendientes (cuotas no pagadas)
+        const pendingPayments = (plan.payments ?? []).filter((p: any) => p.status === 'pending');
+        const nextPayment = pendingPayments[0];
+
+        return (
+          <div key={plan.id} className="border border-indigo-100 rounded-lg p-3 bg-white space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-sm font-bold text-gray-800">{plan.concept}</p>
+                <p className="text-xs text-gray-500 capitalize">
+                  Pagos {plan.modalidad === 'quincenal' ? 'quincenales' : 'semanales'}
+                </p>
+              </div>
+              <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
+                Activo
+              </span>
+            </div>
+
+            {/* Artículos incluidos en el plan */}
+            {planItems.length > 0 && (
+              <div className="bg-gray-50 rounded-lg p-2 space-y-1">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Artículos en plan:</p>
+                {planItems.map((item: any, idx: number) => (
+                  <div key={idx} className="flex justify-between text-xs">
+                    <span className="text-gray-700">{item.name}</span>
+                    <span className="font-semibold text-gray-800">${(item.priceCents / 100).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Barra de progreso */}
+            <div>
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>{paidInstallments} de {totalInstallments} cuotas pagadas</span>
+                <span className="font-bold text-indigo-600">{progressPct}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-indigo-500 h-2 rounded-full transition-all"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Montos */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-green-50 rounded-lg p-2 text-center">
+                <p className="text-xs text-gray-500">Pagado</p>
+                <p className="text-sm font-bold text-green-700">${(paidAmountCents / 100).toFixed(2)}</p>
+              </div>
+              <div className="bg-red-50 rounded-lg p-2 text-center">
+                <p className="text-xs text-gray-500">Pendiente</p>
+                <p className="text-sm font-bold text-red-600">${(pendingAmountCents / 100).toFixed(2)}</p>
+              </div>
+            </div>
+
+            {/* Próxima cuota y botón registrar */}
+            {nextPayment && (
+              <div className="border border-amber-200 rounded-lg p-2 bg-amber-50">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-semibold text-amber-700">Próxima cuota</p>
+                    <p className="text-sm font-bold text-gray-800">${(perInstallmentCents / 100).toFixed(2)}</p>
+                    {nextPayment.dueDate && (
+                      <p className="text-xs text-gray-500">
+                        Vence: {new Date(nextPayment.dueDate).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (confirm(`¿Registrar pago de cuota $${(perInstallmentCents / 100).toFixed(2)} para "${plan.concept}"?`)) {
+                        confirmPaymentMutation.mutate({
+                          paymentId: nextPayment.id,
+                          adminEmail: 'admin@nutriser.com',
+                        });
+                      }
+                    }}
+                    disabled={confirmPaymentMutation.isPending}
+                    className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors"
+                  >
+                    {confirmPaymentMutation.isPending ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Check className="w-3 h-3" />
+                    )}
+                    Registrar pago
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Historial de cuotas pagadas */}
+            {paidInstallments > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Cuotas pagadas:</p>
+                {(plan.payments ?? [])
+                  .filter((p: any) => p.status === 'paid')
+                  .map((p: any, idx: number) => (
+                    <div key={p.id} className="flex justify-between text-xs bg-green-50 rounded px-2 py-1">
+                      <span className="text-gray-600">Cuota #{idx + 1}</span>
+                      <span className="font-semibold text-green-700">
+                        ${(perInstallmentCents / 100).toFixed(2)} — {p.paidAt ? new Date(p.paidAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }) : 'Pagado'}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

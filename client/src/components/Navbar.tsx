@@ -41,17 +41,19 @@ interface NavbarProps {
   onShowSplash?: () => void;
   /** Cuando es true (Home/sitio principal), en móvil solo muestra Inicio, sin Regresar */
   isHome?: boolean;
+  /** Override del comportamiento de Regresar (por defecto va a Splash 1) */
+  onRegresar?: () => void;
 }
 
-export default function Navbar({ lightBg = false, onShowSplash, isHome = false }: NavbarProps) {
+export default function Navbar({ lightBg = false, onShowSplash, isHome = false, onRegresar }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [, navigate] = useLocation();
   const { showSplash, showSplash1 } = useSplash();
   const { isDesktop } = useDeviceType();
 
-  // Móvil: Regresar → Splash 1 (hub de Nutriser)
-  const handleRegresar = showSplash1;
+  // Móvil: Regresar → Splash 1 (hub de Nutriser) o destino personalizado
+  const handleRegresar = onRegresar ?? showSplash1;
   // Móvil: Inicio → Splash 0 (pantalla de entrada)
   const handleInicio = onShowSplash ?? showSplash;
   // Desktop: Ir a Tienda Nutriser

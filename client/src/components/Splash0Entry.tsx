@@ -21,7 +21,7 @@ const CLINIC_SHOP_IMG =
 const IMG_ACADEMY =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy-hub-v2-B6bpVdHqtSSKFqZdAvvqyS.webp";
 const PORTAL_IMG =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-portal-mockup-v4-aU4KfCJ6CG97EN8YaBoxMa.png";
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663459263490/MFJTqCeAfeXYamlP.png";
 const NUTRISER_ICON =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-silhouette-icon_f9345ac8.png";
 
@@ -182,7 +182,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   src={PORTAL_IMG}
                   alt="Portal de Salud Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                  style={{ objectPosition: "center center" }}
+                  style={{ objectPosition: "center 30%" }}
                   loading="eager"
                   fetchPriority="high"
                 />

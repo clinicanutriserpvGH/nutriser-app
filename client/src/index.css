@@ -228,3 +228,13 @@ nav[data-navbar] {
     break-inside: avoid;
   }
 }
+
+/* ── Wallet sheet animations ── */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}

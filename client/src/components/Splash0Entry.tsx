@@ -85,13 +85,13 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
       }}
     >
       <div
-        className="min-h-screen w-full flex flex-col items-center px-3 sm:px-4 md:px-6 lg:px-12 xl:px-16 box-border"
+        className="h-screen w-full flex flex-col items-center px-3 sm:px-4 md:px-6 lg:px-12 xl:px-16 box-border overflow-y-auto"
         style={{
           paddingTop: "max(env(safe-area-inset-top, 0px) + 12px, 20px)",
           paddingBottom: "max(env(safe-area-inset-bottom, 0px) + 8px, 16px)",
         }}
       >
-        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[900px] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px] flex flex-col flex-1">
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[900px] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px] flex flex-col" style={{ minHeight: '100%', justifyContent: 'space-between' }}>
 
           {/* ── Header ── */}
           <div className={`flex items-center gap-3 mb-3 md:mb-4 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
@@ -104,7 +104,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 className="block cursor-pointer focus:outline-none"
                 aria-label="Acceso administrador"
               >
-                <img src={LOGO_URL} alt="Nutriser" className="relative w-11 h-11 md:w-14 md:h-14 object-contain" />
+                <img src={LOGO_URL} alt="Nutriser" className="relative w-11 h-11 md:w-14 md:h-14 object-contain" loading="eager" fetchPriority="high" />
               </button>
             </div>
             <div className="w-px h-10 bg-[#C5A55A]/50 flex-shrink-0" />
@@ -183,6 +183,8 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   alt="Portal de Salud Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   style={{ objectPosition: "center center" }}
+                  loading="eager"
+                  fetchPriority="high"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/80 pointer-events-none" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">
@@ -245,6 +247,8 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   alt="Tienda Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                   style={{ objectPosition: "center 30%" }}
+                  loading="eager"
+                  fetchPriority="high"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85 pointer-events-none" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">

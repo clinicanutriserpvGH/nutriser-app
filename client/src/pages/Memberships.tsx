@@ -2616,120 +2616,134 @@ onClick={() => {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
-          BARRA DE NAVEGACIÓN INFERIOR (estilo Farmacias del Ahorro)
+          BARRA DE NAVEGACIÓN INFERIOR — Monedero FAB centrado (estilo Monedero del Ahorro)
       ══════════════════════════════════════════════════════════════════════ */}
       {!walletSheetOpen && !checkoutOpen && !cartOpen && (
         <div className="fixed bottom-0 left-0 right-0 z-[60]">
-          <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
-            <div className="w-full max-w-screen-lg mx-auto flex items-end justify-around px-2 md:px-8 lg:px-16 pt-2 lg:pt-3 pb-1">
-              {/* Tratamientos */}
-              <button
-                onClick={() => setActiveTab("tratamientos")}
-                className={`flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors ${
-                  activeTab === "tratamientos" ? "text-[#C5A55A]" : "text-gray-400"
-                }`}
-              >
-                {/* Silueta corporal con cintura marcada — representa tratamientos estéticos */}
-                <svg viewBox="0 0 24 24" className="w-7 h-7 lg:w-8 lg:h-8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="3.5" r="1.8" />
-                  <path d="M8.5 7.5 C9 6 10.5 5.5 12 5.5 C13.5 5.5 15 6 15.5 7.5" />
-                  <path d="M8.5 7.5 L8 11.5 C7.8 13 9.5 13.8 12 13.8 C14.5 13.8 16.2 13 16 11.5 L15.5 7.5" />
-                  <path d="M8 11.5 L7.5 15.5 C7.5 17 9.5 17.8 12 17.8 C14.5 17.8 16.5 17 16.5 15.5 L16 11.5" />
-                  <path d="M9.5 17.8 L9 22 M14.5 17.8 L15 22" />
-                  <path d="M4.5 11 L6.5 12.5 M4.5 14 L6.5 12.5" strokeWidth="1.3" />
-                  <path d="M19.5 11 L17.5 12.5 M19.5 14 L17.5 12.5" strokeWidth="1.3" />
-                </svg>
-                <span className="text-[11px] lg:text-xs font-semibold leading-tight mt-0.5">{t("tabServices", lang)}</span>
-              </button>
-
-              {/* Productos */}
-              <button
-                onClick={() => setActiveTab("farmacy")}
-                className={`flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors ${
-                  activeTab === "farmacy" ? "text-[#C5A55A]" : "text-gray-400"
-                }`}
-              >
-                <Droplets className="w-7 h-7 lg:w-8 lg:h-8" />
-                <span className="text-[11px] lg:text-xs font-semibold leading-tight mt-0.5">{t("tabProducts", lang)}</span>
-              </button>
-
-              {/* Monedero — Mini tarjeta Nutriser flotante */}
-              <button
-                onClick={() => {
-                  if (!requireAuth("ver tu Monedero Nutriser")) return;
-                  if (!walletData && patient?.id) walletQuery.refetch();
-                  setWalletSheetOpen(true);
-                }}
-                className="flex flex-col items-center -mt-5 lg:-mt-7 relative"
-                aria-label="Mi Monedero Nutriser"
-              >
+          {/* Tarjeta Monedero FAB — sobresale hacia arriba de la barra, estilo Monedero del Ahorro */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center" style={{ zIndex: 10, bottom: 'calc(100% - 10px)' }}>
+            <button
+              onClick={() => {
+                if (!requireAuth("ver tu Monedero Nutriser")) return;
+                if (!walletData && patient?.id) walletQuery.refetch();
+                setWalletSheetOpen(true);
+              }}
+              className="flex flex-col items-center relative group"
+              aria-label="Mi Monedero Nutriser"
+            >
               {/* Contador de notificaciones no leídas */}
               {adminUnreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 z-10 w-5 h-5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-lg animate-bounce">
                   {adminUnreadCount > 9 ? '9+' : adminUnreadCount}
                 </span>
               )}
-              {/* Mini tarjeta CR-80 estilo Nutriser — fondo blanco con franjas doradas */}
+              {/* Tarjeta CR-80 Nutriser — más grande para que se vea el diseño */}
               <div
-                className="relative overflow-hidden hover:scale-105 active:scale-95 transition-all"
-                  style={{
-                    width: 62,
-                    height: 40,
-                    borderRadius: 7,
-                    background: '#FFFFFF',
-                    boxShadow: '0 4px 14px rgba(197,165,90,0.45), 0 0 0 1.5px #C5A55A',
-                  }}
-                >
-                  {/* Franja dorada superior */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 8, background: 'linear-gradient(90deg, #8B6914, #C5A55A, #E8C97A, #C5A55A, #8B6914)', display: 'flex', alignItems: 'center', paddingLeft: 4, gap: 2 }}>
-                    <img src={LOGO_URL} alt="" style={{ width: 12, height: 12, objectFit: 'contain', flexShrink: 0 }} />
-                    <span style={{ color: '#3a2200', fontWeight: 900, fontSize: 4.5, letterSpacing: '0.1em', textTransform: 'uppercase', lineHeight: 1 }}>Monedero</span>
-                  </div>
-                  {/* Silueta dorada */}
-                  <img src="/manus-storage/nutriser-silueta_f6738ee7.png" alt="" style={{ position: 'absolute', right: 1, top: 7, bottom: 8, height: 'calc(100% - 16px)', width: 'auto', objectFit: 'contain', opacity: 0.85, filter: 'sepia(1) saturate(2.8) hue-rotate(3deg) brightness(0.9)', pointerEvents: 'none' }} />
-                  {/* Franja dorada inferior */}
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 8, background: 'linear-gradient(135deg, #8B6914, #C5A55A, #E8C97A, #C5A55A, #8B6914)', display: 'flex', alignItems: 'center', paddingLeft: 4 }}>
-                    <span style={{ color: '#1A1A1A', fontWeight: 900, fontSize: 4.5, textTransform: 'uppercase', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 40 }}>{patient?.name?.split(' ')[0] || 'Nutriser'}</span>
-                  </div>
-                </div>
-                <span className="text-[11px] lg:text-xs font-bold text-[#C5A55A] mt-1 leading-tight">{t("tabWallet", lang)}</span>
-              </button>
-
-              {/* Librería */}
-              <button
-                onClick={() => setActiveTab("library")}
-                className={`flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors ${
-                  activeTab === "library" ? "text-[#C5A55A]" : "text-gray-400"
-                }`}
-              >
-                <BookOpen className="w-7 h-7 lg:w-8 lg:h-8" />
-                <span className="text-[11px] lg:text-xs font-semibold leading-tight mt-0.5">{t("tabLibrary", lang)}</span>
-              </button>
-
-              {/* Deseos */}
-              <button
-                onClick={() => setActiveTab("wishlist")}
-                className={`flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors relative ${
-                  activeTab === "wishlist" ? "text-red-500" : "text-gray-400"
-                }`}
-              >
-                <Heart className="w-7 h-7 lg:w-8 lg:h-8" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-0.5 right-0 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center">{wishlistCount > 9 ? "9+" : wishlistCount}</span>
-                )}
-                <span className="text-[11px] lg:text-xs font-semibold leading-tight mt-0.5">{t("tabWishlist", lang)}</span>
-              </button>
-              {/* Cuenta */}
-              <button
-                onClick={() => {
-                  if (!requireAuth("ver tu cuenta y estado de monedero")) return;
-                  navigate("/monedero");
+                className="relative overflow-hidden group-hover:scale-105 active:scale-95 transition-all"
+                style={{
+                  width: 80,
+                  height: 52,
+                  borderRadius: 9,
+                  background: '#FFFFFF',
+                  boxShadow: '0 -4px 20px rgba(197,165,90,0.5), 0 4px 16px rgba(197,165,90,0.4), 0 0 0 2px #C5A55A',
                 }}
-                className="flex flex-col items-center gap-1 lg:gap-1 py-2 lg:py-2 px-1 lg:px-2 min-w-[52px] lg:min-w-[60px] transition-colors text-gray-400"
               >
-                <User className="w-7 h-7 lg:w-8 lg:h-8" />
-                <span className="text-[11px] lg:text-xs font-semibold leading-tight mt-0.5">{t("tabAccount", lang)}</span>
-              </button>
+                {/* Franja dorada superior */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 11, background: 'linear-gradient(90deg, #8B6914, #C5A55A, #E8C97A, #C5A55A, #8B6914)', display: 'flex', alignItems: 'center', paddingLeft: 5, gap: 3 }}>
+                  <img src={LOGO_URL} alt="" style={{ width: 14, height: 14, objectFit: 'contain', flexShrink: 0 }} />
+                  <span style={{ color: '#3a2200', fontWeight: 900, fontSize: 5.5, letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>Monedero</span>
+                </div>
+                {/* Silueta dorada */}
+                <img src="/manus-storage/nutriser-silueta_f6738ee7.png" alt="" style={{ position: 'absolute', right: 2, top: 10, bottom: 10, height: 'calc(100% - 22px)', width: 'auto', objectFit: 'contain', opacity: 0.85, filter: 'sepia(1) saturate(2.8) hue-rotate(3deg) brightness(0.9)', pointerEvents: 'none' }} />
+                {/* Franja dorada inferior */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 11, background: 'linear-gradient(135deg, #8B6914, #C5A55A, #E8C97A, #C5A55A, #8B6914)', display: 'flex', alignItems: 'center', paddingLeft: 5 }}>
+                  <span style={{ color: '#1A1A1A', fontWeight: 900, fontSize: 5.5, textTransform: 'uppercase', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 55 }}>{patient?.name?.split(' ')[0] || 'Nutriser'}</span>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold text-[#C5A55A] mt-0.5 leading-tight">{t("tabWallet", lang)}</span>
+            </button>
+          </div>
+
+          {/* Barra inferior con 4 pestañas: 2 izquierda + espacio central + 2 derecha */}
+          <div className="relative bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.08)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
+            {/* Bump semicircular para el FAB */}
+            <div className="absolute left-1/2 -translate-x-1/2 -top-[1px]" style={{ width: 96, height: 20, overflow: 'hidden', pointerEvents: 'none' }}>
+              <div style={{ width: 96, height: 96, borderRadius: '50%', background: 'white', border: '1px solid #e5e7eb', position: 'absolute', top: 0, left: 0, boxShadow: '0 -4px 10px rgba(0,0,0,0.06)' }} />
+            </div>
+            <div className="absolute left-0 right-0 -top-[1px] border-t border-gray-200" style={{ zIndex: 0 }} />
+            <div className="w-full max-w-screen-lg mx-auto flex items-center pt-2 pb-1 px-2">
+              {/* Izquierda: Tratamientos + Skincare */}
+              <div className="flex flex-1 justify-around">
+                {/* Tratamientos */}
+                <button
+                  onClick={() => setActiveTab("tratamientos")}
+                  className={`flex flex-col items-center gap-0.5 py-1 px-2 transition-colors ${
+                    activeTab === "tratamientos" ? "text-[#C5A55A]" : "text-gray-400"
+                  }`}
+                >
+                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="3.5" r="1.8" />
+                    <path d="M8.5 7.5 C9 6 10.5 5.5 12 5.5 C13.5 5.5 15 6 15.5 7.5" />
+                    <path d="M8.5 7.5 L8 11.5 C7.8 13 9.5 13.8 12 13.8 C14.5 13.8 16.2 13 16 11.5 L15.5 7.5" />
+                    <path d="M8 11.5 L7.5 15.5 C7.5 17 9.5 17.8 12 17.8 C14.5 17.8 16.5 17 16.5 15.5 L16 11.5" />
+                    <path d="M9.5 17.8 L9 22 M14.5 17.8 L15 22" />
+                    <path d="M4.5 11 L6.5 12.5 M4.5 14 L6.5 12.5" strokeWidth="1.3" />
+                    <path d="M19.5 11 L17.5 12.5 M19.5 14 L17.5 12.5" strokeWidth="1.3" />
+                  </svg>
+                  <span className="text-[10px] font-semibold leading-tight">{t("tabServices", lang)}</span>
+                </button>
+                {/* Skincare */}
+                <button
+                  onClick={() => setActiveTab("farmacy")}
+                  className={`flex flex-col items-center gap-0.5 py-1 px-2 transition-colors ${
+                    activeTab === "farmacy" ? "text-[#C5A55A]" : "text-gray-400"
+                  }`}
+                >
+                  <Droplets className="w-6 h-6" />
+                  <span className="text-[10px] font-semibold leading-tight">{t("tabProducts", lang)}</span>
+                </button>
+              </div>
+
+              {/* Centro: espacio para la tarjeta FAB */}
+              <div style={{ width: 96, flexShrink: 0 }} />
+
+              {/* Derecha: Librería + Deseos + Cuenta */}
+              <div className="flex flex-1 justify-around">
+                {/* Librería */}
+                <button
+                  onClick={() => setActiveTab("library")}
+                  className={`flex flex-col items-center gap-0.5 py-1 px-2 transition-colors ${
+                    activeTab === "library" ? "text-[#C5A55A]" : "text-gray-400"
+                  }`}
+                >
+                  <BookOpen className="w-6 h-6" />
+                  <span className="text-[10px] font-semibold leading-tight">{t("tabLibrary", lang)}</span>
+                </button>
+                {/* Deseos */}
+                <button
+                  onClick={() => setActiveTab("wishlist")}
+                  className={`flex flex-col items-center gap-0.5 py-1 px-2 transition-colors relative ${
+                    activeTab === "wishlist" ? "text-red-500" : "text-gray-400"
+                  }`}
+                >
+                  <Heart className="w-6 h-6" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-0.5 right-1 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center">{wishlistCount > 9 ? "9+" : wishlistCount}</span>
+                  )}
+                  <span className="text-[10px] font-semibold leading-tight">{t("tabWishlist", lang)}</span>
+                </button>
+                {/* Cuenta */}
+                <button
+                  onClick={() => {
+                    if (!requireAuth("ver tu cuenta y estado de monedero")) return;
+                    navigate("/monedero");
+                  }}
+                  className="flex flex-col items-center gap-0.5 py-1 px-2 transition-colors text-gray-400"
+                >
+                  <User className="w-6 h-6" />
+                  <span className="text-[10px] font-semibold leading-tight">{t("tabAccount", lang)}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2933,17 +2947,7 @@ onClick={() => {
         </div>
       )}
 
-      {/* CSS animations for wallet popup */}
-      <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-        @keyframes fadeInScale {
-          from { opacity: 0; transform: scale(0.92); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
+      {/* CSS animations moved to index.css */}
     </div>
   );
 }

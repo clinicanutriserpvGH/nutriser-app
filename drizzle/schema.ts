@@ -840,6 +840,7 @@ export const cashPendingPayments = mysqlTable("cashPendingPayments", {
   walletId: int("walletId").notNull(),          // FK a wallets.id
   patientId: int("patientId").notNull(),         // FK a patientAccounts.id
   concept: varchar("concept", { length: 500 }).notNull(), // Ej: "Cavitación 80K", "Cupón Promo Verano", "Curso Nutrición"
+  itemsJson: text("itemsJson"), // JSON array: [{name, qty, priceCents, itemType}]
   itemType: mysqlEnum("itemType", ["service", "product", "ebook", "package", "promotion", "course", "other"]).notNull(),
   itemId: varchar("itemId", { length: 100 }),   // ID del ítem si aplica
   amountCents: int("amountCents").notNull(),     // Monto total en centavos MXN

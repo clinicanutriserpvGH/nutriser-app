@@ -3578,6 +3578,7 @@ Devuelve un JSON con estos campos:
         walletId: z.number(),
         patientId: z.number(),
         concept: z.string().min(1),
+        itemsJson: z.string().optional(), // JSON array de artículos del carrito
         itemType: z.enum(['service', 'product', 'ebook', 'package', 'promotion', 'course', 'other']),
         itemId: z.string().optional(),
         amountCents: z.number().min(1),
@@ -3592,6 +3593,7 @@ Devuelve un JSON con estos campos:
           walletId: input.walletId,
           patientId: input.patientId,
           concept: input.concept,
+          itemsJson: input.itemsJson ?? null,
           itemType: input.itemType,
           itemId: input.itemId ?? null,
           amountCents: input.amountCents,

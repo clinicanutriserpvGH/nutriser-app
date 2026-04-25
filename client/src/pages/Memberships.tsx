@@ -825,10 +825,18 @@ export default function Memberships() {
       const firstItem = checkoutItems[0];
       // El saldo del monedero a usar se descuenta al confirmar el admin
       const walletUsedCents = useWallet ? Math.min(walletAmount, Math.round(discountedTotal * 100)) : 0;
+      // Construir desglose de artículos para mostrar en el admin
+      const itemsPayload = checkoutItems.map(i => ({
+        name: i.name,
+        qty: i.qty,
+        priceCents: Math.round((i.discountedPrice ?? i.price) * i.qty * 100),
+        itemType: i.itemType ?? 'service',
+      }));
       cashPendingMutation.mutate({
         walletId: walletData.id,
         patientId: patient.id,
         concept: itemNames,
+        itemsJson: JSON.stringify(itemsPayload),
         itemType: (firstItem?.itemType === 'product' ? 'product' : firstItem?.itemType === 'ebook' ? 'ebook' : firstItem?.itemType === 'package' ? 'package' : 'service') as any,
         itemId: firstItem?.id,
         amountCents: Math.round(discountedTotal * 100),

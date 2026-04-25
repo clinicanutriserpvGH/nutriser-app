@@ -200,6 +200,23 @@ export default function AdminQRScanner() {
     onError: (e) => toast.error('Error al eliminar: ' + e.message),
   });
 
+  // ─── Plan de Pagos a Plazos ─────────────────────────────────────────
+  const [showInstallmentForm, setShowInstallmentForm] = useState(false);
+  const [installmentConcept, setInstallmentConcept] = useState("");
+  const [installmentAmount, setInstallmentAmount] = useState("");
+  const [installmentModalidad, setInstallmentModalidad] = useState<'quincenal' | 'semanal'>('quincenal');
+
+  const installmentCreateMutation = trpc.installments.create.useMutation({
+    onSuccess: (data) => {
+      const perPayment = data.plan.totalAmountCents / data.plan.totalInstallments;
+      toast.success(`✅ Plan creado: ${data.plan.totalInstallments} pagos de $${(perPayment / 100).toFixed(2)} ${data.plan.modalidad === 'quincenal' ? 'quincenales' : 'semanales'}.`);
+      setShowInstallmentForm(false);
+      setInstallmentConcept("");
+      setInstallmentAmount("");
+    },
+    onError: (e) => toast.error('Error al crear plan: ' + e.message),
+  });
+
   // Mutation para registrar compra presencial
   const registerMutation = trpc.wallet.adminRegisterPresentialPurchase.useMutation({
     onSuccess: (data) => {
@@ -539,12 +556,16 @@ export default function AdminQRScanner() {
                       <DollarSign className="w-4 h-4 text-red-500" />
                       <span className="text-sm font-bold text-red-700">Pagos en Clínica Pendientes ({cashPendingQuery.data.length})</span>
                     </div>
-                    {cashPendingQuery.data.map((p: any) => (
+                    {cashPendingQuery.data.map((p: any) => {
+                      // Parsear itemsJson si existe
+                      let parsedItems: Array<{name: string; qty?: number; priceCents: number; itemType?: string}> = [];
+                      try { if (p.itemsJson) parsedItems = JSON.parse(p.itemsJson); } catch {}
+                      return (
                       <div key={p.id} className="bg-red-50 border border-red-200 rounded-xl p-3 space-y-2">
                         <div className="flex justify-between items-start">
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-900 truncate">{p.concept}</p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-0.5">Pago en clínica solicitado</p>
+                            <p className="text-xs text-gray-400">
                               {new Date(p.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
                             </p>
                           </div>
@@ -555,6 +576,29 @@ export default function AdminQRScanner() {
                             )}
                           </div>
                         </div>
+                        {/* Desglose de artículos del carrito */}
+                        {parsedItems.length > 0 ? (
+                          <div className="bg-white border border-red-100 rounded-lg px-3 py-2 space-y-1">
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Artículos ({parsedItems.length})</p>
+                            {parsedItems.map((item, idx) => (
+                              <div key={idx} className="flex justify-between items-center text-xs">
+                                <span className="text-gray-700 flex-1 min-w-0 pr-2">
+                                  {item.qty && item.qty > 1 ? <span className="font-bold text-[#C5A55A] mr-1">{item.qty}×</span> : null}
+                                  {item.name}
+                                </span>
+                                <span className="font-bold text-gray-900 whitespace-nowrap">${(item.priceCents / 100).toFixed(2)}</span>
+                              </div>
+                            ))}
+                            <div className="border-t border-gray-100 pt-1 flex justify-between text-xs font-black">
+                              <span className="text-gray-600">Total</span>
+                              <span className="text-red-700">${(p.amountCents / 100).toFixed(2)}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-white border border-red-100 rounded-lg px-3 py-2">
+                            <p className="text-sm font-bold text-gray-900">{p.concept}</p>
+                          </div>
+                        )}
                         {/* Desglose: saldo del monedero + efectivo a cobrar */}
                         {p.walletAmountUsedCents > 0 && (() => {
                           const cashCents = p.amountCents - p.walletAmountUsedCents;
@@ -590,7 +634,8 @@ export default function AdminQRScanner() {
                           </button>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 ) : (
                   <p className="text-xs text-center text-gray-400 mt-1">Sin pagos en clínica pendientes</p>
@@ -813,6 +858,92 @@ export default function AdminQRScanner() {
                     </div>
                   )}
                  </div>
+
+                {/* ─── Plan de Pagos a Plazos ─── */}
+                <div className="mt-3 border border-blue-200 rounded-xl p-3 bg-gradient-to-br from-blue-50/60 to-white space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">💳</span>
+                      <span className="text-sm font-bold text-gray-800">Plan de Pagos a Plazos</span>
+                    </div>
+                    <button
+                      onClick={() => setShowInstallmentForm(!showInstallmentForm)}
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      {showInstallmentForm ? 'Cancelar' : '+ Crear plan'}
+                    </button>
+                  </div>
+
+                  {showInstallmentForm && (
+                    <div className="space-y-2 pt-1">
+                      <input
+                        type="text"
+                        placeholder="Concepto (ej: Paquete Nutrición)"
+                        value={installmentConcept}
+                        onChange={(e) => setInstallmentConcept(e.target.value)}
+                        className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Monto total en pesos (ej: 3500)"
+                        value={installmentAmount}
+                        onChange={(e) => setInstallmentAmount(e.target.value)}
+                        className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      />
+                      <div className="flex gap-2">
+                        {(['quincenal', 'semanal'] as const).map((m) => (
+                          <button
+                            key={m}
+                            onClick={() => setInstallmentModalidad(m)}
+                            className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${
+                              installmentModalidad === m
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                            }`}
+                          >
+                            {m === 'quincenal' ? '📅 2 pagos quincenales (+10%)' : '📆 4 pagos semanales (+15%)'}
+                          </button>
+                        ))}
+                      </div>
+                      {installmentAmount && parseFloat(installmentAmount) > 0 && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-800">
+                          {(() => {
+                            const base = parseFloat(installmentAmount);
+                            const surcharge = installmentModalidad === 'quincenal' ? 0.10 : 0.15;
+                            const total = base * (1 + surcharge);
+                            const n = installmentModalidad === 'quincenal' ? 2 : 4;
+                            return <>
+                              <span className="font-bold">Total con recargo: ${total.toFixed(2)}</span>
+                              <span className="text-blue-600 ml-2">→ {n} pagos de ${(total / n).toFixed(2)}</span>
+                            </>;
+                          })()}
+                        </div>
+                      )}
+                      <button
+                        onClick={() => {
+                          const amount = parseFloat(installmentAmount);
+                          if (!installmentConcept.trim()) { toast.error('Ingresa el concepto'); return; }
+                          if (!amount || amount <= 0) { toast.error('Ingresa un monto válido'); return; }
+                          installmentCreateMutation.mutate({
+                            walletNumber,
+                            concept: installmentConcept.trim(),
+                            originalAmount: amount,
+                            modalidad: installmentModalidad,
+                            adminEmail: 'admin@nutriser.com',
+                          });
+                        }}
+                        disabled={installmentCreateMutation.isPending}
+                        className="w-full py-2 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                      >
+                        {installmentCreateMutation.isPending ? (
+                          <><Loader2 className="w-3 h-3 animate-spin" /> Creando plan...</>
+                        ) : (
+                          <><CreditCard className="w-3 h-3" /> Crear Plan de Pagos</>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {/* ─── Administración del Monedero (Reiniciar / Dar de Baja / Alta) ─── */}
                 <div className="mt-3 border border-red-200 rounded-xl p-3 bg-gradient-to-br from-red-50/60 to-white space-y-2">

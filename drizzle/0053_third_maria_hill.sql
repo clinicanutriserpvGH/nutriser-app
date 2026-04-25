@@ -1,0 +1,1 @@
+ALTER TABLE `cashPendingPayments` ADD `itemsJson` text;

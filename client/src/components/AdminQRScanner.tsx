@@ -912,28 +912,40 @@ export default function AdminQRScanner() {
                       }
                     }
 
-                    // Calcular montos a partir de allItems y los checkboxes seleccionados
-                    let planAmountCents = 0;
-                    let immediateAmountCents = 0;
+                    // Calcular el total de los artículos seleccionados para el plan
+                    let selectedTotalCents = 0;
                     let planItemsForJson: {name: string; priceCents: number}[] = [];
                     let immediateItemNames: string[] = [];
+                    let immediateAmountCents = 0; // artículos NO seleccionados para el plan
 
                     if (linkedPayment && allItems.length > 0) {
                       allItems.forEach((item, idx) => {
                         if (selectedPlanItems.includes(idx)) {
-                          planAmountCents += item.priceCents;
+                          selectedTotalCents += item.priceCents;
                           planItemsForJson.push(item);
                         } else {
                           immediateAmountCents += item.priceCents;
                           immediateItemNames.push(item.name);
                         }
                       });
-                    } else if (!linkedPayment) {
-                      // Modo manual: usar el monto escrito
-                      planAmountCents = Math.round(parseFloat(installmentAmount || '0') * 100);
                     }
 
-                    const planAmount = planAmountCents / 100;
+                    // REGLA ANTI-FRAUDE: 50% se paga de contado al crear el plan,
+                    // el otro 50% se divide en cuotas con recargo
+                    const downPaymentCents = Math.round(selectedTotalCents * 0.5);
+                    const planAmountCents = selectedTotalCents - downPaymentCents; // 50% restante
+
+                    let manualPlanAmountCents = 0;
+                    if (!linkedPayment) {
+                      // Modo manual: usar el monto escrito (ya es el total, se aplica 50/50)
+                      const manualTotal = Math.round(parseFloat(installmentAmount || '0') * 100);
+                      manualPlanAmountCents = Math.round(manualTotal * 0.5);
+                    }
+
+                    const effectivePlanAmountCents = linkedPayment ? planAmountCents : manualPlanAmountCents;
+                    const effectiveDownPaymentCents = linkedPayment ? downPaymentCents : Math.round(parseFloat(installmentAmount || '0') * 50); // 50% del manual
+
+                    const planAmount = effectivePlanAmountCents / 100;
                     const surcharge = installmentModalidad === 'quincenal' ? 0.10 : 0.15;
                     const planTotal = planAmount * (1 + surcharge);
                     const n = installmentModalidad === 'quincenal' ? 2 : 4;
@@ -996,11 +1008,7 @@ export default function AdminQRScanner() {
                             {selectedPlanItems.length === 0 && (
                               <p className="text-[10px] text-orange-500 font-semibold px-1">⚠️ Selecciona al menos un artículo para el plan</p>
                             )}
-                            {immediateAmountCents > 0 && (
-                              <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 text-[10px] text-green-800">
-                                <span className="font-bold">✅ Se confirmarán de inmediato:</span> {immediateItemNames.join(', ')} — ${(immediateAmountCents / 100).toFixed(2)}
-                              </div>
-                            )}
+
                           </div>
                         )}
 
@@ -1041,11 +1049,36 @@ export default function AdminQRScanner() {
                           ))}
                         </div>
 
-                        {/* Resumen del plan */}
+                        {/* Resumen del plan con regla 50/50 */}
                         {planAmount > 0 && (
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-800">
-                            <span className="font-bold">Total con recargo: ${planTotal.toFixed(2)}</span>
-                            <span className="text-blue-600 ml-2">→ {n} pagos de ${(planTotal / n).toFixed(2)}</span>
+                          <div className="space-y-1.5">
+                            <div className="bg-amber-50 border border-amber-300 rounded-lg px-3 py-2 text-xs text-amber-900">
+                              <p className="font-bold text-amber-800 mb-1">💰 Pago al crear el plan (50% contado)</p>
+                              <div className="flex justify-between">
+                                <span>Enganche requerido hoy:</span>
+                                <span className="font-black text-amber-700">${(effectiveDownPaymentCents / 100).toFixed(2)}</span>
+                              </div>
+                            </div>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-800">
+                              <p className="font-bold mb-1">📅 Resto a plazos (50% + recargo {surcharge * 100}%)</p>
+                              <div className="flex justify-between">
+                                <span>Subtotal a plazos:</span>
+                                <span className="font-bold">${planAmount.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Con recargo ({surcharge * 100}%):</span>
+                                <span className="font-bold">${planTotal.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between border-t border-blue-200 mt-1 pt-1">
+                                <span className="font-bold">{n} cuotas de:</span>
+                                <span className="font-black text-blue-700">${(planTotal / n).toFixed(2)}</span>
+                              </div>
+                            </div>
+                            {immediateAmountCents > 0 && (
+                              <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 text-[10px] text-green-800">
+                                <span className="font-bold">✅ Artículos pagados de inmediato:</span> {immediateItemNames.join(', ')} — ${(immediateAmountCents / 100).toFixed(2)}
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -1055,29 +1088,39 @@ export default function AdminQRScanner() {
                             // Validaciones
                             if (linkedCashPaymentId) {
                               if (selectedPlanItems.length === 0) { toast.error('Selecciona al menos un artículo para el plan'); return; }
-                              if (planAmountCents <= 0) { toast.error('El monto del plan debe ser mayor a 0'); return; }
+                              if (effectivePlanAmountCents <= 0) { toast.error('El monto del plan debe ser mayor a 0'); return; }
                               const conceptForPlan = planItemsForJson.map(i => i.name).join(', ');
+                              // immediateAmountCents aquí incluye artículos NO seleccionados + el enganche 50%
+                              const totalImmediateCents = immediateAmountCents + effectiveDownPaymentCents;
+                              const totalImmediateConcept = [
+                                ...(immediateItemNames.length > 0 ? [`${immediateItemNames.join(', ')}`] : []),
+                                `Enganche 50% (${conceptForPlan})`
+                              ].join(', ');
                               installmentCreateMutation.mutate({
                                 walletNumber,
                                 concept: conceptForPlan,
-                                originalAmount: planAmountCents / 100,
+                                originalAmount: effectivePlanAmountCents / 100,
                                 modalidad: installmentModalidad,
                                 adminEmail: 'admin@nutriser.com',
                                 cashPaymentId: linkedCashPaymentId,
                                 itemsJson: JSON.stringify(planItemsForJson),
-                                immediateAmountCents: immediateAmountCents > 0 ? immediateAmountCents : undefined,
-                                immediateConcept: immediateAmountCents > 0 ? immediateItemNames.join(', ') : undefined,
+                                immediateAmountCents: totalImmediateCents > 0 ? totalImmediateCents : undefined,
+                                immediateConcept: totalImmediateCents > 0 ? totalImmediateConcept : undefined,
                               });
                             } else {
                               const amount = parseFloat(installmentAmount);
                               if (!installmentConcept.trim()) { toast.error('Ingresa el concepto'); return; }
                               if (!amount || amount <= 0) { toast.error('Ingresa un monto válido'); return; }
+                              // Modo manual: 50% contado, 50% a plazos
+                              const halfAmount = amount * 0.5;
                               installmentCreateMutation.mutate({
                                 walletNumber,
                                 concept: installmentConcept.trim(),
-                                originalAmount: amount,
+                                originalAmount: halfAmount, // solo el 50% va a plazos
                                 modalidad: installmentModalidad,
                                 adminEmail: 'admin@nutriser.com',
+                                immediateAmountCents: Math.round(halfAmount * 100), // 50% contado
+                                immediateConcept: `Enganche 50% (${installmentConcept.trim()})`,
                               });
                             }
                           }}

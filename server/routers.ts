@@ -13,7 +13,7 @@ import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotification
 import { getAllProducts, getAllActiveProducts, getProductById, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
-import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount } from './db';
+import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount, adminRequireContract, adminClearContract, getPatientContractStatus } from './db';
 import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet, getCashPendingPaymentById } from './db';
 import { trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, getItemUserBreakdown } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
@@ -3440,6 +3440,43 @@ Devuelve un JSON con estos campos:
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
          await adminUnsuspendWallet(wallet.id);
         return { ok: true };
+      }),
+    // Solicitar firma de contrato a un paciente (admin)
+    adminRequireContract: publicProcedure
+      .input(z.object({ patientEmail: z.string().email() }))
+      .mutation(async ({ input }) => {
+        const patient = await getPatientByEmail(input.patientEmail);
+        if (!patient) throw new TRPCError({ code: 'NOT_FOUND', message: 'Paciente no encontrado' });
+        await adminRequireContract(patient.id);
+        // Enviar notificación push si tiene suscripción
+        if (patient.pushSubscription) {
+          try {
+            await sendPushToPatient(
+              patient.pushSubscription,
+              '📋 Firma tu contrato de consentimiento',
+              'Nutriser requiere que firmes tu contrato antes de continuar.',
+              '/monedero'
+            );
+          } catch (_) {}
+        }
+        return { ok: true };
+      }),
+    // Cancelar solicitud de firma de contrato (admin)
+    adminClearContract: publicProcedure
+      .input(z.object({ patientEmail: z.string().email() }))
+      .mutation(async ({ input }) => {
+        const patient = await getPatientByEmail(input.patientEmail);
+        if (!patient) throw new TRPCError({ code: 'NOT_FOUND', message: 'Paciente no encontrado' });
+        await adminClearContract(patient.id);
+        return { ok: true };
+      }),
+    // Verificar si el paciente tiene contrato pendiente de firma
+    checkContractStatus: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => {
+        const status = await getPatientContractStatus(input.email);
+        if (!status) return { contractRequired: false, consentAcceptedAt: null };
+        return status;
       }),
     // Subir PDF generado en cliente a S3 y devolver URL pública HTTPS
     uploadPdf: publicProcedure

@@ -13,6 +13,7 @@ import { trpc } from "@/lib/trpc";
 import { useRoute } from "wouter";
 import { WalletCard as WalletCardCR80, WalletCardPrintSheet } from "@/components/WalletCardPrint";
 import { NutriserWalletCard, QRFullscreenModal } from "@/components/NutriserWalletCard";
+import ContractBlockModal from "@/components/ContractBlockModal";
 import { toast } from "sonner";
 import { t, type Lang } from "@/lib/i18n";
 
@@ -136,6 +137,16 @@ function TransactionRow({ txn, lang }: { txn: any; lang: Lang }) {
 export default function WalletPage() {
   const { patient, isLoggedIn } = usePatientAuth();
   const [, setLocation] = useLocation();
+  // ─── Verificación de contrato pendiente ──────────────────────────────────────
+  const [contractSigned, setContractSigned] = useState(false);
+  const contractStatusQuery = trpc.wallet.checkContractStatus.useQuery(
+    { email: patient?.email ?? '' },
+    { enabled: isLoggedIn && !!patient?.email, refetchOnWindowFocus: true }
+  );
+  const contractBlocking = isLoggedIn && !!patient &&
+    !contractSigned &&
+    contractStatusQuery.data?.contractRequired === true &&
+    !contractStatusQuery.data?.consentAcceptedAt;
   const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history" | "messages">("card");
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [currentNotifIndex, setCurrentNotifIndex] = useState(0);
@@ -283,6 +294,17 @@ export default function WalletPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+      {/* ── Modal bloqueante de contrato de consentimiento ── */}
+      {contractBlocking && patient && (
+        <ContractBlockModal
+          patientId={patient.id}
+          patientName={patient.name}
+          onSigned={() => {
+            setContractSigned(true);
+            contractStatusQuery.refetch();
+          }}
+        />
+      )}
       {/* Header — simple back button */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center">
         <button onClick={() => setLocation("/memberships")} className="text-gray-600 hover:text-gray-800 mr-3">

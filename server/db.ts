@@ -1150,6 +1150,7 @@ export async function updatePatientConsent(id: number, signature: string, pdfUrl
     consentAcceptedAt: new Date(),
     consentSignature: signature,
     consentPdfUrl: pdfUrl,
+    contractRequired: false,
   }).where(eq(patientAccounts.id, id));
   return { success: true };
 }
@@ -1431,6 +1432,9 @@ export async function getAllWallets() {
       email: patientAccounts.email,
       phone: patientAccounts.phone,
       birthday: patientAccounts.birthday,
+      contractRequired: patientAccounts.contractRequired,
+      contractRequiredAt: patientAccounts.contractRequiredAt,
+      consentAcceptedAt: patientAccounts.consentAcceptedAt,
     }
   }).from(wallets)
     .innerJoin(patientAccounts, eq(wallets.patientId, patientAccounts.id))
@@ -2701,4 +2705,34 @@ export async function deleteMembershipPackage(id: number) {
   const conn = await (await import('mysql2/promise')).createConnection(process.env.DATABASE_URL!);
   await conn.execute(`DELETE FROM membershipPackages WHERE id = ?`, [id]);
   await conn.end();
+}
+
+// ── Contract requirement helpers ──
+/** Admin activa la solicitud de firma de contrato para un paciente */
+export async function adminRequireContract(patientId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(patientAccounts)
+    .set({ contractRequired: true, contractRequiredAt: new Date() })
+    .where(eq(patientAccounts.id, patientId));
+}
+
+/** Admin cancela la solicitud de firma de contrato para un paciente */
+export async function adminClearContract(patientId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(patientAccounts)
+    .set({ contractRequired: false, contractRequiredAt: null })
+    .where(eq(patientAccounts.id, patientId));
+}
+
+/** Obtener estado de contrato de un paciente por email */
+export async function getPatientContractStatus(email: string): Promise<{ contractRequired: boolean; consentAcceptedAt: Date | null } | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select({
+    contractRequired: patientAccounts.contractRequired,
+    consentAcceptedAt: patientAccounts.consentAcceptedAt,
+  }).from(patientAccounts).where(eq(patientAccounts.email, email)).limit(1);
+  return result.length > 0 ? result[0] : null;
 }

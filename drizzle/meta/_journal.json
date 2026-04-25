@@ -365,6 +365,13 @@
       "when": 1777073482809,
       "tag": "0051_tearful_serpent_society",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "5",
+      "when": 1777083326113,
+      "tag": "0052_sad_the_hunter",
+      "breakpoints": true
     }
   ]
 }

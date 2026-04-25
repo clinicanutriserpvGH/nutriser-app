@@ -2085,3 +2085,14 @@
 - [x] Tienda - tarjeta de producto: botones Carrito y Comprar deshabilitados cuando agotado
 - [x] Flujo de compra de productos: idéntico a servicios (comprobante transferencia O pago en clínica)
 - [x] Corregir solapamiento del botón 'Seguimiento de mis tratamientos' sobre botones de redes sociales en móviles
+
+## Sistema de Firma de Contrato de Consentimiento (Sesión Actual)
+- [x] Agregar campos contractRequired y contractRequiredAt a patientAccounts en schema.ts
+- [x] Funciones adminRequireContract, adminClearContract, getPatientContractStatus en server/db.ts
+- [x] updatePatientConsent ahora también limpia contractRequired=false al firmar
+- [x] Procedimientos wallet.adminRequireContract, wallet.adminClearContract, wallet.checkContractStatus en routers.ts
+- [x] Panel admin (AdminWalletTab.tsx): botones Solicitar/Cancelar firma de contrato por paciente
+- [x] Componente ContractBlockModal.tsx: modal de pantalla completa bloqueante con firma digital
+- [x] Memberships.tsx: detecta contractRequired=true y muestra ContractBlockModal (bloquea toda la app)
+- [x] WalletPage.tsx: detecta contractRequired=true y muestra ContractBlockModal (bloquea toda la app)
+- [x] Tests unitarios para el sistema de contrato (server/contract.test.ts) - 8 tests pasando

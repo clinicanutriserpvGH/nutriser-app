@@ -392,6 +392,14 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
     onSuccess: () => { toast.success('Descuento eliminado.'); utils.wallet.adminListAll.invalidate(); },
     onError: (e) => toast.error('Error: ' + e.message),
   });
+  const requireContractMutation = trpc.wallet.adminRequireContract.useMutation({
+    onSuccess: () => { toast.success('✅ Solicitud de firma enviada. El usuario deberá firmar antes de continuar.'); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => toast.error('Error: ' + e.message),
+  });
+  const clearContractMutation = trpc.wallet.adminClearContract.useMutation({
+    onSuccess: () => { toast.success('Solicitud de contrato cancelada.'); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => toast.error('Error: ' + e.message),
+  });
 
   return (
     <>
@@ -658,7 +666,7 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                 {/* Enviar Notificación */}
                 <div className="space-y-1.5">
                   <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-wide">Notificaciones</p>
-                  <Button
+                   <Button
                     size="sm"
                     onClick={() => setShowNotifModal(true)}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs flex items-center gap-1"
@@ -666,7 +674,46 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                     <Bell className="w-3 h-3" />
                     Enviar Notificación al Paciente
                   </Button>
-
+                </div>
+                {/* Contrato de Consentimiento */}
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-gray-300 font-semibold uppercase tracking-wide">Contrato de Consentimiento</p>
+                  {(wallet as any).contractRequired && !(wallet as any).consentAcceptedAt ? (
+                    <div className="space-y-1.5">
+                      <div className="bg-yellow-900/40 border border-yellow-600/50 rounded-lg px-2 py-1.5 text-[10px] text-yellow-300 flex items-center gap-1.5">
+                        📋 Firma pendiente &mdash; el usuario está bloqueado hasta que firme
+                      </div>
+                      <Button
+                        size="sm"
+                        disabled={clearContractMutation.isPending}
+                        onClick={() => {
+                          if (confirm(`¿Cancelar la solicitud de firma de contrato para ${wallet.patientName}?`)) {
+                            clearContractMutation.mutate({ patientEmail: wallet.patientEmail! });
+                          }
+                        }}
+                        className="w-full bg-gray-600 hover:bg-gray-700 text-white text-xs"
+                      >
+                        {clearContractMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : '❌ Cancelar solicitud de firma'}
+                      </Button>
+                    </div>
+                  ) : (wallet as any).consentAcceptedAt ? (
+                    <div className="bg-green-900/40 border border-green-600/50 rounded-lg px-2 py-1.5 text-[10px] text-green-300 flex items-center gap-1.5">
+                      ✅ Contrato firmado el {new Date((wallet as any).consentAcceptedAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      disabled={requireContractMutation.isPending}
+                      onClick={() => {
+                        if (confirm(`¿Solicitar firma de contrato a ${wallet.patientName}? El usuario quedará bloqueado hasta que firme.`)) {
+                          requireContractMutation.mutate({ patientEmail: wallet.patientEmail! });
+                        }
+                      }}
+                      className="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs flex items-center gap-1"
+                    >
+                      {requireContractMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <>📋 Solicitar Firma de Contrato</>}
+                    </Button>
+                  )}
                 </div>
               </div>
 

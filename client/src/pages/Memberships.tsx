@@ -33,6 +33,7 @@ import { t, type Lang } from "@/lib/i18n";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import DebtBlockBanner from "@/components/DebtBlockBanner";
 import { useDebtCheck } from "@/hooks/useDebtCheck";
+import ContractBlockModal from "@/components/ContractBlockModal";
 
 // ─── Assets ──────────────────────────────────────────────────────────────────
 const LOGO_URL =
@@ -329,6 +330,16 @@ export default function Memberships() {
   const { isMobile } = useDeviceType();
   // ─── Verificación de deuda activa ─────────────────────────────────────────────────────────────────────────
   const { hasDebt: patientHasDebt } = useDebtCheck(patient?.id);
+  // ─── Verificación de contrato pendiente ──────────────────────────────────────
+  const [contractSigned, setContractSigned] = useState(false);
+  const contractStatusQuery = trpc.wallet.checkContractStatus.useQuery(
+    { email: patient?.email ?? '' },
+    { enabled: isLoggedIn && !!patient?.email, refetchOnWindowFocus: true }
+  );
+  const contractBlocking = isLoggedIn && !!patient &&
+    !contractSigned &&
+    contractStatusQuery.data?.contractRequired === true &&
+    !contractStatusQuery.data?.consentAcceptedAt;
   const [showPromoSplash, setShowPromoSplash] = useState(
     () => !sessionStorage.getItem("nutriser_tienda_promo_dismissed")
   );
@@ -926,6 +937,17 @@ export default function Memberships() {
         <BackToSplash hideHome desktopBackTo="/" desktopBackLabel={t('back', lang)} />
       )}
 
+      {/* ── Modal bloqueante de contrato de consentimiento ── */}
+      {contractBlocking && patient && (
+        <ContractBlockModal
+          patientId={patient.id}
+          patientName={patient.name}
+          onSigned={() => {
+            setContractSigned(true);
+            contractStatusQuery.refetch();
+          }}
+        />
+      )}
       {/* ── Pop-up de cupones/promociones ── */}
       {showPromoSplash && (
         <PromoSplash

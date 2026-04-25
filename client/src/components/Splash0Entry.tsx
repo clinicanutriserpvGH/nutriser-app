@@ -9,7 +9,7 @@
  * En tablet/desktop: 3 columnas iguales
  * Nota: la misma cuenta de paciente funciona para Shop y Academy.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ShoppingBag, CalendarCheck, Moon, Sun } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
@@ -68,10 +68,47 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
     }, 200);
   };
 
-  // Secret admin access: click logo to open admin panel
-  const handleLogoClick = () => {
-    handleNavigate("/admin/login");
-  };
+  // Secret admin access: long-press 3 seconds on logo to open admin panel
+  const logoLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [logoHoldProgress, setLogoHoldProgress] = useState(0);
+  const logoHoldInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startLogoLongPress = useCallback(() => {
+    setLogoHoldProgress(0);
+    logoHoldInterval.current = setInterval(() => {
+      setLogoHoldProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(logoHoldInterval.current!);
+          return 100;
+        }
+        return prev + (100 / 30); // 30 ticks en 3 segundos (100ms cada tick)
+      });
+    }, 100);
+    logoLongPressTimer.current = setTimeout(() => {
+      clearInterval(logoHoldInterval.current!);
+      setLogoHoldProgress(0);
+      handleNavigate("/admin/login");
+    }, 3000);
+  }, []);
+
+  const cancelLogoLongPress = useCallback(() => {
+    if (logoLongPressTimer.current) clearTimeout(logoLongPressTimer.current);
+    if (logoHoldInterval.current) clearInterval(logoHoldInterval.current);
+    setLogoHoldProgress(0);
+  }, []);
+
+  // Secret website access: long-press 3 seconds on header text
+  const webLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startWebLongPress = useCallback(() => {
+    webLongPressTimer.current = setTimeout(() => {
+      if (onGoToWebsite) onGoToWebsite();
+      else if (onEnterNutriserWeb) onEnterNutriserWeb();
+    }, 3000);
+  }, [onGoToWebsite, onEnterNutriserWeb]);
+
+  const cancelWebLongPress = useCallback(() => {
+    if (webLongPressTimer.current) clearTimeout(webLongPressTimer.current);
+  }, []);
 
   return (
     <div
@@ -98,24 +135,42 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             <div className="relative flex-shrink-0">
               <button
                 type="button"
-                onClick={handleLogoClick}
-                className="block cursor-pointer focus:outline-none"
-                aria-label="Acceso administrador"
+                onMouseDown={startLogoLongPress}
+                onMouseUp={cancelLogoLongPress}
+                onMouseLeave={cancelLogoLongPress}
+                onTouchStart={startLogoLongPress}
+                onTouchEnd={cancelLogoLongPress}
+                onTouchCancel={cancelLogoLongPress}
+                onClick={e => e.preventDefault()}
+                className="block cursor-pointer focus:outline-none relative select-none"
+                aria-label="Nutriser"
+                style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
               >
                 <img src={LOGO_URL} alt="Nutriser" className="relative w-11 h-11 md:w-14 md:h-14 object-contain" loading="eager" fetchPriority="high" />
+                {logoHoldProgress > 0 && (
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 44 44" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle cx="22" cy="22" r="20" fill="none" stroke="#C5A55A" strokeWidth="2.5"
+                      strokeDasharray={`${(logoHoldProgress / 100) * 125.6} 125.6`}
+                      strokeLinecap="round" style={{ transition: 'stroke-dasharray 0.1s linear' }}
+                    />
+                  </svg>
+                )}
               </button>
             </div>
             <div className="w-px h-10 bg-[#C5A55A]/50 flex-shrink-0" />
             <div className="flex flex-col justify-center min-w-0 flex-1">
               <button
                 type="button"
-                onClick={() => {
-                  if (onGoToWebsite) onGoToWebsite();
-                  else if (onEnterNutriserWeb) onEnterNutriserWeb();
-                }}
-                className="text-left cursor-pointer focus:outline-none active:opacity-70"
-                title="Ver sitio web Nutriser"
-                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                onMouseDown={startWebLongPress}
+                onMouseUp={cancelWebLongPress}
+                onMouseLeave={cancelWebLongPress}
+                onTouchStart={startWebLongPress}
+                onTouchEnd={cancelWebLongPress}
+                onTouchCancel={cancelWebLongPress}
+                onClick={e => e.preventDefault()}
+                className="text-left cursor-pointer focus:outline-none"
+                title="Nutriser"
+                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', userSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties}
               >
                 <p className="text-[#C5A55A] text-[9px] md:text-[11px] tracking-[0.25em] uppercase font-light leading-tight hover:text-[#E8C97A] transition-colors">
                   Aesthetic &amp; Nutrition

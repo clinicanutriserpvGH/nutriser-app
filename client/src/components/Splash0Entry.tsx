@@ -17,7 +17,7 @@ import { usePatientAuth } from "@/hooks/usePatientAuth";
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 const CLINIC_SHOP_IMG =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-shop-entrance-v4-HUPan3L87bBgmsrQt8NsWo.webp";
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663459263490/wrAlJInZiLZvEqGh.png";
 const IMG_ACADEMY =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy-hub-v2-B6bpVdHqtSSKFqZdAvvqyS.webp";
 const PORTAL_IMG =
@@ -246,9 +246,10 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   src={CLINIC_SHOP_IMG}
                   alt="Tienda Nutriser"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                  style={{ objectPosition: "center 30%" }}
+                  style={{ objectPosition: "center 40%" }}
                   loading="eager"
                   fetchPriority="high"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85 pointer-events-none" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">

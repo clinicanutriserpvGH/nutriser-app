@@ -895,33 +895,40 @@ export default function AdminQRScanner() {
                     const pendingPayments = cashPendingQuery.data ?? [];
                     const hasPending = pendingPayments.length > 0;
 
-                    // Calcular artículos seleccionados y monto del plan
+                    // Obtener el pago vinculado
+                    const linkedPayment: any = (hasPending && linkedCashPaymentId)
+                      ? (pendingPayments.find((p: any) => p.id === linkedCashPaymentId) ?? null)
+                      : null;
+
+                    // Calcular allItems UNA SOLA VEZ — fallback a artículo único cuando itemsJson está vacío
+                    let allItems: {name: string; priceCents: number}[] = [];
+                    if (linkedPayment) {
+                      try {
+                        const parsed = JSON.parse(linkedPayment.itemsJson ?? '[]');
+                        const mapped = parsed.map((it: any) => ({ name: it.name, priceCents: it.priceCents ?? Math.round((it.price ?? 0) * 100) }));
+                        allItems = mapped.length > 0 ? mapped : [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }];
+                      } catch {
+                        allItems = [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }];
+                      }
+                    }
+
+                    // Calcular montos a partir de allItems y los checkboxes seleccionados
                     let planAmountCents = 0;
                     let immediateAmountCents = 0;
                     let planItemsForJson: {name: string; priceCents: number}[] = [];
                     let immediateItemNames: string[] = [];
-                    let linkedPayment: any = null;
 
-                    if (hasPending && linkedCashPaymentId) {
-                      linkedPayment = pendingPayments.find((p: any) => p.id === linkedCashPaymentId);
-                      if (linkedPayment) {
-                        let allItems: {name: string; priceCents: number}[] = [];
-                        try {
-                          const parsed = JSON.parse(linkedPayment.itemsJson ?? '[]');
-                          allItems = parsed.map((it: any) => ({ name: it.name, priceCents: it.priceCents ?? Math.round((it.price ?? 0) * 100) }));
-                        } catch { allItems = [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }]; }
-
-                        allItems.forEach((item, idx) => {
-                          if (selectedPlanItems.includes(idx)) {
-                            planAmountCents += item.priceCents;
-                            planItemsForJson.push(item);
-                          } else {
-                            immediateAmountCents += item.priceCents;
-                            immediateItemNames.push(item.name);
-                          }
-                        });
-                      }
-                    } else if (!hasPending || !linkedCashPaymentId) {
+                    if (linkedPayment && allItems.length > 0) {
+                      allItems.forEach((item, idx) => {
+                        if (selectedPlanItems.includes(idx)) {
+                          planAmountCents += item.priceCents;
+                          planItemsForJson.push(item);
+                        } else {
+                          immediateAmountCents += item.priceCents;
+                          immediateItemNames.push(item.name);
+                        }
+                      });
+                    } else if (!linkedPayment) {
                       // Modo manual: usar el monto escrito
                       planAmountCents = Math.round(parseFloat(installmentAmount || '0') * 100);
                     }
@@ -961,49 +968,41 @@ export default function AdminQRScanner() {
                         )}
 
                         {/* PASO 2: Si hay pago vinculado, mostrar checkboxes de artículos */}
-                        {linkedCashPaymentId && linkedPayment && (() => {
-                          let allItems: {name: string; priceCents: number}[] = [];
-                          try {
-                            const parsed = JSON.parse(linkedPayment.itemsJson ?? '[]');
-                            allItems = parsed.map((it: any) => ({ name: it.name, priceCents: it.priceCents ?? Math.round((it.price ?? 0) * 100) }));
-                          } catch { allItems = [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }]; }
-
-                          return (
-                            <div className="space-y-1.5">
-                              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Selecciona qué va al plan de pagos</p>
-                              {allItems.map((item, idx) => (
-                                <label key={idx} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                                  selectedPlanItems.includes(idx)
-                                    ? 'border-blue-400 bg-blue-50'
-                                    : 'border-gray-200 bg-white hover:border-blue-200'
-                                }`}>
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedPlanItems.includes(idx)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        setSelectedPlanItems(prev => [...prev, idx]);
-                                      } else {
-                                        setSelectedPlanItems(prev => prev.filter(i => i !== idx));
-                                      }
-                                    }}
-                                    className="w-3.5 h-3.5 accent-blue-600 flex-shrink-0"
-                                  />
-                                  <span className="flex-1 text-xs font-medium text-gray-800">{item.name}</span>
-                                  <span className="text-xs font-black text-gray-700">${(item.priceCents / 100).toFixed(2)}</span>
-                                </label>
-                              ))}
-                              {selectedPlanItems.length === 0 && (
-                                <p className="text-[10px] text-orange-500 font-semibold px-1">⚠️ Selecciona al menos un artículo para el plan</p>
-                              )}
-                              {immediateAmountCents > 0 && (
-                                <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 text-[10px] text-green-800">
-                                  <span className="font-bold">✅ Se confirmarán de inmediato:</span> {immediateItemNames.join(', ')} — ${(immediateAmountCents / 100).toFixed(2)}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()}
+                        {linkedPayment && allItems.length > 0 && (
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Selecciona qué va al plan de pagos</p>
+                            {allItems.map((item, idx) => (
+                              <label key={idx} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                selectedPlanItems.includes(idx)
+                                  ? 'border-blue-400 bg-blue-50'
+                                  : 'border-gray-200 bg-white hover:border-blue-200'
+                              }`}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedPlanItems.includes(idx)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedPlanItems(prev => [...prev, idx]);
+                                    } else {
+                                      setSelectedPlanItems(prev => prev.filter(i => i !== idx));
+                                    }
+                                  }}
+                                  className="w-3.5 h-3.5 accent-blue-600 flex-shrink-0"
+                                />
+                                <span className="flex-1 text-xs font-medium text-gray-800">{item.name}</span>
+                                <span className="text-xs font-black text-gray-700">${(item.priceCents / 100).toFixed(2)}</span>
+                              </label>
+                            ))}
+                            {selectedPlanItems.length === 0 && (
+                              <p className="text-[10px] text-orange-500 font-semibold px-1">⚠️ Selecciona al menos un artículo para el plan</p>
+                            )}
+                            {immediateAmountCents > 0 && (
+                              <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 text-[10px] text-green-800">
+                                <span className="font-bold">✅ Se confirmarán de inmediato:</span> {immediateItemNames.join(', ')} — ${(immediateAmountCents / 100).toFixed(2)}
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* PASO 3: Si no hay pago vinculado, modo manual */}
                         {(!hasPending || !linkedCashPaymentId) && (

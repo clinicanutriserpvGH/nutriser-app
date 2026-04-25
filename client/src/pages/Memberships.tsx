@@ -2660,7 +2660,6 @@ onClick={() => {
                   <span style={{ color: '#1A1A1A', fontWeight: 900, fontSize: 5.5, textTransform: 'uppercase', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 55 }}>{patient?.name?.split(' ')[0] || 'Nutriser'}</span>
                 </div>
               </div>
-              <span className="text-[10px] font-bold text-[#C5A55A] mt-0.5 leading-tight">{t("tabWallet", lang)}</span>
             </button>
           </div>
 
@@ -2704,8 +2703,10 @@ onClick={() => {
                 </button>
               </div>
 
-              {/* Centro: espacio para la tarjeta FAB */}
-              <div style={{ width: 96, flexShrink: 0 }} />
+              {/* Centro: espacio para la tarjeta FAB + etiqueta Monedero */}
+              <div style={{ width: 96, flexShrink: 0 }} className="flex flex-col items-center justify-end pb-1">
+                <span className="text-[10px] font-bold text-[#C5A55A] leading-tight">{t("tabWallet", lang)}</span>
+              </div>
 
               {/* Derecha: Librería + Deseos + Cuenta */}
               <div className="flex flex-1 justify-around">

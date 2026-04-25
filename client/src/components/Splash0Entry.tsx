@@ -91,7 +91,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
           paddingBottom: "max(env(safe-area-inset-bottom, 0px) + 8px, 16px)",
         }}
       >
-        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[900px] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px] flex flex-col" style={{ minHeight: '100%', justifyContent: 'space-between' }}>
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[900px] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px] flex flex-col">
 
           {/* ── Header ── */}
           <div className={`flex items-center gap-3 mb-3 md:mb-4 px-3 py-2.5 rounded-2xl transition-all duration-500 ${

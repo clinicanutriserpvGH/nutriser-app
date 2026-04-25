@@ -516,21 +516,61 @@ export default function WalletPage() {
                   {t('cashPendingSection', lang)}
                 </h3>
                 <div className="space-y-2">
-                  {cashPendingList.map((p: any) => (
-                    <div key={p.id} className="bg-white rounded-xl border border-orange-200 p-3">
+                  {cashPendingList.map((p: any) => {
+                    // Parsear itemsJson si existe
+                    let parsedItems: Array<{name: string; qty?: number; priceCents: number; itemType?: string}> = [];
+                    try { if (p.itemsJson) parsedItems = JSON.parse(p.itemsJson); } catch {}
+                    return (
+                    <div key={p.id} className="bg-white rounded-xl border border-orange-200 p-3 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-800 truncate">{p.concept}</p>
                           <p className="text-xs text-gray-500 mt-0.5">{new Date(p.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                          {p.notes && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{p.notes}</p>}
+                          {p.notes && <p className="text-xs text-gray-400 mt-0.5">{p.notes}</p>}
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-orange-700 font-black text-base">${(p.amountCents / 100).toFixed(2)}</p>
                           <span className="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">{t('statusPending', lang).toUpperCase()}</span>
                         </div>
                       </div>
+                      {/* Desglose de artículos del carrito */}
+                      {parsedItems.length > 0 ? (
+                        <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2 space-y-1">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Artículos ({parsedItems.length})</p>
+                          {parsedItems.map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center text-xs">
+                              <span className="text-gray-700 flex-1 min-w-0 pr-2">
+                                {item.qty && item.qty > 1 ? <span className="font-bold text-[#C5A55A] mr-1">{item.qty}×</span> : null}
+                                {item.name}
+                              </span>
+                              <span className="font-bold text-gray-900 whitespace-nowrap">${(item.priceCents / 100).toFixed(2)}</span>
+                            </div>
+                          ))}
+                          <div className="border-t border-orange-200 pt-1 flex justify-between text-xs font-black">
+                            <span className="text-gray-600">Total</span>
+                            <span className="text-orange-700">${(p.amountCents / 100).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2">
+                          <p className="text-sm font-bold text-gray-900">{p.concept}</p>
+                        </div>
+                      )}
+                      {/* Desglose: saldo del monedero usado */}
+                      {p.walletAmountUsedCents > 0 && (
+                        <div className="bg-green-50 border border-green-100 rounded-lg px-3 py-1.5">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-green-700 font-semibold">🪙 Monedero aplicado</span>
+                            <span className="text-green-700 font-bold">-${(p.walletAmountUsedCents / 100).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-xs mt-0.5">
+                            <span className="text-gray-600">A pagar en efectivo</span>
+                            <span className="text-orange-700 font-black">${((p.amountCents - p.walletAmountUsedCents) / 100).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <p className="text-xs text-orange-600 mt-3 text-center">
                   {t('presentWallet', lang)}

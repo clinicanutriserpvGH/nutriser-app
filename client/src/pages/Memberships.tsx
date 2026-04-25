@@ -532,7 +532,11 @@ export default function Memberships() {
 
   // ─── Filtros Tratamientos ───────────────────────────────────────────────────
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(() => {
+    // Si viene de la landing con ?q=NombreServicio, pre-cargar la búsqueda
+    const params = new URLSearchParams(window.location.search);
+    return params.get("q") || "";
+  });
   // ─── Filtros Skincare (productos) ──────────────────────────────────────────
   const [activeProdCategory, setActiveProdCategory] = useState<string>("all");
   // ─── Categoría principal (fila de íconos grandes) ──────────────────────────
@@ -634,7 +638,7 @@ export default function Memberships() {
   // ─── Filtros de categoría para productos ──────────────────────────────────
   const prodCategories = useMemo(() => {
     if (!products || products.length === 0) return [];
-    const cats = [...new Set(products.map((p: any) => p.category).filter(Boolean))] as string[];
+    const cats = Array.from(new Set(products.map((p: any) => p.category).filter(Boolean))) as string[];
     return cats;
   }, [products]);
   const filteredProducts = useMemo(() => {

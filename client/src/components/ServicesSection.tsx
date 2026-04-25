@@ -319,16 +319,15 @@ export default function ServicesSection() {
                           WhatsApp
                         </a>
                       </div>
-                      {/* Fila 2: Adquirir + Agendar Cita */}
+                      {/* Fila 2: Adquirir (→ Tienda) + Agendar Cita */}
                       <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenPurchase(service.name, service.price)}
+                        <a
+                          href={`/memberships?q=${encodeURIComponent(service.name)}`}
                           className="flex-1 flex items-center justify-center gap-1.5 bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs font-bold py-2.5 rounded-lg transition-colors shadow-sm"
                         >
                           <ShoppingBag className="w-3.5 h-3.5" />
                           Adquirir
-                        </button>
+                        </a>
                         <a
                           href={`/appointment-form?service=${encodeURIComponent(service.name)}`}
                           className="flex-1 flex items-center justify-center gap-1.5 border border-[#C5A55A]/60 text-[#C5A55A] hover:bg-[#C5A55A] hover:text-white text-xs font-bold py-2.5 rounded-lg transition-all duration-300"
@@ -635,17 +634,13 @@ export default function ServicesSection() {
 
                     {/* CTA Buttons */}
                     <div className="flex gap-3 pt-4">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setInfoModal(false);
-                          handleOpenPurchase(selectedServiceInfo, "");
-                        }}
+                      <a
+                        href={`/memberships?q=${encodeURIComponent(selectedServiceInfo)}`}
                         className="flex-1 bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"
                       >
                         <ShoppingBag className="w-4 h-4" />
-                        Adquirir Servicio
-                      </button>
+                        Adquirir en Tienda
+                      </a>
                       <a
                         href={`/appointment-form?service=${encodeURIComponent(selectedServiceInfo)}`}
                         className="flex-1 border-2 border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"

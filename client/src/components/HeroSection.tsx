@@ -129,47 +129,47 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.85 }}
             className="flex flex-col gap-3 max-w-2xl"
           >
-            {/* Fila con Tienda y Academia en desktop, apilados en móvil */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            {/* Fila principal: Tienda + Agenda Cita (siempre lado a lado) */}
+            <div className="flex flex-row gap-3">
               {/* 1. Tienda Nutriser */}
               <motion.a
                 href="/memberships"
                 onClick={handleTienda}
-                className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg flex-1"
+                className="relative inline-flex items-center justify-center gap-2 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg flex-1"
                 animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
                 transition={{ duration: 1.2, repeat: Infinity }}
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <motion.span
-                  className="relative w-3 h-3 rounded-full bg-[#C5A55A] flex-shrink-0"
+                  className="relative w-2.5 h-2.5 rounded-full bg-[#C5A55A] flex-shrink-0"
                   animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
                   transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
                 />
-                <Store className="relative w-5 h-5 flex-shrink-0" />
-                <span className="relative">Tienda Nutriser</span>
+                <Store className="relative w-4 h-4 flex-shrink-0" />
+                <span className="relative">Tienda</span>
               </motion.a>
-              {/* 2. Academia Nutriser — solo visible cuando el admin la activa */}
-              {academiaVisible && (
-                <a
-                  href="/cursos"
-                  onClick={handleAcademia}
-                  className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg flex-1"
-                >
-                  <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <BookOpen className="relative w-5 h-5 flex-shrink-0" />
-                  <span className="relative">Academia Nutriser</span>
-                </a>
-              )}
+              {/* 2. Agenda tu Cita — siempre visible junto a Tienda */}
+              <a
+                href="/appointment-form"
+                onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
+                className="relative inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-sm tracking-[0.12em] uppercase font-semibold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30 rounded-lg flex-1"
+              >
+                <CalendarCheck className="w-4 h-4 flex-shrink-0" />
+                <span>Agenda Cita</span>
+              </a>
             </div>
-            {/* 3. Agenda tu Cita */}
-            <a
-              href="/appointment-form"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-xs tracking-[0.12em] uppercase font-semibold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/25 rounded-lg"
-            >
-              <CalendarCheck className="w-3.5 h-3.5" />
-              Agenda tu Cita
-            </a>
+            {/* 3. Academia Nutriser — solo visible cuando el admin la activa */}
+            {academiaVisible && (
+              <a
+                href="/cursos"
+                onClick={handleAcademia}
+                className="relative inline-flex items-center justify-center gap-3 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <BookOpen className="relative w-5 h-5 flex-shrink-0" />
+                <span className="relative">Academia Nutriser</span>
+              </a>
+            )}
           </motion.div>
         </div>
       </div>

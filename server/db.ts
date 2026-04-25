@@ -743,7 +743,7 @@ export async function getAllActiveProducts() {
   const db = await getDb();
   if (!db) return [];
   return await db.select().from(products)
-    .where(eq(products.isActive, true))
+    .where(sql`${products.isActive} = 1`)
     .orderBy(products.sortOrder, products.id);
 }
 export async function getProductById(id: number) {

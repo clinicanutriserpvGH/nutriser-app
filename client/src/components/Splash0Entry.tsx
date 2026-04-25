@@ -152,7 +152,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                     <span className="text-[9px] font-bold tracking-wide uppercase text-green-200 max-w-[70px] truncate">
                       {patient?.name?.split(' ')[0] ?? 'Mi Cuenta'}
                     </span>
-                    <span className="text-[7px] text-green-300 max-w-[70px] leading-tight" style={{fontSize:'6.5px'}}>Seguimiento de mis tratamientos</span>
+                    <span className="text-[9px] text-green-300 max-w-[80px] leading-tight">Seguimiento de mis tratamientos</span>
                   </div>
                 </>
               ) : (

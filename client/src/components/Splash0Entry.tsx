@@ -206,7 +206,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                       Portal de Salud<br />Nutriser
                     </h2>
                     <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
-                      Acceder / Crear Cuenta
+                      Asesoría Nutricional
                     </span>
                   </div>
                 </div>

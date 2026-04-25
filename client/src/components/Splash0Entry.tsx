@@ -10,7 +10,7 @@
  * Nota: la misma cuenta de paciente funciona para Shop y Academy.
  */
 import { useState, useEffect } from "react";
-import { ShoppingBag, CalendarCheck, Moon, Sun, LogIn } from "lucide-react";
+import { ShoppingBag, CalendarCheck, Moon, Sun } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
 const LOGO_URL =
@@ -125,21 +125,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 Bienvenido a Nutriser
               </h1>
             </div>
-            {/* Botón Crear Cuenta Nutriser — solo para crear cuenta / iniciar sesión en la tienda */}
-            <button
-              type="button"
-              onClick={() => handleNavigate('/mis-tratamientos')}
-              className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 active:scale-95 group"
-              style={{
-                background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 100%)',
-                boxShadow: '0 0 10px rgba(197,165,90,0.7), 0 0 20px rgba(197,165,90,0.3)',
-                border: '1px solid rgba(232,201,122,0.5)'
-              }}
-              aria-label="Crear Cuenta Nutriser"
-            >
-              <LogIn className="w-4 h-4 text-black flex-shrink-0" />
-              <span className="text-[12px] font-bold tracking-wide uppercase text-black leading-tight">Crear Cuenta<br/>Nutriser</span>
-            </button>
+
           </div>
 
           {/* ── Grid principal — portrait: columna vertical | landscape: fila horizontal ── */}

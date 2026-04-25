@@ -450,7 +450,7 @@ export default function Memberships() {
   const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
 
   // ─── Lista de deseos (persistida en localStorage) ──────────────────
-  const { wishlist, wishlistCount, isInWishlist, toggleWishlist, removeFromWishlist } = useWishlist();
+  const { wishlist, wishlistCount, isInWishlist, toggleWishlist, removeFromWishlist } = useWishlist(patient?.id);
 
   const addToCart = (item: Omit<CartItem, "qty">) => {
     // Tracking: evento cart

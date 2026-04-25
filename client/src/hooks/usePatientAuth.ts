@@ -88,6 +88,8 @@ class PatientAuthStore {
   }
 
   logout() {
+    // Limpiar la wishlist del guest para que no persista entre sesiones
+    localStorage.removeItem("nutriser-wishlist-guest");
     localStorage.removeItem(SESSION_KEY);
     this.snapshot = null;
     this.emit();

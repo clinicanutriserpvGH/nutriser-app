@@ -251,14 +251,14 @@ export default function MyTreatments() {
 
   useEffect(() => {
     if (patient) {
-      setView(patient.consentAcceptedAt ? "portal" : "consent");
+      setView("portal");
     }
   }, []);
 
   useEffect(() => {
     // Si hay returnTo, no cambiar la vista aquí — el loginMutation.onSuccess maneja la redirección
     if (patient && view === "auth" && !returnTo) {
-      setView(patient.consentAcceptedAt ? "portal" : "consent");
+      setView("portal");
     }
   }, [patient, returnTo]);
 
@@ -288,8 +288,8 @@ export default function MyTreatments() {
   const registerMutation = trpc.patients.register.useMutation({
     onSuccess: (data) => {
       persistPatient(data as PatientSafe);
-      setView("consent");
-      toast.success("¡Cuenta creada! Por favor lee y firma el consentimiento.");
+      setView("portal");
+      toast.success("¡Cuenta creada exitosamente! Bienvenido a Nutriser.");
     },
     onError: (e) => toast.error(e.message),
   });
@@ -309,7 +309,7 @@ export default function MyTreatments() {
         // Si vino desde otra sección (tienda, monedero, etc.), regresar ahí siempre
         window.location.href = returnTo;
       } else {
-        setView(p.consentAcceptedAt ? "portal" : "consent");
+        setView("portal");
       }
     },
     onError: (e) => toast.error(e.message),
@@ -488,8 +488,8 @@ export default function MyTreatments() {
   if (view === "auth") {
     return (
       <div className="fixed inset-0 bg-[#f5f5f5] overflow-y-auto">
-      <div className="min-h-full flex flex-col items-center justify-center px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 24px, 40px)' }}>
-        <div className="w-full max-w-md">
+        <div className="min-h-full flex flex-col items-center justify-center px-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px) + 24px, 40px)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px) + 24px, 40px)' }}>
+          <div className="w-full max-w-md">
 
           {/* Botón Regresar */}
           <div className="flex justify-start mb-6">
@@ -516,7 +516,7 @@ export default function MyTreatments() {
             {authMode !== "forgot" && authMode !== "register-form" && (
               <div className="flex bg-gray-100 rounded-2xl p-1 mb-6">
                 {(["login", "register"] as Array<"login" | "register" | "register-form">).map(m => (
-                  <button key={m} onClick={() => setAuthMode(m)}
+                  <button key={m} onClick={() => setAuthMode(m === "register" ? "register-form" : m)}
                     className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${(authMode === m || (m === "register" && (authMode as string) === "register-form")) ? "bg-[#C5A55A] text-white shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
                     {m === "login" ? "Iniciar sesión" : "Crear cuenta"}
                   </button>
@@ -546,64 +546,29 @@ export default function MyTreatments() {
                 </button>
               </form>
             )}
-
-            {/* Register - Aviso de contrato */}
-            {authMode === "register" && (
-              <div className="space-y-5">
-                <div className="flex flex-col items-center gap-3 py-2">
-                  <div className="w-14 h-14 rounded-full bg-[#C5A55A]/10 flex items-center justify-center">
-                    <ShieldCheck className="w-7 h-7 text-[#C5A55A]" />
-                  </div>
-                  <h3 className="text-gray-900 font-bold text-lg text-center">Contrato de Consentimiento</h3>
-                  <p className="text-gray-500 text-sm text-center leading-relaxed">
-                    Para crear tu cuenta en Nutriser es necesario que leas y firmes el{" "}
-                    <strong className="text-gray-700">Contrato de Consentimiento Informado</strong>.
-                  </p>
-                </div>
-                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
-                  <p className="text-[#C5A55A] text-xs font-semibold uppercase tracking-wider mb-2">¿Cómo firmar?</p>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {isDesktop
-                      ? "Usa el mouse para dibujar tu firma en el recuadro. Se debe usar la firma de tu identificación oficial."
-                      : "Usa tu dedo o S Pen para firmar directamente en la pantalla. Se debe usar la firma de tu identificación oficial."}
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  onClick={() => setAuthMode("register-form")}
-                  className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-3"
-                >
-                  Continuar y leer contrato
-                </Button>
-                <button
-                  type="button"
-                  onClick={() => setAuthMode("login")}
-                  className="w-full text-center text-gray-400 text-xs hover:text-gray-600 transition-colors"
-                >
-                  Ya tengo cuenta — Iniciar sesión
-                </button>
-              </div>
-            )}
             {/* Register Form */}
             {authMode === "register-form" && (
               <form onSubmit={handleRegister} className="space-y-4">
-                <button type="button" onClick={() => setAuthMode("register")} className="flex items-center gap-1 text-gray-400 text-sm hover:text-gray-600 mb-2">
+                <button type="button" onClick={() => setAuthMode("login")} className="flex items-center gap-1 text-gray-400 text-sm hover:text-gray-600 mb-2">
                   <ChevronLeft className="w-4 h-4" /> Volver
                 </button>
                 {/* Mensaje informativo: usar mismo correo del Portal de Salud */}
-                <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-3">
-                  <span className="text-amber-500 text-base mt-0.5 flex-shrink-0">ℹ️</span>
+                <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
+                  <span className="text-amber-500 text-sm flex-shrink-0">ℹ️</span>
                   <p className="text-amber-800 text-xs leading-relaxed">
-                    <strong>¿Ya tienes cuenta en el Portal de Salud Nutriser?</strong> Te recomendamos usar el mismo correo electrónico y contraseña para acceder fácilmente desde cualquier parte de la app.
+                    ¿Ya tienes cuenta en el <strong>Portal de Salud</strong>? Usa el mismo correo y contraseña.
                   </p>
                 </div>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input name="name" placeholder="Nombre completo" required minLength={2} className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
                 </div>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input name="email" type="email" placeholder="Correo electrónico" required className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
+                <div>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input name="email" type="email" placeholder="Correo electrónico" required className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400" />
+                  </div>
+                  <p className="text-[10px] text-[#C5A55A] mt-1 ml-1">🎁 Aquí recibirás tus cupones y promociones exclusivas</p>
                 </div>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -611,8 +576,9 @@ export default function MyTreatments() {
                 </div>
                 {/* Fecha de nacimiento — 3 selectores para fácil uso en móvil */}
                 <div>
-                  <label className="flex items-center gap-2 text-gray-500 text-xs mb-1.5">
-                    <Calendar className="w-3.5 h-3.5" /> Fecha de nacimiento <span className="text-red-500 ml-0.5">*</span>
+                  <label className="flex items-center justify-between text-gray-500 text-xs mb-1.5">
+                    <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Fecha de nacimiento <span className="text-red-500">*</span></span>
+                    <span className="text-[#C5A55A] font-semibold">🎂 ¡Premio en tu cumple!</span>
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     <select
@@ -677,10 +643,8 @@ export default function MyTreatments() {
               </form>
             )}
           </div>
-
-
+          </div>
         </div>
-      </div>
       </div>
     );
   }
@@ -909,7 +873,7 @@ export default function MyTreatments() {
               {([
                 { id: "tracking", icon: Sparkles, label: "Seguimiento" },
                 { id: "photos", icon: Camera, label: "Fotos" },
-                { id: "consent", icon: FileText, label: "Contrato" },
+
               ] as const).map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                   className={`flex-1 lg:flex-none flex flex-col lg:flex-row items-center lg:items-center gap-0.5 lg:gap-2 py-2 lg:py-2.5 lg:px-3 rounded-xl text-[10px] lg:text-xs font-semibold transition-all ${activeTab === tab.id ? "bg-[#C5A55A] text-white shadow-sm" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}>
@@ -1050,45 +1014,7 @@ export default function MyTreatments() {
           </div>
         )}
 
-        {/* ── Tab: Contrato ── */}
-        {activeTab === "consent" && (
-          <div className="space-y-4">
-            {patient?.consentAcceptedAt ? (
-              <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  <h3 className="text-gray-900 font-bold text-sm">Consentimiento firmado</h3>
-                </div>
-                <p className="text-gray-500 text-xs">
-                  Firmado el {new Date(patient.consentAcceptedAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}
-                </p>
-                {patient.consentPdfUrl && (
-                  <button
-                    onClick={() => {
-                      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-                      if (isIOS) {
-                        window.location.href = patient.consentPdfUrl!;
-                      } else {
-                        window.open(patient.consentPdfUrl!, '_blank', 'noopener,noreferrer');
-                      }
-                    }}
-                    className="mt-3 inline-flex items-center gap-1.5 text-[#C5A55A] text-xs hover:underline cursor-pointer"
-                  >
-                    <FileText className="w-4 h-4" /> Ver PDF firmado
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <ShieldCheck className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                <p className="text-gray-500 text-sm">No has firmado el consentimiento aún.</p>
-                <Button onClick={() => setView("consent")} className="mt-3 bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs">
-                  Firmar ahora
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
+
           </div>
           {/* fin columna derecha */}
         </div>

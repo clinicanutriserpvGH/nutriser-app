@@ -175,7 +175,7 @@ export default function ContractBlockModal({ patientId, patientName, onSigned }:
           </div>
           <div className="bg-amber-500/20 border border-amber-500/40 rounded-xl px-3 py-2 mt-3">
             <p className="text-amber-200 text-xs leading-relaxed">
-              <strong>Acción requerida:</strong> Tu clínica solicita que firmes el contrato de consentimiento informado antes de continuar con tus tratamientos. Lee el documento completo y firma al final.
+              <strong>Firma requerida:</strong> Antes de comenzar cualquier tratamiento en Nutriser Aesthetic &amp; Nutrition es necesario que firmes el Contrato de Consentimiento Informado. Lee el documento completo y firma al final para continuar.
             </p>
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function ContractBlockModal({ patientId, patientName, onSigned }:
           <div>
             <div className="flex items-center gap-2 mb-2">
               <ShieldCheck className="w-4 h-4 text-[#C5A55A]" />
-              <span className="text-gray-800 text-sm font-semibold">Documento de Consentimiento Informado</span>
+              <span className="text-gray-800 text-sm font-semibold">Contrato de Consentimiento Informado para Tratamientos</span>
             </div>
             <div
               ref={scrollRef}
@@ -254,7 +254,7 @@ export default function ContractBlockModal({ patientId, patientName, onSigned }:
 
           {/* Nota legal */}
           <p className="text-gray-400 text-[10px] text-center leading-relaxed">
-            Al firmar, aceptas los términos del consentimiento informado conforme a la NOM-004-SSA3-2012 y el Artículo 51 Bis 2 de la Ley General de Salud.
+            Este contrato aplica para todos los tratamientos estéticos, corporales, faciales y nutricionales realizados en Nutriser Aesthetic &amp; Nutrition, conforme a la NOM-004-SSA3-2012.
           </p>
         </div>
       </div>

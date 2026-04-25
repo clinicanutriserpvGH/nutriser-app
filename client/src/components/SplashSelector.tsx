@@ -334,9 +334,9 @@ export default function SplashSelector({ onEnterSite, onNavigate, isTransitionin
               >
                 <div className="flex items-center gap-1">
                   <User className="w-3 h-3" />
-                  <span className="text-[11px] font-bold leading-tight">Iniciar sesión</span>
+                  <span className="text-[11px] font-bold leading-tight">Crear Monedero</span>
                 </div>
-                <span className="text-[8px] font-medium opacity-70 leading-tight">Accede a tu cuenta Nutriser</span>
+                <span className="text-[8px] font-medium opacity-70 leading-tight">Nutriser</span>
               </button>
             )}
 

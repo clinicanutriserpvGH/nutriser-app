@@ -6,7 +6,7 @@ export const translations = {
     searchPlaceholder: "Buscar tratamientos, productos, libros…",
     closeSession: "Cerrar sesión",
     back: "Regresar",
-    signIn: "Iniciar sesión",
+    signIn: "Crear Monedero Nutriser",
 
     // Tabs (bottom nav)
     tabTreatments: "Tratamientos",
@@ -211,7 +211,7 @@ export const translations = {
 
     // WalletPage
     walletNutriser: "Monedero Nutriser",
-    walletLoginDesc: "Inicia sesión para ver tu tarjeta digital, saldo y beneficios exclusivos.",
+    walletLoginDesc: "Crea tu Monedero Nutriser para acceder a tu tarjeta digital, saldo y beneficios exclusivos.",
     walletLoading: "Cargando tu monedero...",
     availableBalance: "Saldo disponible",
     viewStatement: "Ver Estado de Cuenta",
@@ -295,7 +295,7 @@ export const translations = {
     searchPlaceholder: "Search treatments, products, books…",
     closeSession: "Sign out",
     back: "Back",
-    signIn: "Sign in",
+    signIn: "Create Nutriser Wallet",
 
     // Tabs (bottom nav)
     tabTreatments: "Treatments",

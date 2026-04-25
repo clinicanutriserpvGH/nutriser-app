@@ -10,9 +10,8 @@
  * Nota: la misma cuenta de paciente funciona para Shop y Academy.
  */
 import { useState, useEffect } from "react";
-import { ShoppingBag, CalendarCheck, Moon, Sun, ClipboardList, BookOpen, User, LogIn } from "lucide-react";
+import { ShoppingBag, CalendarCheck, Moon, Sun, LogIn } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
-import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -49,7 +48,6 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
     };
   }, []);
   const { isLight, isAuto, toggleSplashTheme, resetToAuto } = useSplashTheme();
-  const { patient, isLoggedIn } = usePatientAuth();
   const bg = isLight
     ? "linear-gradient(160deg, #FAF7F2 0%, #F5EFE4 50%, #FAF7F2 100%)"
     : "linear-gradient(160deg, #0f0f0f 0%, #1a1208 50%, #0f0f0f 100%)";
@@ -127,40 +125,20 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 Bienvenido a Nutriser
               </h1>
             </div>
-            {/* Botón Mi Cuenta Nutriser — muestra nombre si hay sesión activa */}
+            {/* Botón Crear Cuenta Nutriser — solo para crear cuenta / iniciar sesión en la tienda */}
             <button
               type="button"
               onClick={() => handleNavigate('/mis-tratamientos')}
               className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 active:scale-95 group"
               style={{
-                background: isLoggedIn
-                  ? 'linear-gradient(145deg, #1a3a1a 0%, #2d5a2d 100%)'
-                  : 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 100%)',
-                boxShadow: isLoggedIn
-                  ? '0 0 10px rgba(50,180,50,0.5), 0 0 20px rgba(50,180,50,0.2)'
-                  : '0 0 10px rgba(197,165,90,0.7), 0 0 20px rgba(197,165,90,0.3)',
-                border: isLoggedIn
-                  ? '1px solid rgba(80,200,80,0.4)'
-                  : '1px solid rgba(232,201,122,0.5)'
+                background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 100%)',
+                boxShadow: '0 0 10px rgba(197,165,90,0.7), 0 0 20px rgba(197,165,90,0.3)',
+                border: '1px solid rgba(232,201,122,0.5)'
               }}
-              aria-label="Mi Cuenta Nutriser"
+              aria-label="Crear Cuenta Nutriser"
             >
-              {isLoggedIn ? (
-                <>
-                  <User className="w-3.5 h-3.5 text-green-300 flex-shrink-0" />
-                  <div className="flex flex-col leading-tight">
-                    <span className="text-[9px] font-bold tracking-wide uppercase text-green-200 max-w-[70px] truncate">
-                      {patient?.name?.split(' ')[0] ?? 'Mi Cuenta'}
-                    </span>
-                    <span className="text-[9px] text-green-300 max-w-[80px] leading-tight">Seguimiento de mis tratamientos</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <LogIn className="w-4 h-4 text-black flex-shrink-0" />
-                  <span className="text-[12px] font-bold tracking-wide uppercase text-black leading-tight">Crear Cuenta<br/>Nutriser</span>
-                </>
-              )}
+              <LogIn className="w-4 h-4 text-black flex-shrink-0" />
+              <span className="text-[12px] font-bold tracking-wide uppercase text-black leading-tight">Crear Cuenta<br/>Nutriser</span>
             </button>
           </div>
 

@@ -14,6 +14,7 @@ import { useRoute } from "wouter";
 import { WalletCard as WalletCardCR80, WalletCardPrintSheet } from "@/components/WalletCardPrint";
 import { NutriserWalletCard, QRFullscreenModal } from "@/components/NutriserWalletCard";
 import ContractBlockModal from "@/components/ContractBlockModal";
+import TreatmentsTab from "@/components/TreatmentsTab";
 import { toast } from "sonner";
 import { t, type Lang } from "@/lib/i18n";
 
@@ -147,7 +148,7 @@ export default function WalletPage() {
     !contractSigned &&
     contractStatusQuery.data?.contractRequired === true &&
     !contractStatusQuery.data?.consentAcceptedAt;
-  const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history" | "messages">("card");
+  const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history" | "messages" | "treatments">("card");
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [currentNotifIndex, setCurrentNotifIndex] = useState(0);
   const [notifModalShown, setNotifModalShown] = useState(false);
@@ -439,6 +440,7 @@ export default function WalletPage() {
             { key: "loyalty" as const, label: 'Lealtad' },
             { key: "purchases" as const, label: 'Compras' },
             { key: "history" as const, label: 'Movimientos' },
+            { key: "treatments" as const, label: 'Mis Tratamientos' },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -1019,6 +1021,25 @@ export default function WalletPage() {
               <div className="text-center py-8">
                 <p className="text-gray-400 text-sm">{t('noMovements', lang)}</p>
                 <p className="text-gray-300 text-xs mt-1">{t('noMovementsDesc', lang)}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── PESTAÑA MIS TRATAMIENTOS ── */}
+        {activeTab === "treatments" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[#1A1A1A] font-bold text-base flex items-center gap-2">
+                <span className="text-[#C5A55A]">✦</span>
+                Mis Tratamientos
+              </h2>
+            </div>
+            {patient?.id ? (
+              <TreatmentsTab patientId={patient.id} />
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-400 text-sm">No se pudo cargar la información del paciente.</p>
               </div>
             )}
           </div>

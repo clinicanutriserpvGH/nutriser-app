@@ -344,7 +344,7 @@ export default function Store() {
                 className="flex items-center gap-1.5 bg-[#1A1A1A] text-white text-xs lg:text-sm font-semibold px-3 lg:px-5 py-2 lg:py-2.5 rounded-full hover:bg-[#333] transition"
               >
                 <User className="w-3.5 h-3.5 lg:w-5 lg:h-5" />
-                <span className="hidden sm:inline">Iniciar sesión</span>
+                <span className="hidden sm:inline">Crear Monedero Nutriser</span>
               </button>
             )}
           </div>

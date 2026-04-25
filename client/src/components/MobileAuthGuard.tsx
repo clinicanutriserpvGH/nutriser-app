@@ -151,7 +151,7 @@ export default function MobileAuthGuard({
                 }}
               >
                 <LogIn className="w-5 h-5" />
-                Crear cuenta / Iniciar sesión
+                Crear Monedero Nutriser
               </button>
 
               <button
@@ -269,7 +269,7 @@ export default function MobileAuthGuard({
               }}
             >
               <LogIn className="w-5 h-5" />
-              Crear cuenta / Iniciar sesión
+              Crear Monedero Nutriser
             </button>
 
             <button

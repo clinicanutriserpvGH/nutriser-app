@@ -102,9 +102,9 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div>
             <h2 className="text-white font-black text-xl tracking-tight">
-              {mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
+              {mode === "login" ? "Acceder a tu Monedero" : "Crear Monedero Nutriser"}
             </h2>
-            <p className="text-white/40 text-xs mt-0.5">Accede a tu monedero, cupones y beneficios</p>
+            <p className="text-white/40 text-xs mt-0.5">Tu monedero digital Nutriser — cupones, saldo y beneficios</p>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-full hover:bg-white/10 text-white/50 transition-colors">
             <X className="w-5 h-5" />
@@ -126,7 +126,7 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
               mode === "login" ? "bg-[#C5A55A] text-black" : "text-white/50 hover:text-white"
             }`}
           >
-            <LogIn className="w-3.5 h-3.5" /> Iniciar sesión
+            <LogIn className="w-3.5 h-3.5" /> Ya tengo cuenta
           </button>
           <button
             onClick={() => setMode("register")}
@@ -134,7 +134,7 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
               mode === "register" ? "bg-[#C5A55A] text-black" : "text-white/50 hover:text-white"
             }`}
           >
-            <UserPlus className="w-3.5 h-3.5" /> Crear cuenta
+            <UserPlus className="w-3.5 h-3.5" /> Crear Monedero
           </button>
         </div>
 

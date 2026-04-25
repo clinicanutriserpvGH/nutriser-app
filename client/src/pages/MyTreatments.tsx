@@ -518,7 +518,7 @@ export default function MyTreatments() {
                 {(["login", "register"] as Array<"login" | "register" | "register-form">).map(m => (
                   <button key={m} onClick={() => setAuthMode(m === "register" ? "register-form" : m)}
                     className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${(authMode === m || (m === "register" && (authMode as string) === "register-form")) ? "bg-[#C5A55A] text-white shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-                    {m === "login" ? "Iniciar sesión" : "Crear cuenta"}
+                    {m === "login" ? "Ya tengo Monedero" : "Crear Monedero"}
                   </button>
                 ))}
               </div>

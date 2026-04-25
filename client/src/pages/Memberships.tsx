@@ -1758,6 +1758,9 @@ export default function Memberships() {
                   {products.slice(0, 8).map(product => {
                     const salePrice = (product as any).salePrice;
                     const priceNum = salePrice ? parseInt(String(salePrice).replace(/[^0-9]/g, "")) : product.price ? parseInt(product.price.replace(/[^0-9]/g, "")) : null;
+                    const regularPriceNum = product.price ? parseInt(product.price.replace(/[^0-9]/g, "")) : null;
+                    const savingPct = salePrice && regularPriceNum && priceNum && regularPriceNum > priceNum
+                      ? Math.round((1 - priceNum / regularPriceNum) * 100) : 0;
                     const isOutOfStock = (product.stock ?? null) !== null && product.stock === 0;
                     return (
                       <div key={product.id} className={`flex-shrink-0 w-48 sm:w-52 bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col ${isOutOfStock ? 'opacity-60 border-gray-200' : 'border-gray-100'}`}>
@@ -1767,12 +1770,25 @@ export default function Memberships() {
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-50"><Droplets className="w-10 h-10 text-gray-200" /></div>
                           )}
+                          {savingPct > 0 && !isOutOfStock && (
+                            <div className="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow">
+                              -{savingPct}% AHORRO
+                            </div>
+                          )}
                           {isOutOfStock && <div className="absolute inset-0 bg-black/40 flex items-center justify-center"><span className="bg-white text-gray-800 font-black text-xs px-3 py-1 rounded-full">Agotado</span></div>}
                         </div>
                         <div className="p-3 flex-1 flex flex-col">
                           <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{tx(product.name)}</h3>
                           {salePrice ? (
-                            <p className="text-[#C5A55A] font-black text-sm mb-2">${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN</p>
+                            <div className="mb-2">
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="text-[#C5A55A] font-black text-sm">${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")}</span>
+                                <span className="line-through text-gray-400 text-[10px]">${parseInt((product.price||"").replace(/[^0-9]/g,"")).toLocaleString("es-MX")}</span>
+                              </div>
+                              {savingPct > 0 && (
+                                <p className="text-green-600 text-[9px] font-bold">Ahorras {savingPct}% hoy</p>
+                              )}
+                            </div>
                           ) : product.price ? (
                             <p className="text-[#C5A55A] font-black text-sm mb-2">${parseInt((product.price||"").replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN</p>
                           ) : (

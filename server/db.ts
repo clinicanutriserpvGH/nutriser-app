@@ -2402,7 +2402,10 @@ export async function getInstallmentPlansByWallet(walletId: number): Promise<(In
   if (!db) return [];
 
   const plans = await db.select().from(installmentPlans)
-    .where(and(eq(installmentPlans.walletId, walletId), eq(installmentPlans.status, 'active')))
+    .where(and(
+      eq(installmentPlans.walletId, walletId),
+      inArray(installmentPlans.status, ['active', 'completed'])
+    ))
     .orderBy(desc(installmentPlans.createdAt));
 
   return await Promise.all(plans.map(async (plan) => {

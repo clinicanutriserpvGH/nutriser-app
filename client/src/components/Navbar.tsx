@@ -45,9 +45,11 @@ interface NavbarProps {
   onRegresar?: () => void;
   /** Ocultar los links de navegación del sitio (Servicios, Cupones, etc.) en páginas internas */
   hideNavLinks?: boolean;
+  /** Ocultar el logo (para evitar acceso accidental al panel admin desde páginas internas) */
+  hideLogo?: boolean;
 }
 
-export default function Navbar({ lightBg = false, onShowSplash, isHome = false, onRegresar, hideNavLinks = false }: NavbarProps) {
+export default function Navbar({ lightBg = false, onShowSplash, isHome = false, onRegresar, hideNavLinks = false, hideLogo = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [, navigate] = useLocation();
@@ -108,6 +110,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
       >
         <div className="container flex items-center justify-between h-20">
           {/* Logo */}
+          {!hideLogo ? (
           <a
             href="#inicio"
             onClick={(e) => {
@@ -123,6 +126,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
               className="h-12 w-auto object-contain transition-all duration-500"
             />
           </a>
+          ) : <div className="w-12" />}
 
           {/* DESKTOP: Sin botones de splash ni Shop en navbar (Shop va en el hero) */}
 

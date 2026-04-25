@@ -1,6 +1,17 @@
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
-import { SILUETA_CROPPED_B64 } from "./siluetaCroppedB64";
+// Silueta image loaded from CDN
+const SILUETA_CDN_URL = "/manus-storage/silueta_cropped_60db8b78.png";
+
+async function loadImageAsDataUrl(url: string): Promise<string> {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
+}
 
 export interface WalletPdfCardData {
   patientName: string;
@@ -19,7 +30,7 @@ async function makeQR(text: string): Promise<string> {
   });
 }
 
-async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: number) {
+async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: number, siluetaDataUrl?: string) {
   const qrImg = await makeQR(card.qrUrl);
   // Fondo
   pdf.setFillColor(254, 254, 252);
@@ -44,7 +55,7 @@ async function drawCard(pdf: jsPDF, card: WalletPdfCardData, x: number, y: numbe
   const silW = silH * 0.263;
   const silX = x + W - silW - 3.5;
   const silY = y + H * 0.12;
-  try { pdf.addImage(SILUETA_CROPPED_B64, "PNG", silX, silY, silW, silH); } catch (_) {}
+  try { if (siluetaDataUrl) pdf.addImage(siluetaDataUrl, "PNG", silX, silY, silW, silH); } catch (_) {}
   // Zona central
   const zTop    = y + H * 0.30;
   const zBottom = y + H * 0.82;
@@ -108,6 +119,9 @@ export async function generateWalletPdf(
   mode: "individual" | "a4" = "individual"
 ): Promise<void> {
   if (cards.length === 0) return;
+  // Load silueta image from CDN once
+  let siluetaDataUrl: string | undefined;
+  try { siluetaDataUrl = await loadImageAsDataUrl(SILUETA_CDN_URL); } catch (_) {}
   let pdf: jsPDF;
   if (mode === "a4" && cards.length > 1) {
     pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -115,14 +129,14 @@ export async function generateWalletPdf(
       if (i > 0 && i % 8 === 0) pdf.addPage();
       const col = i % 2;
       const row = Math.floor(i / 2) % 4;
-      await drawCard(pdf, cards[i], 10 + col * (W + 5), 10 + row * (H + 5));
+      await drawCard(pdf, cards[i], 10 + col * (W + 5), 10 + row * (H + 5), siluetaDataUrl);
     }
   } else {
     pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: [W, H] });
-    await drawCard(pdf, cards[0], 0, 0);
+    await drawCard(pdf, cards[0], 0, 0, siluetaDataUrl);
     for (let i = 1; i < cards.length; i++) {
       pdf.addPage([W, H], "landscape");
-      await drawCard(pdf, cards[i], 0, 0);
+      await drawCard(pdf, cards[i], 0, 0, siluetaDataUrl);
     }
   }
   const fileName = cards.length === 1

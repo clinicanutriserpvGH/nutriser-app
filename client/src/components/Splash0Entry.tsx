@@ -187,7 +187,20 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   fetchPriority="high"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/80 pointer-events-none" />
-                <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-5 md:p-6 text-left pointer-events-none">
+                <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">
+                  {/* Fila superior: badge App Pacientes */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.75)', border: '2px solid rgba(197,165,90,0.9)', backdropFilter: 'blur(6px)' }}>
+                      <img
+                        src={NUTRISER_ICON}
+                        alt="Nutriser"
+                        className="w-5 h-5 md:w-6 md:h-6 object-contain"
+                      />
+                    </div>
+                    <span className="text-[11px] md:text-xs font-bold tracking-widest uppercase text-[#E8C97A]" style={{ textShadow: '0 1px 6px rgba(0,0,0,1), 0 0 16px rgba(0,0,0,1)', background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '6px' }}>
+                      App Pacientes
+                    </span>
+                  </div>
                   <div>
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
                       Portal de Salud<br />Nutriser

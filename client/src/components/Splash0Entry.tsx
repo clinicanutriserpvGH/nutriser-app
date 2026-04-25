@@ -91,7 +91,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
           paddingBottom: "max(env(safe-area-inset-bottom, 0px) + 8px, 16px)",
         }}
       >
-        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[900px] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px] flex flex-col">
+        <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[900px] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px] flex flex-col" style={{ minHeight: '100%' }}>
 
           {/* ── Header ── */}
           <div className={`flex items-center gap-3 mb-3 md:mb-4 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
@@ -167,11 +167,11 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
           {/* ── Grid principal — portrait: columna vertical | landscape: fila horizontal ── */}
           <div
             className="gap-3 mb-3"
-            style={{ display: 'flex', flexDirection: isLandscape ? 'row' : 'column' }}
+            style={{ display: 'flex', flexDirection: isLandscape ? 'row' : 'column', flex: 1, minHeight: 0 }}
           >
 
             {/* ── Tarjeta 3: Portal de Salud Nutriser ── */}
-            <div style={{ flex: isLandscape ? '6' : 'none', minHeight: isLandscape ? '0' : '180px', height: isLandscape ? '100%' : '180px' }}>
+            <div style={{ flex: isLandscape ? '6' : '1', minHeight: isLandscape ? '0' : '160px' }}>
               <button
                 type="button"
                 onClick={handlePortalSalud}
@@ -235,7 +235,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
 
 
             {/* ── Tarjeta 1: Tienda Nutriser ── */}
-            <div style={{ flex: isLandscape ? '6' : 'none', minHeight: isLandscape ? '0' : '180px', height: isLandscape ? '100%' : '180px' }}>
+            <div style={{ flex: isLandscape ? '6' : '1', minHeight: isLandscape ? '0' : '160px' }}>
               <button
                 type="button"
                 onClick={() => handleNavigate('/memberships')}

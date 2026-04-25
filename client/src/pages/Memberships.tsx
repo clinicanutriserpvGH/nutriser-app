@@ -3,6 +3,7 @@
  * Estilo: Farmacia del Ahorro / e-commerce moderno
  * Fondo claro, scroll horizontal, carrusel de ofertas, categorías con iconos
  */
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,7 +41,8 @@ const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-type StoreTab = "tratamientos" | "misTratamientos" | "farmacy" | "library" | "monedero" | "wishlist";
+type StoreTab = "tratamientos" | "misTratamientos" | "farmacy" | "library" | "monedero" | "wishlist" | "packages";
+type MainCat = "all" | "tratamientos" | "skincare" | "libreria";
 
 interface CartItem {
   id: string;
@@ -533,6 +535,25 @@ export default function Memberships() {
   const [searchQuery, setSearchQuery] = useState("");
   // ─── Filtros Skincare (productos) ──────────────────────────────────────────
   const [activeProdCategory, setActiveProdCategory] = useState<string>("all");
+  // ─── Categoría principal (fila de íconos grandes) ──────────────────────────
+  const [activeMainCat, setActiveMainCat] = useState<MainCat>("all");
+
+  /** Cambia la categoría principal y sincroniza el tab activo */
+  const handleMainCat = (cat: MainCat) => {
+    setActiveMainCat(cat);
+    if (cat === "all") {
+      setActiveTab("tratamientos");
+      setActiveCategory("all");
+    } else if (cat === "tratamientos") {
+      setActiveTab("tratamientos");
+      setActiveCategory("all");
+    } else if (cat === "skincare") {
+      setActiveTab("farmacy");
+      setActiveProdCategory("all");
+    } else if (cat === "libreria") {
+      setActiveTab("library");
+    }
+  };
 
   // ─── Normalización de texto (quita tildes, minúsculas) ─────────────────────
   const normalize = (text: string) =>
@@ -1516,45 +1537,90 @@ export default function Memberships() {
       ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === "tratamientos" && !searchQuery && (
         <div className="pb-28">
-          {/* ── Categorías con iconos circulares (scroll horizontal) ── */}
+          {/* ── Categorías principales: Todos / Tratamientos / Skincare / Librería ── */}
           <div className="bg-white mt-2 py-4">
             <div className="max-w-7xl mx-auto px-4">
               <h3 className="text-gray-900 font-bold text-base mb-3">{t("categories", lang)}</h3>
               <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-1 lg:justify-center" style={{ scrollbarWidth: "none" }}>
+
                 {/* Todos */}
-                <button onClick={() => setActiveCategory("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                <button onClick={() => handleMainCat("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
                   <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
-                    activeCategory === "all" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-gray-100"
+                    activeMainCat === "all" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-gray-100"
                   }`}>
-                    <Package className={`w-6 h-6 ${activeCategory === "all" ? "text-white" : "text-gray-500"}`} />
+                    <Package className={`w-6 h-6 ${activeMainCat === "all" ? "text-white" : "text-gray-500"}`} />
                   </div>
-                  <span className={`text-[10px] font-semibold ${activeCategory === "all" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catAll", lang)}</span>
+                  <span className={`text-[10px] font-semibold ${activeMainCat === "all" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catAll", lang)}</span>
                 </button>
-                {/* Paquetes */}
-                <button onClick={() => setActiveCategory("packages")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px]">
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
-                    activeCategory === "packages" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-amber-50"
+
+                {/* Tratamientos */}
+                <button onClick={() => handleMainCat("tratamientos")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                    activeMainCat === "tratamientos" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-amber-50"
                   }`}>
-                    <Crown className={`w-6 h-6 ${activeCategory === "packages" ? "text-white" : "text-amber-600"}`} />
+                    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke={activeMainCat === "tratamientos" ? "#fff" : "#C5A55A"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="3.5" r="1.8" />
+                      <path d="M8.5 7.5 C9 6 10.5 5.5 12 5.5 C13.5 5.5 15 6 15.5 7.5" />
+                      <path d="M8.5 7.5 L8 11.5 C7.8 13 9.5 13.8 12 13.8 C14.5 13.8 16.2 13 16 11.5 L15.5 7.5" />
+                      <path d="M8 11.5 L7.5 15.5 C7.5 17 9.5 17.8 12 17.8 C14.5 17.8 16.5 17 16.5 15.5 L16 11.5" />
+                      <path d="M9.5 17.8 L9 22 M14.5 17.8 L15 22" />
+                      <path d="M4.5 11 L6.5 12.5 M4.5 14 L6.5 12.5" strokeWidth="1.3" />
+                      <path d="M19.5 11 L17.5 12.5 M19.5 14 L17.5 12.5" strokeWidth="1.3" />
+                    </svg>
                   </div>
-                  <span className={`text-[10px] font-semibold ${activeCategory === "packages" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catPackages", lang)}</span>
+                  <span className={`text-[10px] font-semibold ${activeMainCat === "tratamientos" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabServices", lang)}</span>
                 </button>
-                {sortedCategories.map(cat => {
-                  const meta = CATEGORY_META[cat] ?? { label: cat, icon: Package, color: "#888", bg: "#f3f4f6" };
-                  const Icon = meta.icon;
-                  const isActive = activeCategory === cat;
-                  return (
-                    <button key={cat} onClick={() => setActiveCategory(cat)} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
-                      <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
-                        isActive ? "shadow-lg" : ""
-                      }`} style={{ backgroundColor: isActive ? meta.color : meta.bg }}>
-                        <Icon className="w-6 h-6" style={{ color: isActive ? "#fff" : meta.color }} />
-                      </div>
-                      <span className={`text-[10px] font-semibold ${isActive ? "text-gray-900" : "text-gray-500"}`}>{t(meta.label as any, lang)}</span>
-                    </button>
-                  );
-                })}
+
+                {/* Skincare */}
+                <button onClick={() => handleMainCat("skincare")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                    activeMainCat === "skincare" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-pink-50"
+                  }`}>
+                    <Droplets className={`w-6 h-6 ${activeMainCat === "skincare" ? "text-white" : "text-pink-400"}`} />
+                  </div>
+                  <span className={`text-[10px] font-semibold ${activeMainCat === "skincare" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabProducts", lang)}</span>
+                </button>
+
+                {/* Librería */}
+                <button onClick={() => handleMainCat("libreria")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                    activeMainCat === "libreria" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-blue-50"
+                  }`}>
+                    <BookOpen className={`w-6 h-6 ${activeMainCat === "libreria" ? "text-white" : "text-blue-400"}`} />
+                  </div>
+                  <span className={`text-[10px] font-semibold ${activeMainCat === "libreria" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabLibrary", lang)}</span>
+                </button>
+
               </div>
+
+              {/* ── Subcategorías de Tratamientos (solo cuando está activo) ── */}
+              {activeMainCat === "tratamientos" && (
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+                  <button
+                    onClick={() => setActiveCategory("all")}
+                    className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${
+                      activeCategory === "all" ? "bg-[#C5A55A] text-white" : "bg-gray-100 text-gray-500"
+                    }`}
+                  >
+                    {t("catAll", lang)}
+                  </button>
+                  {sortedCategories.map(cat => {
+                    const meta = CATEGORY_META[cat] ?? { label: cat, icon: Package, color: "#888", bg: "#f3f4f6" };
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setActiveCategory(cat)}
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${
+                          activeCategory === cat ? "bg-[#C5A55A] text-white" : "bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        {t(meta.label as any, lang)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
             </div>
           </div>
 
@@ -1808,6 +1874,28 @@ onClick={() => {
       ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === "farmacy" && !searchQuery && (
         <div className="pb-28 mt-2">
+          {/* ── Categorías principales (compartidas entre tabs) ── */}
+          <div className="bg-white py-3 border-b border-gray-100">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+                {([
+                  { key: "all", label: t("catAll", lang), icon: <Package className="w-5 h-5" />, bg: "bg-gray-100", activeBg: "bg-[#C5A55A]" },
+                  { key: "tratamientos", label: t("tabServices", lang), icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="3.5" r="1.8" /><path d="M8.5 7.5 C9 6 10.5 5.5 12 5.5 C13.5 5.5 15 6 15.5 7.5" /><path d="M8.5 7.5 L8 11.5 C7.8 13 9.5 13.8 12 13.8 C14.5 13.8 16.2 13 16 11.5 L15.5 7.5" /><path d="M8 11.5 L7.5 15.5 C7.5 17 9.5 17.8 12 17.8 C14.5 17.8 16.5 17 16.5 15.5 L16 11.5" /><path d="M9.5 17.8 L9 22 M14.5 17.8 L15 22" /></svg>, bg: "bg-amber-50", activeBg: "bg-[#C5A55A]" },
+                  { key: "skincare", label: t("tabProducts", lang), icon: <Droplets className="w-5 h-5" />, bg: "bg-pink-50", activeBg: "bg-[#C5A55A]" },
+                  { key: "libreria", label: t("tabLibrary", lang), icon: <BookOpen className="w-5 h-5" />, bg: "bg-blue-50", activeBg: "bg-[#C5A55A]" },
+                ] as { key: MainCat; label: string; icon: React.ReactNode; bg: string; activeBg: string }[]).map(item => (
+                  <button key={item.key} onClick={() => handleMainCat(item.key)} className="flex flex-col items-center gap-1 flex-shrink-0 min-w-[56px]">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                      activeMainCat === item.key ? `${item.activeBg} shadow-md text-white` : `${item.bg} text-gray-500`
+                    }`}>
+                      {item.icon}
+                    </div>
+                    <span className={`text-[10px] font-semibold ${ activeMainCat === item.key ? "text-[#C5A55A]" : "text-gray-500"}`}>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
           <div className="bg-white py-5">
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-center justify-between mb-4">
@@ -2003,6 +2091,28 @@ onClick={() => {
       ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === "library" && !searchQuery && (
         <div className="pb-28 mt-2">
+          {/* ── Categorías principales (compartidas entre tabs) ── */}
+          <div className="bg-white py-3 border-b border-gray-100">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+                {([
+                  { key: "all", label: t("catAll", lang), icon: <Package className="w-5 h-5" />, bg: "bg-gray-100", activeBg: "bg-[#C5A55A]" },
+                  { key: "tratamientos", label: t("tabServices", lang), icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="3.5" r="1.8" /><path d="M8.5 7.5 C9 6 10.5 5.5 12 5.5 C13.5 5.5 15 6 15.5 7.5" /><path d="M8.5 7.5 L8 11.5 C7.8 13 9.5 13.8 12 13.8 C14.5 13.8 16.2 13 16 11.5 L15.5 7.5" /><path d="M8 11.5 L7.5 15.5 C7.5 17 9.5 17.8 12 17.8 C14.5 17.8 16.5 17 16.5 15.5 L16 11.5" /><path d="M9.5 17.8 L9 22 M14.5 17.8 L15 22" /></svg>, bg: "bg-amber-50", activeBg: "bg-[#C5A55A]" },
+                  { key: "skincare", label: t("tabProducts", lang), icon: <Droplets className="w-5 h-5" />, bg: "bg-pink-50", activeBg: "bg-[#C5A55A]" },
+                  { key: "libreria", label: t("tabLibrary", lang), icon: <BookOpen className="w-5 h-5" />, bg: "bg-blue-50", activeBg: "bg-[#C5A55A]" },
+                ] as { key: MainCat; label: string; icon: React.ReactNode; bg: string; activeBg: string }[]).map(item => (
+                  <button key={item.key} onClick={() => handleMainCat(item.key)} className="flex flex-col items-center gap-1 flex-shrink-0 min-w-[56px]">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                      activeMainCat === item.key ? `${item.activeBg} shadow-md text-white` : `${item.bg} text-gray-500`
+                    }`}>
+                      {item.icon}
+                    </div>
+                    <span className={`text-[10px] font-semibold ${ activeMainCat === item.key ? "text-[#C5A55A]" : "text-gray-500"}`}>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
           <div className="bg-white py-5">
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-center gap-2 mb-4">
@@ -2716,35 +2826,27 @@ onClick={() => {
             </div>
             <div className="absolute left-0 right-0 -top-[1px] border-t border-gray-200" style={{ zIndex: 0 }} />
             <div className="w-full max-w-screen-lg mx-auto flex items-center pt-2 pb-1 px-2">
-              {/* Izquierda: Tratamientos + Skincare */}
+              {/* Izquierda: Inicio + Paquetes */}
               <div className="flex flex-1 justify-around">
-                {/* Tratamientos */}
+                {/* Inicio */}
                 <button
-                  onClick={() => setActiveTab("tratamientos")}
+                  onClick={() => { setActiveTab("tratamientos"); setActiveMainCat("all"); setActiveCategory("all"); }}
                   className={`flex flex-col items-center gap-0.5 py-1 px-2 transition-colors ${
-                    activeTab === "tratamientos" ? "text-[#C5A55A]" : "text-gray-400"
+                    activeTab === "tratamientos" && activeMainCat === "all" ? "text-[#C5A55A]" : "text-gray-400"
                   }`}
                 >
-                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="3.5" r="1.8" />
-                    <path d="M8.5 7.5 C9 6 10.5 5.5 12 5.5 C13.5 5.5 15 6 15.5 7.5" />
-                    <path d="M8.5 7.5 L8 11.5 C7.8 13 9.5 13.8 12 13.8 C14.5 13.8 16.2 13 16 11.5 L15.5 7.5" />
-                    <path d="M8 11.5 L7.5 15.5 C7.5 17 9.5 17.8 12 17.8 C14.5 17.8 16.5 17 16.5 15.5 L16 11.5" />
-                    <path d="M9.5 17.8 L9 22 M14.5 17.8 L15 22" />
-                    <path d="M4.5 11 L6.5 12.5 M4.5 14 L6.5 12.5" strokeWidth="1.3" />
-                    <path d="M19.5 11 L17.5 12.5 M19.5 14 L17.5 12.5" strokeWidth="1.3" />
-                  </svg>
-                  <span className="text-[10px] font-semibold leading-tight">{t("tabServices", lang)}</span>
+                  <Home className="w-6 h-6" />
+                  <span className="text-[10px] font-semibold leading-tight">Inicio</span>
                 </button>
-                {/* Skincare */}
+                {/* Paquetes */}
                 <button
-                  onClick={() => setActiveTab("farmacy")}
+                  onClick={() => { setActiveTab("tratamientos"); setActiveMainCat("all"); setActiveCategory("packages"); }}
                   className={`flex flex-col items-center gap-0.5 py-1 px-2 transition-colors ${
-                    activeTab === "farmacy" ? "text-[#C5A55A]" : "text-gray-400"
+                    activeCategory === "packages" ? "text-[#C5A55A]" : "text-gray-400"
                   }`}
                 >
-                  <Droplets className="w-6 h-6" />
-                  <span className="text-[10px] font-semibold leading-tight">{t("tabProducts", lang)}</span>
+                  <Crown className="w-6 h-6" />
+                  <span className="text-[10px] font-semibold leading-tight">{t("catPackages", lang)}</span>
                 </button>
               </div>
 
@@ -2753,18 +2855,8 @@ onClick={() => {
                 <span className="text-[10px] font-bold text-[#C5A55A] leading-tight">{t("tabWallet", lang)}</span>
               </div>
 
-              {/* Derecha: Librería + Deseos + Cuenta */}
+              {/* Derecha: Deseos + Cuenta */}
               <div className="flex flex-1 justify-around">
-                {/* Librería */}
-                <button
-                  onClick={() => setActiveTab("library")}
-                  className={`flex flex-col items-center gap-0.5 py-1 px-2 transition-colors ${
-                    activeTab === "library" ? "text-[#C5A55A]" : "text-gray-400"
-                  }`}
-                >
-                  <BookOpen className="w-6 h-6" />
-                  <span className="text-[10px] font-semibold leading-tight">{t("tabLibrary", lang)}</span>
-                </button>
                 {/* Deseos */}
                 <button
                   onClick={() => setActiveTab("wishlist")}

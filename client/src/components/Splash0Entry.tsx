@@ -10,7 +10,7 @@
  * Nota: la misma cuenta de paciente funciona para Shop y Academy.
  */
 import { useState, useEffect } from "react";
-import { ShoppingBag, CalendarCheck, Moon, Sun, Utensils, Camera, ClipboardList, BookOpen, Ruler, Image, Flame, ChefHat, User, LogIn } from "lucide-react";
+import { ShoppingBag, CalendarCheck, Moon, Sun, ClipboardList, BookOpen, User, LogIn } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 
@@ -188,37 +188,18 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/80 pointer-events-none" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">
-                  {/* Fila superior: badge App Pacientes + íconos en md+ */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.45)', border: '1.5px solid rgba(197,165,90,0.6)', backdropFilter: 'blur(4px)' }}>
-                        <img
-                          src={NUTRISER_ICON}
-                          alt="Nutriser"
-                          className="w-5 h-5 md:w-6 md:h-6 object-contain"
-                        />
-                      </div>
-                      <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-[#C5A55A]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
-                        App Pacientes
-                      </span>
-                    </div>                    {/* Íconos — 2 columnas × 3 filas, visibles en celular, tablet y desktop */}
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-2">
-                      {[
-                        { icon: Utensils, label: "Mi Dieta" },
-                        { icon: Camera, label: "Escáner de Alimentos" },
-                        { icon: Ruler, label: "Mis Mediciones" },
-                        { icon: Image, label: "Mis Fotos" },
-                        { icon: Flame, label: "Lista de Detonantes" },
-                        { icon: ChefHat, label: "Mi Recetario" },
-                      ].map(({ icon: Ic, label }) => (
-                        <div key={label} className="flex flex-col items-center gap-1">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(197,165,90,0.25)', border: '1.5px solid rgba(197,165,90,0.7)', backdropFilter: 'blur(6px)' }}>
-                            <Ic className="w-5 h-5 text-[#E8C97A]" />
-                          </div>
-                          <span className="text-[8px] font-semibold leading-tight text-center text-white w-full" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>{label}</span>
-                        </div>
-                      ))}
+                  {/* Fila superior: badge App Pacientes */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.45)', border: '1.5px solid rgba(197,165,90,0.6)', backdropFilter: 'blur(4px)' }}>
+                      <img
+                        src={NUTRISER_ICON}
+                        alt="Nutriser"
+                        className="w-5 h-5 md:w-6 md:h-6 object-contain"
+                      />
                     </div>
+                    <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-[#C5A55A]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+                      App Pacientes
+                    </span>
                   </div>
                   <div>
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>

@@ -43,9 +43,11 @@ interface NavbarProps {
   isHome?: boolean;
   /** Override del comportamiento de Regresar (por defecto va a Splash 1) */
   onRegresar?: () => void;
+  /** Ocultar los links de navegación del sitio (Servicios, Cupones, etc.) en páginas internas */
+  hideNavLinks?: boolean;
 }
 
-export default function Navbar({ lightBg = false, onShowSplash, isHome = false, onRegresar }: NavbarProps) {
+export default function Navbar({ lightBg = false, onShowSplash, isHome = false, onRegresar, hideNavLinks = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [, navigate] = useLocation();
@@ -161,7 +163,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
           )}
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className={`hidden lg:flex items-center gap-8 ${hideNavLinks ? 'invisible pointer-events-none' : ''}`}>
             {navLinks.map((link: any) => (
               <div key={link.href} className="relative group">
                 <a

@@ -14,7 +14,7 @@ export default function Cupones() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar onShowSplash={showSplash} onRegresar={handleRegresar} />
+      <Navbar onShowSplash={showSplash} onRegresar={handleRegresar} hideNavLinks lightBg />
       <main>
         <PromotionsSection />
       </main>

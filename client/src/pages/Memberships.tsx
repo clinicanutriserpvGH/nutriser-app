@@ -1761,9 +1761,19 @@ export default function Memberships() {
                           ) : (
                             <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
                           )}
-                          <button disabled={isOutOfStock} onClick={() => !isOutOfStock && openCheckout({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ? `$${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : product.price ?? "Consultar", qty: 1, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })} className="mt-auto w-full flex items-center justify-center gap-1 bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95 disabled:opacity-40">
-                            <Zap className="w-3 h-3" /> {isOutOfStock ? "Agotado" : t("buy", lang)}
-                          </button>
+                          <div className="mt-auto flex flex-col gap-1.5">
+                            <button disabled={isOutOfStock} onClick={() => !isOutOfStock && setDetailItem({ id: `prd-${product.id}`, name: product.name, price: product.price ?? null, priceNum: priceNum ?? undefined, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", originalId: product.id })} className="w-full flex items-center justify-center gap-1 border border-gray-200 text-gray-700 font-bold text-[10px] py-1.5 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-40">
+                              <Info className="w-3 h-3" /> Ver detalles
+                            </button>
+                            <div className="flex gap-1.5">
+                              <button disabled={isOutOfStock} onClick={() => !isOutOfStock && addToCart({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ? `$${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : product.price ?? "Consultar", imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })} className="flex-1 flex items-center justify-center gap-1 border border-[#C5A55A] text-[#C5A55A] font-bold text-[10px] py-1.5 rounded-lg hover:bg-[#C5A55A]/10 transition-all disabled:opacity-40">
+                                <ShoppingCart className="w-3 h-3" /> Al carrito
+                              </button>
+                              <button disabled={isOutOfStock} onClick={() => !isOutOfStock && openCheckout({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ? `$${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : product.price ?? "Consultar", qty: 1, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })} className="flex-1 flex items-center justify-center gap-1 bg-[#C5A55A] text-white font-bold text-[10px] py-1.5 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95 disabled:opacity-40">
+                                <Zap className="w-3 h-3" /> {isOutOfStock ? "Agotado" : t("buy", lang)}
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     );
@@ -1794,9 +1804,16 @@ export default function Memberships() {
                     <div className="p-3 flex-1 flex flex-col">
                       <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{tx(ebook.title)}</h3>
                       <p className="text-[#C5A55A] font-black text-sm mb-2">${parseFloat(String((ebook as any).presalePrice ?? ebook.price)).toLocaleString("es-MX")} MXN</p>
-                      <button onClick={() => handleMainCat("libreria")} className="mt-auto w-full flex items-center justify-center gap-1 bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all">
-                        <BookOpen className="w-3 h-3" /> Ver
-                      </button>
+                      <div className="mt-auto flex flex-col gap-1.5">
+                        <div className="flex gap-1.5">
+                          <button onClick={() => addToCart({ id: `ebook-${ebook.id}`, name: ebook.title, price: parseFloat(String((ebook as any).presalePrice ?? ebook.price)), priceLabel: `$${parseFloat(String((ebook as any).presalePrice ?? ebook.price)).toLocaleString("es-MX")} MXN`, imageUrl: ebook.coverUrl ?? undefined, category: "ebook", itemType: "ebook", ebookId: ebook.id })} className="flex-1 flex items-center justify-center gap-1 border border-[#C5A55A] text-[#C5A55A] font-bold text-[10px] py-1.5 rounded-lg hover:bg-[#C5A55A]/10 transition-all">
+                            <ShoppingCart className="w-3 h-3" /> Al carrito
+                          </button>
+                          <button onClick={() => handleMainCat("libreria")} className="flex-1 flex items-center justify-center gap-1 bg-[#C5A55A] text-white font-bold text-[10px] py-1.5 rounded-lg hover:bg-[#B8963E] transition-all">
+                            <BookOpen className="w-3 h-3" /> Ver
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

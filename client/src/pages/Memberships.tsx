@@ -1298,11 +1298,12 @@ export default function Memberships() {
                   </button>
                 </div>
               ) : (
-                // Solo visible en escritorio — en móvil el usuario inicia sesión desde Mi Cuenta Nutriser en el splash
+                // Visible en móvil y desktop — lleva al formulario de crear monedero
                 <button onClick={() => navigate("/mis-tratamientos?returnTo=/memberships")}
-                  className="hidden md:flex items-center gap-1.5 bg-[#C5A55A] text-white px-3 py-2 rounded-full text-xs font-bold hover:bg-[#B8963E] active:scale-95 transition-all">
+                  className="flex items-center gap-1.5 bg-[#C5A55A] text-white px-3 py-2 rounded-full text-xs font-bold hover:bg-[#B8963E] active:scale-95 transition-all">
                   <User className="w-3.5 h-3.5" />
-                  {t("signIn", lang)}
+                  <span className="hidden sm:inline">{t("signIn", lang)}</span>
+                  <span className="sm:hidden">Monedero</span>
                 </button>
               )}
               {/* Language toggle */}

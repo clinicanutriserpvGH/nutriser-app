@@ -2084,3 +2084,4 @@
 - [x] Tienda - tarjeta de producto: muestra "Agotado" con overlay cuando stock = 0
 - [x] Tienda - tarjeta de producto: botones Carrito y Comprar deshabilitados cuando agotado
 - [x] Flujo de compra de productos: idéntico a servicios (comprobante transferencia O pago en clínica)
+- [x] Corregir solapamiento del botón 'Seguimiento de mis tratamientos' sobre botones de redes sociales en móviles

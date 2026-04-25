@@ -1272,11 +1272,17 @@ export async function deletePatientPhoto(id: number) {
 export async function deletePatientAccount(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+  // Obtener el email del paciente antes de eliminarlo para borrar también la cuenta OAuth
+  const [patient] = await db.select({ email: patientAccounts.email }).from(patientAccounts).where(eq(patientAccounts.id, id));
   // Delete related data first (cascade)
   await db.delete(patientPhotos).where(eq(patientPhotos.patientId, id));
   await db.delete(patientAppointments).where(eq(patientAppointments.patientId, id));
   await db.delete(patientTreatments).where(eq(patientTreatments.patientId, id));
   await db.delete(patientAccounts).where(eq(patientAccounts.id, id));
+  // También eliminar la cuenta OAuth (tabla users) con el mismo email para revocar acceso a la tienda
+  if (patient?.email) {
+    await db.delete(users).where(eq(users.email, patient.email));
+  }
   return { success: true };
 }
 

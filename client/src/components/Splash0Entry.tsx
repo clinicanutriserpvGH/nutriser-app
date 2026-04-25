@@ -131,7 +131,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             <button
               type="button"
               onClick={() => handleNavigate('/mis-tratamientos')}
-              className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all duration-200 active:scale-95 group"
+              className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 active:scale-95 group"
               style={{
                 background: isLoggedIn
                   ? 'linear-gradient(145deg, #1a3a1a 0%, #2d5a2d 100%)'
@@ -157,8 +157,8 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 </>
               ) : (
                 <>
-                  <LogIn className="w-3.5 h-3.5 text-black flex-shrink-0" />
-                  <span className="text-[8px] font-bold tracking-wide uppercase text-black leading-tight">Crear Cuenta<br/>Nutriser</span>
+                  <LogIn className="w-4 h-4 text-black flex-shrink-0" />
+                  <span className="text-[12px] font-bold tracking-wide uppercase text-black leading-tight">Crear Cuenta<br/>Nutriser</span>
                 </>
               )}
             </button>

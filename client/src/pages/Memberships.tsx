@@ -542,8 +542,10 @@ export default function Memberships() {
   const handleMainCat = (cat: MainCat) => {
     setActiveMainCat(cat);
     if (cat === "all") {
+      // "Todos" se queda en el tab tratamientos pero muestra todo (servicios + productos + librería)
       setActiveTab("tratamientos");
       setActiveCategory("all");
+      setActiveProdCategory("all");
     } else if (cat === "tratamientos") {
       setActiveTab("tratamientos");
       setActiveCategory("all");
@@ -1707,6 +1709,89 @@ export default function Memberships() {
                     );
                   })}
                 </HScrollRail>
+              </div>
+            </div>
+          )}
+
+          {/* ── Sección Skincare (solo en modo Todos) ── */}
+          {activeMainCat === "all" && activeCategory !== "packages" && products.length > 0 && (
+            <div className="bg-white mt-2 py-5">
+              <div className="max-w-7xl mx-auto px-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-pink-50 flex items-center justify-center">
+                      <Droplets className="w-4 h-4 text-pink-400" />
+                    </div>
+                    <h2 className="font-bold text-gray-900 text-base">{t("tabProducts", lang)}</h2>
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{products.length}</span>
+                  </div>
+                  <button onClick={() => handleMainCat("skincare")} className="text-[#C5A55A] text-xs font-bold flex items-center gap-0.5">
+                    {t("viewAll", lang)} <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <HScrollRail>
+                  {products.slice(0, 8).map(product => {
+                    const salePrice = (product as any).salePrice;
+                    const priceNum = salePrice ? parseInt(String(salePrice).replace(/[^0-9]/g, "")) : product.price ? parseInt(product.price.replace(/[^0-9]/g, "")) : null;
+                    const isOutOfStock = (product.stock ?? null) !== null && product.stock === 0;
+                    return (
+                      <div key={product.id} className={`flex-shrink-0 w-48 sm:w-52 bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col ${isOutOfStock ? 'opacity-60 border-gray-200' : 'border-gray-100'}`}>
+                        <div className="relative h-36 overflow-hidden">
+                          {product.imageUrl ? (
+                            <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-50"><Droplets className="w-10 h-10 text-gray-200" /></div>
+                          )}
+                          {isOutOfStock && <div className="absolute inset-0 bg-black/40 flex items-center justify-center"><span className="bg-white text-gray-800 font-black text-xs px-3 py-1 rounded-full">Agotado</span></div>}
+                        </div>
+                        <div className="p-3 flex-1 flex flex-col">
+                          <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{tx(product.name)}</h3>
+                          {salePrice ? (
+                            <p className="text-[#C5A55A] font-black text-sm mb-2">${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN</p>
+                          ) : product.price ? (
+                            <p className="text-[#C5A55A] font-black text-sm mb-2">${parseInt((product.price||"").replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN</p>
+                          ) : (
+                            <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
+                          )}
+                          <button disabled={isOutOfStock} onClick={() => !isOutOfStock && openCheckout({ id: `prd-${product.id}`, name: product.name, price: priceNum ?? 0, priceLabel: salePrice ? `$${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : product.price ?? "Consultar", qty: 1, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", productId: product.id })} className="mt-auto w-full flex items-center justify-center gap-1 bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all active:scale-95 disabled:opacity-40">
+                            <Zap className="w-3 h-3" /> {isOutOfStock ? "Agotado" : t("buy", lang)}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </HScrollRail>
+              </div>
+            </div>
+          )}
+
+          {/* ── Sección Librería (solo en modo Todos) ── */}
+          {activeMainCat === "all" && activeCategory !== "packages" && ebook && (
+            <div className="bg-white mt-2 py-5">
+              <div className="max-w-7xl mx-auto px-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                      <BookOpen className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <h2 className="font-bold text-gray-900 text-base">{lang === "EN" ? "Library" : "Librería"}</h2>
+                  </div>
+                  <button onClick={() => handleMainCat("libreria")} className="text-[#C5A55A] text-xs font-bold flex items-center gap-0.5">
+                    {t("viewAll", lang)} <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-48 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+                    {ebook.coverUrl && <img src={ebook.coverUrl} alt={ebook.title} className="w-full h-36 object-cover" />}
+                    <div className="p-3 flex-1 flex flex-col">
+                      <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{tx(ebook.title)}</h3>
+                      <p className="text-[#C5A55A] font-black text-sm mb-2">${parseFloat(String((ebook as any).presalePrice ?? ebook.price)).toLocaleString("es-MX")} MXN</p>
+                      <button onClick={() => handleMainCat("libreria")} className="mt-auto w-full flex items-center justify-center gap-1 bg-[#C5A55A] text-white font-bold text-[10px] py-2 rounded-lg hover:bg-[#B8963E] transition-all">
+                        <BookOpen className="w-3 h-3" /> Ver
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

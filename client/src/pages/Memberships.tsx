@@ -469,7 +469,7 @@ export default function Memberships() {
     if (wCount > 0) parts.push(`${wCount} ${wCount === 1 ? 'artículo' : 'artículos'} en tu lista de deseos`);
     if (cCount > 0) parts.push(`${cCount} ${cCount === 1 ? 'artículo' : 'artículos'} en tu carrito`);
     const suffix = parts.length > 0 ? ` Tienes ${parts.join(' y ')}.` : '';
-    toast(`👋 ¡Bienvenida de vuelta, ${firstName}!${suffix}`, {
+    toast(`👋 ¡Hola de nuevo, ${firstName}!${suffix}`, {
       duration: parts.length > 0 ? 5000 : 3000,
       style: { background: '#1A1A1A', color: '#FAF7F2', borderLeft: '4px solid #C5A55A' },
     });

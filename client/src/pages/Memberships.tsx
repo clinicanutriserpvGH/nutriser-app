@@ -449,8 +449,30 @@ export default function Memberships() {
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
 
-  // ─── Lista de deseos (persistida en localStorage) ──────────────────
+   // ─── Lista de deseos (persistida en localStorage) ──────────────────
   const { wishlist, wishlistCount, isInWishlist, toggleWishlist, removeFromWishlist } = useWishlist(patient?.id);
+
+  // ─── Toast de bienvenida al iniciar sesión ──────────────────────────
+  const prevPatientIdRef = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    const prevId = prevPatientIdRef.current;
+    const currId = patient?.id;
+    // Solo mostrar cuando el usuario acaba de iniciar sesión (de null → id)
+    if (!prevId && currId && patient) {
+      const firstName = patient.name?.split(' ')[0] || patient.name || 'de vuelta';
+      const wCount = wishlistCount;
+      const cCount = cartCount;
+      const parts: string[] = [];
+      if (wCount > 0) parts.push(`${wCount} ${wCount === 1 ? 'artículo' : 'artículos'} en tu lista de deseos`);
+      if (cCount > 0) parts.push(`${cCount} ${cCount === 1 ? 'artículo' : 'artículos'} en tu carrito`);
+      const suffix = parts.length > 0 ? ` Tienes ${parts.join(' y ')}.` : '';
+      toast(`👋 ¡Bienvenida de vuelta, ${firstName}!${suffix}`, {
+        duration: parts.length > 0 ? 5000 : 3000,
+        style: { background: '#1A1A1A', color: '#FAF7F2', borderLeft: '4px solid #C5A55A' },
+      });
+    }
+    prevPatientIdRef.current = currId;
+  }, [patient?.id]);
 
   const addToCart = (item: Omit<CartItem, "qty">) => {
     // Tracking: evento cart

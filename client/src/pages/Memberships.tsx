@@ -836,7 +836,7 @@ export default function Memberships() {
       const itemsPayload = checkoutItems.map(i => ({
         name: i.name,
         qty: i.qty,
-        priceCents: Math.round((i.discountedPrice ?? i.price) * i.qty * 100),
+        priceCents: Math.round(i.price * i.qty * 100),
         itemType: i.itemType ?? 'service',
       }));
       cashPendingMutation.mutate({
@@ -1786,6 +1786,7 @@ export default function Memberships() {
                                 if (isOutOfStock) return;
                                 const salePriceLabel = salePrice ? `$${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : null;
                                 const regularPriceLabel = product.price ? `$${parseInt((product.price||"").replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : null;
+                                const regularPriceNum = product.price ? parseFloat(String(product.price).replace(/[^0-9.]/g, "")) : null;
                                 const item: DetailItem = {
                                   id: `prd-${product.id}`,
                                   productId: product.id,

@@ -443,6 +443,23 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
             </button>
           </div>
 
+          {/* Badge de contrato — visible sin expandir */}
+          <div className="flex items-center gap-2 mt-2">
+            {(wallet as any).consentAcceptedAt ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200">
+                ✅ Contrato firmado
+              </span>
+            ) : (wallet as any).contractRequired ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200">
+                ⏳ Firma pendiente
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200">
+                📋 Sin contrato
+              </span>
+            )}
+          </div>
+
           {/* Loyalty info */}
           <div className="flex flex-wrap gap-3 mt-2 text-[10px] text-gray-500">
             <span>Consultas ciclo: <b className="text-gray-700">{wallet.consultationsInCycle || 0}/3</b></span>

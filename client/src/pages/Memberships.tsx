@@ -42,7 +42,7 @@ const LOGO_URL =
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 type StoreTab = "tratamientos" | "misTratamientos" | "farmacy" | "library" | "monedero" | "wishlist" | "packages";
-type MainCat = "all" | "tratamientos" | "skincare" | "libreria";
+type MainCat = "all" | "tratamientos" | "skincare" | "libreria" | "packages";
 
 interface CartItem {
   id: string;
@@ -558,6 +558,9 @@ export default function Memberships() {
       setActiveProdCategory("all");
     } else if (cat === "libreria") {
       setActiveTab("library");
+    } else if (cat === "packages") {
+      setActiveTab("tratamientos");
+      setActiveCategory("packages");
     }
   };
 
@@ -1605,6 +1608,16 @@ export default function Memberships() {
                   <span className={`text-[10px] font-semibold ${activeMainCat === "libreria" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabLibrary", lang)}</span>
                 </button>
 
+                {/* Paquetes */}
+                <button onClick={() => handleMainCat("packages")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                    activeMainCat === "packages" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-amber-50"
+                  }`}>
+                    <Crown className={`w-6 h-6 ${activeMainCat === "packages" ? "text-white" : "text-amber-500"}`} />
+                  </div>
+                  <span className={`text-[10px] font-semibold ${activeMainCat === "packages" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catPackages", lang)}</span>
+                </button>
+
               </div>
 
               {/* ── Subcategorías de Tratamientos (solo cuando está activo) ── */}
@@ -1766,7 +1779,49 @@ export default function Memberships() {
                             <p className="text-gray-400 text-xs mb-2 italic">{t("consultPrice", lang)}</p>
                           )}
                           <div className="mt-auto flex flex-col gap-1.5">
-                            <button disabled={isOutOfStock} onClick={() => !isOutOfStock && setDetailItem({ id: `prd-${product.id}`, name: product.name, price: product.price ?? null, priceNum: priceNum ?? undefined, imageUrl: product.imageUrl, category: product.category ?? "general", itemType: "product", originalId: product.id })} className="w-full flex items-center justify-center gap-1 border border-gray-200 text-gray-700 font-bold text-[10px] py-1.5 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-40">
+                            <button
+                              disabled={isOutOfStock}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (isOutOfStock) return;
+                                const salePriceLabel = salePrice ? `$${parseInt(String(salePrice).replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : null;
+                                const regularPriceLabel = product.price ? `$${parseInt((product.price||"").replace(/[^0-9]/g,"")).toLocaleString("es-MX")} MXN` : null;
+                                const item: DetailItem = {
+                                  id: `prd-${product.id}`,
+                                  productId: product.id,
+                                  name: product.name,
+                                  description: product.description,
+                                  price: salePriceLabel ?? regularPriceLabel,
+                                  priceNum: priceNum,
+                                  regularPrice: salePrice && regularPriceNum ? regularPriceNum : null,
+                                  category: product.category ?? "general",
+                                  imageUrl: product.imageUrl,
+                                  itemType: "product",
+                                  isLoadingAI: true,
+                                };
+                                setDetailItem(item);
+                                generateProductInfoMutation.mutate(
+                                  { name: product.name, description: product.description ?? undefined, category: product.category ?? undefined },
+                                  {
+                                    onSuccess: (data) => {
+                                      setDetailItem(prev => prev && prev.id === `prd-${product.id}` ? {
+                                        ...prev,
+                                        benefits: data.benefits,
+                                        howToUse: data.howToUse,
+                                        ingredients: data.ingredients,
+                                        disclaimer: data.disclaimer,
+                                        isLoadingAI: false,
+                                      } : prev);
+                                    },
+                                    onError: () => {
+                                      setDetailItem(prev => prev ? { ...prev, isLoadingAI: false } : prev);
+                                    },
+                                  }
+                                );
+                              }}
+                              className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-1.5 rounded-lg mb-1.5 transition-all active:scale-95 disabled:opacity-40"
+                              style={{ border: "1px solid rgba(197,165,90,0.35)", color: "#C5A55A", background: "rgba(197,165,90,0.05)" }}
+                            >
                               <Info className="w-3 h-3" /> Ver detalles
                             </button>
                             <div className="flex gap-1.5">
@@ -2952,15 +3007,13 @@ onClick={() => {
                   <Home className="w-6 h-6" />
                   <span className="text-[10px] font-semibold leading-tight">Inicio</span>
                 </button>
-                {/* Paquetes */}
+                {/* Cupones */}
                 <button
-                  onClick={() => { setActiveTab("tratamientos"); setActiveMainCat("all"); setActiveCategory("packages"); }}
-                  className={`flex flex-col items-center gap-0.5 py-1 px-2 transition-colors ${
-                    activeCategory === "packages" ? "text-[#C5A55A]" : "text-gray-400"
-                  }`}
+                  onClick={() => navigate("/cupones")}
+                  className="flex flex-col items-center gap-0.5 py-1 px-2 transition-colors text-gray-400 hover:text-[#C5A55A]"
                 >
-                  <Crown className="w-6 h-6" />
-                  <span className="text-[10px] font-semibold leading-tight">{t("catPackages", lang)}</span>
+                  <Tag className="w-6 h-6" />
+                  <span className="text-[10px] font-semibold leading-tight">Cupones</span>
                 </button>
               </div>
 

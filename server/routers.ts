@@ -4143,12 +4143,54 @@ Devuelve un JSON con estos campos:
         originalAmount: z.number().positive(),
         modalidad: z.enum(['quincenal', 'semanal']),
         adminEmail: z.string(),
+        // Referencia al pago pendiente del que se originan estos artículos
+        cashPaymentId: z.number().optional(),
+        // JSON con los artículos seleccionados para el plan [{name, priceCents}]
+        itemsJson: z.string().optional(),
+        // Monto de los artículos NO incluidos en el plan (se confirman de inmediato)
+        immediateAmountCents: z.number().optional(),
+        // Concepto para el pago inmediato (artículos que sí se pagan ahora)
+        immediateConcept: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const wallet = await getWalletByNumber(input.walletNumber);
         if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
         if (!wallet.isActive) throw new TRPCError({ code: 'FORBIDDEN', message: 'Este monedero está dado de baja' });
         const originalAmountCents = Math.round(input.originalAmount * 100);
+
+        // Si hay artículos que se pagan de inmediato (fuera del plan), crearlos como pago confirmado
+        if (input.cashPaymentId && input.immediateAmountCents && input.immediateAmountCents > 0 && input.immediateConcept) {
+          const newPay = await createCashPendingPayment({
+            walletId: wallet.id,
+            patientId: wallet.patientId,
+            concept: input.immediateConcept,
+            itemsJson: null,
+            itemType: 'other',
+            amountCents: input.immediateAmountCents,
+            walletAmountUsedCents: 0,
+            cashbackPercent: 2,
+          });
+          await confirmCashPayment(newPay.id, input.adminEmail);
+          // Acumular cashback por el pago inmediato
+          const cashbackCents = Math.round(input.immediateAmountCents * 2 / 100);
+          if (cashbackCents > 0) {
+            await addWalletTransaction({
+              walletId: wallet.id,
+              type: 'cashback',
+              amount: cashbackCents,
+              description: `Cashback 2% por pago inmediato: ${input.immediateConcept}`,
+              referenceType: 'cash_payment',
+              referenceId: newPay.id,
+              createdBy: `admin:${input.adminEmail}`,
+            });
+          }
+        }
+
+        // Cancelar el pago pendiente original si se vincula a este plan
+        if (input.cashPaymentId) {
+          await cancelCashPayment(input.cashPaymentId);
+        }
+
         const plan = await createInstallmentPlan({
           walletId: wallet.id,
           patientId: wallet.patientId,
@@ -4156,8 +4198,10 @@ Devuelve un JSON con estos campos:
           originalAmountCents,
           modalidad: input.modalidad,
           createdBy: input.adminEmail,
+          cashPaymentId: input.cashPaymentId,
+          itemsJson: input.itemsJson,
         });
-        // SIN cashback — los pagos a plazos no acumulan
+        // SIN cashback — los pagos a plazos acumulan al confirmar cada cuota
         return { success: true, plan };
       }),
 

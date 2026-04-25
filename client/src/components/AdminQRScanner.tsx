@@ -205,6 +205,10 @@ export default function AdminQRScanner() {
   const [installmentConcept, setInstallmentConcept] = useState("");
   const [installmentAmount, setInstallmentAmount] = useState("");
   const [installmentModalidad, setInstallmentModalidad] = useState<'quincenal' | 'semanal'>('quincenal');
+  // IDs de artículos seleccionados para el plan (índices del itemsJson del pago pendiente)
+  const [selectedPlanItems, setSelectedPlanItems] = useState<number[]>([]);
+  // ID del pago pendiente vinculado al plan
+  const [linkedCashPaymentId, setLinkedCashPaymentId] = useState<number | null>(null);
 
   const installmentCreateMutation = trpc.installments.create.useMutation({
     onSuccess: (data) => {
@@ -213,6 +217,10 @@ export default function AdminQRScanner() {
       setShowInstallmentForm(false);
       setInstallmentConcept("");
       setInstallmentAmount("");
+      setSelectedPlanItems([]);
+      setLinkedCashPaymentId(null);
+      utils.cashPayments.getMyPending.invalidate();
+      utils.wallet.adminLookupByNumber.invalidate();
     },
     onError: (e) => toast.error('Error al crear plan: ' + e.message),
   });
@@ -867,82 +875,225 @@ export default function AdminQRScanner() {
                       <span className="text-sm font-bold text-gray-800">Plan de Pagos a Plazos</span>
                     </div>
                     <button
-                      onClick={() => setShowInstallmentForm(!showInstallmentForm)}
+                      onClick={() => {
+                        setShowInstallmentForm(!showInstallmentForm);
+                        if (!showInstallmentForm) {
+                          setSelectedPlanItems([]);
+                          setLinkedCashPaymentId(null);
+                          setInstallmentConcept("");
+                          setInstallmentAmount("");
+                        }
+                      }}
                       className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
                     >
                       {showInstallmentForm ? 'Cancelar' : '+ Crear plan'}
                     </button>
                   </div>
 
-                  {showInstallmentForm && (
-                    <div className="space-y-2 pt-1">
-                      <input
-                        type="text"
-                        placeholder="Concepto (ej: Paquete Nutrición)"
-                        value={installmentConcept}
-                        onChange={(e) => setInstallmentConcept(e.target.value)}
-                        className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Monto total en pesos (ej: 3500)"
-                        value={installmentAmount}
-                        onChange={(e) => setInstallmentAmount(e.target.value)}
-                        className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                      />
-                      <div className="flex gap-2">
-                        {(['quincenal', 'semanal'] as const).map((m) => (
-                          <button
-                            key={m}
-                            onClick={() => setInstallmentModalidad(m)}
-                            className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${
-                              installmentModalidad === m
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
-                            }`}
-                          >
-                            {m === 'quincenal' ? '📅 2 pagos quincenales (+10%)' : '📆 4 pagos semanales (+15%)'}
-                          </button>
-                        ))}
-                      </div>
-                      {installmentAmount && parseFloat(installmentAmount) > 0 && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-800">
-                          {(() => {
-                            const base = parseFloat(installmentAmount);
-                            const surcharge = installmentModalidad === 'quincenal' ? 0.10 : 0.15;
-                            const total = base * (1 + surcharge);
-                            const n = installmentModalidad === 'quincenal' ? 2 : 4;
-                            return <>
-                              <span className="font-bold">Total con recargo: ${total.toFixed(2)}</span>
-                              <span className="text-blue-600 ml-2">→ {n} pagos de ${(total / n).toFixed(2)}</span>
-                            </>;
-                          })()}
-                        </div>
-                      )}
-                      <button
-                        onClick={() => {
-                          const amount = parseFloat(installmentAmount);
-                          if (!installmentConcept.trim()) { toast.error('Ingresa el concepto'); return; }
-                          if (!amount || amount <= 0) { toast.error('Ingresa un monto válido'); return; }
-                          installmentCreateMutation.mutate({
-                            walletNumber,
-                            concept: installmentConcept.trim(),
-                            originalAmount: amount,
-                            modalidad: installmentModalidad,
-                            adminEmail: 'admin@nutriser.com',
-                          });
-                        }}
-                        disabled={installmentCreateMutation.isPending}
-                        className="w-full py-2 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
-                      >
-                        {installmentCreateMutation.isPending ? (
-                          <><Loader2 className="w-3 h-3 animate-spin" /> Creando plan...</>
-                        ) : (
-                          <><CreditCard className="w-3 h-3" /> Crear Plan de Pagos</>
+                  {showInstallmentForm && (() => {
+                    // Artículos del pago pendiente en clínica (si hay alguno)
+                    const pendingPayments = cashPendingQuery.data ?? [];
+                    const hasPending = pendingPayments.length > 0;
+
+                    // Calcular artículos seleccionados y monto del plan
+                    let planAmountCents = 0;
+                    let immediateAmountCents = 0;
+                    let planItemsForJson: {name: string; priceCents: number}[] = [];
+                    let immediateItemNames: string[] = [];
+                    let linkedPayment: any = null;
+
+                    if (hasPending && linkedCashPaymentId) {
+                      linkedPayment = pendingPayments.find((p: any) => p.id === linkedCashPaymentId);
+                      if (linkedPayment) {
+                        let allItems: {name: string; priceCents: number}[] = [];
+                        try {
+                          const parsed = JSON.parse(linkedPayment.itemsJson ?? '[]');
+                          allItems = parsed.map((it: any) => ({ name: it.name, priceCents: it.priceCents ?? Math.round((it.price ?? 0) * 100) }));
+                        } catch { allItems = [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }]; }
+
+                        allItems.forEach((item, idx) => {
+                          if (selectedPlanItems.includes(idx)) {
+                            planAmountCents += item.priceCents;
+                            planItemsForJson.push(item);
+                          } else {
+                            immediateAmountCents += item.priceCents;
+                            immediateItemNames.push(item.name);
+                          }
+                        });
+                      }
+                    } else if (!hasPending || !linkedCashPaymentId) {
+                      // Modo manual: usar el monto escrito
+                      planAmountCents = Math.round(parseFloat(installmentAmount || '0') * 100);
+                    }
+
+                    const planAmount = planAmountCents / 100;
+                    const surcharge = installmentModalidad === 'quincenal' ? 0.10 : 0.15;
+                    const planTotal = planAmount * (1 + surcharge);
+                    const n = installmentModalidad === 'quincenal' ? 2 : 4;
+
+                    return (
+                      <div className="space-y-2 pt-1">
+                        {/* PASO 1: Si hay pagos pendientes, seleccionar cuál vincular */}
+                        {hasPending && (
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pago pendiente a vincular</p>
+                            {pendingPayments.map((p: any) => (
+                              <button
+                                key={p.id}
+                                onClick={() => {
+                                  setLinkedCashPaymentId(linkedCashPaymentId === p.id ? null : p.id);
+                                  setSelectedPlanItems([]);
+                                }}
+                                className={`w-full text-left px-3 py-2 rounded-lg border text-xs transition-all ${
+                                  linkedCashPaymentId === p.id
+                                    ? 'border-blue-500 bg-blue-50 text-blue-800'
+                                    : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300'
+                                }`}
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold truncate pr-2">{p.concept.length > 30 ? p.concept.slice(0, 30) + '...' : p.concept}</span>
+                                  <span className="font-black text-green-700 whitespace-nowrap">${(p.amountCents / 100).toFixed(2)}</span>
+                                </div>
+                                {linkedCashPaymentId === p.id && <span className="text-[9px] text-blue-600 font-semibold">✓ Seleccionado</span>}
+                              </button>
+                            ))}
+                          </div>
                         )}
-                      </button>
-                    </div>
-                  )}
+
+                        {/* PASO 2: Si hay pago vinculado, mostrar checkboxes de artículos */}
+                        {linkedCashPaymentId && linkedPayment && (() => {
+                          let allItems: {name: string; priceCents: number}[] = [];
+                          try {
+                            const parsed = JSON.parse(linkedPayment.itemsJson ?? '[]');
+                            allItems = parsed.map((it: any) => ({ name: it.name, priceCents: it.priceCents ?? Math.round((it.price ?? 0) * 100) }));
+                          } catch { allItems = [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }]; }
+
+                          return (
+                            <div className="space-y-1.5">
+                              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Selecciona qué va al plan de pagos</p>
+                              {allItems.map((item, idx) => (
+                                <label key={idx} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                  selectedPlanItems.includes(idx)
+                                    ? 'border-blue-400 bg-blue-50'
+                                    : 'border-gray-200 bg-white hover:border-blue-200'
+                                }`}>
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedPlanItems.includes(idx)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedPlanItems(prev => [...prev, idx]);
+                                      } else {
+                                        setSelectedPlanItems(prev => prev.filter(i => i !== idx));
+                                      }
+                                    }}
+                                    className="w-3.5 h-3.5 accent-blue-600 flex-shrink-0"
+                                  />
+                                  <span className="flex-1 text-xs font-medium text-gray-800">{item.name}</span>
+                                  <span className="text-xs font-black text-gray-700">${(item.priceCents / 100).toFixed(2)}</span>
+                                </label>
+                              ))}
+                              {selectedPlanItems.length === 0 && (
+                                <p className="text-[10px] text-orange-500 font-semibold px-1">⚠️ Selecciona al menos un artículo para el plan</p>
+                              )}
+                              {immediateAmountCents > 0 && (
+                                <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 text-[10px] text-green-800">
+                                  <span className="font-bold">✅ Se confirmarán de inmediato:</span> {immediateItemNames.join(', ')} — ${(immediateAmountCents / 100).toFixed(2)}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                        {/* PASO 3: Si no hay pago vinculado, modo manual */}
+                        {(!hasPending || !linkedCashPaymentId) && (
+                          <>
+                            <input
+                              type="text"
+                              placeholder="Concepto (ej: Paquete Nutrición)"
+                              value={installmentConcept}
+                              onChange={(e) => setInstallmentConcept(e.target.value)}
+                              className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            />
+                            <input
+                              type="number"
+                              placeholder="Monto total en pesos (ej: 3500)"
+                              value={installmentAmount}
+                              onChange={(e) => setInstallmentAmount(e.target.value)}
+                              className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            />
+                          </>
+                        )}
+
+                        {/* Modalidad */}
+                        <div className="flex gap-2">
+                          {(['quincenal', 'semanal'] as const).map((m) => (
+                            <button
+                              key={m}
+                              onClick={() => setInstallmentModalidad(m)}
+                              className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${
+                                installmentModalidad === m
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                              }`}
+                            >
+                              {m === 'quincenal' ? '📅 2 pagos quincenales (+10%)' : '📆 4 pagos semanales (+15%)'}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Resumen del plan */}
+                        {planAmount > 0 && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-800">
+                            <span className="font-bold">Total con recargo: ${planTotal.toFixed(2)}</span>
+                            <span className="text-blue-600 ml-2">→ {n} pagos de ${(planTotal / n).toFixed(2)}</span>
+                          </div>
+                        )}
+
+                        {/* Botón crear */}
+                        <button
+                          onClick={() => {
+                            // Validaciones
+                            if (linkedCashPaymentId) {
+                              if (selectedPlanItems.length === 0) { toast.error('Selecciona al menos un artículo para el plan'); return; }
+                              if (planAmountCents <= 0) { toast.error('El monto del plan debe ser mayor a 0'); return; }
+                              const conceptForPlan = planItemsForJson.map(i => i.name).join(', ');
+                              installmentCreateMutation.mutate({
+                                walletNumber,
+                                concept: conceptForPlan,
+                                originalAmount: planAmountCents / 100,
+                                modalidad: installmentModalidad,
+                                adminEmail: 'admin@nutriser.com',
+                                cashPaymentId: linkedCashPaymentId,
+                                itemsJson: JSON.stringify(planItemsForJson),
+                                immediateAmountCents: immediateAmountCents > 0 ? immediateAmountCents : undefined,
+                                immediateConcept: immediateAmountCents > 0 ? immediateItemNames.join(', ') : undefined,
+                              });
+                            } else {
+                              const amount = parseFloat(installmentAmount);
+                              if (!installmentConcept.trim()) { toast.error('Ingresa el concepto'); return; }
+                              if (!amount || amount <= 0) { toast.error('Ingresa un monto válido'); return; }
+                              installmentCreateMutation.mutate({
+                                walletNumber,
+                                concept: installmentConcept.trim(),
+                                originalAmount: amount,
+                                modalidad: installmentModalidad,
+                                adminEmail: 'admin@nutriser.com',
+                              });
+                            }
+                          }}
+                          disabled={installmentCreateMutation.isPending || (linkedCashPaymentId ? selectedPlanItems.length === 0 : false)}
+                          className="w-full py-2 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                        >
+                          {installmentCreateMutation.isPending ? (
+                            <><Loader2 className="w-3 h-3 animate-spin" /> Creando plan...</>
+                          ) : (
+                            <><CreditCard className="w-3 h-3" /> Crear Plan de Pagos</>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* ─── Administración del Monedero (Reiniciar / Dar de Baja / Alta) ─── */}

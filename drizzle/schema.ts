@@ -992,6 +992,10 @@ export const installmentPlans = mysqlTable("installmentPlans", {
   paidInstallments: int("paidInstallments").default(0).notNull(),
   status: mysqlEnum("status", ["active", "completed", "cancelled"]).default("active").notNull(),
   createdBy: varchar("createdBy", { length: 255 }),
+  // Referencia al pago pendiente en clínica del que se originó este plan
+  cashPaymentId: int("cashPaymentId"),
+  // JSON con los artículos que entran al plan [{name, priceCents}]
+  itemsJson: text("itemsJson"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

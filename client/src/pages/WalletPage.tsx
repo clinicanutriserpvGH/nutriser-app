@@ -236,6 +236,13 @@ export default function WalletPage() {
 
   const qrUrl = wallet ? `https://nutriserpv.com/c/${wallet.walletNumber}` : "";
 
+  // ── Planes de Pago a Plazos ──
+  const installmentPlansQuery = trpc.installments.getMyPlans.useQuery(
+    { walletNumber: wallet?.walletNumber || "" },
+    { enabled: isLoggedIn && !!wallet?.walletNumber }
+  );
+  const installmentPlans: any[] = installmentPlansQuery.data || [];
+
   const physicalCardStatusQuery = trpc.physicalCard.getMyStatus.useQuery(
     { walletId: wallet?.id || 0 },
     { enabled: !!wallet?.id }
@@ -624,6 +631,113 @@ export default function WalletPage() {
             {tracker && (
               <ConsultationCard totalConsultations={tracker.nutritionConsultations} freeAvailable={tracker.freeConsultationsEarned - tracker.freeConsultationsUsed} lang={lang} />
             )}
+            {/* ── Planes de Pago a Plazos ── */}
+            {installmentPlans.length > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-[#C5A55A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                  <h3 className="text-[#1A1A1A] font-bold text-sm">Planes de Pago a Plazos</h3>
+                </div>
+                <div className="space-y-3">
+                  {installmentPlans.map((plan: any) => {
+                    const payments: any[] = plan.payments || [];
+                    const paidPayments = payments.filter((p: any) => p.status === 'paid');
+                    const pendingPayments = payments.filter((p: any) => p.status === 'pending');
+                    const paidAmountCents = paidPayments.reduce((sum: number, p: any) => sum + (p.amountCents || 0), 0);
+                    const remainingCents = (plan.totalAmountCents || 0) - paidAmountCents;
+                    const progressPct = plan.totalInstallments > 0 ? Math.round((plan.paidInstallments / plan.totalInstallments) * 100) : 0;
+                    const nextPayment = pendingPayments[0];
+                    let parsedItems: any[] = [];
+                    try { if (plan.itemsJson) parsedItems = JSON.parse(plan.itemsJson); } catch {}
+                    return (
+                      <div key={plan.id} className="bg-white rounded-2xl border border-[#C5A55A]/30 shadow-sm overflow-hidden">
+                        {/* Header */}
+                        <div className="bg-[#C5A55A]/8 px-4 py-3 flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-bold text-[#1A1A1A] text-sm">{plan.concept}</p>
+                            <p className="text-gray-500 text-xs mt-0.5 capitalize">{plan.modalidad === 'quincenal' ? 'Pagos quincenales' : 'Pagos semanales'}</p>
+                          </div>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                            plan.status === 'active' ? 'bg-blue-50 text-blue-700' :
+                            plan.status === 'completed' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
+                          }`}>
+                            {plan.status === 'active' ? 'Activo' : plan.status === 'completed' ? 'Completado' : plan.status}
+                          </span>
+                        </div>
+                        <div className="px-4 py-3 space-y-3">
+                          {/* Artículos en el plan */}
+                          {parsedItems.length > 0 && (
+                            <div>
+                              <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1.5">Artículos en este plan</p>
+                              <div className="space-y-1">
+                                {parsedItems.map((item: any, idx: number) => (
+                                  <div key={idx} className="flex justify-between text-xs">
+                                    <span className="text-gray-600">{item.name}</span>
+                                    <span className="font-semibold text-gray-800">${(item.priceCents / 100).toFixed(2)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {/* Progreso */}
+                          <div>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-gray-500">{plan.paidInstallments} de {plan.totalInstallments} cuotas pagadas</span>
+                              <span className="font-bold text-[#C5A55A]">{progressPct}%</span>
+                            </div>
+                            <div className="w-full bg-gray-100 rounded-full h-2">
+                              <div className="bg-[#C5A55A] h-2 rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+                            </div>
+                          </div>
+                          {/* Montos */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-green-50 rounded-xl px-3 py-2">
+                              <p className="text-green-600 text-[10px] font-bold uppercase">Pagado</p>
+                              <p className="text-green-700 font-black text-base">${(paidAmountCents / 100).toFixed(2)}</p>
+                            </div>
+                            <div className="bg-red-50 rounded-xl px-3 py-2">
+                              <p className="text-red-500 text-[10px] font-bold uppercase">Pendiente</p>
+                              <p className="text-red-600 font-black text-base">${(remainingCents / 100).toFixed(2)}</p>
+                            </div>
+                          </div>
+                          {/* Próximo pago */}
+                          {nextPayment && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                              <p className="text-amber-700 text-[10px] font-bold uppercase mb-0.5">Próxima cuota</p>
+                              <div className="flex justify-between items-center">
+                                <span className="text-amber-800 text-xs">{nextPayment.dueDate ? new Date(nextPayment.dueDate).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Por definir'}</span>
+                                <span className="font-black text-amber-800">${(nextPayment.amountCents / 100).toFixed(2)}</span>
+                              </div>
+                            </div>
+                          )}
+                          {/* Historial de pagos */}
+                          {paidPayments.length > 0 && (
+                            <div>
+                              <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1.5">Pagos realizados</p>
+                              <div className="space-y-1">
+                                {paidPayments.map((p: any) => (
+                                  <div key={p.id} className="flex justify-between items-center text-xs">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-2.5 h-2.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                                      </span>
+                                      <span className="text-gray-500">{p.paidAt ? new Date(p.paidAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }) : 'Pagado'}</span>
+                                    </div>
+                                    <span className="font-semibold text-green-700">${(p.amountCents / 100).toFixed(2)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── Planes de Lealtad ── */}
             {progressList.length > 0 ? (
               progressList.map((p: any) => (
                 <LoyaltyPlanCard key={p.id} planName={p.plan.name} productName={p.plan.productName} current={p.currentCount} required={p.plan.requiredPurchases} rewardLabel={p.plan.rewardDescription || "1 GRATIS"} rewardsAvailable={p.rewardsEarned - p.rewardsUsed} expiresAt={p.plan.expiresAt} lang={lang} />
@@ -633,7 +747,7 @@ export default function WalletPage() {
                 <LoyaltyPlanCard key={plan.id} planName={plan.name} productName={plan.productName} current={0} required={plan.requiredPurchases} rewardLabel={plan.rewardDescription || "1 GRATIS"} rewardsAvailable={0} expiresAt={plan.expiresAt} lang={lang} />
               ))
             ) : (
-              !tracker && (
+              !tracker && installmentPlans.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-gray-400 text-sm">{t('noLoyaltyPlans', lang)}</p>
                   <p className="text-gray-300 text-xs mt-1">{t('noLoyaltyPlansDesc', lang)}</p>

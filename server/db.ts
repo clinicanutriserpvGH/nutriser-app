@@ -2301,6 +2301,10 @@ export async function createInstallmentPlan(data: {
   originalAmountCents: number;
   modalidad: 'quincenal' | 'semanal';
   createdBy: string;
+  // Referencia al pago pendiente en clínica del que se originó este plan
+  cashPaymentId?: number;
+  // JSON con los artículos que entran al plan
+  itemsJson?: string;
 }): Promise<InstallmentPlan & { payments: InstallmentPayment[] }> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -2323,6 +2327,8 @@ export async function createInstallmentPlan(data: {
     paidInstallments: 0,
     status: 'active',
     createdBy: data.createdBy,
+    cashPaymentId: data.cashPaymentId ?? null,
+    itemsJson: data.itemsJson ?? null,
   });
 
   const [plan] = await db.select().from(installmentPlans)

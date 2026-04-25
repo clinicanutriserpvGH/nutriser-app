@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, X, Bell, BellRing, Mail, AlertCircle, Megaphone, PartyPopper, CheckCircle2, Trash2 } from "lucide-react";
+import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, X, Bell, BellRing, Mail, AlertCircle, Megaphone, PartyPopper, CheckCircle2, Trash2, LogOut } from "lucide-react";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 // NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import { trpc } from "@/lib/trpc";
@@ -136,7 +136,7 @@ function TransactionRow({ txn, lang }: { txn: any; lang: Lang }) {
 }
 
 export default function WalletPage() {
-  const { patient, isLoggedIn } = usePatientAuth();
+  const { patient, isLoggedIn, logout } = usePatientAuth();
   const [, setLocation] = useLocation();
   // ─── Verificación de contrato pendiente ──────────────────────────────────────
   const [contractSigned, setContractSigned] = useState(false);
@@ -314,11 +314,23 @@ export default function WalletPage() {
         />
       )}
       {/* Header — simple back button */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center">
-        <button onClick={() => setLocation("/memberships")} className="text-gray-600 hover:text-gray-800 mr-3">
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-base font-bold text-[#1A1A1A]">{t('walletNutriser', lang)}</h1>
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center">
+          <button onClick={() => setLocation("/memberships")} className="text-gray-600 hover:text-gray-800 mr-3">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-base font-bold text-[#1A1A1A]">{t('walletNutriser', lang)}</h1>
+        </div>
+        {isLoggedIn && (
+          <button
+            onClick={() => { logout(); setLocation("/memberships"); }}
+            className="flex items-center gap-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+            title="Cerrar sesión"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Salir</span>
+          </button>
+        )}
       </div>
 
       {/* ── Tarjeta CR-80 (formato tarjeta de crédito 85.5×54mm) ── */}
@@ -868,14 +880,18 @@ export default function WalletPage() {
                       {myPurchases!.cashPayments.map((cp: any) => (
                         <div key={cp.id} className="bg-white rounded-2xl p-4 border border-green-200 shadow-sm">
                           <div className="flex items-start justify-between gap-2">
-                            <div>
+                            <div className="flex-1 min-w-0">
                               <p className="text-[#1A1A1A] font-bold text-sm">{cp.concept}</p>
-                              <p className="text-gray-500 text-xs mt-0.5">${(cp.amountCents / 100).toFixed(2)} MXN</p>
+                              <p className="text-green-700 font-black text-base mt-0.5">${(cp.amountCents / 100).toFixed(2)} <span className="text-gray-400 font-normal text-xs">MXN</span></p>
                               {cp.confirmedAt && <p className="text-gray-400 text-xs mt-0.5">{lang === 'EN' ? 'Paid on' : 'Pagado el'} {new Date(cp.confirmedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
                             </div>
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 bg-green-50 text-green-700">
-                              {lang === 'EN' ? 'Confirmed' : 'Confirmado'}
-                            </span>
+                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                                {lang === 'EN' ? 'Paid' : 'Pagado'}
+                              </span>
+                              <span className="text-[10px] text-gray-400">{lang === 'EN' ? 'Full payment' : 'Pago completo'}</span>
+                            </div>
                           </div>
                         </div>
                       ))}

@@ -97,6 +97,7 @@ export default function AdminDashboard() {
     salePrice: '',
     imageUrl: '',
     stock: 0,
+    showUrgency: false,
     lowStockAlert: 0,
     isActive: true,
     sortOrder: 0,
@@ -291,7 +292,7 @@ export default function AdminDashboard() {
     onSuccess: () => {
       toast.success('Producto creado exitosamente');
       refetchProducts();
-      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 0, isActive: true, sortOrder: 0 });
+      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, showUrgency: false, lowStockAlert: 0, isActive: true, sortOrder: 0 });
       setProductImage(null);
       setProductImagePreview(null);
       setEditingProductId(null);
@@ -303,7 +304,7 @@ export default function AdminDashboard() {
     onSuccess: () => {
       toast.success('Producto actualizado exitosamente');
       refetchProducts();
-      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 0, isActive: true, sortOrder: 0 });
+      setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, showUrgency: false, lowStockAlert: 0, isActive: true, sortOrder: 0 });
       setProductImage(null);
       setProductImagePreview(null);
       setEditingProductId(null);
@@ -1089,6 +1090,7 @@ export default function AdminDashboard() {
       salePrice: productForm.salePrice || undefined,
       imageUrl: imageUrl || undefined,
       stock: productForm.stock,
+      showUrgency: productForm.showUrgency,
       lowStockAlert: productForm.lowStockAlert,
       isActive: productForm.isActive,
       sortOrder: productForm.sortOrder,
@@ -1110,7 +1112,8 @@ export default function AdminDashboard() {
       salePrice: product.salePrice || '',
       imageUrl: product.imageUrl || '',
       stock: product.stock || 0,
-      lowStockAlert: product.lowStockAlert ?? 5,
+      showUrgency: product.showUrgency ?? false,
+      lowStockAlert: product.lowStockAlert ?? 0,
       isActive: product.isActive,
       sortOrder: product.sortOrder || 0,
     });
@@ -3155,7 +3158,7 @@ export default function AdminDashboard() {
                        editingProductId ? 'Actualizar Producto' : 'Agregar Producto'}
                     </button>
                     {editingProductId && (
-                      <button onClick={() => { setEditingProductId(null); setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, lowStockAlert: 0, isActive: true, sortOrder: 0 }); setProductImage(null); setProductImagePreview(null); }} className="px-4 py-2 border rounded-lg text-sm text-[#666] hover:bg-gray-50 transition">Cancelar</button>
+                      <button onClick={() => { setEditingProductId(null); setProductForm({ name: '', description: '', category: 'general', price: '', salePrice: '', imageUrl: '', stock: 0, showUrgency: false, lowStockAlert: 0, isActive: true, sortOrder: 0 }); setProductImage(null); setProductImagePreview(null); }} className="px-4 py-2 border rounded-lg text-sm text-[#666] hover:bg-gray-50 transition">Cancelar</button>
                     )}
                   </div>
                 </div>
@@ -3209,10 +3212,11 @@ export default function AdminDashboard() {
                             <div className="flex flex-col gap-0.5">
                               {prod.stock === 0 ? (
                                 <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">⚠️ RESURTIR</span>
-                              ) : prod.stock <= (prod.lowStockAlert || 5) ? (
-                                <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">⚠️ Bajo: {prod.stock} pzs</span>
                               ) : (
                                 <span className="text-sm text-green-700 font-semibold">{prod.stock} pzs</span>
+                              )}
+                              {prod.showUrgency && prod.stock !== 0 && (
+                                <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">🔥 Urgencia activa</span>
                               )}
                               {prod.soldCount > 0 && <span className="text-xs text-gray-400">{prod.soldCount} vendidas</span>}
                             </div>

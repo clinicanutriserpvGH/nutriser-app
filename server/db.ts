@@ -2311,6 +2311,8 @@ export async function createInstallmentPlan(data: {
   cashPaymentId?: number;
   // JSON con los artículos que entran al plan
   itemsJson?: string;
+  // Enganche pagado al crear el plan (50% contado)
+  downPaymentCents?: number;
 }): Promise<InstallmentPlan & { payments: InstallmentPayment[] }> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -2334,6 +2336,7 @@ export async function createInstallmentPlan(data: {
     status: 'active',
     createdBy: data.createdBy,
     cashPaymentId: data.cashPaymentId ?? null,
+    downPaymentCents: data.downPaymentCents ?? 0,
     itemsJson: data.itemsJson ?? null,
   });
 

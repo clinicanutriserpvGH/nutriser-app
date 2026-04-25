@@ -360,7 +360,8 @@ export const products = mysqlTable("products", {
   imageUrl: text("imageUrl"), // URL de la imagen en S3
   stock: int("stock").default(0), // Piezas en inventario
   soldCount: int("soldCount").default(0).notNull(), // Total de piezas vendidas (historial acumulado)
-  lowStockAlert: int("lowStockAlert").default(3), // Alerta cuando stock <= este valor
+  showUrgency: boolean("showUrgency").default(false).notNull(), // Toggle para mostrar "Últimas piezas" al cliente
+  lowStockAlert: int("lowStockAlert").default(3), // Campo legacy — ya no se usa en el frontend
   isActive: boolean("isActive").default(true).notNull(),
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -994,6 +995,8 @@ export const installmentPlans = mysqlTable("installmentPlans", {
   createdBy: varchar("createdBy", { length: 255 }),
   // Referencia al pago pendiente en clínica del que se originó este plan
   cashPaymentId: int("cashPaymentId"),
+  // Enganche pagado al crear el plan (50% contado)
+  downPaymentCents: int("downPaymentCents").default(0).notNull(),
   // JSON con los artículos que entran al plan [{name, priceCents}]
   itemsJson: text("itemsJson"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

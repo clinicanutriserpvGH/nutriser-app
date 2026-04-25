@@ -1106,6 +1106,7 @@ export default function AdminQRScanner() {
                                 itemsJson: JSON.stringify(planItemsForJson),
                                 immediateAmountCents: totalImmediateCents > 0 ? totalImmediateCents : undefined,
                                 immediateConcept: totalImmediateCents > 0 ? totalImmediateConcept : undefined,
+                                downPaymentCents: effectiveDownPaymentCents,
                               });
                             } else {
                               const amount = parseFloat(installmentAmount);
@@ -1121,6 +1122,7 @@ export default function AdminQRScanner() {
                                 adminEmail: 'admin@nutriser.com',
                                 immediateAmountCents: Math.round(halfAmount * 100), // 50% contado
                                 immediateConcept: `Enganche 50% (${installmentConcept.trim()})`,
+                                downPaymentCents: Math.round(halfAmount * 100),
                               });
                             }
                           }}

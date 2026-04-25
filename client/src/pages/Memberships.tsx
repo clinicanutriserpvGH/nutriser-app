@@ -2132,11 +2132,10 @@ onClick={() => {
                     const regularPriceNum = product.price ? parseInt(product.price.replace(/[^0-9]/g, "")) : null;
                     const savingPct = salePrice && regularPriceNum && priceNum && regularPriceNum > priceNum
                       ? Math.round((1 - priceNum / regularPriceNum) * 100) : 0;
-                    const lowStockThreshold = (product as any).lowStockAlert ?? 0;
                     const stockLeft = product.stock ?? null;
                     // El número real de stock NUNCA se muestra al cliente.
-                    // Solo se muestra el badge de urgencia cuando el admin configuró un umbral > 0
-                    const isLowStock = lowStockThreshold > 0 && stockLeft !== null && stockLeft > 0 && stockLeft <= lowStockThreshold;
+                    // El admin activa el badge de urgencia con el toggle showUrgency
+                    const isLowStock = !!(product as any).showUrgency && stockLeft !== 0;
                     const isOutOfStock = stockLeft !== null && stockLeft === 0;
                     return (
                       <div key={product.id} className={`flex-shrink-0 w-48 sm:w-52 lg:w-56 bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col ${isOutOfStock ? 'opacity-60 border-gray-200' : 'border-gray-100'}`}>
@@ -2158,7 +2157,7 @@ onClick={() => {
                           )}
                           {isLowStock && !savingPct && (
                             <div className="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
-                              Últimas {stockLeft} pzs
+                              ¡Últimas piezas!
                             </div>
                           )}
                           {isOutOfStock && (

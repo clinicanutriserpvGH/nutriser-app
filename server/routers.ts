@@ -1589,6 +1589,7 @@ export const appRouter = router({
         salePrice: z.string().optional(),
         imageUrl: z.string().optional(),
         stock: z.number().int().optional(),
+        showUrgency: z.boolean().optional(),
         lowStockAlert: z.number().int().optional(),
         isActive: z.boolean().default(true),
         sortOrder: z.number().int().default(0),
@@ -1606,6 +1607,7 @@ export const appRouter = router({
         salePrice: z.string().optional(),
         imageUrl: z.string().optional(),
         stock: z.number().int().optional(),
+        showUrgency: z.boolean().optional(),
         lowStockAlert: z.number().int().optional(),
         isActive: z.boolean().optional(),
         sortOrder: z.number().int().optional(),
@@ -4151,6 +4153,8 @@ Devuelve un JSON con estos campos:
         immediateAmountCents: z.number().optional(),
         // Concepto para el pago inmediato (artículos que sí se pagan ahora)
         immediateConcept: z.string().optional(),
+        // Enganche pagado al crear el plan (50% contado)
+        downPaymentCents: z.number().int().optional(),
       }))
       .mutation(async ({ input }) => {
         const wallet = await getWalletByNumber(input.walletNumber);
@@ -4200,6 +4204,7 @@ Devuelve un JSON con estos campos:
           createdBy: input.adminEmail,
           cashPaymentId: input.cashPaymentId,
           itemsJson: input.itemsJson,
+          downPaymentCents: input.downPaymentCents ?? 0,
         });
         // SIN cashback — los pagos a plazos acumulan al confirmar cada cuota
         return { success: true, plan };

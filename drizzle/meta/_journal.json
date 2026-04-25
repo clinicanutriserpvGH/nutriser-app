@@ -379,6 +379,20 @@
       "when": 1777131061083,
       "tag": "0053_third_maria_hill",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "5",
+      "when": 1777140264850,
+      "tag": "0054_talented_thanos",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "5",
+      "when": 1777140593532,
+      "tag": "0055_regular_jimmy_woo",
+      "breakpoints": true
     }
   ]
 }

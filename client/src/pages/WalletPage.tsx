@@ -436,7 +436,7 @@ export default function WalletPage() {
         >
           {[
             { key: "card" as const, label: 'Tarjeta' },
-            { key: "loyalty" as const, label: 'Planes' },
+            { key: "loyalty" as const, label: 'Lealtad' },
             { key: "purchases" as const, label: 'Compras' },
             { key: "history" as const, label: 'Movimientos' },
           ].map((tab) => (
@@ -890,8 +890,10 @@ export default function WalletPage() {
                         const payments: any[] = plan.payments || [];
                         const paidPayments = payments.filter((p: any) => p.status === 'paid');
                         const pendingPayments = payments.filter((p: any) => p.status === 'pending');
-                        const paidAmountCents = paidPayments.reduce((sum: number, p: any) => sum + (p.amountCents || 0), 0);
-                        const remainingCents = (plan.totalAmountCents || 0) - paidAmountCents;
+                        const cuotasPagadasCents = paidPayments.reduce((sum: number, p: any) => sum + (p.amountCents || 0), 0);
+                        const engancheCents = plan.downPaymentCents || 0;
+                        const paidAmountCents = cuotasPagadasCents + engancheCents;
+                        const remainingCents = (plan.totalAmountCents || 0) - cuotasPagadasCents;
                         const progressPct = plan.totalInstallments > 0 ? Math.round((plan.paidInstallments / plan.totalInstallments) * 100) : 0;
                         const nextPayment = pendingPayments[0];
                         let parsedItems: any[] = [];

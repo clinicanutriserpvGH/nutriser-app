@@ -33,6 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { t, type Lang } from "@/lib/i18n";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import DebtBlockBanner from "@/components/DebtBlockBanner";
+import { useSplashTheme } from "@/contexts/SplashThemeContext";
 import { useDebtCheck } from "@/hooks/useDebtCheck";
 import ContractBlockModal from "@/components/ContractBlockModal";
 
@@ -316,6 +317,16 @@ function PromoBanner({ lang, storeBanners: rawBanners = [], onBannerClick, onSys
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Memberships() {
   const [, navigate] = useLocation();
+  const { isLight } = useSplashTheme();
+
+  // ─── Saludo dinámico por hora del día ─────────────────────────────────────
+  function getGreeting(): string {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 12) return "Buenos días";
+    if (hour >= 12 && hour < 19) return "Buenas tardes";
+    return "Buenas noches";
+  }
+
   const [lang, setLang] = useState<Lang>(() => {
     const saved = localStorage.getItem("nutriser-lang");
     return (saved === "EN" || saved === "ES") ? saved as Lang : "ES";
@@ -471,7 +482,8 @@ export default function Memberships() {
     if (wCount > 0) parts.push(`${wCount} ${wCount === 1 ? 'artículo' : 'artículos'} en tu lista de deseos`);
     if (cCount > 0) parts.push(`${cCount} ${cCount === 1 ? 'artículo' : 'artículos'} en tu carrito`);
     const suffix = parts.length > 0 ? ` Tienes ${parts.join(' y ')}.` : '';
-    toast(`👋 ¡Bienvenido/a de vuelta, ${firstName}!${suffix}`, {
+    const greeting = getGreeting();
+    toast(`👋 ¡${greeting}, bienvenido/a de vuelta, ${firstName}!${suffix}`, {
       duration: parts.length > 0 ? 5000 : 3000,
       style: { background: '#1A1A1A', color: '#FAF7F2', borderLeft: '4px solid #C5A55A' },
     });
@@ -930,7 +942,7 @@ export default function Memberships() {
 
   // ─── Render ─────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#f5f5f5]" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 3.5rem)" }}>
+    <div className="min-h-screen transition-colors duration-500" style={{ background: isLight ? '#f5f5f5' : '#1A1A1A', paddingTop: "calc(env(safe-area-inset-top, 0px) + 3.5rem)" }}>
       {/* Botón Regresar inteligente:
           - Wishlist → vuelve a Tratamientos
           - Categoría específica (no "all") → vuelve a "all"

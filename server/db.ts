@@ -1981,6 +1981,16 @@ export async function deleteCashPayment(id: number): Promise<void> {
   await db.delete(cashPendingPayments).where(eq(cashPendingPayments.id, id));
 }
 
+/** Eliminar TODOS los pagos en efectivo de un monedero (admin) */
+export async function clearAllCashPaymentsByWallet(walletId: number): Promise<{ deleted: number }> {
+  const db = await getDb();
+  if (!db) return { deleted: 0 };
+  const existing = await db.select({ id: cashPendingPayments.id }).from(cashPendingPayments).where(eq(cashPendingPayments.walletId, walletId));
+  if (existing.length === 0) return { deleted: 0 };
+  await db.delete(cashPendingPayments).where(eq(cashPendingPayments.walletId, walletId));
+  return { deleted: existing.length };
+}
+
 // ─── Splash Ads ────────────────────────────────────────────────────────────────
 
 /** Obtener todos los splash ads activos de un tipo (para mostrar al paciente) */

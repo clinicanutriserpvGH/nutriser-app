@@ -379,6 +379,14 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
     onSuccess: (data) => { toast.success(`Historial limpiado (${data.deleted} movimientos)`); setConfirmClearAll(false); transactionsQuery.refetch(); utils.wallet.adminListAll.invalidate(); },
     onError: (e) => toast.error(e.message),
   });
+  const deleteCashPaymentMutation = trpc.cashPayments.adminDelete.useMutation({
+    onSuccess: () => { toast.success('Pago eliminado'); cashPaymentsHistoryQuery.refetch(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const clearAllCashPaymentsMutation = trpc.cashPayments.adminClearAll.useMutation({
+    onSuccess: (data) => { toast.success(`${data.deleted} pago(s) eliminado(s)`); cashPaymentsHistoryQuery.refetch(); },
+    onError: (e) => toast.error(e.message),
+  });
 
   // ── Administración del monedero ──
   const suspendMutation = trpc.wallet.adminSuspendWallet.useMutation({
@@ -826,7 +834,19 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                   <div className="mt-2 space-y-3">
                     {/* Pagos en clínica */}
                     <div>
-                      <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">Pagos en clínica</p>
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">Pagos en clínica</p>
+                        {(cashPaymentsHistoryQuery.data || []).length > 0 && (
+                          <button
+                            onClick={() => clearAllCashPaymentsMutation.mutate({ walletId: wallet.id })}
+                            disabled={clearAllCashPaymentsMutation.isPending}
+                            className="flex items-center gap-1 text-[9px] text-red-600 hover:text-red-800 font-bold transition disabled:opacity-50"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            {clearAllCashPaymentsMutation.isPending ? '...' : 'Borrar todos'}
+                          </button>
+                        )}
+                      </div>
                       {cashPaymentsHistoryQuery.isLoading ? (
                         <div className="flex justify-center py-3"><Loader2 className="w-4 h-4 animate-spin text-[#C5A55A]" /></div>
                       ) : (cashPaymentsHistoryQuery.data || []).length === 0 ? (
@@ -848,6 +868,14 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                                 ) : (
                                   <span className="text-[9px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">Pendiente</span>
                                 )}
+                                <button
+                                  onClick={() => deleteCashPaymentMutation.mutate({ id: p.id })}
+                                  disabled={deleteCashPaymentMutation.isPending}
+                                  className="p-1 rounded bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 transition flex-shrink-0 disabled:opacity-50"
+                                  title="Eliminar este pago"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
                               </div>
                             </div>
                           ))}

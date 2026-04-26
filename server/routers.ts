@@ -14,7 +14,7 @@ import { getAllProducts, getAllActiveProducts, getProductById, createProduct, up
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
 import { createPatientAccount, getPatientByEmail, getPatientById, getAllPatients, updatePatientConsent, setPatientResetToken, getPatientByResetToken, updatePatientPassword, updatePatientPushSubscription, createPatientTreatment, getPatientTreatments, updatePatientTreatment, deletePatientTreatment, createPatientAppointment, getPatientAppointments, updatePatientAppointment, deletePatientAppointment, createPatientPhoto, getPatientPhotos, deletePatientPhoto, deletePatientAccount, adminRequireContract, adminClearContract, getPatientContractStatus } from './db';
-import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet, getCashPendingPaymentById } from './db';
+import { createWallet, getWalletByPatientId, getWalletById, getWalletByNumber, getAllWallets, addWalletTransaction, getWalletTransactions, getLoyaltyTracker, recordConsultation, useFreeConsultation, createLoyaltyPlan, getActiveLoyaltyPlans, getAllLoyaltyPlans, updateLoyaltyPlan, deleteLoyaltyPlan, getWalletLoyaltyProgress, recordLoyaltyPurchase, useLoyaltyReward, adminSetWalletBalance, toggleWalletActive, createCashPendingPayment, getCashPendingPaymentsByWallet, getAllCashPendingPayments, confirmCashPayment, cancelCashPayment, getCashPaymentHistoryByWallet, deleteWalletTransaction, clearAllWalletTransactions, setWalletDiscount, removeWalletDiscount, deleteCashPayment, clearAllCashPaymentsByWallet, adminResetWallet, adminSuspendWallet, adminUnsuspendWallet, getCashPendingPaymentById } from './db';
 import { trackBehaviorEvent, getTopBehaviorItems, getBehaviorSummary, getBehaviorTrend, resetAllBehaviorEvents, getItemUserBreakdown } from './db';
 import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, deleteSplashAd, updateSplashAdOrder, getSplashConfig, setSplashShowDefault, setSplashCustomImage } from './db';
 import { createInstallmentPlan, confirmInstallmentPayment, getInstallmentPlansByWallet, getAllInstallmentPlans, sendAdminNotification, getAdminNotificationsByWallet, countUnreadAdminNotifications, markAdminNotificationRead, markAllAdminNotificationsRead, deleteAdminNotification, deleteAllAdminNotifications, updateAdminNotification, sendCashbackNotification, createDebtAuthRequest, getAllDebtAuthRequests, resolveDebtAuthRequest, patientHasActiveDebt, patientHasPendingDebtRequest, deleteDebtNotifications } from './db';
@@ -3708,6 +3708,14 @@ Devuelve un JSON con estos campos:
       .mutation(async ({ input }) => {
         await deleteCashPayment(input.id);
         return { success: true };
+      }),
+
+    // Admin: eliminar TODOS los pagos en efectivo de un monedero
+    adminClearAll: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .mutation(async ({ input }) => {
+        const result = await clearAllCashPaymentsByWallet(input.walletId);
+        return result;
       }),
 
     // Admin: obtener historial de compras de un paciente (para ver y borrar)

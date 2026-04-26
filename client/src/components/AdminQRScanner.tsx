@@ -1216,49 +1216,7 @@ export default function AdminQRScanner() {
                     </div>
                   )}
 
-                  {/* Reiniciar Monedero */}
-                  {!confirmReset ? (
-                    <button
-                      onClick={() => setConfirmReset(true)}
-                      className="w-full py-2 rounded-lg bg-red-100 text-red-700 text-xs font-bold hover:bg-red-200 transition-all flex items-center justify-center gap-1"
-                    >
-                      <Trash2 className="w-3 h-3" /> Reiniciar Monedero (Poner en Cero)
-                    </button>
-                  ) : (
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] text-red-600 font-bold text-center">
-                        ⚠️ CONFIRMAR: Esto pondrá saldo, cashback y canjeado en $0.00. No se puede deshacer.
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setConfirmReset(false)}
-                          className="flex-1 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold hover:bg-gray-200 transition-all"
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          onClick={() => {
-                            const session = sessionStorage.getItem('adminSession');
-                            let adminEmail = 'admin';
-                            try { adminEmail = JSON.parse(session || '{}').email || 'admin'; } catch {}
-                            openSecurityModal(
-                              '⚠️ Reiniciar Monedero',
-                              `ADVERTENCIA: Esto pondrá saldo, cashback y canjeado en $0.00 del monedero de ${patientQuery.data?.patientName}. No se puede deshacer.`,
-                              (pw) => resetWalletMutation.mutate({ walletNumber, adminEmail, adminPassword: pw })
-                            );
-                          }}
-                          disabled={resetWalletMutation.isPending}
-                          className="flex-1 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
-                        >
-                          {resetWalletMutation.isPending ? (
-                            <><Loader2 className="w-3 h-3 animate-spin" /> Reiniciando...</>
-                          ) : (
-                            'Sí, Reiniciar'
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  {/* Reiniciar Monedero: disponible solo desde la tarjeta en el panel de Tarjetas */}
                 </div>
               </CardContent>
             </Card>

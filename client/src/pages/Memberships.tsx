@@ -2699,6 +2699,14 @@ onClick={() => {
                       <p className="text-xs text-gray-400 mb-1">{lang === "EN" ? "Tracking code" : "Código de seguimiento"}</p>
                       <p className="font-black text-[#C5A55A] text-lg font-mono">{successCode}</p>
                     </div>
+                    {checkoutItems[0]?.itemType === 'product' && (
+                      <div className="bg-[#FAF7F2] border border-[#C5A55A]/30 rounded-xl p-4 mb-4 text-left">
+                        <p className="text-xs font-bold text-[#C5A55A] uppercase tracking-wider mb-2">📦 ¿Cómo recojo mi producto?</p>
+                        <p className="text-sm text-[#1A1A1A] leading-relaxed">
+                          Una vez que aprobemos tu comprobante, <strong>visita Nutriser y presenta tu Monedero Nutriser</strong> para recoger tu producto. ¡Te esperamos!
+                        </p>
+                      </div>
+                    )}
                     <button onClick={() => { setCheckoutOpen(false); setCart([]); }}
                       className="w-full bg-[#C5A55A] text-white font-bold py-3 rounded-xl hover:bg-[#B8963E] transition-all">
                       {t("done", lang)}
@@ -3125,9 +3133,14 @@ onClick={() => {
             <div className="px-5 pb-1">
               <button
                 onClick={() => { setWalletSheetOpen(false); navigate("/monedero?tab=messages"); }}
-                className="w-full text-[#C5A55A] text-sm font-bold py-2 underline"
+                className="w-full text-[#C5A55A] text-sm font-bold py-2 underline flex items-center justify-center gap-2"
               >
                 🔔 Notificaciones
+                {adminUnreadCount > 0 && (
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                    {adminUnreadCount > 9 ? '9+' : adminUnreadCount}
+                  </span>
+                )}
               </button>
             </div>
 

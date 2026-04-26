@@ -371,6 +371,14 @@ export default function Memberships() {
     !contractStatusQuery.data?.consentAcceptedAt;
   // DESACTIVADO: cupones solo en sección Cupones directamente
   const [showPromoSplash, setShowPromoSplash] = useState(false);
+
+  // Mostrar PromoSplash automáticamente al entrar a la tienda (si no fue cerrado en esta sesión)
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem('nutriser_tienda_promo_dismissed');
+    if (!dismissed) {
+      setShowPromoSplash(true);
+    }
+  }, []);
   const [pendingCartItem] = useState<Omit<CartItem, "qty"> | null>(null); // reservado para uso futuro
 
   // ─── Modal de acción al hacer clic en banner ──────────────────────────────────────

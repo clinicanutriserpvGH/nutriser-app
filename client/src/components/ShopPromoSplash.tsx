@@ -159,10 +159,11 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
 }
 
 export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated = false }: ShopPromoSplashProps) {
-  const { data: promotions = [], isLoading: loadingPromos } = trpc.promotions.list.useQuery();
+  // Cupones NO aparecen en splash - solo imágenes admin
   const { data: splashAds = [], isLoading: loadingAds } = (trpc.splashAds.getActive as any).useQuery({ type: 'inicio' });
   const { data: splashConfigData, isLoading: loadingConfig } = (trpc.splashAds.getConfig as any).useQuery({ type: 'inicio' });
-  const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
+  const activePromos: Promo[] = [];
+  const loadingPromos = false;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAuthGuard, setShowAuthGuard] = useState(false);
   const [isClosing, setIsClosing] = useState(false);

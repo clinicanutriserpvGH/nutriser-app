@@ -195,10 +195,11 @@ function MonederoPromoCard({ onAction }: { onAction: () => void }) {
 }
 
 export default function PromoSplash({ onClose, onGoToCoupon, onOpenWallet, isAuthenticated = false }: PromoSplashProps) {
-  const { data: promotions = [], isLoading: loadingPromos } = trpc.promotions.list.useQuery();
   const { data: tiendaAds = [], isLoading: loadingAds } = (trpc.splashAds.getActive as any).useQuery({ type: 'tienda' });
   const { data: splashConfigData, isLoading: loadingConfig } = (trpc.splashAds.getConfig as any).useQuery({ type: 'tienda' });
-  const activePromos = (promotions as Promo[]).filter((p) => p.isActive);
+  // Cupones NO aparecen en splash - solo imágenes admin y slide del Monedero
+  const activePromos: Promo[] = [];
+  const loadingPromos = false;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const [showAuthGuard, setShowAuthGuard] = useState(false);

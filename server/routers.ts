@@ -327,6 +327,24 @@ export const appRouter = router({
           title: "Nuevo Comprobante de Membresía",
           content: `Cliente: ${membership.clientName}\nEmail: ${membership.clientEmail}\nTeléfono: ${membership.clientPhone || "No proporcionado"}\nPrograma: ${membership.programType === "basic" ? "Básico" : "Premium"}\nConcepto: ${membership.depositConcept}\nArchivo: ${input.fileName}`,
         });
+
+        // Mensaje al monedero del paciente: comprobante recibido
+        try {
+          const patient = await getPatientByEmail(membership.clientEmail);
+          if (patient) {
+            const wallet = await getWalletByPatientId(patient.id);
+            if (wallet) {
+              await sendAdminNotification({
+                walletId: wallet.id,
+                patientId: patient.id,
+                title: '⏳ Comprobante recibido',
+                message: `Recibimos tu comprobante de pago para “${membership.programName || membership.programType}”. Lo estamos revisando y te avisaremos cuando sea aprobado.`,
+                type: 'general',
+                sentBy: 'sistema',
+              });
+            }
+          }
+        } catch (e) { console.warn('Wallet msg (membership proof) error:', e); }
         
         return proof;
       }),
@@ -384,6 +402,17 @@ export const appRouter = router({
                     });
                   }
                 }
+                // Mensaje al monedero: paquete aprobado
+                try {
+                  await sendAdminNotification({
+                    walletId: wallet.id,
+                    patientId: patient.id,
+                    title: '✅ ¡Paquete aprobado!',
+                    message: `Tu paquete “${membership.programName || membership.programType}” fue aprobado. Presenta tu Monedero Nutriser en clínica para comenzar.`,
+                    type: 'general',
+                    sentBy: 'sistema',
+                  });
+                } catch (e) { console.warn('Wallet msg (membership approve) error:', e); }
               }
             }
           } catch (e) {
@@ -719,6 +748,24 @@ export const appRouter = router({
         const whatsappUrl = whatsappPhone
           ? `https://wa.me/52${whatsappPhone}?text=${whatsappMsg}`
           : `https://wa.me/?text=${whatsappMsg}`;
+
+        // Mensaje al monedero del paciente: cupón aprobado
+        try {
+          const patient = await getPatientByEmail(purchase.buyerEmail);
+          if (patient) {
+            const wallet = await getWalletByPatientId(patient.id);
+            if (wallet) {
+              await sendAdminNotification({
+                walletId: wallet.id,
+                patientId: patient.id,
+                title: '✅ ¡Cupón aprobado!',
+                message: `Tu cupón de “${promotionTitle}” fue aprobado. Código: ${couponCode}. Preséntalo en clínica para redimirlo.`,
+                type: 'general',
+                sentBy: 'sistema',
+              });
+            }
+          }
+        } catch (e) { console.warn('Wallet msg (coupon approve) error:', e); }
 
         return { success: true, whatsappUrl, buyerPhone: purchase.buyerPhone };
       }),
@@ -1432,6 +1479,22 @@ export const appRouter = router({
               '/monedero'
             );
           }
+          // Guardar mensaje en el monedero del paciente
+          if (patient) {
+            try {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet) {
+                await sendAdminNotification({
+                  walletId: wallet.id,
+                  patientId: patient.id,
+                  title: '⏳ Comprobante recibido',
+                  message: `Recibimos tu comprobante de pago para “${input.serviceName}”. Lo estamos revisando y te avisaremos cuando sea aprobado.`,
+                  type: 'general',
+                  sentBy: 'sistema',
+                });
+              }
+            } catch (e) { console.warn('Wallet msg (service create) error:', e); }
+          }
         } catch (e) { console.warn('Push received (service) error:', e); }
 
         // Return success WITHOUT the code — user must wait for admin approval
@@ -1501,6 +1564,22 @@ export const appRouter = router({
               `Tu compra de ${purchase.serviceName} fue aprobada. Presenta tu Monedero Nutriser en clínica.`,
               '/monedero'
             );
+          }
+          // Guardar mensaje en el monedero del paciente
+          if (patient) {
+            try {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet) {
+                await sendAdminNotification({
+                  walletId: wallet.id,
+                  patientId: patient.id,
+                  title: '✅ ¡Compra aprobada!',
+                  message: `Tu compra de “${purchase.serviceName}” fue aprobada. Presenta tu Monedero Nutriser en clínica para hacer válido tu servicio.`,
+                  type: 'general',
+                  sentBy: 'sistema',
+                });
+              }
+            } catch (e) { console.warn('Wallet msg (service approve) error:', e); }
           }
         } catch (e) { console.warn('Push approved (service) error:', e); }
 
@@ -1809,6 +1888,22 @@ Devuelve un JSON con estos campos:
                 '/monedero'
               );
             }
+            // Guardar mensaje en el monedero del paciente
+            if (patient) {
+              try {
+                const wallet = await getWalletByPatientId(patient.id);
+                if (wallet) {
+                  await sendAdminNotification({
+                    walletId: wallet.id,
+                    patientId: patient.id,
+                    title: '⏳ Comprobante recibido',
+                    message: `Recibimos tu comprobante de pago para “${input.productName}” (${input.quantity}x). Lo estamos revisando y te avisaremos cuando sea aprobado.`,
+                    type: 'general',
+                    sentBy: 'sistema',
+                  });
+                }
+              } catch (e) { console.warn('Wallet msg (product create) error:', e); }
+            }
           } catch (e) { console.warn('Push received (product) error:', e); }
         }
 
@@ -1896,6 +1991,22 @@ Devuelve un JSON con estos campos:
               `Tu compra de ${purchase.productName} fue aprobada. Presenta tu Monedero Nutriser en clínica.`,
               '/monedero'
             );
+          }
+          // Guardar mensaje en el monedero del paciente
+          if (patient) {
+            try {
+              const wallet = await getWalletByPatientId(patient.id);
+              if (wallet) {
+                await sendAdminNotification({
+                  walletId: wallet.id,
+                  patientId: patient.id,
+                  title: '✅ ¡Compra aprobada!',
+                  message: `Tu compra de “${purchase.productName}” fue aprobada. Presenta tu Monedero Nutriser en clínica para recoger tu producto.`,
+                  type: 'general',
+                  sentBy: 'sistema',
+                });
+              }
+            } catch (e) { console.warn('Wallet msg (product approve) error:', e); }
           }
         } catch (e) { console.warn('Push approved (product) error:', e); }
         return { success: true };

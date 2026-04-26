@@ -552,12 +552,20 @@ export default function MyTreatments() {
                 <button type="button" onClick={() => setAuthMode("login")} className="flex items-center gap-1 text-gray-400 text-sm hover:text-gray-600 mb-2">
                   <ChevronLeft className="w-4 h-4" /> Volver
                 </button>
-                {/* Mensaje informativo: usar mismo correo del Portal de Salud */}
-                <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
-                  <span className="text-amber-500 text-sm flex-shrink-0">ℹ️</span>
-                  <p className="text-amber-800 text-xs leading-relaxed">
-                    ¿Ya tienes cuenta en el <strong>Portal de Salud</strong>? Usa el mismo correo y contraseña.
-                  </p>
+                {/* Mensaje informativo: crear cuenta obligatoria */}
+                <div className="flex flex-col gap-1.5 bg-amber-50 border border-amber-200 rounded-xl px-3 py-3">
+                  <div className="flex items-start gap-2">
+                    <span className="text-amber-500 text-sm flex-shrink-0 mt-0.5">ℹ️</span>
+                    <p className="text-amber-800 text-xs leading-relaxed">
+                      Para acceder a tu Monedero Nutriser <strong>debes crear una cuenta aquí</strong>, aunque ya tengas cuenta en el Portal de Salud — son plataformas distintas.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-amber-500 text-sm flex-shrink-0 mt-0.5">💡</span>
+                    <p className="text-amber-800 text-xs leading-relaxed">
+                      <strong>Tip:</strong> usa el mismo correo del Portal de Salud para tener todo organizado en un solo lugar.
+                    </p>
+                  </div>
                 </div>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

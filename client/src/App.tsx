@@ -100,15 +100,6 @@ function AppContent() {
 
   const isDesktop = isDesktopDevice();
 
-  // Estado para mostrar ShopPromoSplash (splash del monedero/inicio)
-  const [showShopPromoSplash, setShowShopPromoSplash] = useState<boolean>(() => {
-    // Solo mostrar en móvil y en la ruta raíz
-    if (isDesktopDevice() || location !== "/") return false;
-    // Verificar si ya fue visto en esta sesión
-    const dismissed = sessionStorage.getItem("nutriser_shop_promo_dismissed");
-    return !dismissed;
-  });
-
   const [splashState, setSplashState] = useState<SplashState>(() => {
     // Nunca mostrar splash en rutas de admin/internas
     if (isNoSplashRoute(location)) return "site";
@@ -177,22 +168,6 @@ function AppContent() {
     <SplashContext.Provider value={{ showSplash: handleShowSplash, showSplash1: handleShowSplash1 }}>
       {/* Música de fondo solo en la página principal del sitio web */}
       {splashState === "site" && location === "/" && <BackgroundMusic />}
-
-      {/* ShopPromoSplash - splash del monedero/inicio (solo móvil, antes de Splash 0) */}
-      {!isDesktop && showShopPromoSplash && (
-        <ShopPromoSplash
-          isAuthenticated={patientIsLoggedIn}
-          onClose={() => {
-            sessionStorage.setItem("nutriser_shop_promo_dismissed", "1");
-            setShowShopPromoSplash(false);
-          }}
-          onGoToShop={() => {
-            sessionStorage.setItem("nutriser_shop_promo_dismissed", "1");
-            setShowShopPromoSplash(false);
-            window.location.href = "/memberships";
-          }}
-        />
-      )}
 
       {/* Splash 0 (solo móvil) */}
       {!isDesktop && splashState === "splash0" && (

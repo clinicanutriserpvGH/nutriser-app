@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import EbookStore from "./pages/EbookStore";
 import EbookReader from "./pages/EbookReader";
 import EbookLogin from "./pages/EbookLogin";
+import EbookViewer from "./pages/EbookViewer";
 import Store from "@/pages/Store";
 import CouponPage from "@/pages/CouponPage";
 import Courses from "@/pages/Courses";
@@ -70,6 +71,7 @@ function Router() {
       <Route path={"/mis-tratamientos"} component={MyTreatments} />
       <Route path={"/nutriser-home"} component={NutriserHomePage} />
       <Route path={"/monedero/:walletNumber?"} component={WalletPage} />
+      <Route path={"/mis-libros/:ebookId"} component={EbookViewer} />
       <Route path={"/c/:walletNumber"} component={WalletQR} />
       <Route path={"/servicio/:serviceId"} component={(props: any) => <ServicePage serviceId={props.params.serviceId} />} />
       <Route path={"/cupones"} component={Cupones} />

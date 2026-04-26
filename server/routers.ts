@@ -1085,46 +1085,90 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         if (input.status === 'approved') {
-          // Generar contraseña aleatoria segura (8 caracteres alfanuméricos)
-          const rawPassword = Math.random().toString(36).slice(2, 6).toUpperCase() +
-            Math.random().toString(36).slice(2, 6);
-          const passwordHash = await bcrypt.hash(rawPassword, 10);
-          await updateEbookPurchaseStatus(input.id, input.status, passwordHash);
+          // Aprobar sin contraseña — el acceso es por sesión activa en el monedero
+          await updateEbookPurchaseStatus(input.id, input.status);
 
-          // Obtener la compra para enviar email
+          // Obtener la compra para notificar al paciente
           const purchases = await getAllEbookPurchases();
           const purchase = purchases.find(p => p.id === input.id);
           if (purchase) {
+            // Buscar paciente y su monedero para enviar notificación interna
+            try {
+              const patient = await getPatientByEmail(purchase.buyerEmail);
+              if (patient) {
+                const wallet = await getWalletByPatientId(patient.id);
+                if (wallet) {
+                  await sendAdminNotification({
+                    walletId: wallet.id,
+                    patientId: patient.id,
+                    type: 'general',
+                    title: '📚 ¡Tu libro digital está listo!',
+                    message: `¡Hola ${purchase.buyerName}! Tu compra fue aprobada. Ve a la pestaña 📚 Libros en tu Monedero Nutriser para leer tu libro digital cuando quieras.`,
+                    sentBy: 'Nutriser',
+                  });
+                }
+                // Push notification al paciente
+                if (patient.pushSubscription) {
+                  try {
+                    await sendPushToPatient(
+                      patient.pushSubscription,
+                      '📚 ¡Tu libro digital está listo!',
+                      'Tu compra fue aprobada. ¡Entra a tu Monedero Nutriser y lee tu libro!',
+                      '/monedero?tab=books'
+                    );
+                  } catch (e) { console.warn('Push ebook approved error:', e); }
+                }
+              }
+            } catch (e) { console.warn('Wallet notification ebook error:', e); }
+
+            // Correo simple sin contraseña
             try {
               const nodemailer = await import('nodemailer');
               const transporter = nodemailer.default.createTransport({
                 service: 'gmail',
                 auth: { user: ENV.gmailUser, pass: ENV.gmailPassword },
               });
-              const loginUrl = `https://nutriserpv.com/ebook/login`;
               await transporter.sendMail({
                 from: `"Nutriser" <${ENV.gmailUser}>`,
                 to: purchase.buyerEmail,
-                subject: '📚 Tu acceso al Ebook de Nutriser está listo',
+                subject: '📚 ¡Tu libro digital Nutriser está listo!',
                 html: `
                   <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#FAF7F2;padding:32px;border-radius:8px">
                     <h2 style="color:#C5A55A">¡Tu compra fue aprobada!</h2>
                     <p>Hola <strong>${purchase.buyerName}</strong>,</p>
-                    <p>Tu pago fue verificado. Aquí están tus credenciales de acceso al ebook:</p>
-                    <div style="background:#fff;border:1px solid #C5A55A;border-radius:8px;padding:20px;margin:16px 0">
-                      <p style="margin:4px 0"><strong>Correo:</strong> ${purchase.buyerEmail}</p>
-                      <p style="margin:4px 0"><strong>Contraseña:</strong> <span style="font-family:monospace;font-size:18px;color:#C5A55A">${rawPassword}</span></p>
-                    </div>
-                    <a href="${loginUrl}" style="display:inline-block;background:#C5A55A;color:#fff;padding:14px 28px;text-decoration:none;border-radius:4px;font-weight:bold;margin:16px 0">Acceder a mi Ebook</a>
-                    <p style="color:#888;font-size:12px">Guarda estas credenciales. Son personales e intransferibles. El contenido solo puede visualizarse en línea.</p>
+                    <p>Tu libro digital ya está disponible en tu <strong>Monedero Nutriser</strong>.</p>
+                    <p>Solo inicia sesión en <a href="https://nutriserpv.com/monedero" style="color:#C5A55A">nutriserpv.com/monedero</a> y ve a la pestaña <strong>📚 Libros</strong> para leerlo cuando quieras.</p>
+                    <a href="https://nutriserpv.com/monedero" style="display:inline-block;background:#C5A55A;color:#fff;padding:14px 28px;text-decoration:none;border-radius:4px;font-weight:bold;margin:16px 0">Ir a mi Monedero</a>
+                    <p style="color:#888;font-size:12px">El libro es de uso personal e intransferible. Solo puede leerse en línea con tu cuenta activa.</p>
                     <p style="color:#888;font-size:12px">Nutriser Aesthetic &amp; Nutrition</p>
                   </div>
                 `,
               });
-            } catch (e) { console.warn('Email ebook access error:', e); }
+            } catch (e) { console.warn('Email ebook approved error:', e); }
           }
         } else {
           await updateEbookPurchaseStatus(input.id, input.status);
+          // Notificar rechazo al paciente
+          const purchases = await getAllEbookPurchases();
+          const purchase = purchases.find(p => p.id === input.id);
+          if (purchase) {
+            try {
+              const patient = await getPatientByEmail(purchase.buyerEmail);
+              if (patient) {
+                const wallet = await getWalletByPatientId(patient.id);
+                if (wallet) {
+                  await sendAdminNotification({
+                    walletId: wallet.id,
+                    patientId: patient.id,
+                    type: 'general',
+                    title: '❌ Compra de libro no aprobada',
+                    message: 'Tu comprobante de pago no pudo ser verificado. Por favor contáctanos por WhatsApp o reenvía tu comprobante.',
+                    sentBy: 'Nutriser',
+                  });
+                }
+              }
+            } catch (e) { console.warn('Wallet notification ebook rejected error:', e); }
+          }
         }
         return { success: true };
       }),
@@ -1196,6 +1240,42 @@ export const appRouter = router({
           description: discountCode.description,
           isFree: discountCode.discountPercent === 100,
         };
+      }),
+
+    // Obtener mis ebooks (por email del paciente autenticado)
+    getMyEbooks: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => {
+        const { ebookPurchases: ep, ebooks: eb } = await import('../drizzle/schema');
+        const { or } = await import('drizzle-orm');
+        const db = await getDb();
+        if (!db) return [];
+        const emailLower = input.email.toLowerCase().trim();
+        const result = await db.select({
+          id: ep.id,
+          ebookId: ep.ebookId,
+          buyerName: ep.buyerName,
+          status: ep.status,
+          accessToken: ep.accessToken,
+          createdAt: ep.createdAt,
+          approvedAt: ep.approvedAt,
+          ebookTitle: eb.title,
+          ebookCoverUrl: eb.coverUrl,
+          ebookDescription: eb.description,
+          ebookPrice: eb.price,
+          pdfUrl: eb.pdfUrl,
+        }).from(ep)
+          .leftJoin(eb, eq(ep.ebookId, eb.id))
+          .where(or(
+            eq(ep.buyerEmail, emailLower),
+            eq(ep.patientEmail, emailLower)
+          ))
+          .orderBy(desc(ep.createdAt));
+        return result.map((r) => ({
+          ...r,
+          // Solo exponer pdfUrl si está aprobado
+          pdfUrl: r.status === 'approved' ? r.pdfUrl : null,
+        }));
       }),
 
     // Listar códigos de descuento (admin)

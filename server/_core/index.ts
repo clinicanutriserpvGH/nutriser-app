@@ -442,6 +442,70 @@ async function startServer() {
     }
   });
 
+  // Proxy seguro para PDF del ebook desde el Monedero (usa accessToken)
+  app.get("/api/ebook-proxy", async (req, res) => {
+    try {
+      const token = req.query.token as string;
+      if (!token) { res.status(400).send("Token requerido"); return; }
+      const { getEbookPurchaseByToken } = await import("../db");
+      const purchase = await getEbookPurchaseByToken(token);
+      if (!purchase || purchase.status !== 'approved') {
+        res.status(403).send("Acceso no autorizado");
+        return;
+      }
+      // Obtener el ebook por ID
+      const { getAllEbooks } = await import("../db");
+      const allEbooks = await getAllEbooks();
+      const ebook = allEbooks.find((e: any) => e.id === purchase.ebookId);
+      if (!ebook || !ebook.pdfUrl) { res.status(404).send("Libro no disponible"); return; }
+      const pdfResp = await fetch(ebook.pdfUrl);
+      if (!pdfResp.ok) { res.status(502).send("Error al obtener el libro"); return; }
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline");
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("X-Frame-Options", "SAMEORIGIN");
+      const buffer = await pdfResp.arrayBuffer();
+      res.send(Buffer.from(buffer));
+    } catch (err) {
+      console.error("[EbookProxy] Error:", err);
+      res.status(500).send("Error interno");
+    }
+  });
+
+  // Proxy seguro para PDF del ebook - sirve el PDF sin exponer la URL de S3
+  // Solo accesible con token válido y aprobado
+  app.get("/api/ebook/pdf/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      if (!token) { res.status(400).send("Token requerido"); return; }
+      const { getEbookPurchaseByToken } = await import("../db");
+      const { getActiveEbook } = await import("../db");
+      const purchase = await getEbookPurchaseByToken(token);
+      if (!purchase || purchase.status !== 'approved') {
+        res.status(403).send("Acceso no autorizado");
+        return;
+      }
+      const ebook = await getActiveEbook();
+      if (!ebook || !ebook.pdfUrl) { res.status(404).send("Ebook no disponible"); return; }
+      // Hacer proxy del PDF desde S3 sin exponer la URL
+      const pdfResp = await fetch(ebook.pdfUrl);
+      if (!pdfResp.ok) { res.status(502).send("Error al obtener el PDF"); return; }
+      // Cabeceras anti-descarga: no-cache, no-store, inline only
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline");
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("X-Frame-Options", "SAMEORIGIN");
+      // Transmitir el PDF como stream
+      const buffer = await pdfResp.arrayBuffer();
+      res.send(Buffer.from(buffer));
+    } catch (err) {
+      console.error("[EbookProxy] Error:", err);
+      res.status(500).send("Error interno");
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

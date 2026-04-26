@@ -148,7 +148,16 @@ export default function WalletPage() {
     !contractSigned &&
     contractStatusQuery.data?.contractRequired === true &&
     !contractStatusQuery.data?.consentAcceptedAt;
-  const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history" | "messages" | "treatments">("card");
+  const [activeTab, setActiveTab] = useState<"card" | "loyalty" | "purchases" | "history" | "messages" | "treatments" | "books">(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab === 'messages' || tab === 'treatments' || tab === 'purchases' || tab === 'loyalty' || tab === 'history' || tab === 'books') {
+        return tab;
+      }
+    }
+    return "card";
+  });
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [currentNotifIndex, setCurrentNotifIndex] = useState(0);
   const [notifModalShown, setNotifModalShown] = useState(false);
@@ -169,6 +178,13 @@ export default function WalletPage() {
     { enabled: isLoggedIn && !!patient?.email && activeTab === 'purchases' }
   );
   const myPurchases = purchasesQuery.data;
+
+  // Mis libros digitales
+  const myEbooksQuery = trpc.ebook.getMyEbooks.useQuery(
+    { email: patient?.email ?? 'x@x.com' },
+    { enabled: isLoggedIn && !!patient?.email && activeTab === 'books' }
+  );
+  const myEbooks = myEbooksQuery.data ?? [];
   const [copied, setCopied] = useState(false);
   const [showCardSheet, setShowCardSheet] = useState(false);
   const [showQRFullscreen, setShowQRFullscreen] = useState(false);
@@ -441,50 +457,101 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Tabs — scroll horizontal para que no se amontonen en pantallas pequeñas */}
+      {/* Tabs — scroll horizontal con indicador visual de más contenido */}
       <div className="max-w-md mx-auto px-4 mt-3">
-        <div
-          className="flex bg-white rounded-xl shadow-sm border border-gray-100 p-1 gap-0.5"
-          style={{ overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
-        >
-          {[
-            { key: "card" as const, label: 'Pagos Pendientes' },
-            { key: "loyalty" as const, label: 'Lealtad' },
-            { key: "purchases" as const, label: 'Compras' },
-            { key: "history" as const, label: 'Movimientos' },
-            { key: "treatments" as const, label: 'Mis Tratamientos' },
-          ].map((tab) => (
+        <div className="relative">
+          {/* Gradiente derecho que indica que hay más pestañas */}
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#FAF7F2] to-transparent z-10 pointer-events-none rounded-r-xl" />
+          <div
+            className="flex bg-white rounded-xl shadow-sm border border-gray-100 p-1 gap-0.5"
+            style={{ overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', msOverflowStyle: 'none' } as React.CSSProperties}
+          >
+            {/* Pagos Pendientes */}
             <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex-shrink-0 py-2 px-3 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
-                activeTab === tab.key ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500 hover:text-gray-700"
+              onClick={() => setActiveTab("card")}
+              className={`flex-shrink-0 py-2 px-2.5 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap flex flex-col items-center gap-0.5 min-w-[58px] ${
+                activeTab === "card" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500"
               }`}
             >
-              {tab.label}
+              <span className="text-[14px] leading-none">💳</span>
+              <span>Pagos</span>
             </button>
-          ))}
-          {/* Pestaña Mensajes con contador */}
-          <button
-            onClick={() => {
-              setActiveTab("messages");
-              if (unreadCount > 0 && wallet?.walletNumber) {
-                markAllReadMutation.mutate({ walletNumber: wallet.walletNumber });
-              }
-            }}
-            className={`relative flex-shrink-0 py-2 px-3 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-1 ${
-              activeTab === "messages" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <Bell className="w-3 h-3" />
-            Mensajes
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
-                {unreadCount > 9 ? '9+' : unreadCount}
+            {/* Lealtad */}
+            <button
+              onClick={() => setActiveTab("loyalty")}
+              className={`flex-shrink-0 py-2 px-2.5 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap flex flex-col items-center gap-0.5 min-w-[52px] ${
+                activeTab === "loyalty" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500"
+              }`}
+            >
+              <span className="text-[14px] leading-none">⭐</span>
+              <span>Lealtad</span>
+            </button>
+            {/* Compras */}
+            <button
+              onClick={() => setActiveTab("purchases")}
+              className={`flex-shrink-0 py-2 px-2.5 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap flex flex-col items-center gap-0.5 min-w-[56px] ${
+                activeTab === "purchases" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500"
+              }`}
+            >
+              <span className="text-[14px] leading-none">🛎️</span>
+              <span>Compras</span>
+            </button>
+            {/* Movimientos */}
+            <button
+              onClick={() => setActiveTab("history")}
+              className={`flex-shrink-0 py-2 px-2.5 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap flex flex-col items-center gap-0.5 min-w-[60px] ${
+                activeTab === "history" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500"
+              }`}
+            >
+              <span className="text-[14px] leading-none">📊</span>
+              <span>Historial</span>
+            </button>
+            {/* Tratamientos */}
+            <button
+              onClick={() => setActiveTab("treatments")}
+              className={`flex-shrink-0 py-2 px-2.5 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap flex flex-col items-center gap-0.5 min-w-[62px] ${
+                activeTab === "treatments" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500"
+              }`}
+            >
+              <span className="text-[14px] leading-none">✨</span>
+              <span>Tratam.</span>
+            </button>
+            {/* Mis Libros */}
+            <button
+              onClick={() => setActiveTab("books")}
+              className={`flex-shrink-0 py-2 px-2.5 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap flex flex-col items-center gap-0.5 min-w-[52px] ${
+                activeTab === "books" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500"
+              }`}
+            >
+              <span className="text-[14px] leading-none">📚</span>
+              <span>Libros</span>
+            </button>
+            {/* Notificaciones con contador */}
+            <button
+              onClick={() => {
+                setActiveTab("messages");
+                if (unreadCount > 0 && wallet?.walletNumber) {
+                  markAllReadMutation.mutate({ walletNumber: wallet.walletNumber });
+                }
+              }}
+              className={`relative flex-shrink-0 py-2 px-2.5 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap flex flex-col items-center gap-0.5 min-w-[62px] ${
+                activeTab === "messages" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500"
+              }`}
+            >
+              <span className="text-[14px] leading-none relative">
+                🔔
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </span>
-            )}
-          </button>
+              <span>Notif.</span>
+            </button>
+          </div>
         </div>
+        {/* Indicador de deslizamiento */}
+        <p className="text-center text-[9px] text-gray-300 mt-1 select-none">← desliza para ver más →</p>
       </div>
 
       {/* Tab content */}
@@ -1034,7 +1101,7 @@ export default function WalletPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-[#1A1A1A] font-bold text-base flex items-center gap-2">
                 <BellRing className="w-5 h-5 text-[#C5A55A]" />
-                Mensajes de Nutriser
+                Notificaciones de Nutriser
               </h2>
               {unreadCount > 0 && (
                 <span className="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full">
@@ -1050,8 +1117,8 @@ export default function WalletPage() {
             ) : adminNotifs.length === 0 ? (
               <div className="text-center py-12">
                 <Bell className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                <p className="text-gray-400 text-sm font-medium">Sin mensajes</p>
-                <p className="text-gray-300 text-xs mt-1">Aquí aparecerán los mensajes de Nutriser</p>
+                <p className="text-gray-400 text-sm font-medium">Sin notificaciones</p>
+                <p className="text-gray-300 text-xs mt-1">Aquí aparecerán las notificaciones de Nutriser</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -1087,6 +1154,83 @@ export default function WalletPage() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Mis Libros ── */}
+        {activeTab === "books" && (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <BookOpen className="w-5 h-5 text-[#C5A55A]" />
+              <h2 className="text-[#1A1A1A] font-bold text-base">Mis Libros Digitales</h2>
+            </div>
+            {myEbooksQuery.isLoading ? (
+              <div className="text-center py-10">
+                <div className="w-8 h-8 border-2 border-[#C5A55A] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-gray-400 text-xs">Cargando tu biblioteca...</p>
+              </div>
+            ) : myEbooks.length === 0 ? (
+              <div className="text-center py-12">
+                <BookOpen className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm font-medium">Sin libros aún</p>
+                <p className="text-gray-300 text-xs mt-1">Tus libros digitales aparecerán aquí una vez aprobada tu compra</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {myEbooks.map((book: any) => (
+                  <div key={book.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="flex gap-3 p-4">
+                      {/* Portada */}
+                      <div className="flex-shrink-0 w-20 h-28 rounded-xl overflow-hidden bg-[#F5F0E8] border border-[#C5A55A]/20">
+                        {book.ebookCoverUrl ? (
+                          <img src={book.ebookCoverUrl} alt={book.ebookTitle} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <BookOpen className="w-8 h-8 text-[#C5A55A]/40" />
+                          </div>
+                        )}
+                      </div>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-[#1A1A1A] text-sm leading-tight mb-1">{book.ebookTitle ?? 'Libro Digital'}</h3>
+                        {book.ebookDescription && (
+                          <p className="text-gray-400 text-xs line-clamp-2 mb-2">{book.ebookDescription}</p>
+                        )}
+                        {/* Estado */}
+                        <div className="mb-3">
+                          {book.status === 'approved' ? (
+                            <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                              ✅ Aprobado
+                            </span>
+                          ) : book.status === 'pending' ? (
+                            <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                              ⏳ Pendiente de aprobación
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                              ❌ Rechazado
+                            </span>
+                          )}
+                        </div>
+                        {/* Botón leer */}
+                        {book.status === 'approved' && book.pdfUrl && (
+                          <button
+                            onClick={() => setLocation(`/mis-libros/${book.ebookId}`)}
+                            className="w-full bg-[#C5A55A] hover:bg-[#B8963E] text-white font-bold py-2 px-4 rounded-xl text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
+                          >
+                            <BookOpen className="w-3.5 h-3.5" />
+                            Leer libro
+                          </button>
+                        )}
+                        {book.status === 'pending' && (
+                          <p className="text-[10px] text-gray-400 italic">Te notificaremos cuando esté listo</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

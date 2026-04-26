@@ -2096,3 +2096,10 @@
 - [x] Memberships.tsx: detecta contractRequired=true y muestra ContractBlockModal (bloquea toda la app)
 - [x] WalletPage.tsx: detecta contractRequired=true y muestra ContractBlockModal (bloquea toda la app)
 - [x] Tests unitarios para el sistema de contrato (server/contract.test.ts) - 8 tests pasando
+
+## Sesión actual - Gestión Librería/Ebook
+- [ ] Separar gestión de ebook en tab propio "Gestión Librería" en AdminDashboard
+- [ ] Al aprobar compra de ebook: crear mensaje en monedero del paciente con acceso directo al libro
+- [ ] Al aprobar compra de ebook: notificación push al paciente
+- [ ] Acceso al libro desde monedero: botón "Leer libro" que abre el PDF directamente (sin contraseña)
+- [ ] Vincular compra de ebook por email del paciente autenticado

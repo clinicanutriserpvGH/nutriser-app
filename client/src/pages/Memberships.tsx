@@ -3120,13 +3120,13 @@ onClick={() => {
               )}
             </div>
 
-            {/* Ver Estado de Cuenta */}
+            {/* Mis Tratamientos */}
             <div className="px-5 pb-1">
               <button
-                onClick={() => { setWalletSheetOpen(false); navigate("/monedero"); }}
+                onClick={() => { setWalletSheetOpen(false); navigate("/monedero?tab=messages"); }}
                 className="w-full text-[#C5A55A] text-sm font-bold py-2 underline"
               >
-                {t("viewStatement", lang)}
+                🔔 Notificaciones
               </button>
             </div>
 

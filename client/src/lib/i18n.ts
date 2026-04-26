@@ -214,7 +214,7 @@ export const translations = {
     walletLoginDesc: "Crea tu Monedero Nutriser para acceder a tu tarjeta digital, saldo y beneficios exclusivos.",
     walletLoading: "Cargando tu monedero...",
     availableBalance: "Saldo disponible",
-    viewStatement: "Ver Pagos Pendientes",
+    viewStatement: "Ver Estado de Cuenta",
     requestPhysicalCard: "Solicitar tarjeta física",
     requestSent: "Solicitud enviada",
     inPreparation: "En preparación",

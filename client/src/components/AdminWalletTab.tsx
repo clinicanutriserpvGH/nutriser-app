@@ -325,6 +325,7 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
   const [debitDesc, setDebitDesc] = useState("");
   const [showTransactions, setShowTransactions] = useState(false);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
+  const [showPurchases, setShowPurchases] = useState(false);
   const [discountValue, setDiscountValue] = useState<10|15|20|25|30>(10);
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [editingNotif, setEditingNotif] = useState<any | null>(null);
@@ -361,6 +362,14 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
   const transactionsQuery = trpc.wallet.adminGetTransactions.useQuery(
     { walletId: wallet.id },
     { enabled: showTransactions }
+  );
+  const cashPaymentsHistoryQuery = trpc.cashPayments.getMyHistory.useQuery(
+    { walletId: wallet.id },
+    { enabled: showPurchases }
+  );
+  const installmentPlansQuery = trpc.installments.getMyPlans.useQuery(
+    { walletNumber: wallet.walletNumber },
+    { enabled: showPurchases }
   );
   const deleteTransactionMutation = trpc.wallet.adminDeleteTransaction.useMutation({
     onSuccess: () => { toast.success("Movimiento eliminado"); transactionsQuery.refetch(); utils.wallet.adminListAll.invalidate(); },
@@ -803,6 +812,118 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                   onSaved={() => { setEditingNotif(null); notifsQuery.refetch(); }}
                 />
               )}
+
+              {/* ─── Compras desglosadas (Admin) ─── */}
+              <div className="mt-2">
+                <button
+                  onClick={() => setShowPurchases(!showPurchases)}
+                  className="flex items-center gap-2 text-xs font-semibold text-gray-600 hover:text-[#C5A55A] transition"
+                >
+                  <DollarSign className="w-3.5 h-3.5" />
+                  {showPurchases ? "Ocultar compras" : "Ver compras"}
+                </button>
+                {showPurchases && (
+                  <div className="mt-2 space-y-3">
+                    {/* Pagos en clínica */}
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">Pagos en clínica</p>
+                      {cashPaymentsHistoryQuery.isLoading ? (
+                        <div className="flex justify-center py-3"><Loader2 className="w-4 h-4 animate-spin text-[#C5A55A]" /></div>
+                      ) : (cashPaymentsHistoryQuery.data || []).length === 0 ? (
+                        <p className="text-[10px] text-gray-400 text-center py-2">Sin pagos en clínica</p>
+                      ) : (
+                        <div className="space-y-1 max-h-40 overflow-y-auto">
+                          {(cashPaymentsHistoryQuery.data || []).map((p: any) => (
+                            <div key={p.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-semibold text-gray-800 truncate">{p.concept}</p>
+                                <p className="text-[9px] text-gray-400">{new Date(p.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                              </div>
+                              <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                                <span className="text-xs font-black text-gray-700">${(p.amountCents / 100).toFixed(2)}</span>
+                                {p.status === 'confirmed' ? (
+                                  <span className="text-[9px] font-bold text-green-600 bg-green-50 border border-green-200 rounded-full px-1.5 py-0.5">Pagado ✓</span>
+                                ) : p.status === 'cancelled' ? (
+                                  <span className="text-[9px] font-bold text-red-600 bg-red-50 border border-red-200 rounded-full px-1.5 py-0.5">Cancelado</span>
+                                ) : (
+                                  <span className="text-[9px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">Pendiente</span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Planes a plazos */}
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">Planes a plazos</p>
+                      {installmentPlansQuery.isLoading ? (
+                        <div className="flex justify-center py-3"><Loader2 className="w-4 h-4 animate-spin text-[#C5A55A]" /></div>
+                      ) : (installmentPlansQuery.data || []).length === 0 ? (
+                        <p className="text-[10px] text-gray-400 text-center py-2">Sin planes a plazos</p>
+                      ) : (
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {(installmentPlansQuery.data || []).map((plan: any) => {
+                            const paidInstallments = (plan.installmentPayments || []).filter((ip: any) => ip.status === 'paid').length;
+                            const totalInstallments = plan.numberOfInstallments;
+                            const progressPct = totalInstallments > 0 ? Math.round((paidInstallments / totalInstallments) * 100) : 0;
+                            const totalPaid = (plan.downPaymentCents || 0) + (plan.installmentPayments || []).filter((ip: any) => ip.status === 'paid').reduce((s: number, ip: any) => s + ip.amountCents, 0);
+                            const remaining = (plan.totalAmountCents || 0) - totalPaid;
+                            return (
+                              <div key={plan.id} className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                                <div className="flex items-start justify-between mb-1">
+                                  <p className="text-[10px] font-bold text-gray-800 leading-tight flex-1 pr-2">{plan.serviceName}</p>
+                                  {plan.status === 'completed' ? (
+                                    <span className="text-[9px] font-bold text-green-600 bg-green-50 border border-green-200 rounded-full px-1.5 py-0.5 flex-shrink-0">Completado ✓</span>
+                                  ) : plan.status === 'cancelled' ? (
+                                    <span className="text-[9px] font-bold text-red-600 bg-red-50 border border-red-200 rounded-full px-1.5 py-0.5 flex-shrink-0">Cancelado</span>
+                                  ) : (
+                                    <span className="text-[9px] font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-1.5 py-0.5 flex-shrink-0">Activo</span>
+                                  )}
+                                </div>
+                                <div className="flex justify-between text-[9px] text-gray-500 mb-1">
+                                  <span>Total: <strong className="text-gray-700">${(plan.totalAmountCents / 100).toFixed(2)}</strong></span>
+                                  <span>Pagado: <strong className="text-green-600">${(totalPaid / 100).toFixed(2)}</strong></span>
+                                  {remaining > 0 && <span>Resta: <strong className="text-red-600">${(remaining / 100).toFixed(2)}</strong></span>}
+                                </div>
+                                {/* Barra de progreso */}
+                                <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1.5">
+                                  <div
+                                    className="h-1.5 rounded-full bg-gradient-to-r from-[#C5A55A] to-amber-400 transition-all"
+                                    style={{ width: `${progressPct}%` }}
+                                  />
+                                </div>
+                                <p className="text-[9px] text-gray-400 mb-1">{paidInstallments}/{totalInstallments} cuotas pagadas</p>
+                                {/* Cuotas individuales */}
+                                {(plan.installmentPayments || []).length > 0 && (
+                                  <div className="space-y-0.5">
+                                    {(plan.installmentPayments || []).map((ip: any) => (
+                                      <div key={ip.id} className="flex items-center justify-between">
+                                        <span className="text-[9px] text-gray-500">Cuota #{ip.installmentNumber}</span>
+                                        <div className="flex items-center gap-1">
+                                          <span className="text-[9px] font-semibold text-gray-700">${(ip.amountCents / 100).toFixed(2)}</span>
+                                          {ip.status === 'paid' ? (
+                                            <span className="text-[8px] font-bold text-green-600">✓ Pagada</span>
+                                          ) : ip.dueDate && new Date(ip.dueDate) < new Date() ? (
+                                            <span className="text-[8px] font-bold text-red-600">Vencida</span>
+                                          ) : (
+                                            <span className="text-[8px] font-bold text-amber-600">Pendiente</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Historial de Movimientos (Admin) */}
               <div className="mt-2">

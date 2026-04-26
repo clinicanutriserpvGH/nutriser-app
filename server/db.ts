@@ -2217,28 +2217,31 @@ export async function adminResetWallet(walletId: number, adminEmail: string): Pr
       discountActivatedAt: null,
     })
     .where(eq(wallets.id, walletId));
-  // 2. Cancelar todos los pagos en clínica pendientes de este monedero
-  await db.update(cashPendingPayments)
-    .set({ status: 'cancelled', cancelledAt: new Date() })
-    .where(and(
-      eq(cashPendingPayments.walletId, walletId),
-      eq(cashPendingPayments.status, 'pending')
-    ));
-  // 3. Resetear el tracker de consultas de lealtad (consultas acumuladas, gratis ganadas/usadas)
+  // 2. Borrar TODOS los pagos en clínica (pendientes, confirmados y cancelados)
+  await db.delete(cashPendingPayments).where(eq(cashPendingPayments.walletId, walletId));
+  // 3. Borrar todos los planes a plazos y sus pagos
+  const plans = await db.select({ id: installmentPlans.id })
+    .from(installmentPlans)
+    .where(eq(installmentPlans.walletId, walletId));
+  for (const plan of plans) {
+    await db.delete(installmentPayments).where(eq(installmentPayments.planId, plan.id));
+  }
+  await db.delete(installmentPlans).where(eq(installmentPlans.walletId, walletId));
+  // 4. Resetear el tracker de consultas de lealtad
   await db.update(loyaltyTracker)
     .set({ nutritionConsultations: 0, freeConsultationsEarned: 0, freeConsultationsUsed: 0 })
     .where(eq(loyaltyTracker.walletId, walletId));
-  // 4. Borrar el progreso en todos los planes de lealtad por producto
+  // 5. Borrar el progreso en todos los planes de lealtad por producto
   await db.delete(loyaltyProgress).where(eq(loyaltyProgress.walletId, walletId));
-  // 5. Borrar todo el historial de movimientos del monedero
+  // 6. Borrar todo el historial de movimientos del monedero
   await db.delete(walletTransactions).where(eq(walletTransactions.walletId, walletId));
-  // 6. Registrar un único movimiento de auditoría post-reinicio
+  // 7. Registrar un único movimiento de auditoría post-reinicio
   await db.insert(walletTransactions).values({
     walletId,
     type: "adjustment",
     amount: 0,
     balanceAfter: 0,
-    description: `Monedero reiniciado por admin (${adminEmail})`,
+    description: `Monedero reiniciado por admin (${adminEmail}) — historial completo borrado`,
     createdBy: `admin:${adminEmail}`,
   }).catch(() => {});
 }

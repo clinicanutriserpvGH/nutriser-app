@@ -641,6 +641,20 @@ export default function AdminQRScanner() {
                             {confirmCashMutation.isPending ? 'Confirmando...' : 'Confirmar pago'}
                           </button>
                           <button
+                            onClick={() => {
+                              setLinkedCashPaymentId(p.id);
+                              setShowInstallmentForm(true);
+                              setTimeout(() => {
+                                document.getElementById('plazos-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }, 150);
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-1"
+                            title="Crear plan a plazos"
+                          >
+                            <CreditCard className="w-3 h-3" />
+                            Plazos
+                          </button>
+                          <button
                             onClick={() => cancelCashMutation.mutate({ id: p.id })}
                             disabled={cancelCashMutation.isPending}
                             className="px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-300 disabled:opacity-50 transition-all"
@@ -657,7 +671,7 @@ export default function AdminQRScanner() {
                 )}
 
                 {/* ─── Plan de Pagos a Plazos ─── */}
-                <div className="mt-3 border border-blue-200 rounded-xl p-3 bg-gradient-to-br from-blue-50/60 to-white space-y-2">
+                <div id="plazos-section" className="mt-3 border border-blue-200 rounded-xl p-3 bg-gradient-to-br from-blue-50/60 to-white space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-base">💳</span>

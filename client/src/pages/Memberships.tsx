@@ -1653,7 +1653,7 @@ export default function Memberships() {
           </div>
 
           {/* ── Paquetes Especiales (scroll horizontal) ── */}
-          {(activeCategory === "all" || activeCategory === "packages") && (
+          {(activeMainCat === "all" || activeMainCat === "packages") && (
             <div className="bg-white mt-2 py-5">
               <div className="max-w-7xl mx-auto px-4">
                 <div className="flex items-center justify-between mb-4">

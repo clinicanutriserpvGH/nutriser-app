@@ -190,6 +190,22 @@ function formatServicePrice(raw: string | null | undefined): string {
   return `$${num.toLocaleString("es-MX")} MXN`;
 }
 
+// ─── ActiveCouponsBadge ─────────────────────────────────────────────────────
+function ActiveCouponsBadge() {
+  const { data: promotions } = trpc.promotions.list.useQuery();
+  const count = promotions?.filter((p: { isActive?: boolean; expiresAt?: Date | string | null }) => {
+    if (!p.isActive) return false;
+    if (p.expiresAt && new Date(p.expiresAt) < new Date()) return false;
+    return true;
+  }).length ?? 0;
+  if (count === 0) return null;
+  return (
+    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[8px] font-black min-w-[16px] h-4 px-0.5 rounded-full flex items-center justify-center leading-none shadow-sm">
+      {count > 9 ? '9+' : count}
+    </span>
+  );
+}
+
 // ─── CopyButton ───────────────────────────────────────────────────────────────
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -3066,12 +3082,15 @@ onClick={() => {
                   <Home className="w-6 h-6" />
                   <span className="text-[10px] font-semibold leading-tight">Inicio</span>
                 </button>
-                {/* Cupones */}
+                {/* Cupones con badge contador */}
                 <button
                   onClick={() => navigate("/cupones")}
-                  className="flex flex-col items-center gap-0.5 py-1 px-2 transition-colors text-gray-400 hover:text-[#C5A55A]"
+                  className="flex flex-col items-center gap-0.5 py-1 px-2 transition-colors text-gray-400 hover:text-[#C5A55A] relative"
                 >
-                  <Tag className="w-6 h-6" />
+                  <div className="relative">
+                    <Tag className="w-6 h-6" />
+                    <ActiveCouponsBadge />
+                  </div>
                   <span className="text-[10px] font-semibold leading-tight">Cupones</span>
                 </button>
               </div>

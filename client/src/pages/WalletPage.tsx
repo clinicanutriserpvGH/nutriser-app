@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, X, Bell, BellRing, Mail, AlertCircle, Megaphone, PartyPopper, CheckCircle2, Trash2, LogOut } from "lucide-react";
+import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, X, Bell, BellRing, Mail, AlertCircle, Megaphone, PartyPopper, CheckCircle2, Trash2, LogOut, ChevronDown } from "lucide-react";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 // NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import { trpc } from "@/lib/trpc";
@@ -186,6 +186,11 @@ export default function WalletPage() {
   );
   const myEbooks = myEbooksQuery.data ?? [];
   const [copied, setCopied] = useState(false);
+  // Acordeón: controla qué items están expandidos en Pendientes y Compras
+  const [expandedPendingIds, setExpandedPendingIds] = useState<Set<number>>(new Set());
+  const [expandedPurchaseIds, setExpandedPurchaseIds] = useState<Set<string>>(new Set());
+  const togglePending = (id: number) => setExpandedPendingIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+  const togglePurchase = (id: string) => setExpandedPurchaseIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
   const [showCardSheet, setShowCardSheet] = useState(false);
   const [showQRFullscreen, setShowQRFullscreen] = useState(false);
   const [showPhysicalCardDialog, setShowPhysicalCardDialog] = useState(false);
@@ -608,52 +613,66 @@ export default function WalletPage() {
                     // Parsear itemsJson si existe
                     let parsedItems: Array<{name: string; qty?: number; priceCents: number; itemType?: string}> = [];
                     try { if (p.itemsJson) parsedItems = JSON.parse(p.itemsJson); } catch {}
+                    const isExpanded = expandedPendingIds.has(p.id);
                     return (
-                    <div key={p.id} className="bg-white rounded-xl border border-orange-200 p-3 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
+                    <div key={p.id} className="bg-white rounded-xl border border-orange-200 overflow-hidden">
+                      {/* Cabecera siempre visible — tap para expandir */}
+                      <button
+                        onClick={() => togglePending(p.id)}
+                        className="w-full flex items-center justify-between gap-2 p-3 text-left"
+                      >
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-500 mt-0.5">{new Date(p.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                          {p.notes && <p className="text-xs text-gray-400 mt-0.5">{p.notes}</p>}
+                          <p className="text-xs text-gray-500">{new Date(p.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                          {p.notes && !isExpanded && <p className="text-xs text-gray-400 truncate">{p.notes}</p>}
                         </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-orange-700 font-black text-base">${(p.amountCents / 100).toFixed(2)}</p>
-                          <span className="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">{t('statusPending', lang).toUpperCase()}</span>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="text-right">
+                            <p className="text-orange-700 font-black text-base">${(p.amountCents / 100).toFixed(2)}</p>
+                            <span className="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">{t('statusPending', lang).toUpperCase()}</span>
+                          </div>
+                          <ChevronDown className={`w-4 h-4 text-orange-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                         </div>
-                      </div>
-                      {/* Desglose de artículos del carrito */}
-                      {parsedItems.length > 0 ? (
-                        <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2 space-y-1">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Artículos ({parsedItems.length})</p>
-                          {parsedItems.map((item, idx) => (
-                            <div key={idx} className="flex justify-between items-center text-xs">
-                              <span className="text-gray-700 flex-1 min-w-0 pr-2">
-                                {item.qty && item.qty > 1 ? <span className="font-bold text-[#C5A55A] mr-1">{item.qty}×</span> : null}
-                                {item.name}
-                              </span>
-                              <span className="font-bold text-gray-900 whitespace-nowrap">${(item.priceCents / 100).toFixed(2)}</span>
+                      </button>
+                      {/* Detalle colapsable */}
+                      {isExpanded && (
+                        <div className="px-3 pb-3 space-y-2 border-t border-orange-100">
+                          {p.notes && <p className="text-xs text-gray-400 pt-2">{p.notes}</p>}
+                          {/* Desglose de artículos del carrito */}
+                          {parsedItems.length > 0 ? (
+                            <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2 space-y-1">
+                              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Artículos ({parsedItems.length})</p>
+                              {parsedItems.map((item, idx) => (
+                                <div key={idx} className="flex justify-between items-center text-xs">
+                                  <span className="text-gray-700 flex-1 min-w-0 pr-2">
+                                    {item.qty && item.qty > 1 ? <span className="font-bold text-[#C5A55A] mr-1">{item.qty}×</span> : null}
+                                    {item.name}
+                                  </span>
+                                  <span className="font-bold text-gray-900 whitespace-nowrap">${(item.priceCents / 100).toFixed(2)}</span>
+                                </div>
+                              ))}
+                              <div className="border-t border-orange-200 pt-1 flex justify-between text-xs font-black">
+                                <span className="text-gray-600">Total</span>
+                                <span className="text-orange-700">${(p.amountCents / 100).toFixed(2)}</span>
+                              </div>
                             </div>
-                          ))}
-                          <div className="border-t border-orange-200 pt-1 flex justify-between text-xs font-black">
-                            <span className="text-gray-600">Total</span>
-                            <span className="text-orange-700">${(p.amountCents / 100).toFixed(2)}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2">
-                          <p className="text-sm font-bold text-gray-900">{p.concept}</p>
-                        </div>
-                      )}
-                      {/* Desglose: saldo del monedero usado */}
-                      {p.walletAmountUsedCents > 0 && (
-                        <div className="bg-green-50 border border-green-100 rounded-lg px-3 py-1.5">
-                          <div className="flex justify-between text-xs">
-                            <span className="text-green-700 font-semibold">🪙 Monedero aplicado</span>
-                            <span className="text-green-700 font-bold">-${(p.walletAmountUsedCents / 100).toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between text-xs mt-0.5">
-                            <span className="text-gray-600">A pagar en efectivo</span>
-                            <span className="text-orange-700 font-black">${((p.amountCents - p.walletAmountUsedCents) / 100).toFixed(2)}</span>
-                          </div>
+                          ) : (
+                            <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2">
+                              <p className="text-sm font-bold text-gray-900">{p.concept}</p>
+                            </div>
+                          )}
+                          {/* Desglose: saldo del monedero usado */}
+                          {p.walletAmountUsedCents > 0 && (
+                            <div className="bg-green-50 border border-green-100 rounded-lg px-3 py-1.5">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-green-700 font-semibold">🪙 Monedero aplicado</span>
+                                <span className="text-green-700 font-bold">-${(p.walletAmountUsedCents / 100).toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between text-xs mt-0.5">
+                                <span className="text-gray-600">A pagar en efectivo</span>
+                                <span className="text-orange-700 font-black">${((p.amountCents - p.walletAmountUsedCents) / 100).toFixed(2)}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -790,30 +809,39 @@ export default function WalletPage() {
                   <div>
                     <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">PAQUETES</p>
                     <div className="space-y-3">
-                      {myPurchases!.services.filter((s: any) => s.purchaseType === 'package').map((svc: any) => (
-                        <div key={svc.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
+                      {myPurchases!.services.filter((s: any) => s.purchaseType === 'package').map((svc: any) => {
+                        const key = `pkg-${svc.id}`;
+                        const isExp = expandedPurchaseIds.has(key);
+                        return (
+                        <div key={svc.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${
                           svc.status === 'approved' ? 'border-green-200' :
                           svc.status === 'rejected' ? 'border-red-200' : 'border-yellow-200'
                         }`}>
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
+                          <button onClick={() => togglePurchase(key)} className="w-full flex items-center justify-between gap-2 p-4 text-left">
+                            <div className="flex-1 min-w-0">
                               <p className="text-[#1A1A1A] font-bold text-sm">{svc.serviceName}</p>
                               {svc.originalPrice && <p className="text-gray-500 text-xs mt-0.5">{svc.originalPrice.replace(/^\$+/, '$').replace(/\s*MXN\s*MXN/i, ' MXN').replace(/\s*MXN$/i, ' MXN').trim()}</p>}
-                              {svc.approvedAt && <p className="text-gray-400 text-xs mt-0.5">{t('authorizedAt', lang)} {new Date(svc.approvedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
                             </div>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                              svc.status === 'approved' ? 'bg-green-50 text-green-700' :
-                              svc.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
-                            }`}>
-                              {svc.status === 'approved' ? t('statusActive', lang) : svc.status === 'pending' ? t('statusPending', lang) : t('statusRejected', lang)}
-                            </span>
-                          </div>
-                          {svc.status === 'approved' && (
-                            <p className="text-green-700 text-xs mt-2 font-medium">Presenta tu Monedero Nutriser en clínica – ¡listo!</p>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                svc.status === 'approved' ? 'bg-green-50 text-green-700' :
+                                svc.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
+                              }`}>
+                                {svc.status === 'approved' ? t('statusActive', lang) : svc.status === 'pending' ? t('statusPending', lang) : t('statusRejected', lang)}
+                              </span>
+                              <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isExp ? 'rotate-180' : ''}`} />
+                            </div>
+                          </button>
+                          {isExp && (
+                            <div className="px-4 pb-3 border-t border-gray-100 pt-2 space-y-1">
+                              {svc.approvedAt && <p className="text-gray-400 text-xs">{t('authorizedAt', lang)} {new Date(svc.approvedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                              {svc.status === 'approved' && <p className="text-green-700 text-xs font-medium">Presenta tu Monedero Nutriser en clínica – ¡listo!</p>}
+                              {svc.status === 'pending' && <p className="text-yellow-600 text-xs">Estamos revisando tu comprobante, te avisamos pronto.</p>}
+                            </div>
                           )}
-                          {svc.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">Estamos revisando tu comprobante, te avisamos pronto.</p>}
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -823,30 +851,39 @@ export default function WalletPage() {
                   <div>
                     <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">{t('servicesSection', lang)}</p>
                     <div className="space-y-3">
-                      {myPurchases!.services.filter((s: any) => s.purchaseType !== 'package').map((svc: any) => (
-                        <div key={svc.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
+                      {myPurchases!.services.filter((s: any) => s.purchaseType !== 'package').map((svc: any) => {
+                        const key = `svc-${svc.id}`;
+                        const isExp = expandedPurchaseIds.has(key);
+                        return (
+                        <div key={svc.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${
                           svc.status === 'approved' ? 'border-green-200' :
                           svc.status === 'rejected' ? 'border-red-200' : 'border-yellow-200'
                         }`}>
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
+                          <button onClick={() => togglePurchase(key)} className="w-full flex items-center justify-between gap-2 p-4 text-left">
+                            <div className="flex-1 min-w-0">
                               <p className="text-[#1A1A1A] font-bold text-sm">{svc.serviceName}</p>
                               {svc.originalPrice && <p className="text-gray-500 text-xs mt-0.5">{svc.originalPrice.replace(/^\$+/, '$').replace(/\s*MXN\s*MXN/i, ' MXN').replace(/\s*MXN$/i, ' MXN').trim()}</p>}
-                              {svc.approvedAt && <p className="text-gray-400 text-xs mt-0.5">{t('authorizedAt', lang)} {new Date(svc.approvedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
                             </div>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                              svc.status === 'approved' ? 'bg-green-50 text-green-700' :
-                              svc.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
-                            }`}>
-                              {svc.status === 'approved' ? t('statusActive', lang) : svc.status === 'pending' ? t('statusPending', lang) : t('statusRejected', lang)}
-                            </span>
-                          </div>
-                          {svc.status === 'approved' && (
-                            <p className="text-green-700 text-xs mt-2 font-medium">Presenta tu Monedero Nutriser en clínica – ¡listo!</p>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                svc.status === 'approved' ? 'bg-green-50 text-green-700' :
+                                svc.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
+                              }`}>
+                                {svc.status === 'approved' ? t('statusActive', lang) : svc.status === 'pending' ? t('statusPending', lang) : t('statusRejected', lang)}
+                              </span>
+                              <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isExp ? 'rotate-180' : ''}`} />
+                            </div>
+                          </button>
+                          {isExp && (
+                            <div className="px-4 pb-3 border-t border-gray-100 pt-2 space-y-1">
+                              {svc.approvedAt && <p className="text-gray-400 text-xs">{t('authorizedAt', lang)} {new Date(svc.approvedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                              {svc.status === 'approved' && <p className="text-green-700 text-xs font-medium">Presenta tu Monedero Nutriser en clínica – ¡listo!</p>}
+                              {svc.status === 'pending' && <p className="text-yellow-600 text-xs">Estamos revisando tu comprobante, te avisamos pronto.</p>}
+                            </div>
                           )}
-                          {svc.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">Estamos revisando tu comprobante, te avisamos pronto.</p>}
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
+import NutriserAuthModal from "@/components/NutriserAuthModal";
 
 export default function CouponPage() {
   const params = useParams<{ id: string }>();
@@ -102,6 +103,9 @@ export default function CouponPage() {
     setWalletUsedForFull(false);
   };
 
+  // Modal de bienvenida para usuarios sin monedero
+  const [showWalletPromoModal, setShowWalletPromoModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   // Monedero Nutriser
   const [useWallet, setUseWallet] = useState(false);
   const [walletAmount, setWalletAmount] = useState(0);
@@ -436,7 +440,7 @@ export default function CouponPage() {
                     <button
                       onClick={() => {
                         if (!isLoggedIn || !patient) {
-                          toast.error('Necesitas un Monedero Nutriser activo para adquirir este cupón.');
+                          setShowWalletPromoModal(true);
                           return;
                         }
                         setShowPaymentFlow(true);
@@ -836,6 +840,81 @@ export default function CouponPage() {
 
       <Footer />
       <WhatsAppButton />
+
+      {/* ═══ MODAL BIENVENIDA: Crear Monedero para comprar cupón ═══ */}
+      {showWalletPromoModal && promo && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#1A1A1A] border border-[#C5A55A]/40 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4">
+            {/* Header dorado */}
+            <div className="bg-gradient-to-r from-[#C5A55A] to-[#8B6914] px-6 py-5 text-center">
+              <div className="text-3xl mb-2">🎁</div>
+              <h2 className="text-white font-black text-lg uppercase tracking-wide">¡Casi es tuyo!</h2>
+              <p className="text-white/90 text-sm mt-1">Crea tu Monedero Nutriser gratis para comprarlo</p>
+            </div>
+
+            {/* Cuerpo */}
+            <div className="px-6 py-5 space-y-4">
+              {/* Cupón que quiere comprar */}
+              <div className="bg-[#C5A55A]/10 border border-[#C5A55A]/30 rounded-xl p-3 flex items-center gap-3">
+                <span className="text-2xl">🏷️</span>
+                <div>
+                  <p className="text-[#C5A55A] text-xs font-bold uppercase tracking-wide">Cupón seleccionado</p>
+                  <p className="text-white font-semibold text-sm">{promo.title}</p>
+                  <p className="text-[#C5A55A] font-black">{promo.price}</p>
+                </div>
+              </div>
+
+              {/* Beneficios */}
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400 text-lg mt-0.5">✓</span>
+                  <p className="text-white/90 text-sm"><strong className="text-white">Monedero electrónico gratuito</strong> — sin costo, se crea en 2 minutos</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400 text-lg mt-0.5">✓</span>
+                  <p className="text-white/90 text-sm"><strong className="text-white">Compra este cupón</strong> con descuento exclusivo</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-[#C5A55A] text-lg mt-0.5">💰</span>
+                  <p className="text-white/90 text-sm"><strong className="text-[#C5A55A]">Recibes cashback</strong> en tu primera compra — acumulable para próximas visitas</p>
+                </div>
+              </div>
+
+              {/* CTAs */}
+              <button
+                onClick={() => {
+                  setShowWalletPromoModal(false);
+                  setShowAuthModal(true);
+                }}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#C5A55A] to-[#8B6914] text-white font-black text-sm uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
+              >
+                Crear mi Monedero Gratis
+              </button>
+              <button
+                onClick={() => setShowWalletPromoModal(false)}
+                className="w-full py-2 text-white/50 text-sm hover:text-white/80 transition-colors"
+              >
+                Ahora no
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de registro/login del Monedero */}
+      <NutriserAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          // Regresar al cupón para que lo compre
+          setTimeout(() => {
+            setShowPaymentFlow(true);
+            toast.success('🎉 ¡Monedero creado! Ahora puedes adquirir tu cupón.');
+          }, 500);
+        }}
+        contextMessage={`Para adquirir el cupón "${promo?.title || ''}" necesitas un Monedero Nutriser gratuito. ¡Se crea en 2 minutos y recibes cashback en tu compra!`}
+      />
     </div>
   );
 }

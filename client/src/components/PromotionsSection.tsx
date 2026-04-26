@@ -326,7 +326,7 @@ export default function PromotionsSection() {
   };
 
   return (
-    <section id="promociones" className="py-20 bg-[#FAF7F2]">
+    <section id="promociones" className="py-20 bg-[#FAF7F2]" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 6rem)' }}>
       <div className="container">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center mb-12">
           <h2 className="font-serif text-4xl lg:text-5xl text-[#1A1A1A] mb-4">Cuponera de Descuentos</h2>

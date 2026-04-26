@@ -872,33 +872,6 @@ export default function WalletPage() {
                   </div>
                 )}
 
-                {/* Pagos en clínica confirmados */}
-                {(myPurchases?.cashPayments?.length ?? 0) > 0 && (
-                  <div>
-                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">{lang === 'EN' ? 'Clinic Payments' : 'Pagos en Clínica'}</p>
-                    <div className="space-y-3">
-                      {myPurchases!.cashPayments.map((cp: any) => (
-                        <div key={cp.id} className="bg-white rounded-2xl p-4 border border-green-200 shadow-sm">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[#1A1A1A] font-bold text-sm">{cp.concept}</p>
-                              <p className="text-green-700 font-black text-base mt-0.5">${(cp.amountCents / 100).toFixed(2)} <span className="text-gray-400 font-normal text-xs">MXN</span></p>
-                              {cp.confirmedAt && <p className="text-gray-400 text-xs mt-0.5">{lang === 'EN' ? 'Paid on' : 'Pagado el'} {new Date(cp.confirmedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
-                            </div>
-                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                                {lang === 'EN' ? 'Paid' : 'Pagado'}
-                              </span>
-                              <span className="text-[10px] text-gray-400">{lang === 'EN' ? 'Full payment' : 'Pago completo'}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* ── Planes de Pago a Plazos ── */}
                 {installmentPlans.length > 0 && (
                   <div>
@@ -1004,7 +977,6 @@ export default function WalletPage() {
                  (myPurchases?.coupons?.length ?? 0) === 0 &&
                  (myPurchases?.products?.length ?? 0) === 0 &&
                  (myPurchases?.ebooks?.length ?? 0) === 0 &&
-                 (myPurchases?.cashPayments?.length ?? 0) === 0 &&
                  installmentPlans.length === 0 && (
                   <div className="text-center py-12">
                     <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>

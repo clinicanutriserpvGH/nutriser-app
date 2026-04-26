@@ -656,6 +656,279 @@ export default function AdminQRScanner() {
                   <p className="text-xs text-center text-gray-400 mt-1">Sin pagos en clínica pendientes</p>
                 )}
 
+                {/* ─── Plan de Pagos a Plazos ─── */}
+                <div className="mt-3 border border-blue-200 rounded-xl p-3 bg-gradient-to-br from-blue-50/60 to-white space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">💳</span>
+                      <span className="text-sm font-bold text-gray-800">Plan de Pagos a Plazos</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowInstallmentForm(!showInstallmentForm);
+                        if (!showInstallmentForm) {
+                          setSelectedPlanItems([]);
+                          setLinkedCashPaymentId(null);
+                          setInstallmentConcept("");
+                          setInstallmentAmount("");
+                        }
+                      }}
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      {showInstallmentForm ? 'Cancelar' : '+ Crear plan'}
+                    </button>
+                  </div>
+
+                  {showInstallmentForm && (() => {
+                    // Artículos del pago pendiente en clínica (si hay alguno)
+                    const pendingPayments = cashPendingQuery.data ?? [];
+                    const hasPending = pendingPayments.length > 0;
+
+                    // Obtener el pago vinculado
+                    const linkedPayment: any = (hasPending && linkedCashPaymentId)
+                      ? (pendingPayments.find((p: any) => p.id === linkedCashPaymentId) ?? null)
+                      : null;
+
+                    // Calcular allItems UNA SOLA VEZ — fallback a artículo único cuando itemsJson está vacío
+                    let allItems: {name: string; priceCents: number}[] = [];
+                    if (linkedPayment) {
+                      try {
+                        const parsed = JSON.parse(linkedPayment.itemsJson ?? '[]');
+                        const mapped = parsed.map((it: any) => ({ name: it.name, priceCents: it.priceCents ?? Math.round((it.price ?? 0) * 100) }));
+                        allItems = mapped.length > 0 ? mapped : [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }];
+                      } catch {
+                        allItems = [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }];
+                      }
+                    }
+
+                    // Calcular el total de los artículos seleccionados para el plan
+                    let selectedTotalCents = 0;
+                    let planItemsForJson: {name: string; priceCents: number}[] = [];
+                    let immediateItemNames: string[] = [];
+                    let immediateAmountCents = 0; // artículos NO seleccionados para el plan
+
+                    if (linkedPayment && allItems.length > 0) {
+                      allItems.forEach((item, idx) => {
+                        if (selectedPlanItems.includes(idx)) {
+                          selectedTotalCents += item.priceCents;
+                          planItemsForJson.push(item);
+                        } else {
+                          immediateAmountCents += item.priceCents;
+                          immediateItemNames.push(item.name);
+                        }
+                      });
+                    }
+
+                    // REGLA ANTI-FRAUDE: 50% se paga de contado al crear el plan,
+                    // el otro 50% se divide en cuotas con recargo
+                    const downPaymentCents = Math.round(selectedTotalCents * 0.5);
+                    const planAmountCents = selectedTotalCents - downPaymentCents; // 50% restante
+
+                    let manualPlanAmountCents = 0;
+                    if (!linkedPayment) {
+                      // Modo manual: usar el monto escrito (ya es el total, se aplica 50/50)
+                      const manualTotal = Math.round(parseFloat(installmentAmount || '0') * 100);
+                      manualPlanAmountCents = Math.round(manualTotal * 0.5);
+                    }
+
+                    const effectivePlanAmountCents = linkedPayment ? planAmountCents : manualPlanAmountCents;
+                    const effectiveDownPaymentCents = linkedPayment ? downPaymentCents : Math.round(parseFloat(installmentAmount || '0') * 50); // 50% del manual
+
+                    const planAmount = effectivePlanAmountCents / 100;
+                    const surcharge = installmentModalidad === 'quincenal' ? 0.10 : 0.15;
+                    const planTotal = planAmount * (1 + surcharge);
+                    const n = installmentModalidad === 'quincenal' ? 2 : 4;
+
+                    return (
+                      <div className="space-y-2 pt-1">
+                        {/* PASO 1: Si hay pagos pendientes, seleccionar cuál vincular */}
+                        {hasPending && (
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pago pendiente a vincular</p>
+                            {pendingPayments.map((p: any) => (
+                              <button
+                                key={p.id}
+                                onClick={() => {
+                                  setLinkedCashPaymentId(linkedCashPaymentId === p.id ? null : p.id);
+                                  setSelectedPlanItems([]);
+                                }}
+                                className={`w-full text-left px-3 py-2 rounded-lg border text-xs transition-all ${
+                                  linkedCashPaymentId === p.id
+                                    ? 'border-blue-500 bg-blue-50 text-blue-800'
+                                    : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300'
+                                }`}
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold truncate pr-2">{p.concept.length > 30 ? p.concept.slice(0, 30) + '...' : p.concept}</span>
+                                  <span className="font-black text-green-700 whitespace-nowrap">${(p.amountCents / 100).toFixed(2)}</span>
+                                </div>
+                                {linkedCashPaymentId === p.id && <span className="text-[9px] text-blue-600 font-semibold">✓ Seleccionado</span>}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* PASO 2: Si hay pago vinculado, mostrar checkboxes de artículos */}
+                        {linkedPayment && allItems.length > 0 && (
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Selecciona qué va al plan de pagos</p>
+                            {allItems.map((item, idx) => (
+                              <label key={idx} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                selectedPlanItems.includes(idx)
+                                  ? 'border-blue-400 bg-blue-50'
+                                  : 'border-gray-200 bg-white hover:border-blue-200'
+                              }`}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedPlanItems.includes(idx)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedPlanItems(prev => [...prev, idx]);
+                                    } else {
+                                      setSelectedPlanItems(prev => prev.filter(i => i !== idx));
+                                    }
+                                  }}
+                                  className="w-3.5 h-3.5 accent-blue-600 flex-shrink-0"
+                                />
+                                <span className="flex-1 text-xs font-medium text-gray-800">{item.name}</span>
+                                <span className="text-xs font-black text-gray-700">${(item.priceCents / 100).toFixed(2)}</span>
+                              </label>
+                            ))}
+                            {selectedPlanItems.length === 0 && (
+                              <p className="text-[10px] text-orange-500 font-semibold px-1">⚠️ Selecciona al menos un artículo para el plan</p>
+                            )}
+
+                          </div>
+                        )}
+
+                        {/* PASO 3: Si no hay pago vinculado, modo manual */}
+                        {(!hasPending || !linkedCashPaymentId) && (
+                          <>
+                            <input
+                              type="text"
+                              placeholder="Concepto (ej: Paquete Nutrición)"
+                              value={installmentConcept}
+                              onChange={(e) => setInstallmentConcept(e.target.value)}
+                              className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            />
+                            <input
+                              type="number"
+                              placeholder="Monto total en pesos (ej: 3500)"
+                              value={installmentAmount}
+                              onChange={(e) => setInstallmentAmount(e.target.value)}
+                              className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            />
+                          </>
+                        )}
+
+                        {/* Modalidad */}
+                        <div className="flex gap-2">
+                          {(['quincenal', 'semanal'] as const).map((m) => (
+                            <button
+                              key={m}
+                              onClick={() => setInstallmentModalidad(m)}
+                              className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${
+                                installmentModalidad === m
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                              }`}
+                            >
+                              {m === 'quincenal' ? '📅 2 pagos quincenales (+10%)' : '📆 4 pagos semanales (+15%)'}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Resumen del plan con regla 50/50 */}
+                        {planAmount > 0 && (
+                          <div className="space-y-1.5">
+                            <div className="bg-amber-50 border border-amber-300 rounded-lg px-3 py-2 text-xs text-amber-900">
+                              <p className="font-bold text-amber-800 mb-1">💰 Pago al crear el plan (50% contado)</p>
+                              <div className="flex justify-between">
+                                <span>Enganche requerido hoy:</span>
+                                <span className="font-black text-amber-700">${(effectiveDownPaymentCents / 100).toFixed(2)}</span>
+                              </div>
+                            </div>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-800">
+                              <p className="font-bold mb-1">📅 Resto a plazos (50% + recargo {surcharge * 100}%)</p>
+                              <div className="flex justify-between">
+                                <span>Subtotal a plazos:</span>
+                                <span className="font-bold">${planAmount.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Con recargo ({surcharge * 100}%):</span>
+                                <span className="font-bold">${planTotal.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between border-t border-blue-200 mt-1 pt-1">
+                                <span className="font-bold">{n} cuotas de:</span>
+                                <span className="font-black text-blue-700">${(planTotal / n).toFixed(2)}</span>
+                              </div>
+                            </div>
+                            {immediateAmountCents > 0 && (
+                              <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 text-[10px] text-green-800">
+                                <span className="font-bold">✅ Artículos pagados de inmediato:</span> {immediateItemNames.join(', ')} — ${(immediateAmountCents / 100).toFixed(2)}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Botón crear */}
+                        <button
+                          onClick={() => {
+                            // Validaciones
+                            if (linkedCashPaymentId) {
+                              if (selectedPlanItems.length === 0) { toast.error('Selecciona al menos un artículo para el plan'); return; }
+                              if (effectivePlanAmountCents <= 0) { toast.error('El monto del plan debe ser mayor a 0'); return; }
+                              const conceptForPlan = planItemsForJson.map(i => i.name).join(', ');
+                              // immediateAmountCents aquí incluye artículos NO seleccionados + el enganche 50%
+                              const totalImmediateCents = immediateAmountCents + effectiveDownPaymentCents;
+                              const totalImmediateConcept = [
+                                ...(immediateItemNames.length > 0 ? [`${immediateItemNames.join(', ')}`] : []),
+                                `Enganche 50% (${conceptForPlan})`
+                              ].join(', ');
+                              installmentCreateMutation.mutate({
+                                walletNumber,
+                                concept: conceptForPlan,
+                                originalAmount: effectivePlanAmountCents / 100,
+                                modalidad: installmentModalidad,
+                                adminEmail: 'admin@nutriser.com',
+                                cashPaymentId: linkedCashPaymentId,
+                                itemsJson: JSON.stringify(planItemsForJson),
+                                immediateAmountCents: totalImmediateCents > 0 ? totalImmediateCents : undefined,
+                                immediateConcept: totalImmediateCents > 0 ? totalImmediateConcept : undefined,
+                                downPaymentCents: effectiveDownPaymentCents,
+                              });
+                            } else {
+                              const amount = parseFloat(installmentAmount);
+                              if (!installmentConcept.trim()) { toast.error('Ingresa el concepto'); return; }
+                              if (!amount || amount <= 0) { toast.error('Ingresa un monto válido'); return; }
+                              // Modo manual: 50% contado, 50% a plazos
+                              const halfAmount = amount * 0.5;
+                              installmentCreateMutation.mutate({
+                                walletNumber,
+                                concept: installmentConcept.trim(),
+                                originalAmount: halfAmount, // solo el 50% va a plazos
+                                modalidad: installmentModalidad,
+                                adminEmail: 'admin@nutriser.com',
+                                immediateAmountCents: Math.round(halfAmount * 100), // 50% contado
+                                immediateConcept: `Enganche 50% (${installmentConcept.trim()})`,
+                                downPaymentCents: Math.round(halfAmount * 100),
+                              });
+                            }
+                          }}
+                          disabled={installmentCreateMutation.isPending || (linkedCashPaymentId ? selectedPlanItems.length === 0 : false)}
+                          className="w-full py-2 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
+                        >
+                          {installmentCreateMutation.isPending ? (
+                            <><Loader2 className="w-3 h-3 animate-spin" /> Creando plan...</>
+                          ) : (
+                            <><CreditCard className="w-3 h-3" /> Crear Plan de Pagos</>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })()}
+                </div>
+
                 {/* ─── Solicitudes de Promoción (Banner Interests) ─── */}
                 {bannerInterestsAdminQuery.isLoading ? (
                   <div className="flex justify-center py-2"><Loader2 className="w-4 h-4 animate-spin text-amber-500" /></div>
@@ -967,279 +1240,6 @@ export default function AdminQRScanner() {
                     </div>
                   )}
                  </div>
-
-                {/* ─── Plan de Pagos a Plazos ─── */}
-                <div className="mt-3 border border-blue-200 rounded-xl p-3 bg-gradient-to-br from-blue-50/60 to-white space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">💳</span>
-                      <span className="text-sm font-bold text-gray-800">Plan de Pagos a Plazos</span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setShowInstallmentForm(!showInstallmentForm);
-                        if (!showInstallmentForm) {
-                          setSelectedPlanItems([]);
-                          setLinkedCashPaymentId(null);
-                          setInstallmentConcept("");
-                          setInstallmentAmount("");
-                        }
-                      }}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      {showInstallmentForm ? 'Cancelar' : '+ Crear plan'}
-                    </button>
-                  </div>
-
-                  {showInstallmentForm && (() => {
-                    // Artículos del pago pendiente en clínica (si hay alguno)
-                    const pendingPayments = cashPendingQuery.data ?? [];
-                    const hasPending = pendingPayments.length > 0;
-
-                    // Obtener el pago vinculado
-                    const linkedPayment: any = (hasPending && linkedCashPaymentId)
-                      ? (pendingPayments.find((p: any) => p.id === linkedCashPaymentId) ?? null)
-                      : null;
-
-                    // Calcular allItems UNA SOLA VEZ — fallback a artículo único cuando itemsJson está vacío
-                    let allItems: {name: string; priceCents: number}[] = [];
-                    if (linkedPayment) {
-                      try {
-                        const parsed = JSON.parse(linkedPayment.itemsJson ?? '[]');
-                        const mapped = parsed.map((it: any) => ({ name: it.name, priceCents: it.priceCents ?? Math.round((it.price ?? 0) * 100) }));
-                        allItems = mapped.length > 0 ? mapped : [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }];
-                      } catch {
-                        allItems = [{ name: linkedPayment.concept, priceCents: linkedPayment.amountCents }];
-                      }
-                    }
-
-                    // Calcular el total de los artículos seleccionados para el plan
-                    let selectedTotalCents = 0;
-                    let planItemsForJson: {name: string; priceCents: number}[] = [];
-                    let immediateItemNames: string[] = [];
-                    let immediateAmountCents = 0; // artículos NO seleccionados para el plan
-
-                    if (linkedPayment && allItems.length > 0) {
-                      allItems.forEach((item, idx) => {
-                        if (selectedPlanItems.includes(idx)) {
-                          selectedTotalCents += item.priceCents;
-                          planItemsForJson.push(item);
-                        } else {
-                          immediateAmountCents += item.priceCents;
-                          immediateItemNames.push(item.name);
-                        }
-                      });
-                    }
-
-                    // REGLA ANTI-FRAUDE: 50% se paga de contado al crear el plan,
-                    // el otro 50% se divide en cuotas con recargo
-                    const downPaymentCents = Math.round(selectedTotalCents * 0.5);
-                    const planAmountCents = selectedTotalCents - downPaymentCents; // 50% restante
-
-                    let manualPlanAmountCents = 0;
-                    if (!linkedPayment) {
-                      // Modo manual: usar el monto escrito (ya es el total, se aplica 50/50)
-                      const manualTotal = Math.round(parseFloat(installmentAmount || '0') * 100);
-                      manualPlanAmountCents = Math.round(manualTotal * 0.5);
-                    }
-
-                    const effectivePlanAmountCents = linkedPayment ? planAmountCents : manualPlanAmountCents;
-                    const effectiveDownPaymentCents = linkedPayment ? downPaymentCents : Math.round(parseFloat(installmentAmount || '0') * 50); // 50% del manual
-
-                    const planAmount = effectivePlanAmountCents / 100;
-                    const surcharge = installmentModalidad === 'quincenal' ? 0.10 : 0.15;
-                    const planTotal = planAmount * (1 + surcharge);
-                    const n = installmentModalidad === 'quincenal' ? 2 : 4;
-
-                    return (
-                      <div className="space-y-2 pt-1">
-                        {/* PASO 1: Si hay pagos pendientes, seleccionar cuál vincular */}
-                        {hasPending && (
-                          <div className="space-y-1.5">
-                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pago pendiente a vincular</p>
-                            {pendingPayments.map((p: any) => (
-                              <button
-                                key={p.id}
-                                onClick={() => {
-                                  setLinkedCashPaymentId(linkedCashPaymentId === p.id ? null : p.id);
-                                  setSelectedPlanItems([]);
-                                }}
-                                className={`w-full text-left px-3 py-2 rounded-lg border text-xs transition-all ${
-                                  linkedCashPaymentId === p.id
-                                    ? 'border-blue-500 bg-blue-50 text-blue-800'
-                                    : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300'
-                                }`}
-                              >
-                                <div className="flex justify-between items-center">
-                                  <span className="font-bold truncate pr-2">{p.concept.length > 30 ? p.concept.slice(0, 30) + '...' : p.concept}</span>
-                                  <span className="font-black text-green-700 whitespace-nowrap">${(p.amountCents / 100).toFixed(2)}</span>
-                                </div>
-                                {linkedCashPaymentId === p.id && <span className="text-[9px] text-blue-600 font-semibold">✓ Seleccionado</span>}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* PASO 2: Si hay pago vinculado, mostrar checkboxes de artículos */}
-                        {linkedPayment && allItems.length > 0 && (
-                          <div className="space-y-1.5">
-                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Selecciona qué va al plan de pagos</p>
-                            {allItems.map((item, idx) => (
-                              <label key={idx} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                                selectedPlanItems.includes(idx)
-                                  ? 'border-blue-400 bg-blue-50'
-                                  : 'border-gray-200 bg-white hover:border-blue-200'
-                              }`}>
-                                <input
-                                  type="checkbox"
-                                  checked={selectedPlanItems.includes(idx)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedPlanItems(prev => [...prev, idx]);
-                                    } else {
-                                      setSelectedPlanItems(prev => prev.filter(i => i !== idx));
-                                    }
-                                  }}
-                                  className="w-3.5 h-3.5 accent-blue-600 flex-shrink-0"
-                                />
-                                <span className="flex-1 text-xs font-medium text-gray-800">{item.name}</span>
-                                <span className="text-xs font-black text-gray-700">${(item.priceCents / 100).toFixed(2)}</span>
-                              </label>
-                            ))}
-                            {selectedPlanItems.length === 0 && (
-                              <p className="text-[10px] text-orange-500 font-semibold px-1">⚠️ Selecciona al menos un artículo para el plan</p>
-                            )}
-
-                          </div>
-                        )}
-
-                        {/* PASO 3: Si no hay pago vinculado, modo manual */}
-                        {(!hasPending || !linkedCashPaymentId) && (
-                          <>
-                            <input
-                              type="text"
-                              placeholder="Concepto (ej: Paquete Nutrición)"
-                              value={installmentConcept}
-                              onChange={(e) => setInstallmentConcept(e.target.value)}
-                              className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            />
-                            <input
-                              type="number"
-                              placeholder="Monto total en pesos (ej: 3500)"
-                              value={installmentAmount}
-                              onChange={(e) => setInstallmentAmount(e.target.value)}
-                              className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            />
-                          </>
-                        )}
-
-                        {/* Modalidad */}
-                        <div className="flex gap-2">
-                          {(['quincenal', 'semanal'] as const).map((m) => (
-                            <button
-                              key={m}
-                              onClick={() => setInstallmentModalidad(m)}
-                              className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${
-                                installmentModalidad === m
-                                  ? 'bg-blue-600 text-white border-blue-600'
-                                  : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
-                              }`}
-                            >
-                              {m === 'quincenal' ? '📅 2 pagos quincenales (+10%)' : '📆 4 pagos semanales (+15%)'}
-                            </button>
-                          ))}
-                        </div>
-
-                        {/* Resumen del plan con regla 50/50 */}
-                        {planAmount > 0 && (
-                          <div className="space-y-1.5">
-                            <div className="bg-amber-50 border border-amber-300 rounded-lg px-3 py-2 text-xs text-amber-900">
-                              <p className="font-bold text-amber-800 mb-1">💰 Pago al crear el plan (50% contado)</p>
-                              <div className="flex justify-between">
-                                <span>Enganche requerido hoy:</span>
-                                <span className="font-black text-amber-700">${(effectiveDownPaymentCents / 100).toFixed(2)}</span>
-                              </div>
-                            </div>
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-800">
-                              <p className="font-bold mb-1">📅 Resto a plazos (50% + recargo {surcharge * 100}%)</p>
-                              <div className="flex justify-between">
-                                <span>Subtotal a plazos:</span>
-                                <span className="font-bold">${planAmount.toFixed(2)}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Con recargo ({surcharge * 100}%):</span>
-                                <span className="font-bold">${planTotal.toFixed(2)}</span>
-                              </div>
-                              <div className="flex justify-between border-t border-blue-200 mt-1 pt-1">
-                                <span className="font-bold">{n} cuotas de:</span>
-                                <span className="font-black text-blue-700">${(planTotal / n).toFixed(2)}</span>
-                              </div>
-                            </div>
-                            {immediateAmountCents > 0 && (
-                              <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 text-[10px] text-green-800">
-                                <span className="font-bold">✅ Artículos pagados de inmediato:</span> {immediateItemNames.join(', ')} — ${(immediateAmountCents / 100).toFixed(2)}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Botón crear */}
-                        <button
-                          onClick={() => {
-                            // Validaciones
-                            if (linkedCashPaymentId) {
-                              if (selectedPlanItems.length === 0) { toast.error('Selecciona al menos un artículo para el plan'); return; }
-                              if (effectivePlanAmountCents <= 0) { toast.error('El monto del plan debe ser mayor a 0'); return; }
-                              const conceptForPlan = planItemsForJson.map(i => i.name).join(', ');
-                              // immediateAmountCents aquí incluye artículos NO seleccionados + el enganche 50%
-                              const totalImmediateCents = immediateAmountCents + effectiveDownPaymentCents;
-                              const totalImmediateConcept = [
-                                ...(immediateItemNames.length > 0 ? [`${immediateItemNames.join(', ')}`] : []),
-                                `Enganche 50% (${conceptForPlan})`
-                              ].join(', ');
-                              installmentCreateMutation.mutate({
-                                walletNumber,
-                                concept: conceptForPlan,
-                                originalAmount: effectivePlanAmountCents / 100,
-                                modalidad: installmentModalidad,
-                                adminEmail: 'admin@nutriser.com',
-                                cashPaymentId: linkedCashPaymentId,
-                                itemsJson: JSON.stringify(planItemsForJson),
-                                immediateAmountCents: totalImmediateCents > 0 ? totalImmediateCents : undefined,
-                                immediateConcept: totalImmediateCents > 0 ? totalImmediateConcept : undefined,
-                                downPaymentCents: effectiveDownPaymentCents,
-                              });
-                            } else {
-                              const amount = parseFloat(installmentAmount);
-                              if (!installmentConcept.trim()) { toast.error('Ingresa el concepto'); return; }
-                              if (!amount || amount <= 0) { toast.error('Ingresa un monto válido'); return; }
-                              // Modo manual: 50% contado, 50% a plazos
-                              const halfAmount = amount * 0.5;
-                              installmentCreateMutation.mutate({
-                                walletNumber,
-                                concept: installmentConcept.trim(),
-                                originalAmount: halfAmount, // solo el 50% va a plazos
-                                modalidad: installmentModalidad,
-                                adminEmail: 'admin@nutriser.com',
-                                immediateAmountCents: Math.round(halfAmount * 100), // 50% contado
-                                immediateConcept: `Enganche 50% (${installmentConcept.trim()})`,
-                                downPaymentCents: Math.round(halfAmount * 100),
-                              });
-                            }
-                          }}
-                          disabled={installmentCreateMutation.isPending || (linkedCashPaymentId ? selectedPlanItems.length === 0 : false)}
-                          className="w-full py-2 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1"
-                        >
-                          {installmentCreateMutation.isPending ? (
-                            <><Loader2 className="w-3 h-3 animate-spin" /> Creando plan...</>
-                          ) : (
-                            <><CreditCard className="w-3 h-3" /> Crear Plan de Pagos</>
-                          )}
-                        </button>
-                      </div>
-                    );
-                  })()}
-                </div>
 
                 {/* ─── Planes de Pago Activos del Paciente ─── */}
                 <PatientInstallmentPlans walletNumber={walletNumber} />

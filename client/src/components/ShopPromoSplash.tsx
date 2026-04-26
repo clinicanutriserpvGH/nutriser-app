@@ -169,21 +169,19 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   const { isMobile } = useDeviceType();
   const [, navigate] = useLocation();
 
-  // Slides: imágenes del admin (tipo inicio) + cupones activos
-  // Si hay imágenes del admin Y showDefault=false → reemplazan la ShopCard fija
-  // Si showDefault=true → la ShopCard fija aparece junto a las imágenes del admin
-  // Si no hay imágenes del admin → se usa la ShopCard fija siempre
+  // Slides: SOLO imágenes del admin (tipo inicio) + ShopCard fija
+  // Los cupones/promociones activos NO aparecen en el splash de inicio — solo en la Tienda
   const adminAds = splashAds as Array<{ id: number; imageUrl: string; title: string }>;
   const showDefaultSlide = !!(splashConfigData?.showDefault); // Solo si el admin lo activó — NUNCA por defecto
   const customImageUrl: string | null = (splashConfigData as any)?.customImageUrl ?? null;
   const hasAdminAds = adminAds.length > 0;
-  // Orden: [imágenes admin] + [ShopCard si showDefault] + [cupones activos]
+  // Orden: [imágenes admin] + [ShopCard si showDefault] — SIN cupones activos
   const adminAdsCount = adminAds.length;
   const defaultSlideCount = showDefaultSlide ? 1 : 0;
-  const totalSlides = adminAdsCount + defaultSlideCount + activePromos.length;
+  const totalSlides = adminAdsCount + defaultSlideCount; // Cupones eliminados del splash de inicio
   const isAdminAdSlide = currentIndex < adminAdsCount;
   const isShopSlide = !isAdminAdSlide && currentIndex === adminAdsCount && showDefaultSlide;
-  const promoIndex = currentIndex - adminAdsCount - defaultSlideCount;
+  const promoIndex = -1; // No se usan cupones en el splash de inicio
 
   const handleClose = useCallback(() => {
     setIsClosing(true); // Deshabilitar pointer-events inmediatamente para evitar bloqueo de taps en iOS

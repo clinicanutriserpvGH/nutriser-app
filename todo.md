@@ -2103,3 +2103,12 @@
 - [ ] Al aprobar compra de ebook: notificación push al paciente
 - [ ] Acceso al libro desde monedero: botón "Leer libro" que abre el PDF directamente (sin contraseña)
 - [ ] Vincular compra de ebook por email del paciente autenticado
+
+## Sesión 20 - Corrección Sistema de Cashback por Referidos
+
+- [ ] Corregir cashback: acreditar SOLO cuando admin aprueba compra del referido (no al registrarse)
+- [ ] Guardar referredByWalletCode en patients.register (desde ?ref= en URL)
+- [ ] Actualizar mensaje banner compartir: "por cada cupón que compren tus recomendados"
+- [ ] Remover processReferralCashback del onSuccess de registerMutation en NutriserAuthModal
+- [ ] Agregar banner compartir (WhatsApp/link + cashback) siempre en CouponPage (/cupon/:id)
+- [ ] Unificar flujo: CouponPage y PromotionsSection muestran el mismo banner de compartir

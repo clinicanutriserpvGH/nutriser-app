@@ -54,20 +54,8 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
       const patient = data as PatientSession;
       login(patient);
       toast.success(`¡Cuenta creada! Bienvenido, ${patient.name}`);
-      // Si hay código de referido, procesar cashback para el referidor
-      if (refCode && patient.email) {
-        processReferralMutation.mutate(
-          { newPatientEmail: patient.email, referrerWalletCode: refCode, promotionId: promoIdFromUrl },
-          {
-            onSuccess: (res) => {
-              if (res.success) {
-                // No revelar el porcentaje, solo confirmar
-                console.log('[Referral] Cashback acreditado al referidor');
-              }
-            },
-          }
-        );
-      }
+      // El cashback al referidor se acredita cuando el admin APRUEBA la compra del cupón
+      // No se acredita al registrarse
       onSuccess?.(patient);
       onClose();
     },
@@ -105,6 +93,7 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
       password,
       phone: fd.get("phone") as string,
       birthday,
+      referredByWalletCode: refCode || undefined, // Guardar código de referido si viene del URL
     });
   };
 

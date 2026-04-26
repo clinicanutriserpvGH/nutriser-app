@@ -515,7 +515,7 @@ export default function PromotionsSection() {
                       <div className="bg-[#C5A55A]/15 border border-[#C5A55A]/40 rounded-lg px-3 py-2 mb-2.5 flex items-start gap-2">
                         <span className="text-base flex-shrink-0">💰</span>
                         <p className="text-[10px] text-[#C5A55A] leading-snug">
-                          <strong>¡Gana cashback en tu Monedero!</strong> Comparte desde aquí y regresa a la app — cada vez que alguien nuevo se registre con tu link, te acreditamos cashback automáticamente.
+                          <strong>¡Gana cashback en tu Monedero!</strong> Comparte tu link y por cada cupón que compren tus recomendados, te acreditamos cashback automáticamente. Solo necesitan abrir su Monedero con tu link y comprar.
                         </p>
                       </div>
                       <div className="flex items-center gap-2">

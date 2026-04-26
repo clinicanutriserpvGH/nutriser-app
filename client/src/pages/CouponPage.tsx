@@ -3,10 +3,10 @@
  * Se abre cuando alguien hace clic en el link compartido por WhatsApp
  * URL: /cupon/:id
  */
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ArrowRight, Clock, Flame, AlertTriangle, Upload, CheckCircle, Tag, Wallet, Gift, User } from "lucide-react";
+import { Loader2, ArrowRight, Clock, Flame, AlertTriangle, Upload, CheckCircle, Tag, Wallet, Gift, User, Copy, Check } from "lucide-react";
 import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -19,6 +19,61 @@ export default function CouponPage() {
   const params = useParams<{ id: string }>();
   const couponId = parseInt(params.id || "0", 10);
   const { patient, isLoggedIn } = usePatientAuth();
+
+  // ── Compartir con cashback ──────────────────────────────────────────────────
+  const [linkCopied, setLinkCopied] = useState(false);
+  const pendingShareRef = useRef<number | null>(null); // promoId pendiente de cashback
+  const walletShareQuery = trpc.wallet.getMyWallet.useQuery(
+    { patientId: patient?.id || 0 },
+    { enabled: isLoggedIn && !!patient?.id }
+  );
+  const myWalletCode = walletShareQuery.data?.wallet?.walletNumber || null;
+
+  const buildShareUrl = useCallback((promoId: number) => {
+    const base = 'https://nutriserpv.com';
+    return myWalletCode
+      ? `${base}/cupon/${promoId}?ref=${myWalletCode}`
+      : `${base}/cupon/${promoId}`;
+  }, [myWalletCode]);
+
+  const handleShareWhatsApp = useCallback(() => {
+    if (!isLoggedIn || !myWalletCode) {
+      toast.info('Inicia sesión en tu Monedero para ganar cashback al compartir');
+    }
+    if (!couponId) return;
+    const shareUrl = buildShareUrl(couponId);
+    const title = (document.querySelector('h1')?.textContent || 'Oferta Nutriser').trim();
+    const text = `${shareUrl}\n\n🔥 *¡OFERTA ESPECIAL NUTRISER!* 🔥\n\n🎁 *${title}*\n\n✅ Adquiere tu cupón directamente en el link de arriba`;
+    if (isLoggedIn && myWalletCode) pendingShareRef.current = couponId;
+    window.location.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  }, [couponId, buildShareUrl, isLoggedIn, myWalletCode]);
+
+  const handleCopyLink = useCallback(() => {
+    if (!isLoggedIn || !myWalletCode) {
+      toast.info('Inicia sesión en tu Monedero para ganar cashback al compartir');
+    }
+    if (!couponId) return;
+    const shareUrl = buildShareUrl(couponId);
+    navigator.clipboard.writeText(shareUrl);
+    setLinkCopied(true);
+    if (isLoggedIn && myWalletCode) pendingShareRef.current = couponId;
+    toast.success('¡Link copiado! Pégalo en WhatsApp, Facebook o donde quieras 🎉');
+    setTimeout(() => setLinkCopied(false), 3000);
+  }, [couponId, buildShareUrl, isLoggedIn, myWalletCode]);
+
+  // Detectar regreso a la app tras compartir (visibilitychange)
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && pendingShareRef.current !== null) {
+        pendingShareRef.current = null;
+        // El cashback real se acredita cuando el admin aprueba la compra del referido
+        // Aquí solo mostramos confirmación visual
+        toast.success('¡Gracias por compartir! Cuando tu recomendado compre, recibirás cashback en tu Monedero 💰');
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
 
   // Estados principales
   const [showPaymentFlow, setShowPaymentFlow] = useState(false);
@@ -396,12 +451,42 @@ export default function CouponPage() {
                       {isSoldOut ? '❌ Agotado' : '🎁 ¡Lo Quiero! — Adquirir Cupón'}
                     </button>
 
-                    <p className="text-white/60 text-xs text-center mt-3">
+                     <p className="text-white/60 text-xs text-center mt-3">
                       * Previa cita requerida · Válido en Nutriser Aesthetic &amp; Nutrition
                     </p>
+
+                    {/* ═══ BANNER COMPARTIR CON CASHBACK ═══ */}
+                    <div className="mt-4 bg-black/30 border border-[#C5A55A]/40 rounded-xl px-4 py-3">
+                      <div className="flex items-start gap-2 mb-3">
+                        <span className="text-base flex-shrink-0">💰</span>
+                        <div>
+                          <p className="text-[#C5A55A] text-xs font-bold mb-0.5">¡Comparte y gana cashback en tu Monedero!</p>
+                          <p className="text-white/70 text-[10px] leading-snug">
+                            Comparte este cupón con tus contactos. Por cada recomendado que abra su Monedero con tu link y <strong className="text-white">compre un cupón</strong>, te acreditamos cashback automáticamente. Solo cuenta cuando compartes desde aquí.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={handleShareWhatsApp}
+                          className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all active:scale-95"
+                        >
+                          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current flex-shrink-0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                          WhatsApp
+                        </button>
+                        <button
+                          onClick={handleCopyLink}
+                          className="flex items-center justify-center gap-2 bg-[#C5A55A]/20 hover:bg-[#C5A55A]/30 border border-[#C5A55A]/50 text-[#C5A55A] font-bold text-xs py-2.5 px-3 rounded-xl transition-all active:scale-95"
+                        >
+                          {linkCopied ? <Check className="w-4 h-4 flex-shrink-0" /> : <Copy className="w-4 h-4 flex-shrink-0" />}
+                          {linkCopied ? '¡Copiado!' : 'Copiar link'}
+                        </button>
+                      </div>
+                    </div>
+                    {/* ═══════════════════════════════════════ */}
+
                   </div>
                 </div>
-
                 {/* Bottom CTA */}
                 <div className="mt-8 text-center">
                   <p className="text-[#666] text-sm mb-4">¿Quieres ver más ofertas?</p>

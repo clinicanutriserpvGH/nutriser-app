@@ -98,15 +98,7 @@ function AppContent() {
   // Auth del paciente para pasar isAuthenticated a los splashes
   const { isLoggedIn: patientIsLoggedIn } = usePatientAuth();
 
-  // ShopPromoSplash: mostrar una vez por sesión
-  // - Móvil: bloquea el Splash 0 hasta que el usuario lo cierre
-  // - Escritorio: aparece como modal flotante encima del sitio web
   const isDesktop = isDesktopDevice();
-  const [showShopPromo, setShowShopPromo] = useState<boolean>(() => {
-    if (isNoSplashRoute(location)) return false;
-    if (location !== "/") return false;
-    return !sessionStorage.getItem("nutriser_shop_promo_seen");
-  });
 
   const [splashState, setSplashState] = useState<SplashState>(() => {
     // Nunca mostrar splash en rutas de admin/internas
@@ -177,23 +169,8 @@ function AppContent() {
       {/* Música de fondo solo en la página principal del sitio web */}
       {splashState === "site" && location === "/" && <BackgroundMusic />}
 
-      {/* === MÓVIL: ShopPromoSplash bloquea el Splash 0 === */}
-      {!isDesktop && showShopPromo && (
-        <ShopPromoSplash
-          isAuthenticated={patientIsLoggedIn}
-          onClose={() => {
-            sessionStorage.setItem("nutriser_shop_promo_seen", "1");
-            setShowShopPromo(false);
-          }}
-          onGoToShop={() => {
-            sessionStorage.setItem("nutriser_shop_promo_seen", "1");
-            setShowShopPromo(false);
-            window.open("https://nutriserpv.com/memberships", "_blank");
-          }}
-        />
-      )}
-      {/* Splash 0 (solo móvil, cuando ShopPromoSplash ya fue cerrado) */}
-      {!isDesktop && !showShopPromo && splashState === "splash0" && (
+      {/* Splash 0 (solo móvil) */}
+      {!isDesktop && splashState === "splash0" && (
         <Splash0Entry
           onEnterNutriserWeb={() => { sessionStorage.setItem('nutriser_splash_seen', '1'); setSplashState('site'); }}
           onGoToWebsite={() => { sessionStorage.setItem('nutriser_splash_seen', '1'); setSplashState('site'); }}
@@ -201,25 +178,9 @@ function AppContent() {
         />
       )}
 
-      {/* Sitio principal (móvil: solo cuando splash cerrado; escritorio: siempre) */}
-      {(isDesktop || (!isDesktop && splashState === "site" && !showShopPromo)) && (
+      {/* Sitio principal */}
+      {(isDesktop || (!isDesktop && splashState === "site")) && (
         <Router />
-      )}
-
-      {/* === ESCRITORIO: Modal promocional encima del sitio web === */}
-      {isDesktop && showShopPromo && (
-        <ShopPromoSplash
-          isAuthenticated={patientIsLoggedIn}
-          onClose={() => {
-            sessionStorage.setItem("nutriser_shop_promo_seen", "1");
-            setShowShopPromo(false);
-          }}
-          onGoToShop={() => {
-            sessionStorage.setItem("nutriser_shop_promo_seen", "1");
-            setShowShopPromo(false);
-            window.open("https://nutriserpv.com/memberships", "_blank");
-          }}
-        />
       )}
     </SplashContext.Provider>
     </SplashThemeProvider>

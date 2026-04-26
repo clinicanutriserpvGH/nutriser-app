@@ -795,6 +795,58 @@ export const appRouter = router({
           }
         } catch (e) { console.warn('Wallet msg (coupon approve) error:', e); }
 
+        // Cashback por referido: si el comprador fue referido, acreditar al referidor
+        try {
+          const buyerPatient = await getPatientByEmail(purchase.buyerEmail);
+          if (buyerPatient?.referredByWalletCode && !buyerPatient.referralCashbackPaid) {
+            const referrerWallet = await getWalletByNumber(buyerPatient.referredByWalletCode);
+            if (referrerWallet && referrerWallet.isActive) {
+              const referrerPatient = await getPatientById(referrerWallet.patientId);
+              // Anti-fraude: no acreditar si es el mismo usuario
+              if (referrerPatient && referrerPatient.email.toLowerCase() !== purchase.buyerEmail.toLowerCase()) {
+                // Calcular 1.5% del precio de la promo
+                let cashbackCents = 2000; // $20 MXN por defecto
+                if (purchase.promotionId) {
+                  try {
+                    const promos = await getAllPromotionsForAdmin();
+                    const promo = promos.find(p => p.id === purchase.promotionId);
+                    if (promo?.price) {
+                      const priceNum = parseFloat(promo.price.replace(/[^0-9.]/g, ''));
+                      if (!isNaN(priceNum) && priceNum > 0) {
+                        cashbackCents = Math.round(priceNum * 0.015 * 100);
+                      }
+                    }
+                  } catch {}
+                }
+                // Acreditar cashback al referidor
+                await addWalletTransaction({
+                  walletId: referrerWallet.id,
+                  type: 'cashback',
+                  amount: cashbackCents,
+                  description: `🎁 Cashback por referido: tu recomendado compró "${promotionTitle}"`,
+                  referenceType: 'referral',
+                  createdBy: 'sistema',
+                });
+                // Marcar al comprador como cashback pagado
+                const db2 = await getDb();
+                if (db2) {
+                  const { patientAccounts: pa2 } = await import('../drizzle/schema');
+                  await db2.update(pa2).set({ referralCashbackPaid: true }).where(eq(pa2.id, buyerPatient.id));
+                }
+                // Notificar al referidor
+                await sendAdminNotification({
+                  walletId: referrerWallet.id,
+                  patientId: referrerWallet.patientId,
+                  title: '🎉 ¡Cashback por referido!',
+                  message: `Tu recomendado compró "${promotionTitle}". ¡Te acreditamos cashback en tu Monedero Nutriser!`,
+                  type: 'general',
+                  sentBy: 'sistema',
+                });
+              }
+            }
+          }
+        } catch (refErr) { console.warn('Referral cashback error:', refErr); }
+
         return { success: true, whatsappUrl, buyerPhone: purchase.buyerPhone };
       }),
 
@@ -868,16 +920,16 @@ export const appRouter = router({
       }),
 
     // ── Registrar share de cupón y acreditar cashback cuando nuevo usuario crea monedero ──
-    // Este procedure se llama cuando un nuevo usuario crea su monedero con código de referido
+    // Este procedure se llama cuando el admin APRUEBA la compra de un cupón de un referido.
     // El cashback se acredita al referidor SOLO si:
-    // 1. El nuevo usuario tiene email diferente al del referidor
-    // 2. El referidor tiene monedero activo
-    // 3. No se ha pagado cashback de referido antes para este paciente
+    // 1. El comprador del cupón tiene referredByWalletCode en su cuenta
+    // 2. El referidor tiene monedero activo y es diferente al comprador
+    // 3. No se ha pagado cashback de referido antes para este comprador
     processReferralCashback: publicProcedure
       .input(z.object({
-        newPatientEmail: z.string().email(),   // Email del nuevo usuario que se registró
-        referrerWalletCode: z.string().min(1), // Código del monedero del referidor (NUT-XXXX-XXXX)
-        promotionId: z.number().optional(),    // ID de la promo que compartó (opcional)
+        newPatientEmail: z.string().email(),   // Email del comprador del cupón
+        referrerWalletCode: z.string().min(1), // Código del monedero del referidor
+        promotionId: z.number().optional(),    // ID de la promo comprada
       }))
       .mutation(async ({ input }) => {
         try {
@@ -889,17 +941,17 @@ export const appRouter = router({
           const referrerPatient = await getPatientById(referrerWallet.patientId);
           if (!referrerPatient) return { success: false, reason: 'referrer_patient_not_found' };
 
-          // 3. Anti-fraude: el nuevo usuario NO puede ser el mismo que el referidor
+          // 3. Anti-fraude: el comprador NO puede ser el mismo que el referidor
           if (referrerPatient.email.toLowerCase() === input.newPatientEmail.toLowerCase()) {
             return { success: false, reason: 'same_user' };
           }
 
-          // 4. Verificar que el nuevo paciente existe y no ha recibido cashback de referido antes
+          // 4. Verificar que el comprador existe y no ha generado cashback de referido antes
           const newPatient = await getPatientByEmail(input.newPatientEmail);
           if (!newPatient) return { success: false, reason: 'new_patient_not_found' };
           if (newPatient.referralCashbackPaid) return { success: false, reason: 'already_paid' };
 
-          // 5. Calcular cashback: 2% del precio de la promo (o $20 MXN fijo si no hay promo)
+          // 5. Calcular cashback: 1.5% del precio de la promo (o $20 MXN fijo si no hay promo)
           let cashbackCents = 2000; // $20 MXN por defecto
           let promotionTitle = 'Cupón Nutriser';
           let promotionPrice = 0;
@@ -909,7 +961,6 @@ export const appRouter = router({
               const promos = await getAllPromotionsForAdmin();
               const promo = promos.find(p => p.id === input.promotionId);
               if (promo?.price) {
-                // Parsear precio (puede ser '$479 MXN' o '479')
                 const priceNum = parseFloat(promo.price.replace(/[^0-9.]/g, ''));
                 if (!isNaN(priceNum) && priceNum > 0) {
                   cashbackCents = Math.round(priceNum * 0.015 * 100); // 1.5% en centavos
@@ -925,7 +976,7 @@ export const appRouter = router({
             walletId: referrerWallet.id,
             type: 'cashback',
             amount: cashbackCents,
-            description: `🎁 Cashback por referido: nuevo usuario se registró con tu link de "${promotionTitle}"`,
+            description: `🎁 Cashback por referido: tu recomendado compró "${promotionTitle}"`,
             referenceType: 'referral',
             createdBy: 'sistema',
           });
@@ -941,11 +992,11 @@ export const appRouter = router({
             shareMethod: 'whatsapp',
           });
 
-          // 8. Marcar al nuevo paciente como "cashback de referido pagado" (evitar doble pago)
+          // 8. Marcar al comprador como "cashback de referido pagado" (evitar doble pago)
           const db = await getDb();
           if (db) {
             const { patientAccounts: pa } = await import('../drizzle/schema');
-            await db.update(pa).set({ referralCashbackPaid: true, referredByWalletCode: input.referrerWalletCode }).where(eq(pa.id, newPatient.id));
+            await db.update(pa).set({ referralCashbackPaid: true }).where(eq(pa.id, newPatient.id));
           }
 
           // 9. Notificar al referidor
@@ -954,7 +1005,7 @@ export const appRouter = router({
               walletId: referrerWallet.id,
               patientId: referrerWallet.patientId,
               title: '🎉 ¡Cashback por referido!',
-              message: `Alguien se registró con tu link de "${promotionTitle}". Te acreditamos $${(cashbackCents / 100).toFixed(2)} MXN en tu Monedero Nutriser.`,
+              message: `Tu recomendado compró "${promotionTitle}". ¡Te acreditamos cashback en tu Monedero Nutriser!`,
               type: 'general',
               sentBy: 'sistema',
             });
@@ -2687,6 +2738,7 @@ Devuelve un JSON con estos campos:
         password: z.string().min(6),
         phone: z.string().min(8),
         birthday: z.string().min(1, 'La fecha de nacimiento es obligatoria'),
+        referredByWalletCode: z.string().optional(), // Código de referido del URL ?ref=
       }))
       .mutation(async ({ input }) => {
         const existing = await getPatientByEmail(input.email);
@@ -2698,6 +2750,7 @@ Devuelve un JSON con estos campos:
           passwordHash,
           phone: input.phone,
           birthday: input.birthday,
+          referredByWalletCode: input.referredByWalletCode || null,
         });
         // Auto-crear monedero electrónico
         try {

@@ -259,6 +259,7 @@ export default function WalletPage() {
   const qrUrl = wallet ? `https://nutriserpv.com/c/${wallet.walletNumber}` : "";
 
   // ── Planes de Pago a Plazos ──
+  // Usar walletNumber si existe, si no usar walletQuery directamente
   const installmentPlansQuery = trpc.installments.getMyPlans.useQuery(
     { walletNumber: wallet?.walletNumber || "" },
     { enabled: isLoggedIn && !!wallet?.walletNumber }

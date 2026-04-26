@@ -1294,7 +1294,9 @@ export default function AdminDashboard() {
             const isActive = activeTab === tab.value;
             let badge: number | null = null;
             // subscribers tab badge removed (couponSubscribers concept eliminated)
-            if (tab.value === 'servicePurchases' && servicePurchases) badge = servicePurchases.filter(p => p.status === 'pending').length;
+            if (tab.value === 'servicePurchases' && servicePurchases) badge = servicePurchases.filter((p: any) => p.status === 'pending' && p.purchaseType !== 'package').length;
+            if (tab.value === 'memberships' && servicePurchases) badge = servicePurchases.filter((p: any) => p.status === 'pending' && p.purchaseType === 'package').length;
+            if (tab.value === 'giftPurchases' && giftPurchases) badge = (giftPurchases as any[]).filter((p: any) => p.status === 'pending').length;
             if (tab.value === 'productPurchases' && productPurchases) badge = (productPurchases as any[]).filter(p => p.status === 'pending').length;
             return (
               <button
@@ -1325,27 +1327,9 @@ export default function AdminDashboard() {
           <TabsContent value="memberships" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-[#C5A55A]">Solicitudes de Paquetes</CardTitle>
-                    <CardDescription>Gestiona las solicitudes de paquetes de los clientes</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                      onClick={handleVerifyAll}
-                    >
-                      Verificar Todo
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                      onClick={handleDeleteAll}
-                    >
-                      Eliminar Todo
-                    </Button>
-                  </div>
+                <div>
+                  <CardTitle className="text-[#C5A55A]">Paquetes Comprados</CardTitle>
+                  <CardDescription>Solicitudes de compra de paquetes — autoriza o rechaza cada una</CardDescription>
                 </div>
               </CardHeader>
               <CardContent>
@@ -1353,10 +1337,11 @@ export default function AdminDashboard() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-[#C5A55A]/20">
-                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Cliente</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Comprador</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Email</th>
-                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Programa</th>
-                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Código de Acceso</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Teléfono</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Paquete</th>
+                        <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Código</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Estado</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Comprobante</th>
                         <th className="text-left py-3 px-4 text-[#C5A55A] font-bold">Acciones</th>
@@ -1364,79 +1349,67 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {memberships && memberships.length > 0 ? (
-                        memberships.map((membership) => (
-                          <tr key={membership.id} className="border-b border-[#C5A55A]/10 hover:bg-[#C5A55A]/5">
-                            <td className="py-3 px-4 font-semibold">{membership.clientName}</td>
-                            <td className="py-3 px-4">{membership.clientEmail}</td>
-                            <td className="py-3 px-4 capitalize">
-                              {membership.programType === "basic" ? "Básico" : "Premium"}
+                      {servicePurchases && servicePurchases.filter((sp: any) => sp.purchaseType === 'package').length > 0 ? (
+                        servicePurchases.filter((sp: any) => sp.purchaseType === 'package').map((sp: any) => (
+                          <tr key={sp.id} className={`border-b border-[#C5A55A]/10 hover:bg-[#C5A55A]/5 ${sp.status === 'pending' ? 'bg-yellow-50' : ''}`}>
+                            <td className="py-3 px-4 font-semibold">{sp.buyerName}</td>
+                            <td className="py-3 px-4">{sp.buyerEmail}</td>
+                            <td className="py-3 px-4">{sp.buyerPhone || '-'}</td>
+                            <td className="py-3 px-4">{sp.serviceName}</td>
+                            <td className="py-3 px-4">
+                              <span className="font-mono text-xs bg-[#FAF7F2] border border-[#C5A55A]/30 px-2 py-1 rounded">{sp.serviceCode || '-'}</span>
                             </td>
                             <td className="py-3 px-4">
-                              {membership.accessCode ? (
-                                <span className="font-mono text-sm font-bold tracking-widest bg-[#C5A55A]/10 border border-[#C5A55A]/30 text-[#C5A55A] px-2 py-1 rounded">
-                                  {membership.accessCode}
-                                </span>
-                              ) : (
-                                <span className="text-xs text-[#999] italic">Sin código</span>
-                              )}
-                            </td>
-                            <td className="py-3 px-4">
-                              <span
-                                className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                  membership.status === "verified"
-                                    ? "bg-green-100 text-green-700"
-                                    : membership.status === "pending"
-                                      ? "bg-yellow-100 text-yellow-700"
-                                      : "bg-red-100 text-red-700"
-                                }`}
-                              >
-                                {membership.status === "verified"
-                                  ? "Verificada"
-                                  : membership.status === "pending"
-                                    ? "Pendiente"
-                                    : "Rechazada"}
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                sp.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                sp.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {sp.status === 'approved' ? '✅ Aprobado' : sp.status === 'pending' ? '⏳ Pendiente' : '❌ Rechazado'}
                               </span>
                             </td>
                             <td className="py-3 px-4">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                onClick={() => handleViewProof(membership.id)}
-                              >
-                                Ver
-                              </Button>
+                              {sp.proofUrl && (
+                                <a href={sp.proofUrl} target="_blank" rel="noopener noreferrer">
+                                  <Button size="sm" variant="outline" className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200">
+                                    <Eye className="w-3.5 h-3.5 mr-1" /> Ver
+                                  </Button>
+                                </a>
+                              )}
                             </td>
-                            <td className="py-3 px-4 flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs bg-green-100 text-green-700 hover:bg-green-200"
-                                onClick={() => handleVerifyMembership(membership.id)}
-                                disabled={membership.status === "verified"}
-                              >
-                                Verificar
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs bg-red-100 text-red-700 hover:bg-red-200"
-                                onClick={() => handleDeleteMembership(membership.id)}
-                              >
-                                Eliminar
-                              </Button>
+                            <td className="py-3 px-4">
+                              <div className="flex gap-1.5 flex-wrap">
+                                {sp.status === 'pending' && (
+                                  <>
+                                    <Button size="sm" variant="outline" className="text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                                      onClick={() => approveServiceMutation.mutate({ id: sp.id })}
+                                      disabled={approveServiceMutation.isPending}>
+                                      Aprobar
+                                    </Button>
+                                    <Button size="sm" variant="outline" className="text-xs bg-red-100 text-red-700 hover:bg-red-200"
+                                      onClick={() => rejectServiceMutation.mutate({ id: sp.id })}
+                                      disabled={rejectServiceMutation.isPending}>
+                                      Rechazar
+                                    </Button>
+                                  </>
+                                )}
+                                {sp.status === 'approved' && (
+                                  <Button size="sm" variant="outline" className="text-xs bg-purple-100 text-purple-700 hover:bg-purple-200"
+                                    onClick={() => retryCashbackMutation.mutate({ id: sp.id })}
+                                    disabled={retryCashbackMutation.isPending}>
+                                    💰 Cashback
+                                  </Button>
+                                )}
+                              </div>
                             </td>
                             <td className="py-3 px-4 text-xs text-[#999]">
-                              {new Date(membership.createdAt).toLocaleDateString()}
+                              {new Date(sp.createdAt).toLocaleDateString()}
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={8} className="py-8 text-center text-[#999]">
-                            No hay membresías
-                          </td>
+                          <td colSpan={9} className="py-8 text-center text-[#999]">No hay paquetes comprados</td>
                         </tr>
                       )}
                     </tbody>
@@ -1445,8 +1418,7 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* Appointments Tab */}
+                    {/* Appointments Tab */}
           <TabsContent value="appointments" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>

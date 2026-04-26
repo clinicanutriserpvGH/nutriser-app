@@ -942,7 +942,7 @@ export default function Memberships() {
 
   // ─── Render ─────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen transition-colors duration-500" style={{ background: isLight ? '#f5f5f5' : '#1A1A1A', paddingTop: "calc(env(safe-area-inset-top, 0px) + 3.5rem)" }}>
+    <div className="min-h-screen" style={{ background: '#f5f5f5', paddingTop: "calc(env(safe-area-inset-top, 0px) + 3.5rem)" }}>
       {/* Botón Regresar inteligente:
           - Wishlist → vuelve a Tratamientos
           - Categoría específica (no "all") → vuelve a "all"

@@ -2743,6 +2743,18 @@ Devuelve un JSON con estos campos:
       .mutation(async ({ input }) => {
         const existing = await getPatientByEmail(input.email);
         if (existing) throw new TRPCError({ code: 'CONFLICT', message: 'Ya existe una cuenta con ese correo.' });
+        // Anti-trampa: verificar que el referido no sea el mismo usuario
+        let validReferralCode: string | null = input.referredByWalletCode || null;
+        if (validReferralCode) {
+          const referrerWallet = await getWalletByNumber(validReferralCode);
+          if (referrerWallet) {
+            const referrerPatient = await getPatientById(referrerWallet.patientId);
+            if (referrerPatient && referrerPatient.email.toLowerCase() === input.email.toLowerCase()) {
+              // El usuario se está refiriendo a sí mismo — ignorar el código
+              validReferralCode = null;
+            }
+          }
+        }
         const passwordHash = await bcrypt.hash(input.password, 10);
         const patient = await createPatientAccount({
           name: input.name,
@@ -2750,7 +2762,7 @@ Devuelve un JSON con estos campos:
           passwordHash,
           phone: input.phone,
           birthday: input.birthday,
-          referredByWalletCode: input.referredByWalletCode || null,
+          referredByWalletCode: validReferralCode,
         });
         // Auto-crear monedero electrónico
         try {
@@ -4963,6 +4975,67 @@ Devuelve un JSON con estos campos:
         }
         await deleteMembershipPackage(input.id);
         return { success: true };
+      }),
+  }),
+  // ── Referidos de Cupones ─────────────────────────────────────────────────────
+  couponReferrals: router({
+    // Admin: estadísticas de referidos por monedero
+    getStats: publicProcedure
+      .input(z.object({ sessionToken: z.string() }))
+      .query(async ({ input }) => {
+        const admin = await getAdminBySessionToken(input.sessionToken);
+        if (!admin) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Sesión inválida' });
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB no disponible' });
+        const { patientAccounts: pa, wallets: wt, walletTransactions: wtx } = await import('../drizzle/schema');
+        const { sql: sqlFn, eq: eqFn } = await import('drizzle-orm');
+        // Obtener todos los monederos con sus pacientes (join por patientId)
+        const allWallets = await db.select({
+          walletId: wt.id,
+          walletNumber: wt.walletNumber,
+          patientId: wt.patientId,
+          patientName: pa.name,
+          patientEmail: pa.email,
+        })
+        .from(wt)
+        .leftJoin(pa, eqFn(pa.id, wt.patientId));
+        // Para cada monedero, contar referidos y cashback ganado
+        const statsAll = await Promise.all(allWallets.map(async (w: { walletId: number; walletNumber: string; patientId: number; patientName: string | null; patientEmail: string | null }) => {
+          // Referidos registrados: pacientes con referredByWalletCode = walletNumber
+          const referredUsers = await db.select({
+            id: pa.id,
+            name: pa.name,
+            email: pa.email,
+            referralCashbackPaid: pa.referralCashbackPaid,
+            createdAt: pa.createdAt,
+          })
+          .from(pa)
+          .where(eqFn(pa.referredByWalletCode, w.walletNumber));
+          // Cashback total ganado por referidos (type='cashback', referenceType='referral')
+          const cashbackTxs = await db.select({ amount: wtx.amount })
+            .from(wtx)
+            .where(sqlFn`${wtx.walletId} = ${w.walletId} AND ${wtx.type} = 'cashback' AND ${wtx.referenceType} = 'referral'`);
+          const totalCashback = cashbackTxs.reduce((sum: number, tx: { amount: number }) => sum + (tx.amount || 0), 0);
+          const referidosQueCompraron = referredUsers.filter((u: { referralCashbackPaid: boolean }) => u.referralCashbackPaid).length;
+          return {
+            walletId: w.walletId,
+            walletNumber: w.walletNumber,
+            patientName: w.patientName ?? 'Sin nombre',
+            patientEmail: w.patientEmail ?? '',
+            totalReferidos: referredUsers.length,
+            referidosQueCompraron,
+            totalCashbackGanado: totalCashback,
+            referidos: referredUsers.map((u: { id: number; name: string; email: string; referralCashbackPaid: boolean; createdAt: Date }) => ({
+              id: u.id,
+              name: u.name,
+              email: u.email,
+              compro: u.referralCashbackPaid,
+              fechaRegistro: u.createdAt,
+            })),
+          };
+        }));
+        // Solo retornar monederos con al menos 1 referido, ordenados por cashback ganado
+        return statsAll.filter((s: { totalReferidos: number }) => s.totalReferidos > 0).sort((a: { totalCashbackGanado: number }, b: { totalCashbackGanado: number }) => b.totalCashbackGanado - a.totalCashbackGanado);
       }),
   }),
 });

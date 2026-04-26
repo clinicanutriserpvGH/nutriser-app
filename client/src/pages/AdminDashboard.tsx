@@ -8,6 +8,7 @@ import AdminWalletTab from "@/components/AdminWalletTab";
 import AdminPackages from "@/pages/AdminPackages";
 import AdminSecurityTab from "@/components/AdminSecurityTab";
 import AdminSiteConfigTab from "@/components/AdminSiteConfigTab";
+import AdminCouponReferralsTab from "@/components/AdminCouponReferralsTab";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +39,8 @@ const ADMIN_TABS = [
   { value: 'splashAds', label: 'Aparador de Publicidad', emoji: '\uD83D\uDCF8' },
   { value: 'storeBanners', label: 'Aparador Tienda Principal', emoji: '\uD83D\uDECD\uFE0F' },
   { value: 'security', label: 'Seguridad', emoji: '\uD83D\uDD10' },
-  { value: 'siteConfig', label: 'Configuración del Sitio', emoji: '\u2699️' },
+  { value: 'siteConfig', label: 'Configuración del Sitio', emoji: '⚙️' },
+  { value: 'couponReferrals', label: 'Referidos de Cupones', emoji: '🔗' },
 ] as const;
 type AdminTabValue = typeof ADMIN_TABS[number]['value'];
 
@@ -4202,6 +4204,10 @@ export default function AdminDashboard() {
           {/* Configuración del Sitio Tab */}
           <TabsContent value="siteConfig" className="space-y-4">
             <AdminSiteConfigTab />
+          </TabsContent>
+          {/* ═══ REFERIDOS DE CUPONES ═══ */}
+          <TabsContent value="couponReferrals" className="space-y-4">
+            <AdminCouponReferralsTab isAuthenticated={isAuthenticated} />
           </TabsContent>
 
         </Tabs>

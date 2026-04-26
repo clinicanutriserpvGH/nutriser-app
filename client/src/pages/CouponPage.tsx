@@ -464,8 +464,8 @@ export default function CouponPage() {
                       <div className="flex items-start gap-2 mb-3">
                         <span className="text-base flex-shrink-0">💰</span>
                         <div>
-                          <p className="text-[#C5A55A] text-xs font-bold mb-0.5">¡Comparte y gana cashback en tu Monedero!</p>
-                          <p className="text-white/70 text-[10px] leading-snug">
+                          <p className="text-[#C5A55A] text-sm font-bold mb-1">¡Comparte y gana cashback en tu Monedero!</p>
+                          <p className="text-white/80 text-sm leading-snug">
                             Comparte este cupón con tus contactos. Por cada recomendado que abra su Monedero con tu link y <strong className="text-white">compre un cupón</strong>, te acreditamos cashback automáticamente. Solo cuenta cuando compartes desde aquí.
                           </p>
                         </div>
@@ -706,9 +706,9 @@ export default function CouponPage() {
                                     : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
                                 }`}
                               >
-                                <span className="text-xl">💵</span>
-                                <span className="text-xs font-bold">Efectivo</span>
-                                <span className="text-[10px] text-center leading-tight opacity-70">Paga en clínica</span>
+                                <span className="text-xl">🏥</span>
+                                <span className="text-xs font-bold">Pagar en clínica</span>
+                                <span className="text-[10px] text-center leading-tight opacity-70">Paga al llegar</span>
                               </button>
                             </div>
                             {paymentMethod === 'cash' && !walletData?.id && (

@@ -802,7 +802,7 @@ export default function WalletPage() {
                     <div className="space-y-3">
                       {myPurchases!.products.map((prod: any) => (
                         <div key={prod.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
-                          prod.status === 'verified' ? 'border-green-200' :
+                          (prod.status === 'verified' || prod.status === 'approved') ? 'border-green-200' :
                           prod.status === 'rejected' ? 'border-red-200' : 'border-yellow-200'
                         }`}>
                           <div className="flex items-start justify-between gap-2">
@@ -812,10 +812,10 @@ export default function WalletPage() {
                               <p className="text-gray-400 text-xs mt-0.5">{new Date(prod.createdAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                             </div>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                              prod.status === 'verified' ? 'bg-green-50 text-green-700' :
+                              (prod.status === 'verified' || prod.status === 'approved') ? 'bg-green-50 text-green-700' :
                               prod.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
                             }`}>
-                              {prod.status === 'verified' ? (lang === 'EN' ? 'Verified' : 'Verificado') : prod.status === 'pending' ? (lang === 'EN' ? 'Pending' : 'Pendiente') : (lang === 'EN' ? 'Rejected' : 'Rechazado')}
+                              {(prod.status === 'verified' || prod.status === 'approved') ? (lang === 'EN' ? 'Approved' : 'Aprobado') : prod.status === 'pending' ? (lang === 'EN' ? 'Pending' : 'Pendiente') : (lang === 'EN' ? 'Rejected' : 'Rechazado')}
                             </span>
                           </div>
                           {prod.purchaseCode && (

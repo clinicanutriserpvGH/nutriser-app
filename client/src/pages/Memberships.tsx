@@ -353,9 +353,8 @@ export default function Memberships() {
     !contractSigned &&
     contractStatusQuery.data?.contractRequired === true &&
     !contractStatusQuery.data?.consentAcceptedAt;
-  const [showPromoSplash, setShowPromoSplash] = useState(
-    () => !sessionStorage.getItem("nutriser_tienda_promo_dismissed")
-  );
+  // DESACTIVADO: cupones solo en sección Cupones directamente
+  const [showPromoSplash, setShowPromoSplash] = useState(false);
   const [pendingCartItem] = useState<Omit<CartItem, "qty"> | null>(null); // reservado para uso futuro
 
   // ─── Modal de acción al hacer clic en banner ──────────────────────────────────────

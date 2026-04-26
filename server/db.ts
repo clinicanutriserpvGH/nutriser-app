@@ -2249,6 +2249,22 @@ export async function adminResetWallet(walletId: number, adminEmail: string): Pr
     await db.delete(installmentPayments).where(eq(installmentPayments.planId, plan.id));
   }
   await db.delete(installmentPlans).where(eq(installmentPlans.walletId, walletId));
+  // 3.5. Borrar todas las compras asociadas al monedero
+  const walletData = await db.select().from(wallets).where(eq(wallets.id, walletId)).limit(1);
+  if (walletData.length > 0 && walletData[0].patientId) {
+    const patientId = walletData[0].patientId;
+    // Obtener email del paciente
+    const patientData = await db.select().from(patientAccounts).where(eq(patientAccounts.id, patientId)).limit(1);
+    const patientEmail = patientData.length > 0 ? patientData[0].email : null;
+    // Borrar servicios comprados (paquetes y servicios)
+    if (patientEmail) {
+      await db.delete(servicePurchases).where(eq(servicePurchases.patientEmail, patientEmail)).catch(() => {});
+      // Borrar productos comprados
+      await db.delete(productPurchases).where(eq(productPurchases.patientEmail, patientEmail)).catch(() => {});
+      // Borrar libros comprados
+      await db.delete(ebookPurchases).where(eq(ebookPurchases.patientEmail, patientEmail)).catch(() => {});
+    }
+  }
   // 4. Resetear el tracker de consultas de lealtad
   await db.update(loyaltyTracker)
     .set({ nutritionConsultations: 0, freeConsultationsEarned: 0, freeConsultationsUsed: 0 })

@@ -30,6 +30,7 @@ import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
 import { adminCredentials, pushSubscriptions } from "../drizzle/schema";
 import { getDb } from "./db";
+import { membershipCoupons } from "../drizzle/schema";
 
 // ── Helper: enviar correo + push al paciente cuando el admin manda notificación ──
 async function sendAdminNotifEmailAndPush(
@@ -3932,6 +3933,35 @@ Devuelve un JSON con estos campos:
         const key = `wallet-pdfs/${Date.now()}-${input.fileName}`;
         const { url } = await storagePut(key, buffer, 'application/pdf');
         return { url };
+      }),
+    // Borrar una compra individual (admin)
+    adminDeletePurchase: publicProcedure
+      .input(z.object({
+        purchaseId: z.number(),
+        purchaseType: z.enum(['service', 'coupon', 'product', 'ebook']),
+        adminPassword: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const currentPassphrase = await getSystemConfig('adminPassphrase');
+        if (!currentPassphrase || input.adminPassword.trim().toLowerCase() !== currentPassphrase.trim().toLowerCase()) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Palabra clave incorrecta' });
+        }
+        try {
+          if (input.purchaseType === 'service') {
+            await deleteServicePurchase(input.purchaseId);
+          } else if (input.purchaseType === 'coupon') {
+            const db = await getDb();
+            if (db) await db.delete(membershipCoupons).where(eq(membershipCoupons.id, input.purchaseId));
+          } else if (input.purchaseType === 'product') {
+            await deleteProductPurchase(input.purchaseId);
+          } else if (input.purchaseType === 'ebook') {
+            await deleteEbookPurchase(input.purchaseId);
+          }
+          return { ok: true };
+        } catch (e) {
+          console.error('[adminDeletePurchase] Error:', e);
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Error al borrar compra' });
+        }
       }),
   }),
   // ─── Analítica de Comportamiento ─────────────────────────────────────────────

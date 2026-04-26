@@ -786,8 +786,19 @@ export async function getAllProductPurchases() {
 export async function updateProductPurchaseStatus(id: number, status: 'pending' | 'approved' | 'verified' | 'rejected') {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(productPurchases).set({ status }).where(eq(productPurchases.id, id));
-  return { success: true };
+  let purchaseCode: string | undefined;
+  if (status === 'approved') {
+    // Generar código solo al aprobar
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const part = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    purchaseCode = `NUT-PRD-${part}`;
+  }
+  const updateData: any = { status };
+  if (purchaseCode) updateData.purchaseCode = purchaseCode;
+  await db.update(productPurchases).set(updateData).where(eq(productPurchases.id, id));
+  // Retornar el purchaseCode para que el router pueda notificar al paciente
+  const updated = await db.select().from(productPurchases).where(eq(productPurchases.id, id)).limit(1);
+  return { success: true, purchaseCode: updated[0]?.purchaseCode };
 }
 export async function deleteProductPurchase(id: number) {
   const db = await getDb();

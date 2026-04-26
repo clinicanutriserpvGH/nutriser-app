@@ -170,7 +170,7 @@ export default function Store() {
 
   const purchaseMutation = trpc.productPurchases.create.useMutation({
     onSuccess: (data) => {
-      setSuccessCode(data.purchaseCode);
+      setSuccessCode(data.purchaseCode ?? "PENDIENTE");
       setIsSubmitting(false);
     },
     onError: (err) => {

@@ -180,3 +180,103 @@ export async function sendServicePurchaseApprovedEmail(
     return false;
   }
 }
+
+// ─── Notificación al paciente: comprobante recibido (pendiente de aprobación) ─
+
+export async function sendPurchaseReceivedEmail(
+  buyerEmail: string,
+  buyerName: string,
+  itemName: string
+) {
+  const transporter = getEmailTransporter();
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f6f0;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; padding: 30px 0 10px;">
+            <h1 style="color: #C5A55A; font-size: 28px; margin: 0;">Nutriser</h1>
+            <p style="color: #888; font-size: 13px; margin: 4px 0 0;">Aesthetic &amp; Nutrition</p>
+          </div>
+          <p>Hola <strong>${buyerName}</strong>,</p>
+          <p>Recibimos tu comprobante de pago. Estamos revisando tu compra:</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fff8e1; border-radius: 12px; border: 2px solid #C5A55A; margin: 24px 0;">
+            <tr><td style="padding: 24px; text-align: center;">
+              <p style="color: #C5A55A; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 8px;">Pendiente de Aprobacion</p>
+              <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px;">${itemName}</h2>
+              <p style="color: #666; font-size: 13px; margin: 0;">Te avisaremos cuando sea aprobada. Solo presenta tu <strong>Monedero Nutriser</strong> en la clinica.</p>
+            </td></tr>
+          </table>
+          <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px 16px; border-radius: 4px; margin: 16px 0;">
+            <p style="margin: 0; font-size: 13px; color: #2e7d32;">
+              Dudas? Llama al <strong>322 450 3257</strong> o WhatsApp: <strong>+52 322 100 7799</strong>
+            </p>
+          </div>
+          <p style="font-size: 11px; color: #aaa; text-align: center; margin-top: 24px;">Nutriser - Aesthetic &amp; Nutrition - nutriserpv.com</p>
+        </div>
+      </body>
+    </html>
+  `;
+  try {
+    await transporter.sendMail({
+      from: `"Nutriser" <${ENV.gmailUser}>`,
+      to: buyerEmail,
+      subject: `Comprobante recibido: ${itemName} - Nutriser`,
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending purchase received email:', error);
+    return false;
+  }
+}
+
+// ─── Notificación al paciente: compra aprobada (sin código, solo monedero) ───
+
+export async function sendPurchaseApprovedEmail(
+  buyerEmail: string,
+  buyerName: string,
+  itemName: string
+) {
+  const transporter = getEmailTransporter();
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f6f0;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; padding: 30px 0 10px;">
+            <h1 style="color: #C5A55A; font-size: 28px; margin: 0;">Nutriser</h1>
+            <p style="color: #888; font-size: 13px; margin: 4px 0 0;">Aesthetic &amp; Nutrition</p>
+          </div>
+          <p>Hola <strong>${buyerName}</strong>,</p>
+          <p>Tu compra ha sido <strong style="color: #2e7d32;">aprobada</strong>!</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a1a1a; border-radius: 16px; border: 2px solid #C5A55A; margin: 24px 0;">
+            <tr><td style="padding: 28px; text-align: center;">
+              <p style="color: #C5A55A; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 8px;">Compra Aprobada</p>
+              <h2 style="color: #ffffff; font-size: 20px; margin: 0 0 12px;">${itemName}</h2>
+              <hr style="border: none; border-top: 1px dashed #C5A55A; margin: 12px 0;">
+              <p style="color: #aaaaaa; font-size: 14px; margin: 8px 0 0;">Solo presenta tu <strong style="color: #C5A55A;">Monedero Nutriser</strong> al llegar a la clinica.</p>
+            </td></tr>
+          </table>
+          <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px 16px; border-radius: 4px; margin: 16px 0;">
+            <p style="margin: 0; font-size: 13px; color: #2e7d32;">
+              Agenda tu cita: <strong>322 450 3257</strong> o WhatsApp: <strong>+52 322 100 7799</strong>
+            </p>
+          </div>
+          <p style="font-size: 11px; color: #aaa; text-align: center; margin-top: 24px;">Nutriser - Aesthetic &amp; Nutrition - nutriserpv.com</p>
+        </div>
+      </body>
+    </html>
+  `;
+  try {
+    await transporter.sendMail({
+      from: `"Nutriser" <${ENV.gmailUser}>`,
+      to: buyerEmail,
+      subject: `Tu compra fue aprobada! ${itemName} - Nutriser`,
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending purchase approved email:', error);
+    return false;
+  }
+}
+

@@ -766,7 +766,7 @@ export default function Memberships() {
     onError: (err) => { toast.error("Error: " + err.message); setIsSubmitting(false); },
   });
   const productPurchaseMutation = trpc.productPurchases.create.useMutation({
-    onSuccess: (data) => { setSuccessCode(data.purchaseCode); setIsSubmitting(false); },
+    onSuccess: (data) => { setSuccessCode(data.purchaseCode ?? "PENDIENTE"); setIsSubmitting(false); },
     onError: (err) => { toast.error("Error: " + err.message); setIsSubmitting(false); },
   });
   const ebookPurchaseMutation = trpc.ebook.purchase.useMutation({

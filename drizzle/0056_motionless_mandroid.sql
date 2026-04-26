@@ -1,0 +1,1 @@
+ALTER TABLE `productPurchases` MODIFY COLUMN `purchaseCode` varchar(30);

@@ -741,13 +741,10 @@ export default function WalletPage() {
                               {svc.status === 'approved' ? t('statusActive', lang) : svc.status === 'pending' ? t('statusPending', lang) : t('statusRejected', lang)}
                             </span>
                           </div>
-                          {svc.status === 'approved' && svc.serviceCode && (
-                            <div className="mt-2 bg-gray-50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                              <span className="text-gray-400 text-xs">{t('codeLabel', lang)}</span>
-                              <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{svc.serviceCode}</span>
-                            </div>
+                          {svc.status === 'approved' && (
+                            <p className="text-green-700 text-xs mt-2 font-medium">Presenta tu Monedero Nutriser en clínica – ¡listo!</p>
                           )}
-                          {svc.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">{t('pendingServiceReview', lang)}</p>}
+                          {svc.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">Estamos revisando tu comprobante, te avisamos pronto.</p>}
                         </div>
                       ))}
                     </div>
@@ -818,12 +815,10 @@ export default function WalletPage() {
                               {(prod.status === 'verified' || prod.status === 'approved') ? (lang === 'EN' ? 'Approved' : 'Aprobado') : prod.status === 'pending' ? (lang === 'EN' ? 'Pending' : 'Pendiente') : (lang === 'EN' ? 'Rejected' : 'Rechazado')}
                             </span>
                           </div>
-                          {prod.purchaseCode && (
-                            <div className="mt-2 bg-gray-50 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                              <span className="text-gray-400 text-xs">{t('codeLabel', lang)}</span>
-                              <span className="text-[#C5A55A] font-mono font-black text-sm tracking-widest">{prod.purchaseCode}</span>
-                            </div>
+                          {(prod.status === 'approved' || prod.status === 'verified') && (
+                            <p className="text-green-700 text-xs mt-2 font-medium">Presenta tu Monedero Nutriser en clínica – ¡listo!</p>
                           )}
+                          {prod.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">Estamos revisando tu comprobante, te avisamos pronto.</p>}
                         </div>
                       ))}
                     </div>

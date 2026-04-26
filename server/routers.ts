@@ -9,7 +9,7 @@ import { notifyOwner } from "./_core/notification";
 import { invokeLLM } from "./_core/llm";
 import { ENV } from "./_core/env";
 import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail, sendPurchaseReceiptEmail } from "./_core/email";
-import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail } from './_core/email_extra';
+import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail, sendPurchaseReceivedEmail, sendPurchaseApprovedEmail } from './_core/email_extra';
 import { getAllProducts, getAllActiveProducts, getProductById, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
 import { getApprovedSuggestions, getAllSuggestions, getPendingSuggestions, createTopicSuggestion, approveSuggestion, rejectSuggestion, markSuggestionPublished, deleteSuggestion, voteForSuggestion, hasVoted } from './db';
@@ -1394,7 +1394,7 @@ export const appRouter = router({
           buyerEmail: input.buyerEmail,
           buyerPhone: input.buyerPhone,
           proofUrl: url,
-          serviceCode: '', // placeholder, assigned on approval
+          serviceCode: undefined, // assigned on approval
           status: 'pending',
           discountCode: input.discountCode,
           discountPercent: input.discountPercent,
@@ -1416,6 +1416,23 @@ export const appRouter = router({
         } catch (e) {
           console.error('Error sending service purchase notification:', e);
         }
+
+        // Notificar al paciente: comprobante recibido
+        try {
+          await sendPurchaseReceivedEmail(input.buyerEmail, input.buyerName, input.serviceName);
+        } catch (e) { console.warn('Email received (service) error:', e); }
+        try {
+          const patientEmail = input.patientEmail || input.buyerEmail;
+          const patient = await getPatientByEmail(patientEmail);
+          if (patient?.pushSubscription) {
+            await sendPushToPatient(
+              patient.pushSubscription,
+              'Comprobante recibido',
+              `Tu comprobante de ${input.serviceName} fue recibido. Te avisamos cuando sea aprobado.`,
+              '/monedero'
+            );
+          }
+        } catch (e) { console.warn('Push received (service) error:', e); }
 
         // Return success WITHOUT the code — user must wait for admin approval
         return { success: true };
@@ -1470,17 +1487,22 @@ export const appRouter = router({
           console.warn('Error adding cashback to wallet:', e);
         }
 
-        // Send approval email to buyer WITH the code
+        // Notificar al paciente: compra aprobada (sin código, solo monedero)
         try {
-          await sendServicePurchaseApprovedEmail(
-            purchase.buyerEmail,
-            purchase.buyerName,
-            purchase.serviceName,
-            serviceCode
-          );
-        } catch (e) {
-          console.error('Error sending service approval email:', e);
-        }
+          await sendPurchaseApprovedEmail(purchase.buyerEmail, purchase.buyerName, purchase.serviceName);
+        } catch (e) { console.warn('Email approved (service) error:', e); }
+        try {
+          const patientEmail = purchase.patientEmail || purchase.buyerEmail;
+          const patient = await getPatientByEmail(patientEmail);
+          if (patient?.pushSubscription) {
+            await sendPushToPatient(
+              patient.pushSubscription,
+              '¡Compra aprobada!',
+              `Tu compra de ${purchase.serviceName} fue aprobada. Presenta tu Monedero Nutriser en clínica.`,
+              '/monedero'
+            );
+          }
+        } catch (e) { console.warn('Push approved (service) error:', e); }
 
         return { success: true };
       }),
@@ -1710,10 +1732,7 @@ Devuelve un JSON con estos campos:
         discountPercent: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        const part = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-        const purchaseCode = `NUT-PRD-${part}`;
-
+        // NOTE: purchaseCode is NOT generated here — it is generated when admin approves
         let proofUrl: string | undefined;
         if (input.paymentMethod === 'transfer' && input.proofData && input.proofMimeType) {
           const buffer = Buffer.from(input.proofData, 'base64');
@@ -1756,7 +1775,7 @@ Devuelve un JSON con estos campos:
           quantity: input.quantity,
           proofUrl: proofUrl || null,
           paymentMethod: input.paymentMethod,
-          purchaseCode,
+          purchaseCode: undefined, // assigned on approval
           status: 'pending',
           walletDiscount: walletDiscountAmt > 0 ? String(walletDiscountAmt) : undefined,
           patientEmail: input.patientEmail,
@@ -1770,11 +1789,30 @@ Devuelve un JSON con estos campos:
           const payLabel = input.paymentMethod === 'cash' ? 'PAGO EN CLÍNICA' : 'COMPROBANTE ENVIADO';
           await notifyOwner({
             title: `📦 Nueva compra de producto: ${input.productName}`,
-            content: `${input.buyerName} (${input.buyerEmail}) solicitó ${input.quantity}x ${input.productName}. Método: ${payLabel}. Código: ${purchaseCode}`,
+            content: `${input.buyerName} (${input.buyerEmail}) solicitó ${input.quantity}x ${input.productName}. Método: ${payLabel}. Estado: PENDIENTE DE APROBACIÓN`,
           });
         } catch (e) { console.warn('Notify error (product purchase):', e); }
 
-        return { purchaseCode, id: purchase.id };
+        // Notificar al paciente: comprobante recibido
+        if (input.paymentMethod === 'transfer') {
+          try {
+            await sendPurchaseReceivedEmail(input.buyerEmail, input.buyerName, input.productName);
+          } catch (e) { console.warn('Email received (product) error:', e); }
+          try {
+            const patientEmail = input.patientEmail || input.buyerEmail;
+            const patient = await getPatientByEmail(patientEmail);
+            if (patient?.pushSubscription) {
+              await sendPushToPatient(
+                patient.pushSubscription,
+                'Comprobante recibido',
+                `Tu comprobante de ${input.productName} fue recibido. Te avisamos cuando sea aprobado.`,
+                '/monedero'
+              );
+            }
+          } catch (e) { console.warn('Push received (product) error:', e); }
+        }
+
+        return { purchaseCode: null, id: purchase.id };
       }),
     listAll: publicProcedure.query(async () => {
       return await getAllProductPurchases();
@@ -1843,6 +1881,23 @@ Devuelve un JSON con estos campos:
             }
           } catch (e) { console.warn('Wallet deduct (clinic) error:', e); }
         }
+        // Notificar al paciente: compra aprobada
+        try {
+          const patientEmail = purchase.patientEmail || purchase.buyerEmail;
+          await sendPurchaseApprovedEmail(patientEmail, purchase.buyerName, purchase.productName);
+        } catch (e) { console.warn('Email approved (product) error:', e); }
+        try {
+          const patientEmail = purchase.patientEmail || purchase.buyerEmail;
+          const patient = await getPatientByEmail(patientEmail);
+          if (patient?.pushSubscription) {
+            await sendPushToPatient(
+              patient.pushSubscription,
+              '¡Compra aprobada!',
+              `Tu compra de ${purchase.productName} fue aprobada. Presenta tu Monedero Nutriser en clínica.`,
+              '/monedero'
+            );
+          }
+        } catch (e) { console.warn('Push approved (product) error:', e); }
         return { success: true };
       }),
     verify: publicProcedure

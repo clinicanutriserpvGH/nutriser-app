@@ -52,6 +52,12 @@ export default function AdminQRScanner() {
   // Filtrar solo los del paciente actual (por walletId/patientId)
   // El endpoint getPending devuelve todos, filtraremos por patientEmail
   const [patientEmailForFilter, setPatientEmailForFilter] = useState<string | null>(null);
+  const [patientIdForOnlinePurchases, setPatientIdForOnlinePurchases] = useState<number | null>(null);
+  // Query para compras en línea aprobadas del paciente
+  const onlinePurchasesQuery = trpc.patients.getMyPurchases.useQuery(
+    { email: patientEmailForFilter!, patientId: patientIdForOnlinePurchases ?? undefined },
+    { enabled: !!patientEmailForFilter }
+  );
   const patientBannerInterests = (bannerInterestsAdminQuery.data || []).filter(
     (i: any) => patientEmailForFilter && i.patientEmail === patientEmailForFilter
   );
@@ -322,6 +328,7 @@ export default function AdminQRScanner() {
     }
     if (patientQuery.data?.patientId) {
       setPatientIdForHistory(patientQuery.data.patientId);
+      setPatientIdForOnlinePurchases(patientQuery.data.patientId);
     }
   }, [patientQuery.data?.walletId, patientQuery.data?.patientEmail, patientQuery.data?.patientId]);
 
@@ -740,6 +747,100 @@ export default function AdminQRScanner() {
                 ) : (
                   <p className="text-xs text-center text-gray-400 mt-1">Sin solicitudes de promoción pendientes</p>
                 )}
+
+                {/* ─── Compras en Línea (aprobadas y pendientes) ─── */}
+                {onlinePurchasesQuery.isLoading ? (
+                  <div className="flex justify-center py-2"><Loader2 className="w-4 h-4 animate-spin text-[#C5A55A]" /></div>
+                ) : (() => {
+                  const purchases = onlinePurchasesQuery.data;
+                  if (!purchases) return null;
+                  const services = (purchases.services || []).filter((s: any) => s.status !== 'rejected');
+                  const products = (purchases.products || []).filter((p: any) => p.status !== 'rejected');
+                  const packages = (purchases.packages || []).filter((m: any) => m.status !== 'rejected');
+                  const ebooks = (purchases.ebooks || []).filter((e: any) => e.status !== 'rejected');
+                  const total = services.length + products.length + packages.length + ebooks.length;
+                  if (total === 0) return null;
+                  const statusBadge = (status: string) => (
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                      status === 'approved' || status === 'verified' ? 'bg-green-100 text-green-700' :
+                      status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {status === 'approved' || status === 'verified' ? '✓ Aprobado' : status === 'pending' ? '⏳ Pendiente' : status}
+                    </span>
+                  );
+                  return (
+                    <div className="mt-3 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🛒</span>
+                        <span className="text-sm font-bold text-gray-800">Compras en Línea ({total})</span>
+                      </div>
+                      {services.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Servicios</p>
+                          <div className="space-y-1.5">
+                            {services.map((s: any) => (
+                              <div key={s.id} className="bg-blue-50 border border-blue-100 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold text-gray-900 truncate">{s.serviceName}</p>
+                                  <p className="text-[10px] text-gray-400">{new Date(s.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                                </div>
+                                {statusBadge(s.status)}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {products.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Productos</p>
+                          <div className="space-y-1.5">
+                            {products.map((p: any) => (
+                              <div key={p.id} className="bg-purple-50 border border-purple-100 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold text-gray-900 truncate">{p.productName} {p.quantity > 1 ? `×${p.quantity}` : ''}</p>
+                                  <p className="text-[10px] text-gray-400">{new Date(p.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                                </div>
+                                {statusBadge(p.status)}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {packages.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Paquetes / Membresías</p>
+                          <div className="space-y-1.5">
+                            {packages.map((m: any) => (
+                              <div key={m.id} className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold text-gray-900 truncate">{m.membershipName || m.name || 'Paquete'}</p>
+                                  <p className="text-[10px] text-gray-400">{new Date(m.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                                </div>
+                                {statusBadge(m.status)}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {ebooks.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Librería / Ebooks</p>
+                          <div className="space-y-1.5">
+                            {ebooks.map((e: any) => (
+                              <div key={e.id} className="bg-green-50 border border-green-100 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold text-gray-900 truncate">{e.ebookTitle || 'Ebook'}</p>
+                                  <p className="text-[10px] text-gray-400">{new Date(e.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                                </div>
+                                {statusBadge(e.status)}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* ─── Historial de Compras del Paciente (Admin puede borrar) ─── */}
                 {patientPurchaseHistoryQuery.data && patientPurchaseHistoryQuery.data.length > 0 && (

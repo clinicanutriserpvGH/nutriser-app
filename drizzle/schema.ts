@@ -289,7 +289,7 @@ export const servicePurchases = mysqlTable("servicePurchases", {
   buyerEmail: varchar("buyerEmail", { length: 320 }).notNull(),
   buyerPhone: varchar("buyerPhone", { length: 20 }),
   proofUrl: text("proofUrl").notNull(), // URL del comprobante en S3
-  serviceCode: varchar("serviceCode", { length: 20 }).notNull().unique(), // Código único NUT-SRV-XXXX
+  serviceCode: varchar("serviceCode", { length: 20 }), // Código único NUT-SRV-XXXX — generado solo al aprobar
   status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
   adminNotes: text("adminNotes"), // Notas del administrador
   discountCode: varchar("discountCode", { length: 50 }), // Código de descuento aplicado
@@ -384,7 +384,7 @@ export const productPurchases = mysqlTable("productPurchases", {
   proofUrl: text("proofUrl"), // URL del comprobante en S3 (null si pago en clínica)
   paymentMethod: mysqlEnum("paymentMethod", ["transfer", "cash"]).default("transfer"), // transfer=comprobante, cash=en clínica
   status: mysqlEnum("status", ["pending", "approved", "verified", "rejected"]).default("pending").notNull(),
-  purchaseCode: varchar("purchaseCode", { length: 30 }).notNull(),
+  purchaseCode: varchar("purchaseCode", { length: 30 }), // Generado solo al aprobar la compra (null hasta aprobación)
   notes: text("notes"),
   discountCode: varchar("discountCode", { length: 50 }), // Código de descuento aplicado
   discountPercent: int("discountPercent"), // Porcentaje de descuento aplicado

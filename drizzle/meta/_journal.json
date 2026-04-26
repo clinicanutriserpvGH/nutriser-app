@@ -393,6 +393,20 @@
       "when": 1777140593532,
       "tag": "0055_regular_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "5",
+      "when": 1777180865802,
+      "tag": "0056_motionless_mandroid",
+      "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "5",
+      "when": 1777181058157,
+      "tag": "0057_charming_luckman",
+      "breakpoints": true
     }
   ]
 }

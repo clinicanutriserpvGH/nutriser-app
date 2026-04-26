@@ -6,7 +6,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ArrowRight, Clock, Flame, AlertTriangle, Upload, CheckCircle, Tag, Wallet } from "lucide-react";
+import { Loader2, ArrowRight, Clock, Flame, AlertTriangle, Upload, CheckCircle, Tag, Wallet, Gift, User } from "lucide-react";
 import BackToSplash from "@/components/BackToSplash";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -23,25 +23,29 @@ export default function CouponPage() {
   // Estados principales
   const [showPaymentFlow, setShowPaymentFlow] = useState(false);
 
-  // Estados del flujo de pago — se auto-rellenan si hay sesión activa
-  const [payName, setPayName] = useState('');
-  const [payPhone, setPayPhone] = useState('');
-  const [payEmail, setPayEmail] = useState('');
+  // Estados del flujo de pago
+  const [isGift, setIsGift] = useState<boolean | null>(null); // null = no elegido aún
+  const [recipientName, setRecipientName] = useState('');
+  const [recipientPhone, setRecipientPhone] = useState('');
+  const [recipientEmail, setRecipientEmail] = useState('');
   const [payProofFile, setPayProofFile] = useState<File | null>(null);
-  const [payStep, setPayStep] = useState<'form' | 'uploading' | 'done'>('form');
+  const [payStep, setPayStep] = useState<'gift_choice' | 'form' | 'uploading' | 'done'>('gift_choice');
   const payProofRef = useRef<HTMLInputElement>(null);
 
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
   const promo = promotions?.find((p) => p.id === couponId);
 
-  // Auto-rellenar datos del paciente logueado
-  useEffect(() => {
-    if (isLoggedIn && patient) {
-      if (!payName && patient.name) setPayName(patient.name);
-      if (!payEmail && patient.email) setPayEmail(patient.email);
-      if (!payPhone && patient.phone) setPayPhone(patient.phone);
-    }
-  }, [isLoggedIn, patient]);
+  // Resetear isGift cuando se cierra el modal
+  const handleCloseModal = () => {
+    setShowPaymentFlow(false);
+    setPayStep('gift_choice');
+    setIsGift(null);
+    setRecipientName('');
+    setRecipientPhone('');
+    setRecipientEmail('');
+    setPayProofFile(null);
+    setWalletUsedForFull(false);
+  };
 
   // Monedero Nutriser
   const [useWallet, setUseWallet] = useState(false);
@@ -58,7 +62,7 @@ export default function CouponPage() {
   const walletData = walletQuery.data?.wallet;
 
   // Mutaciones
-  const createServicePurchaseMutation = trpc.servicePurchases.create.useMutation({
+  const createGiftPurchaseMutation = trpc.giftPurchases.create.useMutation({
     onSuccess: () => {
       setPayStep('done');
       toast.success('¡Comprobante enviado! El equipo Nutriser verificará tu pago.');
@@ -117,11 +121,16 @@ export default function CouponPage() {
 
   // Enviar comprobante de pago
   const handleSubmitPayment = async () => {
-    if (!payName.trim() || !payPhone.trim()) {
-      toast.error('Nombre y teléfono son requeridos');
+    if (!promo) return;
+    if (!isLoggedIn || !patient) {
+      toast.error('Necesitas un Monedero Nutriser activo para adquirir este cupón.');
       return;
     }
-    if (!promo) return;
+
+    const buyerName = patient.name || '';
+    const buyerPhone = patient.phone || '';
+    const buyerEmail = patient.email || '';
+    const giftFlag = isGift === true;
 
     // Calcular precio numérico del cupón
     const rawPrice = promo.price || '';
@@ -143,7 +152,7 @@ export default function CouponPage() {
         amountCents: numericPriceCents,
         walletAmountUsedCents: numericPriceCents,
         cashbackPercent: 2,
-        notes: `Cupón: ${promo.title}. Pago completo con saldo del monedero solicitado por ${payName}. Pendiente de autorización del administrador.`,
+        notes: `Cupón: ${promo.title}. Pago completo con saldo del monedero solicitado por ${buyerName}. ${giftFlag ? `Para regalar a: ${recipientName} (${recipientEmail}, ${recipientPhone})` : 'Para uso propio'}. Pendiente de autorización del administrador.`,
       });
       return;
     }
@@ -168,7 +177,7 @@ export default function CouponPage() {
         amountCents: remainingCents,
         walletAmountUsedCents: walletUsedCents,
         cashbackPercent: 2,
-        notes: `Cupón: ${promo.title}. Pago en efectivo solicitado por ${payName}.`,
+        notes: `Cupón: ${promo.title}. Pago en efectivo solicitado por ${buyerName}. ${giftFlag ? `Para regalar a: ${recipientName} (${recipientEmail}, ${recipientPhone})` : 'Para uso propio'}.`,
       });
       return;
     }
@@ -198,16 +207,19 @@ export default function CouponPage() {
       // Calcular descuento real del monedero (en pesos MXN)
       const walletDiscountPesos = useWallet && walletAmount > 0 ? walletAmount / 100 : 0;
 
-      await createServicePurchaseMutation.mutateAsync({
-        buyerName: payName.trim(),
-        buyerPhone: payPhone.trim(),
-        buyerEmail: payEmail.trim() || 'sin-correo@nutriser.com',
-        serviceName: promo.title,
+      await createGiftPurchaseMutation.mutateAsync({
+        promotionId: promo.id,
+        buyerName,
+        buyerPhone,
+        buyerEmail: buyerEmail || 'sin-correo@nutriser.com',
         proofData: base64Data,
         proofMimeType: payProofFile.type || 'image/jpeg',
-        originalPrice: promo.price || undefined,
+        isGift: giftFlag,
+        recipientName: giftFlag ? recipientName : undefined,
+        recipientContact: giftFlag ? recipientPhone : undefined,
         walletDiscount: walletDiscountPesos > 0 ? walletDiscountPesos : undefined,
-        patientEmail: walletDiscountPesos > 0 && patient?.email ? patient.email : undefined,
+        patientEmail: patient?.email || undefined,
+        promotionTitle: promo.title,
       });
     } catch (err: any) {
       setPayStep('form');
@@ -367,7 +379,13 @@ export default function CouponPage() {
 
                     {/* CTA Button */}
                     <button
-                      onClick={() => setShowPaymentFlow(true)}
+                      onClick={() => {
+                        if (!isLoggedIn || !patient) {
+                          toast.error('Necesitas un Monedero Nutriser activo para adquirir este cupón.');
+                          return;
+                        }
+                        setShowPaymentFlow(true);
+                      }}
                       disabled={isSoldOut}
                       className={`block w-full py-4 px-4 rounded-xl font-black text-base text-center uppercase tracking-widest transition-all duration-200 shadow-lg ${
                         isSoldOut
@@ -404,10 +422,33 @@ export default function CouponPage() {
                     <div className="bg-white rounded-2xl max-w-md w-full p-6 my-4 shadow-2xl">
                       <div className="flex justify-between items-center mb-4">
                         <h2 className="font-serif text-xl font-bold text-[#1A1A1A]">💳 Adquirir cupón</h2>
-                        <button onClick={() => { setShowPaymentFlow(false); setPayStep('form'); }} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+                        <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
                       </div>
 
-                      {payStep === 'done' ? (
+                      {payStep === 'gift_choice' ? (
+                        /* ── Paso 0: ¿Para mí o para regalar? ── */
+                        <div className="py-4">
+                          <p className="text-sm text-gray-600 mb-5 text-center">¿Este cupón es para ti o lo quieres regalar?</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <button
+                              onClick={() => { setIsGift(false); setPayStep('form'); }}
+                              className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-[#C5A55A] bg-amber-50 hover:bg-amber-100 transition-all"
+                            >
+                              <User className="w-8 h-8 text-[#C5A55A]" />
+                              <span className="font-bold text-[#1A1A1A] text-sm">Para mí</span>
+                              <span className="text-xs text-gray-500 text-center leading-tight">Usaré el cupón yo mismo</span>
+                            </button>
+                            <button
+                              onClick={() => { setIsGift(true); setPayStep('form'); }}
+                              className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-purple-400 bg-purple-50 hover:bg-purple-100 transition-all"
+                            >
+                              <Gift className="w-8 h-8 text-purple-500" />
+                              <span className="font-bold text-[#1A1A1A] text-sm">Para regalar</span>
+                              <span className="text-xs text-gray-500 text-center leading-tight">Lo enviaré a alguien especial</span>
+                            </button>
+                          </div>
+                        </div>
+                      ) : payStep === 'done' ? (
                         <div className="text-center py-6">
                           <CheckCircle className="w-14 h-14 text-green-500 mx-auto mb-3" />
                           {useWallet && walletUsedForFull ? (
@@ -421,16 +462,65 @@ export default function CouponPage() {
                           ) : (
                             <>
                               <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">¡Comprobante enviado!</h3>
-                              <p className="text-gray-500 text-sm mb-2">El equipo Nutriser verificará tu pago y te confirmará por WhatsApp.</p>
+                              <p className="text-gray-500 text-sm mb-2">
+                                {isGift
+                                  ? `El equipo Nutriser verificará tu pago. Al aprobarlo, ${recipientName} recibirá el cupón en su correo.`
+                                  : 'El equipo Nutriser verificará tu pago y recibirás tu cupón por correo al ser aprobado.'}
+                              </p>
                             </>
                           )}
                           <p className="text-[#C5A55A] font-semibold text-sm">📞 322 450 3257</p>
-                          <Button className="mt-5 bg-[#C5A55A] hover:bg-[#B8963E] text-white" onClick={() => { setShowPaymentFlow(false); setPayStep('form'); setWalletUsedForFull(false); }}>
+                          <Button className="mt-5 bg-[#C5A55A] hover:bg-[#B8963E] text-white" onClick={handleCloseModal}>
                             Cerrar
                           </Button>
                         </div>
                       ) : (
                         <>
+                          {/* Indicador: para mí o para regalar */}
+                          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-4 text-sm font-semibold ${
+                            isGift ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                          }`}>
+                            {isGift ? <Gift className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                            {isGift ? 'Cupón de regalo' : 'Cupón para uso propio'}
+                            <button onClick={() => { setIsGift(null); setPayStep('gift_choice'); }} className="ml-auto text-xs underline opacity-70">cambiar</button>
+                          </div>
+
+                          {/* Campos del destinatario si es regalo */}
+                          {isGift && (
+                            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4 space-y-3">
+                              <p className="text-xs font-bold text-purple-700 uppercase tracking-wide">Datos de quien recibirá el regalo</p>
+                              <div>
+                                <label className="text-xs text-gray-600 font-medium">Nombre completo *</label>
+                                <Input
+                                  value={recipientName}
+                                  onChange={e => setRecipientName(e.target.value)}
+                                  placeholder="Nombre de quien lo recibirá"
+                                  className="mt-1 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-600 font-medium">Correo electrónico *</label>
+                                <Input
+                                  type="email"
+                                  value={recipientEmail}
+                                  onChange={e => setRecipientEmail(e.target.value)}
+                                  placeholder="correo@ejemplo.com"
+                                  className="mt-1 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-600 font-medium">Teléfono *</label>
+                                <Input
+                                  type="tel"
+                                  value={recipientPhone}
+                                  onChange={e => setRecipientPhone(e.target.value)}
+                                  placeholder="322 000 0000"
+                                  className="mt-1 text-sm"
+                                />
+                              </div>
+                            </div>
+                          )}
+
                           {/* Resumen del cupón */}
                           <div className="bg-[#FAF7F2] rounded-xl p-4 mb-4">
                             <p className="font-semibold text-[#1A1A1A] text-sm mb-1">{promo.title}</p>
@@ -440,21 +530,20 @@ export default function CouponPage() {
                             </div>
                           </div>
 
-                          {/* Datos del cliente — auto-rellenados si hay sesión */}
-                          <div className="space-y-3 mb-4">
-                            <div>
-                              <label className="text-xs font-semibold text-[#1A1A1A] mb-1 block">Nombre completo *</label>
-                              <Input placeholder="Tu nombre completo" value={payName} onChange={e => setPayName(e.target.value)} className="text-[#1A1A1A] placeholder:text-gray-400" />
+                          {/* Datos del cliente — tomados del monedero */}
+                          {patient && (
+                            <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
+                              <div className="w-9 h-9 rounded-full bg-[#C5A55A] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                {patient.name?.charAt(0).toUpperCase() || '?'}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[#1A1A1A] font-bold text-sm truncate">{patient.name}</p>
+                                <p className="text-gray-500 text-xs truncate">{patient.email}</p>
+                                <p className="text-gray-500 text-xs">{patient.phone}</p>
+                              </div>
+                              <span className="text-green-600 text-xs font-bold flex-shrink-0">✓ Monedero</span>
                             </div>
-                            <div>
-                              <label className="text-xs font-semibold text-[#1A1A1A] mb-1 block">Correo electrónico *</label>
-                              <Input placeholder="tu@correo.com" value={payEmail} onChange={e => setPayEmail(e.target.value)} className="text-[#1A1A1A] placeholder:text-gray-400" />
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-[#1A1A1A] mb-1 block">Teléfono *</label>
-                              <Input placeholder="322 000 0000" value={payPhone} onChange={e => setPayPhone(e.target.value)} className="text-[#1A1A1A] placeholder:text-gray-400" />
-                            </div>
-                          </div>
+                          )}
 
                           {/* Monedero Nutriser */}
                           {(() => {
@@ -610,12 +699,16 @@ export default function CouponPage() {
                             const numericPriceSubmit = parseFloat(rawPriceSubmit.replace(/[^0-9.]/g, '')) || 0;
                             const numericPriceCentsSubmit = Math.round(numericPriceSubmit * 100);
                             const walletCoversSubmit = useWallet && walletBalance >= numericPriceCentsSubmit && numericPriceCentsSubmit > 0;
+                            const giftFieldsMissing = isGift && (!recipientName.trim() || !recipientEmail.trim() || !recipientPhone.trim());
                             const needsProof = paymentMethod === 'transfer' && !walletCoversSubmit && !payProofFile;
                             return (
                               <>
+                                {giftFieldsMissing && (
+                                  <p className="text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">⚠️ Completa los datos del destinatario para continuar.</p>
+                                )}
                                 <Button
                                   onClick={handleSubmitPayment}
-                                  disabled={payStep === 'uploading' || !payName || !payPhone || needsProof}
+                                  disabled={payStep === 'uploading' || needsProof || !!giftFieldsMissing}
                                   className={`w-full text-white font-bold py-3 ${
                                     walletCoversSubmit
                                       ? 'bg-amber-600 hover:bg-amber-700'

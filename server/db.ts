@@ -6,6 +6,7 @@ import { products, InsertProduct, productPurchases, InsertProductPurchase, disco
 import { patientAccounts, InsertPatientAccount, PatientAccount, patientTreatments, InsertPatientTreatment, patientAppointments, InsertPatientAppointment, patientPhotos, InsertPatientPhoto } from '../drizzle/schema';
 import { storeBanners, type InsertStoreBanner, bannerInterests, type InsertBannerInterest, systemConfig } from '../drizzle/schema';
 import { installmentPlans, installmentPayments, adminNotifications, type InstallmentPlan, type InstallmentPayment, type AdminNotification } from '../drizzle/schema';
+import { couponShares, type InsertCouponShare } from '../drizzle/schema';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -2777,4 +2778,33 @@ export async function getPatientContractStatus(email: string): Promise<{ contrac
     consentAcceptedAt: patientAccounts.consentAcceptedAt,
   }).from(patientAccounts).where(eq(patientAccounts.email, email)).limit(1);
   return result.length > 0 ? result[0] : null;
+}
+
+// ===== COUPON SHARES (CASHBACK POR COMPARTIR) =====
+/** Registra un share de cupón y devuelve el registro creado */
+export async function createCouponShare(data: InsertCouponShare) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(couponShares).values(data);
+  const id = (result as any)[0]?.insertId;
+  return { id, ...data };
+}
+
+/** Obtiene todos los shares de un wallet (para historial) */
+export async function getCouponSharesByWallet(walletId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(couponShares)
+    .where(eq(couponShares.walletId, walletId))
+    .orderBy(desc(couponShares.createdAt));
+}
+
+/** Cuenta cuántas veces un wallet compartió una promoción específica */
+export async function countSharesByWalletAndPromo(walletId: number, promotionId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(couponShares)
+    .where(and(eq(couponShares.walletId, walletId), eq(couponShares.promotionId, promotionId)));
+  return Number(result[0]?.count ?? 0);
 }

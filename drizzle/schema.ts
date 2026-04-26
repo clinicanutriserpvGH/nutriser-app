@@ -180,6 +180,8 @@ export const giftPurchases = mysqlTable("giftPurchases", {
   isGift: boolean("isGift").default(false).notNull(), // true = regalo para otra persona
   recipientName: varchar("recipientName", { length: 255 }), // Nombre del destinatario (si es regalo)
   recipientContact: varchar("recipientContact", { length: 320 }), // WhatsApp o email del destinatario
+  recipientEmail: varchar("recipientEmail", { length: 320 }), // Email del destinatario (para enviar cupón)
+  recipientPhone: varchar("recipientPhone", { length: 20 }), // Teléfono del destinatario
   status: mysqlEnum("status", ["pending", "approved", "rejected", "used"]).default("pending").notNull(),
   approvedAt: timestamp("approvedAt"),
   approvedBy: int("approvedBy"), // ID del admin que aprobó
@@ -298,6 +300,7 @@ export const servicePurchases = mysqlTable("servicePurchases", {
   originalPrice: varchar("originalPrice", { length: 100 }), // Precio antes del descuento
   walletDiscount: decimal("walletDiscount", { precision: 10, scale: 2 }).default("0"), // Descuento del monedero
   patientEmail: varchar("patientEmail", { length: 320 }), // Email del paciente para vincular con monedero
+  purchaseType: mysqlEnum("purchaseType", ["service", "package"]).default("service").notNull(), // Distingue servicios de paquetes
   approvedAt: timestamp("approvedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -559,6 +562,8 @@ export const patientAccounts = mysqlTable("patientAccounts", {
   consentSignature: text("consentSignature"), // URL de la firma o imagen base64
   contractRequired: boolean("contractRequired").default(false).notNull(), // Admin activa esto para forzar firma
   contractRequiredAt: timestamp("contractRequiredAt"), // Cuándo el admin lo solicitó
+  referredByWalletCode: varchar("referredByWalletCode", { length: 20 }), // Código del monedero que refirió al nuevo usuario
+  referralCashbackPaid: boolean("referralCashbackPaid").default(false).notNull(), // Si ya se pagó el cashback al referidor
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -1077,3 +1082,26 @@ export const membershipPackages = mysqlTable("membershipPackages", {
 });
 export type MembershipPackage = typeof membershipPackages.$inferSelect;
 export type InsertMembershipPackage = typeof membershipPackages.$inferInsert;
+
+// ============================================================
+// COMPARTIDOS DE CUPONES (CASHBACK POR COMPARTIR)
+// ============================================================
+/**
+ * Registra cada vez que un paciente comparte un cupón por WhatsApp desde la app.
+ * Al registrar el share, se acredita automáticamente el 2% del precio del cupón
+ * como cashback en el monedero del paciente.
+ * Solo se cuenta cuando el usuario regresa a la app después de abrir WhatsApp.
+ */
+export const couponShares = mysqlTable("couponShares", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("walletId").notNull(),                          // FK a wallets.id
+  patientId: int("patientId").notNull(),                        // FK a patientAccounts.id
+  promotionId: int("promotionId").notNull(),                    // FK a promotions.id
+  promotionTitle: varchar("promotionTitle", { length: 255 }),   // Título de la promoción al momento del share
+  promotionPrice: int("promotionPrice"),                        // Precio de la promoción al momento del share (en centavos MXN)
+  cashbackAmount: int("cashbackAmount").notNull(),              // Monto de cashback acreditado (en centavos MXN)
+  shareMethod: mysqlEnum("shareMethod", ["whatsapp", "link"]).default("whatsapp").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type CouponShare = typeof couponShares.$inferSelect;
+export type InsertCouponShare = typeof couponShares.$inferInsert;

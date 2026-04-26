@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, Gift, Copy, Check, X, ArrowRight, Flame, Clock, AlertTriangle, Bell, BellRing } from "lucide-react";
 import { toast } from "sonner";
 import { checkIOSPushReadiness, isPushSupported, subscribeToPush, isNativeApp as checkIsNativeApp, isAnyPushAvailable, requestNativePushPermission, isIOSDevice } from "@/lib/pushHelper";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 type Step = "form" | "type" | "payment" | "success";
 
@@ -54,6 +55,15 @@ export default function PromotionsSection() {
   const { data: promotions, isLoading } = trpc.promotions.list.useQuery();
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [highlightId, setHighlightId] = useState<number | null>(null);
+  const { patient, isLoggedIn } = usePatientAuth();
+  // Wallet query para obtener el walletNumber del usuario logueado
+  const walletQuery = trpc.wallet.getMyWallet.useQuery(
+    { patientId: patient?.id || 0 },
+    { enabled: isLoggedIn && !!patient?.id }
+  );
+  const myWalletCode = walletQuery.data?.wallet?.walletNumber || null;
+  // Estado para detectar regreso tras compartir (pendiente de cashback)
+  const pendingShareRef = useRef<{ promoId: number; promoTitle: string } | null>(null);
 
   // Scroll to coupon if URL has #cupon-{id}
   useEffect(() => {
@@ -295,20 +305,39 @@ export default function PromotionsSection() {
     reader.readAsDataURL(proofFile);
   };
 
+  const buildShareUrl = (promoId: number) => {
+    const base = `https://nutriserpv.com/cupon/${promoId}`;
+    return myWalletCode ? `${base}?ref=${encodeURIComponent(myWalletCode)}` : base;
+  };
+
   const handleShareWhatsApp = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null; imageUrl?: string | null }) => {
-    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promo.id}`;
+    if (!isLoggedIn || !myWalletCode) {
+      toast.info('Inicia sesión en tu Monedero para ganar cashback al compartir');
+    }
+    const shareUrl = buildShareUrl(promo.id);
     const priceText = promo.regularPrice && promo.price
       ? `\n💰 Antes: ~${promo.regularPrice}~ → *Ahora: ${promo.price}*`
       : promo.price ? `\n💰 Precio: *${promo.price}*` : "";
     const text = `${shareUrl}\n\n🔥 *¡OFERTA ESPECIAL NUTRISER!* 🔥\n\n🎁 *${promo.title}*\n${promo.description || ""}${priceText}\n\n✅ Adquiere tu cupón directamente en el link de arriba`;
-    // Usar location.href en lugar de window.open para compatibilidad con WebView iOS
+    // Guardar pendiente para detectar regreso y acreditar cashback
+    if (isLoggedIn && myWalletCode) {
+      pendingShareRef.current = { promoId: promo.id, promoTitle: promo.title };
+    }
+    // Usar location.href para compatibilidad con WebView iOS
     window.location.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
   };
 
   const handleCopyLink = (promo: { id: number; title: string; description: string | null; price: string | null; regularPrice: string | null }) => {
-    const shareUrl = `https://nutriserpv.com/api/og/cupon/${promo.id}`;
+    if (!isLoggedIn || !myWalletCode) {
+      toast.info('Inicia sesión en tu Monedero para ganar cashback al compartir');
+    }
+    const shareUrl = buildShareUrl(promo.id);
     navigator.clipboard.writeText(shareUrl);
     setCopiedId(promo.id);
+    // Guardar pendiente para detectar regreso y acreditar cashback
+    if (isLoggedIn && myWalletCode) {
+      pendingShareRef.current = { promoId: promo.id, promoTitle: promo.title };
+    }
     toast.success("¡Link copiado! Pégalo en Facebook, Instagram o donde quieras 🎉");
     setTimeout(() => setCopiedId(null), 3000);
   };
@@ -480,22 +509,31 @@ export default function PromotionsSection() {
                       </button>
                     </div>
 
-                    {/* Compartir — solo WhatsApp y Copiar */}
-                    <div className="bg-[#1A1A1A] rounded-b-2xl px-4 py-3 flex items-center gap-3">
-                      <span className="text-[10px] text-gray-400 uppercase tracking-wider flex-shrink-0">Compartir:</span>
-                      <button
-                        onClick={() => handleShareWhatsApp(promo)}
-                        className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-xs font-bold transition flex-1 justify-center"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/></svg>
-                        WhatsApp
-                      </button>
-                      <button
-                        onClick={() => handleCopyLink(promo)}
-                        className="flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg text-xs font-bold transition flex-1 justify-center"
-                      >
-                        {copiedId === promo.id ? <><Check size={14} /> ¡Copiado!</> : <><Copy size={14} /> Copiar link</>}
-                      </button>
+                    {/* Compartir con cashback */}
+                    <div className="bg-[#1A1A1A] rounded-b-2xl px-4 pt-3 pb-3">
+                      {/* Banner cashback */}
+                      <div className="bg-[#C5A55A]/15 border border-[#C5A55A]/40 rounded-lg px-3 py-2 mb-2.5 flex items-start gap-2">
+                        <span className="text-base flex-shrink-0">💰</span>
+                        <p className="text-[10px] text-[#C5A55A] leading-snug">
+                          <strong>¡Gana cashback en tu Monedero!</strong> Comparte desde aquí y regresa a la app — cada vez que alguien nuevo se registre con tu link, te acreditamos cashback automáticamente.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] text-gray-500 uppercase tracking-wider flex-shrink-0">Compartir:</span>
+                        <button
+                          onClick={() => handleShareWhatsApp(promo)}
+                          className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-lg text-xs font-bold transition flex-1 justify-center"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.967 1.523 9.9 9.9 0 001.563 19.231c2.693.47 5.455.082 7.978-1.125a9.9 9.9 0 00-4.57-19.629z"/></svg>
+                          WhatsApp
+                        </button>
+                        <button
+                          onClick={() => handleCopyLink(promo)}
+                          className="flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded-lg text-xs font-bold transition flex-1 justify-center"
+                        >
+                          {copiedId === promo.id ? <><Check size={14} /> ¡Copiado!</> : <><Copy size={14} /> Copiar link</>}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>

@@ -30,6 +30,13 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
   const [birthYear, setBirthYear] = useState("");
+  // Capturar código de referido del URL (?ref=NUT-XXXX-XXXX)
+  const refCode = new URLSearchParams(window.location.search).get('ref') || null;
+  const promoIdFromUrl = (() => {
+    const match = window.location.pathname.match(/\/cupon\/(\d+)/);
+    return match ? parseInt(match[1], 10) : undefined;
+  })();
+  const processReferralMutation = trpc.giftPurchases.processReferralCashback.useMutation();
 
   const loginMutation = trpc.patients.login.useMutation({
     onSuccess: (data) => {
@@ -47,6 +54,20 @@ export default function NutriserAuthModal({ isOpen, onClose, onSuccess, contextM
       const patient = data as PatientSession;
       login(patient);
       toast.success(`¡Cuenta creada! Bienvenido, ${patient.name}`);
+      // Si hay código de referido, procesar cashback para el referidor
+      if (refCode && patient.email) {
+        processReferralMutation.mutate(
+          { newPatientEmail: patient.email, referrerWalletCode: refCode, promotionId: promoIdFromUrl },
+          {
+            onSuccess: (res) => {
+              if (res.success) {
+                // No revelar el porcentaje, solo confirmar
+                console.log('[Referral] Cashback acreditado al referidor');
+              }
+            },
+          }
+        );
+      }
       onSuccess?.(patient);
       onClose();
     },

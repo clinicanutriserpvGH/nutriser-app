@@ -2953,8 +2953,8 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {servicePurchases && servicePurchases.length > 0 ? (
-                        servicePurchases.map((sp) => (
+                      {servicePurchases && servicePurchases.filter((sp: any) => sp.purchaseType !== 'package').length > 0 ? (
+                        servicePurchases.filter((sp: any) => sp.purchaseType !== 'package').map((sp) => (
                           <tr key={sp.id} className={`border-b border-[#C5A55A]/10 hover:bg-[#C5A55A]/5 ${sp.status === 'pending' ? 'bg-yellow-50' : ''}`}>
                             <td className="py-3 px-4 font-semibold">{sp.buyerName}</td>
                             <td className="py-3 px-4">{sp.buyerEmail}</td>

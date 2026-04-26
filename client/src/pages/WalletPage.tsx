@@ -785,12 +785,45 @@ export default function WalletPage() {
                   </div>
                 )}
 
+                {/* Paquetes comprados */}
+                {(myPurchases?.services?.filter((s: any) => s.purchaseType === 'package')?.length ?? 0) > 0 && (
+                  <div>
+                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">PAQUETES</p>
+                    <div className="space-y-3">
+                      {myPurchases!.services.filter((s: any) => s.purchaseType === 'package').map((svc: any) => (
+                        <div key={svc.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
+                          svc.status === 'approved' ? 'border-green-200' :
+                          svc.status === 'rejected' ? 'border-red-200' : 'border-yellow-200'
+                        }`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-[#1A1A1A] font-bold text-sm">{svc.serviceName}</p>
+                              {svc.originalPrice && <p className="text-gray-500 text-xs mt-0.5">{svc.originalPrice.replace(/^\$+/, '$').replace(/\s*MXN\s*MXN/i, ' MXN').replace(/\s*MXN$/i, ' MXN').trim()}</p>}
+                              {svc.approvedAt && <p className="text-gray-400 text-xs mt-0.5">{t('authorizedAt', lang)} {new Date(svc.approvedAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                            </div>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                              svc.status === 'approved' ? 'bg-green-50 text-green-700' :
+                              svc.status === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'
+                            }`}>
+                              {svc.status === 'approved' ? t('statusActive', lang) : svc.status === 'pending' ? t('statusPending', lang) : t('statusRejected', lang)}
+                            </span>
+                          </div>
+                          {svc.status === 'approved' && (
+                            <p className="text-green-700 text-xs mt-2 font-medium">Presenta tu Monedero Nutriser en clínica – ¡listo!</p>
+                          )}
+                          {svc.status === 'pending' && <p className="text-yellow-600 text-xs mt-2">Estamos revisando tu comprobante, te avisamos pronto.</p>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Servicios */}
-                {(myPurchases?.services?.length ?? 0) > 0 && (
+                {(myPurchases?.services?.filter((s: any) => s.purchaseType !== 'package')?.length ?? 0) > 0 && (
                   <div>
                     <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">{t('servicesSection', lang)}</p>
                     <div className="space-y-3">
-                      {myPurchases!.services.map((svc: any) => (
+                      {myPurchases!.services.filter((s: any) => s.purchaseType !== 'package').map((svc: any) => (
                         <div key={svc.id} className={`bg-white rounded-2xl p-4 border shadow-sm ${
                           svc.status === 'approved' ? 'border-green-200' :
                           svc.status === 'rejected' ? 'border-red-200' : 'border-yellow-200'

@@ -933,6 +933,7 @@ export default function Memberships() {
           pricePaid: transferAmount > 0 ? transferAmount : firstItem.price,
         });
       } else {
+        const isPackageCheckout = firstItem?.itemType === 'package';
         servicePurchaseMutation.mutate({
           serviceName: itemNames,
           buyerName, buyerEmail, buyerPhone,
@@ -941,6 +942,7 @@ export default function Memberships() {
           discountCode: discountInfo?.valid ? discountCode.trim() : undefined,
           discountPercent: discountInfo?.valid ? (discountInfo.discount ?? 0) : undefined,
           originalPrice: `$${discountedTotal.toLocaleString("es-MX")} MXN`,
+          purchaseType: isPackageCheckout ? 'package' : 'service',
         });
       }
     };

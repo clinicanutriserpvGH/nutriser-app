@@ -8,7 +8,7 @@ import { createMembership, getAllMemberships, getMembershipById, updateMembershi
 import { notifyOwner } from "./_core/notification";
 import { invokeLLM } from "./_core/llm";
 import { ENV } from "./_core/env";
-import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail, sendPurchaseReceiptEmail } from "./_core/email";
+import { sendConfirmationEmail, sendAppointmentNotification, sendMembershipNotificationToAdmin, sendAppointmentConfirmationToClient, sendCouponApprovedEmail, sendGiftRecipientEmail, sendCouponPurchaseNotificationToAdmin, sendPasswordResetEmail, sendPatientNotificationEmail, sendLoginAuthorizationEmail, sendPurchaseReceiptEmail } from "./_core/email";
 import { sendNewCouponNotificationToSubscribers, sendServicePurchaseNotificationToAdmin, sendServicePurchaseApprovedEmail, sendPurchaseReceivedEmail, sendPurchaseApprovedEmail } from './_core/email_extra';
 import { getAllProducts, getAllActiveProducts, getProductById, createProduct, updateProduct, deleteProduct, createProductPurchase, getAllProductPurchases, updateProductPurchaseStatus, deleteProductPurchase, validateDiscountCode, getAllDiscountCodes, toggleDiscountCode, incrementDiscountCodeUsage } from './db';
 import { getAllCourses, getPublishedCourses, getCourseById, createCourse, updateCourse, deleteCourse, getVideosByCourse, getVideoById, createCourseVideo, updateCourseVideo, deleteCourseVideo, getDocumentsByVideo, createCourseDocument, deleteCourseDocument, getApprovedCommentsByVideo, getPendingComments, getAllCourseComments, createCourseComment, updateCommentStatus, deleteCourseComment, getAllCourseSubscribers, createCourseSubscriber, deleteCourseSubscriber } from './db';
@@ -20,6 +20,7 @@ import { getActiveSplashAds, getAllSplashAds, createSplashAd, toggleSplashAd, de
 import { createInstallmentPlan, confirmInstallmentPayment, getInstallmentPlansByWallet, getAllInstallmentPlans, sendAdminNotification, getAdminNotificationsByWallet, countUnreadAdminNotifications, markAdminNotificationRead, markAllAdminNotificationsRead, deleteAdminNotification, deleteAllAdminNotifications, updateAdminNotification, sendCashbackNotification, createDebtAuthRequest, getAllDebtAuthRequests, resolveDebtAuthRequest, patientHasActiveDebt, patientHasPendingDebtRequest, deleteDebtNotifications } from './db';
 import { getActiveStoreBanners, getAllStoreBanners, createStoreBanner, toggleStoreBanner, deleteStoreBanner, updateStoreBannerOrder } from './db';
 import { createBannerInterest, getPendingBannerInterests, getAllBannerInterests, getBannerInterestsByUser, attendBannerInterest, deleteBannerInterest } from './db';
+import { createCouponShare, getCouponSharesByWallet, countSharesByWalletAndPromo } from './db';
 import { getSystemConfig, setSystemConfig } from './db';
 import { listMembershipPackages, getMembershipPackageBySlug, createMembershipPackage, updateMembershipPackage, deleteMembershipPackage } from './db';
 import { savePushSubscription, deletePushSubscription, sendPushNotificationToAll, getAllPushSubscriptions, sendPushToPatient } from "./pushNotifications";
@@ -615,6 +616,8 @@ export const appRouter = router({
         isGift: z.boolean().default(false),
         recipientName: z.string().optional(),
         recipientContact: z.string().optional(),
+        recipientEmail: z.string().email().optional(),
+        recipientPhone: z.string().optional(),
         walletDiscount: z.number().optional(),
         patientEmail: z.string().email().optional(),
         promotionTitle: z.string().optional(),
@@ -660,6 +663,8 @@ export const appRouter = router({
           isGift: input.isGift,
           recipientName: input.recipientName,
           recipientContact: input.recipientContact,
+          recipientEmail: input.recipientEmail,
+          recipientPhone: input.recipientPhone,
           status: 'pending',
           walletDiscount: walletDiscountAmt > 0 ? String(walletDiscountAmt) : undefined,
           patientEmail: input.patientEmail,
@@ -720,7 +725,14 @@ export const appRouter = router({
           }
         } catch {}
 
-        // Send email to buyer with the newly generated code
+        // Generar QR code como base64 PNG
+        let qrDataUrl = '';
+        try {
+          const QRCode = await import('qrcode');
+          qrDataUrl = await QRCode.default.toDataURL(couponCode, { width: 200, margin: 2 });
+        } catch (e) { console.warn('QR generation error:', e); }
+
+        // Enviar email al comprador con QR
         await sendCouponApprovedEmail(
           purchase.buyerEmail,
           purchase.buyerName,
@@ -728,8 +740,24 @@ export const appRouter = router({
           promotionTitle,
           purchase.isGift ?? false,
           purchase.recipientName ?? undefined,
-          promotionExpiresAt ?? undefined
+          promotionExpiresAt ?? undefined,
+          qrDataUrl
         );
+
+        // Si es regalo y hay email del destinatario, enviar email separado al destinatario
+        if (purchase.isGift && purchase.recipientEmail) {
+          try {
+            await sendGiftRecipientEmail(
+              purchase.recipientEmail,
+              purchase.recipientName || 'Destinatario',
+              purchase.buyerName,
+              promotionTitle,
+              couponCode,
+              qrDataUrl,
+              promotionExpiresAt ?? undefined
+            );
+          } catch (e) { console.warn('Gift recipient email error:', e); }
+        }
 
         // Build WhatsApp message for admin to send manually
         const holderName = (purchase.isGift && purchase.recipientName) ? purchase.recipientName : purchase.buyerName;
@@ -832,14 +860,113 @@ export const appRouter = router({
           buyerName: match.buyerName,
           promotionTitle,
           status: displayStatus,
-          approvedAt: match.approvedAt,
+           approvedAt: match.approvedAt,
           expiresAt: promotionExpiresAt,
           isGift: match.isGift,
           recipientName: match.recipientName,
         };
       }),
-  }),
 
+    // ── Registrar share de cupón y acreditar cashback cuando nuevo usuario crea monedero ──
+    // Este procedure se llama cuando un nuevo usuario crea su monedero con código de referido
+    // El cashback se acredita al referidor SOLO si:
+    // 1. El nuevo usuario tiene email diferente al del referidor
+    // 2. El referidor tiene monedero activo
+    // 3. No se ha pagado cashback de referido antes para este paciente
+    processReferralCashback: publicProcedure
+      .input(z.object({
+        newPatientEmail: z.string().email(),   // Email del nuevo usuario que se registró
+        referrerWalletCode: z.string().min(1), // Código del monedero del referidor (NUT-XXXX-XXXX)
+        promotionId: z.number().optional(),    // ID de la promo que compartó (opcional)
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          // 1. Obtener el monedero del referidor por código
+          const referrerWallet = await getWalletByNumber(input.referrerWalletCode);
+          if (!referrerWallet || !referrerWallet.isActive) return { success: false, reason: 'referrer_not_found' };
+
+          // 2. Obtener el paciente referidor
+          const referrerPatient = await getPatientById(referrerWallet.patientId);
+          if (!referrerPatient) return { success: false, reason: 'referrer_patient_not_found' };
+
+          // 3. Anti-fraude: el nuevo usuario NO puede ser el mismo que el referidor
+          if (referrerPatient.email.toLowerCase() === input.newPatientEmail.toLowerCase()) {
+            return { success: false, reason: 'same_user' };
+          }
+
+          // 4. Verificar que el nuevo paciente existe y no ha recibido cashback de referido antes
+          const newPatient = await getPatientByEmail(input.newPatientEmail);
+          if (!newPatient) return { success: false, reason: 'new_patient_not_found' };
+          if (newPatient.referralCashbackPaid) return { success: false, reason: 'already_paid' };
+
+          // 5. Calcular cashback: 2% del precio de la promo (o $20 MXN fijo si no hay promo)
+          let cashbackCents = 2000; // $20 MXN por defecto
+          let promotionTitle = 'Cupón Nutriser';
+          let promotionPrice = 0;
+          if (input.promotionId) {
+            try {
+              const { getAllPromotionsForAdmin } = await import('./db');
+              const promos = await getAllPromotionsForAdmin();
+              const promo = promos.find(p => p.id === input.promotionId);
+              if (promo?.price) {
+                // Parsear precio (puede ser '$479 MXN' o '479')
+                const priceNum = parseFloat(promo.price.replace(/[^0-9.]/g, ''));
+                if (!isNaN(priceNum) && priceNum > 0) {
+                  cashbackCents = Math.round(priceNum * 0.015 * 100); // 1.5% en centavos
+                  promotionPrice = Math.round(priceNum * 100);
+                }
+                promotionTitle = promo.title;
+              }
+            } catch {}
+          }
+
+          // 6. Acreditar cashback al referidor
+          await addWalletTransaction({
+            walletId: referrerWallet.id,
+            type: 'cashback',
+            amount: cashbackCents,
+            description: `🎁 Cashback por referido: nuevo usuario se registró con tu link de "${promotionTitle}"`,
+            referenceType: 'referral',
+            createdBy: 'sistema',
+          });
+
+          // 7. Registrar el share en couponShares
+          await createCouponShare({
+            walletId: referrerWallet.id,
+            patientId: referrerWallet.patientId,
+            promotionId: input.promotionId || 0,
+            promotionTitle,
+            promotionPrice,
+            cashbackAmount: cashbackCents,
+            shareMethod: 'whatsapp',
+          });
+
+          // 8. Marcar al nuevo paciente como "cashback de referido pagado" (evitar doble pago)
+          const db = await getDb();
+          if (db) {
+            const { patientAccounts: pa } = await import('../drizzle/schema');
+            await db.update(pa).set({ referralCashbackPaid: true, referredByWalletCode: input.referrerWalletCode }).where(eq(pa.id, newPatient.id));
+          }
+
+          // 9. Notificar al referidor
+          try {
+            await sendAdminNotification({
+              walletId: referrerWallet.id,
+              patientId: referrerWallet.patientId,
+              title: '🎉 ¡Cashback por referido!',
+              message: `Alguien se registró con tu link de "${promotionTitle}". Te acreditamos $${(cashbackCents / 100).toFixed(2)} MXN en tu Monedero Nutriser.`,
+              type: 'general',
+              sentBy: 'sistema',
+            });
+          } catch {}
+
+          return { success: true, cashbackCents, promotionTitle };
+        } catch (e) {
+          console.error('processReferralCashback error:', e);
+          return { success: false, reason: 'error' };
+        }
+      }),
+  }),
   promotions: router({
     list: publicProcedure.query(async () => {
       return await getPromotionsWithCouponCounts();
@@ -1478,6 +1605,7 @@ export const appRouter = router({
         originalPrice: z.string().optional(),
         walletDiscount: z.number().optional(), // Monto en pesos MXN a descontar del monedero
         patientEmail: z.string().email().optional(),
+        purchaseType: z.enum(['service', 'package']).optional(), // Distingue servicios de paquetes
       }))
       .mutation(async ({ input }) => {
         // Upload proof to S3
@@ -1529,9 +1657,9 @@ export const appRouter = router({
           originalPrice: input.originalPrice,
           walletDiscount: walletDiscountAmt > 0 ? String(walletDiscountAmt) : undefined,
           patientEmail: input.patientEmail,
+          purchaseType: input.purchaseType ?? 'service',
         });
-
-        // Notify admin via email (no code yet)
+        // Notify admin via email (no code yet))
         try {
           await sendServicePurchaseNotificationToAdmin(
             ENV.gmailUser,

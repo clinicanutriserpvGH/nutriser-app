@@ -356,7 +356,8 @@ export async function sendCouponApprovedEmail(
   promotionTitle: string,
   isGift: boolean,
   recipientName?: string,
-  expiresAt?: Date
+  expiresAt?: Date,
+  qrDataUrl?: string
 ) {
   const transporter = getEmailTransporter();
 
@@ -400,7 +401,8 @@ export async function sendCouponApprovedEmail(
               <p style="color: #aaaaaa; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px;">C&#211;DIGO &#218;NICO</p>
               <p style="color: #C5A55A; font-size: 28px; font-family: 'Courier New', monospace; font-weight: bold; letter-spacing: 4px; margin: 0;">${couponCode}</p>
               ${expiresBlock}
-              <p style="color: #aaaaaa; font-size: 10px; margin: 16px 0 0;">Presenta este c&#243;digo en Nutriser para redimir tu cup&#243;n.</p>
+              ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR Code" style="width:140px;height:140px;margin:12px auto;display:block;border-radius:8px;">` : ''}
+              <p style="color: #aaaaaa; font-size: 10px; margin: 8px 0 0;">Presenta este c&#243;digo o el QR en Nutriser para redimir tu cup&#243;n.</p>
             </td></tr>
           </table>
 
@@ -738,6 +740,65 @@ export async function sendPurchaseReceiptEmail(params: {
     return true;
   } catch (error) {
     console.error('[Email] Error sending purchase receipt:', error);
+    return false;
+  }
+}
+
+export async function sendGiftRecipientEmail(
+  recipientEmail: string,
+  recipientName: string,
+  senderName: string,
+  promotionTitle: string,
+  couponCode: string,
+  qrDataUrl?: string,
+  expiresAt?: Date
+): Promise<boolean> {
+  const transporter = getEmailTransporter();
+  const expiresBlock = expiresAt
+    ? `<p style="color:#C5A55A;font-size:12px;margin:8px 0 0;">V&#225;lido hasta: <strong>${new Date(expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</strong></p>`
+    : '';
+  const html = `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:20px">
+    <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e0e0e0">
+      <div style="background:linear-gradient(135deg,#1A1A1A,#2d2416);padding:32px;text-align:center">
+        <h1 style="color:#C5A55A;font-size:22px;margin:0">&#127873; &#161;Tienes un regalo!</h1>
+        <p style="color:#fff;margin:8px 0 0"><strong>${senderName}</strong> te envi&#243; un cup&#243;n de Nutriser</p>
+      </div>
+      <div style="padding:28px">
+        <p style="color:#333">Hola <strong>${recipientName}</strong>,</p>
+        <p style="color:#555"><strong>${senderName}</strong> te regal&#243; el siguiente cup&#243;n exclusivo:</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:16px;border:2px solid #C5A55A;margin:20px 0">
+          <tr><td style="padding:28px;text-align:center">
+            <p style="color:#C5A55A;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin:0 0 6px">Cup&#243;n V&#225;lido</p>
+            <h2 style="color:#fff;font-size:18px;margin:0 0 12px">${promotionTitle}</h2>
+            <hr style="border:none;border-top:1px dashed #C5A55A;margin:10px 0">
+            <p style="color:#aaa;font-size:11px;letter-spacing:2px;margin:0 0 4px">A NOMBRE DE</p>
+            <p style="color:#fff;font-size:16px;font-weight:bold;margin:0 0 12px">${recipientName}</p>
+            <hr style="border:none;border-top:1px dashed #C5A55A;margin:10px 0">
+            <p style="color:#aaa;font-size:11px;letter-spacing:2px;margin:0 0 4px">C&#211;DIGO &#218;NICO</p>
+            <p style="color:#C5A55A;font-size:26px;font-family:'Courier New',monospace;font-weight:bold;letter-spacing:4px;margin:0">${couponCode}</p>
+            ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR" style="width:130px;height:130px;margin:12px auto;display:block;border-radius:8px;">` : ''}
+            ${expiresBlock}
+          </td></tr>
+        </table>
+        <div style="background:#e8f5e9;border-left:4px solid #4caf50;padding:12px 16px;border-radius:4px;margin:16px 0">
+          <p style="margin:0;font-size:13px;color:#2e7d32">&#128222; <strong>Agenda tu cita</strong><br>Llama al <strong>322 450 3257</strong> o esc&#237;benos por WhatsApp.</p>
+        </div>
+        <p style="font-size:13px;color:#666">&#191;Dudas? WhatsApp: <strong>+52 322 100 7799</strong></p>
+        <hr style="border:none;border-top:1px solid #ddd;margin:20px 0">
+        <p style="font-size:11px;color:#aaa;text-align:center">Nutriser - Aesthetic &amp; Nutrition &middot; nutriserpv.com</p>
+      </div>
+    </div>
+  </body></html>`;
+  try {
+    await transporter.sendMail({
+      from: `"Nutriser" <${ENV.gmailUser}>`,
+      to: recipientEmail,
+      subject: `&#127873; ${senderName} te regal&#243; un cup&#243;n: ${promotionTitle} - Nutriser`,
+      html,
+    });
+    return true;
+  } catch (e) {
+    console.error('sendGiftRecipientEmail error:', e);
     return false;
   }
 }

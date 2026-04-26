@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Gift, Copy, Check, X, ArrowRight, Flame, Clock, AlertTriangle, Bell, BellRing } from "lucide-react";
@@ -200,6 +201,7 @@ export default function PromotionsSection() {
     setSubSuccess(true);
   };
 
+  const [, navigate] = useLocation();
   const [giftModalOpen, setGiftModalOpen] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<{ id: number; title: string } | null>(null);
   const [step, setStep] = useState<Step>("form");
@@ -492,12 +494,7 @@ export default function PromotionsSection() {
 
                       {/* Botón Lo Quiero */}
                       <button
-                        onClick={() => {
-                          if (isSoldOut) { toast.error("Esta promoción ya no tiene cupones disponibles"); return; }
-                          setSelectedPromo({ id: promo.id, title: promo.title });
-                          setStep("form");
-                          setGiftModalOpen(true);
-                        }}
+                            onClick={() => { if (isSoldOut) { toast.error("Esta promoción ya no tiene cupones disponibles"); return; } navigate(`/cupon/${promo.id}?from=store`); }}
                         disabled={isSoldOut}
                         className={`block w-full py-3 px-4 rounded-xl font-black text-sm text-center uppercase tracking-widest transition-all duration-200 shadow-lg ${
                           isSoldOut

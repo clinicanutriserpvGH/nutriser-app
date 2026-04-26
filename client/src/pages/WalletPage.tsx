@@ -920,13 +920,10 @@ export default function WalletPage() {
                               {eb.status === 'approved' ? (lang === 'EN' ? 'Active' : 'Activo') : eb.status === 'pending' ? (lang === 'EN' ? 'Pending' : 'Pendiente') : (lang === 'EN' ? 'Rejected' : 'Rechazado')}
                             </span>
                           </div>
-                          {eb.status === 'approved' && eb.accessToken && (
-                            <div className="mt-2">
-                              <a href={`/ebook/${eb.accessToken}`} className="inline-flex items-center gap-1 text-[#C5A55A] text-xs font-bold hover:underline">
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                                {lang === 'EN' ? 'Read eBook' : 'Leer eBook'}
-                              </a>
-                            </div>
+                          {eb.status === 'approved' && (
+                            <p className="text-xs text-green-600 mt-1.5">
+                              {lang === 'EN' ? '📚 Available in your Books tab' : '📚 Disponible en tu pestaña Libros'}
+                            </p>
                           )}
                         </div>
                       ))}

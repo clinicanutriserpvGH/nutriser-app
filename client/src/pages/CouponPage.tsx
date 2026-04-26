@@ -466,7 +466,7 @@ export default function CouponPage() {
                         <div>
                           <p className="text-[#C5A55A] text-sm font-bold mb-1">¡Comparte y gana cashback en tu Monedero!</p>
                           <p className="text-white/80 text-sm leading-snug">
-                            Comparte este cupón con tus contactos. Por cada recomendado que abra su Monedero con tu link y <strong className="text-white">compre un cupón</strong>, te acreditamos cashback automáticamente. Solo cuenta cuando compartes desde aquí.
+                            Compártelo por <strong className="text-white">WhatsApp</strong> o copia el link. Por cada recomendado que abra su Monedero con tu link y compre, te acreditamos cashback automáticamente.
                           </p>
                         </div>
                       </div>

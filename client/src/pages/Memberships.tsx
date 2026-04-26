@@ -736,6 +736,12 @@ export default function Memberships() {
     { enabled: isLoggedIn && !!walletData?.id }
   );
   const adminUnreadCount = (adminNotifsQuery.data || []).filter((n: any) => !n.isRead).length;
+  // ── Ebooks ya comprados por el usuario ──
+  const myEbooksQuery = trpc.ebook.getMyEbooks.useQuery(
+    { email: patient?.email ?? '' },
+    { enabled: isLoggedIn && !!patient?.email }
+  );
+  const purchasedEbookIds = new Set((myEbooksQuery.data || []).filter((e: any) => e.status === 'approved' || e.status === 'pending').map((e: any) => e.ebookId));
 
   // Refetch wallet data when sheet opens to ensure fresh data
   useEffect(() => {
@@ -1530,6 +1536,10 @@ export default function Memberships() {
                                 </button>
                               </div>
                             </>
+                          ) : item.itemType === "ebook" && item.originalId && purchasedEbookIds.has(item.originalId) ? (
+                            <div className="w-full flex items-center justify-center gap-1 bg-green-50 border border-green-200 text-green-700 font-bold text-[10px] py-2 rounded-xl">
+                              <CheckCircle2 className="w-3 h-3" /> Ya adquirido
+                            </div>
                           ) : (
                             <button
                               onClick={(e) => {
@@ -1546,7 +1556,7 @@ export default function Memberships() {
                               <Zap className="w-3 h-3" />
                               {item.itemType === "ebook" ? t("buyBook", lang) : t("buy", lang)}
                             </button>
-                          )}
+                          )
                         </div>
                       </div>
                     </div>
@@ -1896,9 +1906,15 @@ export default function Memberships() {
                       <p className="text-[#C5A55A] font-black text-sm mb-2">${parseFloat(String((ebook as any).presalePrice ?? ebook.price)).toLocaleString("es-MX")} MXN</p>
                       <div className="mt-auto flex flex-col gap-1.5">
                         <div className="flex gap-1.5">
-                          <button onClick={() => addToCart({ id: `ebook-${ebook.id}`, name: ebook.title, price: parseFloat(String((ebook as any).presalePrice ?? ebook.price)), priceLabel: `$${parseFloat(String((ebook as any).presalePrice ?? ebook.price)).toLocaleString("es-MX")} MXN`, imageUrl: ebook.coverUrl ?? undefined, category: "ebook", itemType: "ebook", ebookId: ebook.id })} className="flex-1 flex items-center justify-center gap-1 border border-[#C5A55A] text-[#C5A55A] font-bold text-[10px] py-1.5 rounded-lg hover:bg-[#C5A55A]/10 transition-all">
-                            <ShoppingCart className="w-3 h-3" /> Al carrito
-                          </button>
+                          {purchasedEbookIds.has(ebook.id) ? (
+                            <div className="flex-1 flex items-center justify-center gap-1 bg-green-50 border border-green-200 text-green-600 font-bold text-[10px] py-1.5 rounded-lg">
+                              <CheckCircle2 className="w-3 h-3" /> Adquirido
+                            </div>
+                          ) : (
+                            <button onClick={() => addToCart({ id: `ebook-${ebook.id}`, name: ebook.title, price: parseFloat(String((ebook as any).presalePrice ?? ebook.price)), priceLabel: `$${parseFloat(String((ebook as any).presalePrice ?? ebook.price)).toLocaleString("es-MX")} MXN`, imageUrl: ebook.coverUrl ?? undefined, category: "ebook", itemType: "ebook", ebookId: ebook.id })} className="flex-1 flex items-center justify-center gap-1 border border-[#C5A55A] text-[#C5A55A] font-bold text-[10px] py-1.5 rounded-lg hover:bg-[#C5A55A]/10 transition-all">
+                              <ShoppingCart className="w-3 h-3" /> Al carrito
+                            </button>
+                          )}
                           <button onClick={() => handleMainCat("libreria")} className="flex-1 flex items-center justify-center gap-1 bg-[#C5A55A] text-white font-bold text-[10px] py-1.5 rounded-lg hover:bg-[#B8963E] transition-all">
                             <BookOpen className="w-3 h-3" /> Ver
                           </button>
@@ -2375,7 +2391,12 @@ onClick={() => {
                           </div>
                         </div>
                       )}
-                      {ebook.comingSoon && !(ebook as any).presalePrice ? (
+                      {purchasedEbookIds.has(ebook.id) ? (
+                        <div className="w-full flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-700 font-bold py-3.5 rounded-xl">
+                          <CheckCircle2 className="w-5 h-5" />
+                          {lang === "EN" ? "You already own this book" : "Ya adquiriste este libro"}
+                        </div>
+                      ) : ebook.comingSoon && !(ebook as any).presalePrice ? (
                         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
                           <p className="text-amber-700 font-bold text-sm">{t("comingSoonAvailable", lang)}</p>
                           <p className="text-gray-400 text-xs mt-1">{lang === "EN" ? "Subscribe to receive notification" : "Suscríbete para recibir notificación"}</p>

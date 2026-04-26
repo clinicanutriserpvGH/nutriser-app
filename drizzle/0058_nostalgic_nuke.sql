@@ -1,0 +1,1 @@
+ALTER TABLE `ebookPurchases` ADD `pricePaid` decimal(10,2);

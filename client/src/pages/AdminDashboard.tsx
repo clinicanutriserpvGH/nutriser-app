@@ -3046,6 +3046,90 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Compras Librería Tab */}
+          <TabsContent value="ebookPurchasesTab" className="space-y-4">
+            <Card className="border-[#C5A55A]/20">
+              <CardHeader>
+                <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                  <span className="text-lg">📖</span>
+                  Compras de Librería
+                </CardTitle>
+                <CardDescription>Gestiona las compras de ebooks y autoriza el acceso al contenido digital</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!ebookPurchases || ebookPurchases.length === 0 ? (
+                  <div className="bg-[#FAF7F2] p-6 rounded-lg text-center text-[#999]">
+                    <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p>No hay compras de eBook registradas</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {ebookPurchases.map((purchase) => (
+                      <div key={purchase.id} className="bg-[#FAF7F2] p-4 rounded-lg border border-[#C5A55A]/20">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                                purchase.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                purchase.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                'bg-red-100 text-red-600'
+                              }`}>
+                                {purchase.status === 'pending' ? '⏳ Pendiente' :
+                                 purchase.status === 'approved' ? '✅ Aprobado' : '❌ Rechazado'}
+                              </span>
+                            </div>
+                            <p className="font-semibold text-[#1A1A1A]">{purchase.buyerName}</p>
+                            <p className="text-sm text-[#666]">{purchase.buyerEmail}</p>
+                            {(purchase as any).pricePaid && (
+                              <p className="text-xs text-[#C5A55A] font-bold mt-1">${Number((purchase as any).pricePaid).toLocaleString('es-MX')} MXN</p>
+                            )}
+                            <p className="text-xs text-[#999] mt-1">{new Date(purchase.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {purchase.proofUrl && purchase.proofUrl !== 'free_ebook_code' && (
+                              <a href={purchase.proofUrl} target="_blank" rel="noreferrer noopener"
+                                className="flex items-center gap-1 px-3 py-2 border border-[#C5A55A] text-[#C5A55A] rounded-lg hover:bg-[#C5A55A]/10 transition text-sm">
+                                <Eye className="w-4 h-4" />
+                                Ver comprobante
+                              </a>
+                            )}
+                            {purchase.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    if (confirm(`¿Aprobar la compra de ${purchase.buyerName}?\n\nSe enviará notificación al paciente.`))
+                                      updateEbookPurchaseMutation.mutate({ id: purchase.id, status: 'approved' });
+                                  }}
+                                  disabled={updateEbookPurchaseMutation.isPending}
+                                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium disabled:opacity-50"
+                                >
+                                  ✅ Aprobar
+                                </button>
+                                <button
+                                  onClick={() => updateEbookPurchaseMutation.mutate({ id: purchase.id, status: 'rejected' })}
+                                  disabled={updateEbookPurchaseMutation.isPending}
+                                  className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm font-medium disabled:opacity-50"
+                                >
+                                  Rechazar
+                                </button>
+                              </>
+                            )}
+                            {purchase.status === 'approved' && (
+                              <div className="flex items-center gap-1 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
+                                <span>✅</span>
+                                Acceso activo
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Productos Tab */}
           <TabsContent value="products" className="space-y-4">
             <Card className="border-[#C5A55A]/20">

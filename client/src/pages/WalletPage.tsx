@@ -474,7 +474,7 @@ export default function WalletPage() {
               }`}
             >
               <span className="text-[14px] leading-none">💳</span>
-              <span>Pagos</span>
+              <span>Pendientes</span>
             </button>
             {/* Lealtad */}
             <button
@@ -493,7 +493,7 @@ export default function WalletPage() {
                 activeTab === "purchases" ? "bg-[#1A1A1A] text-[#C5A55A]" : "text-gray-500"
               }`}
             >
-              <span className="text-[14px] leading-none">🛎️</span>
+              <span className="text-[14px] leading-none">🛒</span>
               <span>Compras</span>
             </button>
             {/* Movimientos */}
@@ -909,7 +909,7 @@ export default function WalletPage() {
                               )}
                               <div>
                                 <p className="text-[#1A1A1A] font-bold text-sm">{eb.ebookTitle ?? 'eBook'}</p>
-                                {eb.ebookPrice && <p className="text-gray-500 text-xs mt-0.5">${eb.ebookPrice} MXN</p>}
+                                {(eb.pricePaid || eb.ebookPrice) && <p className="text-gray-500 text-xs mt-0.5">${eb.pricePaid ? Number(eb.pricePaid).toLocaleString('es-MX') : eb.ebookPrice} MXN</p>}
                                 <p className="text-gray-400 text-xs mt-0.5">{new Date(eb.createdAt).toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                               </div>
                             </div>
@@ -1220,6 +1220,9 @@ export default function WalletPage() {
                             <BookOpen className="w-3.5 h-3.5" />
                             Leer libro
                           </button>
+                        )}
+                        {book.status === 'approved' && !book.pdfUrl && (
+                          <p className="text-[11px] text-amber-600 font-medium bg-amber-50 rounded-lg px-3 py-2 text-center">📖 Tu libro está en preventa — te avisaremos cuando esté disponible para leer</p>
                         )}
                         {book.status === 'pending' && (
                           <p className="text-[10px] text-gray-400 italic">Te notificaremos cuando esté listo</p>

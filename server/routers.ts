@@ -991,9 +991,10 @@ export const appRouter = router({
         walletDiscount: z.number().optional(),
         patientEmail: z.string().email().optional(),
         ebookTitle: z.string().optional(),
+        pricePaid: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { proofBase64, discountCode, walletDiscount: walletDiscountAmt = 0, patientEmail, ebookTitle, ...rest } = input;
+        const { proofBase64, discountCode, walletDiscount: walletDiscountAmt = 0, patientEmail, ebookTitle, pricePaid, ...rest } = input;
 
         // ── Descontar saldo del monedero INMEDIATAMENTE ──
         if (walletDiscountAmt > 0 && patientEmail) {
@@ -1038,7 +1039,7 @@ export const appRouter = router({
         }
         
         const accessToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-        const purchase = await createEbookPurchase({ ...rest, proofUrl, accessToken, status: 'pending' });
+        const purchase = await createEbookPurchase({ ...rest, proofUrl, accessToken, status: 'pending', pricePaid: pricePaid ? String(pricePaid) : null });
         // Notificar al admin
         try {
           const nodemailer = await import('nodemailer');

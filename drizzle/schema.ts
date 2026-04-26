@@ -249,6 +249,7 @@ export const ebookPurchases = mysqlTable("ebookPurchases", {
   accessToken: varchar("accessToken", { length: 64 }).notNull().unique(), // Token único para acceder al PDF
   accessPasswordHash: varchar("accessPasswordHash", { length: 255 }), // Contraseña hasheada para login seguro
   referredBy: varchar("referredBy", { length: 255 }), // Nombre del comprador que recomendó el eBook
+  pricePaid: decimal("pricePaid", { precision: 10, scale: 2 }), // Precio real pagado al momento de la compra (ej. preventa $299)
   walletDiscount: decimal("walletDiscount", { precision: 10, scale: 2 }).default("0"), // Descuento del monedero
   patientEmail: varchar("patientEmail", { length: 320 }), // Email del paciente para vincular con monedero
   status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),

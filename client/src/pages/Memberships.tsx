@@ -924,6 +924,7 @@ export default function Memberships() {
           buyerName, buyerEmail,
           proofBase64: base64,
           discountCode: discountInfo?.valid ? discountCode.trim() : undefined,
+          pricePaid: transferAmount > 0 ? transferAmount : firstItem.price,
         });
       } else {
         servicePurchaseMutation.mutate({
@@ -1761,7 +1762,7 @@ export default function Memberships() {
                       <Droplets className="w-4 h-4 text-pink-400" />
                     </div>
                     <h2 className="font-bold text-gray-900 text-base">{t("tabProducts", lang)}</h2>
-                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{products.length}</span>
+                    
                   </div>
                   <button onClick={() => handleMainCat("skincare")} className="text-[#C5A55A] text-xs font-bold flex items-center gap-0.5">
                     {t("viewAll", lang)} <ChevronRight className="w-3.5 h-3.5" />
@@ -1999,7 +2000,7 @@ onClick={() => {
                         {(() => { const Icon = (CATEGORY_META[activeCategory] ?? CATEGORY_META.general).icon; return <Icon className="w-4 h-4" style={{ color: (CATEGORY_META[activeCategory] ?? CATEGORY_META.general).color }} />; })()}
                       </div>
                       <h2 className="font-bold text-gray-900 text-lg">{t((CATEGORY_META[activeCategory] ?? CATEGORY_META.general).label as any, lang)}</h2>
-                      <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{filteredServices.length}</span>
+                      
                     </div>
                     {filteredServices.length === 0 ? (
                       <div className="text-center py-16">

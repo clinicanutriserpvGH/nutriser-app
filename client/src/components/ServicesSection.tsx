@@ -239,15 +239,7 @@ export default function ServicesSection() {
                     <Icon className="w-4 h-4" />
                     <span className="hidden sm:inline">{cat.label}</span>
                     <span className="sm:hidden">{cat.label.split(" ")[0]}</span>
-                    <span
-                      className={`text-xs px-1.5 py-0.5 rounded-full ${
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-[#1A1A1A]/5 text-[#1A1A1A]/40"
-                      }`}
-                    >
-                      {cat.services.length}
-                    </span>
+
                   </button>
                 );
               })}

@@ -1929,7 +1929,6 @@ export default function Memberships() {
                               <Icon className="w-4 h-4" style={{ color: meta.color }} />
                             </div>
                             <h2 className="font-bold text-gray-900 text-base">{t(meta.label as any, lang)}</h2>
-                            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{catServices.length}</span>
                           </div>
                           <button onClick={() => setActiveCategory(cat)} className="text-[#C5A55A] text-xs font-bold flex items-center gap-0.5">
                             {t("viewAll", lang)} <ChevronRight className="w-3.5 h-3.5" />

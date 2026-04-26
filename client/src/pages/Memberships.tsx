@@ -1511,7 +1511,7 @@ export default function Memberships() {
                           {item.itemType === "service" ? (
                             <>
                               <button
-                                onClick={(e) => { e.stopPropagation(); const svc = services.find(s => s.id === item.originalId); if (svc) { const pn = parseInt((svc.price ?? "").replace(/[^0-9]/g, ""), 10); const b = (() => { try { return JSON.parse(svc.benefits ?? "[]"); } catch { return []; } })(); const a = (() => { try { return JSON.parse(svc.aftercare ?? "[]"); } catch { return []; } })(); setDetailItem({ id: `svc-${svc.id}`, name: svc.name, description: svc.description, price: svc.price, priceNum: isNaN(pn) ? null : pn, category: svc.category, imageUrl: svc.imageUrl, itemType: "service", benefits: b, duration: svc.duration, aftercare: a }); } }}
+                                onClick={(e) => { e.stopPropagation(); const svc = services.find(s => s.id === item.originalId); if (svc) { const pn = parseInt((svc.price ?? "").replace(/\D/g, ""), 10); const b = (() => { try { return JSON.parse(svc.benefits ?? "[]"); } catch { return []; } })(); const a = (() => { try { return JSON.parse(svc.aftercare ?? "[]"); } catch { return []; } })(); setDetailItem({ id: `svc-${svc.id}`, name: svc.name, description: svc.description, price: svc.price, priceNum: isNaN(pn) ? null : pn, category: svc.category, imageUrl: svc.imageUrl, itemType: "service", benefits: b, duration: svc.duration, aftercare: a }); } }}
                                 className="w-full flex items-center justify-center gap-1 font-semibold text-[10px] py-2 rounded-xl border mb-1.5 transition-all active:scale-95"
                                 style={{ borderColor: "#C5A55A", color: "#C5A55A", background: "transparent" }}
                               >
@@ -1556,7 +1556,7 @@ export default function Memberships() {
                               <Zap className="w-3 h-3" />
                               {item.itemType === "ebook" ? t("buyBook", lang) : t("buy", lang)}
                             </button>
-                          )
+                          )}
                         </div>
                       </div>
                     </div>

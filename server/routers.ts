@@ -3132,6 +3132,7 @@ Devuelve un JSON con estos campos:
           createdAt: ebookPurchases.createdAt,
           ebookTitle: ebooks.title,
           ebookPrice: ebooks.price,
+          pricePaid: ebookPurchases.pricePaid,
           ebookImageUrl: ebooks.coverUrl,
         }).from(ebookPurchases)
           .leftJoin(ebooks, eq(ebookPurchases.ebookId, ebooks.id))

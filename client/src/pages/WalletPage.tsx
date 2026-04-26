@@ -448,7 +448,7 @@ export default function WalletPage() {
           style={{ overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
         >
           {[
-            { key: "card" as const, label: 'Tarjeta' },
+            { key: "card" as const, label: 'Estado de Cuenta' },
             { key: "loyalty" as const, label: 'Lealtad' },
             { key: "purchases" as const, label: 'Compras' },
             { key: "history" as const, label: 'Movimientos' },

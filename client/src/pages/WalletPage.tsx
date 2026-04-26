@@ -262,7 +262,7 @@ export default function WalletPage() {
   // Usar walletNumber si existe, si no usar walletQuery directamente
   const installmentPlansQuery = trpc.installments.getMyPlans.useQuery(
     { walletNumber: wallet?.walletNumber || "" },
-    { enabled: isLoggedIn && !!wallet?.walletNumber }
+    { enabled: isLoggedIn && (!!wallet?.walletNumber || !!patient?.id) }
   );
   const installmentPlans: any[] = installmentPlansQuery.data || [];
 

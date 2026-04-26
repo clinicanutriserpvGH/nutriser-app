@@ -3076,8 +3076,8 @@ onClick={() => {
               </div>
 
               {/* Centro: espacio para la tarjeta FAB + etiqueta Monedero */}
-              <div style={{ width: 96, flexShrink: 0 }} className="flex flex-col items-center justify-end pb-1">
-                <span className="text-[10px] font-bold text-[#C5A55A] leading-tight">{t("tabWallet", lang)}</span>
+              <div style={{ width: 96, flexShrink: 0 }} className="flex flex-col items-center justify-end">
+                <span className="text-[10px] font-semibold text-[#C5A55A] leading-tight pb-1">{t("tabWallet", lang)}</span>
               </div>
 
               {/* Derecha: Deseos + Cuenta */}

@@ -161,7 +161,6 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
 export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated = false }: ShopPromoSplashProps) {
   // Cupones NO aparecen en splash - solo imágenes admin
   const { data: splashAds = [], isLoading: loadingAds } = (trpc.splashAds.getActive as any).useQuery({ type: 'inicio' });
-  console.log('[ShopPromoSplash] splashAds:', splashAds, 'loading:', loadingAds);
   const { data: splashConfigData, isLoading: loadingConfig } = (trpc.splashAds.getConfig as any).useQuery({ type: 'inicio' });
   const activePromos: Promo[] = [];
   const loadingPromos = false;

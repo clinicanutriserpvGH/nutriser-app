@@ -94,7 +94,7 @@ type SplashState = "splash0" | "site";
 const SPLASH_VERSION = "v3";
 
 function AppContent() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   // Auth del paciente para pasar isAuthenticated a los splashes
   const { isLoggedIn: patientIsLoggedIn } = usePatientAuth();
 
@@ -171,8 +171,13 @@ function AppContent() {
       {/* ShopPromoSplash - Imágenes de aparadores del inicio */}
       {!isDesktop && splashState === "splash0" && (
         <ShopPromoSplash
-          onClose={() => {}}
-          onGoToShop={() => {}}
+          onClose={() => {
+            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
+          }}
+          onGoToShop={() => {
+            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
+            navigate('/memberships');
+          }}
         />
       )}
 

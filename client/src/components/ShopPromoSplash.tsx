@@ -184,6 +184,9 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   const isShopSlide = !isAdminAdSlide && currentIndex === adminAdsCount && showDefaultSlide;
   const promoIndex = -1; // No se usan cupones en el splash de inicio
 
+  const shouldShow = totalSlides > 0 && !isClosing;
+  const dataLoaded = !loadingPromos && !loadingAds && !loadingConfig;
+
   const handleClose = useCallback(() => {
     setIsClosing(true); // Deshabilitar pointer-events inmediatamente para evitar bloqueo de taps en iOS
     onClose();
@@ -214,7 +217,6 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   }, [totalSlides]);
 
   // Cuando los datos ya cargaron y no hay nada que mostrar → llamar onClose para no bloquear el Splash 0
-  const dataLoaded = !loadingPromos && !loadingAds && !loadingConfig;
   useEffect(() => {
     if (dataLoaded && totalSlides === 0) {
       onClose(); // Liberar el Splash 0 automáticamente
@@ -222,7 +224,7 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
   }, [dataLoaded, totalSlides, onClose]);
 
   // Mientras cargan los datos o si no hay nada → no renderizar el overlay
-  if (!dataLoaded || totalSlides === 0) return null;
+  if (!shouldShow) return null;
 
   return (
     <>

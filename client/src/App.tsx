@@ -33,7 +33,7 @@ import Transformaciones from "./pages/Transformaciones";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import SplashSelector from "@/components/SplashSelector";
 import Splash0Entry from "@/components/Splash0Entry";
-import ShopPromoSplash from "@/components/ShopPromoSplash";
+
 import { SplashContext } from "@/contexts/SplashContext";
 import { SplashThemeProvider } from "@/contexts/SplashThemeContext";
 import { useState } from "react";
@@ -168,18 +168,6 @@ function AppContent() {
     <SplashContext.Provider value={{ showSplash: handleShowSplash, showSplash1: handleShowSplash1 }}>
       {/* Música de fondo solo en la página principal del sitio web */}
       {splashState === "site" && location === "/" && <BackgroundMusic />}
-      {/* ShopPromoSplash - Imágenes de aparadores del inicio */}
-      {!isDesktop && splashState === "splash0" && (
-        <ShopPromoSplash
-          onClose={() => {
-            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
-          }}
-          onGoToShop={() => {
-            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
-            navigate('/memberships');
-          }}
-        />
-      )}
 
       {/* Splash 0 - Entry Point */}
       {!isDesktop && splashState === "splash0" && (

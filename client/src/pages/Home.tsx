@@ -14,10 +14,26 @@ import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { useSplash } from "@/contexts/SplashContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import ShopPromoSplash from "@/components/ShopPromoSplash";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
+import { useDeviceType } from "@/hooks/useDeviceType";
 
 export default function Home() {
   const { showSplash } = useSplash();
+  const { isLoggedIn: patientIsLoggedIn } = usePatientAuth();
+  const { isMobile } = useDeviceType();
+  const [showShopPromoSplash, setShowShopPromoSplash] = useState(false);
+
+  // Mostrar ShopPromoSplash automáticamente al cargar Home en móvil (si no fue cerrado en esta sesión)
+  useEffect(() => {
+    if (isMobile) {
+      const dismissed = sessionStorage.getItem('nutriser_shop_promo_dismissed');
+      if (!dismissed) {
+        setShowShopPromoSplash(true);
+      }
+    }
+  }, [isMobile]);
 
   // Scroll automático si viene desde el botón Cuponera/Servicios del Hub
   useEffect(() => {
@@ -42,6 +58,21 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* ShopPromoSplash - Aparadores del inicio */}
+      {showShopPromoSplash && (
+        <ShopPromoSplash
+          isAuthenticated={patientIsLoggedIn}
+          onClose={() => {
+            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
+            setShowShopPromoSplash(false);
+          }}
+          onGoToShop={() => {
+            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
+            setShowShopPromoSplash(false);
+            window.location.href = '/memberships';
+          }}
+        />
+      )}
       <Navbar onShowSplash={showSplash} isHome />
       <main>
         <HeroSection />

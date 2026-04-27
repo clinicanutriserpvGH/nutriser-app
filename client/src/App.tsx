@@ -168,8 +168,15 @@ function AppContent() {
     <SplashContext.Provider value={{ showSplash: handleShowSplash, showSplash1: handleShowSplash1 }}>
       {/* Música de fondo solo en la página principal del sitio web */}
       {splashState === "site" && location === "/" && <BackgroundMusic />}
+      {/* ShopPromoSplash - Imágenes de aparadores del inicio */}
+      {!isDesktop && splashState === "splash0" && (
+        <ShopPromoSplash
+          onClose={() => {}}
+          onGoToShop={() => {}}
+        />
+      )}
 
-      {/* Splash 0 (solo móvil) */}
+      {/* Splash 0 - Entry Point */}
       {!isDesktop && splashState === "splash0" && (
         <Splash0Entry
           onEnterNutriserWeb={() => { sessionStorage.setItem('nutriser_splash_seen', '1'); setSplashState('site'); }}

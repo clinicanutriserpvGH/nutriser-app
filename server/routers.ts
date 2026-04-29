@@ -479,6 +479,21 @@ export const appRouter = router({
           price: match.price,
         };
       }),
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteMembership } = await import('./db');
+        return await deleteMembership(input.id);
+      }),
+    deleteAll: publicProcedure
+      .mutation(async () => {
+        const { getAllMemberships, deleteMembership } = await import('./db');
+        const memberships = await getAllMemberships();
+        for (const membership of memberships) {
+          await deleteMembership(membership.id);
+        }
+        return { success: true, deleted: memberships.length };
+      }),
   }),
 
   appointments: router({
@@ -1470,6 +1485,57 @@ export const appRouter = router({
       }),
   }),
 
+  // ─── Compras de Ebooks ────────────────────────────────────────────────────
+  ebookPurchases: router({
+    list: publicProcedure.query(async () => {
+      const { getDb } = await import('./db');
+      const db = await getDb();
+      if (!db) return [];
+      const { ebookPurchases, ebooks } = await import('../drizzle/schema');
+      const { desc } = await import('drizzle-orm');
+      return await db.select()
+        .from(ebookPurchases)
+        .orderBy(desc(ebookPurchases.createdAt));
+    }),
+    update: publicProcedure
+      .input(z.object({ id: z.number(), status: z.enum(['pending', 'approved', 'rejected']) }))
+      .mutation(async ({ input }) => {
+        const { getDb } = await import('./db');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { ebookPurchases } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        await db.update(ebookPurchases)
+          .set({ status: input.status })
+          .where(eq(ebookPurchases.id, input.id));
+        return { success: true };
+      }),
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { getDb } = await import('./db');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { ebookPurchases } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        await db.delete(ebookPurchases).where(eq(ebookPurchases.id, input.id));
+        return { success: true };
+      }),
+    deleteAll: publicProcedure
+      .mutation(async () => {
+        const { getDb } = await import('./db');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { ebookPurchases } = await import('../drizzle/schema');
+        const purchases = await db.select().from(ebookPurchases);
+        const { eq } = await import('drizzle-orm');
+        for (const purchase of purchases) {
+          await db.delete(ebookPurchases).where(eq(ebookPurchases.id, purchase.id));
+        }
+        return { success: true, deleted: purchases.length };
+      }),
+  }),
+
   // ─── Push Notificationss ─────────────────────────────────────────────────────
   push: router({
     subscribe: publicProcedure
@@ -1857,6 +1923,15 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return await deleteServicePurchase(input.id);
+      }),
+    deleteAll: publicProcedure
+      .mutation(async () => {
+        const { getAllServicePurchases, deleteServicePurchase } = await import('./db');
+        const purchases = await getAllServicePurchases();
+        for (const purchase of purchases) {
+          await deleteServicePurchase(purchase.id);
+        }
+        return { success: true, deleted: purchases.length };
       }),
     // Reintentar cashback para una compra ya aprobada (backfill)
     retryCashback: publicProcedure
@@ -2314,6 +2389,24 @@ Devuelve un JSON con estos campos:
           } catch (e) { console.warn('Stock restore error (delete):', e); }
         }
         return await deleteProductPurchase(input.id);
+      }),
+    deleteAll: publicProcedure
+      .mutation(async () => {
+        const purchases = await getAllProductPurchases();
+        for (const purchase of purchases) {
+          if (purchase.status === 'approved') {
+            try {
+              const product = await getProductById(purchase.productId);
+              if (product && product.stock !== null && product.stock !== undefined) {
+                const restoredStock = (product.stock || 0) + (purchase.quantity || 1);
+                const restoredSold = Math.max(0, (product.soldCount || 0) - (purchase.quantity || 1));
+                await updateProduct(purchase.productId, { stock: restoredStock, soldCount: restoredSold });
+              }
+            } catch (e) { console.warn('Stock restore error (deleteAll):', e); }
+          }
+          await deleteProductPurchase(purchase.id);
+        }
+        return { success: true, deleted: purchases.length };
       }),
   }),
   courses: router({

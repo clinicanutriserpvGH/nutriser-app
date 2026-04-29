@@ -2152,3 +2152,34 @@
 - [x] Cambiar layout de 2 columnas horizontal a grid vertical (3-4 columnas responsivo)
 - [x] Cambiar card de horizontal a vertical (imagen arriba, contenido abajo)
 - [ ] Corregir categorías de productos en BD (actualizar manualmente cada producto con su categoría correcta)
+
+
+## Correcciones Sesión 20 - Eliminación de Compras (Paquetes y Libros)
+
+### Backend - tRPC Endpoints
+- [x] Agregar endpoint `memberships.deleteAll` para eliminar todos los paquetes comprados
+- [x] Agregar endpoint `servicePurchases.deleteAll` para eliminar todos los servicios comprados
+- [x] Agregar endpoint `productPurchases.deleteAll` para eliminar todos los productos comprados
+- [x] Crear nuevo router `ebookPurchases` con endpoints: list, update, delete, deleteAll
+- [x] Todos los endpoints deleteAll restauran stock si la compra estaba aprobada
+
+### Frontend - AdminDashboard
+- [x] Renombrar "Compras Librería" a "Libros Comprados"
+- [x] Mover "Libros Comprados" al lado de "Productos Comprados"
+- [x] Agregar mutación `deleteAllMembershipsMutation` para Paquetes Comprados
+- [x] Agregar mutación `deleteAllServicePurchasesMutation` para Servicios Comprados
+- [x] Agregar mutación `deleteAllProductPurchasesMutation` para Productos Comprados
+- [x] Agregar mutación `deleteAllEbookPurchasesMutation` para Libros Comprados
+
+### Frontend - UI Buttons
+- [x] Agregar botón "Eliminar Todo" en tab Paquetes Comprados
+- [x] Agregar botón "Eliminar Todo" en tab Servicios Comprados
+- [x] Agregar botón "Eliminar Todo" en tab Productos Comprados
+- [x] Agregar botón "Eliminar Todo" en tab Libros Comprados
+- [x] Todos los botones incluyen confirmación con conteo de items
+- [x] Todos los botones muestran toast de éxito/error
+
+### Testing
+- [x] Verificar que TypeScript compila sin errores
+- [x] Verificar que el servidor dev está corriendo correctamente
+- [x] Verificar que no hay errores en la consola del navegador

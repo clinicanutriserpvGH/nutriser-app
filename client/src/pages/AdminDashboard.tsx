@@ -28,9 +28,9 @@ const ADMIN_TABS = [
   { value: 'memberships', label: 'Paquetes Comprados', emoji: '📦' },
   { value: 'servicePurchases', label: 'Servicios Comprados', emoji: '💉' },
   { value: 'productPurchases', label: 'Productos Comprados', emoji: '🛒' },
+  { value: 'ebookPurchasesTab', label: 'Libros Comprados', emoji: '📖' },
   { value: 'discountCodes', label: 'Códigos de Descuento', emoji: '🏷️%' },
   { value: 'ebook', label: 'Gestión Librería', emoji: '📚' },
-  { value: 'ebookPurchasesTab', label: 'Compras Librería', emoji: '📖' },
   { value: 'subscribers', label: 'Notificaciones Push', emoji: '🔔' },
   { value: 'courses', label: 'Cursos', emoji: '🎓' },
   { value: 'suggestions', label: 'Foro Expertos', emoji: '💡' },
@@ -782,6 +782,46 @@ export default function AdminDashboard() {
     },
   });
 
+  const deleteAllMembershipsMutation = trpc.memberships.deleteAll.useMutation({
+    onSuccess: () => {
+      toast.success("Todos los paquetes eliminados");
+      utils.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error: " + error.message);
+    },
+  });
+
+  const deleteAllServicePurchasesMutation = trpc.servicePurchases.deleteAll.useMutation({
+    onSuccess: () => {
+      toast.success("Todos los servicios comprados eliminados");
+      utils.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error: " + error.message);
+    },
+  });
+
+  const deleteAllProductPurchasesMutation = trpc.productPurchases.deleteAll.useMutation({
+    onSuccess: () => {
+      toast.success("Todos los productos comprados eliminados");
+      utils.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error: " + error.message);
+    },
+  });
+
+  const deleteAllEbookPurchasesMutation = trpc.ebookPurchases.deleteAll.useMutation({
+    onSuccess: () => {
+      toast.success("Todos los libros comprados eliminados");
+      utils.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error: " + error.message);
+    },
+  });
+
   const handleCancelAppointment = (appointmentId: number) => {
     if (confirm("¿Estás seguro de que deseas cancelar esta cita?")) {
       cancelAppointmentMutation.mutate({ id: appointmentId });
@@ -1327,9 +1367,28 @@ export default function AdminDashboard() {
           <TabsContent value="memberships" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
-                <div>
-                  <CardTitle className="text-[#C5A55A]">Paquetes Comprados</CardTitle>
-                  <CardDescription>Solicitudes de compra de paquetes — autoriza o rechaza cada una</CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-[#C5A55A]">Paquetes Comprados</CardTitle>
+                    <CardDescription>Solicitudes de compra de paquetes — autoriza o rechaza cada una</CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={() => {
+                      const packageCount = servicePurchases?.filter((sp: any) => sp.purchaseType === 'package').length || 0;
+                      if (packageCount === 0) {
+                        toast.error("No hay paquetes para eliminar");
+                        return;
+                      }
+                      if (confirm(`¿Estás seguro de que deseas eliminar TODOS los ${packageCount} paquete(s)? Esta acción no se puede deshacer.`)) {
+                        deleteAllMembershipsMutation.mutate();
+                      }
+                    }}
+                    disabled={deleteAllMembershipsMutation.isPending}
+                  >
+                    Eliminar Todo
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -2904,11 +2963,32 @@ export default function AdminDashboard() {
           <TabsContent value="servicePurchases" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
-                <CardTitle className="text-[#C5A55A] flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5" />
-                  Compras de Servicios
-                </CardTitle>
-                <CardDescription>Gestiona las solicitudes de compra de servicios de la clínica</CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                      <ShoppingBag className="w-5 h-5" />
+                      Compras de Servicios
+                    </CardTitle>
+                    <CardDescription>Gestiona las solicitudes de compra de servicios de la clínica</CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={() => {
+                      const serviceCount = servicePurchases?.filter((sp: any) => sp.purchaseType !== 'package').length || 0;
+                      if (serviceCount === 0) {
+                        toast.error("No hay servicios para eliminar");
+                        return;
+                      }
+                      if (confirm(`¿Estás seguro de que deseas eliminar TODOS los ${serviceCount} servicio(s)? Esta acción no se puede deshacer.`)) {
+                        deleteAllServicePurchasesMutation.mutate();
+                      }
+                    }}
+                    disabled={deleteAllServicePurchasesMutation.isPending}
+                  >
+                    Eliminar Todo
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -3020,15 +3100,36 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Compras Librería Tab */}
+          {/* Libros Comprados Tab */}
           <TabsContent value="ebookPurchasesTab" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
-                <CardTitle className="text-[#C5A55A] flex items-center gap-2">
-                  <span className="text-lg">📖</span>
-                  Compras de Librería
-                </CardTitle>
-                <CardDescription>Gestiona las compras de ebooks y autoriza el acceso al contenido digital</CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-[#C5A55A] flex items-center gap-2">
+                      <span className="text-lg">📖</span>
+                      Libros Comprados
+                    </CardTitle>
+                    <CardDescription>Gestiona las compras de ebooks y autoriza el acceso al contenido digital</CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={() => {
+                      const bookCount = ebookPurchases?.length || 0;
+                      if (bookCount === 0) {
+                        toast.error("No hay libros para eliminar");
+                        return;
+                      }
+                      if (confirm(`¿Estás seguro de que deseas eliminar TODOS los ${bookCount} libro(s)? Esta acción no se puede deshacer.`)) {
+                        deleteAllEbookPurchasesMutation.mutate();
+                      }
+                    }}
+                    disabled={deleteAllEbookPurchasesMutation.isPending}
+                  >
+                    Eliminar Todo
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {!ebookPurchases || ebookPurchases.length === 0 ? (
@@ -3307,8 +3408,29 @@ export default function AdminDashboard() {
           <TabsContent value="productPurchases" className="space-y-4">
             <Card className="border-[#C5A55A]/20">
               <CardHeader>
-                <CardTitle className="text-[#1A1A1A]">Compras de Productos</CardTitle>
-                <CardDescription>Verifica comprobantes y aprueba o rechaza compras de productos.</CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-[#1A1A1A]">Compras de Productos</CardTitle>
+                    <CardDescription>Verifica comprobantes y aprueba o rechaza compras de productos.</CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={() => {
+                      const productCount = productPurchases?.length || 0;
+                      if (productCount === 0) {
+                        toast.error("No hay productos para eliminar");
+                        return;
+                      }
+                      if (confirm(`¿Estás seguro de que deseas eliminar TODOS los ${productCount} producto(s)? Esta acción no se puede deshacer.`)) {
+                        deleteAllProductPurchasesMutation.mutate();
+                      }
+                    }}
+                    disabled={deleteAllProductPurchasesMutation.isPending}
+                  >
+                    Eliminar Todo
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">

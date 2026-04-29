@@ -2144,3 +2144,11 @@
 - [x] Instalación de librerías pdfkit y qrcode
 - [ ] Prueba manual del flujo de descarga de PDF
 - [ ] Validación de compatibilidad con impresora Evolis Badgy 100
+
+
+## Sesión Actual - Correcciones Skincare/Productos
+
+- [x] Renombrar categoría "Skincare" → "Productos" en tienda
+- [x] Cambiar layout de 2 columnas horizontal a grid vertical (3-4 columnas responsivo)
+- [x] Cambiar card de horizontal a vertical (imagen arriba, contenido abajo)
+- [ ] Corregir categorías de productos en BD (actualizar manualmente cada producto con su categoría correcta)

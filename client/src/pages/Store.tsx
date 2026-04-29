@@ -377,7 +377,7 @@ export default function Store() {
           {[
             { id: "all" as const, label: "Todo", count: tabCounts.all },
             { id: "services" as const, label: "Servicios", count: tabCounts.services },
-            { id: "products" as const, label: "Skincare", count: tabCounts.products },
+            { id: "products" as const, label: "Productos", count: tabCounts.products },
             { id: "ebooks" as const, label: "Libros", count: tabCounts.ebooks },
           ].map((tab) => (
             <button
@@ -416,7 +416,7 @@ export default function Store() {
                   ? `Resultados para "${searchQuery}"`
                   : activeTab === "all" ? "Todo en Nutriser"
                   : activeTab === "services" ? "Servicios"
-                  : activeTab === "products" ? "Skincare"
+                  : activeTab === "products" ? "Productos"
                   : "Libros Digitales"}
               </h2>
               <span className="text-xs lg:text-sm text-gray-400">{filteredItems.length} resultado{filteredItems.length !== 1 ? "s" : ""}</span>
@@ -437,15 +437,15 @@ export default function Store() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+              <div className="space-y-3 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 space-y-0">
                 {filteredItems.map((item) => (
                   <div
                     key={`${item.type}-${item.id}`}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex hover:shadow-md transition-shadow cursor-pointer"
+                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => handleItemClick(item)}
                   >
                     {/* Image */}
-                    <div className="w-28 h-28 sm:w-32 sm:h-32 lg:w-44 lg:h-44 flex-shrink-0 bg-[#F5F0E8] flex items-center justify-center overflow-hidden">
+                    <div className="w-full h-40 sm:h-48 bg-[#F5F0E8] flex items-center justify-center overflow-hidden">
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
@@ -462,7 +462,7 @@ export default function Store() {
                     </div>
 
                     {/* Info */}
-                    <div className="flex-1 p-3 lg:p-5 flex flex-col justify-between min-w-0">
+                    <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between">
                       <div>
                         {/* Type badge + category */}
                         <div className="flex items-center gap-1.5 flex-wrap mb-1">

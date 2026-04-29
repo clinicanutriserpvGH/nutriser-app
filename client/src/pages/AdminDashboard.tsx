@@ -413,6 +413,14 @@ export default function AdminDashboard() {
     onError: (error) => toast.error('Error al revocar acceso: ' + error.message),
   });
 
+  const deleteEbookPurchaseMutation = trpc.ebookPurchases.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Libro eliminado');
+      refetchEbookPurchases();
+    },
+    onError: (error) => toast.error('Error al eliminar libro: ' + error.message),
+  });
+
   const approveGiftMutation = trpc.giftPurchases.approve.useMutation({
     onSuccess: (data) => {
       toast.success('Compra autorizada. Email enviado al comprador.');
@@ -1459,6 +1467,11 @@ export default function AdminDashboard() {
                                     💰 Cashback
                                   </Button>
                                 )}
+                                <Button size="sm" variant="outline" className="text-xs bg-red-100 text-red-700 hover:bg-red-200"
+                                  onClick={() => { if (confirm('¿Eliminar este paquete?')) deleteServiceMutation.mutate({ id: sp.id }); }}
+                                  disabled={deleteServiceMutation.isPending}>
+                                  🗑️ Eliminar
+                                </Button>
                               </div>
                             </td>
                             <td className="py-3 px-4 text-xs text-[#999]">
@@ -3195,6 +3208,13 @@ export default function AdminDashboard() {
                                 Acceso activo
                               </div>
                             )}
+                            <button
+                              onClick={() => { if (confirm('¿Eliminar este libro?')) deleteEbookPurchaseMutation.mutate({ id: purchase.id }); }}
+                              disabled={deleteEbookPurchaseMutation.isPending}
+                              className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm font-medium disabled:opacity-50"
+                            >
+                              🗑️ Eliminar
+                            </button>
                           </div>
                         </div>
                       </div>

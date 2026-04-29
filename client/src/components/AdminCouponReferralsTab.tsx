@@ -21,8 +21,8 @@ export default function AdminCouponReferralsTab({ isAuthenticated }: Props) {
   }, []);
 
   const { data: stats, isLoading, error } = trpc.couponReferrals.getStats.useQuery(
-    { sessionToken },
-    { enabled: isAuthenticated && !!sessionToken }
+    { sessionToken: sessionToken || "" },
+    { enabled: isAuthenticated && !!sessionToken && sessionToken.length > 0 }
   );
 
   if (!isAuthenticated) return null;

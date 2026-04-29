@@ -3964,13 +3964,12 @@ Devuelve un JSON con estos campos:
         }
       }),
 
-    generateWalletPDF: protectedProcedure
+    generateWalletPDF: publicProcedure
       .input(z.object({
         walletIds: z.array(z.number()).min(1),
         format: z.enum(['sheet', 'individual']).default('sheet'),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+      .mutation(async ({ input }) => {
         const { walletIds, format } = input;
         const db = getDb();
         const wallets = await Promise.all(
@@ -5134,13 +5133,12 @@ Devuelve un JSON con estos campos:
         return statsAll.filter((s: { totalReferidos: number }) => s.totalReferidos > 0).sort((a: { totalCashbackGanado: number }, b: { totalCashbackGanado: number }) => b.totalCashbackGanado - a.totalCashbackGanado);
       }),
 
-    generateWalletPDF: protectedProcedure
+    generateWalletPDF: publicProcedure
       .input(z.object({
         walletIds: z.array(z.number()).min(1),
         format: z.enum(['sheet', 'individual']).default('sheet'),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+      .mutation(async ({ input }) => {
         const { walletIds, format } = input;
         const db = getDb();
         const wallets = await Promise.all(

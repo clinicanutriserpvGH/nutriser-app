@@ -3963,6 +3963,72 @@ Devuelve un JSON con estos campos:
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Error al borrar compra' });
         }
       }),
+
+    generateWalletPDF: protectedProcedure
+      .input(z.object({
+        walletIds: z.array(z.number()).min(1),
+        format: z.enum(['sheet', 'individual']).default('sheet'),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+        const { walletIds, format } = input;
+        const db = getDb();
+        const wallets = await Promise.all(
+          walletIds.map(async (id) => {
+            const wallet = await getWalletById(id);
+            if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: `Wallet ${id} not found` });
+            return wallet;
+          })
+        );
+        const PDFDocument = require('pdfkit');
+        const QRCode = require('qrcode');
+        const doc = new PDFDocument({ size: 'A4', margin: 10, bufferPages: true });
+        let pdfBuffer: any[] = [];
+        doc.on('data', (chunk: any) => pdfBuffer.push(chunk));
+        const cardWidthMM = 53.98;
+        const cardHeightMM = 85.60;
+        const cardWidth = cardWidthMM * 2.834645669;
+        const cardHeight = cardHeightMM * 2.834645669;
+        const qrDataMap = new Map();
+        for (const wallet of wallets) {
+          const qrUrl = `https://nutriserpv.com/monedero/${wallet.walletNumber}`;
+          const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 300, margin: 1, color: { dark: '#000000', light: '#FFFFFF' } });
+          qrDataMap.set(wallet.id, qrDataUrl);
+        }
+        if (format === 'sheet') {
+          const marginX = 20;
+          const marginY = 20;
+          const gapX = 10;
+          const gapY = 10;
+          const cardsPerPage = 8;
+          const cardsPerRow = 2;
+          wallets.forEach((wallet, index) => {
+            if (index > 0 && index % cardsPerPage === 0) doc.addPage();
+            const rowInPage = Math.floor((index % cardsPerPage) / cardsPerRow);
+            const colInPage = (index % cardsPerPage) % cardsPerRow;
+            const x = marginX + colInPage * (cardWidth + gapX);
+            const y = marginY + rowInPage * (cardHeight + gapY);
+            const qrData = qrDataMap.get(wallet.id);
+            drawWalletCardPDF(doc, wallet, x, y, cardWidth, cardHeight, qrData);
+          });
+        } else {
+          wallets.forEach((wallet, index) => {
+            if (index > 0) doc.addPage();
+            const x = (595 - cardWidth) / 2;
+            const y = (842 - cardHeight) / 2;
+            const qrData = qrDataMap.get(wallet.id);
+            drawWalletCardPDF(doc, wallet, x, y, cardWidth, cardHeight, qrData);
+          });
+        }
+        doc.end();
+        return new Promise((resolve, reject) => {
+          doc.on('finish', () => {
+            const buffer = Buffer.concat(pdfBuffer);
+            resolve({ success: true, buffer: buffer.toString('base64'), filename: `nutriser-wallets-${Date.now()}.pdf` });
+          });
+          doc.on('error', reject);
+        });
+      }),
   }),
   // ─── Analítica de Comportamiento ─────────────────────────────────────────────
   analytics: router({
@@ -5067,6 +5133,107 @@ Devuelve un JSON con estos campos:
         // Solo retornar monederos con al menos 1 referido, ordenados por cashback ganado
         return statsAll.filter((s: { totalReferidos: number }) => s.totalReferidos > 0).sort((a: { totalCashbackGanado: number }, b: { totalCashbackGanado: number }) => b.totalCashbackGanado - a.totalCashbackGanado);
       }),
+
+    generateWalletPDF: protectedProcedure
+      .input(z.object({
+        walletIds: z.array(z.number()).min(1),
+        format: z.enum(['sheet', 'individual']).default('sheet'),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
+        const { walletIds, format } = input;
+        const db = getDb();
+        const wallets = await Promise.all(
+          walletIds.map(async (id) => {
+            const wallet = await getWalletById(id);
+            if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: `Wallet ${id} not found` });
+            return wallet;
+          })
+        );
+        const PDFDocument = require('pdfkit');
+        const QRCode = require('qrcode');
+        const doc = new PDFDocument({ size: 'A4', margin: 10, bufferPages: true });
+        let pdfBuffer: any[] = [];
+        doc.on('data', (chunk: any) => pdfBuffer.push(chunk));
+        const cardWidthMM = 53.98;
+        const cardHeightMM = 85.60;
+        const cardWidth = cardWidthMM * 2.834645669;
+        const cardHeight = cardHeightMM * 2.834645669;
+        const qrDataMap = new Map();
+        for (const wallet of wallets) {
+          const qrUrl = `https://nutriserpv.com/monedero/${wallet.walletNumber}`;
+          const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 300, margin: 1, color: { dark: '#000000', light: '#FFFFFF' } });
+          qrDataMap.set(wallet.id, qrDataUrl);
+        }
+        if (format === 'sheet') {
+          const marginX = 20;
+          const marginY = 20;
+          const gapX = 10;
+          const gapY = 10;
+          const cardsPerPage = 8;
+          const cardsPerRow = 2;
+          wallets.forEach((wallet, index) => {
+            if (index > 0 && index % cardsPerPage === 0) doc.addPage();
+            const rowInPage = Math.floor((index % cardsPerPage) / cardsPerRow);
+            const colInPage = (index % cardsPerPage) % cardsPerRow;
+            const x = marginX + colInPage * (cardWidth + gapX);
+            const y = marginY + rowInPage * (cardHeight + gapY);
+            const qrData = qrDataMap.get(wallet.id);
+            drawWalletCardPDF(doc, wallet, x, y, cardWidth, cardHeight, qrData);
+          });
+        } else {
+          wallets.forEach((wallet, index) => {
+            if (index > 0) doc.addPage();
+            const x = (595 - cardWidth) / 2;
+            const y = (842 - cardHeight) / 2;
+            const qrData = qrDataMap.get(wallet.id);
+            drawWalletCardPDF(doc, wallet, x, y, cardWidth, cardHeight, qrData);
+          });
+        }
+        doc.end();
+        return new Promise((resolve, reject) => {
+          doc.on('finish', () => {
+            const buffer = Buffer.concat(pdfBuffer);
+            resolve({ success: true, buffer: buffer.toString('base64'), filename: `nutriser-wallets-${Date.now()}.pdf` });
+          });
+          doc.on('error', reject);
+        });
+      }),
   }),
 });
+
+// Función helper movida antes de export
+function drawWalletCardPDF(doc: any, wallet: any, x: number, y: number, width: number, height: number, qrDataUrl?: string) {
+  const GOLD_LIGHT = '#E8C97A';
+  const GOLD_DARK = '#8B6914';
+  const TEXT_DARK = '#1A1A1A';
+  doc.rect(x, y, width, height).fill('#FFFFFF').stroke('#D4AF60');
+  const topHeight = height * 0.24;
+  doc.rect(x, y, width, topHeight).fill(GOLD_LIGHT);
+  doc.fontSize(10).font('Helvetica-Bold').fill(TEXT_DARK);
+  doc.text('MONEDERO NUTRISER', x + 5, y + 3, { width: width - 10, align: 'left' });
+  doc.fontSize(7).font('Helvetica').fill('rgba(58,34,0,0.6)');
+  doc.text('aesthetic & nutrition', x + 5, y + 13, { width: width - 10, align: 'left' });
+  const centerY = y + topHeight;
+  const centerHeight = height * 0.48;
+  const qrSize = Math.min(width * 0.4, centerHeight - 4);
+  const qrX = x + 3;
+  const qrY = centerY + (centerHeight - qrSize) / 2;
+  if (qrDataUrl) {
+    doc.image(qrDataUrl, qrX, qrY, { width: qrSize, height: qrSize });
+  } else {
+    doc.rect(qrX, qrY, qrSize, qrSize).stroke(GOLD_DARK);
+    doc.fontSize(6).fill(GOLD_DARK).text('QR', qrX + qrSize / 2 - 5, qrY + qrSize / 2 - 3);
+  }
+  const bottomY = y + height - height * 0.28;
+  doc.rect(x, bottomY, width, height * 0.28).fill(GOLD_LIGHT);
+  doc.fontSize(11).font('Helvetica-Bold').fill(TEXT_DARK);
+  const patientName = (wallet.patientName || 'SIN NOMBRE').toUpperCase().substring(0, 20);
+  doc.text(patientName, x + 3, bottomY + 2, { width: width - 6, align: 'left' });
+  doc.fontSize(7).font('Courier').fill('rgba(58,34,0,0.7)');
+  doc.text(wallet.walletNumber || 'NUT-XXXX-XXXX', x + 3, bottomY + 13, { width: width - 6, align: 'left' });
+  doc.fontSize(6).font('Helvetica').fill('rgba(58,34,0,0.65)');
+  doc.text('nutriserpv.com/monedero', x + 3, bottomY + 20, { width: width - 6, align: 'left' });
+}
+
 export type AppRouter = typeof appRouter;

@@ -1530,7 +1530,9 @@ function PrintCardsTab({
 
   const selectedWallets = wallets.filter((w: any) => selectedCards.has(w.id));
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isGeneratingEvolis, setIsGeneratingEvolis] = useState(false);
   const printContainerRef = useRef<HTMLDivElement>(null);
+  const generateEvolisPDF = trpc.wallet.generateWalletPDF.useMutation();
 
   // Convertir datos de wallet al formato de WalletCardData
   const toCardData = (w: any) => ({
@@ -1567,6 +1569,45 @@ function PrintCardsTab({
       setIsPrinting(false);
     }
   }, [selectedWallets, printMode]);
+
+  // Genera PDF de alta resolución (260 dpi) para impresora Evolis
+  const handleGenerateEvolisPDF = useCallback(async () => {
+    if (selectedWallets.length === 0) {
+      toast.error("Selecciona al menos una tarjeta para imprimir");
+      return;
+    }
+    setIsGeneratingEvolis(true);
+    toast.info("Generando PDF para Evolis (260 dpi)...");
+    try {
+      const walletIds = selectedWallets.map((w: any) => w.id);
+      const result = (await generateEvolisPDF.mutateAsync({
+        walletIds,
+        format: printMode === "sheet" ? "sheet" : "individual",
+      })) as any;
+      if (result?.success && result?.buffer) {
+        const binaryString = atob(result.buffer as string);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = (result.filename as string) || "nutriser-wallets.pdf";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success("✅ PDF Evolis descargado (260 dpi, QR de alta resolución)");
+      }
+    } catch (err: any) {
+      console.error("[Evolis PDF]", err);
+      toast.error(err?.message || "Error al generar PDF Evolis");
+    } finally {
+      setIsGeneratingEvolis(false);
+    }
+  }, [selectedWallets, printMode, generateEvolisPDF]);
 
   return (
     <div className="space-y-4">
@@ -1627,6 +1668,18 @@ function PrintCardsTab({
             <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generando PDF...</>
           ) : (
             <><Printer className="w-4 h-4 mr-2" />Generar PDF {selectedCards.size > 0 ? `(${selectedCards.size})` : ""}</>
+          )}
+        </Button>
+        <Button
+          onClick={handleGenerateEvolisPDF}
+          disabled={selectedCards.size === 0 || isGeneratingEvolis}
+          className="bg-green-600 hover:bg-green-700 text-white font-bold"
+          title="PDF de alta resolución (260 dpi) para impresora Evolis Badgy"
+        >
+          {isGeneratingEvolis ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Evolis...</>
+          ) : (
+            <><PrinterCheck className="w-4 h-4 mr-2" />Evolis 260dpi {selectedCards.size > 0 ? `(${selectedCards.size})` : ""}</>
           )}
         </Button>
       </div>

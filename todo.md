@@ -2112,3 +2112,35 @@
 - [ ] Remover processReferralCashback del onSuccess de registerMutation en NutriserAuthModal
 - [ ] Agregar banner compartir (WhatsApp/link + cashback) siempre en CouponPage (/cupon/:id)
 - [ ] Unificar flujo: CouponPage y PromotionsSection muestran el mismo banner de compartir
+
+
+## Sesión Actual - Generación de PDFs para Impresora Evolis
+
+### Corrección de Splash
+- [x] Separar ShopPromoSplash (inicio) de PromoSplash (tienda)
+- [x] Remover ShopPromoSplash de App.tsx (renderizado global)
+- [x] Mover ShopPromoSplash a Home.tsx (solo en ruta /)
+- [x] Verificar que cada splash tiene su propia sesión key
+
+### Generación de PDFs de Tarjetas para Evolis Badgy 100
+- [ ] Crear endpoint tRPC `/api/print/wallet-pdf` para generar PDFs de alta resolución
+- [ ] Implementar generación de PDF con resolución 260 x 300 dpi
+- [ ] Tamaño exacto CR-80: 53.98 mm x 85.60 mm
+- [ ] QR de alta resolución (300x300px mínimo)
+- [ ] Colores optimizados para sublimación de tinta
+- [ ] Soporte para 8 tarjetas por hoja A4
+- [ ] Soporte para tarjeta individual
+- [ ] Márgenes seguros para impresora Evolis
+- [ ] Integrar en frontend con botón "Generar PDF para Imprimir"
+- [ ] Pruebas de compatibilidad con impresora
+
+
+## Sesión Actual - Generación de PDFs Evolis (260 dpi)
+
+- [x] Endpoint tRPC `wallet.generateWalletPDF` para generar PDFs de alta resolución (260 dpi)
+- [x] Integración de QR codes reales en PDFs (300x300px)
+- [x] Soporte para formato Hoja A4 (8 tarjetas/hoja) e Individual
+- [x] Botón "Evolis 260dpi" en AdminWalletTab para descargar PDFs
+- [x] Instalación de librerías pdfkit y qrcode
+- [ ] Prueba manual del flujo de descarga de PDF
+- [ ] Validación de compatibilidad con impresora Evolis Badgy 100

@@ -4007,8 +4007,8 @@ Devuelve un JSON con estos campos:
             return wallet;
           })
         );
-        const PDFDocument = require('pdfkit');
-        const QRCode = require('qrcode');
+        const PDFDocument = (await import('pdfkit')).default;
+        const QRCode = (await import('qrcode')).default;
         const doc = new PDFDocument({ size: 'A4', margin: 10, bufferPages: true });
         let pdfBuffer: any[] = [];
         doc.on('data', (chunk: any) => pdfBuffer.push(chunk));
@@ -5176,8 +5176,8 @@ Devuelve un JSON con estos campos:
             return wallet;
           })
         );
-        const PDFDocument = require('pdfkit');
-        const QRCode = require('qrcode');
+        const PDFDocument = (await import('pdfkit')).default;
+        const QRCode = (await import('qrcode')).default;
         const doc = new PDFDocument({ size: 'A4', margin: 10, bufferPages: true });
         let pdfBuffer: any[] = [];
         doc.on('data', (chunk: any) => pdfBuffer.push(chunk));

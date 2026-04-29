@@ -4016,12 +4016,13 @@ Devuelve un JSON con estos campos:
         const cardHeightMM = 85.60;
         const cardWidth = cardWidthMM * 2.834645669;
         const cardHeight = cardHeightMM * 2.834645669;
+        // Generar QR codes en paralelo para optimizar
         const qrDataMap = new Map();
-        for (const wallet of wallets) {
+        await Promise.all(wallets.map(async (wallet) => {
           const qrUrl = `https://nutriserpv.com/monedero/${wallet.walletNumber}`;
-          const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 300, margin: 1, color: { dark: '#000000', light: '#FFFFFF' } });
+          const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 200, margin: 1, color: { dark: '#000000', light: '#FFFFFF' } });
           qrDataMap.set(wallet.id, qrDataUrl);
-        }
+        }));
         if (format === 'sheet') {
           const marginX = 20;
           const marginY = 20;
@@ -5185,12 +5186,13 @@ Devuelve un JSON con estos campos:
         const cardHeightMM = 85.60;
         const cardWidth = cardWidthMM * 2.834645669;
         const cardHeight = cardHeightMM * 2.834645669;
+        // Generar QR codes en paralelo para optimizar
         const qrDataMap = new Map();
-        for (const wallet of wallets) {
+        await Promise.all(wallets.map(async (wallet) => {
           const qrUrl = `https://nutriserpv.com/monedero/${wallet.walletNumber}`;
-          const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 300, margin: 1, color: { dark: '#000000', light: '#FFFFFF' } });
+          const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 200, margin: 1, color: { dark: '#000000', light: '#FFFFFF' } });
           qrDataMap.set(wallet.id, qrDataUrl);
-        }
+        }));
         if (format === 'sheet') {
           const marginX = 20;
           const marginY = 20;

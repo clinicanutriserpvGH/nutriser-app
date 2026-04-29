@@ -485,8 +485,11 @@ export const appRouter = router({
         const { deleteMembership } = await import('./db');
         return await deleteMembership(input.id);
       }),
-    deleteAll: publicProcedure
-      .mutation(async () => {
+    deleteAll: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Solo administradores pueden eliminar paquetes' });
+        }
         const { getAllMemberships, deleteMembership } = await import('./db');
         const memberships = await getAllMemberships();
         for (const membership of memberships) {
@@ -1521,16 +1524,19 @@ export const appRouter = router({
         await db.delete(ebookPurchases).where(eq(ebookPurchases.id, input.id));
         return { success: true };
       }),
-    deleteAll: publicProcedure
-      .mutation(async () => {
+    deleteAll: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Solo administradores pueden eliminar servicios' });
+        }
         const { getDb } = await import('./db');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
-        const { ebookPurchases } = await import('../drizzle/schema');
-        const purchases = await db.select().from(ebookPurchases);
+        const { servicePurchases } = await import('../drizzle/schema');
+        const purchases = await db.select().from(servicePurchases);
         const { eq } = await import('drizzle-orm');
         for (const purchase of purchases) {
-          await db.delete(ebookPurchases).where(eq(ebookPurchases.id, purchase.id));
+          await db.delete(servicePurchases).where(eq(servicePurchases.id, purchase.id));
         }
         return { success: true, deleted: purchases.length };
       }),
@@ -1924,8 +1930,11 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await deleteServicePurchase(input.id);
       }),
-    deleteAll: publicProcedure
-      .mutation(async () => {
+    deleteAll: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Solo administradores pueden eliminar compras' });
+        }
         const { getAllServicePurchases, deleteServicePurchase } = await import('./db');
         const purchases = await getAllServicePurchases();
         for (const purchase of purchases) {
@@ -2390,8 +2399,11 @@ Devuelve un JSON con estos campos:
         }
         return await deleteProductPurchase(input.id);
       }),
-    deleteAll: publicProcedure
-      .mutation(async () => {
+    deleteAll: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Solo administradores pueden eliminar compras' });
+        }
         const purchases = await getAllProductPurchases();
         for (const purchase of purchases) {
           if (purchase.status === 'approved') {

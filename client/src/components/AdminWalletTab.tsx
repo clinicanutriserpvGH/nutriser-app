@@ -417,6 +417,10 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
     onSuccess: () => { toast.success('Solicitud de contrato cancelada.'); utils.wallet.adminListAll.invalidate(); },
     onError: (e) => toast.error('Error: ' + e.message),
   });
+  const clearAllPurchasesMutation = trpc.wallet.adminClearAllPurchases.useMutation({
+    onSuccess: () => { toast.success('✅ Todas las compras (servicios, productos, libros) han sido eliminadas.'); utils.wallet.adminListAll.invalidate(); },
+    onError: (e) => toast.error('Error: ' + e.message),
+  });
 
   return (
     <>
@@ -881,6 +885,22 @@ function WalletCard({ wallet, onCredit, onDebit, isLoading, openSecurityModal }:
                           ))}
                         </div>
                       )}
+                    </div>
+
+                    {/* Borrar todas las compras */}
+                    <div>
+                      <button
+                        onClick={() => {
+                          if (confirm('¿Estás seguro? Se eliminarán TODAS las compras (servicios, productos, libros).')) {
+                            clearAllPurchasesMutation.mutate({ walletId: wallet.id });
+                          }
+                        }}
+                        disabled={clearAllPurchasesMutation.isPending}
+                        className="flex items-center gap-1 text-[9px] text-red-600 hover:text-red-800 font-bold transition disabled:opacity-50 px-2 py-1 rounded hover:bg-red-50"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        {clearAllPurchasesMutation.isPending ? 'Eliminando...' : 'Borrar todas las compras'}
+                      </button>
                     </div>
 
                     {/* Planes a plazos */}

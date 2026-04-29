@@ -28,9 +28,8 @@ import { saveAPNsToken, sendAPNsPushToAll, isAPNsConfigured } from "./apnsServic
 import { storagePut } from "./storage";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
-import { adminCredentials, pushSubscriptions } from "../drizzle/schema";
+import { adminCredentials, pushSubscriptions, productPurchases, ebookPurchases, servicePurchases, patientAccounts, membershipCoupons } from "../drizzle/schema";
 import { getDb } from "./db";
-import { membershipCoupons } from "../drizzle/schema";
 
 // ── Helper: enviar correo + push al paciente cuando el admin manda notificación ──
 async function sendAdminNotifEmailAndPush(
@@ -3641,6 +3640,35 @@ Devuelve un JSON con estos campos:
       .mutation(async ({ input }) => {
         const result = await clearAllWalletTransactions(input.walletId);
         return { success: true, deleted: result.deleted };
+      }),
+    // Borrar todas las compras del usuario (servicios, productos, libros)
+    adminClearAllPurchases: publicProcedure
+      .input(z.object({ walletId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database connection failed' });
+        
+        const wallet = await getWalletById(input.walletId);
+        if (!wallet) throw new TRPCError({ code: 'NOT_FOUND', message: 'Monedero no encontrado' });
+        
+        const patientId = wallet.patientId;
+        if (!patientId) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Monedero sin paciente asociado' });
+        
+        const patientData = await db.select().from(patientAccounts).where(eq(patientAccounts.id, patientId)).limit(1);
+        const patientEmail = patientData.length > 0 ? patientData[0].email : null;
+        
+        if (!patientEmail) throw new TRPCError({ code: 'NOT_FOUND', message: 'Email del paciente no encontrado' });
+        
+        // Borrar servicios comprados
+        await db.delete(servicePurchases).where(eq(servicePurchases.patientEmail, patientEmail)).catch(() => {});
+        
+        // Borrar productos comprados
+        await db.delete(productPurchases).where(eq(productPurchases.patientEmail, patientEmail)).catch(() => {});
+        
+        // Borrar libros comprados
+        await db.delete(ebookPurchases).where(eq(ebookPurchases.patientEmail, patientEmail)).catch(() => {});
+        
+        return { success: true, deleted: 0 };
       }),
      // Registrar consulta nutricional (admin)
     adminRecordConsultation: publicProcedure

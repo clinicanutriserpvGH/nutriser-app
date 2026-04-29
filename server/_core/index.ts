@@ -165,6 +165,69 @@ async function startServer() {
     }
   });
   
+  // ─── Notification Image Upload ───────────────────────────────────────────────
+  // POST /api/upload-notif-image — carga imágenes para notificaciones
+  app.post("/api/upload-notif-image", (req, res, next) => {
+    req.setTimeout(30000);
+    res.setTimeout(30000);
+    next();
+  }, async (req, res) => {
+    try {
+      const { storagePut } = await import("../storage");
+      const busboy = await import("busboy");
+      const bb = busboy.default({ headers: req.headers, limits: { fileSize: 2 * 1024 * 1024 } }); // 2MB max
+      let fileBuffer: Buffer | null = null;
+      let fileType = "application/octet-stream";
+      let originalFilename = "image";
+      
+      bb.on("file", (fieldname: string, file: any, info: any) => {
+        const chunks: Buffer[] = [];
+        fileType = info.mimeType || "application/octet-stream";
+        originalFilename = info.filename || "image";
+        file.on("data", (chunk: Buffer) => chunks.push(chunk));
+        file.on("end", () => {
+          fileBuffer = Buffer.concat(chunks);
+        });
+      });
+      
+      bb.on("close", async () => {
+        try {
+          if (!fileBuffer) {
+            return res.status(400).json({ error: "No file uploaded" });
+          }
+          
+          // Validar que sea imagen
+          if (!fileType.startsWith('image/')) {
+            return res.status(400).json({ error: "Solo se permiten imágenes" });
+          }
+          
+          // Obtener extensión
+          const ext = originalFilename.includes('.')
+            ? originalFilename.split('.').pop()?.toLowerCase() || 'jpg'
+            : 'jpg';
+          
+          // Generar nombre único para la imagen
+          const timestamp = Date.now();
+          const random = Math.random().toString(36).substring(7);
+          const filename = `notif-${timestamp}-${random}.${ext}`;
+          
+          // Subir a S3
+          const { url } = await storagePut(`notifications/${filename}`, fileBuffer, fileType);
+          
+          res.status(200).json({ url, success: true });
+        } catch (error) {
+          console.error("Notification image upload error:", error);
+          res.status(500).json({ error: "Upload failed: " + (error instanceof Error ? error.message : "Unknown error") });
+        }
+      });
+      
+      req.pipe(bb);
+    } catch (error) {
+      console.error("Notification image upload error:", error);
+      res.status(500).json({ error: "Upload failed" });
+    }
+  });
+  
   // ─── Chunked Upload Endpoints ──────────────────────────────────────────────
   // POST /api/upload-chunk — recibe un chunk del video y lo guarda en disco
   app.post("/api/upload-chunk", (req, res, next) => {

@@ -10,7 +10,7 @@
  * Nota: la misma cuenta de paciente funciona para Shop y Academy.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ShoppingBag, CalendarCheck, Moon, Sun } from "lucide-react";
+import { ShoppingBag, CalendarCheck, Moon, Sun, Wallet } from "lucide-react";
 import { useSplashTheme } from "@/contexts/SplashThemeContext";
 
 const LOGO_URL =
@@ -328,6 +328,24 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 </svg>
               </div>
               <span className={`text-[9px] sm:text-[10px] md:text-xs font-medium ${isLight ? 'text-[#9a8050]' : 'text-[#C5A55A]/80'}`}>Instagram</span>
+            </a>
+
+            {/* Mi Monedero */}
+            <a
+              href="#"
+              onClick={e => { e.preventDefault(); handleNavigate('/wallet'); }}
+              className="flex flex-col items-center gap-1 group flex-shrink-0"
+              aria-label="Mi Monedero"
+            >
+              <div className="w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center shadow-md group-hover:scale-110 active:scale-95 transition-all duration-200"
+                style={{
+                  background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 50%, #C5A55A 100%)',
+                  border: '1px solid rgba(197,165,90,0.6)',
+                  boxShadow: '0 0 12px rgba(197,165,90,0.4)'
+                }}>
+                <Wallet className="w-5 h-5 sm:w-7 sm:h-7 md:w-8 md:h-8" style={{ color: '#1a1208' }} />
+              </div>
+              <span className="text-[9px] sm:text-[10px] md:text-xs font-medium text-center leading-tight text-[#C5A55A] font-bold">Mi<br/>Monedero</span>
             </a>
 
             {/* Facebook */}

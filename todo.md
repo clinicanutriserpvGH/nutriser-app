@@ -2183,3 +2183,30 @@
 - [x] Verificar que TypeScript compila sin errores
 - [x] Verificar que el servidor dev está corriendo correctamente
 - [x] Verificar que no hay errores en la consola del navegador
+
+
+## Sesión Actual - Refinamiento Admin y Botón Mi Monedero
+
+### Correcciones AdminDashboard
+- [x] Corregir error de TypeScript: duplicado de `deleteMembershipMutation` (era caché de Vite, resuelto con restart)
+- [x] Verificar que todos los endpoints deleteAll funcionan correctamente
+- [x] Verificar que las eliminaciones se reflejan inmediatamente en el monedero del usuario
+
+### Botón Mi Monedero en Splash 0
+- [x] Agregar botón "Mi Monedero" entre Instagram y Facebook en Splash 0
+- [x] Estilo dorado con gradiente (mismo que wallet)
+- [x] Navegación a /wallet al hacer clic
+- [x] Acceso rápido sin entrar a la tienda
+
+### Notificaciones con Imágenes
+- [x] Crear endpoint `/api/upload-notif-image` para subir imágenes
+- [x] Validar tamaño máximo 2MB y formato JPG/PNG
+- [x] Guardar en S3 en carpeta notifications/
+- [x] Mostrar instrucciones en modal (600x400px, <500KB)
+
+### Verificación Final
+- [x] Compilar TypeScript sin errores
+- [x] Verificar que el servidor dev está corriendo
+- [x] Probar navegación desde Splash 0 al monedero
+- [x] Probar eliminación de compras y actualización en monedero
+- [x] Guardar checkpoint final

@@ -1155,8 +1155,11 @@ function NotifModal({ walletId, patientName, onClose }: { walletId: number; pati
           <div>
             <label className="text-xs font-semibold text-gray-600 mb-1 block flex items-center gap-1">
               <Image className="w-3 h-3" /> Imagen (opcional)
-              <span className="text-gray-400 font-normal ml-1">JPG/PNG, máx. 800×600px, 2MB</span>
+              <span className="text-gray-400 font-normal ml-1">JPG/PNG, máx. 600×400px, 500KB</span>
             </label>
+            <p className="text-xs text-gray-500 mb-2 bg-blue-50 p-2 rounded border border-blue-200">
+              📌 <strong>Especificaciones:</strong> Ancho 600px, Alto 400px, Peso máximo 500KB. La imagen se mostrará completa en el Monedero. En Gmail, el usuario debe hacer clic en "Mostrar imágenes" para verla (bloqueo de seguridad de Gmail).
+            </p>
             {imageUrl ? (
               <div className="relative">
                 <img src={imageUrl} alt="Preview" className="w-full max-h-32 object-cover rounded-lg border" />

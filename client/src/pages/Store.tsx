@@ -441,8 +441,7 @@ export default function Store() {
                 {filteredItems.map((item) => (
                   <div
                     key={`${item.type}-${item.id}`}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => handleItemClick(item)}
+                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
                   >
                     {/* Image */}
                     <div className="w-full h-40 sm:h-48 bg-[#F5F0E8] flex items-center justify-center overflow-hidden">
@@ -497,7 +496,7 @@ export default function Store() {
                         <button
                           onClick={(e) => { e.stopPropagation(); handleItemClick(item); }}
                           disabled={item.type === "product" && item.stock === 0}
-                          className="flex items-center gap-1 lg:gap-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs lg:text-sm font-bold px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl transition-colors shadow-sm"
+                          className="flex items-center gap-1 lg:gap-2 bg-[#C5A55A] hover:bg-[#B8963E] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs lg:text-sm font-bold px-3 lg:px-5 py-2 lg:py-2.5 rounded-xl transition-colors shadow-sm cursor-pointer"
                         >
                           {item.type === "ebook" ? (
                             <><BookOpen className="w-3.5 h-3.5" /> Ver libro</>

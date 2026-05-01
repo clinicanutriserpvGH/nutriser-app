@@ -179,7 +179,7 @@ export function NutriserWalletCard({
         overflow: "hidden",
       }}>
         {/* QR con borde dorado */}
-        <button
+        <div
           onClick={onQRClick ? (e) => { e.stopPropagation(); onQRClick(); } : undefined}
           style={{
             background: "#FFFFFF",
@@ -203,7 +203,7 @@ export function NutriserWalletCard({
             bgColor="#FFFFFF"
             fgColor="#000000"
           />
-        </button>
+        </div>
 
         {/* Separador vertical dorado */}
         <div style={{ width: 1, alignSelf: "stretch", background: "linear-gradient(180deg, transparent, #C5A55A 30%, #C5A55A 70%, transparent)", margin: "4px 0", flexShrink: 0 }} />

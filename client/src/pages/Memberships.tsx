@@ -512,6 +512,15 @@ export default function Memberships() {
     });
   }, [patient?.id]);
 
+  // Abrir carrito automáticamente si viene de /cart
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('showCart') === 'true') {
+      setCartOpen(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   const addToCart = (item: Omit<CartItem, "qty">) => {
     // Tracking: evento cart
     track(item.itemType as any, item.id, item.name, "cart");

@@ -42,7 +42,7 @@ import { isDesktopDevice } from "@/hooks/useDeviceType";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 // Rutas que NUNCA muestran el splash
-const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/cupones", "/servicios", "/transformaciones", "/services", "/privacy-policy", "/delete-account", "/mis-tratamientos", "/nutriser-home", "/monedero", "/servicio", "/c"];
+const NO_SPLASH_ROUTES = ["/admin", "/ebook/read", "/ebook/login", "/cupon", "/memberships", "/tienda", "/ebook", "/cursos", "/appointments", "/appointment-form", "/coupons", "/cupones", "/servicios", "/transformaciones", "/services", "/privacy-policy", "/delete-account", "/mis-tratamientos", "/nutriser-home", "/monedero", "/servicio", "/c", "/cart"];
 
 function isNoSplashRoute(path: string) {
   return NO_SPLASH_ROUTES.some((r) => path === r || path.startsWith(r + "/") || path.startsWith(r + "?"));
@@ -79,6 +79,7 @@ function Router() {
       <Route path={"/transformaciones"} component={Transformaciones} />
       <Route path={"/coupons"} component={() => { window.location.replace("/cupones"); return null; }} />
       <Route path={"/services"} component={() => { window.location.replace("/servicios"); return null; }} />
+      <Route path={"/cart"} component={() => { window.location.replace("/memberships?showCart=true"); return null; }} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

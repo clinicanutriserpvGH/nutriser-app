@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, X, Bell, BellRing, Mail, AlertCircle, Megaphone, PartyPopper, CheckCircle2, Trash2, LogOut, ChevronDown } from "lucide-react";
+import { Home, Sparkles, BookOpen, User, ChevronLeft, Download, X, Bell, BellRing, Mail, AlertCircle, Megaphone, PartyPopper, CheckCircle2, Trash2, LogOut, ChevronDown, Calendar, MessageCircle, ShoppingCart } from "lucide-react";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
 // NutriserAuthModal eliminado: desktop redirige a /mis-tratamientos
 import { trpc } from "@/lib/trpc";
@@ -1314,9 +1314,9 @@ export default function WalletPage() {
               <Home className="w-5 h-5 text-gray-400" />
               <span className="text-[10px] font-medium text-gray-400">{t('navHome', lang)}</span>
             </button>
-            <button onClick={() => setLocation("/memberships")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
-              <Sparkles className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">{t('navStore', lang)}</span>
+            <button onClick={() => setLocation("/appointment-form")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
+              <Calendar className="w-5 h-5 text-gray-400" />
+              <span className="text-[10px] font-medium text-gray-400">Agendar</span>
             </button>
             <div className="flex flex-col items-center -mt-5">
               <div className="w-14 h-14 rounded-full bg-white border-4 border-[#C5A55A] shadow-lg flex items-center justify-center mb-0.5">
@@ -1324,13 +1324,13 @@ export default function WalletPage() {
               </div>
               <span className="text-[10px] font-bold text-[#C5A55A]">{t('navWallet', lang)}</span>
             </div>
-            <button onClick={() => setLocation("/memberships")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
-              <BookOpen className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">{t('navLibrary', lang)}</span>
+            <button onClick={() => window.open('https://wa.me/+573005555555', '_blank')} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
+              <MessageCircle className="w-5 h-5 text-gray-400" />
+              <span className="text-[10px] font-medium text-gray-400">WhatsApp</span>
             </button>
-            <button onClick={() => setLocation("/memberships")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
-              <User className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">{t('navAccount', lang)}</span>
+            <button onClick={() => setLocation("/cart")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
+              <ShoppingCart className="w-5 h-5 text-gray-400" />
+              <span className="text-[10px] font-medium text-gray-400">Carrito</span>
             </button>
           </div>
         </div>

@@ -10,9 +10,9 @@ import { useLocation } from "wouter";
 import { SimpleCaptcha } from "@/components/SimpleCaptcha";
 import { useSplash } from "@/contexts/SplashContext";
 import { useDeviceType } from "@/hooks/useDeviceType";
+import { usePatientAuth } from "@/hooks/usePatientAuth";
 
 const SERVICES = [
-  "Asesoría Nutricional Personalizada",
   "Cavitación 80K y 120K",
   "Radiofrecuencia Corporal",
   "Vacunterapia",
@@ -49,13 +49,14 @@ export default function AppointmentForm() {
   const [, navigate] = useLocation();
   const { showSplash } = useSplash();
   const { isDesktop } = useDeviceType();
+  const { patient, isLoggedIn } = usePatientAuth();
 
   // Leer el servicio preseleccionado desde el query param ?service=...
   const searchParams = new URLSearchParams(window.location.search);
   const preselectedService = searchParams.get("service");
   const initialService = preselectedService && SERVICES.includes(preselectedService)
     ? preselectedService
-    : "Asesoría Nutricional Personalizada";
+    : "Cavitación 80K y 120K";
 
   const [formData, setFormData] = useState({
     clientName: "",
@@ -68,6 +69,18 @@ export default function AppointmentForm() {
   const [isServiceOpen, setIsServiceOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
+
+  // Autofill datos del usuario si esta autenticado
+  useEffect(() => {
+    if (isLoggedIn && patient) {
+      setFormData(prev => ({
+        ...prev,
+        clientName: patient.name || "",
+        clientEmail: patient.email || "",
+        clientPhone: patient.phone || "",
+      }));
+    }
+  }, [isLoggedIn, patient]);
 
   const createMutation = trpc.appointments.create.useMutation();
 
@@ -105,7 +118,7 @@ export default function AppointmentForm() {
         clientPhone: "",
         appointmentDate: "",
         appointmentTime: "",
-        serviceType: "Asesoría Nutricional Personalizada",
+        serviceType: "Cavitación 80K y 120K",
       });
     } catch (error) {
       toast.error("Error al agendar la cita");
@@ -170,7 +183,8 @@ export default function AppointmentForm() {
                   onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
                   placeholder="Tu nombre"
                   required
-                  className="border-[#C5A55A]/30 focus:border-[#C5A55A]"
+                  readOnly={isLoggedIn}
+                  className={`border-[#C5A55A]/30 focus:border-[#C5A55A] ${isLoggedIn ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 />
               </div>
 
@@ -187,7 +201,8 @@ export default function AppointmentForm() {
                   onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
                   placeholder="tu@email.com"
                   required
-                  className="border-[#C5A55A]/30 focus:border-[#C5A55A]"
+                  readOnly={isLoggedIn}
+                  className={`border-[#C5A55A]/30 focus:border-[#C5A55A] ${isLoggedIn ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 />
               </div>
 
@@ -203,7 +218,8 @@ export default function AppointmentForm() {
                   onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
                   placeholder="+52 (requerido)"
                   required
-                  className="border-[#C5A55A]/30 focus:border-[#C5A55A]"
+                  readOnly={isLoggedIn}
+                  className={`border-[#C5A55A]/30 focus:border-[#C5A55A] ${isLoggedIn ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 />
               </div>
 

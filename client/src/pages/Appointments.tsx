@@ -79,7 +79,6 @@ export default function Appointments() {
   }
 
   const services = [
-    "Asesoría Nutricional Personalizada",
     "Tratamiento de Estrías",
     "Tratamiento de Cicatrices de Acné",
     "Tratamiento de Celulitis",

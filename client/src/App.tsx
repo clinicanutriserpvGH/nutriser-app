@@ -140,7 +140,7 @@ function AppContent() {
   // Navegar a una ruta interna desde el Splash 0
   const handleNavigateFromSplash = (path: string) => {
     sessionStorage.setItem("nutriser_splash_seen", "1");
-    window.location.href = path;
+    navigate(path);
   };
 
   // Volver al Splash 0 (usado por botones "Regresar" en páginas internas)

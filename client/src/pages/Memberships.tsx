@@ -3124,16 +3124,18 @@ onClick={() => {
                   )}
                   <span className="text-[10px] font-semibold leading-tight">{t("tabWishlist", lang)}</span>
                 </button>
-                {/* Cuenta */}
+                {/* Monedero */}
                 <button
                   onClick={() => {
-                    if (!requireAuth("ver tu cuenta y estado de monedero")) return;
+                    if (!requireAuth("ver tu monedero")) return;
                     navigate("/monedero");
                   }}
-                  className="flex flex-col items-center gap-0.5 py-1 px-2 transition-colors text-gray-400"
+                  className={`flex flex-col items-center gap-0.5 py-1 px-2 transition-colors ${
+                    activeTab === "monedero" ? "text-[#C5A55A]" : "text-gray-400"
+                  }`}
                 >
-                  <User className="w-6 h-6" />
-                  <span className="text-[10px] font-semibold leading-tight">{t("tabAccount", lang)}</span>
+                  <Wallet className="w-6 h-6" />
+                  <span className="text-[10px] font-semibold leading-tight">Monedero</span>
                 </button>
               </div>
             </div>

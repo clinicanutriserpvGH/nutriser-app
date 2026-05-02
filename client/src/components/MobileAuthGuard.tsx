@@ -3,7 +3,7 @@
  *
  * Cuando un usuario intenta acceder a una función protegida sin haber iniciado sesión,
  * se muestra este modal con dos opciones:
- *   1. "Crear cuenta / Iniciar sesión" → redirige a Mi Cuenta Nutriser con returnTo
+ *   1. "Crear cuenta / Iniciar sesión" → redirige a Mi Monedero Nutriser con returnTo
  *   2. "Después" → cierra el modal y el usuario sigue navegando en la misma página
  *
  * En móvil/tablet: aparece como bottom sheet (desliza desde abajo)
@@ -47,7 +47,7 @@ export default function MobileAuthGuard({
 
   const handleGoToAccount = () => {
     onClose();
-    // Navegar a Mi Cuenta Nutriser con returnTo para regresar al destino original
+    // Navegar a Mi Monedero Nutriser con returnTo para regresar al destino original
     window.location.href = `/mis-tratamientos?returnTo=${encodeURIComponent(returnTo)}`;
   };
 

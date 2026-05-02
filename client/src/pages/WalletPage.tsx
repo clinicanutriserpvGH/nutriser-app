@@ -1324,7 +1324,7 @@ export default function WalletPage() {
               </div>
               <span className="text-[10px] font-bold text-[#C5A55A]">{t('navWallet', lang)}</span>
             </div>
-            <button onClick={() => window.open('https://wa.me/+573005555555', '_blank')} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
+            <button onClick={() => window.open('https://wa.me/523221007799', '_blank')} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
               <MessageCircle className="w-5 h-5 text-gray-400" />
               <span className="text-[10px] font-medium text-gray-400">WhatsApp</span>
             </button>

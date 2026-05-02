@@ -16,37 +16,57 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, Users, Calendar, CheckCircle, Clock, XCircle, ArrowLeft, BookOpen, Upload, Eye, Bell, BellRing, ShoppingBag, Trash2, Settings, Plus, Pencil, Send } from "lucide-react";
 import { toast } from "sonner";
 
-const ADMIN_TABS = [
+// Tabs de Gestiones
+const GESTIONES_TABS = [
   { value: 'patients', label: 'Gestión de Pacientes', emoji: '🏥' },
   { value: 'appointments', label: 'Gestión de Citas', emoji: '📅' },
   { value: 'services', label: 'Gestión de Servicios', emoji: '📋' },
   { value: 'packages', label: 'Gestión de Paquetes', emoji: '🎁' },
   { value: 'promotions', label: 'Gestión de Cupones', emoji: '🎟️' },
   { value: 'products', label: 'Gestión de Productos', emoji: '🧴' },
-  { value: 'wallet', label: 'Monedero Nutriser', emoji: '💳' },
+  { value: 'ebook', label: 'Gestión Librería', emoji: '📚' },
+] as const;
+
+// Tabs de Compras
+const COMPRAS_TABS = [
   { value: 'giftPurchases', label: 'Cupones Comprados', emoji: '🏷️' },
   { value: 'memberships', label: 'Paquetes Comprados', emoji: '📦' },
   { value: 'servicePurchases', label: 'Servicios Comprados', emoji: '💉' },
   { value: 'productPurchases', label: 'Productos Comprados', emoji: '🛒' },
   { value: 'ebookPurchasesTab', label: 'Libros Comprados', emoji: '📖' },
+] as const;
+
+// Tabs de Configuración
+const CONFIG_TABS = [
+  { value: 'wallet', label: 'Monedero Nutriser', emoji: '💳' },
   { value: 'discountCodes', label: 'Códigos de Descuento', emoji: '🏷️%' },
-  { value: 'ebook', label: 'Gestión Librería', emoji: '📚' },
   { value: 'subscribers', label: 'Notificaciones Push', emoji: '🔔' },
   { value: 'courses', label: 'Cursos', emoji: '🎓' },
   { value: 'suggestions', label: 'Foro Expertos', emoji: '💡' },
   { value: 'beforeAfter', label: 'Transformaciones Pacientes', emoji: '✨' },
   { value: 'analytics', label: 'Analítica de Comportamiento', emoji: '📊' },
-  { value: 'splashAds', label: 'Aparador de Publicidad', emoji: '\uD83D\uDCF8' },
-  { value: 'storeBanners', label: 'Aparador Tienda Principal', emoji: '\uD83D\uDECD\uFE0F' },
-  { value: 'security', label: 'Seguridad', emoji: '\uD83D\uDD10' },
+  { value: 'splashAds', label: 'Aparador de Publicidad', emoji: '📸' },
+  { value: 'storeBanners', label: 'Aparador Tienda Principal', emoji: '🛍️' },
+  { value: 'security', label: 'Seguridad', emoji: '🔐' },
   { value: 'siteConfig', label: 'Configuración del Sitio', emoji: '⚙️' },
   { value: 'couponReferrals', label: 'Referidos de Cupones', emoji: '🔗' },
+] as const;
+
+const ADMIN_TABS = [
+  ...GESTIONES_TABS,
+  ...COMPRAS_TABS,
+  ...CONFIG_TABS,
 ] as const;
 type AdminTabValue = typeof ADMIN_TABS[number]['value'];
 
 export default function AdminDashboard() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<AdminTabValue>('memberships');
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    gestiones: true,
+    compras: false,
+    config: false,
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedProofId, setSelectedProofId] = useState<number | null>(null);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
@@ -1336,35 +1356,119 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Navegación del panel - cuadrícula siempre visible */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 mb-4">
-          {ADMIN_TABS.map((tab) => {
-            const isActive = activeTab === tab.value;
-            let badge: number | null = null;
-            // subscribers tab badge removed (couponSubscribers concept eliminated)
-            if (tab.value === 'servicePurchases' && servicePurchases) badge = servicePurchases.filter((p: any) => p.status === 'pending' && p.purchaseType !== 'package').length;
-            if (tab.value === 'memberships' && servicePurchases) badge = servicePurchases.filter((p: any) => p.status === 'pending' && p.purchaseType === 'package').length;
-            if (tab.value === 'giftPurchases' && giftPurchases) badge = (giftPurchases as any[]).filter((p: any) => p.status === 'pending').length;
-            if (tab.value === 'productPurchases' && productPurchases) badge = (productPurchases as any[]).filter(p => p.status === 'pending').length;
-            return (
-              <button
-                key={tab.value}
-                type="button"
-                onClick={() => setActiveTab(tab.value)}
-                className={`relative flex flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-3 text-center transition-all ${
-                  isActive
-                    ? 'border-[#C5A55A] bg-[#C5A55A] text-white shadow-md'
-                    : 'border-[#C5A55A]/30 bg-white text-[#1A1A1A] hover:border-[#C5A55A] hover:bg-[#C5A55A]/10'
-                }`}
-              >
-                <span className="text-lg leading-none">{tab.emoji}</span>
-                <span className="text-[11px] font-semibold leading-tight">{tab.label}</span>
-                {badge !== null && badge > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">{badge}</span>
-                )}
-              </button>
-            );
-          })}
+        {/* Navegación del panel - grupos expandibles */}
+        <div className="space-y-3 mb-4">
+          {/* Grupo GESTIONES */}
+          <div>
+            <button
+              onClick={() => setExpandedGroups(prev => ({ ...prev, gestiones: !prev.gestiones }))}
+              className="w-full flex items-center justify-between bg-gradient-to-r from-[#C5A55A] to-[#B8945A] text-white px-4 py-3 rounded-lg font-bold hover:shadow-md transition-all"
+            >
+              <span className="text-lg">📋 GESTIONES</span>
+              <span className="text-xl">{expandedGroups.gestiones ? '−' : '+'}</span>
+            </button>
+            {expandedGroups.gestiones && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 mt-2">
+                {GESTIONES_TABS.map((tab) => {
+                  const isActive = activeTab === tab.value;
+                  let badge: number | null = null;
+                  if (tab.value === 'appointments' && appointments) badge = appointments.filter((a: any) => a.status === 'pending').length;
+                  return (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      onClick={() => setActiveTab(tab.value)}
+                      className={`relative flex flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-3 text-center transition-all ${
+                        isActive
+                          ? 'border-[#C5A55A] bg-[#C5A55A] text-white shadow-md'
+                          : 'border-[#C5A55A]/30 bg-white text-[#1A1A1A] hover:border-[#C5A55A] hover:bg-[#C5A55A]/10'
+                      }`}
+                    >
+                      <span className="text-lg leading-none">{tab.emoji}</span>
+                      <span className="text-[11px] font-semibold leading-tight">{tab.label}</span>
+                      {badge !== null && badge > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">{badge}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Grupo COMPRAS */}
+          <div>
+            <button
+              onClick={() => setExpandedGroups(prev => ({ ...prev, compras: !prev.compras }))}
+              className="w-full flex items-center justify-between bg-gradient-to-r from-[#E8B4A8] to-[#D89A8E] text-white px-4 py-3 rounded-lg font-bold hover:shadow-md transition-all"
+            >
+              <span className="text-lg">🛒 COMPRAS</span>
+              <span className="text-xl">{expandedGroups.compras ? '−' : '+'}</span>
+            </button>
+            {expandedGroups.compras && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 mt-2">
+                {COMPRAS_TABS.map((tab) => {
+                  const isActive = activeTab === tab.value;
+                  let badge: number | null = null;
+                  if (tab.value === 'servicePurchases' && servicePurchases) badge = servicePurchases.filter((p: any) => p.status === 'pending' && p.purchaseType !== 'package').length;
+                  if (tab.value === 'memberships' && servicePurchases) badge = servicePurchases.filter((p: any) => p.status === 'pending' && p.purchaseType === 'package').length;
+                  if (tab.value === 'giftPurchases' && giftPurchases) badge = (giftPurchases as any[]).filter((p: any) => p.status === 'pending').length;
+                  if (tab.value === 'productPurchases' && productPurchases) badge = (productPurchases as any[]).filter(p => p.status === 'pending').length;
+                  return (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      onClick={() => setActiveTab(tab.value)}
+                      className={`relative flex flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-3 text-center transition-all ${
+                        isActive
+                          ? 'border-[#C5A55A] bg-[#C5A55A] text-white shadow-md'
+                          : 'border-[#C5A55A]/30 bg-white text-[#1A1A1A] hover:border-[#C5A55A] hover:bg-[#C5A55A]/10'
+                      }`}
+                    >
+                      <span className="text-lg leading-none">{tab.emoji}</span>
+                      <span className="text-[11px] font-semibold leading-tight">{tab.label}</span>
+                      {badge !== null && badge > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">{badge}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Grupo CONFIGURACIÓN */}
+          <div>
+            <button
+              onClick={() => setExpandedGroups(prev => ({ ...prev, config: !prev.config }))}
+              className="w-full flex items-center justify-between bg-gradient-to-r from-[#888] to-[#666] text-white px-4 py-3 rounded-lg font-bold hover:shadow-md transition-all"
+            >
+              <span className="text-lg">⚙️ CONFIGURACIÓN</span>
+              <span className="text-xl">{expandedGroups.config ? '−' : '+'}</span>
+            </button>
+            {expandedGroups.config && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 mt-2">
+                {CONFIG_TABS.map((tab) => {
+                  const isActive = activeTab === tab.value;
+                  return (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      onClick={() => setActiveTab(tab.value)}
+                      className={`relative flex flex-col items-center justify-center gap-1 rounded-xl border-2 px-2 py-3 text-center transition-all ${
+                        isActive
+                          ? 'border-[#C5A55A] bg-[#C5A55A] text-white shadow-md'
+                          : 'border-[#C5A55A]/30 bg-white text-[#1A1A1A] hover:border-[#C5A55A] hover:bg-[#C5A55A]/10'
+                      }`}
+                    >
+                      <span className="text-lg leading-none">{tab.emoji}</span>
+                      <span className="text-[11px] font-semibold leading-tight">{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Contenido de la sección activa */}

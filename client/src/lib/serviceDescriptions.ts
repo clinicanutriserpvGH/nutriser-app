@@ -12,26 +12,7 @@ export const serviceDescriptions: Record<string, {
   care: string[];
 }> = {
   // ═══ NUTRICIÓN ═══
-  "Asesoría Nutricional Personalizada": {
-    title: "Asesoría Nutricional Personalizada",
-    whatIs: "Consulta con nutriólogo profesional donde se realiza evaluación completa de tus hábitos alimenticios, estado de salud y objetivos personales. Se diseña un plan nutricional personalizado adaptado a tu estilo de vida, preferencias y necesidades específicas.",
-    benefits: [
-      "Plan alimenticio personalizado según tus objetivos",
-      "Mejora de energía y vitalidad",
-      "Pérdida de peso saludable y sostenible",
-      "Mejor digestión y bienestar general",
-      "Prevención de enfermedades crónicas",
-      "Seguimiento profesional continuo"
-    ],
-    duration: "Consulta inicial: 60 minutos | Seguimientos: 30-45 minutos",
-    care: [
-      "Sigue el plan nutricional recomendado",
-      "Mantén hidratación adecuada (2-3 litros de agua diaria)",
-      "Registra tus comidas para el seguimiento",
-      "Asiste a tus citas de seguimiento programadas",
-      "Comunica cambios en tu salud o medicamentos"
-    ]
-  },
+  // Asesoría Nutricional Personalizada - DESCONTINUADA
 
   // ═══ CORPORALES ═══
   "Cavitación 80K y 120K": {

@@ -182,7 +182,8 @@ export async function sendAppointmentConfirmationToClient(
   clientName: string,
   clientEmail: string,
   appointmentDate: Date,
-  appointmentTime: string
+  appointmentTime: string,
+  serviceType: string = "Valoración Nutricional"
 ) {
   const transporter = getEmailTransporter();
 
@@ -207,7 +208,7 @@ export async function sendAppointmentConfirmationToClient(
             <h3 style="margin-top: 0; color: #C5A55A;">Detalles de tu Cita</h3>
             <p><strong>Fecha Solicitada:</strong> ${formattedDate}</p>
             <p><strong>Hora Solicitada:</strong> ${appointmentTime}</p>
-            <p><strong>Servicio:</strong> Valoración Nutricional</p>
+            <p><strong>Servicio:</strong> ${serviceType}</p>
           </div>
           
           <p>Si tienes alguna pregunta o necesitas cambiar la fecha, por favor contáctanos por WhatsApp: <strong>+52 322 100 7799</strong></p>

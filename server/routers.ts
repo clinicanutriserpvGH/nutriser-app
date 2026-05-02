@@ -527,7 +527,8 @@ export const appRouter = router({
           input.clientName,
           input.clientEmail,
           input.appointmentDate,
-          input.appointmentTime
+          input.appointmentTime,
+          input.serviceType
         );
         
         // Send notification to admin
@@ -5331,11 +5332,11 @@ Devuelve un JSON con estos campos:
           });
           doc.on('error', reject);
         });
-      }),
+      })
   }),
 });
 
-// Función helper movida antes de export
+// Función helper movida antes de exportt
 function drawWalletCardPDF(doc: any, wallet: any, x: number, y: number, width: number, height: number, qrDataUrl?: string) {
   const GOLD_LIGHT = '#E8C97A';
   const GOLD_DARK = '#8B6914';

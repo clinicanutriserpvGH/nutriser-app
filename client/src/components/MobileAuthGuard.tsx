@@ -135,7 +135,7 @@ export default function MobileAuthGuard({
 
             {/* Descripción principal */}
             <p className="text-white/65 text-sm text-center leading-relaxed mb-6 px-1">
-              Obtén tu Monedero Nutriser, acumula cashback en cada compra y accede a descuentos exclusivos en tratamientos y productos. Lleva el seguimiento de tus tratamientos en clínica y compra fácilmente en nuestra tienda.
+              Obtén tu Monedero Nutriser, acumula cashback en cada compra y accede a descuentos exclusivos en tratamientos y productos. Lleva el seguimiento de tus tratamientos en clínica, compra fácilmente en nuestra tienda y <span style={{ color: "#C5A55A" }}>agenda tus citas</span> con nuestros especialistas.
             </p>
 
             {/* Botones */}
@@ -253,7 +253,7 @@ export default function MobileAuthGuard({
 
           {/* Descripción */}
           <p className="text-white/65 text-sm text-center leading-relaxed mb-7 px-2">
-            Obtén tu Monedero Nutriser, acumula cashback en cada compra y accede a descuentos exclusivos en tratamientos y productos. Lleva el seguimiento de tus tratamientos en clínica y compra fácilmente en nuestra tienda.
+            Obtén tu Monedero Nutriser, acumula cashback en cada compra y accede a descuentos exclusivos en tratamientos y productos. Lleva el seguimiento de tus tratamientos en clínica, compra fácilmente en nuestra tienda y <span style={{ color: "#C5A55A" }}>agenda tus citas</span> con nuestros especialistas.
           </p>
 
           {/* Botones */}

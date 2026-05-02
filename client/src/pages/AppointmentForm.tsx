@@ -11,6 +11,7 @@ import { SimpleCaptcha } from "@/components/SimpleCaptcha";
 import { useSplash } from "@/contexts/SplashContext";
 import { useDeviceType } from "@/hooks/useDeviceType";
 import { usePatientAuth } from "@/hooks/usePatientAuth";
+import MobileAuthGuard from "@/components/MobileAuthGuard";
 
 const SERVICES = [
   "Cavitación 80K y 120K",
@@ -50,7 +51,6 @@ export default function AppointmentForm() {
   const { showSplash } = useSplash();
   const { isDesktop } = useDeviceType();
   const { patient, isLoggedIn } = usePatientAuth();
-
   // Leer el servicio preseleccionado desde el query param ?service=...
   const searchParams = new URLSearchParams(window.location.search);
   const preselectedService = searchParams.get("service");
@@ -81,6 +81,18 @@ export default function AppointmentForm() {
       }));
     }
   }, [isLoggedIn, patient]);
+
+  // Si no está autenticado, mostrar guard
+  if (!isLoggedIn) {
+    return (
+      <MobileAuthGuard
+        isOpen={true}
+        onClose={() => navigate('/')}
+        featureDescription="agendar citas con nuestros especialistas"
+        returnTo="/appointment-form"
+      />
+    );
+  }
 
   const createMutation = trpc.appointments.create.useMutation();
 

@@ -4,12 +4,15 @@
  * Cuando un usuario intenta acceder a una función protegida sin haber iniciado sesión,
  * se muestra este modal con dos opciones:
  *   1. "Crear cuenta / Iniciar sesión" → redirige a Mi Monedero Nutriser con returnTo
- *   2. "Después" → cierra el modal y el usuario sigue navegando en la misma página
+ *   2. "Después" → cierra el modal
+ *      - Móvil/Tablet desde Splash 0: Regresa al Splash 0
+ *      - Desktop desde sitio web: Regresa al sitio web (/)
  *
  * En móvil/tablet: aparece como bottom sheet (desliza desde abajo)
  * En desktop: aparece centrado como modal flotante
  */
 import { useDeviceType } from "@/hooks/useDeviceType";
+import { useSplash } from "@/contexts/SplashContext";
 import { X, LogIn, Clock } from "lucide-react";
 
 const LOGO_URL =
@@ -42,6 +45,7 @@ export default function MobileAuthGuard({
   onDismiss,
 }: MobileAuthGuardProps) {
   const { isMobile } = useDeviceType();
+  const { showSplash } = useSplash();
 
   if (!isOpen) return null;
 
@@ -55,7 +59,16 @@ export default function MobileAuthGuard({
     if (onDismiss) {
       onDismiss();
     } else {
-      onClose(); // Se queda en la misma página
+      // Móvil/Tablet: Regresar al Splash 0
+      // Desktop: Regresar al sitio web (/)
+      if (isMobile) {
+        sessionStorage.removeItem("nutriser_splash_seen");
+        sessionStorage.removeItem("nutriser_chose_splash1");
+        showSplash();
+      } else {
+        // Desktop: navegar al sitio web
+        window.location.href = "/";
+      }
     }
   };
 
@@ -164,7 +177,7 @@ export default function MobileAuthGuard({
                 }}
               >
                 <Clock className="w-4 h-4" />
-                Después
+                {isMobile ? "Volver" : "Después"}
               </button>
             </div>
 
@@ -282,7 +295,7 @@ export default function MobileAuthGuard({
               }}
             >
               <Clock className="w-4 h-4" />
-              Después
+              {isMobile ? "Volver" : "Después"}
             </button>
           </div>
 

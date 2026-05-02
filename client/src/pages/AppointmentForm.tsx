@@ -37,7 +37,6 @@ const SERVICES = [
   "Rellenos Faciales",
   "Detox Iónico",
   "Retiro de Tatuajes con Láser",
-  "Productos Nutricionales y Cosméticos",
   "Valoración General",
 ];
 

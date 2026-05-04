@@ -62,61 +62,8 @@ interface CartItem {
 const BANK_INFO = { bank: "Banamex", account: "002470701448743487" };
 
 // ─── Paquetes destacados ─────────────────────────────────────────────────────
-function getPackages(lang: Lang) {
-  return [
-    {
-      id: "pkg-nutricion",
-      name: lang === "EN" ? "Nutrition Package" : "Paquete Nutrición",
-      price: 2000,
-      regularPrice: 3200,
-      badge: "mostPopular",
-      description: lang === "EN"
-        ? "Complete personalized nutritional counseling program with follow-up and body scans."
-        : "Programa completo de asesoría nutricional personalizada con seguimiento y escaneos corporales.",
-      features: lang === "EN" ? [
-        "4 personalized nutritional consultations",
-        "4 body scans",
-        "10% discount on body treatments",
-        "Access to online follow-up",
-      ] : [
-        "4 asesorías nutricionales personalizadas",
-        "4 escaneos corporales",
-        "10% de descuento en tratamientos corporales",
-        "Acceso a seguimiento online",
-      ],
-      imageUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/paquete-nutricion-iZYFQemGqyUBv8zktgvgAM.webp",
-      category: "nutricion",
-    },
-    {
-      id: "pkg-reductor",
-      name: lang === "EN" ? "Nutriser Slimming Package" : "Paquete Reductor Nutriser",
-      price: 4500,
-      regularPrice: 7500,
-      badge: "maxSavings",
-      description: lang === "EN"
-        ? "Comprehensive body slimming package: cavitation, radiofrequency and reducing mesotherapy."
-        : "Paquete integral de reducción corporal: cavitaciones, radiofrecuencias y mesoterapia reductora.",
-      features: lang === "EN" ? [
-        "4 personalized nutritional consultations",
-        "4 body cavitation sessions",
-        "4 body radiofrequency sessions",
-        "4 reducing mesotherapy sessions",
-        "10% discount on facial treatments",
-        "10% discount on product purchases",
-      ] : [
-        "4 asesorías nutricionales personalizadas",
-        "4 sesiones de Cavitación corporal",
-        "4 sesiones de Radiofrecuencia corporal",
-        "4 sesiones de Mesoterapia reductora",
-        "10% de descuento en tratamientos faciales",
-        "10% de descuento en compra de productos",
-      ],
-      imageUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/paquete-reductor-ZsAtHwV2VSTjMf52QKYuRC.webp",
-      category: "corporales",
-    },
-  ];
-}
-const PACKAGES = getPackages("ES"); // fallback estático para PromoBanner
+// Los paquetes se cargan dinámicamente desde la base de datos via tRPC
+const PACKAGES: any[] = []; // fallback vacío
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
   nutricion: { label: "catNutricion", icon: Apple, color: "#16a34a", bg: "#dcfce7" },
@@ -334,6 +281,9 @@ function PromoBanner({ lang, storeBanners: rawBanners = [], onBannerClick, onSys
 export default function Memberships() {
   const [, navigate] = useLocation();
   const { isLight } = useSplashTheme();
+  
+  // Cargar paquetes dinámicamente desde la base de datos
+  const { data: packagesData = [] } = trpc.packages.list.useQuery();
 
   // ─── Saludo dinámico por hora del día ─────────────────────────────────────
   function getGreeting(): string {
@@ -1408,7 +1358,7 @@ export default function Memberships() {
         onSystemBannerClick={(linkTarget) => {
           // Abrir directamente el modal de detalles del paquete correspondiente
           if (linkTarget === 'paquete-nutricion') {
-            const pkg = getPackages(lang).find(p => p.id === 'pkg-nutricion');
+            const pkg = packagesData?.find((p: any) => p.id === 'new-skin' || p.slug === 'new-skin' || p.id === 'pkg-nutricion');
             if (pkg) {
               setDetailItem({
                 id: pkg.id,
@@ -1425,7 +1375,7 @@ export default function Memberships() {
               });
             }
           } else if (linkTarget === 'paquete-reductor') {
-            const pkg = getPackages(lang).find(p => p.id === 'pkg-reductor');
+            const pkg = packagesData?.find((p: any) => p.id === 'pkg-reductor' || p.slug === 'pkg-reductor');
             if (pkg) {
               setDetailItem({
                 id: pkg.id,
@@ -1724,7 +1674,7 @@ export default function Memberships() {
                 </div>
 
                 <HScrollRail className="lg:!flex lg:!gap-6">
-                  {getPackages(lang).map(pkg => {
+                  {packagesData?.map((pkg: any) => {
                     const savings = pkg.regularPrice - pkg.price;
                     const savingsPct = Math.round((savings / pkg.regularPrice) * 100);
                     return (
@@ -1760,7 +1710,7 @@ export default function Memberships() {
                           </div>
 
                           <ul className="space-y-1 mb-3">
-                            {pkg.features.slice(0, 2).map((f, i) => (
+                            {pkg.features.slice(0, 2).map((f: any, i: number) => (
                               <li key={i} className="flex items-start gap-1.5 text-[11px] text-gray-500">
                                 <Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />{f}
                               </li>

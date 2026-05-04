@@ -1710,14 +1710,30 @@ export default function Memberships() {
                           </div>
 
                           <ul className="space-y-1 mb-3">
-                            {pkg.features.slice(0, 2).map((f: any, i: number) => (
-                              <li key={i} className="flex items-start gap-1.5 text-[11px] text-gray-500">
-                                <Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />{f}
-                              </li>
-                            ))}
-                            {pkg.features.length > 2 && (
-                              <li className="text-[11px] text-[#C5A55A] font-semibold pl-4">+{pkg.features.length - 2} {lang === "EN" ? "more" : "más"}</li>
-                            )}
+                            {(() => {
+                              let features = [];
+                              if (typeof pkg.features === 'string') {
+                                try {
+                                  features = JSON.parse(pkg.features || '[]');
+                                } catch {
+                                  features = pkg.features.split('\n').filter((f: string) => f.trim()).map((f: string) => f.replace(/^[•\-\*]\s*/, '').trim());
+                                }
+                              } else {
+                                features = pkg.features || [];
+                              }
+                              return (
+                                <>
+                                  {features.slice(0, 2).map((f: any, i: number) => (
+                                    <li key={i} className="flex items-start gap-1.5 text-[11px] text-gray-500">
+                                      <Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />{f}
+                                    </li>
+                                  ))}
+                                  {features.length > 2 && (
+                                    <li className="text-[11px] text-[#C5A55A] font-semibold pl-4">+{features.length - 2} {lang === "EN" ? "more" : "mas"}</li>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </ul>
 
                           <button

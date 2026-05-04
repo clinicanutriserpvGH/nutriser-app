@@ -283,7 +283,15 @@ export default function Memberships() {
   const { isLight } = useSplashTheme();
   
   // Cargar paquetes dinámicamente desde la base de datos
-  const { data: packagesData = [] } = trpc.packages.list.useQuery();
+  const { data: packagesRaw = [] } = trpc.packages.list.useQuery();
+  
+  // Transformar datos: parsear features como JSON y convertir precios a números
+  const packagesData = packagesRaw.map((pkg: any) => ({
+    ...pkg,
+    features: typeof pkg.features === 'string' ? JSON.parse(pkg.features || '[]') : (pkg.features || []),
+    price: Number(pkg.price) || 0,
+    regularPrice: Number(pkg.regularPrice) || Number(pkg.price) || 0,
+  }));
 
   // ─── Saludo dinámico por hora del día ─────────────────────────────────────
   function getGreeting(): string {

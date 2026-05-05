@@ -148,7 +148,12 @@ export default function WalletPage() {
   
   // Determinar a dónde regresar
   const getBackDestination = () => {
-    return comeFromSplash ? '/' : '/memberships';
+    if (comeFromSplash) {
+      // Si viene desde Splash 0, limpiar la bandera para que vuelva a mostrar Splash 0
+      sessionStorage.removeItem('nutriser_splash_seen');
+      return '/';
+    }
+    return '/memberships';
   };
   // ─── Verificación de contrato pendiente ──────────────────────────────────────
   const [contractSigned, setContractSigned] = useState(false);

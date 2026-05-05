@@ -2058,7 +2058,7 @@ onClick={() => {
                         <p className="text-gray-400 font-medium">{t("noServicesFound", lang)}</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
                         {filteredServices.map(service => {
                           const catMeta = CATEGORY_META[service.category ?? "general"] ?? CATEGORY_META.general;
                           const CatIcon = catMeta.icon;

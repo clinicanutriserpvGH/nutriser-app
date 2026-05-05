@@ -138,6 +138,18 @@ function TransactionRow({ txn, lang }: { txn: any; lang: Lang }) {
 export default function WalletPage() {
   const { patient, isLoggedIn, logout } = usePatientAuth();
   const [, setLocation] = useLocation();
+  
+  // Detectar si viene desde Splash 0
+  const comeFromSplash = (() => {
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('fromSplash') === 'true';
+  })();
+  
+  // Determinar a dónde regresar
+  const getBackDestination = () => {
+    return comeFromSplash ? '/' : '/memberships';
+  };
   // ─── Verificación de contrato pendiente ──────────────────────────────────────
   const [contractSigned, setContractSigned] = useState(false);
   const contractStatusQuery = trpc.wallet.checkContractStatus.useQuery(
@@ -292,7 +304,7 @@ export default function WalletPage() {
     return (
       <div className="min-h-screen bg-[#1A1A1A] flex flex-col">
         <div className="pt-12 px-4" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}>
-          <button onClick={() => setLocation("/memberships")} className="inline-flex items-center gap-1 text-white/70 hover:text-white text-sm font-medium bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
+          <button onClick={() => setLocation(getBackDestination())} className="inline-flex items-center gap-1 text-white/70 hover:text-white text-sm font-medium bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
             <ChevronLeft className="w-4 h-4" /> {t('back', lang).toUpperCase()}
           </button>
         </div>
@@ -338,14 +350,14 @@ export default function WalletPage() {
       {/* Header — simple back button */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
-          <button onClick={() => setLocation("/memberships")} className="text-gray-600 hover:text-gray-800 mr-3">
+          <button onClick={() => setLocation(getBackDestination())} className="text-gray-600 hover:text-gray-800 mr-3">
             <ChevronLeft className="w-5 h-5" />
           </button>
           <h1 className="text-base font-bold text-[#1A1A1A]">{t('walletNutriser', lang)}</h1>
         </div>
         {isLoggedIn && (
           <button
-            onClick={() => { logout(); setLocation("/memberships"); }}
+            onClick={() => { logout(); setLocation(getBackDestination()); }}
             className="flex items-center gap-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
             title="Cerrar sesión"
           >

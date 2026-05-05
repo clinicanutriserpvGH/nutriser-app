@@ -333,7 +333,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
             {/* Mi Monedero */}
             <a
               href="#"
-              onClick={e => { e.preventDefault(); handleNavigate('/monedero'); }}
+              onClick={e => { e.preventDefault(); handleNavigate('/monedero?fromSplash=true'); }}
               className="flex flex-col items-center gap-1 group flex-shrink-0"
               aria-label="Mi Monedero"
             >

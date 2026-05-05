@@ -2202,7 +2202,7 @@ onClick={() => {
                       </div>
                     </div>
                   )}
-                  <HScrollRail>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3">
                   {filteredProducts.map(product => {
                     const salePrice = (product as any).salePrice;
                     const priceNum = salePrice
@@ -2217,7 +2217,7 @@ onClick={() => {
                     const isLowStock = !!(product as any).showUrgency && stockLeft !== 0;
                     const isOutOfStock = stockLeft !== null && stockLeft === 0;
                     return (
-                      <div key={product.id} className={`flex-shrink-0 w-48 sm:w-52 lg:w-56 bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col ${isOutOfStock ? 'opacity-60 border-gray-200' : 'border-gray-100'}`}>
+                      <div key={product.id} className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col ${isOutOfStock ? 'opacity-60 border-gray-200' : 'border-gray-100'}`}>
                         <div className="relative h-40 lg:h-48 overflow-hidden">
                           {product.imageUrl ? (
                             <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
@@ -2327,7 +2327,7 @@ onClick={() => {
                       </div>
                     );
                   })}
-                </HScrollRail>
+                </div>
                 </>
               )}
             </div>

@@ -1750,6 +1750,37 @@ export default function Memberships() {
                 </div>
               )}
 
+              {/* ── Subcategorías de Skincare (solo cuando está activo) ── */}
+              {activeMainCat === "skincare" && (
+                <div className="mt-4">
+                  <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-1 lg:justify-start" style={{ scrollbarWidth: "none" }}>
+                    <button onClick={() => setActiveProdCategory("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                      <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                        activeProdCategory === "all" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-gray-100"
+                      }`}>
+                        <Package className={`w-6 h-6 ${activeProdCategory === "all" ? "text-white" : "text-gray-500"}`} />
+                      </div>
+                      <span className={`text-[10px] font-semibold ${activeProdCategory === "all" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catAll", lang)}</span>
+                    </button>
+                    {prodCategories.map(cat => {
+                      const meta = PRODUCT_CATEGORY_META[cat] ?? { label: cat, icon: Package, color: "#888", bg: "#f3f4f6" };
+                      const Icon = meta.icon;
+                      const isActive = activeProdCategory === cat;
+                      return (
+                        <button key={cat} onClick={() => setActiveProdCategory(cat)} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
+                          <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                            isActive ? "shadow-lg" : ""
+                          }`} style={{ backgroundColor: isActive ? meta.color : meta.bg }}>
+                            <Icon className="w-6 h-6" style={{ color: isActive ? "#fff" : meta.color }} />
+                          </div>
+                          <span className={`text-[10px] font-semibold ${isActive ? "text-gray-900" : "text-gray-500"}`}>{t(meta.label as any, lang)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
 

@@ -1616,24 +1616,38 @@ export default function Memberships() {
           <div className="bg-white mt-2 py-4">
             <div className="max-w-7xl mx-auto px-4">
               <h3 className="text-gray-900 font-bold text-base mb-3">{t("categories", lang)}</h3>
-              <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-1 lg:justify-center" style={{ scrollbarWidth: "none" }}>
+              <div className={`flex gap-4 lg:gap-6 overflow-x-auto pb-1 transition-all ${
+                activeMainCat === "tratamientos" ? "lg:justify-start" : "lg:justify-center"
+              }`} style={{ scrollbarWidth: "none" }}>
 
                 {/* Todos */}
-                <button onClick={() => handleMainCat("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
-                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                <button onClick={() => handleMainCat("all")} className={`flex flex-col items-center gap-1.5 flex-shrink-0 transition-all ${
+                  activeMainCat === "tratamientos" ? "min-w-[48px] lg:min-w-[56px]" : "min-w-[64px] lg:min-w-[80px]"
+                }`}>
+                  <div className={`rounded-full flex items-center justify-center transition-all ${
+                    activeMainCat === "tratamientos" ? "w-10 h-10 lg:w-12 lg:h-12" : "w-14 h-14 lg:w-16 lg:h-16"
+                  } ${
                     activeMainCat === "all" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-gray-100"
                   }`}>
-                    <Package className={`w-6 h-6 ${activeMainCat === "all" ? "text-white" : "text-gray-500"}`} />
+                    <Package className={`transition-all ${
+                      activeMainCat === "tratamientos" ? "w-4 h-4" : "w-6 h-6"
+                    } ${activeMainCat === "all" ? "text-white" : "text-gray-500"}`} />
                   </div>
-                  <span className={`text-[10px] font-semibold ${activeMainCat === "all" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catAll", lang)}</span>
+                  <span className={`font-semibold transition-all ${
+                    activeMainCat === "tratamientos" ? "text-[8px]" : "text-[10px]"
+                  } ${activeMainCat === "all" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catAll", lang)}</span>
                 </button>
 
                 {/* Tratamientos */}
-                <button onClick={() => handleMainCat("tratamientos")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
-                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                <button onClick={() => handleMainCat("tratamientos")} className={`flex flex-col items-center gap-1.5 flex-shrink-0 transition-all ${
+                  activeMainCat === "tratamientos" ? "min-w-[48px] lg:min-w-[56px]" : "min-w-[64px] lg:min-w-[80px]"
+                }`}>
+                  <div className={`rounded-full flex items-center justify-center transition-all ${
+                    activeMainCat === "tratamientos" ? "w-10 h-10 lg:w-12 lg:h-12" : "w-14 h-14 lg:w-16 lg:h-16"
+                  } ${
                     activeMainCat === "tratamientos" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-amber-50"
                   }`}>
-                    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke={activeMainCat === "tratamientos" ? "#fff" : "#C5A55A"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <svg viewBox="0 0 24 24" className={`transition-all ${activeMainCat === "tratamientos" ? "w-4 h-4" : "w-6 h-6"}`} fill="none" stroke={activeMainCat === "tratamientos" ? "#fff" : "#C5A55A"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="3.5" r="1.8" />
                       <path d="M8.5 7.5 C9 6 10.5 5.5 12 5.5 C13.5 5.5 15 6 15.5 7.5" />
                       <path d="M8.5 7.5 L8 11.5 C7.8 13 9.5 13.8 12 13.8 C14.5 13.8 16.2 13 16 11.5 L15.5 7.5" />
@@ -1643,37 +1657,63 @@ export default function Memberships() {
                       <path d="M19.5 11 L17.5 12.5 M19.5 14 L17.5 12.5" strokeWidth="1.3" />
                     </svg>
                   </div>
-                  <span className={`text-[10px] font-semibold ${activeMainCat === "tratamientos" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabServices", lang)}</span>
+                  <span className={`font-semibold transition-all ${
+                    activeMainCat === "tratamientos" ? "text-[8px]" : "text-[10px]"
+                  } ${activeMainCat === "tratamientos" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabServices", lang)}</span>
                 </button>
 
                 {/* Skincare */}
-                <button onClick={() => handleMainCat("skincare")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
-                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                <button onClick={() => handleMainCat("skincare")} className={`flex flex-col items-center gap-1.5 flex-shrink-0 transition-all ${
+                  activeMainCat === "tratamientos" ? "min-w-[48px] lg:min-w-[56px]" : "min-w-[64px] lg:min-w-[80px]"
+                }`}>
+                  <div className={`rounded-full flex items-center justify-center transition-all ${
+                    activeMainCat === "tratamientos" ? "w-10 h-10 lg:w-12 lg:h-12" : "w-14 h-14 lg:w-16 lg:h-16"
+                  } ${
                     activeMainCat === "skincare" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-pink-50"
                   }`}>
-                    <Droplets className={`w-6 h-6 ${activeMainCat === "skincare" ? "text-white" : "text-pink-400"}`} />
+                    <Droplets className={`transition-all ${
+                      activeMainCat === "tratamientos" ? "w-4 h-4" : "w-6 h-6"
+                    } ${activeMainCat === "skincare" ? "text-white" : "text-pink-400"}`} />
                   </div>
-                  <span className={`text-[10px] font-semibold ${activeMainCat === "skincare" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabProducts", lang)}</span>
+                  <span className={`font-semibold transition-all ${
+                    activeMainCat === "tratamientos" ? "text-[8px]" : "text-[10px]"
+                  } ${activeMainCat === "skincare" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabProducts", lang)}</span>
                 </button>
 
                 {/* Librería */}
-                <button onClick={() => handleMainCat("libreria")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
-                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                <button onClick={() => handleMainCat("libreria")} className={`flex flex-col items-center gap-1.5 flex-shrink-0 transition-all ${
+                  activeMainCat === "tratamientos" ? "min-w-[48px] lg:min-w-[56px]" : "min-w-[64px] lg:min-w-[80px]"
+                }`}>
+                  <div className={`rounded-full flex items-center justify-center transition-all ${
+                    activeMainCat === "tratamientos" ? "w-10 h-10 lg:w-12 lg:h-12" : "w-14 h-14 lg:w-16 lg:h-16"
+                  } ${
                     activeMainCat === "libreria" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-blue-50"
                   }`}>
-                    <BookOpen className={`w-6 h-6 ${activeMainCat === "libreria" ? "text-white" : "text-blue-400"}`} />
+                    <BookOpen className={`transition-all ${
+                      activeMainCat === "tratamientos" ? "w-4 h-4" : "w-6 h-6"
+                    } ${activeMainCat === "libreria" ? "text-white" : "text-blue-400"}`} />
                   </div>
-                  <span className={`text-[10px] font-semibold ${activeMainCat === "libreria" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabLibrary", lang)}</span>
+                  <span className={`font-semibold transition-all ${
+                    activeMainCat === "tratamientos" ? "text-[8px]" : "text-[10px]"
+                  } ${activeMainCat === "libreria" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("tabLibrary", lang)}</span>
                 </button>
 
                 {/* Paquetes */}
-                <button onClick={() => handleMainCat("packages")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
-                  <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
+                <button onClick={() => handleMainCat("packages")} className={`flex flex-col items-center gap-1.5 flex-shrink-0 transition-all ${
+                  activeMainCat === "tratamientos" ? "min-w-[48px] lg:min-w-[56px]" : "min-w-[64px] lg:min-w-[80px]"
+                }`}>
+                  <div className={`rounded-full flex items-center justify-center transition-all ${
+                    activeMainCat === "tratamientos" ? "w-10 h-10 lg:w-12 lg:h-12" : "w-14 h-14 lg:w-16 lg:h-16"
+                  } ${
                     activeMainCat === "packages" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-amber-50"
                   }`}>
-                    <Crown className={`w-6 h-6 ${activeMainCat === "packages" ? "text-white" : "text-amber-500"}`} />
+                    <Crown className={`transition-all ${
+                      activeMainCat === "tratamientos" ? "w-4 h-4" : "w-6 h-6"
+                    } ${activeMainCat === "packages" ? "text-white" : "text-amber-500"}`} />
                   </div>
-                  <span className={`text-[10px] font-semibold ${activeMainCat === "packages" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catPackages", lang)}</span>
+                  <span className={`font-semibold transition-all ${
+                    activeMainCat === "tratamientos" ? "text-[8px]" : "text-[10px]"
+                  } ${activeMainCat === "packages" ? "text-[#C5A55A]" : "text-gray-500"}`}>{t("catPackages", lang)}</span>
                 </button>
 
               </div>

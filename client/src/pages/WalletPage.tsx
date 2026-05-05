@@ -1333,9 +1333,9 @@ export default function WalletPage() {
               <Home className="w-5 h-5 text-gray-400" />
               <span className="text-[10px] font-medium text-gray-400">{t('navHome', lang)}</span>
             </button>
-            <button onClick={() => setLocation("/appointment-form")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
-              <Calendar className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-400">Agendar</span>
+            <button onClick={() => setLocation("/notifications")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
+              <Bell className="w-5 h-5 text-gray-400" />
+              <span className="text-[10px] font-medium text-gray-400">Notif.</span>
             </button>
             <div className="flex flex-col items-center -mt-5">
               <div className="w-14 h-14 rounded-full bg-white border-4 border-[#C5A55A] shadow-lg flex items-center justify-center mb-0.5">

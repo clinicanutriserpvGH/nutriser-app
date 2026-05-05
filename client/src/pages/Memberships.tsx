@@ -1615,7 +1615,6 @@ export default function Memberships() {
           {/* ── Categorías principales: Todos / Tratamientos / Skincare / Librería ── */}
           <div className="bg-white mt-2 py-4">
             <div className="max-w-7xl mx-auto px-4">
-              <h3 className="text-gray-900 font-bold text-base mb-3">{t("categories", lang)}</h3>
               <div className={`flex gap-4 lg:gap-6 overflow-x-auto pb-1 transition-all ${
                 activeMainCat === "tratamientos" ? "lg:justify-start" : "lg:justify-center"
               }`} style={{ scrollbarWidth: "none" }}>
@@ -1717,12 +1716,14 @@ export default function Memberships() {
                 </button>
 
               </div>
+            </div>
+          </div>
 
-              {/* ── Subcategorías de Tratamientos (solo cuando está activo) ── */}
-              {activeMainCat === "tratamientos" && (
-                <div className="mt-4">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Categorías</h3>
-                  <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-1 lg:justify-start" style={{ scrollbarWidth: "none" }}>
+          {/* ── Subcategorías de Tratamientos (solo cuando está activo) ── */}
+          {activeMainCat === "tratamientos" && (
+                <div className="mt-4 bg-white py-4">
+                  <div className="max-w-7xl mx-auto px-4">
+                    <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-1 lg:justify-start" style={{ scrollbarWidth: "none" }}>
                     <button onClick={() => setActiveCategory("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
                       <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${
                         activeCategory === "all" ? "bg-[#C5A55A] shadow-lg shadow-[#C5A55A]/30" : "bg-gray-100"
@@ -1746,12 +1747,10 @@ export default function Memberships() {
                         </button>
                       );
                     })}
+                    </div>
                   </div>
                 </div>
               )}
-
-            </div>
-          </div>
 
           {/* ── Paquetes Especiales (scroll horizontal) ── */}
           {(activeMainCat === "all" || activeMainCat === "packages") && (

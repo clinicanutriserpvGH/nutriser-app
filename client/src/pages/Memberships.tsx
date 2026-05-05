@@ -1721,6 +1721,7 @@ export default function Memberships() {
               {/* ── Subcategorías de Tratamientos (solo cuando está activo) ── */}
               {activeMainCat === "tratamientos" && (
                 <div className="mt-4">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Categorías</h3>
                   <div className="flex gap-4 lg:gap-6 overflow-x-auto pb-1 lg:justify-start" style={{ scrollbarWidth: "none" }}>
                     <button onClick={() => setActiveCategory("all")} className="flex flex-col items-center gap-1.5 flex-shrink-0 min-w-[64px] lg:min-w-[80px]">
                       <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all ${

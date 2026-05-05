@@ -288,8 +288,11 @@ export default function MyTreatments() {
   const registerMutation = trpc.patients.register.useMutation({
     onSuccess: (data) => {
       persistPatient(data as PatientSafe);
-      setView("portal");
       toast.success("¡Cuenta creada exitosamente! Bienvenido a Nutriser.");
+      // Después de crear monedero, redirigir a la tienda (/memberships)
+      // Si hay returnTo, usarlo; si no, ir a /memberships por defecto
+      const destination = returnTo || '/memberships';
+      window.location.href = destination;
     },
     onError: (e) => toast.error(e.message),
   });
@@ -378,14 +381,11 @@ export default function MyTreatments() {
       if (patient) {
         const updated = { ...patient, consentAcceptedAt: new Date(), consentPdfUrl: data.pdfUrl, consentSignature: data.pdfUrl };
         persistPatient(updated as PatientSafe);
-        if (returnTo) {
-          // Tras firmar el consentimiento, redirigir al destino original
-          window.location.href = returnTo;
-          return;
-        }
       }
-      setView("portal");
       toast.success("¡Consentimiento firmado y guardado exitosamente!");
+      // Siempre redirigir a la tienda después de firmar consentimiento
+      const destination = returnTo || '/memberships';
+      window.location.href = destination;
     },
     onError: (e) => toast.error(e.message),
   });

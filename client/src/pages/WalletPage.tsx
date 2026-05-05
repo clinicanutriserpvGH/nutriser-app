@@ -1333,7 +1333,7 @@ export default function WalletPage() {
               <Home className="w-5 h-5 text-gray-400" />
               <span className="text-[10px] font-medium text-gray-400">{t('navHome', lang)}</span>
             </button>
-            <button onClick={() => setLocation("/notifications")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
+            <button onClick={() => setActiveTab("messages")} className="flex flex-col items-center gap-0.5 py-1 px-3 min-w-[60px]">
               <Bell className="w-5 h-5 text-gray-400" />
               <span className="text-[10px] font-medium text-gray-400">Notif.</span>
             </button>

@@ -1971,7 +1971,7 @@ export default function Memberships() {
               {loadingServices ? (
                 <div className="flex justify-center py-20 bg-white"><Loader2 className="w-8 h-8 animate-spin text-[#C5A55A]" /></div>
               ) : activeCategory === "all" ? (
-                /* Mostrar cada categoría como sección con scroll horizontal */
+                /* Mostrar cada categoría como sección con grid vertical */
                 Object.entries(servicesByCategory).map(([cat, catServices]) => {
                   const meta = CATEGORY_META[cat] ?? CATEGORY_META.general;
                   const Icon = meta.icon;
@@ -1990,12 +1990,12 @@ export default function Memberships() {
                           </button>
                         </div>
 
-                        <HScrollRail>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
                           {catServices.map(service => {
                             const priceNum = service.price ? parseInt(service.price.replace(/[^0-9]/g, "")) : null;
                             return (
-                              <div key={service.id} className="flex-shrink-0 w-52 sm:w-56 lg:w-60 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all">
-                                <div className="relative h-32 lg:h-40 overflow-hidden">
+                              <div key={service.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+                                <div className="relative h-32 overflow-hidden">
                                   {service.imageUrl ? (
                                     <img src={service.imageUrl} alt={service.name} className="w-full h-full object-cover" />
                                   ) : (
@@ -2007,8 +2007,8 @@ export default function Memberships() {
                                     <Heart className={`w-3.5 h-3.5 transition-colors ${isInWishlist(`svc-${service.id}`) ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
                                   </button>
                                 </div>
-                                <div className="p-3">
-                                  <h3 className="font-bold text-gray-900 text-xs lg:text-sm leading-snug mb-1 line-clamp-2">{tx(service.name)}</h3>
+                                <div className="p-3 flex-1 flex flex-col">
+                                  <h3 className="font-bold text-gray-900 text-xs leading-snug mb-1 line-clamp-2">{tx(service.name)}</h3>
                                   {service.price && service.price !== "Consultar precio" ? (
                                     <p className="text-[#C5A55A] font-black text-sm mb-2">{formatServicePrice(service.price)}</p>
                                   ) : (
@@ -2026,7 +2026,7 @@ onClick={() => {
                                    >
                                      <Info className="w-3 h-3" /> {t("seeDetails", lang)}
                                    </button>
-                                   <div className="flex gap-1.5">
+                                   <div className="flex gap-1.5 mt-auto">
                                      <button onClick={() => addToCart({ id: `svc-${service.id}`, name: service.name, price: priceNum ?? 0, priceLabel: formatServicePrice(service.price), imageUrl: service.imageUrl, category: service.category ?? "general", itemType: "service" })}
                                        className="flex-1 flex items-center justify-center gap-0.5 border border-gray-200 text-gray-600 font-bold text-[10px] py-2 rounded-lg hover:bg-gray-50 transition-all active:scale-95">
                                        <ShoppingCart className="w-3 h-3" />
@@ -2040,7 +2040,7 @@ onClick={() => {
                               </div>
                             );
                           })}
-                        </HScrollRail>
+                        </div>
                       </div>
                     </div>
                   );

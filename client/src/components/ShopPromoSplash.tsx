@@ -36,7 +36,10 @@ function useCountdown(expiresAt: Date | string | null | undefined) {
 }
 
 const SHOP_SPLASH_IMAGE =
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663459263490/YZYSGKGuchmpBSLJ.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/splash-tienda-nutriser-e4FnnRXUZC8F2A8nbH44tT.webp";
+
+const PORTAL_SPLASH_IMAGE =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/splash-portal-nutriser-GReGQGAESTeF6fCJgJWmXH.webp";
 
 interface ShopPromoSplashProps {
   onClose: () => void;

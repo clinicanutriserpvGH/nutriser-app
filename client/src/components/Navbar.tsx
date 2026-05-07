@@ -92,9 +92,29 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
     }
   };
 
-  // Secret admin access: triple-click logo to open admin panel
-  const handleLogoClick = () => {
-    navigate("/admin/login");
+  // Secret admin access: long press logo to open admin panel
+  let logoLongPressTimer: NodeJS.Timeout | null = null;
+  const handleLogoMouseDown = () => {
+    logoLongPressTimer = setTimeout(() => {
+      navigate("/admin/login");
+    }, 1000);
+  };
+  const handleLogoMouseUp = () => {
+    if (logoLongPressTimer) {
+      clearTimeout(logoLongPressTimer);
+      logoLongPressTimer = null;
+    }
+  };
+  const handleLogoTouchStart = () => {
+    logoLongPressTimer = setTimeout(() => {
+      navigate("/admin/login");
+    }, 1000);
+  };
+  const handleLogoTouchEnd = () => {
+    if (logoLongPressTimer) {
+      clearTimeout(logoLongPressTimer);
+      logoLongPressTimer = null;
+    }
   };
 
   return (
@@ -111,21 +131,20 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
         <div className="container flex items-center justify-between h-20">
           {/* Logo */}
           {!hideLogo ? (
-          <a
-            href="#inicio"
-            onClick={(e) => {
-              e.preventDefault();
-              handleLogoClick();
-            }}
-            className="flex items-center gap-2 cursor-pointer"
-            title="Nutriser Home"
+          <div
+            onMouseDown={handleLogoMouseDown}
+            onMouseUp={handleLogoMouseUp}
+            onTouchStart={handleLogoTouchStart}
+            onTouchEnd={handleLogoTouchEnd}
+            className="flex items-center gap-2 cursor-pointer select-none"
+            title="Nutriser Home (Mantén presionado para panel admin)"
           >
             <img
               src={LOGO_URL}
               alt="Nutriser - Aesthetic & Nutrition"
               className="h-12 w-auto object-contain transition-all duration-500"
             />
-          </a>
+          </div>
           ) : <div className="w-12" />}
 
           {/* DESKTOP: Sin botones de splash ni Shop en navbar (Shop va en el hero) */}

@@ -92,12 +92,12 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
     }
   };
 
-  // Secret admin access: long press logo to open admin panel
+  // Secret admin access: long press logo to open admin panel (3 seconds for security)
   let logoLongPressTimer: NodeJS.Timeout | null = null;
   const handleLogoMouseDown = () => {
     logoLongPressTimer = setTimeout(() => {
       navigate("/admin/login");
-    }, 1000);
+    }, 3000);
   };
   const handleLogoMouseUp = () => {
     if (logoLongPressTimer) {
@@ -108,7 +108,7 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
   const handleLogoTouchStart = () => {
     logoLongPressTimer = setTimeout(() => {
       navigate("/admin/login");
-    }, 1000);
+    }, 3000);
   };
   const handleLogoTouchEnd = () => {
     if (logoLongPressTimer) {

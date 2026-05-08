@@ -66,10 +66,31 @@ export default function Home() {
             sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
             setShowShopPromoSplash(false);
           }}
+          onGoToPortal={() => {
+            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
+            setShowShopPromoSplash(false);
+            window.location.href = '/portal';
+          }}
           onGoToShop={() => {
             sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
             setShowShopPromoSplash(false);
             window.location.href = '/memberships';
+          }}
+          onGoToWallet={() => {
+            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
+            setShowShopPromoSplash(false);
+            window.location.href = '/wallet';
+          }}
+          onGoToAgenda={() => {
+            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
+            setShowShopPromoSplash(false);
+            window.location.href = '/agenda';
+          }}
+          onOpenWhatsApp={() => {
+            sessionStorage.setItem('nutriser_shop_promo_dismissed', '1');
+            setShowShopPromoSplash(false);
+            const whatsappNumber = '525617285959';
+            window.open(`https://wa.me/${whatsappNumber}`, '_blank');
           }}
         />
       )}

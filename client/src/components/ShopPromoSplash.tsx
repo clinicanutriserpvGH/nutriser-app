@@ -35,15 +35,16 @@ function useCountdown(expiresAt: Date | string | null | undefined) {
   return timeLeft;
 }
 
-const SHOP_SPLASH_IMAGE =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/splash-tienda-nutriser-e4FnnRXUZC8F2A8nbH44tT.webp";
-
-const PORTAL_SPLASH_IMAGE =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/splash-portal-nutriser-GReGQGAESTeF6fCJgJWmXH.webp";
+const SPLASH_ZERO_IMAGE =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/splash-zero-complete-final-kRadW7ipdfNVgrKrUZbEKa.webp";
 
 interface ShopPromoSplashProps {
   onClose: () => void;
   onGoToShop: () => void;
+  onGoToPortal?: () => void;
+  onGoToWallet?: () => void;
+  onGoToAgenda?: () => void;
+  onOpenWhatsApp?: () => void;
   /** Si el usuario ya inició sesión; si no, se muestra el guard al intentar comprar */
   isAuthenticated?: boolean;
 }
@@ -62,27 +63,77 @@ interface Promo {
   couponsRemaining?: number | null;
 }
 
-/* ── Slide 0: Tarjeta de Tienda Nutriser ── */
-function ShopCard({ onAction }: { onAction: () => void }) {
+/* ── Slide 0: Splash Zero completo con Portal, Tienda y Acciones ── */
+function SplashZeroCard({
+  onGoToPortal,
+  onGoToShop,
+  onGoToWallet,
+  onGoToAgenda,
+  onOpenWhatsApp,
+}: {
+  onGoToPortal?: () => void;
+  onGoToShop?: () => void;
+  onGoToWallet?: () => void;
+  onGoToAgenda?: () => void;
+  onOpenWhatsApp?: () => void;
+}) {
   return (
     <div className="relative w-full flex-shrink-0">
       <div
         className="relative w-full overflow-hidden rounded-2xl"
         style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
       >
-        {/* Imagen 2x2 con etiquetas ya incluidas en el PNG */}
-        <button
-          onClick={onAction}
-          className="relative w-full block transition-opacity hover:opacity-95 active:opacity-80"
-          style={{ padding: 0 }}
-        >
+        {/* Imagen del Splash Zero con botones interactivos */}
+        <div className="relative w-full">
           <img
-            src={SHOP_SPLASH_IMAGE}
-            alt="Tienda Nutriser"
+            src={SPLASH_ZERO_IMAGE}
+            alt="Nutriser - Portal y Tienda"
             className="w-full h-auto block"
             style={{ display: "block" }}
+            useMap="#splash-zero-map"
           />
-        </button>
+          {/* Mapa interactivo invisible para los botones */}
+          <map name="splash-zero-map">
+            {/* Botón ENTRAR AL PORTAL (aproximadamente en el área del Portal) */}
+            <area
+              shape="rect"
+              coords="0,0,100%,40%"
+              onClick={onGoToPortal}
+              style={{ cursor: "pointer" }}
+              alt="Entrar al Portal"
+            />
+            {/* Botón IR A LA TIENDA (aproximadamente en el área de la Tienda) */}
+            <area
+              shape="rect"
+              coords="0,40%,100%,75%"
+              onClick={onGoToShop}
+              style={{ cursor: "pointer" }}
+              alt="Ir a la Tienda"
+            />
+            {/* Botones de acciones (WhatsApp, Agendar, Monedero) */}
+            <area
+              shape="rect"
+              coords="0,75%,33%,100%"
+              onClick={onOpenWhatsApp}
+              style={{ cursor: "pointer" }}
+              alt="WhatsApp"
+            />
+            <area
+              shape="rect"
+              coords="33%,75%,66%,100%"
+              onClick={onGoToAgenda}
+              style={{ cursor: "pointer" }}
+              alt="Agendar cita"
+            />
+            <area
+              shape="rect"
+              coords="66%,75%,100%,100%"
+              onClick={onGoToWallet}
+              style={{ cursor: "pointer" }}
+              alt="Mi monedero"
+            />
+          </map>
+        </div>
       </div>
     </div>
   );
@@ -161,7 +212,15 @@ function PromoCard({ promo, onAction }: { promo: Promo; onAction: () => void }) 
   );
 }
 
-export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated = false }: ShopPromoSplashProps) {
+export default function ShopPromoSplash({
+  onClose,
+  onGoToShop,
+  onGoToPortal,
+  onGoToWallet,
+  onGoToAgenda,
+  onOpenWhatsApp,
+  isAuthenticated = false,
+}: ShopPromoSplashProps) {
   // Cupones NO aparecen en splash - solo imágenes admin
   const { data: splashAds = [], isLoading: loadingAds } = (trpc.splashAds.getActive as any).useQuery({ type: 'inicio' });
   const { data: splashConfigData, isLoading: loadingConfig } = (trpc.splashAds.getConfig as any).useQuery({ type: 'inicio' });
@@ -281,25 +340,13 @@ export default function ShopPromoSplash({ onClose, onGoToShop, isAuthenticated =
               </div>
             </div>
           ) : isShopSlide ? (
-            customImageUrl ? (
-              // Imagen personalizada del admin para la slide fija de Tienda
-              <div className="relative w-full flex-shrink-0">
-                <div
-                  className="relative w-full overflow-hidden rounded-2xl"
-                  style={{ background: "#141008", border: "1px solid rgba(197,165,90,0.2)" }}
-                >
-                  <img
-                    src={customImageUrl}
-                    alt="Tienda Nutriser"
-                    className="w-full h-auto block"
-                    style={{ display: 'block', cursor: 'pointer' }}
-                    onClick={handleGoToShop}
-                  />
-                </div>
-              </div>
-            ) : (
-              <ShopCard onAction={handleGoToShop} />
-            )
+            <SplashZeroCard
+              onGoToPortal={onGoToPortal}
+              onGoToShop={handleGoToShop}
+              onGoToWallet={onGoToWallet}
+              onGoToAgenda={onGoToAgenda}
+              onOpenWhatsApp={onOpenWhatsApp}
+            />
           ) : (
             activePromos[promoIndex] && (
               <PromoCard

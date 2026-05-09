@@ -217,15 +217,19 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                       />
                     </div>
                     <span className="text-[11px] md:text-xs font-bold tracking-widest uppercase text-[#E8C97A]" style={{ textShadow: '0 1px 6px rgba(0,0,0,1), 0 0 16px rgba(0,0,0,1)', background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '6px' }}>
-                      App Pacientes
+                      Portal de Salud Nutriser
                     </span>
                   </div>
                   <div>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
-                      Portal de Salud<br />Nutriser
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
+                      Consulta tu plan, avances,<br />mediciones y seguimiento
                     </h2>
-                    <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 bg-white/20 backdrop-blur-sm text-white border border-white/40">
-                      Mi Asesoría Nutricional
+                    <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 text-black" style={{
+                        background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 50%, #C5A55A 100%)',
+                        boxShadow: '0 0 12px rgba(197,165,90,0.9), 0 0 24px rgba(197,165,90,0.6), 0 0 40px rgba(197,165,90,0.3)',
+                        border: '1px solid rgba(232,201,122,0.7)'
+                      }}>
+                      Entrar a mi Portal
                     </span>
                   </div>
                 </div>

@@ -68,7 +68,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
     }, 200);
   };
 
-  // Secret admin access: long-press 3 seconds on logo to open admin panel
+  // Secret admin access: long-press 3 seconds on footer text to open admin panel
   const logoLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [logoHoldProgress, setLogoHoldProgress] = useState(0);
   const logoHoldInterval = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -97,19 +97,6 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
     setLogoHoldProgress(0);
   }, []);
 
-  // Secret website access: long-press 3 seconds on header text
-  const webLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startWebLongPress = useCallback(() => {
-    webLongPressTimer.current = setTimeout(() => {
-      if (onGoToWebsite) onGoToWebsite();
-      else if (onEnterNutriserWeb) onEnterNutriserWeb();
-    }, 3000);
-  }, [onGoToWebsite, onEnterNutriserWeb]);
-
-  const cancelWebLongPress = useCallback(() => {
-    if (webLongPressTimer.current) clearTimeout(webLongPressTimer.current);
-  }, []);
-
   return (
     <div
       className="fixed inset-0 z-[99999] overflow-x-hidden overflow-y-auto transition-all duration-500"
@@ -127,61 +114,6 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
         }}
       >
         <div className="w-full max-w-[480px] sm:max-w-[600px] md:max-w-[900px] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px] flex flex-col" style={{ minHeight: '100%' }}>
-
-          {/* ── Header ── */}
-          <div className={`flex items-center gap-3 mb-3 md:mb-4 px-3 py-2.5 rounded-2xl transition-all duration-500 ${
-            isLight ? "bg-[#2a1f0a]/90 shadow-lg shadow-[#C5A55A]/10" : "bg-transparent"
-          }`}>
-            <div className="relative flex-shrink-0">
-              <button
-                type="button"
-                onMouseDown={startLogoLongPress}
-                onMouseUp={cancelLogoLongPress}
-                onMouseLeave={cancelLogoLongPress}
-                onTouchStart={startLogoLongPress}
-                onTouchEnd={cancelLogoLongPress}
-                onTouchCancel={cancelLogoLongPress}
-                onClick={e => e.preventDefault()}
-                className="block cursor-pointer focus:outline-none relative select-none"
-                aria-label="Nutriser"
-                style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
-              >
-                <img src={LOGO_URL} alt="Nutriser" className="relative w-11 h-11 md:w-14 md:h-14 object-contain" loading="eager" fetchPriority="high" />
-                {logoHoldProgress > 0 && (
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 44 44" style={{ transform: 'rotate(-90deg)' }}>
-                    <circle cx="22" cy="22" r="20" fill="none" stroke="#C5A55A" strokeWidth="2.5"
-                      strokeDasharray={`${(logoHoldProgress / 100) * 125.6} 125.6`}
-                      strokeLinecap="round" style={{ transition: 'stroke-dasharray 0.1s linear' }}
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
-            <div className="w-px h-10 bg-[#C5A55A]/50 flex-shrink-0" />
-            <div className="flex flex-col justify-center min-w-0 flex-1">
-              <button
-                type="button"
-                onMouseDown={startWebLongPress}
-                onMouseUp={cancelWebLongPress}
-                onMouseLeave={cancelWebLongPress}
-                onTouchStart={startWebLongPress}
-                onTouchEnd={cancelWebLongPress}
-                onTouchCancel={cancelWebLongPress}
-                onClick={e => e.preventDefault()}
-                className="text-left cursor-pointer focus:outline-none"
-                title="Nutriser"
-                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', userSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties}
-              >
-                <p className="text-[#C5A55A] text-[9px] md:text-[11px] tracking-[0.25em] uppercase font-light leading-tight hover:text-[#E8C97A] transition-colors">
-                  Aesthetic &amp; Nutrition
-                </p>
-              </button>
-              <h1 className="text-white text-xs md:text-sm font-semibold tracking-wider uppercase leading-tight mt-0.5">
-                Bienvenido a Nutriser
-              </h1>
-            </div>
-
-          </div>
 
           {/* ── Grid principal — portrait: columna vertical | landscape: fila horizontal ── */}
           <div
@@ -207,7 +139,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-black/40 pointer-events-none" />
                 <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6 text-left pointer-events-none">
-                  {/* Fila superior: badge App Pacientes */}
+                  {/* Fila superior: badge Portal de Salud Nutriser */}
                   <div className="flex items-center gap-2">
                     <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.75)', border: '2px solid rgba(197,165,90,0.9)', backdropFilter: 'blur(6px)' }}>
                       <img
@@ -238,6 +170,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
 
 
 
+            
             {/* ── Tarjeta 1: Tienda Nutriser ── */}
             <div style={{ flex: isLandscape ? '6' : '1', minHeight: isLandscape ? '0' : '160px' }}>
               <button
@@ -332,15 +265,30 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
 
 
 
-
-
-
-
-          {/* ── Pie ── */}
+          {/* ── Pie con acceso admin ── */}
           <div className="flex items-center justify-between mt-1 md:mt-2">
-            <p className={`text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-center flex-1 ${isLight ? "text-[#9a8050]/40" : "text-white/20"}`}>
-              Nutriser Aesthetic &amp; Nutrition
-            </p>
+            <button
+              type="button"
+              onMouseDown={startLogoLongPress}
+              onMouseUp={cancelLogoLongPress}
+              onMouseLeave={cancelLogoLongPress}
+              onTouchStart={startLogoLongPress}
+              onTouchEnd={cancelLogoLongPress}
+              onTouchCancel={cancelLogoLongPress}
+              onClick={e => e.preventDefault()}
+              className="relative cursor-pointer focus:outline-none select-none flex-1 transition-all duration-300"
+              aria-label="Nutriser - Presiona 3 segundos para acceso admin"
+              style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+            >
+              <p className={`text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-center ${isLight ? "text-[#9a8050]/40 hover:text-[#7a6030]/60" : "text-white/20 hover:text-white/40"} transition-colors`}>
+                Nutriser Aesthetic &amp; Nutrition
+              </p>
+              {logoHoldProgress > 0 && (
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 10" style={{ transform: 'scaleX(-1)' }}>
+                  <line x1="0" y1="5" x2={logoHoldProgress} y2="5" stroke="#C5A55A" strokeWidth="1" opacity="0.6" />
+                </svg>
+              )}
+            </button>
             {/* Toggle discreto modo claro/oscuro */}
             <div className="flex flex-col items-end gap-0.5">
               <button

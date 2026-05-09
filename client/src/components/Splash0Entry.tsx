@@ -20,7 +20,7 @@ const CLINIC_SHOP_IMG =
 const IMG_ACADEMY =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-academy-hub-v2-B6bpVdHqtSSKFqZdAvvqyS.webp";
 const PORTAL_IMG =
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663459263490/MFJTqCeAfeXYamlP.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/portal-nutriser-app_aa3f7f62-Eo4vKzH6xKdqVJJKqXXXXX.png";
 const NUTRISER_ICON =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-silhouette-icon_f9345ac8.png";
 

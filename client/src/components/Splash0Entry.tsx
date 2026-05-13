@@ -154,7 +154,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                   </div>
                   <div>
                     <h2 className="text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-2 md:mb-3 drop-shadow-lg text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
-                      Consulta tu plan, avances,<br />mediciones y seguimiento
+                      Consulta tu plan personalizado, diario de detonantes, tu racha 🔥, avances y tu seguimiento
                     </h2>
                     <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase shadow-lg transition-all duration-200 group-hover:scale-105 text-black" style={{
                         background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 50%, #C5A55A 100%)',

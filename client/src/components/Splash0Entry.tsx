@@ -197,10 +197,9 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                     <span className="text-sm md:text-lg lg:text-xl font-bold tracking-wide uppercase text-white" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.9)', background: 'rgba(0,0,0,0.7)', padding: '6px 16px', borderRadius: '8px' }}>Tienda Nutriser</span>
                   </div>
                   <div>
-                    <h2 className="text-2xl sm:text-3xl md:text-3xl font-bold leading-tight mb-0.5 md:mb-1 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
+                    <h2 className="text-2xl sm:text-3xl md:text-3xl font-bold leading-tight mb-2 md:mb-3 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)' }}>
                       Tienda en Línea
                     </h2>
-                    <p className="text-base sm:text-lg md:text-xl font-semibold text-[#C5A55A] mb-2 md:mb-3" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>Nutriser</p>
                     <span className="inline-flex items-center gap-1.5 px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm md:text-sm font-bold tracking-wide uppercase transition-all duration-200 group-hover:scale-105 text-black"
                       style={{
                         background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 50%, #C5A55A 100%)',

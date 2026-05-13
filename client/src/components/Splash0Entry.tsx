@@ -148,7 +148,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                         className="w-5 h-5 md:w-6 md:h-6 object-contain"
                       />
                     </div>
-                    <span className="text-[11px] md:text-xs font-bold tracking-widest uppercase text-[#E8C97A]" style={{ textShadow: '0 1px 6px rgba(0,0,0,1), 0 0 16px rgba(0,0,0,1)', background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '6px' }}>
+                    <span className="text-sm md:text-lg lg:text-xl font-bold tracking-widest uppercase text-[#E8C97A]" style={{ textShadow: '0 1px 6px rgba(0,0,0,1), 0 0 16px rgba(0,0,0,1)', background: 'rgba(0,0,0,0.7)', padding: '6px 16px', borderRadius: '8px' }}>
                       Portal de Salud Nutriser
                     </span>
                   </div>

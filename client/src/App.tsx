@@ -108,34 +108,16 @@ function AppContent() {
     if (location !== "/") return "site";
 
     // ── DETECCIÓN DE DISPOSITIVO ──────────────────────────────────────────
-    // Si es computadora/laptop/Mac → ir directo al sitio web (más formal)
+    // Si es computadora/laptop/Mac → ir directo al sitio web (Home de Nutriser)
     if (isDesktopDevice()) {
       return "site";
     }
 
-    // Si la versión del splash cambió, limpiar el estado guardado
-    const savedVersion = sessionStorage.getItem("nutriser_splash_version");
-    if (savedVersion !== SPLASH_VERSION) {
-      sessionStorage.removeItem("nutriser_splash_seen");
-      sessionStorage.removeItem("nutriser_chose_splash1");
-      sessionStorage.setItem("nutriser_splash_version", SPLASH_VERSION);
+    // Móvil/tablet → Redirigir automáticamente a Portal de Salud (sin mostrar Splash 0)
+    if (typeof window !== "undefined") {
+      window.location.href = "https://portaldesaludnutriser.club";
     }
-
-    // Si hay bandera de ir directo al sitio (ej: desde botón Cuponera), saltarse el splash
-    const goToSite = sessionStorage.getItem("nutriser_go_to_site");
-    if (goToSite) {
-      sessionStorage.removeItem("nutriser_go_to_site");
-      return "site";
-    }
-
-    // Si el usuario ya eligió ir al sitio web en esta sesión, no volver al splash
-    const splashSeen = sessionStorage.getItem("nutriser_splash_seen");
-    if (splashSeen) {
-      return "site";
-    }
-
-    // Móvil/tablet → Splash 0
-    return "splash0";
+    return "site";
   });
 
   // Navegar a una ruta interna desde el Splash 0

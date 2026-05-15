@@ -1,12 +1,12 @@
-import express, { type Express } from "express";
 import fs from "fs";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import express from "express";
 import viteConfig from "../../vite.config";
 
-export async function setupVite(app: Express, server: Server) {
+export async function setupVite(app: express.Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -21,7 +21,16 @@ export async function setupVite(app: Express, server: Server) {
   });
 
   app.use(vite.middlewares);
-  app.use("*", async (req, res, next) => {
+  app.use("*", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // REDIRECCIÓN CRÍTICA: Móviles/Tablets → Portal de Salud ANTES de servir HTML
+    const userAgent = req.headers['user-agent'] || '';
+    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i.test(userAgent);
+    
+    if (isMobileOrTablet) {
+      console.log(`[Mobile Redirect] Detectado dispositivo móvil`);
+      return res.redirect(301, 'https://portaldesaludnutriser.club');
+    }
+    
     const url = req.originalUrl;
 
     try {
@@ -47,7 +56,7 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
-export function serveStatic(app: Express) {
+export function serveStatic(app: express.Express) {
   const distPath =
     process.env.NODE_ENV === "development"
       ? path.resolve(import.meta.dirname, "../..", "dist", "public")
@@ -58,9 +67,23 @@ export function serveStatic(app: Express) {
     );
   }
 
+  // REDIRECCIÓN CRÍTICA: Móviles/Tablets → Portal de Salud ANTES de servir cualquier contenido
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const userAgent = req.headers['user-agent'] || '';
+    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i.test(userAgent);
+    const isApiRoute = req.path.startsWith('/api/');
+    
+    if (isMobileOrTablet && !isApiRoute) {
+      console.log(`[Mobile Redirect] Detectado dispositivo móvil en producción`);
+      return res.redirect(301, 'https://portaldesaludnutriser.club');
+    }
+    
+    next();
+  });
+
   // Serve static files but EXCLUDE /cupon/* routes so Express handlers can intercept them
   // Use a custom static middleware that skips /cupon/* paths
-  app.use((req, res, next) => {
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
     const url = req.originalUrl;
     // Let Express handle /cupon/* and /api/* routes — don't serve static for these
     if (url.startsWith("/cupon/") || url.startsWith("/api/")) {
@@ -69,12 +92,13 @@ export function serveStatic(app: Express) {
     express.static(distPath)(req, res, next);
   });
 
-  // fall through to index.html for all non-API, non-coupon routes (SPA routing)
-  app.use("*", (req, res, next) => {
-    const url = req.originalUrl;
-    if (url.startsWith("/api/") || url.startsWith("/cupon/")) {
-      return next();
+  // Serve index.html for any remaining routes (SPA fallback)
+  app.use((req: express.Request, res: express.Response) => {
+    const indexPath = path.join(distPath, "index.html");
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).send("index.html not found");
     }
-    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

@@ -2,15 +2,11 @@
 <html lang="es">
 
   <head>
-    <!-- REDIRECCIÓN INMEDIATA: Móviles/Tablets → Portal de Salud ANTES de cualquier renderizado -->
+    <!-- REDIRECCIÓN: Móviles/Tablets → Portal de Salud -->
     <script>
-      (function() {
-        var userAgent = navigator.userAgent || '';
-        var isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i.test(userAgent);
-        if (isMobileOrTablet) {
-          window.location.replace('https://portaldesaludnutriser.club');
-        }
-      })();
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i.test(navigator.userAgent)) {
+        window.location.href = 'https://portaldesaludnutriser.club';
+      }
     </script>
 
     <meta charset="UTF-8" />

@@ -67,6 +67,20 @@ export function serveStatic(app: Express) {
     );
   }
 
+  // REDIRECCIÓN CRÍTICA: Móviles/Tablets → Portal de Salud ANTES de servir contenido
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/manus-storage/')) {
+      return next();
+    }
+    const userAgent = req.headers['user-agent'] || '';
+    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i.test(userAgent);
+    if (isMobileOrTablet) {
+      console.log('[Mobile Redirect] Detectado dispositivo móvil en producción');
+      return res.redirect(301, 'https://portaldesaludnutriser.club');
+    }
+    next();
+  });
+
   // Serve static files but EXCLUDE /cupon/* routes so Express handlers can intercept them
   // Use a custom static middleware that skips /cupon/* paths
   app.use((req, res, next) => {

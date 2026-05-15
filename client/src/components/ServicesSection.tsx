@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   CalendarCheck,
   Info,
+  MessageCircle,
 } from "lucide-react";
 import { serviceDescriptions } from "@/lib/serviceDescriptions";
 
@@ -311,23 +312,7 @@ export default function ServicesSection() {
                           WhatsApp
                         </a>
                       </div>
-                      {/* Fila 2: Adquirir (→ Tienda) + Agendar Cita */}
-                      <div className="flex gap-2">
-                        <a
-                          href={`/memberships?q=${encodeURIComponent(service.name)}`}
-                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#C5A55A] hover:bg-[#B8963E] text-white text-xs font-bold py-2.5 rounded-lg transition-colors shadow-sm"
-                        >
-                          <ShoppingBag className="w-3.5 h-3.5" />
-                          Adquirir
-                        </a>
-                        <a
-                          href={`/appointment-form?service=${encodeURIComponent(service.name)}`}
-                          className="flex-1 flex items-center justify-center gap-1.5 border border-[#C5A55A]/60 text-[#C5A55A] hover:bg-[#C5A55A] hover:text-white text-xs font-bold py-2.5 rounded-lg transition-all duration-300"
-                        >
-                          <CalendarCheck className="w-3.5 h-3.5" />
-                          Cita
-                        </a>
-                      </div>
+                      {/* Fila 2: Ver Detalles (ya existe arriba en Fila 1, no duplicar) */}
                     </div>
                   </motion.div>
                 ))}
@@ -336,7 +321,7 @@ export default function ServicesSection() {
           </>
         )}
 
-        {/* Bottom CTA */}
+        {/* Bottom CTA - Contacto por WhatsApp */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={headerInView ? { opacity: 1 } : {}}
@@ -348,10 +333,13 @@ export default function ServicesSection() {
             personalizada.
           </p>
           <a
-            href="/appointment-form?service=Valoraci%C3%B3n+General"
-            className="inline-flex items-center gap-2 bg-[#C5A55A] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/30"
+            href="https://wa.me/573221007799"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#20BA5A] hover:shadow-lg hover:shadow-[#25D366]/30"
           >
-            Agendar Cita
+            <MessageCircle className="w-5 h-5" />
+            Contáctanos por WhatsApp
           </a>
         </motion.div>
       </div>

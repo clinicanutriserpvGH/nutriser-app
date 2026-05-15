@@ -4,7 +4,7 @@
  * Portal de Salud as the primary featured element
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, CalendarCheck, Store, BookOpen } from "lucide-react";
+import { ChevronDown, BookOpen, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 
@@ -122,42 +122,24 @@ export default function HeroSection() {
             tecnología y experiencia profesional.
           </motion.p>
 
-          {/* ─── Botones (Tienda Nutriser + Academia Nutriser + Agenda tu Cita) ─────────────────────────── */}
+          {/* ─── Botones (WhatsApp + Academia Nutriser) ─────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
             className="flex flex-col gap-3 max-w-2xl"
           >
-            {/* Fila principal: Tienda + Agenda Cita (siempre lado a lado) */}
-            <div className="flex flex-row gap-3">
-              {/* 1. Tienda Nutriser */}
-              <motion.a
-                href="/memberships"
-                onClick={handleTienda}
-                className="relative inline-flex items-center justify-center gap-2 bg-[#1A1A1A]/80 text-[#C5A55A] px-5 py-3.5 text-sm tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#C5A55A] hover:text-[#1A1A1A] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg flex-1"
-                animate={{ boxShadow: ["0 0 0 0 rgba(197, 165, 90, 0.7)", "0 0 0 18px rgba(197, 165, 90, 0)"] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-[#C5A55A]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <motion.span
-                  className="relative w-2.5 h-2.5 rounded-full bg-[#C5A55A] flex-shrink-0"
-                  animate={{ opacity: [1, 0.1, 1], scale: [1, 0.7, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <Store className="relative w-4 h-4 flex-shrink-0" />
-                <span className="relative">Tienda</span>
-              </motion.a>
-              {/* 2. Agenda tu Cita — siempre visible junto a Tienda */}
-              <a
-                href="/appointment-form"
-                onClick={(e) => { e.preventDefault(); window.location.href = '/appointment-form'; }}
-                className="relative inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-3.5 text-sm tracking-[0.12em] uppercase font-semibold transition-all duration-300 hover:bg-white/20 hover:shadow-lg border border-white/30 rounded-lg flex-1"
-              >
-                <CalendarCheck className="w-4 h-4 flex-shrink-0" />
-                <span>Agenda Cita</span>
-              </a>
-            </div>
+            {/* WhatsApp Button */}
+            <a
+              href="https://wa.me/573221007799"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-5 py-3.5 text-sm tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#20BA5A] hover:shadow-lg hover:shadow-[#25D366]/40 border-2 border-[#25D366] overflow-hidden group rounded-lg"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-[#25D366]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <MessageCircle className="relative w-4 h-4 flex-shrink-0" />
+              <span className="relative">WhatsApp</span>
+            </a>
             {/* 3. Academia Nutriser — solo visible cuando el admin la activa */}
             {academiaVisible && (
               <a

@@ -113,9 +113,10 @@ function AppContent() {
       return "site";
     }
 
-    // NOTA: La redirección de móvil/tablet a Portal de Salud ahora se maneja
-    // a nivel de servidor (server/_core/index.ts) para que NUNCA se cargue
-    // el sitio web en dispositivos móviles.
+    // Móvil/tablet → Redirigir automáticamente a Portal de Salud (sin mostrar Splash 0)
+    if (typeof window !== "undefined") {
+      window.location.href = "https://portaldesaludnutriser.club";
+    }
     return "site";
   });
 

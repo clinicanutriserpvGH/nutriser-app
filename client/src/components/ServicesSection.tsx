@@ -612,21 +612,16 @@ export default function ServicesSection() {
                       </ul>
                     </div>
 
-                    {/* CTA Buttons */}
+                    {/* CTA Button - Solo WhatsApp */}
                     <div className="flex gap-3 pt-4">
                       <a
-                        href={`/memberships?q=${encodeURIComponent(selectedServiceInfo)}`}
-                        className="flex-1 bg-[#C5A55A] hover:bg-[#B8963E] text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"
+                        href="https://wa.me/573221007799"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-[#25D366] hover:bg-[#20BA5A] text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"
                       >
-                        <ShoppingBag className="w-4 h-4" />
-                        Adquirir en Tienda
-                      </a>
-                      <a
-                        href={`/appointment-form?service=${encodeURIComponent(selectedServiceInfo)}`}
-                        className="flex-1 border-2 border-[#C5A55A] text-[#C5A55A] hover:bg-[#C5A55A] hover:text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"
-                      >
-                        <CalendarCheck className="w-4 h-4" />
-                        Agendar Cita
+                        <MessageCircle className="w-4 h-4" />
+                        Contactar por WhatsApp
                       </a>
                     </div>
                   </>

@@ -159,7 +159,7 @@ export default function CouponPage() {
     return "ok";
   };
 
-  // Detectar si el usuario viene de la tienda (/memberships) via query param ?from=store
+  // NO permitir acceso a tienda desde desktop - siempre volver a Home
   const [cameFromStore] = useState(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -170,12 +170,9 @@ export default function CouponPage() {
   const [, navigate] = useLocation();
 
   const handleBack = () => {
-    if (cameFromStore) {
-      navigate('/memberships');
-    } else {
-      sessionStorage.setItem("nutriser_scroll_to", "promociones");
-      window.location.replace("/");
-    }
+    // Siempre volver al Home, nunca a tienda
+    sessionStorage.setItem("nutriser_scroll_to", "promociones");
+    window.location.replace("/");
   };
 
   // Enviar comprobante de pago
@@ -290,10 +287,10 @@ export default function CouponPage() {
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
       {/* Navegación única: BackToSplash (sin Navbar para evitar duplicados) */}
       <BackToSplash
-        hideHome={cameFromStore}
-        desktopBackTo={cameFromStore ? "/memberships" : "/"}
-        desktopBackLabel={cameFromStore ? "Volver a la tienda" : "Regresar"}
-        mobileBackTo={cameFromStore ? "/memberships" : undefined}
+        hideHome={false}
+        desktopBackTo="/"
+        desktopBackLabel="Regresar"
+        mobileBackTo={undefined}
       />
 
       {/* Espaciador para safe area + BackToSplash */}

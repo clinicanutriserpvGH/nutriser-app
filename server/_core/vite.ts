@@ -22,6 +22,15 @@ export async function setupVite(app: Express, server: Server) {
 
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
+    // REDIRECCIÓN CRÍTICA: Móviles/Tablets → Portal de Salud ANTES de servir HTML
+    const userAgent = req.headers['user-agent'] || '';
+    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i.test(userAgent);
+    
+    if (isMobileOrTablet) {
+      console.log(`[Mobile Redirect] Detectado dispositivo móvil - redirigiendo a Portal de Salud`);
+      return res.redirect(301, 'https://portaldesaludnutriser.club');
+    }
+    
     const url = req.originalUrl;
 
     try {

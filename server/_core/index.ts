@@ -54,6 +54,20 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // REDIRECCIÓN A NIVEL DE SERVIDOR: Móviles/Tablets → Portal de Salud
+  app.use((req, res, next) => {
+    // Excluir rutas de API y recursos estáticos
+    if (req.path.startsWith("/api") || req.path.startsWith("/manus-storage") || req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/i)) {
+      return next();
+    }
+    
+    const ua = req.get("user-agent") || "";
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i.test(ua)) {
+      return res.redirect(301, "https://portaldesaludnutriser.club");
+    }
+    next();
+  });
   // Storage proxy for /manus-storage/* paths
   registerStorageProxy(app);
   // OAuth callback under /api/oauth/callback

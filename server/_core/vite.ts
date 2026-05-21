@@ -28,7 +28,7 @@ export async function setupVite(app: Express, server: Server) {
     
     if (isMobileOrTablet) {
       console.log(`[Mobile Redirect] Detectado dispositivo móvil - redirigiendo a Portal de Salud`);
-      return res.redirect(302, 'https://portaldesaludnutriser.club');
+      return res.redirect(301, 'https://portaldesaludnutriser.club');
     }
     
     const url = req.originalUrl;
@@ -76,7 +76,7 @@ export function serveStatic(app: Express) {
     const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i.test(userAgent);
     if (isMobileOrTablet) {
       console.log('[Mobile Redirect] Detectado dispositivo móvil en producción');
-      return res.redirect(302, 'https://portaldesaludnutriser.club');
+      return res.redirect(301, 'https://portaldesaludnutriser.club');
     }
     next();
   });

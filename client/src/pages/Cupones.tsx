@@ -16,7 +16,6 @@ export default function Cupones() {
       {/* Navbar sin logo (para no exponer el acceso al admin) y sin links del sitio */}
       <Navbar
         onShowSplash={showSplash}
-        onRegresar={handleRegresar}
         hideNavLinks
         hideLogo
         lightBg

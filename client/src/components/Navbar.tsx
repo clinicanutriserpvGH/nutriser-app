@@ -1,19 +1,13 @@
 /*
- * Nutriser - Navbar Component
+ * Nutriser - Navbar Component (Desktop Marketing Site Only)
  * Design: Neo-Art Deco with warm organic feel
  * Gold accent on scroll, transparent initially
- *
- * LÓGICA DE DISPOSITIVOS:
- * ─ Móvil/Tableta (PWA): Botones Inicio (→ Splash 0) y Regresar (→ Splash 1)
- * ─ Desktop (computadora): Botón "Tienda Nutriser" que lleva a /memberships
- *   Los splashes son exclusivos de la app móvil, desktop NO debe ir a splashes.
+ * All users see the same marketing website
  */
 import { useState, useEffect } from "react";
-import { Menu, X, Phone, Instagram, Facebook, Ruler, ShoppingBag } from "lucide-react";
+import { Menu, X, Phone, Instagram, Facebook } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
-import { useSplash } from "@/contexts/SplashContext";
-import { useDeviceType } from "@/hooks/useDeviceType";
 
 const LOGO_URL =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663459263490/7jSTACnGYyADJrX65GKurG/nutriser-logo-transparent_8c59cfa6.png";
@@ -27,41 +21,18 @@ const navLinks = [
   { label: "Contacto", href: "#contacto" },
 ];
 
-const serviceSubmenu = [
-  { label: "Nutriólogo", href: "/servicio/nutriologo" },
-  { label: "Hollywood Peel", href: "/servicio/hollywood_peel" },
-  { label: "Limpieza Facial", href: "/servicio/limpieza_facial" },
-  { label: "Mesoterapia", href: "/servicio/mesoterapia" },
-  { label: "Radiofrecuencia", href: "/servicio/radiofrecuencia" },
-  { label: "Rellenos Faciales", href: "/servicio/rellenos" },
-];
-
 interface NavbarProps {
   lightBg?: boolean;
   onShowSplash?: () => void;
-  /** Cuando es true (Home/sitio principal), en móvil solo muestra Inicio, sin Regresar */
   isHome?: boolean;
-  /** Override del comportamiento de Regresar (por defecto va a Splash 1) */
-  onRegresar?: () => void;
-  /** Ocultar los links de navegación del sitio (Servicios, Cupones, etc.) en páginas internas */
   hideNavLinks?: boolean;
-  /** Ocultar el logo (para evitar acceso accidental al panel admin desde páginas internas) */
   hideLogo?: boolean;
 }
 
-export default function Navbar({ lightBg = false, onShowSplash, isHome = false, onRegresar, hideNavLinks = false, hideLogo = false }: NavbarProps) {
+export default function Navbar({ lightBg = false, onShowSplash, isHome = false, hideNavLinks = false, hideLogo = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [, navigate] = useLocation();
-  const { showSplash, showSplash1 } = useSplash();
-  const { isDesktop } = useDeviceType();
-
-  // Móvil: Regresar → Splash 1 (hub de Nutriser) o destino personalizado
-  const handleRegresar = onRegresar ?? showSplash1;
-  // Móvil: Inicio → Splash 0 (pantalla de entrada)
-  const handleInicio = onShowSplash ?? showSplash;
-  // Desktop: Ir a Tienda Nutriser
-  const handleGoToShop = () => navigate("/memberships");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -147,44 +118,6 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
           </div>
           ) : <div className="w-12" />}
 
-          {/* DESKTOP: Sin botones de splash ni Shop en navbar (Shop va en el hero) */}
-
-          {/* ═══ MÓVIL/TABLETA: En Home solo Inicio, en páginas internas Inicio + Regresar ═══ */}
-          {!isDesktop && (
-            <div className="hidden lg:flex items-center gap-2">
-              <button
-                onClick={handleInicio}
-                title="Ir a la pantalla de inicio"
-                  className={`flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase font-bold px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                  !isHome || scrolled || lightBg
-                    ? "border-[#C5A55A]/30 text-[#C5A55A]/70 hover:bg-[#C5A55A]/10"
-                    : "border-white/20 text-white/60 hover:bg-white/10"
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-                Inicio
-              </button>
-              {!isHome && (
-                <button
-                  onClick={handleRegresar}
-                  title="Regresar al menú de Nutriser"
-                  className={`flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase font-bold px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                    !isHome || scrolled || lightBg
-                      ? "border-[#C5A55A]/30 text-[#C5A55A]/70 hover:bg-[#C5A55A]/10"
-                      : "border-white/20 text-white/60 hover:bg-white/10"
-                  }`}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 12H5M12 5l-7 7 7 7"/>
-                  </svg>
-                  Regresar
-                </button>
-              )}
-            </div>
-          )}
-
           {/* Desktop Nav Links */}
           <div className={`hidden lg:flex items-center gap-8 ${hideNavLinks ? 'invisible pointer-events-none' : ''}`}>
             {navLinks.map((link: any) => (
@@ -201,28 +134,10 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
                   }}
                   className={`text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:text-[#C5A55A] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-[#C5A55A] after:transition-all after:duration-300 hover:after:w-full ${
                     !isHome || scrolled || lightBg ? "text-[#1A1A1A]/70" : "text-white/80"
-                  } ${(link as any).external ? "flex items-center gap-1" : ""}`}
+                  }`}
                 >
-                  {(link as any).external && <Ruler className="w-3.5 h-3.5" />}
                   {link.label}
                 </a>
-                {link.submenu && (
-                  <div className="absolute left-0 mt-0 w-56 bg-white shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                    {link.submenu.map((item: any) => (
-                      <a
-                        key={item.href}
-                        href={item.href}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleNavClick(item.href);
-                        }}
-                        className="block px-4 py-2.5 text-sm text-[#1A1A1A] hover:bg-[#FAF7F2] hover:text-[#C5A55A] transition-colors first:rounded-t-md last:rounded-b-md"
-                      >
-                        {item.label}
-                      </a>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
             <div className="flex items-center gap-4">
@@ -245,10 +160,10 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
               >
                 <Facebook className="w-4 h-4" />
               </a>
-              {/* Call Button - Solo en móvil */}
+              {/* Call Button */}
               <a
                 href="tel:3224503257"
-                className="flex sm:hidden items-center gap-2 bg-[#C5A55A] text-white px-5 py-2.5 text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/20"
+                className="flex items-center gap-2 bg-[#C5A55A] text-white px-5 py-2.5 text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/20"
               >
                 <Phone className="w-3.5 h-3.5" />
                 Llamada: 322 450 3257
@@ -256,39 +171,8 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
             </div>
           </div>
 
-          {/* ═══ Mobile: Botones según dispositivo + Toggle ═══ */}
+          {/* Mobile Menu Toggle */}
           <div className="lg:hidden flex items-center gap-1.5">
-            {/* MÓVIL/TABLETA: En Home solo Inicio, en páginas internas Inicio + Regresar */}
-            {!isDesktop && (
-              <>
-                <button
-                  onClick={handleInicio}
-                  aria-label="Ir a la pantalla de inicio"
-                  className="flex items-center gap-1 text-[10px] tracking-widest uppercase font-extrabold px-2.5 py-2 rounded-full bg-white/20 text-white border border-white/30 backdrop-blur-sm active:scale-95 transition-all duration-200"
-                  style={scrolled ? { background: 'rgba(197,165,90,0.15)', color: '#C5A55A', borderColor: 'rgba(197,165,90,0.4)' } : {}}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                  </svg>
-                  Inicio
-                </button>
-                {!isHome && (
-                  <button
-                    onClick={handleRegresar}
-                    aria-label="Regresar al menú de Nutriser"
-                    className="flex items-center gap-1 text-[10px] tracking-widest uppercase font-extrabold px-2.5 py-2 rounded-full bg-[#C5A55A] text-black border-2 border-[#C5A55A] shadow-lg shadow-[#C5A55A]/30 active:scale-95 transition-all duration-200"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M19 12H5M12 5l-7 7 7 7"/>
-                    </svg>
-                    Regresar
-                  </button>
-                )}
-              </>
-            )}
-
-            {/* DESKTOP: Sin botón Shop en navbar (va en el hero del Home) */}
-
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className={`transition-colors duration-300 ${
@@ -314,25 +198,6 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
             style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 6rem)' }}
           >
             <div className="flex flex-col gap-6">
-              {/* Desktop: Agregar enlace a Tienda Nutriser en el menú móvil */}
-              {isDesktop && (
-                <motion.a
-                  href="/memberships"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setMobileOpen(false);
-                    navigate("/memberships");
-                  }}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0 }}
-                  className="font-serif text-3xl text-[#C5A55A] hover:text-[#B8963E] transition-colors flex items-center gap-3"
-                >
-                  <ShoppingBag className="w-6 h-6" />
-                  Tienda Nutriser
-                </motion.a>
-              )}
-
               {navLinks.map((link, i) => (
                 <motion.a
                   key={link.href}
@@ -349,10 +214,9 @@ export default function Navbar({ lightBg = false, onShowSplash, isHome = false, 
                   }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (isDesktop ? i + 1 : i) * 0.1 }}
+                  transition={{ delay: i * 0.1 }}
                   className="font-serif text-3xl text-[#1A1A1A]/80 hover:text-[#C5A55A] transition-colors flex items-center gap-3"
                 >
-                  {(link as any).external && <Ruler className="w-6 h-6 text-[#C5A55A]" />}
                   {link.label}
                 </motion.a>
               ))}

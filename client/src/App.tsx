@@ -107,16 +107,7 @@ function AppContent() {
     // Solo mostrar en "/"
     if (location !== "/") return "site";
 
-    // ── DETECCIÓN DE DISPOSITIVO ──────────────────────────────────────────
-    // Si es computadora/laptop/Mac → ir directo al sitio web (Home de Nutriser)
-    if (isDesktopDevice()) {
-      return "site";
-    }
-
-    // Móvil/tablet → Redirigir automáticamente a Portal de Salud (sin mostrar Splash 0)
-    if (typeof window !== "undefined") {
-      window.location.href = "https://portaldesaludnutriser.club";
-    }
+    // Todos los usuarios ven el sitio web (sin redirecciones)
     return "site";
   });
 

@@ -273,12 +273,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
     }, 200);
   };
 
-  const handlePortalSalud = () => {
-    setLeaving(true);
-    setTimeout(() => {
-      window.location.href = "https://portaldesaludnutriser.club";
-    }, 200);
-  };
+
 
   // Secret admin access: long-press 3 seconds on footer text
   const logoLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -348,47 +343,7 @@ export default function Splash0Entry({ onEnterNutriserWeb, onGoToWebsite, onNavi
                 className="gap-3 mb-3"
                 style={{ display: 'flex', flexDirection: isLandscape ? 'row' : 'column', flex: 1, minHeight: 0 }}
               >
-                {/* ── Tarjeta: Portal de Salud Nutriser ── */}
-                <div style={{ flex: isLandscape ? '6' : '1', minHeight: isLandscape ? '0' : '160px' }}>
-                  <button
-                    type="button"
-                    onClick={handlePortalSalud}
-                    className="group relative w-full rounded-3xl overflow-hidden focus:outline-none h-full cursor-pointer"
-                    style={{ minHeight: "150px", WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
-                  >
-                    <img
-                      src={PORTAL_IMG}
-                      alt="Portal de Salud Nutriser"
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                      style={{ objectPosition: "center 30%" }}
-                      loading="eager"
-                      fetchPriority="high"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-black/40 pointer-events-none" />
-                    <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 text-left pointer-events-none">
-                      <div className="flex items-center gap-2">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'rgba(0,0,0,0.75)', border: '2px solid rgba(197,165,90,0.9)', backdropFilter: 'blur(6px)' }}>
-                          <img src={NUTRISER_ICON} alt="Nutriser" className="w-5 h-5 object-contain" />
-                        </div>
-                        <span className="text-sm font-bold tracking-widest uppercase text-[#E8C97A]" style={{ textShadow: '0 1px 6px rgba(0,0,0,1)', background: 'rgba(0,0,0,0.7)', padding: '6px 16px', borderRadius: '8px' }}>
-                          Portal de Salud Nutriser
-                        </span>
-                      </div>
-                      <div>
-                        <h2 className="text-lg font-bold leading-tight mb-2 drop-shadow-lg text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>
-                          Consulta tu plan, diario, racha 🔥 y seguimiento
-                        </h2>
-                        <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold tracking-wide uppercase shadow-lg text-black" style={{
-                          background: 'linear-gradient(145deg, #C5A55A 0%, #E8C97A 50%, #C5A55A 100%)',
-                          boxShadow: '0 0 12px rgba(197,165,90,0.9)',
-                          border: '1px solid rgba(232,201,122,0.7)'
-                        }}>
-                          Entrar a mi Portal
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                </div>
+
 
                 {/* ── Tarjeta: Tienda Nutriser ── */}
                 <div style={{ flex: isLandscape ? '6' : '1', minHeight: isLandscape ? '0' : '160px' }}>

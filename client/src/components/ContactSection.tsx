@@ -96,7 +96,7 @@ export default function ContactSection() {
 
               {/* Email */}
               <a
-                href="mailto:nutriserpv@gmail.com"
+                href="mailto:clinicanutriserpv@gmail.com"
                 className="flex items-center gap-5 p-6 bg-white/5 border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-[#C5A55A]/30"
               >
                 <div className="w-14 h-14 flex items-center justify-center border border-[#C5A55A]/40 flex-shrink-0">
@@ -107,7 +107,7 @@ export default function ContactSection() {
                     Email
                   </span>
                   <p className="text-white text-lg font-medium">
-                    nutriserpv@gmail.com
+                    clinicanutriserpv@gmail.com
                   </p>
                   <p className="text-white/50 text-sm">
                     Envíanos tus dudas o solicita información

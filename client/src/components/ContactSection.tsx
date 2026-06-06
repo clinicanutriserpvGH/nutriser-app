@@ -148,7 +148,10 @@ export default function ContactSection() {
                     Horario
                   </span>
                   <p className="text-white text-lg font-medium">
-                    Lunes a Sábado
+                    Lunes a Viernes: 10:00 a.m. - 7:00 p.m.
+                  </p>
+                  <p className="text-white text-lg font-medium">
+                    Sábado: 10:00 a.m. - 2:00 p.m.
                   </p>
 
                 </div>

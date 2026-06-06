@@ -131,7 +131,7 @@ export default function HeroSection() {
           >
             {/* WhatsApp Button */}
             <a
-              href="https://wa.me/573221007799"
+              href="https://wa.me/523221007799"
               target="_blank"
               rel="noopener noreferrer"
               className="relative inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-5 py-3.5 text-sm tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#20BA5A] hover:shadow-lg hover:shadow-[#25D366]/40 border-2 border-[#25D366] overflow-hidden group rounded-lg"

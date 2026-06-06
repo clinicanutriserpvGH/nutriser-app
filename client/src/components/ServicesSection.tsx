@@ -333,7 +333,7 @@ export default function ServicesSection() {
             personalizada.
           </p>
           <a
-            href="https://wa.me/573221007799"
+            href="https://wa.me/523221007799"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-[#25D366] text-white px-8 py-4 text-sm tracking-[0.15em] uppercase transition-all duration-300 hover:bg-[#20BA5A] hover:shadow-lg hover:shadow-[#25D366]/30"
@@ -615,7 +615,7 @@ export default function ServicesSection() {
                     {/* CTA Button - Solo WhatsApp */}
                     <div className="flex gap-3 pt-4">
                       <a
-                        href="https://wa.me/573221007799"
+                        href="https://wa.me/523221007799"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1 bg-[#25D366] hover:bg-[#20BA5A] text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-2"

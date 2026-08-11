@@ -28,6 +28,26 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { generateCouponImage } from "../couponImageGenerator";
 import { getPromotionById } from "../db";
+import { MOBILE_REDIRECT_URL, shouldRedirectMobileRequest } from "./deviceRedirect";
+
+try {
+  new URL(MOBILE_REDIRECT_URL);
+} catch {
+  throw new Error("Invalid mobile redirect URL configuration");
+}
+
+function registerMobileRedirect(app: express.Express) {
+  app.use((req, res, next) => {
+    if (shouldRedirectMobileRequest({
+      userAgent: req.get("user-agent") || "",
+      secChUaMobile: req.get("sec-ch-ua-mobile") || "",
+      path: req.path,
+    })) {
+      return res.redirect(302, MOBILE_REDIRECT_URL);
+    }
+    next();
+  });
+}
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -51,6 +71,11 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // Móviles y tabletas van al portal; computadoras permanecen en Nutriser PV.
+  // Se registra antes de las rutas de API para evitar que el HTML llegue a renderizarse.
+  registerMobileRedirect(app);
+
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

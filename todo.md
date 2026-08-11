@@ -2210,3 +2210,9 @@
 - [x] Probar navegación desde Splash 0 al monedero
 - [x] Probar eliminación de compras y actualización en monedero
 - [x] Guardar checkpoint final
+
+- [x] Restaurar redirección inmediata de celulares y tabletas desde nutriserpv.com a portaldesaludnutriser.club
+- [x] Mantener el sitio de Nutriser PV sin redirección para computadoras
+- [x] Verificar la redirección con User-Agent de celular, tableta y computadora
+- [x] Confirmar que la redirección no afecte rutas de API ni recursos del sitio
+- [x] Ejecutar pruebas y guardar checkpoint de la redirección por dispositivo

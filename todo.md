@@ -2216,3 +2216,10 @@
 - [x] Verificar la redirección con User-Agent de celular, tableta y computadora
 - [x] Confirmar que la redirección no afecte rutas de API ni recursos del sitio
 - [x] Ejecutar pruebas y guardar checkpoint de la redirección por dispositivo
+
+## Corrección urgente - Redirección exclusiva para no computadoras
+- [x] Redirigir celulares, iPhone, Android, iPad y tabletas a https://portaldesaludnutriser.club
+- [x] Mantener las computadoras en nutriserpv.com sin redirección
+- [x] Verificar User-Agent de iPhone, Android, iPad y tabletas Android
+- [x] Verificar que User-Agent de computadora reciba el sitio de Nutriser PV
+- [x] Ejecutar pruebas y guardar checkpoint de la corrección

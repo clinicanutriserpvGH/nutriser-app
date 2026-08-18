@@ -7,6 +7,23 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
 
+    <!-- Redirección inmediata: todo dispositivo que no sea computadora va al portal. -->
+    <script>
+      (function () {
+        var portalUrl = 'https://portaldesaludnutriser.club';
+        var ua = navigator.userAgent || '';
+        var platform = navigator.platform || '';
+        var isIpad = /ipad/i.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var isPhone = /android.*mobile|iphone|ipod|blackberry|iemobile|opera mini|windows phone|mobile/i.test(ua);
+        var isTablet = /tablet|android(?!.*mobile)|kindle|silk|playbook|nexus 7|nexus 9|sm-t|sm-x|gt-p|lenovo tab|mediapad|mi pad|windows rt/i.test(ua);
+        var isMobileClientHint = navigator.userAgentData && navigator.userAgentData.mobile === true;
+        var isNonComputer = isIpad || isPhone || isTablet || isMobileClientHint;
+
+        if (isNonComputer && window.location.hostname !== 'portaldesaludnutriser.club') {
+          window.location.replace(portalUrl);
+        }
+      })();
+    </script>
 
     <!-- ═══ SEO Principal ═══ -->
     <title>Nutriser | Clínica de Nutrición y Estética en Puerto Vallarta</title>

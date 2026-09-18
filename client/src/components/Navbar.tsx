@@ -15,7 +15,6 @@ const LOGO_URL =
 const navLinks = [
   { label: "Inicio", href: "/" },
   { label: "Servicios", href: "/servicios" },
-  { label: "Cupones", href: "/cupones" },
   { label: "Transformaciones", href: "/transformaciones" },
   { label: "Nosotros", href: "#nosotros" },
   { label: "Contacto", href: "#contacto" },

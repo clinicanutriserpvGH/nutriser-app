@@ -122,23 +122,23 @@ export default function HeroSection() {
             tecnología y experiencia profesional.
           </motion.p>
 
-          {/* ─── Botones (WhatsApp + Academia Nutriser) ─────────────────────────── */}
+          {/* ─── Botones (información + Academia Nutriser) ──────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
             className="flex flex-col gap-3 max-w-2xl"
           >
-            {/* WhatsApp Button */}
+            {/* Solicitar información por WhatsApp */}
             <a
-              href="https://wa.me/523221007799"
+              href="https://wa.me/523221007799?text=Hola%2C%20deseo%20pedir%20informaci%C3%B3n%20sobre%20los%20servicios%20de%20Nutriser"
               target="_blank"
               rel="noopener noreferrer"
-              className="relative inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-5 py-3.5 text-sm tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#20BA5A] hover:shadow-lg hover:shadow-[#25D366]/40 border-2 border-[#25D366] overflow-hidden group rounded-lg"
+              className="relative inline-flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-5 py-3.5 text-sm tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-[#25D366]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <MessageCircle className="relative w-4 h-4 flex-shrink-0" />
-              <span className="relative">WhatsApp</span>
+              <span className="relative">Pedir informes</span>
             </a>
             {/* 3. Academia Nutriser — solo visible cuando el admin la activa */}
             {academiaVisible && (

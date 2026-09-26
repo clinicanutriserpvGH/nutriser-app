@@ -4,7 +4,7 @@
  * Portal de Salud as the primary featured element
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, BookOpen, MessageCircle } from "lucide-react";
+import { ChevronDown, BookOpen, ShoppingBag } from "lucide-react";
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 
@@ -26,7 +26,6 @@ export default function HeroSection() {
   }, []);
 
   // Navegación directa sin guard — el login se pide solo al intentar comprar/agregar al carrito
-  const handleTienda = () => { window.location.href = "/memberships"; };
   const handleAcademia = () => { window.location.href = "/cursos"; };
 
   // Visibilidad de Academia (controlada por el admin)
@@ -122,23 +121,22 @@ export default function HeroSection() {
             tecnología y experiencia profesional.
           </motion.p>
 
-          {/* ─── Botones (información + Academia Nutriser) ──────────────────────── */}
+          {/* ─── Acciones opcionales del hero ───────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
             className="flex flex-col gap-3 max-w-2xl"
           >
-            {/* Solicitar información por WhatsApp */}
             <a
-              href="https://wa.me/523221007799?text=Hola%2C%20deseo%20pedir%20informaci%C3%B3n%20sobre%20los%20servicios%20de%20Nutriser"
+              href="https://portaldesaludnutriser.club/memberships"
               target="_blank"
               rel="noopener noreferrer"
-              className="relative inline-flex items-center justify-center gap-2 bg-[#C5A55A] text-white px-5 py-3.5 text-sm tracking-[0.12em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
+              className="relative inline-flex items-center justify-center gap-3 bg-[#C5A55A] text-white px-5 py-3.5 text-sm tracking-[0.15em] uppercase font-bold transition-all duration-300 hover:bg-[#B8963E] hover:shadow-lg hover:shadow-[#C5A55A]/40 border-2 border-[#C5A55A] overflow-hidden group rounded-lg"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <MessageCircle className="relative w-4 h-4 flex-shrink-0" />
-              <span className="relative">Pedir informes</span>
+              <ShoppingBag className="relative w-5 h-5 flex-shrink-0" />
+              <span className="relative">Visitar tienda Nutriser</span>
             </a>
             {/* 3. Academia Nutriser — solo visible cuando el admin la activa */}
             {academiaVisible && (
